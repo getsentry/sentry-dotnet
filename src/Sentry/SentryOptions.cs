@@ -1904,14 +1904,8 @@ public class SentryOptions
         "Grpc",
         "ServiceStack",
         "Java.Interop",
-        // (^|[/\\]) — anchors to start of string or after a forward/backward slash
-        // ([^/\\]*libmonosgen[^/\\]*) — last segment contains libxamarin (no slashes before/after)
-        // $ — end of string
-        new Regex(@"(^|[/\\])([^/\\]*libmonosgen[^/\\]*)$"),
-        // (^|[/\\]) — anchors to start of string or after a forward/backward slash
-        // ([^/\\]*libxamarin[^/\\]*) — last segment contains libxamarin (no slashes before/after)
-        // $ — end of string
-        new Regex(@"(^|[/\\])([^/\\]*libxamarin[^/\\]*)$")
+        InAppExcludeRegexes.LibMonoSgen,
+        InAppExcludeRegexes.LibXamarin
     ];
 
     /// <summary>
