@@ -27,12 +27,6 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void This_Test_Should_Fail()
-    {
-        Assert.True(SentrySdk.IsEnabled);
-    }
-
-    [Fact]
     public void IsEnabled_StartsOffFalse()
     {
         Assert.False(SentrySdk.IsEnabled);
