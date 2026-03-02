@@ -256,7 +256,7 @@ public class SentryStackFrameTests
         sut.ConfigureAppFrame(options);
 
         // Assert
-        Assert.Equal(sut.InApp, expectedInApp);
+        Assert.Equal(expectedInApp, sut.InApp);
     }
 
     [Theory]
@@ -276,7 +276,7 @@ public class SentryStackFrameTests
         sut.ConfigureAppFrame(options);
 
         // Assert
-        Assert.Equal(sut.InApp, expectedInApp);
+        Assert.Equal(expectedInApp, sut.InApp);
     }
 
     [Fact]
