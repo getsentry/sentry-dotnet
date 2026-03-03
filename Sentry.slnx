@@ -48,6 +48,7 @@
     <File Path="integration-test/runtime.Tests.ps1" />
   </Folder>
   <Folder Name="/integration-test/net4-console/" />
+  <Folder Name="/integration-test/net9-maui/" />
   <Folder Name="/modules/">
     <File Path="modules/sentry-cocoa.properties" />
     <Project Path="modules/perfview/src/FastSerialization/FastSerialization.csproj" />

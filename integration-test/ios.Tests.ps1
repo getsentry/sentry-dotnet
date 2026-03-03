@@ -16,13 +16,17 @@ BeforeDiscovery {
     $script:simulator = Get-IosSimulatorUdid -PreferredStates @('Booted')
 }
 
+$ios_tpv = switch ($dotnet_version) {
+    'net9.0' { '26.0' }
+    default  { '26.2' }
+}
 $cases = @(
     @{ configuration = 'Release' }
     @{ configuration = 'Debug'   }
 )
 Describe 'iOS app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-not $script:simulator) {
     BeforeAll {
-        $tfm = "$dotnet_version-ios$(GetIosTpv $dotnet_version)"
+        $tfm = "$dotnet_version-ios$ios_tpv"
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
