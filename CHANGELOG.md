@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add `SentrySdk.GetPersistedBreadcrumbs()` API to retrieve breadcrumbs from the previous Android app session ([#4977](https://github.com/getsentry/sentry-dotnet/pull/4977))
+
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
