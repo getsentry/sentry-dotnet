@@ -1,5 +1,6 @@
 using Android.Content.PM;
 using Android.OS;
+using Android.Runtime;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
@@ -22,6 +23,7 @@ namespace Sentry;
 public static partial class SentrySdk
 {
     private static AndroidContext AppContext { get; set; } = Application.Context;
+    private static List<Breadcrumb>? _persistedBreadcrumbs;
 
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
@@ -184,6 +186,9 @@ public static partial class SentrySdk
             SentryAndroid.Init(AppContext, configuration);
         }
 
+        // Read persisted breadcrumbs from the previous session before they get overwritten
+        _persistedBreadcrumbs = ReadPersistedBreadcrumbs(nativeOptions!);
+
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new AndroidEventProcessor(nativeOptions!));
         if (options.Android.LogCatIntegration != LogCatIntegrationType.None)
@@ -285,5 +290,40 @@ public static partial class SentrySdk
         return packageInfo.VersionCode;
 #pragma warning restore CA1422
 #pragma warning restore CS0618
+    }
+
+    /// <summary>
+    /// Retrieves breadcrumbs that were persisted to disk by the Android SDK's scope observer.
+    /// These are breadcrumbs from the previous app session that were saved before the app terminated.
+    /// </summary>
+    /// <returns>A list of persisted breadcrumbs, or an empty list if unavailable.</returns>
+    public static IReadOnlyList<Breadcrumb> GetPersistedBreadcrumbs() =>
+        _persistedBreadcrumbs ?? [];
+
+    private static List<Breadcrumb>? ReadPersistedBreadcrumbs(JavaSdk.SentryOptions nativeOptions)
+    {
+        var observer = nativeOptions.FindPersistingScopeObserver();
+        if (observer is null)
+        {
+            return null;
+        }
+
+        var result = observer.Read(nativeOptions, "breadcrumbs.json",
+            Java.Lang.Class.FromType(typeof(Java.Util.ArrayList)));
+
+        if (result is not Java.Util.IList javaList)
+        {
+            return null;
+        }
+
+        var breadcrumbs = new List<Breadcrumb>();
+        for (var i = 0; i < javaList.Size(); i++)
+        {
+            if (javaList.Get(i)?.JavaCast<JavaSdk.Breadcrumb>() is { } javaBreadcrumb)
+            {
+                breadcrumbs.Add(javaBreadcrumb.ToBreadcrumb());
+            }
+        }
+        return breadcrumbs;
     }
 }
