@@ -111,7 +111,9 @@ jobs:
 
       - name: Install Pester
         shell: pwsh
-        run: Install-Module -Name Pester -MinimumVersion 5.0.0 -Scope CurrentUser
+        run: |
+          Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+          Install-Module -Name Pester -MinimumVersion 5.0.0 -Scope CurrentUser
 
       - name: Run Integration Tests
         id: first-integration-test-run
