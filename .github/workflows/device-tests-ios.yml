@@ -113,7 +113,7 @@ jobs:
         shell: pwsh
         run: |
           Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
-          Install-Module -Name Pester -MinimumVersion 5.0.0 -Scope CurrentUser
+          Install-Module -Name Pester -Scope CurrentUser
 
       - name: Run Integration Tests
         id: first-integration-test-run
