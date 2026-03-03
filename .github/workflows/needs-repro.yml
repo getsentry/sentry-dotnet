@@ -1,0 +1,34 @@
+name: Needs Repro
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: write
+
+jobs:
+  comment:
+    name: Post repro instructions
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 's/needs-repro'
+    steps:
+      - name: Post repro comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `👋 Thanks for the report! We've added the \`s/needs-repro\` label because we need a minimal reproduction to investigate further.
+
+            Please provide a link to a **public GitHub repository** that reproduces the issue with as little code as possible. Our [repro guide](https://github.com/getsentry/sentry-dotnet/blob/main/.github/repro.md) has tips on how to create one.
+
+            Some quick hints:
+            - Start from a fresh \`dotnet new console\` (or similar) project
+            - Add only the Sentry NuGet package(s) relevant to the bug
+            - Include the exact SDK version number and your \`SentrySdk.Init\` / \`UseSentry\` call (with the DSN blanked out)
+
+            This issue will be closed automatically in 14 days if we don't hear back. Feel free to re-open it once you have a repro ready. Thank you! 🙏`
+            });
