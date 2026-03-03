@@ -32,10 +32,11 @@
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-    <!-- Pin target iOS version to a compatible Xcode version of the respective CI runner image.
+    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released for GitHub-hosted Actions Runner Images.
+         Cirrus Runners images are available with defined Xcode versions pre-installed.
          'netX.0-ios' resolves the latest version of the iOS SDK otherwise. -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' And '$(TargetFramework)' == 'net9.0-ios'">18.0</TargetPlatformVersion>
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' And '$(TargetFramework)' == 'net10.0-ios'">26.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' And '$(TargetFramework)' == 'net9.0-ios'">26.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' And '$(TargetFramework)' == 'net10.0-ios'">26.2</TargetPlatformVersion>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
     <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).
