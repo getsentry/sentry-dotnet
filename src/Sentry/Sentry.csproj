@@ -69,7 +69,6 @@
   </ItemGroup>
   <PropertyGroup>
     <PolyStringInterpolation>true</PolyStringInterpolation>
-    <PolyArgumentExceptions>true</PolyArgumentExceptions>
     <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);FeatureHttp</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants);FeatureHttp</DefineConstants>
   </PropertyGroup>
