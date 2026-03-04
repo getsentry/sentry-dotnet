@@ -2663,6 +2663,7 @@ public partial class HubTests : IDisposable
         integration.Disposed.Should().Be(1);
     }
 
+#nullable enable
     [Theory]
     // strict=false: matching org IDs -> continue
     [InlineData(false, "1", "1", true)]
