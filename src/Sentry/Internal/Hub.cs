@@ -355,6 +355,13 @@ internal class Hub : IHub, IDisposable
         string? name = null,
         string? operation = null)
     {
+        if (!ShouldContinueTrace(baggageHeader))
+        {
+            _options.LogDebug("Not continuing trace due to org ID validation. Starting new trace.");
+            traceHeader = null;
+            baggageHeader = null;
+        }
+
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession);
         ConfigureScope(static (scope, propagationContext) => scope.SetPropagationContext(propagationContext), propagationContext);
 
@@ -366,6 +373,39 @@ internal class Hub : IHub, IDisposable
             traceId: propagationContext.TraceId,
             isSampled: traceHeader?.IsSampled,
             isParentSampled: traceHeader?.IsSampled);
+    }
+
+    internal bool ShouldContinueTrace(BaggageHeader? baggageHeader)
+    {
+        var sdkOrgId = _options.GetEffectiveOrgId();
+
+        string? baggageOrgId = null;
+        if (baggageHeader is not null)
+        {
+            var sentryMembers = baggageHeader.GetSentryMembers();
+            sentryMembers.TryGetValue("org_id", out baggageOrgId);
+        }
+
+        // Mismatched org IDs always cause a new trace, regardless of strict mode
+        if (!string.IsNullOrEmpty(sdkOrgId) && !string.IsNullOrEmpty(baggageOrgId) && sdkOrgId != baggageOrgId)
+        {
+            return false;
+        }
+
+        // In strict mode, both must be present and match
+        if (_options.StrictTraceContinuation)
+        {
+            // If both are missing, continue (nothing to compare)
+            if (string.IsNullOrEmpty(sdkOrgId) && string.IsNullOrEmpty(baggageOrgId))
+            {
+                return true;
+            }
+
+            // Both must be present and equal
+            return sdkOrgId == baggageOrgId;
+        }
+
+        return true;
     }
 
     public void StartSession()
