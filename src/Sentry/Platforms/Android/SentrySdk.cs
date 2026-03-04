@@ -173,6 +173,11 @@ public static partial class SentrySdk
             o.ConnectionStatusProvider =
                 new AndroidConnectionStatusProvider(AppContext, o, buildInfoProvider, timeProvider, mainHandler).JavaCast<IConnectionStatusProvider>();
             o.AddIntegration(new SystemEventsBreadcrumbsIntegration(AppContext, mainHandler).JavaCast<JavaSdk.IIntegration>());
+
+            // Read persisted breadcrumbs now, inside the options callback, before the SDK starts.
+            // This avoids a race condition with breadcrumb-producing integrations that start writing
+            // to the QueueFile as soon as SentryAndroid.Init() completes.
+            _persistedBreadcrumbs = ReadPersistedBreadcrumbs(o);
         });
 
         // Now initialize the Android SDK (with a logger only if we're debugging)
@@ -185,9 +190,6 @@ public static partial class SentrySdk
         {
             SentryAndroid.Init(AppContext, configuration);
         }
-
-        // Read persisted breadcrumbs from the previous session before they get overwritten
-        _persistedBreadcrumbs = ReadPersistedBreadcrumbs(nativeOptions!);
 
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new AndroidEventProcessor(nativeOptions!));
@@ -302,35 +304,31 @@ public static partial class SentrySdk
 
     private static List<Breadcrumb>? ReadPersistedBreadcrumbs(JavaSdk.SentryOptions nativeOptions)
     {
-        try
-        {
-            var observer = nativeOptions.FindPersistingScopeObserver();
-            if (observer is null)
-            {
-                return null;
-            }
-
-            var result = observer.Read(nativeOptions, "breadcrumbs.json",
-                Java.Lang.Class.FromType(typeof(Java.Util.IList)));
-
-            if (result is not Java.Util.IList javaList)
-            {
-                return null;
-            }
-
-            var breadcrumbs = new List<Breadcrumb>();
-            for (var i = 0; i < javaList.Size(); i++)
-            {
-                if (javaList.Get(i)?.JavaCast<JavaSdk.Breadcrumb>() is { } javaBreadcrumb)
-                {
-                    breadcrumbs.Add(javaBreadcrumb.ToBreadcrumb());
-                }
-            }
-            return breadcrumbs;
-        }
-        catch (Java.Lang.Exception)
+        if (nativeOptions.CacheDirPath is null)
         {
             return null;
         }
+
+        // Create a temporary observer to read breadcrumbs from the previous session's QueueFile.
+        // This must be called before SentryAndroid.Init() completes, to avoid a race condition
+        // with breadcrumb-producing integrations that write to the same QueueFile concurrently.
+        using var observer = new JavaSdk.Cache.PersistingScopeObserver(nativeOptions);
+        var result = observer.Read(nativeOptions, "breadcrumbs.json",
+            Java.Lang.Class.FromType(typeof(Java.Util.IList)));
+
+        if (result is not Java.Util.IList javaList)
+        {
+            return null;
+        }
+
+        var breadcrumbs = new List<Breadcrumb>();
+        for (var i = 0; i < javaList.Size(); i++)
+        {
+            if (javaList.Get(i)?.JavaCast<JavaSdk.Breadcrumb>() is { } javaBreadcrumb)
+            {
+                breadcrumbs.Add(javaBreadcrumb.ToBreadcrumb());
+            }
+        }
+        return breadcrumbs;
     }
 }
