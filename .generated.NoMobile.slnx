@@ -32,6 +32,7 @@
     <File Path=".github/workflows/release.yml" />
     <File Path=".github/workflows/update-deps.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
+    <File Path=".github/workflows/playwright-blazor-wasm.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Sentry.Benchmarks/Sentry.Benchmarks.csproj" />
@@ -179,5 +180,8 @@
     <Project Path="test/Sentry.Tests/Sentry.Tests.csproj" />
     <Project Path="test/Sentry.TrimTest/Sentry.TrimTest.csproj" />
     <Project Path="test/SingleFileTestApp/SingleFileTestApp.csproj" />
+    <Project Path="test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.csproj" />
+    <Project Path="test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp.csproj" />
+    <Project Path="test/Sentry.AspNetCore.Blazor.WebAssembly.Tests/Sentry.AspNetCore.Blazor.WebAssembly.Tests.csproj" />
   </Folder>
 </Solution>

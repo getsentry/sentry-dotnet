@@ -32,6 +32,8 @@ groupConfigs:
   trimTests:
     - "**/Sentry.TrimTest.csproj"
     - "**/Sentry.MauiTrimTest.csproj"
+  playwrightTests:
+    - "**/*PlaywrightTests*.csproj"
   mobileOnly:
     - "**/*Android*.csproj"
     - "**/*Ios*.csproj"
@@ -50,6 +52,7 @@ filterConfigs:
         - "windowsOnly"
         - "artefacts"
         - "trimTests"
+        - "playwrightTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -67,6 +70,7 @@ filterConfigs:
         - "artefacts"
         - "trimTests"
         - "mobileOnly"
+        - "playwrightTests"
       patterns:
         - "**/*Android*.csproj"
         - "**/*DeviceTests*.csproj"
@@ -83,6 +87,7 @@ filterConfigs:
       groups:
         - "artefacts"
         - "trimTests"
+        - "playwrightTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -100,6 +105,7 @@ filterConfigs:
         - "macOnly"
         - "artefacts"
         - "trimTests"
+        - "playwrightTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
@@ -121,6 +127,7 @@ filterConfigs:
         - "macOnly"
         - "artefacts"
         - "trimTests"
+        - "playwrightTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091

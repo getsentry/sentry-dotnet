@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
+
+## 6.2.0-alpha.0
+
+### Features
+
+- Add navigation breadcrumbs for Blazor WebAssembly ([#4907](https://github.com/getsentry/sentry-dotnet/pull/4907))
+
 ### Dependencies
 
 - Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
@@ -13,6 +23,7 @@
 
 - Add _experimental_ support for [Sentry trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
 - Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
+- Outbound HTTP requests now show in the Network tab for Android Session Replays ([#4860](https://github.com/getsentry/sentry-dotnet/pull/4860))
 
 ### Fixes
 
