@@ -7,14 +7,11 @@ Uses the .NET SDK (`dotnet` CLI). Key files:
 - `global.json` — pins .NET SDK and Workload versions
 - `Directory.Build.props` / `Directory.Build.targets` — shared MSBuild properties across all projects
 
-> **MSBuild hierarchical structure**: MSBuild searches upward from each project file and uses the **nearest** `Directory.Build.props`/`.targets` it finds — parent files are **not** automatically included. Subdirectory files in this repo explicitly `<Import>` the root file when needed.
+### MSBuild hierarchical structure
 
-Subdirectory-level overrides (each explicitly imports the root unless noted):
-- `src/Directory.Build.props` / `src/Directory.Build.targets` — source packaging, SourceLink, nullability, and AOT settings for all projects in `src/`
-- `test/Directory.Build.props` / `test/Directory.Build.targets` — test-specific settings (xUnit, NSubstitute, Verify) for all projects in `test/`
-- `samples/Directory.Build.props` / `samples/Directory.Build.targets` — sample app settings for all projects in `samples/`
-- `benchmarks/Directory.Build.props` — benchmark settings for all projects in `benchmarks/`
-- `integration-test/Directory.Build.props` / `integration-test/Directory.Build.targets` — intentionally **isolated** (does not import root)
+MSBuild searches upward from each project file and uses the **nearest** `Directory.Build.props`/`.targets` it finds. Parent files are not automatically included. props/targets files in this repo explicitly `<Import>` parent/root files when appropriate.
+
+`integration-test/Directory.Build.props` / `integration-test/Directory.Build.targets` are intentionally isolated (do not import root).
 
 ## Solution Filters
 
