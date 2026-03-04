@@ -10,7 +10,7 @@ public class SentryAppender : AppenderSkeleton
     private readonly Func<string, IDisposable> _initAction;
     private volatile IDisposable? _sdkHandle;
 
-    private readonly object _initSync = new();
+    private readonly Lock _initSync = new();
 
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryAppender).Assembly.GetNameAndVersion();
@@ -123,7 +123,7 @@ public class SentryAppender : AppenderSkeleton
 
         evt.SetExtras(GetLoggingEventProperties(loggingEvent));
 
-        if (SendIdentity && !string.IsNullOrEmpty(loggingEvent.Identity))
+        if (SendIdentity && !string.IsNullOrEmpty(loggingEvent.Idntity))
         {
             evt.User = new SentryUser
             {
