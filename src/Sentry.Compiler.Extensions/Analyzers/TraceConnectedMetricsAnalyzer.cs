@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Operations;
 namespace Sentry.Compiler.Extensions.Analyzers;
 
 /// <summary>
-/// Guide consumers to use the public API of <see href="https://develop.sentry.dev/sdk/telemetry/metrics/">Sentry Trace-connected Metrics</see> correctly.
+/// Guide callers to use the public API of <see href="https://develop.sentry.dev/sdk/telemetry/metrics/">Sentry Trace-connected Metrics</see> correctly.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TraceConnectedMetricsAnalyzer : DiagnosticAnalyzer
