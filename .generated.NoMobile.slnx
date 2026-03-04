@@ -32,6 +32,7 @@
     <File Path=".github/workflows/release.yml" />
     <File Path=".github/workflows/update-deps.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
+    <File Path=".github/workflows/playwright-blazor-wasm.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Sentry.Benchmarks/Sentry.Benchmarks.csproj" />

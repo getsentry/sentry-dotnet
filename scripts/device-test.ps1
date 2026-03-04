@@ -52,8 +52,6 @@ try
     {
         $Tfm += '-ios'
         $group = 'apple'
-        # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
-        $arch = 'x64'
         $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/iossimulator-$arch"
         $envValue = $CI ? 'true' : 'false'
         $arguments = @(
