@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <!--
-  We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.
-  https://github.com/SimonCropp/Polyfill
+    We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.
+    https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
     <PackageReference Include="Polyfill" Version="1.32.0" PrivateAssets="all" />
