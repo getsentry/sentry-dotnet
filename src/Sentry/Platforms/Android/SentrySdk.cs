@@ -302,28 +302,35 @@ public static partial class SentrySdk
 
     private static List<Breadcrumb>? ReadPersistedBreadcrumbs(JavaSdk.SentryOptions nativeOptions)
     {
-        var observer = nativeOptions.FindPersistingScopeObserver();
-        if (observer is null)
+        try
         {
-            return null;
-        }
-
-        var result = observer.Read(nativeOptions, "breadcrumbs.json",
-            Java.Lang.Class.FromType(typeof(Java.Util.IList)));
-
-        if (result is not Java.Util.IList javaList)
-        {
-            return null;
-        }
-
-        var breadcrumbs = new List<Breadcrumb>();
-        for (var i = 0; i < javaList.Size(); i++)
-        {
-            if (javaList.Get(i)?.JavaCast<JavaSdk.Breadcrumb>() is { } javaBreadcrumb)
+            var observer = nativeOptions.FindPersistingScopeObserver();
+            if (observer is null)
             {
-                breadcrumbs.Add(javaBreadcrumb.ToBreadcrumb());
+                return null;
             }
+
+            var result = observer.Read(nativeOptions, "breadcrumbs.json",
+                Java.Lang.Class.FromType(typeof(Java.Util.IList)));
+
+            if (result is not Java.Util.IList javaList)
+            {
+                return null;
+            }
+
+            var breadcrumbs = new List<Breadcrumb>();
+            for (var i = 0; i < javaList.Size(); i++)
+            {
+                if (javaList.Get(i)?.JavaCast<JavaSdk.Breadcrumb>() is { } javaBreadcrumb)
+                {
+                    breadcrumbs.Add(javaBreadcrumb.ToBreadcrumb());
+                }
+            }
+            return breadcrumbs;
         }
-        return breadcrumbs;
+        catch (Java.Lang.Exception)
+        {
+            return null;
+        }
     }
 }
