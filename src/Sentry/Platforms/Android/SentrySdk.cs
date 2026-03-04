@@ -309,7 +309,7 @@ public static partial class SentrySdk
         }
 
         var result = observer.Read(nativeOptions, "breadcrumbs.json",
-            Java.Lang.Class.FromType(typeof(Java.Util.ArrayList)));
+            Java.Lang.Class.FromType(typeof(Java.Util.IList)));
 
         if (result is not Java.Util.IList javaList)
         {
