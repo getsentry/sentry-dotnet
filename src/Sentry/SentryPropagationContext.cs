@@ -48,7 +48,7 @@ internal class SentryPropagationContext
         DynamicSamplingContext = other?.DynamicSamplingContext;
     }
 
-    public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader, IReplaySession replaySession)
+    public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader, IReplaySession replaySession, string? sdkOrgId = null)
     {
         logger?.LogDebug("Creating a propagation context from headers.");
 
@@ -56,6 +56,19 @@ internal class SentryPropagationContext
         {
             logger?.LogInfo("Sentry trace header is null. Creating new Sentry Propagation Context.");
             return new SentryPropagationContext();
+        }
+
+        // Check for org ID mismatch between SDK configuration and incoming baggage
+        if (!string.IsNullOrEmpty(sdkOrgId) && baggageHeader is not null)
+        {
+            var sentryMembers = baggageHeader.GetSentryMembers();
+            if (sentryMembers.TryGetValue("org_id", out var baggageOrgId)
+                && !string.IsNullOrEmpty(baggageOrgId)
+                && sdkOrgId != baggageOrgId)
+            {
+                logger?.LogInfo("Org ID mismatch (SDK: {0}, baggage: {1}). Starting new trace.", sdkOrgId, baggageOrgId);
+                return new SentryPropagationContext();
+            }
         }
 
         var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext(replaySession);
