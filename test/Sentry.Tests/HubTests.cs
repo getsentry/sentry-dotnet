@@ -2807,6 +2807,125 @@ public partial class HubTests : IDisposable
         // Assert
         integration.Disposed.Should().Be(1);
     }
+
+    [Theory]
+    // strict=false: matching org IDs -> continue
+    [InlineData(false, "1", "1", true)]
+    // strict=false: no incoming org ID -> continue (permissive)
+    [InlineData(false, "1", null, true)]
+    // strict=false: incoming org ID but no SDK org ID -> continue (permissive)
+    [InlineData(false, null, "1", true)]
+    // strict=false: both missing -> continue
+    [InlineData(false, null, null, true)]
+    // strict=false: mismatched org IDs -> new trace (always)
+    [InlineData(false, "1", "2", false)]
+    // strict=true: matching org IDs -> continue
+    [InlineData(true, "1", "1", true)]
+    // strict=true: no incoming org ID -> new trace (strict requires match)
+    [InlineData(true, "1", null, false)]
+    // strict=true: incoming org ID but no SDK org ID -> new trace (strict requires match)
+    [InlineData(true, null, "1", false)]
+    // strict=true: both missing -> continue (nothing to compare)
+    [InlineData(true, null, null, true)]
+    // strict=true: mismatched org IDs -> new trace
+    [InlineData(true, "1", "2", false)]
+    public void ContinueTrace_StrictTraceContinuation_ValidatesOrgId(
+        bool strict, string? sdkOrgId, string? baggageOrgId, bool expectContinued)
+    {
+        // Arrange
+        var incomingTraceId = SentryId.Parse("bc6d53f15eb88f4320054569b8c553d4");
+
+        _fixture.Options.StrictTraceContinuation = strict;
+        _fixture.Options.OrgId = sdkOrgId;
+
+        var hub = _fixture.GetSut();
+
+        var traceHeader = new SentryTraceHeader(incomingTraceId, SpanId.Parse("b72fa28504b07285"), true);
+
+        var baggageMembers = new List<KeyValuePair<string, string>>
+        {
+            { "sentry-trace_id", "bc6d53f15eb88f4320054569b8c553d4" },
+            { "sentry-public_key", "49d0f7386ad645858ae85020e393bef3" },
+            { "sentry-sample_rate", "1.0" }
+        };
+        if (baggageOrgId is not null)
+        {
+            baggageMembers.Add(new KeyValuePair<string, string>("sentry-org_id", baggageOrgId));
+        }
+        var baggageHeader = BaggageHeader.Create(baggageMembers);
+
+        // Act
+        var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name");
+
+        // Assert
+        if (expectContinued)
+        {
+            transactionContext.TraceId.Should().Be(incomingTraceId,
+                "trace should be continued when org IDs match or validation passes");
+        }
+        else
+        {
+            transactionContext.TraceId.Should().NotBe(incomingTraceId,
+                "a new trace should be started when org ID validation fails");
+        }
+    }
+
+    [Fact]
+    public void ContinueTrace_OrgIdFromDsn_IsUsedForValidation()
+    {
+        // Arrange - DSN with org ID "1" in the subdomain
+        _fixture.Options.Dsn = "https://key@o1.ingest.us.sentry.io/123";
+        _fixture.Options.StrictTraceContinuation = true;
+
+        var hub = _fixture.GetSut();
+
+        var incomingTraceId = SentryId.Parse("bc6d53f15eb88f4320054569b8c553d4");
+        var traceHeader = new SentryTraceHeader(incomingTraceId, SpanId.Parse("b72fa28504b07285"), true);
+
+        // Baggage with matching org_id=1
+        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            { "sentry-trace_id", "bc6d53f15eb88f4320054569b8c553d4" },
+            { "sentry-public_key", "49d0f7386ad645858ae85020e393bef3" },
+            { "sentry-sample_rate", "1.0" },
+            { "sentry-org_id", "1" }
+        });
+
+        // Act
+        var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name");
+
+        // Assert - should continue because org IDs match
+        transactionContext.TraceId.Should().Be(incomingTraceId);
+    }
+
+    [Fact]
+    public void ContinueTrace_OrgIdOptionOverridesDsn()
+    {
+        // Arrange - DSN has org ID "1", but OrgId option overrides to "2"
+        _fixture.Options.Dsn = "https://key@o1.ingest.us.sentry.io/123";
+        _fixture.Options.OrgId = "2";
+        _fixture.Options.StrictTraceContinuation = false;
+
+        var hub = _fixture.GetSut();
+
+        var incomingTraceId = SentryId.Parse("bc6d53f15eb88f4320054569b8c553d4");
+        var traceHeader = new SentryTraceHeader(incomingTraceId, SpanId.Parse("b72fa28504b07285"), true);
+
+        // Baggage with org_id=1 (matches DSN but not the override)
+        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            { "sentry-trace_id", "bc6d53f15eb88f4320054569b8c553d4" },
+            { "sentry-public_key", "49d0f7386ad645858ae85020e393bef3" },
+            { "sentry-sample_rate", "1.0" },
+            { "sentry-org_id", "1" }
+        });
+
+        // Act
+        var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name");
+
+        // Assert - should NOT continue because OrgId override (2) != baggage org_id (1)
+        transactionContext.TraceId.Should().NotBe(incomingTraceId);
+    }
 }
 
 #if NET6_0_OR_GREATER

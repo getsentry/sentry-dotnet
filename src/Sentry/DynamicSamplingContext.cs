@@ -29,7 +29,8 @@ internal class DynamicSamplingContext
         string? release = null,
         string? environment = null,
         string? transactionName = null,
-        IReplaySession? replaySession = null)
+        IReplaySession? replaySession = null,
+        string? orgId = null)
     {
         // Validate and set required values
         if (traceId == SentryId.Empty)
@@ -92,6 +93,11 @@ internal class DynamicSamplingContext
         if (replaySession?.ActiveReplayId is { } replayId && replayId != SentryId.Empty)
         {
             items.Add("replay_id", replayId.ToString());
+        }
+
+        if (!string.IsNullOrWhiteSpace(orgId))
+        {
+            items.Add("org_id", orgId);
         }
 
         _items = items;
@@ -199,7 +205,8 @@ internal class DynamicSamplingContext
             release,
             environment,
             transactionName,
-            replaySession);
+            replaySession,
+            orgId: options.GetEffectiveOrgId());
     }
 
     public static DynamicSamplingContext CreateFromUnsampledTransaction(UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
@@ -224,7 +231,8 @@ internal class DynamicSamplingContext
             release,
             environment,
             transactionName,
-            replaySession);
+            replaySession,
+            orgId: options.GetEffectiveOrgId());
     }
 
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
@@ -240,7 +248,8 @@ internal class DynamicSamplingContext
             null,
             release: release,
             environment: environment,
-            replaySession: replaySession
+            replaySession: replaySession,
+            orgId: options.GetEffectiveOrgId()
             );
     }
 
