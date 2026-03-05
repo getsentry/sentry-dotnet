@@ -121,7 +121,7 @@ public class SentryClient : ISentryClient, IDisposable
             is not { } processedEvent)
         {
             _options.LogWarning("Feedback dropped by event processor");
-            result = CaptureFeedbackResult.UnknownError;
+            result = CaptureFeedbackResult.DroppedByEventProcessor;
             return SentryId.Empty;  // Dropped by an event processor
         }
 
