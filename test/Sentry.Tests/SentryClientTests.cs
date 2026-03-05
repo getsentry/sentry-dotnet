@@ -977,7 +977,7 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
-    public void CaptureFeedback_EventProcessorApplied()
+    public void CaptureFeedback_WithEventProcessor_EventProcessorApplied()
     {
         //Arrange
         var feedback = new SentryFeedback("Everything is great!");
