@@ -132,26 +132,8 @@ public sealed class SentryLog
 
     internal void SetAttribute(string key, int value) => _attributes.SetAttribute(key, value);
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
-    {
-        var environment = options.SettingLocator.GetEnvironment();
-        SetAttribute("sentry.environment", environment);
-
-        var release = options.SettingLocator.GetRelease();
-        if (release is not null)
-        {
-            SetAttribute("sentry.release", release);
-        }
-
-        if (sdk.Name is { } name)
-        {
-            SetAttribute("sentry.sdk.name", name);
-        }
-        if (sdk.Version is { } version)
-        {
-            SetAttribute("sentry.sdk.version", version);
-        }
-    }
+    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk) =>
+        _attributes.SetDefaultAttributes(options, sdk);
 
     internal void SetOrigin(string origin) => SetAttribute("sentry.origin", origin);
 
