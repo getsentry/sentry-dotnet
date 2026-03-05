@@ -32,5 +32,4 @@ jobs:
 
             Alternatively, if the issue only manifests in your own codebase, you could try gradually removing code until you have a minimal repro.
 
-            This issue will be closed automatically in 14 days if we don't hear back. Feel free to re-open it once you have a repro ready. Thank you! 🙏`
             });
