@@ -12,7 +12,8 @@ internal class SdkComposer
 
     public SdkComposer(SentryOptions options, BackpressureMonitor? backpressureMonitor)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
+        _options = options;
         if (options.Dsn is null)
         {
             throw new ArgumentException("No DSN defined in the SentryOptions");

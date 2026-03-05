@@ -20,9 +20,12 @@ public class RequestBodyExtractionDispatcher : IRequestPayloadExtractor
     /// <param name="sizeSwitch">The max request size to capture.</param>
     public RequestBodyExtractionDispatcher(IEnumerable<IRequestPayloadExtractor> extractors, SentryOptions options, Func<RequestSize> sizeSwitch)
     {
-        Extractors = extractors ?? throw new ArgumentNullException(nameof(extractors));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _sizeSwitch = sizeSwitch ?? throw new ArgumentNullException(nameof(sizeSwitch));
+        ArgumentNullException.ThrowIfNull(extractors);
+        Extractors = extractors;
+        ArgumentNullException.ThrowIfNull(options);
+        _options = options;
+        ArgumentNullException.ThrowIfNull(sizeSwitch);
+        _sizeSwitch = sizeSwitch;
     }
 
     /// <summary>

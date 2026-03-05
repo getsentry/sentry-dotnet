@@ -14,8 +14,10 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
 
     public SystemWebRequestEventProcessor(IRequestPayloadExtractor payloadExtractor, SentryOptions options)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        PayloadExtractor = payloadExtractor ?? throw new ArgumentNullException(nameof(payloadExtractor));
+        ArgumentNullException.ThrowIfNull(options);
+        _options = options;
+        ArgumentNullException.ThrowIfNull(payloadExtractor);
+        PayloadExtractor = payloadExtractor;
     }
 
     public SentryEvent? Process(SentryEvent? @event)
