@@ -30,6 +30,5 @@ jobs:
             - Add only the Sentry NuGet package(s) relevant to the bug
             - Include the exact SDK version number and your \`SentrySdk.Init\` / \`UseSentry\` call (with the DSN blanked out)
 
-            Alternatively, if the issue only manifests in your own codebase, you could try gradually removing code until you have a minimal repro.
-
+            Alternatively, if the issue only manifests in your own codebase, you could try gradually removing code until you have a minimal repro.`
             });
