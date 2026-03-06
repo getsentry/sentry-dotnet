@@ -91,6 +91,12 @@
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
+  <!-- Due to Polyfill, System.Memory needs to be a top-level dependency, otherwise app start may fail with:
+       System.IO.FileLoadException: Could not load file or assembly 'System.Memory' or one of its dependencies. The located assembly's manifest definition does not match the assembly reference. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net462'">
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+  </ItemGroup>
+
   <!--
     Include Sentry's custom targets file in the nuget package.
     This file contains targets that are invoked during the end-user's build.
