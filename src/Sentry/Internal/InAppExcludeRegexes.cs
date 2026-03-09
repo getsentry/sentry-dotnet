@@ -21,14 +21,14 @@ internal static partial class InAppExcludeRegexes
 #elif NET8_0
     [GeneratedRegex(LibMonoSgenPattern)]
     private static partial Regex LibMonoSgenRegex();
-    internal static readonly Regex LibMonoSgen = LibMonoSgenRegex();
+    internal static Regex LibMonoSgen { get; } = LibMonoSgenRegex();
 
     [GeneratedRegex(LibXamarinPattern)]
     private static partial Regex LibXamarinRegex();
-    internal static readonly Regex LibXamarin = LibXamarinRegex();
+    internal static Regex LibXamarin { get; } = LibXamarinRegex();
 #else
-    internal static readonly Regex LibMonoSgen = new(LibMonoSgenPattern, RegexOptions.Compiled);
-    internal static readonly Regex LibXamarin = new(LibXamarinPattern, RegexOptions.Compiled);
+    internal static Regex LibMonoSgen { get; } = new(LibMonoSgenPattern, RegexOptions.Compiled);
+    internal static Regex LibXamarin { get; } = new(LibXamarinPattern, RegexOptions.Compiled);
 #endif
 }
 
