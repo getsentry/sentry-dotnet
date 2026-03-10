@@ -208,10 +208,19 @@ SentrySdk.Init(options =>
 
     options.TracesSampleRate = 1.0;
     options.ProfilesSampleRate = 1.0;
-    options.AddProfilingIntegration();
+    options.AddProfilingIntegration(TimeSpan.FromMilliseconds(1_000));
 });
 
+InvokeMethod();
+
 Console.WriteLine("Application completed successfully.");
+
+static void InvokeMethod()
+{
+    var transaction = SentrySdk.StartTransaction("app", "run");
+    Console.WriteLine("Hello World!");
+    transaction.Finish();
+}
 
 internal class FakeTransport : ITransport
 {
@@ -237,6 +246,7 @@ internal class FakeTransport : ITransport
         $output | Should -Not -AnyElementMatch 'ReflectionTypeLoadException'
         $output | Should -Not -AnyElementMatch 'Dia2Lib'
         $output | Should -Not -AnyElementMatch 'TraceReloggerLib'
+        $output | Should -AnyElementMatch 'Profiling stopped on transaction finish.'
         $output | Should -AnyElementMatch 'Application completed successfully.'
     }
 }
