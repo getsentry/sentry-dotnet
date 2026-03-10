@@ -1904,6 +1904,8 @@ public class SentryOptions
         "Grpc",
         "ServiceStack",
         "Java.Interop",
+        InAppExcludeRegexes.LibMonoSgen,
+        InAppExcludeRegexes.LibXamarin
     ];
 
     /// <summary>
