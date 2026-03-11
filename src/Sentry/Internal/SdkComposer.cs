@@ -13,6 +13,7 @@ internal class SdkComposer
     public SdkComposer(SentryOptions options, BackpressureMonitor? backpressureMonitor)
     {
         ArgumentNullException.ThrowIfNull(options);
+
         _options = options;
         if (options.Dsn is null)
         {

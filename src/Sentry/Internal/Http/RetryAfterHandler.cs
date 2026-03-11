@@ -30,6 +30,7 @@ internal class RetryAfterHandler : DelegatingHandler
         : base(innerHandler)
     {
         ArgumentNullException.ThrowIfNull(clock);
+
         _clock = clock;
     }
 

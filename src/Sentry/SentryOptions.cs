@@ -1686,6 +1686,7 @@ public class SentryOptions
     public SentryOptions UseStackTraceFactory(ISentryStackTraceFactory sentryStackTraceFactory)
     {
         ArgumentNullException.ThrowIfNull(sentryStackTraceFactory);
+
         SentryStackTraceFactory = sentryStackTraceFactory;
         return this;
     }

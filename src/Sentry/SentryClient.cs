@@ -46,6 +46,7 @@ public class SentryClient : ISentryClient, IDisposable
         BackpressureMonitor? backpressureMonitor = null)
     {
         ArgumentNullException.ThrowIfNull(options);
+
         _options = options;
         _backpressureMonitor = backpressureMonitor;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();

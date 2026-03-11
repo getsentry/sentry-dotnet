@@ -12,6 +12,7 @@ internal class SentryAspNetCoreBuilder : ISentryBuilder
     public SentryAspNetCoreBuilder(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
+
         Services = services;
     }
 }

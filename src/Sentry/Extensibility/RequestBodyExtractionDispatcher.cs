@@ -21,10 +21,11 @@ public class RequestBodyExtractionDispatcher : IRequestPayloadExtractor
     public RequestBodyExtractionDispatcher(IEnumerable<IRequestPayloadExtractor> extractors, SentryOptions options, Func<RequestSize> sizeSwitch)
     {
         ArgumentNullException.ThrowIfNull(extractors);
-        Extractors = extractors;
         ArgumentNullException.ThrowIfNull(options);
-        _options = options;
         ArgumentNullException.ThrowIfNull(sizeSwitch);
+
+        Extractors = extractors;
+        _options = options;
         _sizeSwitch = sizeSwitch;
     }
 

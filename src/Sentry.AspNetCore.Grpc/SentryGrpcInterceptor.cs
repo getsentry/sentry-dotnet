@@ -28,6 +28,7 @@ public class SentryGrpcInterceptor : Interceptor
         IOptions<SentryAspNetCoreOptions> options)
     {
         ArgumentNullException.ThrowIfNull(hubAccessor);
+
         _hubAccessor = hubAccessor;
         _options = options.Value;
         var hub = _hubAccessor();

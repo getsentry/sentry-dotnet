@@ -17,6 +17,7 @@ public class DelegateLogEntryFilter : ILogEntryFilter
     public DelegateLogEntryFilter(Func<string, LogLevel, EventId, Exception?, bool> filter)
     {
         ArgumentNullException.ThrowIfNull(filter);
+
         _filter = filter;
     }
 

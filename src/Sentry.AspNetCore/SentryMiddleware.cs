@@ -63,6 +63,7 @@ internal class SentryMiddleware : IMiddleware
         IEnumerable<ISentryTransactionProcessor> transactionProcessors)
     {
         ArgumentNullException.ThrowIfNull(getHub);
+
         _getHub = getHub;
         _options = options.Value;
         _hostingEnvironment = hostingEnvironment;
