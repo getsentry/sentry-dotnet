@@ -62,6 +62,9 @@
 
     <Message Importance="High" Text="Setting up the Cocoa SDK version '$(SentryCocoaVersion)'." />
 
+    <!-- Ensure sanitization reruns after re-extracting an absent framework -->
+    <Delete Files="$(SentryCocoaFramework).sanitized.stamp" />
+
     <!-- Clean cache if version does not exist to get rid of old versions -->
     <RemoveDir
       Condition="!Exists('$(SentryCocoaFramework).zip')"
