@@ -69,10 +69,7 @@ internal static class EnumerableExtensions
 {
     internal static bool TryGetNonEnumeratedCount<TSource>(this IEnumerable<TSource> source, out int count)
     {
-        if (source is null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
+        ArgumentNullException.ThrowIfNull(source);
 
         if (source is ICollection<TSource> genericCollection)
         {
