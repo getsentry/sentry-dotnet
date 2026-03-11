@@ -31,6 +31,10 @@ echo "Checking upstream: ${UPSTREAM_REPO}/${UPSTREAM_PATH}"
 # Get the latest commit SHA affecting the tracked path.
 LATEST_SHA=$(gh api "repos/${UPSTREAM_REPO}/commits?path=${UPSTREAM_PATH}&per_page=1" \
   --jq '.[0].sha')
+if [ -z "${LATEST_SHA}" ] || [ "${LATEST_SHA}" = "null" ]; then
+  echo "No commits found for path '${UPSTREAM_PATH}' in ${UPSTREAM_REPO}. Check the path is correct." >&2
+  exit 1
+fi
 LATEST_SHORT="${LATEST_SHA:0:7}"
 echo "Latest upstream commit: ${LATEST_SHA} (${LATEST_SHORT})"
 
