@@ -91,3 +91,26 @@ internal static class EnumerableExtensions
     }
 }
 #endif
+
+// TODO: remove when updating Polyfill: https://github.com/getsentry/sentry-dotnet/pull/4879
+#if !NET6_0_OR_GREATER
+internal static class ArgumentNullExceptionExtensions
+{
+    extension(ArgumentNullException)
+    {
+        internal static void ThrowIfNull([NotNull] object? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
+        {
+            if (argument is null)
+            {
+                Throw(paramName);
+            }
+        }
+    }
+
+    [DoesNotReturn]
+    private static void Throw(string? paramName)
+    {
+        throw new ArgumentNullException(paramName);
+    }
+}
+#endif
