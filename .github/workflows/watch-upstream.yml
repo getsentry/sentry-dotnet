@@ -22,73 +22,12 @@ jobs:
             path: tools/assembly-store-reader-mk2
             local_path: src/Sentry.Android.AssemblyReader/
     steps:
+      - uses: actions/checkout@v4
+
       - name: Check for upstream changes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
-          set -euo pipefail
-
-          UPSTREAM_REPO="${{ matrix.repo }}"
-          UPSTREAM_PATH="${{ matrix.path }}"
-          LOCAL_PATH="${{ matrix.local_path }}"
-          UPSTREAM_URL="https://github.com/${UPSTREAM_REPO}/tree/main/${UPSTREAM_PATH}"
-
-          echo "Checking upstream: $UPSTREAM_REPO/$UPSTREAM_PATH"
-
-          # Get the latest commit SHA affecting the tracked path.
-          LATEST_SHA=$(gh api "repos/${UPSTREAM_REPO}/commits?path=${UPSTREAM_PATH}&per_page=1" \
-            --jq '.[0].sha')
-          LATEST_SHORT="${LATEST_SHA:0:7}"
-          echo "Latest upstream commit: $LATEST_SHA ($LATEST_SHORT)"
-
-          # Avoid creating duplicate issues: skip if any issue (open or closed) already
-          # tracks this exact upstream commit SHA. The SHA in the title makes it unique.
-          ISSUE_LABEL="upstream-watch"
-          EXISTING_ISSUE=$(gh issue list \
-            --label "$ISSUE_LABEL" \
-            --state all \
-            --search "\"${UPSTREAM_REPO} ${UPSTREAM_PATH} @ ${LATEST_SHORT}\"" \
-            --json number,title \
-            --jq '.[0].number // empty')
-
-          if [ -n "$EXISTING_ISSUE" ]; then
-            echo "An issue (#${EXISTING_ISSUE}) already tracks upstream commit ${LATEST_SHORT} for ${UPSTREAM_REPO}/${UPSTREAM_PATH}. Skipping."
-            exit 0
-          fi
-
-          echo "No existing issue found for commit ${LATEST_SHORT}. Creating one..."
-
-          # Ensure the label exists (idempotent).
-          gh label create "$ISSUE_LABEL" \
-            --description "Upstream vendored code has changed — review required" \
-            --color "E4E669" 2>/dev/null || true
-
-          COMMIT_URL="https://github.com/${UPSTREAM_REPO}/commit/${LATEST_SHA}"
-          HISTORY_URL="https://github.com/${UPSTREAM_REPO}/commits/main/${UPSTREAM_PATH}"
-
-          gh issue create \
-            --title "Upstream change detected: ${UPSTREAM_REPO} ${UPSTREAM_PATH} @ ${LATEST_SHORT}" \
-            --label "$ISSUE_LABEL" \
-            --body "## Upstream Change Detected
-
-The code at [\`${UPSTREAM_REPO}/${UPSTREAM_PATH}\`](${UPSTREAM_URL}) has a new commit since our last review.
-
-| | |
-|---|---|
-| **Latest commit** | [\`${LATEST_SHORT}\`](${COMMIT_URL}) |
-| **Path history** | [View history](${HISTORY_URL}) |
-
-Our vendored copy lives in \`${LOCAL_PATH}\`. We modified the upstream code significantly,
-so a direct merge is unlikely to be appropriate — but the commit above may reveal logic
-changes worth porting.
-
-### What to do
-
-1. Review the [upstream commit](${COMMIT_URL}) and [path history](${HISTORY_URL}).
-2. If no action is needed, close this issue with a note explaining why.
-3. If changes should be ported, create a follow-up task and close this issue once the work is tracked.
-
-> _Automatically opened by the [Watch Upstream Changes](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow._"
-
-          echo "Issue created successfully."
+          scripts/watch-upstream.sh "${{ matrix.repo }}" "${{ matrix.path }}" "${{ matrix.local_path }}"
