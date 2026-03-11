@@ -103,11 +103,7 @@
           DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK;_GenerateSentryCocoaBindings;SanitizeSentryCocoaFramework"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
-  <!--
-    Outer build (multi-TFM): runs _SetupCocoaSDK once before MSBuild fans out to inner per-TFM builds.
-    Critically, this ensures the stamp file exists before the inner builds are scheduled, so
-    SetupCocoaSDK's Condition (which checks for the stamp) correctly skips all inner builds.
-  -->
+  <!-- Outer build (multi-TFM): runs _SetupCocoaSDK once before MSBuild fans out to inner per-TFM builds.  -->
   <Target Name="SetupCocoaSDKBeforeOuterBuild" DependsOnTargets="_SetupCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           BeforeTargets="DispatchToInnerBuilds" />
