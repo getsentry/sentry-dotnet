@@ -7,6 +7,12 @@ Uses the .NET SDK (`dotnet` CLI). Key files:
 - `global.json` — pins .NET SDK and Workload versions
 - `Directory.Build.props` / `Directory.Build.targets` — shared MSBuild properties across all projects
 
+### MSBuild hierarchical structure
+
+MSBuild searches upward from each project file and uses the **nearest** `Directory.Build.props`/`.targets` it finds. Parent files are not automatically included. props/targets files in this repo explicitly `<Import>` parent/root files when appropriate.
+
+`integration-test/Directory.Build.props` / `integration-test/Directory.Build.targets` are intentionally isolated (do not import root).
+
 ## Solution Filters
 
 Use solution filters instead of the full `Sentry.slnx`:
