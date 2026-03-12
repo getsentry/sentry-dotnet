@@ -79,6 +79,11 @@
       Condition="Exists('$(SentryCocoaFramework).zip') and !Exists('$(SentryCocoaFramework)')"
       Command="unzip -o $(SentryCocoaFramework).zip -d $(SentryCocoaCache) &amp;&amp; mv $(SentryCocoaCache)Sentry-Dynamic.xcframework $(SentryCocoaFramework)" />
 
+    <!-- Invalidate any stale sanitization stamp left over from a previous extraction.
+         Without this, if the xcframework directory is deleted while the zip survives, the stamp
+         would prevent SanitizeSentryCocoaFramework from running on the freshly extracted framework. -->
+    <Delete Files="$(SentryCocoaFramework).sanitized.stamp" />
+
     <!-- Make a copy of the header files before we butcher these to suite objective sharpie -->
     <MakeDir Directories="$(SentryCocoaFrameworkHeaders)" />
     <ItemGroup>
