@@ -19,15 +19,6 @@ public
 #endif
 static partial class SentrySdk
 {
-    /// <summary>
-    /// TODO
-    /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
-    public static void NewMethodToTestWardenInCI()
-    {
-        throw new NotImplementedException();
-    }
-
     internal static IHub CurrentHub = DisabledHub.Instance;
 
     internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
