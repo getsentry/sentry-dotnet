@@ -823,6 +823,7 @@ namespace Sentry
         public int MaxCacheItems { get; set; }
         public int MaxQueueItems { get; set; }
         public Sentry.Extensibility.INetworkStatusListener? NetworkStatusListener { get; set; }
+        public string? OrgId { get; set; }
         public double? ProfilesSampleRate { get; set; }
         public bool PropagateTraceparent { get; set; }
         public string? Release { get; set; }
@@ -838,6 +839,7 @@ namespace Sentry
         public System.TimeSpan ShutdownTimeout { get; set; }
         public string SpotlightUrl { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
+        public bool StrictTraceContinuation { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> TagFilters { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> TracePropagationTargets { get; set; }
         public double? TracesSampleRate { get; set; }
