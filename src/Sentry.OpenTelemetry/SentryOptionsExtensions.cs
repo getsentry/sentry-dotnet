@@ -24,17 +24,18 @@ public static class SentryOptionsExtensions
     ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
     ///     </para>
     /// </param>
-    public static void UseOpenTelemetry(
-        this SentryOptions options,
-        TracerProviderBuilder traceProviderBuilder,
-        TextMapPropagator? defaultTextMapPropagator = null
-        )
+    /// <param name="disableSentryTracing">Whether to disable traces created using Sentry's tracing instrumentation.
+    /// It's recommended that you set this to <c>true</c> since mixing OpenTelemetry and Sentry traces may yield
+    /// unexpected results. It is <c>false</c> by default for backward compatibility only.
+    /// </param>
+    /// <remarks>
+    /// This method of initialising the Sentry OpenTelemetry integration will be depricated in a future major release.
+    /// We recommend you use the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol integration instead.
+    /// </remarks>
+    public static void UseOpenTelemetry(this SentryOptions options, TracerProviderBuilder traceProviderBuilder,
+        TextMapPropagator? defaultTextMapPropagator = null, bool disableSentryTracing = false)
     {
-        options.Instrumenter = Instrumenter.OpenTelemetry;
-        options.AddTransactionProcessor(
-            new OpenTelemetryTransactionProcessor()
-            );
-
+        options.UseOpenTelemetry(disableSentryTracing);
         traceProviderBuilder.AddSentry(defaultTextMapPropagator);
     }
 
@@ -46,12 +47,21 @@ public static class SentryOptionsExtensions
     /// to ensure OpenTelemetry sends trace information to Sentry.
     /// </para>
     /// </summary>
-    /// <param name="options"><see cref="SentryOptions"/> instance</param>
-    public static void UseOpenTelemetry(this SentryOptions options)
+    /// <param name="options">The <see cref="SentryOptions"/> instance.</param>
+    /// <param name="disableSentryTracing">Whether to disable traces created using Sentry's tracing instrumentation.
+    /// It's recommended that you set this to <c>true</c> since mixing OpenTelemetry and Sentry traces may yield
+    /// unexpected results. It is <c>false</c> by default for backward compatibility only.
+    /// </param>
+    /// <remarks>
+    /// This method of initialising the Sentry OpenTelemetry integration will be depricated in a future major release.
+    /// We recommend you use the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol integration instead.
+    /// </remarks>
+    public static void UseOpenTelemetry(this SentryOptions options, bool disableSentryTracing = false)
     {
         options.Instrumenter = Instrumenter.OpenTelemetry;
+        options.DisableSentryTracing = disableSentryTracing;
         options.AddTransactionProcessor(
             new OpenTelemetryTransactionProcessor()
-            );
+        );
     }
 }

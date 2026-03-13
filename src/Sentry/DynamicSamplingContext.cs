@@ -1,5 +1,4 @@
 using Sentry.Internal;
-using Sentry.Internal.Extensions;
 
 namespace Sentry;
 
@@ -228,8 +227,16 @@ internal class DynamicSamplingContext
             replaySession);
     }
 
-    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    /// <summary>
+    /// Creates a <see cref="DynamicSamplingContext"/> from the given <see cref="IPropagationContext"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method should not be used when instrumenting with OTEL.
+    /// It will throw an exception if Activity.Current is null.
+    /// </remarks>
+    public static DynamicSamplingContext CreateFromPropagationContext(IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
     {
+        Debug.Assert(options.Instrumenter is not Instrumenter.OpenTelemetry, "This method should not be used when instrumenting with OTEL.");
         var traceId = propagationContext.TraceId;
         var publicKey = options.ParsedDsn.PublicKey;
         var release = options.SettingLocator.GetRelease();
@@ -257,6 +264,13 @@ internal static class DynamicSamplingContextExtensions
     public static DynamicSamplingContext CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromUnsampledTransaction(transaction, options, replaySession);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    /// <summary>
+    /// Creates a <see cref="DynamicSamplingContext"/> from the given <see cref="IPropagationContext"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method should not be used when instrumenting with OTEL.
+    /// It will throw an exception if Activity.Current is null.
+    /// </remarks>
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
 }
