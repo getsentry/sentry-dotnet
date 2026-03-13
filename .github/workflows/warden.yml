@@ -25,7 +25,7 @@ jobs:
         run: npm install
 
       - name: Install Skills
-        run: npm run install
+        run: npm run dotagents -- install
 
       - name: Run Warden
         uses: getsentry/warden@3fcaf99ad07de75be2fc8c660e3106d4344aba25 # v0.20.0
