@@ -76,7 +76,7 @@ public partial class SentryMetricEmitterTests : IDisposable
     [Fact]
     public void Create_Enabled_NewDefaultInstance()
     {
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        Assert.True(_fixture.Options.EnableMetrics);
 
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
@@ -88,7 +88,7 @@ public partial class SentryMetricEmitterTests : IDisposable
     [Fact]
     public void Create_Disabled_CachedDisabledInstance()
     {
-        _fixture.Options.Experimental.EnableMetrics = false;
+        _fixture.Options.EnableMetrics = false;
 
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
@@ -101,7 +101,7 @@ public partial class SentryMetricEmitterTests : IDisposable
     public void Emit_WithoutActiveSpan_CapturesEnvelope()
     {
         _fixture.WithoutActiveSpan();
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -120,8 +120,8 @@ public partial class SentryMetricEmitterTests : IDisposable
         var invocations = 0;
         SentryMetric configuredMetric = null!;
 
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
-        _fixture.Options.Experimental.SetBeforeSendMetric((SentryMetric metric) =>
+        Assert.True(_fixture.Options.EnableMetrics);
+        _fixture.Options.SetBeforeSendMetric((SentryMetric metric) =>
         {
             invocations++;
             configuredMetric = metric;
@@ -142,8 +142,8 @@ public partial class SentryMetricEmitterTests : IDisposable
     {
         var invocations = 0;
 
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
-        _fixture.Options.Experimental.SetBeforeSendMetric((SentryMetric metric) =>
+        Assert.True(_fixture.Options.EnableMetrics);
+        _fixture.Options.SetBeforeSendMetric((SentryMetric metric) =>
         {
             invocations++;
             return null;
@@ -159,8 +159,8 @@ public partial class SentryMetricEmitterTests : IDisposable
     [Fact]
     public void Emit_InvalidBeforeSendMetric_DoesNotCaptureEnvelope()
     {
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
-        _fixture.Options.Experimental.SetBeforeSendMetric(static (SentryMetric metric) => throw new InvalidOperationException());
+        Assert.True(_fixture.Options.EnableMetrics);
+        _fixture.Options.SetBeforeSendMetric(static (SentryMetric metric) => throw new InvalidOperationException());
         var metrics = _fixture.GetSut();
 
         metrics.EmitCounter<int>("sentry_tests.sentry_trace_metrics_tests.counter", 1);
@@ -176,7 +176,7 @@ public partial class SentryMetricEmitterTests : IDisposable
     [Fact]
     public void Flush_AfterEmit_CapturesEnvelope()
     {
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -198,7 +198,7 @@ public partial class SentryMetricEmitterTests : IDisposable
     [Fact]
     public void Dispose_BeforeEmit_DoesNotCaptureEnvelope()
     {
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         var defaultMetrics = metrics.Should().BeOfType<DefaultSentryMetricEmitter>().Which;

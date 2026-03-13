@@ -316,7 +316,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private class LastActiveSpanTracker
     {
-        private readonly object _lock = new object();
+        private readonly Lock _lock = new();
 
         private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
         private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
