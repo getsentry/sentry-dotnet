@@ -36,23 +36,21 @@ public class TraceConnectedMetricsAnalyzerTests
                     {
                         public void Init(SentryOptions options)
                         {
-                            options.Experimental.EnableMetrics = false;
+                            options.EnableMetrics = false;
                         }
 
                         public void Emit(IHub hub)
                         {
-                            var metrics = SentrySdk.Experimental.Metrics;
+                            var metrics = SentrySdk.Metrics;
 
                             _ = metrics.GetType();
 
-                    #pragma warning disable SENTRYTRACECONNECTEDMETRICS
                             _ = hub.Metrics.GetType();
-                    #pragma warning restore SENTRYTRACECONNECTEDMETRICS
 
-                            _ = SentrySdk.Experimental.Metrics.Equals(null);
-                            _ = SentrySdk.Experimental.Metrics.GetHashCode();
-                            _ = SentrySdk.Experimental.Metrics.GetType();
-                            _ = SentrySdk.Experimental.Metrics.ToString();
+                            _ = SentrySdk.Metrics.Equals(null);
+                            _ = SentrySdk.Metrics.GetHashCode();
+                            _ = SentrySdk.Metrics.GetType();
+                            _ = SentrySdk.Metrics.ToString();
                         }
                     }
                     """
@@ -85,29 +83,27 @@ public class TraceConnectedMetricsAnalyzerTests
                     {
                         public void Init(SentryOptions options)
                         {
-                            options.Experimental.SetBeforeSendMetric(static SentryMetric? (SentryMetric metric) => metric.TryGetValue<double>(out _) ? metric : null);
-                            options.Experimental.SetBeforeSendMetric(OnBeforeSendMetric);
-                            options.Experimental.SetBeforeSendMetric(OnBeforeSendMetric<double>);
+                            options.SetBeforeSendMetric(static SentryMetric? (SentryMetric metric) => metric.TryGetValue<double>(out _) ? metric : null);
+                            options.SetBeforeSendMetric(OnBeforeSendMetric);
+                            options.SetBeforeSendMetric(OnBeforeSendMetric<double>);
                         }
 
                         public void Emit(IHub hub)
                         {
                             var scope = new Scope(new SentryOptions());
-                            var metrics = SentrySdk.Experimental.Metrics;
+                            var metrics = SentrySdk.Metrics;
 
-                    #pragma warning disable SENTRYTRACECONNECTEDMETRICS
                             metrics.EmitCounter("name", 1);
                             hub.Metrics.EmitCounter("name", 1f);
-                            SentrySdk.Experimental.Metrics.EmitCounter<double>("name", 1.1d, [], scope);
+                            SentrySdk.Metrics.EmitCounter<double>("name", 1.1d, [], scope);
 
                             metrics.EmitGauge("name", 2);
                             hub.Metrics.EmitGauge("name", 2f);
-                            SentrySdk.Experimental.Metrics.EmitGauge<double>("name", 2.2d, MeasurementUnit.Custom("unit"), [], scope);
+                            SentrySdk.Metrics.EmitGauge<double>("name", 2.2d, MeasurementUnit.Custom("unit"), [], scope);
 
                             metrics.EmitDistribution("name", 3);
                             hub.Metrics.EmitDistribution("name", 3f);
-                            SentrySdk.Experimental.Metrics.EmitDistribution<double>("name", 3.3d, MeasurementUnit.Custom("unit"), [], scope);
-                    #pragma warning restore SENTRYTRACECONNECTEDMETRICS
+                            SentrySdk.Metrics.EmitDistribution<double>("name", 3.3d, MeasurementUnit.Custom("unit"), [], scope);
                         }
 
                         private static SentryMetric? OnBeforeSendMetric(SentryMetric metric)
@@ -193,29 +189,27 @@ public class TraceConnectedMetricsAnalyzerTests
                     {
                         public void Init(SentryOptions options)
                         {
-                            options.Experimental.SetBeforeSendMetric(static SentryMetric? (SentryMetric metric) => {|#0:metric.TryGetValue<sbyte>(out _)|#0} ? metric : null);
-                            options.Experimental.SetBeforeSendMetric(OnBeforeSendMetric);
-                            options.Experimental.SetBeforeSendMetric(OnBeforeSendMetric<ulong>);
+                            options.SetBeforeSendMetric(static SentryMetric? (SentryMetric metric) => {|#0:metric.TryGetValue<sbyte>(out _)|#0} ? metric : null);
+                            options.SetBeforeSendMetric(OnBeforeSendMetric);
+                            options.SetBeforeSendMetric(OnBeforeSendMetric<ulong>);
                         }
 
                         public void Emit(IHub hub)
                         {
                             var scope = new Scope(new SentryOptions());
-                            var metrics = SentrySdk.Experimental.Metrics;
+                            var metrics = SentrySdk.Metrics;
 
-                    #pragma warning disable SENTRYTRACECONNECTEDMETRICS
                             {|#10:metrics.EmitCounter("name", (uint)1)|#10};
                             {|#11:hub.Metrics.EmitCounter("name", (StringComparison)1f)|#11};
-                            {|#12:SentrySdk.Experimental.Metrics.EmitCounter<decimal>("name", 1.1m, [], scope)|#12};
+                            {|#12:SentrySdk.Metrics.EmitCounter<decimal>("name", 1.1m, [], scope)|#12};
 
                             {|#13:metrics.EmitGauge("name", (uint)2)|#13};
                             {|#14:hub.Metrics.EmitGauge("name", (StringComparison)2f)|#14};
-                            {|#15:SentrySdk.Experimental.Metrics.EmitGauge<decimal>("name", 2.2m, MeasurementUnit.Custom("unit"), [], scope)|#15};
+                            {|#15:SentrySdk.Metrics.EmitGauge<decimal>("name", 2.2m, MeasurementUnit.Custom("unit"), [], scope)|#15};
 
                             {|#16:metrics.EmitDistribution("name", (uint)3)|#16};
                             {|#17:hub.Metrics.EmitDistribution("name", (StringComparison)3f)|#17};
-                            {|#18:SentrySdk.Experimental.Metrics.EmitDistribution<decimal>("name", 3.3m, MeasurementUnit.Custom("unit"), [], scope)|#18};
-                    #pragma warning restore SENTRYTRACECONNECTEDMETRICS
+                            {|#18:SentrySdk.Metrics.EmitDistribution<decimal>("name", 3.3m, MeasurementUnit.Custom("unit"), [], scope)|#18};
                         }
 
                         private static SentryMetric? OnBeforeSendMetric(SentryMetric metric)
