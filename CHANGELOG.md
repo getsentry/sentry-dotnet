@@ -6,10 +6,6 @@
 
 - Outbound HTTP requests now show in the Network tab for Android Session Replays ([#4860](https://github.com/getsentry/sentry-dotnet/pull/4860))
 
-### Features
-
-- Report a new _Diagnostic_ (`SENTRY1001`) when an (experimental) Metrics-API is invoked with an unsupported numeric type ([#4840](https://github.com/getsentry/sentry-dotnet/pull/4840))
-
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
