@@ -5,89 +5,63 @@ version = 1
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/agents-md"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-0B9yBikJnaA0eBuwb+M9XOZPN7l6STfFQtktRmYVTZc="
 
 [skills.claude-settings-audit]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/claude-settings-audit"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-goe0Hbo1Ax+NAVa5MbtuyrH80Q4rk8ZSrIw1uLjjUNM="
 
 [skills.code-review]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/code-review"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-EQagBxdNIvqA8Ugvd1fdagQTbR+TJLsV2W7D5jIHqzc="
 
 [skills.code-simplifier]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/code-simplifier"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-PplG7pAg8buUE1Zj1xCFf4UwpUialPxWUD7qPtiZdKo="
 
 [skills.commit]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/commit"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-Os/jupEUHn4g5iW7NdUFMuTfrC7l352Yw7GKwkZX6fQ="
 
 [skills.create-branch]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/create-branch"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-GWNsfRiTyL7D5Rn4un/32Zqa5e2XQnTiIuviZwXaqrc="
 
 [skills.create-pr]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/create-pr"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-HWqc7LXSn3qNmvzDaMFVPuH+N5q+mbdCl7yOQQtNRBE="
 
 [skills.dotagents]
 source = "getsentry/dotagents"
 resolved_url = "https://github.com/getsentry/dotagents.git"
 resolved_path = "skills/dotagents"
-commit = "a71b92d3cca4d0ed7bd763b611771ff9c81d50c8"
-integrity = "sha256-/KBw6Ea4epWV0EiNUF32dEQKd7vcBhns31rSI6D4R1o="
 
 [skills.find-bugs]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/find-bugs"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-FWmCLdOj+x+XffiEg7Bx19drylVypeKz8me9OA757js="
 
 [skills.gha-security-review]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/gha-security-review"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-Z9g+OaLnUgEHOiu3eQ3fOyBg0z57bqGsHcFdFeenlUk="
 
 [skills.iterate-pr]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/iterate-pr"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-VBPI6Q92j2NUiNzfBcgDQpzhRCUcFT6UFuO/uP+D37o="
 
 [skills.pr-writer]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/pr-writer"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-l+dO4vlI1vCaVeuOZRbxM0ZaZAyYW52R9+xMGlXFkds="
 
 [skills.security-review]
 source = "getsentry/skills"
 resolved_url = "https://github.com/getsentry/skills.git"
 resolved_path = ".agents/skills/security-review"
-commit = "fe1dd4f1d4d4d0f34da5bfe774ffd803d3c17685"
-integrity = "sha256-/PngFJkQcji7nYQjh1yerMnxIBaEJNiClJJ8FuCGgAo="
