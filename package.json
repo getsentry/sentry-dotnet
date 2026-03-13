@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@sentry/dotagents": "1.3.0"
+  },
+  "scripts": {
+    "dotagents": "dotagents"
+  }
+}
