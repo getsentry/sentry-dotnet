@@ -71,3 +71,9 @@ source = "getsentry/warden"
 resolved_url = "https://github.com/getsentry/warden"
 resolved_path = "skills/warden"
 resolved_ref = "v0.20.0"
+
+[skills.warden-sweep]
+source = "getsentry/warden"
+resolved_url = "https://github.com/getsentry/warden"
+resolved_path = "skills/warden-sweep"
+resolved_ref = "v0.20.0"

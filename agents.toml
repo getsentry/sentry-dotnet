@@ -63,3 +63,8 @@ source = "getsentry/skills"
 name = "warden"
 source = "getsentry/warden"
 ref = "v0.20.0"
+
+[[skills]]
+name = "warden-sweep"
+source = "getsentry/warden"
+ref = "v0.20.0"
