@@ -1,0 +1,33 @@
+name: Warden
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# contents: write required for resolving review threads via GraphQL
+# See: https://github.com/orgs/community/discussions/44650
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    env:
+      WARDEN_MODEL: ${{ secrets.WARDEN_MODEL }}
+      WARDEN_SENTRY_DSN: ${{ secrets.WARDEN_SENTRY_DSN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Skills
+        run: npm run dotagents -- install
+
+      - name: Run Warden
+        uses: getsentry/warden@3fcaf99ad07de75be2fc8c660e3106d4344aba25 # v0.20.0
+        with:
+          anthropic-api-key: ${{ secrets.WARDEN_ANTHROPIC_API_KEY }}
