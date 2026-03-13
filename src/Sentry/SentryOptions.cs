@@ -1178,10 +1178,7 @@ public class SentryOptions
     public void AddJsonConverter(JsonConverter converter)
     {
         // protect against null because user may not have nullability annotations enabled
-        if (converter == null!)
-        {
-            throw new ArgumentNullException(nameof(converter));
-        }
+        ArgumentNullException.ThrowIfNull(converter);
 
         JsonExtensions.AddJsonConverter(converter);
     }
@@ -1202,10 +1199,7 @@ public class SentryOptions
         where T : JsonSerializerContext
     {
         // protect against null because user may not have nullability annotations enabled
-        if (contextBuilder == null!)
-        {
-            throw new ArgumentNullException(nameof(contextBuilder));
-        }
+        ArgumentNullException.ThrowIfNull(contextBuilder);
 
         JsonExtensions.AddJsonSerializerContext(contextBuilder);
     }
@@ -1691,7 +1685,9 @@ public class SentryOptions
     /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
     public SentryOptions UseStackTraceFactory(ISentryStackTraceFactory sentryStackTraceFactory)
     {
-        SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
+        ArgumentNullException.ThrowIfNull(sentryStackTraceFactory);
+
+        SentryStackTraceFactory = sentryStackTraceFactory;
         return this;
     }
 
