@@ -3,7 +3,6 @@
     "@sentry/dotagents": "1.3.0"
   },
   "scripts": {
-    "dotagents": "dotagents",
-    "install": "dotagents install"
+    "dotagents": "dotagents"
   }
 }
