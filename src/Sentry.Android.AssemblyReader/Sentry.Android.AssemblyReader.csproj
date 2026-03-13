@@ -27,7 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ElfSharp\" />
+    <Compile Update="V2\StoreReader.Classes.cs">
+      <DependentUpon>StoreReader.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

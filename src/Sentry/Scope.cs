@@ -22,7 +22,7 @@ public class Scope : IEventLike
 
     internal bool Locked { get; set; }
 
-    private readonly object _lastEventIdSync = new();
+    private readonly Lock _lastEventIdSync = new();
     private SentryId _lastEventId;
 
     internal SentryId LastEventId
@@ -43,7 +43,7 @@ public class Scope : IEventLike
         }
     }
 
-    private readonly object _evaluationSync = new();
+    private readonly Lock _evaluationSync = new();
     private volatile bool _hasEvaluated;
 
     /// <summary>
