@@ -23,10 +23,14 @@ fi
 UPSTREAM_REPO="$1"
 UPSTREAM_PATH="$2"
 LOCAL_PATH="$3"
-UPSTREAM_URL="https://github.com/${UPSTREAM_REPO}/tree/main/${UPSTREAM_PATH}"
 GITHUB_SERVER_URL="${GITHUB_SERVER_URL:-https://github.com}"
 
 echo "Checking upstream: ${UPSTREAM_REPO}/${UPSTREAM_PATH}"
+
+# Resolve the upstream repo's default branch so URLs are correct even for repos
+# that use a branch name other than 'main'.
+DEFAULT_BRANCH=$(gh api "repos/${UPSTREAM_REPO}" --jq '.default_branch')
+UPSTREAM_URL="https://github.com/${UPSTREAM_REPO}/tree/${DEFAULT_BRANCH}/${UPSTREAM_PATH}"
 
 # Get the latest commit SHA affecting the tracked path.
 LATEST_SHA=$(gh api "repos/${UPSTREAM_REPO}/commits?path=${UPSTREAM_PATH}&per_page=1" \
@@ -61,7 +65,7 @@ gh label create "$ISSUE_LABEL" \
   --color "E4E669" 2>/dev/null || true
 
 COMMIT_URL="https://github.com/${UPSTREAM_REPO}/commit/${LATEST_SHA}"
-HISTORY_URL="https://github.com/${UPSTREAM_REPO}/commits/main/${UPSTREAM_PATH}"
+HISTORY_URL="https://github.com/${UPSTREAM_REPO}/commits/${DEFAULT_BRANCH}/${UPSTREAM_PATH}"
 
 if [ -n "${GITHUB_RUN_ID:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
   FOOTER="> _Automatically opened by the [Watch Upstream Changes](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) workflow._"
