@@ -33,7 +33,7 @@
     <File Path=".github/workflows/update-deps.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
     <File Path=".github/workflows/playwright-blazor-wasm.yml" />
-    <File Path=".github\workflows\watch-upstream.yml" />
+    <File Path=".github/workflows/watch-upstream.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Sentry.Benchmarks/Sentry.Benchmarks.csproj" />
@@ -121,7 +121,7 @@
     <File Path="scripts/update-cli.ps1" />
     <File Path="scripts/update-java.ps1" />
     <File Path="scripts/update-project-xml.ps1" />
-    <File Path="scripts\watch-upstream.sh" />
+    <File Path="scripts/watch-upstream.sh" />
   </Folder>
   <Folder Name="/src/">
     <File Path="src/Directory.Build.props" />
