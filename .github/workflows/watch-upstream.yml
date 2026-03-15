@@ -23,7 +23,7 @@ jobs:
             path: tools/assembly-store-reader-mk2
             local_path: src/Sentry.Android.AssemblyReader/
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Check for upstream changes
         env:
