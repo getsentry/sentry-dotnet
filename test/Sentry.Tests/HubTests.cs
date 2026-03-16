@@ -1883,7 +1883,7 @@ public partial class HubTests : IDisposable
     public void Metrics_IsDisabled_DoesNotCaptureMetric()
     {
         // Arrange
-        _fixture.Options.Experimental.EnableMetrics = false;
+        _fixture.Options.EnableMetrics = false;
         var hub = _fixture.GetSut();
 
         // Act
@@ -1903,7 +1903,7 @@ public partial class HubTests : IDisposable
     public void Metrics_IsEnabled_DoesCaptureMetric()
     {
         // Arrange
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
@@ -1923,11 +1923,11 @@ public partial class HubTests : IDisposable
     public void Metrics_EnableAfterCreate_HasNoEffect()
     {
         // Arrange
-        _fixture.Options.Experimental.EnableMetrics = false;
+        _fixture.Options.EnableMetrics = false;
         var hub = _fixture.GetSut();
 
         // Act
-        _fixture.Options.Experimental.EnableMetrics = true;
+        _fixture.Options.EnableMetrics = true;
 
         // Assert
         hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
@@ -1937,11 +1937,11 @@ public partial class HubTests : IDisposable
     public void Metrics_DisableAfterCreate_HasNoEffect()
     {
         // Arrange
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
-        _fixture.Options.Experimental.EnableMetrics = false;
+        _fixture.Options.EnableMetrics = false;
 
         // Assert
         hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
@@ -1951,7 +1951,7 @@ public partial class HubTests : IDisposable
     public async Task Metrics_FlushAsync_DoesCaptureMetric()
     {
         // Arrange
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
@@ -1976,7 +1976,7 @@ public partial class HubTests : IDisposable
     public void Metrics_Dispose_DoesCaptureMetric()
     {
         // Arrange
-        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
