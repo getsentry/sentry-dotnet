@@ -58,3 +58,11 @@ source = "getsentry/skills"
 [[skills]]
 name = "security-review"
 source = "getsentry/skills"
+
+[[skills]]
+name = "warden"
+source = "getsentry/warden"
+
+[[skills]]
+name = "warden-sweep"
+source = "getsentry/warden"
