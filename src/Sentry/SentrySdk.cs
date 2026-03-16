@@ -19,6 +19,15 @@ public
 #endif
 static partial class SentrySdk
 {
+    /// <summary>
+    /// TODO
+    /// </summary>
+    /// <returns></returns>
+    public static int AnotherTestToVerifyWhetherWardenFlagsThisMethod()
+    {
+        throw new NotImplementedException();
+    }
+
     internal static IHub CurrentHub = DisabledHub.Instance;
 
     internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
