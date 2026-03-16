@@ -225,4 +225,4 @@ And yes, Sentry has a [Skill](https://github.com/getsentry/skills) to maintain t
 ### .agents
 
 We use [dotagents](https://github.com/getsentry/dotagents) as a package manager for agent skills and more.
-See [agents.toml](./agents.toml) and [agents.lock](./agents.lock) for our current configuration.
+See [agents.toml](./agents.toml) for our current configuration.
