@@ -107,7 +107,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_MeasurementUnit_Predefined(MeasurementUnit unit, string expected)
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -124,7 +124,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_MeasurementUnit_None()
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -141,7 +141,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_MeasurementUnit_Custom()
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -158,7 +158,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_MeasurementUnit_Empty()
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -175,7 +175,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_MeasurementUnit_Null()
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -192,7 +192,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_MeasurementUnit_Default()
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -210,7 +210,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_String_Custom()
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -228,7 +228,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_String_Empty()
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -246,7 +246,7 @@ public partial class SentryMetricEmitterTests
     public void Emit_Unit_String_Null()
     {
         SentryMetric? captured = null;
-        _fixture.Options.Experimental.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
+        _fixture.Options.SetBeforeSendMetric(SentryMetric? (SentryMetric metric) =>
         {
             captured = metric;
             return null;
@@ -259,6 +259,7 @@ public partial class SentryMetricEmitterTests
         captured.Unit.Should().BeNull();
     }
 
+    [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance", Justification = "The generic SentryMetric type is internal. Testing via the public abstract base type.")]
     private static SentryMetric CreateCounter<T>(T value) where T : struct
     {
         return new SentryMetric<T>(DateTimeOffset.MinValue, SentryId.Empty, SentryMetricType.Counter, "sentry_tests.sentry_trace_metrics_tests.counter", value);

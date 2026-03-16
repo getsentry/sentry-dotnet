@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- GA release for Sentry Metrics ([#5023](https://github.com/getsentry/sentry-dotnet/pull/5023))
+ 
 ## 6.2.0
 
 ### Features
