@@ -857,6 +857,12 @@ public class SentryOptions
         (500, 599)
     };
 
+    /// <summary>
+    /// <para>Transactions will be dropped if the HTTP Response status code matches any of the configured ranges.</para>
+    /// <para>Defaults to an empty collection (all transactions are captured regardless of status code).</para>
+    /// </summary>
+    public IList<HttpStatusCodeRange> TraceIgnoreStatusCodes { get; set; } = [];
+
     // The default failed request target list will match anything, but adding to the list should clear that.
     private Lazy<IList<StringOrRegex>> _failedRequestTargets = new(() =>
         new AutoClearingList<StringOrRegex>(
@@ -1318,7 +1324,8 @@ public class SentryOptions
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 
         TransactionProcessorsProviders = new() {
-            () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
+            () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>(),
+            () => new[] { new TraceIgnoreStatusCodeTransactionProcessor(this) }
         };
 
         _clientReportRecorder = new Lazy<IClientReportRecorder>(() => new ClientReportRecorder(this));
