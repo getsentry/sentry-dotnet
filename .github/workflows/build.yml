@@ -118,7 +118,7 @@ jobs:
 
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
-        uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
+        uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload build logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ matrix.rid }}-build-logs
           path: |
@@ -242,7 +242,7 @@ jobs:
 
       - name: Upload build and test outputs
         if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ matrix.rid }}-verify-test-results
           path: "**/*.received.*"
@@ -252,7 +252,7 @@ jobs:
 
       - name: Archive NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ github.sha }}
           if-no-files-found: error
@@ -274,7 +274,7 @@ jobs:
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ${{ github.sha }}
           path: src
@@ -284,7 +284,7 @@ jobs:
 #        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
         if: ${{ (matrix.rid != 'linux-musl-x64') }}
-        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@26f565c05d0dd49f703d238706b775883037d76b # 3.3.0
         with:
           path: integration-test
 
@@ -293,7 +293,7 @@ jobs:
 #      # by passing it as parameter to aot.Tests.ps1 via an environment variable
 #      - name: Integration test (musl)
 #        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
-#        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
+#        uses: getsentry/github-workflows/sentry-cli/integration-test@26f565c05d0dd49f703d238706b775883037d76b # 3.3.0
 #        env:
 #          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
 #        with:
@@ -332,13 +332,13 @@ jobs:
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Test MSBuild
-        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@26f565c05d0dd49f703d238706b775883037d76b # 3.3.0
         with:
           path: integration-test/msbuild.Tests.ps1
 
       - name: Upload logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ runner.os }}-msbuild-logs
           path: |
@@ -376,13 +376,13 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Fetch NuGet Packages
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ${{ github.sha }}
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@26f565c05d0dd49f703d238706b775883037d76b # 3.3.0
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:

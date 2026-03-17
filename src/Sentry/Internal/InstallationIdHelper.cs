@@ -5,7 +5,7 @@ namespace Sentry.Internal;
 
 internal class InstallationIdHelper(SentryOptions options)
 {
-    private readonly object _installationIdLock = new();
+    private readonly Lock _installationIdLock = new();
     private string? _installationId;
 
     public string? TryGetInstallationId()

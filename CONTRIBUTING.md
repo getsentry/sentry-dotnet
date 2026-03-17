@@ -25,10 +25,11 @@ For a big feature it's advised to raise an issue to discuss it first.
 ## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
+  - [.NET 10.0](https://dotnet.microsoft.com/download/dotnet/10.0)
   - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-  *Technically, you only need the full SDK installation for the latest version (9.0). If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 8.0. However, installing the full SDKs will also give you the runtimes.*
+  *Technically, you only need the full SDK installation for the latest version. If you like, you can install the smaller ASP.NET Core Runtime packages for older versions. However, installing the full SDKs will also give you the runtimes.*
 
 * [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 
@@ -211,3 +212,17 @@ You'll also need to set `<UseLocalSentryMavenRepo>true</UseLocalSentryMavenRepo>
 in the `Sentry.Bindings.Android.csproj`file.
 
 To switch back again, simply revert those two build properties to their original values.
+
+## AI Workflows
+
+### AGENTS.md
+
+We guide coding agents via the [AGENTS.md](./AGENTS.md) file.
+See also https://agents.md/.
+
+And yes, Sentry has a [Skill](https://github.com/getsentry/skills) to maintain the `AGENTS.md` file.
+
+### .agents
+
+We use [dotagents](https://github.com/getsentry/dotagents) as a package manager for agent skills and more.
+See [agents.toml](./agents.toml) for our current configuration.
