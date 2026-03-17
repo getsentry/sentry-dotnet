@@ -1019,10 +1019,11 @@ public partial class SentryClientTests : IDisposable
         var sut = _fixture.GetSut();
 
         //Act
-        var result = sut.CaptureFeedback(feedback);
+        var id = sut.CaptureFeedback(feedback, out var result);
 
         //Assert
-        result.Should().Be(SentryId.Empty);
+        result.Should().Be(CaptureFeedbackResult.DroppedByEventProcessor);
+        id.Should().Be(SentryId.Empty);
         var expectedReason = DiscardReason.EventProcessor;
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(expectedReason, DataCategory.Feedback);
     }
