@@ -15,6 +15,7 @@ using Cocona;
 //   ./dev.cs subup
 //   ./dev.cs wrest
 //   ./dev.cs nrest
+//   ./dev.cs aiup
 //   ./dev.cs cleanslate --dry-run
 //
 // This is intended to be run from the repo root so that git/dotnet
@@ -49,7 +50,8 @@ public class DevCommands
         {
             ("git clean", "git", "clean -dfx"),
             ("git submodule update", "git", "submodule update --init --recursive"),
-            ("dotnet restore", "dotnet", $"restore \"{solution}\"")
+            ("dotnet restore", "dotnet", $"restore \"{solution}\""),
+            ("npx @sentry/dotagents install", "npx", "@sentry/dotagents install")
         };
 
         foreach (var (description, fileName, arguments) in steps)
@@ -92,6 +94,13 @@ public class DevCommands
 
         Console.WriteLine("[dev] 'sudo' not found; running 'dotnet workload restore' without sudo.");
         return await RunStepAsync("dotnet workload restore", "dotnet", "workload restore", options.DryRun);
+    }
+
+    [Command("aiup", Description = "Install/update AI agent files via @sentry/dotagents.")]
+    public Task<int> AiUpdateAsync(GlobalOptions options = default!)
+    {
+        Console.WriteLine("[dev] Installing/updating AI agent files");
+        return RunStepAsync("npx @sentry/dotagents install", "npx", "@sentry/dotagents install", options.DryRun);
     }
 
     [Command("nrest", Description = "Restore the default CI solution.")]
