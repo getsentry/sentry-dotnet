@@ -108,4 +108,56 @@ public class HubExtensionsTests
         Assert.Equal(expectedMessage, crumb.Message);
         Assert.Equal(expectedTimestamp, crumb.Timestamp);
     }
+
+    [Fact]
+    public void GetTraceIdAndSpanId_WithActiveSpan_HasBothTraceIdAndSpanId()
+    {
+        // Arrange
+        var span = Substitute.For<ISpan>();
+        span.TraceId.Returns(SentryId.Create());
+        span.SpanId.Returns(Sentry.SpanId.Create());
+
+        var hub = Substitute.For<IHub>();
+        hub.GetSpan().Returns(span);
+
+        // Act
+        hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
+
+        // Assert
+        traceId.Should().Be(span.TraceId);
+        spanId.Should().Be(span.SpanId);
+    }
+
+    [Fact]
+    public void GetTraceIdAndSpanId_WithoutActiveSpan_HasOnlyTraceIdButNoSpanId()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.GetSpan().Returns((ISpan)null);
+
+        var scope = new Scope();
+        hub.SubstituteConfigureScope(scope);
+
+        // Act
+        hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
+
+        // Assert
+        traceId.Should().Be(scope.PropagationContext.TraceId);
+        spanId.Should().BeNull();
+    }
+
+    [Fact]
+    public void GetTraceIdAndSpanId_WithoutIds_ShouldBeUnreachable()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.GetSpan().Returns((ISpan)null);
+
+        // Act
+        hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
+
+        // Assert
+        traceId.Should().Be(SentryId.Empty);
+        spanId.Should().BeNull();
+    }
 }

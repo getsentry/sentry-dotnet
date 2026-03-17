@@ -20,6 +20,7 @@
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
     <SentryProGuardUUID Condition="'$(SentryProGuardUUID)' == ''">$([System.Guid]::NewGuid())</SentryProGuardUUID>
     <SentryAllowFailure Condition="'$(SENTRY_ALLOW_FAILURE)' == 'true'">true</SentryAllowFailure>
+    <SentryAllowFailure Condition="'$(SentryAllowFailure)' == ''">false</SentryAllowFailure>
   </PropertyGroup>
 
   <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
@@ -109,7 +110,6 @@
       The defaults can be set either via config file, or environment variables, per: https://docs.sentry.io/product/cli/configuration/
     -->
     <PropertyGroup>
-      <SentryCLIBaseOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIBaseOptions) --api-key $(SentryApiKey)</SentryCLIBaseOptions>
       <SentryCLIBaseOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIBaseOptions) --auth-token $(SentryAuthToken)</SentryCLIBaseOptions>
       <SentryCLIBaseOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIBaseOptions) --url $(SentryUrl)</SentryCLIBaseOptions>
       <SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</SentryCLIBaseCommand>

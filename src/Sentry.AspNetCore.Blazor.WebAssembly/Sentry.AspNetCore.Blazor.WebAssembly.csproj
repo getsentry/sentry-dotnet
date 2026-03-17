@@ -10,6 +10,10 @@
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.AspNetCore.Blazor.WebAssembly.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
   </ItemGroup>

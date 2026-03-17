@@ -446,6 +446,18 @@ public sealed class Envelope : ISerializable, IDisposable
         return new Envelope(header, items);
     }
 
+    internal static Envelope FromMetric(TraceMetric metric)
+    {
+        var header = DefaultHeader;
+
+        var items = new[]
+        {
+            EnvelopeItem.FromMetric(metric),
+        };
+
+        return new Envelope(header, items);
+    }
+
     private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
         Stream stream,
         CancellationToken cancellationToken = default)

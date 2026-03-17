@@ -996,6 +996,28 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_FeedbackHasReleaseAndEnvironment()
+    {
+        // Arrange
+        _fixture.SentryOptions.Release = "my-test-release";
+        _fixture.SentryOptions.Environment = "my-test-environment";
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+        var feedback = new SentryFeedback("Test feedback");
+
+        // Act
+        var result = sut.CaptureFeedback(feedback);
+
+        // Assert
+        result.Should().NotBe(SentryId.Empty);
+        var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
+        Assert.Equal(_fixture.SentryOptions.Release, @event.Release);
+        Assert.Equal(_fixture.SentryOptions.Environment, @event.Environment);
+    }
+
+    [Fact]
     public void CaptureTransaction_SampledOut_Dropped()
     {
         // Arrange

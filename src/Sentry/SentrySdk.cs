@@ -288,6 +288,9 @@ static partial class SentrySdk
     /// <inheritdoc cref="IHub.Logger" />
     public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
 
+    /// <inheritdoc cref="IHub.Metrics" />
+    public static SentryMetricEmitter Metrics { [DebuggerStepThrough] get => CurrentHub.Metrics; }
+
     /// <summary>
     /// Creates a new scope that will terminate when disposed.
     /// </summary>

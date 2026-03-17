@@ -29,7 +29,8 @@ public class DotnetReplayBreadcrumbConverterTests
         rrwebEvent.Should().BeOfType<IO.Sentry.Rrweb.RRWebSpanEvent>();
         var rrWebSpanEvent = rrwebEvent as IO.Sentry.Rrweb.RRWebSpanEvent;
         Assert.NotNull(rrWebSpanEvent);
-        // Note the converter divides by 1000 to get ms
+        // Note the converter divides by 1000 to get ms.
+        // See https://github.com/getsentry/sentry-java/blob/94bff8dc0a952ad8c1b6815a9eda5005e41b92c7/sentry-android-replay/src/main/java/io/sentry/android/replay/DefaultReplayBreadcrumbConverter.kt#L215-L228
         rrWebSpanEvent.StartTimestamp.Should().Be(1625079600L);
         rrWebSpanEvent.EndTimestamp.Should().Be(1625079660L);
     }

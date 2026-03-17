@@ -62,3 +62,32 @@ internal static partial class PolyfillExtensions
     }
 }
 #endif
+
+// TODO: remove when updating Polyfill: https://github.com/getsentry/sentry-dotnet/pull/4879
+#if !NET6_0_OR_GREATER
+internal static class EnumerableExtensions
+{
+    internal static bool TryGetNonEnumeratedCount<TSource>(this IEnumerable<TSource> source, out int count)
+    {
+        if (source is null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        if (source is ICollection<TSource> genericCollection)
+        {
+            count = genericCollection.Count;
+            return true;
+        }
+
+        if (source is ICollection collection)
+        {
+            count = collection.Count;
+            return true;
+        }
+
+        count = 0;
+        return false;
+    }
+}
+#endif

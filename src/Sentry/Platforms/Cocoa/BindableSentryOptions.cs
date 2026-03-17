@@ -35,7 +35,9 @@ internal partial class BindableSentryOptions
             options.AppHangTimeoutInterval = AppHangTimeoutInterval ?? options.AppHangTimeoutInterval;
             options.IdleTimeout = IdleTimeout ?? options.IdleTimeout;
             options.EnableAppHangTracking = EnableAppHangTracking ?? options.EnableAppHangTracking;
+#pragma warning disable CS0618 // Type or member is obsolete
             options.EnableAppHangTrackingV2 = EnableAppHangTrackingV2 ?? options.EnableAppHangTrackingV2;
+#pragma warning restore CS0618 // Type or member is obsolete
             options.EnableAutoBreadcrumbTracking = EnableAutoBreadcrumbTracking ?? options.EnableAutoBreadcrumbTracking;
             options.EnableAutoPerformanceTracing = EnableAutoPerformanceTracing ?? options.EnableAutoPerformanceTracing;
             options.EnableCoreDataTracing = EnableCoreDataTracing ?? options.EnableCoreDataTracing;
