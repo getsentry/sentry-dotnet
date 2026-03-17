@@ -1,6 +1,6 @@
 # Sentry SDK for .NET – Bug Report Reproduction Guide
 
-First of all, thank you for reporting this potential bug. Nobody likes bugs and to help us
+First of all, thank you for reporting this potential bug. Nobody likes bugs, and to help us
 diagnose and resolve your issue as effectively and quickly as possible, we would like to give
 you a bit more information about why we ask for a reproducible example of the problem, and how
 to provide one.
@@ -24,7 +24,7 @@ to have a small sample that reproduces the issue. This way we can:
 - fix the issue faster;
 - make sure the issue is not a false positive.
 
-It also acts as a double-edged sword. When you take your code apart piece-by-piece in a new
+It also yields an additional benefit. When you take your code apart piece-by-piece in a new
 project, adding things back one by one, it will become very clear what factors are at play and
 you might discover that the issue is somewhere in your own code. At the very least you will be
 able to provide a very detailed description of what you're seeing. That helps us get to the
@@ -43,11 +43,11 @@ We like to see this as a team effort.
 #### But I don't have time for this!
 
 Please help us, help you! This is an open-source project under the MIT license. Provided as-is,
-without any support or guarantees. We care about our project and therefore by extension also
+without any support or guarantees. We care about our project and therefore, by extension, also
 about your project. But realize that when you come onto our repo, maybe frustrated because
-things are not working and you just drop a one-liner, no reproduction, mentioning that you
-don't have the time, that's also not very motivating for us. On the other end of these GitHub
-issues are still people – people that are doing their best to move this project forward.
+things are not working and you just drop a one-liner without a reproduction, mentioning that you
+don't have the time, is also not very motivating for us. On the other end of these GitHub
+issues are real people – people that are doing their best to move this project forward.
 
 Also consider how that comes across. If you don't have the time to report in detail what is
 going on, then really how important is the issue? If this is really important and blocking you,
@@ -59,7 +59,7 @@ know any details – please help us understand and be nice.
 
 With a reproduction we want to rule out a couple of things:
 
-- The issue is in the Sentry SDK, not in your code;
+- The issue is in the Sentry SDK, not in your code or a third-party library;
 - The issue has not already been resolved in the latest version of the SDK;
 
 Therefore we would like to propose the following steps to create a reproduction sample:
@@ -107,12 +107,12 @@ where `main` holds a default new project and you create a branch for each issue.
 - **Do not** reference external data sources that we can't access. Any external data needed
   should be generated synthetically inside the repro itself.
 - **Always** refer to **concrete version numbers**. Avoid "the latest version" – we don't know
-  whether you mean stable, preview, or nightly. Always include the exact version number.
+  whether you mean stable or pre-release. Always include the exact version number.
 
 ## That's it!
 
 The first time might take you a bit longer to go through all this, but once you've done it
-you'll see it isn't that much more work and will benefit the process a lot.
+you'll see it isn't that much more work and it will benefit the process a lot.
 
 Thank you so much for taking some of your valuable time to make the Sentry SDK for .NET better!
 We really appreciate it. ❤️
