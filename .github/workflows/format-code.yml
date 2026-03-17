@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-15
     steps:
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -26,15 +26,30 @@ jobs:
         # We should be able to get rid of the restore here, if we install the correct workloads in actions/environment
         run: |
           dotnet workload restore
-          dotnet restore Sentry.sln --nologo
-
-      - name: Install dotnet format
-        run: dotnet tool install -g dotnet-format
+          dotnet restore Sentry.slnx --nologo
 
       - name: Format Code
-        # We're excluding `./**/*OptionsSetup.cs` from the format because the tool struggles with
-        # source generators
-        run: dotnet format Sentry.sln --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs
+        # We exclude `./**/*OptionsSetup.cs` from the format because the tool struggles with
+        # source generators.
+        #
+        # We exclude `test/Sentry.Tests/AttributeReaderTests.cs` because dotnet-format tries to
+        # delete assertions in there.
+        # - see https://github.com/getsentry/sentry-dotnet/pull/4911#discussion_r2795717887
+        run: dotnet format Sentry.slnx --no-restore --report ./dotnet-format-report --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs
+
+      - name: Upload Format Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          archive: false
+          path: ./dotnet-format-report/
+          if-no-files-found: ignore
+
+      - name: Exclude Format Report from Git
+        run: |
+          if [ -d ./dotnet-format-report ]; then
+            echo '*' > ./dotnet-format-report/.gitignore
+          fi
 
       # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
       # we need to pass the current branch, otherwise we can't commit the changes.

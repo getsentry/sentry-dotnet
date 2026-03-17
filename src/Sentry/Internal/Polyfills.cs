@@ -1,9 +1,5 @@
 // Polyfills to bridge the missing APIs in older targets.
 
-#if !NET9_0_OR_GREATER
-global using Lock = object;
-#endif
-
 #if NETFRAMEWORK || NETSTANDARD2_0
 namespace System
 {
@@ -11,32 +7,6 @@ namespace System
     {
         public static int Combine<T1, T2>(T1 value1, T2 value2) => (value1, value2).GetHashCode();
         public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3) => (value1, value2, value3).GetHashCode();
-    }
-}
-
-internal static partial class PolyfillExtensions
-{
-    public static StringBuilder AppendJoin(this StringBuilder builder, char separator, params object?[] values)
-    {
-        if (values.Length == 0)
-        {
-            return builder;
-        }
-
-        if (values[0] is {} value)
-        {
-            builder.Append(value);
-        }
-
-        for (var i = 1; i < values.Length; i++)
-        {
-            builder.Append(separator);
-            if (values[i] is {} nextValue)
-            {
-                builder.Append(nextValue);
-            }
-        }
-        return builder;
     }
 }
 #endif
@@ -89,6 +59,35 @@ internal static partial class PolyfillExtensions
     {
         using var document = JsonDocument.Parse(utf8Json);
         document.RootElement.WriteTo(writer);
+    }
+}
+#endif
+
+// TODO: remove when updating Polyfill: https://github.com/getsentry/sentry-dotnet/pull/4879
+#if !NET6_0_OR_GREATER
+internal static class EnumerableExtensions
+{
+    internal static bool TryGetNonEnumeratedCount<TSource>(this IEnumerable<TSource> source, out int count)
+    {
+        if (source is null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        if (source is ICollection<TSource> genericCollection)
+        {
+            count = genericCollection.Count;
+            return true;
+        }
+
+        if (source is ICollection collection)
+        {
+            count = collection.Count;
+            return true;
+        }
+
+        count = 0;
+        return false;
     }
 }
 #endif

@@ -31,7 +31,7 @@ internal partial class StoreReader
         }
     }
 
-    private sealed class IndexEntry
+    internal sealed class IndexEntry
     {
         public readonly ulong name_hash;
         public readonly uint descriptor_index;
@@ -45,7 +45,7 @@ internal partial class StoreReader
         }
     }
 
-    private sealed class EntryDescriptor
+    internal sealed class EntryDescriptor
     {
         public uint mapping_index;
 
@@ -59,7 +59,7 @@ internal partial class StoreReader
         public uint config_data_size;
     }
 
-    private sealed class StoreItemV2 : AssemblyStoreItem
+    internal sealed class StoreItemV2 : AssemblyStoreItem
     {
         public StoreItemV2(AndroidTargetArch targetArch, string name, bool is64Bit, List<IndexEntry> indexEntries,
             EntryDescriptor descriptor, bool ignore)

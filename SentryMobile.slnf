@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "Sentry.sln",
+    "path": "Sentry.slnx",
     "projects": [
       "samples\\Sentry.Samples.Android\\Sentry.Samples.Android.csproj",
       "samples\\Sentry.Samples.Ios\\Sentry.Samples.Ios.csproj",

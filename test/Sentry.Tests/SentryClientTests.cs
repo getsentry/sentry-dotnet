@@ -977,6 +977,58 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_WithEventProcessor_EventProcessorApplied()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        var eventProcessor = Substitute.For<ISentryEventProcessor>();
+        eventProcessor.Process(Arg.Any<SentryEvent>()).Returns(e =>
+        {
+            var evt = (SentryEvent)e[0];
+            evt.Environment = "testing 123";
+            return evt;
+        });
+        _fixture.SentryOptions.AddEventProcessor(eventProcessor);
+        var sut = _fixture.GetSut();
+
+        Envelope envelope = null;
+        sut.Worker.When(w => w.EnqueueEnvelope(Arg.Any<Envelope>()))
+            .Do(callback => envelope = callback.Arg<Envelope>());
+
+        //Act
+        var result = sut.CaptureFeedback(feedback);
+
+        //Assert
+        result.Should().NotBe(SentryId.Empty);
+        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        envelope.Should().NotBeNull();
+        envelope.Items.Should().Contain(item => item.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
+        @event.Environment.Should().Be("testing 123");
+    }
+
+    [Fact]
+    public void CaptureFeedback_EventDropped_SendsClientReport()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        var eventProcessor = Substitute.For<ISentryEventProcessor>();
+        eventProcessor.Process(Arg.Any<SentryEvent>()).Returns(_ => null);
+        _fixture.SentryOptions.AddEventProcessor(eventProcessor);
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.DroppedByEventProcessor);
+        id.Should().Be(SentryId.Empty);
+        var expectedReason = DiscardReason.EventProcessor;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(expectedReason, DataCategory.Feedback);
+    }
+
+    [Fact]
     public void CaptureFeedback_WithHint_HasHintAttachment()
     {
         //Arrange
@@ -993,6 +1045,28 @@ public partial class SentryClientTests : IDisposable
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
             envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
+    }
+
+    [Fact]
+    public void CaptureFeedback_FeedbackHasReleaseAndEnvironment()
+    {
+        // Arrange
+        _fixture.SentryOptions.Release = "my-test-release";
+        _fixture.SentryOptions.Environment = "my-test-environment";
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+        var feedback = new SentryFeedback("Test feedback");
+
+        // Act
+        var result = sut.CaptureFeedback(feedback);
+
+        // Assert
+        result.Should().NotBe(SentryId.Empty);
+        var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
+        Assert.Equal(_fixture.SentryOptions.Release, @event.Release);
+        Assert.Equal(_fixture.SentryOptions.Environment, @event.Environment);
     }
 
     [Fact]
@@ -1663,20 +1737,15 @@ public partial class SentryClientTests : IDisposable
     [Fact]
     public void Ctor_WrapsCustomTransportWhenCachePathOnOptions()
     {
-        // Arrange
         _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.Transport = new FakeTransport();
         using var cacheDirectory = new TempDirectory();
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
 
-        // Act
         using var sut = new SentryClient(_fixture.SentryOptions);
 
-        // Assert
         var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
         _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
-
-        cachingTransport.Dispose(); // Release cache lock so that the cacheDirectory can be removed
     }
 
     [Fact]

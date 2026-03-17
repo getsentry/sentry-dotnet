@@ -1,6 +1,5 @@
 using Sentry.Infrastructure;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry.Extensibility;
 
@@ -36,6 +35,11 @@ public sealed class HubAdapter : IHub
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     public SentryStructuredLogger Logger { [DebuggerStepThrough] get => SentrySdk.Logger; }
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    public SentryMetricEmitter Metrics { [DebuggerStepThrough] get => SentrySdk.Metrics; }
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.

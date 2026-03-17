@@ -6,7 +6,7 @@ Instead, reference one of the following:
 
 ## SDK Developers and Contributors
 
-For .NET SDK contributors, most of the classes in this package are generated automatically.
+For .NET SDK contributors, most of the classes in this package are generated automatically. These can be found in the `src/Sentry.Bindings.Android/obj/{Configuration}/{tfm}/generated/src/` folder after building the project.
 
 - Post generation transformations are controlled via various XML files stored in the `/Transforms` directory  (see [Java Bindings Metadata documentation](https://learn.microsoft.com/en-gb/previous-versions/xamarin/android/platform/binding-java-library/customizing-bindings/java-bindings-metadata) for details).
 

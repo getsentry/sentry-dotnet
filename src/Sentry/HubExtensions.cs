@@ -287,4 +287,34 @@ public static class HubExtensions
         hub.ConfigureScope(scope => current = scope);
         return current;
     }
+
+    /// <summary>
+    /// Get <paramref name="traceId"/> of either the currently active Span, or the current Scope.
+    /// Get <paramref name="spanId"/> only if there is a currently active Span.
+    /// </summary>
+    /// <remarks>
+    /// Intended for use by <see cref="SentryLog"/> and <see cref="SentryMetric{T}"/>.
+    /// </remarks>
+    internal static void GetTraceIdAndSpanId(this IHub hub, out SentryId traceId, out SpanId? spanId)
+    {
+        var activeSpan = hub.GetSpan();
+        if (activeSpan is not null)
+        {
+            traceId = activeSpan.TraceId;
+            spanId = activeSpan.SpanId;
+            return;
+        }
+
+        var scope = hub.GetScope();
+        if (scope is not null)
+        {
+            traceId = scope.PropagationContext.TraceId;
+            spanId = null;
+            return;
+        }
+
+        Debug.Assert(hub is not Hub, "In case of a 'full' Hub, there is always a Scope. Otherwise (disabled) there is no Scope, but this branch should be unreachable.");
+        traceId = SentryId.Empty;
+        spanId = null;
+    }
 }

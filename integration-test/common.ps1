@@ -108,9 +108,12 @@ BeforeAll {
         Remove-Item -Path ~/.nuget/packages/$($name.ToLower())/$packageVersion -Recurse -Force -ErrorAction SilentlyContinue
     }
 
-    Remove-Item -Path "$PSScriptRoot/packages" -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -ItemType Directory -Path "$PSScriptRoot/packages" | Out-Null
-    RegisterLocalPackage 'Sentry'
+    function ResetLocalPackages()
+    {
+        Remove-Item -Path "$PSScriptRoot/packages" -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path "$PSScriptRoot/packages" | Out-Null
+        RegisterLocalPackage 'Sentry'
+    }
 
     function RunDotnetWithSentryCLI([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework)
     {
@@ -131,6 +134,7 @@ BeforeAll {
                     /p:SentryProject=project `
                     /p:SentryUrl=$url `
                     /p:SentryAuthToken=dummy `
+                    /p:SentryProGuardUUID=a5fb4278-bcb5-4464-8585-d811dc3c3959 `
                 | ForEach-Object {
                     if ($_ -match "^Time Elapsed ")
                     {

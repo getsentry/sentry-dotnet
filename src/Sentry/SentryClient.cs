@@ -108,6 +108,7 @@ public class SentryClient : ISentryClient, IDisposable
         // Evaluate and copy before invoking the callback
         scope.Evaluate();
         scope.Apply(evt);
+        _enricher.Apply(evt);
 
         if (scope.Level != null && scope.Level != SentryLevel.Info)
         {
@@ -116,12 +117,19 @@ public class SentryClient : ISentryClient, IDisposable
             evt.Level = scope.Level;
         }
 
+        if (SentryEventHelper.ProcessEvent(evt, scope.GetAllEventProcessors(), hint, _options, DataCategory.Feedback)
+            is not { } processedEvent)
+        {
+            result = CaptureFeedbackResult.DroppedByEventProcessor;
+            return SentryId.Empty;  // Dropped by an event processor
+        }
+
         var attachments = hint.Attachments.ToList();
-        var envelope = Envelope.FromFeedback(evt, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+        var envelope = Envelope.FromFeedback(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
         if (CaptureEnvelope(envelope))
         {
             result = CaptureFeedbackResult.Success;
-            return evt.EventId;
+            return processedEvent.EventId;
         }
         result = CaptureFeedbackResult.UnknownError;
         return SentryId.Empty;
@@ -344,7 +352,8 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options) is not { } processedEvent)
+        if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options, DataCategory.Error)
+            is not { } processedEvent)
         {
             return SentryId.Empty;  // Dropped by an event processor
         }

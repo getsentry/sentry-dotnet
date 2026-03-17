@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": ".generated.NoMobile.sln",
+    "path": ".generated.NoMobile.slnx",
     "projects": [
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",

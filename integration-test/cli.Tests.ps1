@@ -7,6 +7,7 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
     foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
+        ResetLocalPackages
         DotnetNew 'console' 'console-app' $framework
     }
 
@@ -43,6 +44,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
+        ResetLocalPackages
         DotnetNew 'console' 'console-app' $framework
     }
 
@@ -105,6 +107,7 @@ Describe 'MAUI (<framework>)' -ForEach @(
     @{ framework = $previousFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
+        ResetLocalPackages
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
         RegisterLocalPackage 'Sentry.Bindings.Android'
         RegisterLocalPackage 'Sentry.Extensions.Logging'
@@ -146,13 +149,13 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android$androidTpv"
         Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            '/proguard/a5fb4278-bcb5-4464-8585-d811dc3c3959.txt',
             'libsentry-android.so',
             'libsentry.so',
             'libsentrysupplemental.so',
             'libxamarin-app.so',
             'maui-app.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
         $result.ScriptOutput | Should -AnyElementMatch "Found 23 debug information files \(1 with embedded sources\)"
     }
 
