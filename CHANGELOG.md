@@ -9,7 +9,7 @@
 ### Fixes
 
 - Common tags such as `Environment` and `Release` and custom event processors are all now correctly applied to CaptureFeedback events ([#4942](https://github.com/getsentry/sentry-dotnet/pull/4942))
-- Include `Data` set via `ITransactionTracer` in `SentryTransaction`([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
+- Include `Data` set via `ITransactionTracer` in `SentryTransaction` ([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
 
 ## 6.2.0
 
