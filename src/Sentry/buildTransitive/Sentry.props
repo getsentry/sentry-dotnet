@@ -5,5 +5,6 @@
     <_SentryTargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</_SentryTargetFrameworkVersion>
     <_SentryIsNet8OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 8.0))</_SentryIsNet8OrGreater>
     <_SentryIsNet9OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 9.0))</_SentryIsNet9OrGreater>
+    <_SentryIsNet10OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 10.0))</_SentryIsNet10OrGreater>
   </PropertyGroup>
 </Project>
