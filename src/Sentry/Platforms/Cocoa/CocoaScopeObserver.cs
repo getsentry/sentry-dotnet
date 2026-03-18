@@ -112,4 +112,8 @@ internal sealed class CocoaScopeObserver : IScopeObserver
     {
         // TODO: Missing corresponding functionality on the Cocoa SDK
     }
+
+    public void AddAttachment(SentryAttachment attachment) { }
+
+    public void ClearAttachments() { }
 }

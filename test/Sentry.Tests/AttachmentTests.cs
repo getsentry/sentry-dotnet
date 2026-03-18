@@ -3,6 +3,13 @@ namespace Sentry.Tests;
 public class FileAttachmentContentTests
 {
     [Fact]
+    public void FilePath_ReturnsConstructorValue()
+    {
+        var attachment = new FileAttachmentContent("/some/path/file.txt");
+        Assert.Equal("/some/path/file.txt", attachment.FilePath);
+    }
+
+    [Fact]
     public void DoesNotLock()
     {
         // Arrange

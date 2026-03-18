@@ -104,4 +104,8 @@ internal sealed class AndroidScopeObserver : IScopeObserver
     {
         // TODO: This requires sentry-java 8.4.0
     }
+
+    public void AddAttachment(SentryAttachment attachment) { }
+
+    public void ClearAttachments() { }
 }

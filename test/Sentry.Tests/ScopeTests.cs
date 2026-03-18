@@ -740,6 +740,73 @@ public class ScopeTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void AddAttachment_ObserverExist_ObserverNotifiedIfEnabled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        var attachment = new SentryAttachment(default, default, default, "test.txt");
+        var expectedCount = enableScopeSync ? 1 : 0;
+
+        // Act
+        scope.AddAttachment(attachment);
+
+        // Assert
+        observer.Received(expectedCount).AddAttachment(Arg.Is(attachment));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ClearAttachments_ObserverExist_ObserverNotifiedIfEnabled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        scope.AddAttachment(new SentryAttachment(default, default, default, "test.txt"));
+        observer.ClearReceivedCalls();
+        var expectedCount = enableScopeSync ? 1 : 0;
+
+        // Act
+        scope.ClearAttachments();
+
+        // Assert
+        observer.Received(expectedCount).ClearAttachments();
+    }
+
+    [Fact]
+    public void Apply_Attachments_DoesNotNotifyObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var source = new Scope(new SentryOptions());
+        source.AddAttachment(new SentryAttachment(default, default, default, "test.txt"));
+
+        var target = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+        observer.ClearReceivedCalls();
+
+        // Act
+        source.Apply(target);
+
+        // Assert
+        observer.DidNotReceive().AddAttachment(Arg.Any<SentryAttachment>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void SetPropagationContext_ObserverExist_ObserverSetsTraceIfEnabled(bool enableScopeSync)
     {
         // Arrange
