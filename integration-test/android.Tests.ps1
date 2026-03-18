@@ -18,10 +18,12 @@ BeforeDiscovery {
 }
 
 $cases = @(
-    @{ configuration = 'Release' }
-    @{ configuration = 'Debug'   }
+    @{ configuration = 'Release'; runtime = 'mono'    }
+    @{ configuration = 'Release'; runtime = 'coreclr' }
+    @{ configuration = 'Debug';   runtime = 'mono'    }
+    @{ configuration = 'Debug';   runtime = 'coreclr' }
 )
-Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-not $script:emulator) {
+Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
 
@@ -38,10 +40,12 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
         $rid = "android-$arch"
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
+        $useMonoRuntime = if ($runtime -eq 'mono') { 'true' } else { 'false' }
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
             --configuration $configuration `
             --framework $tfm `
-            --runtime $rid
+            --runtime $rid `
+            -p:UseMonoRuntime=$useMonoRuntime
         | ForEach-Object { Write-Host $_ }
         Write-Host '::endgroup::'
         $LASTEXITCODE | Should -Be 0

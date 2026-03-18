@@ -66,6 +66,14 @@ public static partial class SentrySdk
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
             var signalHandlerStrategy = options.Native.ExperimentalOptions.SignalHandlerStrategy;
             if (signalHandlerStrategy == SignalHandlerStrategy.ChainAtStart
+                && Type.GetType("Mono.RuntimeStructs") == null)
+            {
+                options.LogDebug(
+                    "SignalHandlerStrategy.ChainAtStart is not compatible with .NET CoreCLR runtime. " +
+                    "Falling back to SignalHandlerStrategy.Default.");
+                signalHandlerStrategy = SignalHandlerStrategy.Default;
+            }
+            if (signalHandlerStrategy == SignalHandlerStrategy.ChainAtStart
                 && System.Environment.Version is { Major: 10, Minor: 0, Build: < 4 })
             {
                 options.LogWarning(
