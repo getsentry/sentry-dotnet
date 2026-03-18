@@ -123,7 +123,7 @@
 
   <!-- A light-weight replacement for protobuf-javalite (see https://github.com/getsentry/sentry-java/pull/5157) -->
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.1.0" Bind="false" />
+    <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.1.1" Bind="false" />
   </ItemGroup>
 
   <ItemGroup>
