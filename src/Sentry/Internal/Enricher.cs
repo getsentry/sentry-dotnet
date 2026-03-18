@@ -92,7 +92,12 @@ internal class Enricher
 
             eventLike.User.IpAddress ??= DefaultIpAddress;
         }
-        eventLike.User.Id ??= _options.InstallationId;
+        // Set by the GlobalRootScopeIntegration In global mode so that it can be overridden by the user.
+        // In non-global mode (e.g. ASP.NET Core) the enricher sets it here as a fallback.
+        if (!_options.IsGlobalModeEnabled)
+        {
+            eventLike.User.Id ??= _options.InstallationId;
+        }
 
         //Apply App startup and Boot time
         eventLike.Contexts.App.StartTime ??= ProcessInfo.Instance?.StartupTime;
