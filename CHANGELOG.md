@@ -9,6 +9,7 @@
 ### Fixes
 
 - Common tags such as `Environment` and `Release` and custom event processors are all now correctly applied to CaptureFeedback events ([#4942](https://github.com/getsentry/sentry-dotnet/pull/4942))
+- Include `Data` set via `ITransactionTracer` in `SentryTransaction`([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
 
 ## 6.2.0
 
@@ -333,7 +334,6 @@
 - Fixed an issue with the way Sentry detects build settings. This was causing Sentry to produce code that could fail at runtime in AOT compiled applications. ([#4333](https://github.com/getsentry/sentry-dotnet/pull/4333))
 - Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
 - AppDomain.CurrentDomain.ProcessExit hook is now removed on shutdown ([#4323](https://github.com/getsentry/sentry-dotnet/pull/4323))
-- Include `Data` set via `ITransactionTracer` in `SentryTransaction`([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
 
 ### Dependencies
 

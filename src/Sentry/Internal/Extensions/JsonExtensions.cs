@@ -145,6 +145,23 @@ internal static class JsonExtensions
         return result;
     }
 
+    public static ConcurrentDictionary<string, object?>? GetConcurrentDictionaryOrNull(this JsonElement json)
+    {
+        if (json.ValueKind != JsonValueKind.Object)
+        {
+            return null;
+        }
+
+        var result = new ConcurrentDictionary<string, object?>();
+
+        foreach (var (name, value) in json.EnumerateObject())
+        {
+            result[name] = value.GetDynamicOrNull();
+        }
+
+        return result;
+    }
+
     public static Dictionary<string, string?>? GetStringDictionaryOrNull(this JsonElement json)
     {
         if (json.ValueKind != JsonValueKind.Object)

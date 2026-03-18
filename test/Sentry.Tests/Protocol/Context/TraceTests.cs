@@ -90,6 +90,7 @@ public class TraceTests
         Assert.Equal(trace.SpanId, clone.SpanId);
         Assert.Equal(trace.TraceId, clone.TraceId);
         Assert.Equal(trace.Data, clone.Data);
+        Assert.NotSame(trace.Data, clone.Data);
     }
 
     [Fact]
