@@ -1323,10 +1323,9 @@ public class SentryOptions
         SettingLocator = new SettingLocator(this);
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 
-        TransactionProcessorsProviders = new() {
-            () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>(),
-            () => new[] { new TraceIgnoreStatusCodeTransactionProcessor(this) }
-        };
+        TransactionProcessorsProviders = [
+            () => [.. TransactionProcessors ?? [], new TraceIgnoreStatusCodeTransactionProcessor(this)]
+        ];
 
         _clientReportRecorder = new Lazy<IClientReportRecorder>(() => new ClientReportRecorder(this));
 
