@@ -127,6 +127,14 @@ public class DevCommands
             return 0;
         }
 
+        // On Windows, .cmd/.bat files (e.g. npx.cmd) can't be launched via CreateProcess directly;
+        // route through cmd.exe so the shell resolves them correctly.
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            arguments = $"/c {fileName} {arguments}";
+            fileName = "cmd.exe";
+        }
+
         var startInfo = new ProcessStartInfo
         {
             FileName = fileName,
