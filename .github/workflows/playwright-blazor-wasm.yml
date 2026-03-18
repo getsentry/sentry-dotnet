@@ -1,0 +1,65 @@
+name: Blazor WASM Playwright Tests
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+    paths:
+      - 'src/*'
+      - 'src/Sentry/**'
+      - 'src/Sentry.AspNetCore/**'
+      - 'src/Sentry.AspNetCore.Blazor.WebAssembly/**'
+      - 'src/Sentry.Extensions.Logging/**'
+      - 'test/*'
+      - 'test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests/**'
+      - 'test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp/**'
+      - 'test/Sentry.Testing/**'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - 'nuget.config'
+      - '.github/workflows/playwright-blazor-wasm.yml'
+  workflow_dispatch:
+
+jobs:
+  playwright:
+    name: Blazor WASM E2E
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+    steps:
+      - name: Cancel Previous Runs
+        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
+        uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: recursive
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          global-json-file: global.json
+
+      - name: Install .NET Workloads
+        run: dotnet workload restore --temp-dir "${{ runner.temp }}" --skip-sign-check
+
+      - name: Build
+        run: dotnet build test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests -c Release
+
+      - name: Install Playwright Browsers
+        run: pwsh test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests/bin/Release/net10.0/playwright.ps1 install chromium --with-deps
+
+      - name: Run Playwright Tests
+        run: dotnet test test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests -c Release --no-build --logger "trx;LogFileName=results.trx"
+
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: playwright-blazor-wasm-results
+          path: test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests/TestResults/

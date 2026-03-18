@@ -115,8 +115,9 @@ public static partial class SentrySdk
         nativeOptions.AppHangTimeoutInterval = options.Native.AppHangTimeoutInterval.TotalSeconds;
         nativeOptions.IdleTimeout = options.Native.IdleTimeout.TotalSeconds;
         nativeOptions.Dist = options.Distribution;
-        nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking;
-        nativeOptions.EnableAppHangTrackingV2 = options.Native.EnableAppHangTrackingV2;
+#pragma warning disable CS0618 // Type or member is obsolete
+        nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking || options.Native.EnableAppHangTrackingV2;
+#pragma warning restore CS0618 // Type or member is obsolete
         nativeOptions.EnableAutoBreadcrumbTracking = options.Native.EnableAutoBreadcrumbTracking;
         nativeOptions.EnableAutoPerformanceTracing = options.Native.EnableAutoPerformanceTracing;
         nativeOptions.EnableCoreDataTracing = options.Native.EnableCoreDataTracing;
@@ -134,8 +135,7 @@ public static partial class SentrySdk
         // StitchAsyncCode removed from Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973
         // nativeOptions.StitchAsyncCode = options.Native.StitchAsyncCode;
 
-        // In-App Excludes and Includes to be passed to the Cocoa SDK
-        options.Native.InAppExcludes?.ForEach(x => nativeOptions.AddInAppExclude(x));
+        // In-App Includes to be passed to the Cocoa SDK
         options.Native.InAppIncludes?.ForEach(x => nativeOptions.AddInAppInclude(x));
 
         // These options are intentionally not expose or modified
@@ -144,6 +144,29 @@ public static partial class SentrySdk
         // nativeOptions.Integrations
         // nativeOptions.DefaultIntegrations
         // nativeOptions.EnableProfiling  (deprecated)
+
+        // Session Replay options for the Cocoa SDK
+        if (options.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled)
+        {
+            // For replay to work on iOS, session tracking must be enabled in the Cocoa SDK
+            options.AutoSessionTracking = false;
+            nativeOptions.EnableAutoSessionTracking = true;
+
+            // SDK users must explicitly opt-in to Session Replay in unreliable environments
+            nativeOptions.Experimental.EnableSessionReplayInUnreliableEnvironment =
+                options.Native.ExperimentalOptions.SessionReplay.EnableSessionReplayInUnreliableEnvironment;
+
+            var sessionSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate ?? 0f);
+            var onErrorSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate ?? 0f);
+            var cocoaReplayOptions = new Sentry.CocoaSdk.SentryReplayOptions();
+            cocoaReplayOptions.SessionSampleRate = sessionSampleRate;
+            cocoaReplayOptions.OnErrorSampleRate = onErrorSampleRate;
+            cocoaReplayOptions.MaskAllText = options.Native.ExperimentalOptions.SessionReplay.MaskAllText;
+            cocoaReplayOptions.MaskAllImages = options.Native.ExperimentalOptions.SessionReplay.MaskAllImages;
+            cocoaReplayOptions.EnableViewRendererV2 = options.Native.ExperimentalOptions.SessionReplay.EnableViewRendererV2;
+            cocoaReplayOptions.EnableFastViewRendering = options.Native.ExperimentalOptions.SessionReplay.EnableFastViewRendering;
+            nativeOptions.SessionReplay = cocoaReplayOptions;
+        }
 
         // Set hybrid SDK name
         SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
@@ -195,20 +218,15 @@ public static partial class SentrySdk
         => ProcessOnBeforeSend(options, evt, CurrentHub);
 
     /// <summary>
-    /// This overload allows us to inject an IHub for testing. During normal execution, the CurrentHub is used.
-    /// However, since this class is static, there's no easy alternative way to inject this when executing tests.
+    /// Apply suppression logic for redundant native `SIGABRT` and `EXC_BAD_ACCESS` crash events
+    /// that have already been captured as managed exceptions by the Sentry.NET SDK to avoid sending
+    /// duplicate events to Sentry - once managed and once native.
+    ///
+    /// The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
+    /// But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
     /// </summary>
-    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
+    private static bool SuppressNativeCrash(SentryOptions options, CocoaSdk.SentryEvent evt)
     {
-        if (hub is DisabledHub)
-        {
-            return evt;
-        }
-
-        // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
-        // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
-        // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
-
         // There should only be one exception on the event in this case
         if ((options.Native.SuppressSignalAborts || options.Native.SuppressExcBadAccess) && evt.Exceptions?.Length == 1)
         {
@@ -224,7 +242,7 @@ public static partial class SentrySdk
                 // Don't send it
                 options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,
                     ex.Value);
-                return null!;
+                return true;
             }
 
             // Similar workaround for NullReferenceExceptions. We don't have any easy way to know whether the
@@ -235,8 +253,31 @@ public static partial class SentrySdk
                 // Don't send it
                 options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,
                     ex.Value);
-                return null!;
+                return true;
             }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// This overload allows us to inject an IHub for testing. During normal execution, the CurrentHub is used.
+    /// However, since this class is static, there's no easy alternative way to inject this when executing tests.
+    /// </summary>
+    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
+    {
+        // Redundant native crash events must be suppressed even if the SDK is
+        // disabled (or not yet fully initialized) to avoid sending duplicates.
+        // https://github.com/getsentry/sentry-dotnet/pull/4521#discussion_r2347616896
+        if (SuppressNativeCrash(options, evt))
+        {
+            return null!;
+        }
+
+        // If the SDK is disabled, there are no event processors or before send to run.
+        if (hub is DisabledHub)
+        {
+            return evt;
         }
 
         // We run our SIGABRT checks first before running managed processors.
@@ -254,7 +295,8 @@ public static partial class SentrySdk
             }
 
             var sentryEvent = evt.ToSentryEvent();
-            if (SentryEventHelper.ProcessEvent(sentryEvent, manualProcessors, null, options) is not { } processedEvent)
+            if (SentryEventHelper.ProcessEvent(sentryEvent, manualProcessors, null, options, DataCategory.Error)
+                is not { } processedEvent)
             {
                 return null;
             }

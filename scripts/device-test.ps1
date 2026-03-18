@@ -1,3 +1,4 @@
+[CmdletBinding()] # -Verbose
 param(
     [Parameter(Position = 0, Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
@@ -11,6 +12,7 @@ param(
 
 Set-StrictMode -Version latest
 $ErrorActionPreference = 'Stop'
+. $PSScriptRoot/device-test-utils.ps1
 
 if (!$Build -and !$Run)
 {
@@ -24,7 +26,7 @@ try
 {
     if (!$Tfm)
     {
-        $Tfm = 'net9.0'
+        $Tfm = 'net10.0'
     }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
@@ -36,6 +38,7 @@ try
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp',
             '--launch-timeout', '00:10:00',
+            '--timeout', '00:25:00',
             '--instrumentation', 'Sentry.Maui.Device.TestApp.SentryInstrumentation'
         )
 
@@ -49,16 +52,22 @@ try
     {
         $Tfm += '-ios'
         $group = 'apple'
-        # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
-        $arch = 'x64'
         $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/iossimulator-$arch"
         $envValue = $CI ? 'true' : 'false'
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
             '--launch-timeout', '00:10:00',
-            '--set-env', 'CI=$envValue'
+            '--timeout', '00:25:00',
+            '--set-env', "CI=$envValue"
         )
+
+        $udid = Get-IosSimulatorUdid -Verbose
+        if ($udid) {
+            $arguments += @('--device', $udid)
+        } else {
+            Write-Host "No suitable simulator found; proceeding without a specific --device"
+        }
     }
 
     if ($Build)
@@ -73,20 +82,27 @@ try
 
     if ($Run)
     {
-        if (!(Get-Command xharness -ErrorAction SilentlyContinue))
-        {
-            Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/temp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease.25330.2' `
-                --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
-            Pop-Location
-        }
-
+        Install-XHarness
         Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
         try
         {
+            if ($VerbosePreference)
+            {
+                $arguments += '-v'
+            }
             xharness $group test $arguments --output-directory=test_output
             if ($LASTEXITCODE -ne 0)
             {
+                $testResultsXml = './test_output/TestResults.xml'
+                if (Test-Path $testResultsXml)
+                {
+                    $failedTests = Select-String -Path $testResultsXml -Pattern 'result="Fail"'
+                    if ($failedTests)
+                    {
+                        Write-Host "`nFailed tests:"
+                        $failedTests | ForEach-Object { Write-Host $_.Line }
+                    }
+                }
                 throw 'xharness run failed with non-zero exit code'
             }
         }
@@ -94,9 +110,12 @@ try
         {
             if ($CI)
             {
-                scripts/parse-xunit2-xml.ps1 (Get-Item ./test_output/*.xml).FullName | Out-File $env:GITHUB_STEP_SUMMARY
+                $xmlFiles = Get-Item ./test_output/*.xml -ErrorAction SilentlyContinue
+                if ($xmlFiles)
+                {
+                    scripts/parse-xunit2-xml.ps1 $xmlFiles.FullName | Out-File $env:GITHUB_STEP_SUMMARY
+                }
             }
-
         }
     }
 }

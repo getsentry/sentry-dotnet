@@ -62,3 +62,52 @@ internal static partial class PolyfillExtensions
     }
 }
 #endif
+
+// TODO: remove when updating Polyfill: https://github.com/getsentry/sentry-dotnet/pull/4879
+#if !NET6_0_OR_GREATER
+internal static class EnumerableExtensions
+{
+    internal static bool TryGetNonEnumeratedCount<TSource>(this IEnumerable<TSource> source, out int count)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        if (source is ICollection<TSource> genericCollection)
+        {
+            count = genericCollection.Count;
+            return true;
+        }
+
+        if (source is ICollection collection)
+        {
+            count = collection.Count;
+            return true;
+        }
+
+        count = 0;
+        return false;
+    }
+}
+#endif
+
+// TODO: remove when updating Polyfill: https://github.com/getsentry/sentry-dotnet/pull/4879
+#if !NET6_0_OR_GREATER
+internal static class ArgumentNullExceptionExtensions
+{
+    extension(ArgumentNullException)
+    {
+        public static void ThrowIfNull([NotNull] object? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
+        {
+            if (argument is null)
+            {
+                Throw(paramName);
+            }
+        }
+    }
+
+    [DoesNotReturn]
+    private static void Throw(string? paramName)
+    {
+        throw new ArgumentNullException(paramName);
+    }
+}
+#endif

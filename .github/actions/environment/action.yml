@@ -24,42 +24,57 @@ runs:
       shell: bash
       run: sudo chmod 666 /var/run/docker.sock
 
+    # Install old deprecated libssl1 for .NET 5.0 on Linux
+    - name: Install libssl1 for NET 5.0 on Linux
+      if: ${{ runner.os == 'Linux' }}
+      shell: bash
+      run: sudo ./scripts/install-libssl1.sh
+
+    - name: Install Linux ARM 32-bit dependencies
+      if: ${{ matrix.rid == 'linux-arm' }}
+      shell: bash
+      run: |
+        sudo dpkg --add-architecture armhf
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
+
     # zstd is needed for cross OS actions/cache but missing from windows-11-arm
     # https://github.com/actions/partner-runner-images/issues/99
     - name: Install zstd on Windows ARM64
-      if: runner.os == 'Windows' && runner.arch == 'ARM64'
-      shell: pwsh
-      run: choco install zstandard
+      uses: ./.github/actions/install-zstd
 
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
+    # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_16.4.app
+      run: sudo xcode-select --switch /Applications/Xcode_26.2.app
 
     # Java 17 is needed for Android SDK setup step
     - name: Install Java 17
       if: ${{ !matrix.container }}
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
       with:
         distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
         java-version: '17'
 
     - name: Setup Android SDK
-      if: ${{ (runner.os != 'Linux' || runner.arch != 'ARM64') && !matrix.container }}
+      if: ${{ !matrix.container }}
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
+        # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
+        packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
 
     # Java 11 is needed by .NET Android
     - name: Install Java 11
       if: ${{ !matrix.container }}
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
       with:
         distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
         java-version: '11'
 
-    - name: Install Mono
+    - name: Install Mono (macOS)
       if: runner.os == 'macOS'
       shell: bash
       # Attempt to install Mono, allowing it to fail silently
@@ -68,17 +83,39 @@ runs:
         brew install mono || true
         brew link --overwrite mono
 
+    - name: Install Mono (Ubuntu)
+      if: ${{ runner.os == 'Linux' && !matrix.container }}
+      shell: bash
+      run: |
+        sudo apt install -y mono-devel
+        # restore perms for actions/setup-dotnet
+        sudo chmod -R a+rw /usr/share/dotnet
+
     - name: Install .NET SDK
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
       with:
+        global-json-file: global.json
         dotnet-version: |
           8.0.x
-          9.0.301
+          9.0.310
+
+    # .NET 5.0 does not support ARM64 on macOS
+    - name: Install .NET 5.0 SDK
+      if: ${{ runner.os != 'macOS' || runner.arch != 'ARM64' }}
+      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
+      with:
+        dotnet-version: 5.0.x
 
     - name: Install .NET Workloads
       shell: bash
       run: |
+        set -euo pipefail
         pwd
         dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
+        dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
+          --temp-dir "${{ runner.temp }}" \
+          --skip-sign-check
+        # Restore the Android test app explicitly to ensure runtime packs are available
+        dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true

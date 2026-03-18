@@ -95,6 +95,15 @@ public class SentryOptions
     public bool EnableScopeSync { get; set; }
 
     /// <summary>
+    /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
+    /// reduce the sampling rate of events and transactions when the system is under load.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to true / enabled.
+    /// </remarks>
+    public bool EnableBackpressureHandling { get; set; } = true;
+
+    /// <summary>
     /// This holds a reference to the current transport, when one is active.
     /// If set manually before initialization, the provided transport will be used instead of the default transport.
     /// </summary>
@@ -533,6 +542,57 @@ public class SentryOptions
     public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
+    }
+
+    /// <summary>
+    /// When set to <see langword="true"/>, logs are sent to Sentry.
+    /// Defaults to <see langword="false"/>.
+    /// </summary>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+    public bool EnableLogs { get; set; } = false;
+
+    private Func<SentryLog, SentryLog?>? _beforeSendLog;
+
+    internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
+
+    /// <summary>
+    /// Sets a callback function to be invoked before sending the log to Sentry.
+    /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
+    /// </summary>
+    /// <remarks>
+    /// It can be used to modify the log object before being sent to Sentry.
+    /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+    public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
+    {
+        _beforeSendLog = beforeSendLog;
+    }
+
+    /// <summary>
+    /// When set to <see langword="false"/>, the SDK does not generate and send metrics to Sentry via <see cref="SentrySdk.Metrics"/>.
+    /// Defaults to <see langword="true"/>.
+    /// </summary>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+    public bool EnableMetrics { get; set; } = true;
+
+    private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
+
+    internal Func<SentryMetric, SentryMetric?>? BeforeSendMetricInternal => _beforeSendMetric;
+
+    /// <summary>
+    /// Sets a callback function to be invoked before sending the metric to Sentry.
+    /// When the delegate throws an <see cref="Exception"/> during invocation, the metric will not be captured.
+    /// </summary>
+    /// <remarks>
+    /// It can be used to modify the metric object before being sent to Sentry.
+    /// To prevent the metric from being sent to Sentry, return <see langword="null"/>.
+    /// Supported numeric value types are <see langword="byte"/>, <see langword="short"/>, <see langword="int"/>, <see langword="long"/>, <see langword="float"/>, and <see langword="double"/>.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+    public void SetBeforeSendMetric(Func<SentryMetric, SentryMetric?> beforeSendMetric)
+    {
+        _beforeSendMetric = beforeSendMetric;
     }
 
     private int _maxQueueItems = 30;
@@ -986,6 +1046,18 @@ public class SentryOptions
         set => _tracePropagationTargets = value.WithConfigBinding();
     }
 
+    /// <summary>
+    /// Whether to send W3C Trace Context traceparent headers in outgoing HTTP requests for distributed tracing.
+    /// When enabled, the SDK will send the <c>traceparent</c> header in addition to the <c>sentry-trace</c> header
+    /// for requests matching <see cref="TracePropagationTargets"/>.
+    /// </summary>
+    /// <remarks>
+    /// The default value is <c>false</c>. Set to <c>true</c> to enable W3C Trace Context propagation
+    /// for interoperability with services that support OpenTelemetry standards.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
+    public bool PropagateTraceparent { get; set; }
+
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
     private StackTraceMode? _stackTraceMode;
@@ -1132,10 +1204,7 @@ public class SentryOptions
     public void AddJsonConverter(JsonConverter converter)
     {
         // protect against null because user may not have nullability annotations enabled
-        if (converter == null!)
-        {
-            throw new ArgumentNullException(nameof(converter));
-        }
+        ArgumentNullException.ThrowIfNull(converter);
 
         JsonExtensions.AddJsonConverter(converter);
     }
@@ -1156,10 +1225,7 @@ public class SentryOptions
         where T : JsonSerializerContext
     {
         // protect against null because user may not have nullability annotations enabled
-        if (contextBuilder == null!)
-        {
-            throw new ArgumentNullException(nameof(contextBuilder));
-        }
+        ArgumentNullException.ThrowIfNull(contextBuilder);
 
         JsonExtensions.AddJsonSerializerContext(contextBuilder);
     }
@@ -1631,12 +1697,23 @@ public class SentryOptions
         => ExceptionProcessorsProviders.SelectMany(p => p());
 
     /// <summary>
-    /// Use custom <see cref="ISentryStackTraceFactory" />.
+    /// <para>
+    /// Use a custom <see cref="ISentryStackTraceFactory" />.
+    /// </para>
+    /// <para>
+    /// By default, Sentry uses the <see cref="SentryStackTraceFactory"/> to create stack traces and this implementation
+    /// offers the most comprehensive functionality. However, full stack traces are not available in AOT compiled
+    /// applications. If you are compiling your applications AOT and the stack traces that you see in Sentry are not
+    /// informative enough, you could consider using the StringStackTraceFactory instead. This is not as functional but
+    /// is guaranteed to provide at least _something_ useful in AOT compiled applications.
+    /// </para>
     /// </summary>
     /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
     public SentryOptions UseStackTraceFactory(ISentryStackTraceFactory sentryStackTraceFactory)
     {
-        SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
+        ArgumentNullException.ThrowIfNull(sentryStackTraceFactory);
+
+        SentryStackTraceFactory = sentryStackTraceFactory;
         return this;
     }
 
@@ -1761,21 +1838,23 @@ public class SentryOptions
             if (DiagnosticLogger == null)
             {
                 DiagnosticLogger = new ConsoleDiagnosticLogger(DiagnosticLevel);
-                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
-                    DiagnosticLevel);
-            }
-
-            if (SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
-            {
-                DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
-                                            "Be aware this can cause performance degradation and is not advised. " +
-                                            "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
-                                            "for more information");
+                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}", DiagnosticLevel);
             }
         }
         else
         {
             DiagnosticLogger = null;
+        }
+    }
+
+    internal void LogDiagnosticWarning()
+    {
+        if (Debug && DiagnosticLogger is not null && SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
+        {
+            DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
+                                        "Be aware this can cause performance degradation and is not advised. " +
+                                        "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
+                                        "for more information");
         }
     }
 
@@ -1847,5 +1926,7 @@ public class SentryOptions
         "Grpc",
         "ServiceStack",
         "Java.Interop",
+        InAppExcludeRegexes.LibMonoSgen,
+        InAppExcludeRegexes.LibXamarin
     ];
 }

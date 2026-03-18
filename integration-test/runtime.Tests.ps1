@@ -4,9 +4,10 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console app NativeAOT (<framework>)' -ForEach @(
-    @{ framework = 'net8.0' }
+    foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
+        ResetLocalPackages
         $path = './console-app'
         DotnetNew 'console' $path $framework
         @'
@@ -60,11 +61,17 @@ internal class FakeTransport : ITransport
             }
             else
             {
-                if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
+                $musl = (ldd --version 2>&1) -match 'musl'
+                $arm64 = "Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString())
+                if ($musl -and $arm64)
+                {
+                    return "./console-app/bin/Release/$framework/linux-musl-arm64/publish/console-app"
+                }
+                elseif ($arm64)
                 {
                     return "./console-app/bin/Release/$framework/linux-arm64/publish/console-app"
                 }
-                elseif ((ldd --version 2>&1) -match 'musl')
+                elseif ($musl)
                 {
                     return "./console-app/bin/Release/$framework/linux-musl-x64/publish/console-app"
                 }
@@ -178,11 +185,15 @@ internal class FakeTransport : ITransport
 
 # This ensures we don't have a regression for https://github.com/getsentry/sentry-dotnet/issues/2825
 Describe 'Console app regression (missing System.Reflection.Metadata)' {
+    BeforeAll {
+        ResetLocalPackages
+    }
+
     AfterAll {
         dotnet remove ./net4-console/console-app.csproj package Sentry
     }
 
-    It 'Ensure System.Reflection.Metadata is not missing' {
+    It 'Ensure System.Reflection.Metadata is not missing' -Skip:(!$IsWindows) {
         $path = './net4-console'
         Remove-Item -Recurse -Force -Path @("$path/bin", "$path/obj") -ErrorAction SilentlyContinue
         AddPackageReference $path 'Sentry'

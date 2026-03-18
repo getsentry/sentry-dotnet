@@ -8,12 +8,12 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net9.0-android35.0;net8.0-android34.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios18.0;net8.0-ios17.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-maccatalyst18.0;net8.0-maccatalyst17.0</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms);netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestIosTfm);$(PreviousIosTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestMacCatalystTfm);$(PreviousMacCatalystTfm)</TargetFrameworks>
   </PropertyGroup>
-  
+
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\Cocoa\Sentry.Cocoa.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
@@ -25,8 +25,8 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
-  <!-- Only include Native bindings code on .NET 8 or greater (non-mobile platforms) -->
-  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0' and '$(TargetFramework)' != 'net9.0'">
+  <!-- Only include Native bindings code for non-mobile and non-legacy TFMs -->
+  <ItemGroup Condition="!$(CurrentTfms.Contains('$(TargetFramework)'))">
     <Compile Remove="**\Native\**\*" />
   </ItemGroup>
 
@@ -65,7 +65,7 @@
     https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.32.0" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="1.33.2" PrivateAssets="all" />
   </ItemGroup>
 
   <!--
@@ -83,13 +83,7 @@
 
   <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">
-    <PackageReference Include="System.Text.Json" Version="6.0.10" >
-      <!--
-        Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
-        The app can/should pin to the latest version. We will bump once a patch on v6 (still LTS until Nov 24) is out
-      -->
-      <NoWarn>NU1903</NoWarn>
-    </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
   <!--
@@ -113,13 +107,13 @@
       <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
     </PropertyGroup>
     <ItemGroup>
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="a7f9304278c893fb6c39f0a60bdefdb03902d355d78d978f4a5b7def264fcd9b" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="bcf56037d5a8da58aaead346f26e9ca36cb1b05efb170f44cefdab83cc90bdef" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="6e06fc74b6449a3cdf3cbffaf4347ae2dd768efff04fa43a306d9ccea4ede54c" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="fe55d031baf9d182338a0f40a443018cde535371a01a02c0eef60487ec03010a" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="d51a6bc0fa076dcd3d4121b9c3f21999057a1727cbc4113f07e0acf8f17afe48" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="dc0df7dd659ba4c31eda0beb8c05b3f7106dd90b0f7eb5354533de4d20b042ee" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="4b117ad6871af32963a41f3cb3f1fa15674f2c03ca2ce89fe918cde4bfe2a979" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="5d055303380acc6065763e72dbb6408c7c9e8d6381c21c413b7689baafa2123f" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="d7b2b7d9b34c12e8b7485c85536eb9e0162e4f021fa38e8b62bc37af560d7762" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="1951e009ddb6a0ae71449f2ec479a04a29178511f0f7f8a70640f57ff0705758" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="505a669cfac38463e51b911adfd8f484fda428980c9ad59e5904878e8a5dfd7d" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="560ccecdf6e95ffa206eba4ea57ee33a03f8ad38bc80ae4567438c11613d3b46" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="7162b551e2e6388c64546473a3b52d7923faaea65954068a55de878222334a8c" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="5751252926fd27c5e420f35baf6bf260af7a031e13c6e923941cdb9a668a84f6" />
     </ItemGroup>
 
     <!-- Download the files -->
@@ -143,19 +137,20 @@
     <InternalsVisibleTo Include="Sentry.Android.AssemblyReader.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNet" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNet.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.AspNetCore.Blazor.WebAssembly" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.TestUtils" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.Azure.Functions.Worker" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.Azure.Functions.Worker.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Benchmarks" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.DiagnosticSource" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.DiagnosticSource.IntegrationTests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.DiagnosticSource.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.EntityFramework" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.EntityFramework.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Extensions.AI" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Extensions.AI.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging.EfCore.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging.Tests" PublicKey="$(SentryPublicKey)" />
@@ -191,10 +186,41 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Sentry.SourceGenerators\bin\Release\netstandard2.0\Sentry.SourceGenerators.dll"
-          Pack="true"
-          PackagePath="analyzers/dotnet/cs"
-          Visible="false" />
+    <Compile Update="PlatformAbstractions\FrameworkInfo.NetFx.cs;PlatformAbstractions\FrameworkInfo.NetStandard.cs">
+      <DependentUpon>FrameworkInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Update="MeasurementUnit.Duration.cs;MeasurementUnit.Fraction.cs;MeasurementUnit.Information.cs">
+      <DependentUpon>MeasurementUnit.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryMetric.Factory.cs;SentryMetric.Generic.cs">
+      <DependentUpon>SentryMetric.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryMetricEmitter.Counter.cs;SentryMetricEmitter.Distribution.cs;SentryMetricEmitter.Gauge.cs">
+      <DependentUpon>SentryMetricEmitter.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryStructuredLogger.Format.cs">
+      <DependentUpon>SentryStructuredLogger.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry.Compiler.Extensions\Sentry.Compiler.Extensions.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <BeforePack>$(BeforePack);PackSentryCompilerExtensions</BeforePack>
+  </PropertyGroup>
+
+  <Target Name="PackSentryCompilerExtensions">
+    <ItemGroup>
+      <None Include="..\Sentry.Compiler.Extensions\bin\$(Configuration)\netstandard2.0\Sentry.Compiler.Extensions.dll">
+        <Pack>true</Pack>
+        <PackagePath>analyzers\dotnet\roslyn4.3\cs</PackagePath>
+      </None>
+    </ItemGroup>
+  </Target>
 
 </Project>

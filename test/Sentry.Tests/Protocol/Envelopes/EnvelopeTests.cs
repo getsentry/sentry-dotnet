@@ -796,32 +796,6 @@ public class EnvelopeTests
     }
 
     [Fact]
-    public async Task Roundtrip_WithUserFeedback_Success()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        var feedback = new UserFeedback(
-            SentryId.Create(),
-            "Someone Nice",
-            "foo@bar.com",
-            "Everything is great!");
-
-        using var envelope = Envelope.FromUserFeedback(feedback);
-
-        using var stream = new MemoryStream();
-
-        // Act
-        await envelope.SerializeAsync(stream, _testOutputLogger);
-        stream.Seek(0, SeekOrigin.Begin);
-
-        using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
-
-        // Assert
-        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
     public async Task Roundtrip_WithFeedback_Success()
     {
         // Arrange
@@ -1089,5 +1063,27 @@ public class EnvelopeTests
         // this is the main difference between them
         Assert.Contains("""{"foo":"2020-01-01T00:00:00+01:00"}""", serialized1);
         Assert.Contains("""{"foo":"2020-01-01T00:00:00\u002B01:00"}""", serialized2);
+    }
+
+    [Fact]
+    public void FromAttachment_ValidAttachment_CreatesEnvelope()
+    {
+        // Arrange
+        var eventId = SentryId.Create();
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new ByteAttachmentContent("test content"u8.ToArray()),
+            "test.txt",
+            "text/plain");
+
+        // Act
+        using var envelope = Envelope.FromAttachment(eventId, attachment);
+
+        // Assert
+        envelope.TryGetEventId().Should().Be(eventId);
+        envelope.Items.Should().HaveCount(1);
+        envelope.Items[0].Header["type"].Should().Be("attachment");
+        envelope.Items[0].Header["filename"].Should().Be("test.txt");
+        envelope.Items[0].Header["content_type"].Should().Be("text/plain");
     }
 }

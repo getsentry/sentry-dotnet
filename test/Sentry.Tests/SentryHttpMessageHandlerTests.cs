@@ -156,6 +156,85 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task SendAsync_W3C_TraceParent_NotSet_WhenPropagateTraceparentIsFalse()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions();
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().NotContain(h => h.Key == "traceparent");
+    }
+
+    [Fact]
+    public async Task SendAsync_W3C_TraceParent_Set_WhenPropagateTraceparentIsTrue()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions();
+        options.PropagateTraceparent = true;
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        client.DefaultRequestHeaders.Add("sentry-trace", "foobar");
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().Contain(h => h.Key == "traceparent" && h.Value.Single() == "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-00");
+    }
+
+    [Fact]
+    public async Task SendAsync_W3C_TraceParent_NotSet_WhenPropagateTraceparentAlreadySet()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions();
+        options.PropagateTraceparent = true;
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        client.DefaultRequestHeaders.Add("sentry-trace", "foobar");
+        client.DefaultRequestHeaders.Add("traceparent", "existing-value");
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().Contain(h => h.Key == "traceparent" && h.Value.Single() == "existing-value");
+    }
+
+    [Fact]
     public async Task SendAsync_TransactionOnScope_StartsNewSpan()
     {
         // Arrange
@@ -551,6 +630,78 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
+    }
+
+#endif
+
+#if ANDROID
+    [Fact]
+    public void HandleResponse_SpanExists_AddsReplayBreadcrumbData()
+    {
+        // Arrange
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = false
+        };
+
+        var sut = new SentryHttpMessageHandler(hub, options);
+
+        var method = "GET";
+        var url = "https://localhost/";
+        var response = new HttpResponseMessage(HttpStatusCode.OK);
+
+        var span = Substitute.For<ISpan>();
+        span.StartTimestamp.Returns(DateTimeOffset.UtcNow.AddMilliseconds(-50));
+
+        // Act
+        sut.HandleResponse(response, span, method, url);
+
+        // Assert
+        var breadcrumb = scope.Breadcrumbs.First();
+        breadcrumb.Type.Should().Be("http");
+        breadcrumb.Category.Should().Be("http");
+
+        breadcrumb.Data.Should().NotBeNull();
+        breadcrumb.Data!.Should().ContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
+        breadcrumb.Data.Should().ContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
+
+        long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.HttpStartTimestampKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var startMs)
+            .Should().BeTrue();
+        long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.HttpEndTimestampKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var endMs)
+            .Should().BeTrue();
+
+        startMs.Should().BeGreaterThan(0);
+        startMs.Should().Be(span.StartTimestamp.ToUnixTimeMilliseconds());
+        endMs.Should().BeGreaterThan(0);
+        endMs.Should().BeGreaterOrEqualTo(startMs);
+    }
+
+    [Fact]
+    public void HandleResponse_NoSpanExists_NoReplayBreadcrumbData()
+    {
+        // Arrange
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+
+        var sut = new SentryHttpMessageHandler(hub, null);
+
+        var method = "GET";
+        var url = "https://localhost/";
+        var response = new HttpResponseMessage(HttpStatusCode.OK);
+
+        // Act
+        sut.HandleResponse(response, span: null, method, url);
+
+        // Assert
+        var breadcrumb = scope.Breadcrumbs.First();
+        breadcrumb.Data.Should().NotBeNull();
+        breadcrumb.Data!.Should().NotContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
+        breadcrumb.Data.Should().NotContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
     }
 #endif
 }

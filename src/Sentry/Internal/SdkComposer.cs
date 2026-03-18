@@ -8,14 +8,18 @@ namespace Sentry.Internal;
 internal class SdkComposer
 {
     private readonly SentryOptions _options;
+    private readonly BackpressureMonitor? _backpressureMonitor;
 
-    public SdkComposer(SentryOptions options)
+    public SdkComposer(SentryOptions options, BackpressureMonitor? backpressureMonitor)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
+
+        _options = options;
         if (options.Dsn is null)
         {
             throw new ArgumentException("No DSN defined in the SentryOptions");
         }
+        _backpressureMonitor = backpressureMonitor;
     }
 
     private ITransport CreateTransport()
@@ -23,7 +27,7 @@ internal class SdkComposer
         _options.LogDebug("Creating transport.");
 
         // Start from either the transport given on options, or create a new HTTP transport.
-        var transport = _options.Transport ?? new LazyHttpTransport(_options);
+        var transport = _options.Transport ?? new LazyHttpTransport(_options, _backpressureMonitor);
 
         // When a cache directory path is given, wrap the transport in a caching transport.
         if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
@@ -87,6 +91,6 @@ internal class SdkComposer
 
         var transport = CreateTransport();
 
-        return new BackgroundWorker(transport, _options);
+        return new BackgroundWorker(transport, _options, _backpressureMonitor);
     }
 }

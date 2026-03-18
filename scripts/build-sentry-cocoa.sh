@@ -25,6 +25,7 @@ xcodebuild archive -project Sentry.xcodeproj \
     -archivePath ./Carthage/output-ios.xcarchive \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+./scripts/remove-architectures.sh ./Carthage/output-ios.xcarchive arm64e
 xcodebuild archive -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
@@ -47,6 +48,7 @@ xcodebuild archive -project Sentry.xcodeproj \
     -archivePath ./Carthage/output-maccatalyst.xcarchive \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+./scripts/remove-architectures.sh ./Carthage/output-maccatalyst.xcarchive arm64e
 xcodebuild -create-xcframework \
     -framework ./Carthage/output-maccatalyst.xcarchive/Products/Library/Frameworks/Sentry.framework \
     -output ./Carthage/Build-maccatalyst/Sentry.xcframework
@@ -60,7 +62,7 @@ find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Car
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 rm -rf Carthage/output-*
 
-cp ../../.git/modules/modules/sentry-cocoa/HEAD Carthage/.built-from-sha
+cp .git/HEAD Carthage/.built-from-sha
 echo ""
 
 popd >/dev/null

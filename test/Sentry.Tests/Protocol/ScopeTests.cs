@@ -392,7 +392,7 @@ public class ScopeExtensionsTests
         const string expectedCategory = "original Category";
         const string expectedType = "original Type";
         var expectedData = (key: "key", value: "value");
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
+        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Fatal;
 
         var sut = _fixture.GetSut();
         sut.AddBreadcrumb(
@@ -419,7 +419,7 @@ public class ScopeExtensionsTests
         const string expectedCategory = "original Category";
         const string expectedType = "original Type";
         var expectedData = new Dictionary<string, string> { { "key", "val" } };
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
+        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Fatal;
 
         var sut = _fixture.GetSut();
         sut.AddBreadcrumb(
@@ -446,7 +446,7 @@ public class ScopeExtensionsTests
         const string expectedCategory = "original Category";
         const string expectedType = "original Type";
         var expectedData = new Dictionary<string, string> { { "key", "val" } };
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
+        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Fatal;
 
         var sut = _fixture.GetSut();
         sut.AddBreadcrumb(

@@ -11,7 +11,9 @@ public class SentryLoggingOptions : SentryOptions
     /// <summary>
     /// Gets or sets the minimum breadcrumb level.
     /// </summary>
-    /// <remarks>Events with this level or higher will be stored as <see cref="Breadcrumb"/></remarks>
+    /// <remarks>
+    /// Events with this level or higher will be stored as <see cref="Breadcrumb"/>.
+    /// </remarks>
     /// <value>
     /// The minimum breadcrumb level.
     /// </value>
@@ -21,7 +23,7 @@ public class SentryLoggingOptions : SentryOptions
     /// Gets or sets the minimum event level.
     /// </summary>
     /// <remarks>
-    /// Events with this level or higher will be sent to Sentry
+    /// Events with this level or higher will be sent to Sentry.
     /// </remarks>
     /// <value>
     /// The minimum event level.

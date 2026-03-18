@@ -33,8 +33,8 @@ public enum BreadcrumbLevel
     Error = 2,
 
     /// <summary>
-    /// Critical breadcrumb level.
+    /// Fatal breadcrumb level.
     /// </summary>
-    [EnumMember(Value = "critical")]
-    Critical = 3,
+    [EnumMember(Value = "fatal")]
+    Fatal = 3,
 }

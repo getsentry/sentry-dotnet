@@ -9,10 +9,13 @@ internal class PersistedSessionUpdate : ISentryJsonSerializable
 
     public DateTimeOffset? PauseTimestamp { get; }
 
-    public PersistedSessionUpdate(SessionUpdate update, DateTimeOffset? pauseTimestamp)
+    public bool PendingUnhandled { get; }
+
+    public PersistedSessionUpdate(SessionUpdate update, DateTimeOffset? pauseTimestamp, bool pendingUnhandled = false)
     {
         Update = update;
         PauseTimestamp = pauseTimestamp;
+        PendingUnhandled = pendingUnhandled;
     }
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
@@ -26,6 +29,11 @@ internal class PersistedSessionUpdate : ISentryJsonSerializable
             writer.WriteString("paused", pauseTimestamp);
         }
 
+        if (PendingUnhandled)
+        {
+            writer.WriteBoolean("pendingUnhandled", PendingUnhandled);
+        }
+
         writer.WriteEndObject();
     }
 
@@ -33,7 +41,8 @@ internal class PersistedSessionUpdate : ISentryJsonSerializable
     {
         var update = SessionUpdate.FromJson(json.GetProperty("update"));
         var pauseTimestamp = json.GetPropertyOrNull("paused")?.GetDateTimeOffset();
+        var pendingUnhandled = json.GetPropertyOrNull("pendingUnhandled")?.GetBoolean() ?? false;
 
-        return new PersistedSessionUpdate(update, pauseTimestamp);
+        return new PersistedSessionUpdate(update, pauseTimestamp, pendingUnhandled);
     }
 }

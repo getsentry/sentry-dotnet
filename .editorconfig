@@ -40,6 +40,9 @@ indent_size = 2
 # Sort using and Import directives with System.* appearing first
 dotnet_sort_system_directives_first = true
 
+# Keep using directives at the top of the file, outside of the namespace
+csharp_using_directive_placement = outside_namespace
+
 # Avoid "this." and "Me." if not necessary
 dotnet_style_qualification_for_field = false : warning
 dotnet_style_qualification_for_property = false : warning
@@ -205,3 +208,13 @@ indent_style = unset
 insert_final_newline = false
 tab_width = unset
 trim_trailing_whitespace = false
+
+# Disable AOT analyser for test files
+[test/**/*.cs]
+dotnet_diagnostic.IL2026.severity = none
+dotnet_diagnostic.IL2070.severity = none
+dotnet_diagnostic.IL2075.severity = none
+dotnet_diagnostic.IL2090.severity = none
+
+# This appears to be broken and results in false positives (causing dotnet format to delete valid test scenarios)
+dotnet_diagnostic.xUnit1025.severity = none

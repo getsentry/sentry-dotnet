@@ -7,6 +7,7 @@ public class MockHttpMessageHandler : DelegatingHandler
 
     public string Input { get; private set; }
     public int NumberOfCalls { get; private set; }
+    public HttpRequestMessage LastRequest { get; private set; }
 
     public MockHttpMessageHandler(string response, HttpStatusCode statusCode)
     {
@@ -18,9 +19,10 @@ public class MockHttpMessageHandler : DelegatingHandler
         CancellationToken cancellationToken)
     {
         NumberOfCalls++;
+        LastRequest = request;
         if (request.Content != null) // Could be a GET-request without a body
         {
-            Input = await request.Content.ReadAsStringAsync();
+            Input = await request.Content.ReadAsStringAsync(cancellationToken);
         }
         return new HttpResponseMessage
         {

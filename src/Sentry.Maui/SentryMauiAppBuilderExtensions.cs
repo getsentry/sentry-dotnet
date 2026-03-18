@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
-using Sentry;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
@@ -52,14 +51,26 @@ public static class SentryMauiAppBuilderExtensions
 
         services.AddLogging();
         services.AddSingleton<ILoggerProvider, SentryMauiLoggerProvider>();
+        services.AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>();
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
 
-        // Resolve the configured options and register any element event binders from these
+        // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
+        builder.Logging.AddFilter<SentryMauiLoggerProvider>(_ => true);
+        // Add non-delegate rules in order to respect Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
+        builder.Logging.AddFilter<SentryMauiStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
+
+        // Add default event binders
+        services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiSessionReplayMaskControlsOfTypeBinder>();
+
+        // Resolve options configured via the options callback and register any binders injected by integrations
         var options = new SentryMauiOptions();
         configureOptions?.Invoke(options);
-        foreach (var eventBinder in options.DefaultEventBinders)
+        foreach (var eventBinder in options.IntegrationEventBinders)
         {
             eventBinder.Register(services);
         }

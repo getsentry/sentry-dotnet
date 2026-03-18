@@ -12,7 +12,12 @@ internal static class AotHelper
 
     static AotHelper()
     {
-        IsTrimmed = CheckIsTrimmed();
+        IsTrimmed =
+#if SENTRY_UNITY
+            false;
+#else
+            CheckIsTrimmed();
+#endif
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AvoidAtRuntime)]
@@ -39,7 +44,7 @@ internal static class AotHelper
         }
 
         // fallback check
-        logger?.LogDebug("Stacktrace fallback");
+        logger?.LogDebug("Falling back to stack trace check for trimming detection");
         var stackTrace = new StackTrace(false);
         return stackTrace.GetFrame(0)?.GetMethod() is null;
     }

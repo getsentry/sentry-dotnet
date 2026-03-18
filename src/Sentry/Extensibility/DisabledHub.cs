@@ -1,6 +1,5 @@
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry.Extensibility;
 
@@ -18,6 +17,11 @@ public class DisabledHub : IHub, IDisposable
     /// Always disabled.
     /// </summary>
     public bool IsEnabled => false;
+
+    /// <summary>
+    /// Always returns false.
+    /// </summary>
+    public bool IsSessionActive => false;
 
     private DisabledHub()
     {
@@ -100,6 +104,11 @@ public class DisabledHub : IHub, IDisposable
     public BaggageHeader? GetBaggage() => null;
 
     /// <summary>
+    /// Returns null.
+    /// </summary>
+    public W3CTraceparentHeader? GetTraceparentHeader() => null;
+
+    /// <summary>
     /// Returns sampled out transaction context.
     /// </summary>
     public TransactionContext ContinueTrace(
@@ -176,15 +185,21 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
     {
+        result = CaptureFeedbackResult.DisabledHub;
+        return SentryId.Empty;
     }
 
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Scope? scope = null, SentryHint? hint = null)
     {
+        result = CaptureFeedbackResult.DisabledHub;
+        return SentryId.Empty;
     }
 
     /// <summary>
@@ -245,13 +260,15 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-    }
+    public SentryId LastEventId => SentryId.Empty;
 
     /// <summary>
-    /// No-Op.
+    /// Disabled Logger.
     /// </summary>
-    public SentryId LastEventId => SentryId.Empty;
+    public SentryStructuredLogger Logger => DisabledSentryStructuredLogger.Instance;
+
+    /// <summary>
+    /// Disabled Metrics.
+    /// </summary>
+    public SentryMetricEmitter Metrics => DisabledSentryMetricEmitter.Instance;
 }

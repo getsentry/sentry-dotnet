@@ -150,7 +150,7 @@ internal class ProcessInfo
     private static extern IntPtr GetForegroundWindow();
 
     // GetWindowThreadProcessId is only available in the Windows SDK, so trying to call this from UWP apps will fail.
-    // We wrap use of this in a try/catch as a workaround. However, we need `ExactSpelling = true` here  to suppress
+    // We wrap use of this in a try/catch as a workaround. However, we need `ExactSpelling = true` here to suppress
     // warnings about the use of this API when compiling UWP applications.
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
     private static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);

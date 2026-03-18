@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios17.0;net9.0-ios18.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-maccatalyst17.0;net9.0-maccatalyst18.0</TargetFrameworks>
+    <TargetFrameworks>$(LatestTfm);$(PreviousTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestIosTfm);$(PreviousIosTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestMacCatalystTfm);$(PreviousMacCatalystTfm)</TargetFrameworks>
     <UseMaui>true</UseMaui>
   </PropertyGroup>
 
@@ -19,6 +19,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="MauiEventsBinderTests.Application.cs;MauiEventsBinderTests.Element.cs;MauiEventsBinderTests.Page.cs;MauiEventsBinderTests.Shell.cs;MauiEventsBinderTests.VisualElement.cs;MauiEventsBinderTests.Window.cs">
+      <DependentUpon>MauiEventsBinderTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryMauiAppBuilderExtensionsTests.Android.cs;SentryMauiAppBuilderExtensionsTests.Cocoa.cs">
+      <DependentUpon>SentryMauiAppBuilderExtensionsTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

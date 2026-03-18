@@ -1,5 +1,12 @@
 // These are used in all projects except samples.
 
+// Use the new System.Threading.Lock type on .NET 9+, which enables compiler optimisations.
+// On earlier targets, alias it to object so the same lock pattern works everywhere,
+// but don't use the variant of "Polyfill", as it may cause issues on Runtimes that support "Thread.Abort" (e.g. .NET Framework)
+#if !NET9_0_OR_GREATER
+global using Lock = object;
+#endif
+
 global using System.Buffers;
 global using System.Collections;
 global using System.Collections.Concurrent;

@@ -38,8 +38,22 @@ internal static class SentryExtensions
             LogEventLevel.Information => BreadcrumbLevel.Info,
             LogEventLevel.Warning => BreadcrumbLevel.Warning,
             LogEventLevel.Error => BreadcrumbLevel.Error,
-            LogEventLevel.Fatal => BreadcrumbLevel.Critical,
+            LogEventLevel.Fatal => BreadcrumbLevel.Fatal,
             _ => (BreadcrumbLevel)level
+        };
+    }
+
+    public static SentryLogLevel ToSentryLogLevel(this LogEventLevel level)
+    {
+        return level switch
+        {
+            LogEventLevel.Verbose => SentryLogLevel.Trace,
+            LogEventLevel.Debug => SentryLogLevel.Debug,
+            LogEventLevel.Information => SentryLogLevel.Info,
+            LogEventLevel.Warning => SentryLogLevel.Warning,
+            LogEventLevel.Error => SentryLogLevel.Error,
+            LogEventLevel.Fatal => SentryLogLevel.Fatal,
+            _ => (SentryLogLevel)level,
         };
     }
 }

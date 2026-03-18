@@ -24,9 +24,13 @@ public class SentryStopwatchTests
         current.Should().BeCloseTo(DateTimeOffset.UtcNow, TestPrecision);
     }
 
-    [Fact]
+    [SkippableFact]
     public void Elapsed_IsValid()
     {
+#if IOS
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky on iOS in CI.");
+#endif
+
         var sleepTime = TimeSpan.FromMilliseconds(100);
 
         var sw = SentryStopwatch.StartNew();

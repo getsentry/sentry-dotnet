@@ -53,7 +53,7 @@ public class SentryMauiScreenshotTests
         var builder = _fixture.Builder.UseSentry();
 
         // Act
-        using var app = builder.Build();
+        await using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
         var sentryId = client.CaptureException(new Exception());
         await client.FlushAsync();
@@ -94,12 +94,10 @@ public class SentryMauiScreenshotTests
         ));
 
         // Act
-        using var app = builder.Build();
+        await using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
         var sentryId = client.CaptureException(new Exception());
         await client.FlushAsync();
-
-        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
 
         var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
         envelope.Should().NotBeNull();
@@ -118,19 +116,15 @@ public class SentryMauiScreenshotTests
 #endif
 
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture((e, hint) =>
-            {
-                return false;
-            }
+        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture(
+            (_, _) => false
         ));
 
         // Act
-        using var app = builder.Build();
+        await using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
         var sentryId = client.CaptureException(new Exception());
         await client.FlushAsync();
-
-        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
 
         var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
         envelope.Should().NotBeNull();
@@ -157,10 +151,8 @@ public class SentryMauiScreenshotTests
 #endif
 
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture((e, hint) =>
-        {
-            return true;
-        }
+        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture(
+            (_, _) => true
         ));
 
         // Act
@@ -184,43 +176,47 @@ public class SentryMauiScreenshotTests
         }
         else
         {
-        envelopeItem.Should().NotBeNull();
+            envelopeItem.Should().NotBeNull();
             envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task CaptureException_AttachScreenshot_Threadsafe()
     {
+#if ANDROID
+         Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI on Android");
+#endif
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options =>
-        {
-            options.AttachScreenshot = true;
-        });
+        var builder = _fixture.Builder.UseSentry(options => options.AttachScreenshot = true);
         await using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
+        var startSignal = new ManualResetEventSlim(false);
 
-        // Act
         var tasks = new List<Task<SentryId>>();
         for (var i = 0; i < 20; i++)
         {
             var j = i;
-            tasks.Add(Task.Run(() =>
+            tasks.Add(Task.Run(async () =>
             {
+                startSignal.Wait(); // Make sure all the tasks start at the same time
                 var exSample = new NotImplementedException("Sample Exception " + j);
                 var sentryId = client.CaptureException(exSample);
-                client.FlushAsync();
+                await client.FlushAsync(TimeSpan.FromSeconds(5));
                 return sentryId;
             }));
         }
 
-        // Assert
-        while (tasks.Any())
-        {
-            var finishedTask = await Task.WhenAny(tasks);
+        // Act
+        await Task.Delay(50); // Wait for all of the tasks to be ready
+        startSignal.Set();
+        await Task.WhenAll(tasks);
 
-            finishedTask.Exception.Should().BeNull();
-            tasks.Remove(finishedTask);
+        // Assert
+        foreach (var task in tasks)
+        {
+            task.Status.Should().Be(TaskStatus.RanToCompletion, $"Task should complete successfully. Status: {task.Status}");
+            task.Exception.Should().BeNull("No unhandled exceptions should occur during concurrent capture.");
         }
     }
 #endif

@@ -18,16 +18,12 @@ public abstract class BaseRequestPayloadExtractor : IRequestPayloadExtractor
             return null;
         }
 
-        if (request.Body is not { CanRead: true } || !IsSupported(request))
+        if (request.Body == null
+            || !request.Body.CanSeek
+            || !request.Body.CanRead
+            || !IsSupported(request))
         {
             return null;
-        }
-
-        if (!request.Body.CanSeek)
-        {
-            // When RequestDecompression is enabled, the RequestDecompressionMiddleware will store a SizeLimitedStream
-            // in the request body after decompression. Seek operations throw an exception, but we can still read the stream
-            return DoExtractPayLoad(request);
         }
 
         var originalPosition = request.Body.Position;

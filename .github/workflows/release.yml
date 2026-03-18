@@ -4,14 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Version to release
-        required: true
+        description: Version to release (or "auto")
+        required: false
       merge_target:
         description: Target branch to merge into. Uses the default branch as a fallback (optional)
         required: false
       force:
         description: Force a release even when there are release-blockers (optional)
         required: false
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   job_release:
@@ -20,18 +24,18 @@ jobs:
     steps:
       - name: Get auth token
         id: token
-        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
         with:
           app-id: ${{ vars.SENTRY_RELEASE_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SENTRY_RELEASE_BOT_PRIVATE_KEY }}
       - name: Check out current commit (${{ github.sha }})
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           token: ${{ steps.token.outputs.token }}
           fetch-depth: 0
 
       - name: Prepare release ${{ github.event.inputs.version }}
-        uses: getsentry/action-prepare-release@v1
+        uses: getsentry/craft@013a7b2113c2cac0ff32d5180cfeaefc7c9ce5b6 # 2.24.1
         env:
           GITHUB_TOKEN: ${{ steps.token.outputs.token }}
         with:

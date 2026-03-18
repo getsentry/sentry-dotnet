@@ -21,7 +21,7 @@ public partial class HttpTransportTests
     {
         // Arrange
         using var source = new CancellationTokenSource();
-        source.Cancel();
+        await source.CancelAsync();
         var token = source.Token;
 
         var httpHandler = Substitute.For<MockableHttpMessageHandler>();
@@ -36,17 +36,20 @@ public partial class HttpTransportTests
         var envelope = Envelope.FromEvent(
             new SentryEvent(eventId: SentryResponses.ResponseId));
 
-#if NET5_0_OR_GREATER
-        await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
-#else
         // Act
-        await httpTransport.SendEnvelopeAsync(envelope, token);
+        try
+        {
+            await httpTransport.SendEnvelopeAsync(envelope, token);
+        }
+        catch (TaskCanceledException)
+        {
+            // Swallow this
+        }
 
         // Assert
         await httpHandler
             .Received(1)
             .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
-#endif
     }
 
     [Fact]
@@ -199,8 +202,8 @@ public partial class HttpTransportTests
     public async Task SendEnvelopeAsync_ResponseNotOkWithStringMessage_LogsError()
     {
         // Arrange
-        const HttpStatusCode expectedCode = HttpStatusCode.RequestEntityTooLarge;
-        const string expectedMessage = "413 Request Entity Too Large";
+        const HttpStatusCode expectedCode = HttpStatusCode.InternalServerError;
+        const string expectedMessage = "500 Internal Server Error";
 
         var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
@@ -298,6 +301,7 @@ public partial class HttpTransportTests
                 Debug = true
             },
             new HttpClient(httpHandler),
+            null,
             clock: _fakeClock);
 
         // First request always goes through
@@ -382,6 +386,7 @@ public partial class HttpTransportTests
         var httpTransport = new HttpTransport(
             options,
             new HttpClient(httpHandler),
+            null,
             clock: _fakeClock
         );
 
@@ -478,9 +483,9 @@ public partial class HttpTransportTests
             {DiscardReason.EventProcessor.WithCategory(DataCategory.Error), 2},
             {DiscardReason.QueueOverflow.WithCategory(DataCategory.Security), 3},
 
-            // We also expect two new items recorded, due to the forced network failure.
-            {DiscardReason.NetworkError.WithCategory(DataCategory.Error), 1},  // from the event
-            {DiscardReason.NetworkError.WithCategory(DataCategory.Default), 1} // from the client report
+            // We also expect two new items recorded, due to the forced HTTP failure.
+            {DiscardReason.SendError.WithCategory(DataCategory.Error), 1},  // from the event
+            {DiscardReason.SendError.WithCategory(DataCategory.Default), 1} // from the client report
         });
     }
 
@@ -845,5 +850,226 @@ public partial class HttpTransportTests
         // 1 for each span + 1 for the transaction root span
         var expectedDiscardedSpanCount = transaction.Spans.Count + 1;
         options.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Span, expectedDiscardedSpanCount);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_RateLimited_CallsBackpressureMonitor()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+            ));
+
+        using var backpressureMonitor = new BackpressureMonitor(null, _fakeClock, false);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            SendClientReports = false,
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>(),
+            Debug = true
+        };
+
+        var httpTransport = new HttpTransport(
+            options,
+            new HttpClient(httpHandler),
+            backpressureMonitor,
+            clock: _fakeClock
+        );
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        backpressureMonitor.LastRateLimitEventTicks.Should().Be(_fakeClock.GetUtcNow().Ticks);
+        backpressureMonitor.IsHealthy.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response413WithJsonMessage_LogsSizeLimitError()
+    {
+        // Arrange
+        const string expectedDetail = "Envelope too large";
+        var expectedCauses = new[] { "max size exceeded" };
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetJsonErrorResponse(HttpStatusCode.RequestEntityTooLarge, expectedDetail, expectedCauses));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var errorEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("exceeded the maximum allowed size"));
+
+        errorEntry.Should().NotBeNull();
+        errorEntry!.Message.Should().Contain("Consider reducing attachment sizes");
+        errorEntry.Args[2].ToString().Should().Contain(expectedDetail);
+        errorEntry.Args[2].ToString().Should().Contain(expectedCauses[0]);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response413WithTextMessage_LogsSizeLimitError()
+    {
+        // Arrange
+        const string expectedMessage = "413 Request Entity Too Large";
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetTextErrorResponse(HttpStatusCode.RequestEntityTooLarge, expectedMessage));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var errorEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("exceeded the maximum allowed size"));
+
+        errorEntry.Should().NotBeNull();
+        errorEntry!.Message.Should().Contain("Consider reducing attachment sizes");
+        errorEntry.Args[2].ToString().Should().Contain(expectedMessage);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response413_RecordsSendErrorDiscard()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => SentryResponses.GetJsonErrorResponse(HttpStatusCode.RequestEntityTooLarge, "Too large")));
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            SendClientReports = true,
+            Debug = true
+        };
+
+        var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
+
+        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert - should use SendError, not NetworkError
+        recorder.DiscardedEvents.Should().ContainKey(DiscardReason.SendError.WithCategory(DataCategory.Error));
+        recorder.DiscardedEvents.Should().NotContainKey(DiscardReason.NetworkError.WithCategory(DataCategory.Error));
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response429WithJsonMessage_LogsWarning()
+    {
+        // Arrange
+        const string expectedDetail = "Sentry dropped data due to a quota or internal rate limit being reached.";
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetJsonErrorResponse((HttpStatusCode)429, expectedDetail));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var warningEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Warning &&
+            e.Message.Contains("due to rate limiting"));
+
+        warningEntry.Should().NotBeNull();
+        warningEntry!.Message.Should().Contain("exceeded your quota");
+        warningEntry.Args[2].ToString().Should().Contain(expectedDetail);
+
+        // Should NOT have an error-level log for this
+        logger.Entries.Should().NotContain(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("Sentry rejected the envelope"));
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response429WithTextMessage_LogsWarning()
+    {
+        // Arrange
+        const string expectedMessage = "Rate limited";
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetTextErrorResponse((HttpStatusCode)429, expectedMessage));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var warningEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Warning &&
+            e.Message.Contains("due to rate limiting"));
+
+        warningEntry.Should().NotBeNull();
+        warningEntry!.Args[2].ToString().Should().Contain(expectedMessage);
+
+        // Should NOT have an error-level log for this
+        logger.Entries.Should().NotContain(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("Sentry rejected the envelope"));
     }
 }

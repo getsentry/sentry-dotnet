@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms)</TargetFrameworks>
     <!-- These tests fail on Mono -->
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
@@ -24,6 +24,12 @@
     <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
     <Using Include="Microsoft.AspNetCore.Builder" />
     <Using Include="Microsoft.AspNetCore.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="SentrySinkTests.Structured.cs">
+      <DependentUpon>SentrySinkTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

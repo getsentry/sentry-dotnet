@@ -71,6 +71,30 @@ public class HubAdapterTests : IDisposable
     }
 
     [Fact]
+    public void Logger_MockInvoked()
+    {
+        var logger = new InMemorySentryStructuredLogger();
+        Hub.Logger.Returns(logger);
+
+        HubAdapter.Instance.Logger.LogWarning("Message");
+
+        Assert.Collection(logger.Entries,
+            element => element.AssertEqual(SentryLogLevel.Warning, "Message"));
+    }
+
+    [Fact]
+    public void Metrics_MockInvoked()
+    {
+        var metrics = new InMemorySentryMetricEmitter();
+        Hub.Metrics.Returns(metrics);
+
+        HubAdapter.Instance.Metrics.EmitCounter("sentry_tests.hub_adapter_tests.counter", 1);
+
+        Assert.Collection(metrics.Entries,
+            element => element.AssertEqual(SentryMetricType.Counter, "sentry_tests.hub_adapter_tests.counter", 1));
+    }
+
+    [Fact]
     public void EndSession_CrashedStatus_MockInvoked()
     {
         var expected = SessionEndStatus.Crashed;
@@ -159,7 +183,7 @@ public class HubAdapterTests : IDisposable
             {"Key", "value"},
             {"Key2", "value2"},
         };
-        const BreadcrumbLevel level = BreadcrumbLevel.Critical;
+        const BreadcrumbLevel level = BreadcrumbLevel.Fatal;
 
         var scope = new Scope();
         Hub.SubstituteConfigureScope(scope);

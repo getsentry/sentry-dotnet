@@ -21,6 +21,7 @@ public class MauiButtonEventsBinder : IMauiElementEventBinder
     /// <inheritdoc />
     public void UnBind(VisualElement element)
     {
+        _addBreadcrumbCallback = null;
         if (element is Button button)
         {
             button.Clicked -= OnButtonOnClicked;

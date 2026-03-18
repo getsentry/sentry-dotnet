@@ -331,23 +331,6 @@ public sealed class Envelope : ISerializable, IDisposable
     }
 
     /// <summary>
-    /// Creates an envelope that contains a single user feedback.
-    /// </summary>
-    [Obsolete("Use FromFeedback instead.")]
-    public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
-    {
-        var eventId = sentryUserFeedback.EventId;
-        var header = CreateHeader(eventId);
-
-        var items = new[]
-        {
-            EnvelopeItem.FromUserFeedback(sentryUserFeedback)
-        };
-
-        return new Envelope(eventId, header, items);
-    }
-
-    /// <summary>
     /// Creates an envelope that contains a single transaction.
     /// </summary>
     public static Envelope FromTransaction(SentryTransaction transaction)
@@ -440,6 +423,36 @@ public sealed class Envelope : ISerializable, IDisposable
         var items = new[]
         {
             EnvelopeItem.FromClientReport(clientReport)
+        };
+
+        return new Envelope(header, items);
+    }
+
+    /// <summary>
+    /// Creates an envelope that contains only an attachment for an existing event.
+    /// </summary>
+    internal static Envelope FromAttachment(SentryId eventId, SentryAttachment attachment, IDiagnosticLogger? logger = null) =>
+        new(eventId, CreateHeader(eventId), [EnvelopeItem.FromAttachment(attachment)]);
+
+    internal static Envelope FromLog(StructuredLog log)
+    {
+        var header = DefaultHeader;
+
+        var items = new[]
+        {
+            EnvelopeItem.FromLog(log),
+        };
+
+        return new Envelope(header, items);
+    }
+
+    internal static Envelope FromMetric(TraceMetric metric)
+    {
+        var header = DefaultHeader;
+
+        var items = new[]
+        {
+            EnvelopeItem.FromMetric(metric),
         };
 
         return new Envelope(header, items);

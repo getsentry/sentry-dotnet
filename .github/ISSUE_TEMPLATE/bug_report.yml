@@ -2,6 +2,11 @@ name: 🐞 Bug Report
 description: Tell us about something that's not working the way we (probably) intend.
 labels: [".NET", "Bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |-
+        Before filling in this form, please check if a similar issue already exists.
+        If you need help creating a minimal reproduction, see our [repro guide](https://github.com/getsentry/sentry-dotnet/blob/main/.github/repro.md).
   - type: dropdown
     id: nuget
     attributes:
@@ -10,17 +15,21 @@ body:
       options:
         - Sentry
         - Sentry.AspNetCore
+        - Sentry.AspNetCore.Blazor.WebAssembly
         - Sentry.AspNetCore.Grpc
         - Sentry.AspNet
         - Sentry.DiagnosticSource
         - Sentry.EntityFramework
+        - Sentry.Extensions.AI
         - Sentry.Extensions.Logging
         - Sentry.Google.Cloud.Functions
-        - Sentry.Log4net
+        - Sentry.Hangfire
+        - Sentry.Log4Net
         - Sentry.Maui
-        - Sentry.Nlog
+        - Sentry.NLog
+        - Sentry.OpenTelemetry
+        - Sentry.Profiling
         - Sentry.Serilog
-        - Sentry.Tunnel
         - Other
     validations:
       required: true
@@ -45,7 +54,7 @@ body:
     attributes:
       label: .NET Version
       description: If using .NET Core, please copy the output of 'dotnet --version' here
-      placeholder: 9.0.200 ← should look like this
+      placeholder: 10.0.100 ← should look like this
     validations:
       required: true
 
@@ -78,14 +87,35 @@ body:
       label: Development Environment
       description: What development environment are you using
       options:
-        - Visual Studio v17.x
+        - Visual Studio v18.x
         - Visual Studio Code (Windows)
-        - Visual Studio Code (MacOS)
-        - Rider 2024 (Windows)
-        - Rider 2024 (MacOS)
+        - Visual Studio Code (macOS)
+        - Visual Studio Code (Linux)
+        - Rider 2025.x (Windows)
+        - Rider 2025.x (macOS)
+        - Rider 2025.x (Linux)
         - Other
     validations:
       required: true
+
+  - type: dropdown
+    id: other_error_monitoring
+    attributes:
+      description: Are you using any other error monitoring solution alongside Sentry?
+      label: Other Error Monitoring Solution
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+
+  - type: input
+    id: other_error_monitoring_name
+    attributes:
+      label: Other Error Monitoring Solution Name
+      description: If you're using another error monitoring solution side-by-side, please enter the name of the other solution.
+    validations:
+      required: false
 
   - type: input
     id: sentry_sdk_version
@@ -124,7 +154,11 @@ body:
     id: repro
     attributes:
       label: Steps to Reproduce
-      description: How can we see what you're seeing? Specific is terrific.
+      description: >-
+        How can we see what you're seeing? Specific is terrific. Ideally, please provide a link
+        to a minimal reproduction project on GitHub. See our
+        [repro guide](https://github.com/getsentry/sentry-dotnet/blob/main/.github/repro.md)
+        for tips on creating one.
       placeholder: |-
         1. foo
         2. bar

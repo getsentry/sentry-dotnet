@@ -35,4 +35,40 @@ public partial class MauiEventsBinderTests
             }
         }
     }
+
+    [Fact]
+    public void ElementEventBinders_EnabledOnly()
+    {
+        // Arrange
+        var options1 = new SentryMauiOptions { Dsn = ValidDsn };
+#if __ANDROID__
+        options1.Native.ExperimentalOptions.SessionReplay.MaskControlsOfType<object>(); // force masking to be enabled
+        options1.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
+        options1.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
+#endif
+        var iOptions1 = Microsoft.Extensions.Options.Options.Create(options1);
+        var enabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(iOptions1);
+
+        var options2 = new SentryMauiOptions { Dsn = ValidDsn };
+#if __ANDROID__
+        options2.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 0.0;
+        options2.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 0.0;
+#endif
+        var iOptions2 = Microsoft.Extensions.Options.Options.Create(options2);
+        var disabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(iOptions2);
+
+        var buttonEventBinder = new MauiButtonEventsBinder();
+
+        // Act
+        var fixture = new MauiEventsBinderFixture(buttonEventBinder, enabledBinder, disabledBinder);
+
+        // Assert
+#if __ANDROID__
+        var expectedBinders = new List<IMauiElementEventBinder> { buttonEventBinder, enabledBinder };
+#else
+        // We only register MauiSessionReplayMaskControlsOfTypeBinder on platforms that support Session Replay
+        var expectedBinders = new List<IMauiElementEventBinder> { buttonEventBinder };
+#endif
+        fixture.Binder._elementEventBinders.Should().BeEquivalentTo(expectedBinders);
+    }
 }

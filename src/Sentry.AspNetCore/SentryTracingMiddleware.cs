@@ -75,7 +75,7 @@ internal class SentryTracingMiddleware
                 // See:
                 // https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#freezing-dynamic-sampling-context
                 // https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#unified-propagation-mechanism
-                dynamicSamplingContext = DynamicSamplingContext.Empty;
+                dynamicSamplingContext = DynamicSamplingContext.Empty();
             }
 
             var transaction = _getHub().StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
@@ -140,6 +140,9 @@ internal class SentryTracingMiddleware
         catch (Exception e)
         {
             exception = e;
+            // Rethrow immediately so as not to disrupt the .net 10 pipeline behaviour
+            // See: https://github.com/getsentry/sentry-dotnet/issues/4735
+            throw;
         }
         finally
         {
@@ -211,11 +214,6 @@ internal class SentryTracingMiddleware
                 {
                     transaction.Finish(exception, status);
                 }
-            }
-
-            if (exception is not null)
-            {
-                ExceptionDispatchInfo.Capture(exception).Throw();
             }
         }
     }

@@ -13,7 +13,7 @@ internal static class LogLevelExtensions
             LogLevel.Information => BreadcrumbLevel.Info,
             LogLevel.Warning => BreadcrumbLevel.Warning,
             LogLevel.Error => BreadcrumbLevel.Error,
-            LogLevel.Critical => BreadcrumbLevel.Critical,
+            LogLevel.Critical => BreadcrumbLevel.Fatal,
             _ => (BreadcrumbLevel)level
         };
     }
@@ -43,6 +43,21 @@ internal static class LogLevelExtensions
             LogLevel.Error => SentryLevel.Error,
             LogLevel.Critical => SentryLevel.Fatal,
             _ => SentryLevel.Debug
+        };
+    }
+
+    public static SentryLogLevel ToSentryLogLevel(this LogLevel logLevel)
+    {
+        return logLevel switch
+        {
+            LogLevel.Trace => SentryLogLevel.Trace,
+            LogLevel.Debug => SentryLogLevel.Debug,
+            LogLevel.Information => SentryLogLevel.Info,
+            LogLevel.Warning => SentryLogLevel.Warning,
+            LogLevel.Error => SentryLogLevel.Error,
+            LogLevel.Critical => SentryLogLevel.Fatal,
+            LogLevel.None => default,
+            _ => default,
         };
     }
 }

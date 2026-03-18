@@ -1,6 +1,4 @@
 using Microsoft.Extensions.Options;
-using Microsoft.Maui.Platform;
-using Sentry.Extensibility;
 
 namespace Sentry.Maui.Internal;
 
@@ -13,7 +11,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 {
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;
-    private readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
+    internal readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
@@ -29,7 +27,9 @@ internal class MauiEventsBinder : IMauiEventsBinder
     {
         _hub = hub;
         _options = options.Value;
-        _elementEventBinders = elementEventBinders;
+        _elementEventBinders = elementEventBinders.Where(b
+            => b is not MauiSessionReplayMaskControlsOfTypeBinder maskControlTypeBinder
+               || maskControlTypeBinder.IsEnabled);
     }
 
     public void HandleApplicationEvents(Application application, bool bind = true)
@@ -298,9 +298,9 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // https://github.com/dotnet/docs-maui/issues/583
         page.NavigatedTo -= OnPageOnNavigatedTo;
 
-        // Layout changed event
-        // https://docs.microsoft.com/dotnet/api/xamarin.forms.ilayout.layoutchanged
-        page.LayoutChanged -= OnPageOnLayoutChanged;
+        // Size changed event
+        // https://learn.microsoft.com/dotnet/api/microsoft.maui.controls.visualelement.sizechanged
+        page.SizeChanged -= OnPageOnSizeChanged;
 
         if (bind)
         {
@@ -313,9 +313,9 @@ internal class MauiEventsBinder : IMauiEventsBinder
             // https://github.com/dotnet/docs-maui/issues/583
             page.NavigatedTo += OnPageOnNavigatedTo;
 
-            // Layout changed event
-            // https://docs.microsoft.com/dotnet/api/xamarin.forms.ilayout.layoutchanged
-            page.LayoutChanged += OnPageOnLayoutChanged;
+            // Size changed event
+            // https://learn.microsoft.com/dotnet/api/microsoft.maui.controls.visualelement.sizechanged
+            page.SizeChanged += OnPageOnSizeChanged;
         }
     }
 
@@ -446,6 +446,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnPageOnNavigatedTo(object? sender, NavigatedToEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedTo), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.GetPreviousPage(), "PreviousPage"));
 
-    private void OnPageOnLayoutChanged(object? sender, EventArgs _) =>
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.LayoutChanged), SystemType, RenderingCategory);
+    private void OnPageOnSizeChanged(object? sender, EventArgs _) =>
+        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.SizeChanged), SystemType, RenderingCategory);
 }

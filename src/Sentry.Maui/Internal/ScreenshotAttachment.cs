@@ -27,10 +27,8 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 {
     private readonly SentryMauiOptions _options;
 
-#if NET9_0_OR_GREATER && ANDROID
+#if ANDROID
     private static readonly Lock JniLock = new();
-#elif ANDROID
-    private static readonly object JniLock = new();
 #endif
 
     public ScreenshotAttachmentContent(SentryMauiOptions options)

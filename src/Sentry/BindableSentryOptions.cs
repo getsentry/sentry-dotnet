@@ -1,7 +1,7 @@
 namespace Sentry;
 
 /// <summary>
-/// Contains representations of the subset of properties in SentryOptions that can be set from ConfigurationBindings.
+/// Contains representations of the subset of properties in <see cref="SentryOptions"/> that can be set from ConfigurationBindings.
 /// Note that all of these properties are nullable, so that if they are not present in configuration, the values from
 /// the type being bound to will be preserved.
 /// </summary>
@@ -9,6 +9,7 @@ internal partial class BindableSentryOptions
 {
     public bool? IsGlobalModeEnabled { get; set; }
     public bool? EnableScopeSync { get; set; }
+    public bool? EnableBackpressureHandling { get; set; }
     public List<string>? TagFilters { get; set; }
     public bool? SendDefaultPii { get; set; }
     public bool? IsEnvironmentUser { get; set; }
@@ -20,6 +21,8 @@ internal partial class BindableSentryOptions
     public string? Distribution { get; set; }
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
+    public bool? EnableLogs { get; set; }
+    public bool? EnableMetrics { get; set; }
     public int? MaxQueueItems { get; set; }
     public int? MaxCacheItems { get; set; }
     public TimeSpan? ShutdownTimeout { get; set; }
@@ -41,6 +44,7 @@ internal partial class BindableSentryOptions
     public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
+    public bool? PropagateTraceparent { get; set; }
     public double? ProfilesSampleRate { get; set; }
     public StackTraceMode? StackTraceMode { get; set; }
     public long? MaxAttachmentSize { get; set; }
@@ -57,6 +61,7 @@ internal partial class BindableSentryOptions
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
         options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
+        options.EnableBackpressureHandling = EnableBackpressureHandling ?? options.EnableBackpressureHandling;
         options.TagFilters = TagFilters?.Select(s => new StringOrRegex(s)).ToList() ?? options.TagFilters;
         options.SendDefaultPii = SendDefaultPii ?? options.SendDefaultPii;
         options.IsEnvironmentUser = IsEnvironmentUser ?? options.IsEnvironmentUser;
@@ -68,6 +73,8 @@ internal partial class BindableSentryOptions
         options.Distribution = Distribution ?? options.Distribution;
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
+        options.EnableLogs = EnableLogs ?? options.EnableLogs;
+        options.EnableMetrics = EnableMetrics ?? options.EnableMetrics;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;
@@ -89,6 +96,7 @@ internal partial class BindableSentryOptions
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
         options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
         options.TracePropagationTargets = TracePropagationTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.TracePropagationTargets;
+        options.PropagateTraceparent = PropagateTraceparent ?? options.PropagateTraceparent;
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
         options.DetectStartupTime = DetectStartupTime ?? options.DetectStartupTime;

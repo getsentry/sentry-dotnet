@@ -1,5 +1,0 @@
-﻿{
-  Generator: {},
-  GeneratedSources: null,
-  Diagnostics: null
-}

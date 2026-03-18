@@ -14,8 +14,11 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
 
     public SystemWebRequestEventProcessor(IRequestPayloadExtractor payloadExtractor, SentryOptions options)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        PayloadExtractor = payloadExtractor ?? throw new ArgumentNullException(nameof(payloadExtractor));
+        ArgumentNullException.ThrowIfNull(payloadExtractor);
+        ArgumentNullException.ThrowIfNull(options);
+
+        _options = options;
+        PayloadExtractor = payloadExtractor;
     }
 
     public SentryEvent? Process(SentryEvent? @event)
@@ -73,7 +76,7 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
                 @event.User.Username = null;
             }
 
-            @event.User.IpAddress = context.Request.UserHostAddress;
+            @event.User.IpAddress ??= context.Request.UserHostAddress;
             if (context.User.Identity is { } identity)
             {
                 @event.User.Username = identity.Name;

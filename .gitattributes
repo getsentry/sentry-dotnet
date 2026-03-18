@@ -1,6 +1,7 @@
 * text=auto
 *.cs text=auto eol=lf diff=csharp
 *.sln text=auto eol=crlf
+*.slnx text=auto eol=lf
 *.sh eol=lf
 *.ps1 eol=lf
 CHANGELOG.md merge=union

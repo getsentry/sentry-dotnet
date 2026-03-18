@@ -3,12 +3,12 @@
 # the *.slnf solution filters for the Sentry solution.
 ################################################################
 
-coreSolution: Sentry.sln
+coreSolution: Sentry.slnx
 # We don't maintain the buildSolutions manually... these are just
-# copies of Sentry.sln that are used to set certain build
+# copies of Sentry.slnx that are used to set certain build
 # properties when using solution filters that are based on these
 buildSolutions:
-  - .generated.NoMobile.sln
+  - .generated.NoMobile.slnx
 
 groupConfigs:
   allProjects:
@@ -32,6 +32,13 @@ groupConfigs:
   trimTests:
     - "**/Sentry.TrimTest.csproj"
     - "**/Sentry.MauiTrimTest.csproj"
+  playwrightTests:
+    - "**/*PlaywrightTests*.csproj"
+  mobileOnly:
+    - "**/*Android*.csproj"
+    - "**/*Ios*.csproj"
+    - "**/*MacCatalyst*.csproj"
+    - "**/*Maui*.csproj"
 
 filterConfigs:
 
@@ -45,12 +52,14 @@ filterConfigs:
         - "windowsOnly"
         - "artefacts"
         - "trimTests"
+        - "playwrightTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
 
-  - outputPath: Sentry-CI-Build-Linux-arm64.slnf
+  - outputPath: Sentry-CI-Build-Linux-NoMobile.slnf
+    solution: .generated.NoMobile.slnx
     include:
       groups:
         - "allProjects"
@@ -60,21 +69,8 @@ filterConfigs:
         - "windowsOnly"
         - "artefacts"
         - "trimTests"
-      patterns:
-        - "**/*Android*.csproj"
-        - "**/*DeviceTests*.csproj"
-        - "**/*Maui*.csproj"
-
-  - outputPath: Sentry-CI-Build-Linux-musl.slnf
-    include:
-      groups:
-        - "allProjects"
-    exclude:
-      groups:
-        - "macOnly"
-        - "windowsOnly"
-        - "artefacts"
-        - "trimTests"
+        - "mobileOnly"
+        - "playwrightTests"
       patterns:
         - "**/*Android*.csproj"
         - "**/*DeviceTests*.csproj"
@@ -91,6 +87,7 @@ filterConfigs:
       groups:
         - "artefacts"
         - "trimTests"
+        - "playwrightTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -108,8 +105,11 @@ filterConfigs:
         - "macOnly"
         - "artefacts"
         - "trimTests"
+        - "playwrightTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
+        - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
@@ -127,8 +127,11 @@ filterConfigs:
         - "macOnly"
         - "artefacts"
         - "trimTests"
+        - "playwrightTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
+        - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
@@ -152,7 +155,7 @@ filterConfigs:
         - "test/**/*.csproj"
 
   - outputPath: SentryAspNetCore.slnf
-    solution: .generated.NoMobile.sln
+    solution: .generated.NoMobile.slnx
     include:
       patterns:
         - "**/*AspNetCore*.csproj"
@@ -170,24 +173,8 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
         - "**/Sentry.Analyzers.Tests.csproj"
 
-  - outputPath: Sentry.Azure.Functions.slnf
-    include:
-      patterns:
-        - "**/*Azure.Functions*.csproj"
-        - "**/Sentry.Samples.Console.Basic.csproj"
-        - "**/Sentry.Extensions.Logging.csproj"
-        - "**/Sentry.csproj"
-        - "**/Sentry.Analyzers.csproj"
-        - "**/Sentry.Testing.csproj"
-        - "**/Sentry.Testing.CrashableApp.csproj"
-        - "**/Sentry.Tests.csproj"
-        - "**/Sentry.Analyzers.Tests.csproj"
-    exclude:
-      groups:
-        - "artefacts"
-
   - outputPath: SentryCore.slnf
-    solution: .generated.NoMobile.sln
+    solution: .generated.NoMobile.slnx
     include:
       patterns:
         - "**/Sentry.Benchmarks.csproj"
@@ -203,7 +190,7 @@ filterConfigs:
         - "**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryDiagnosticSource.slnf
-    solution: .generated.NoMobile.sln
+    solution: .generated.NoMobile.slnx
     include:
       patterns:
         - "**/*DiagnosticSource*.csproj"
@@ -224,7 +211,7 @@ filterConfigs:
         - "samples/**/*Maui.csproj"
         - "src/**/Sentry.csproj"
         - "src/**/Sentry.Analyzers.csproj"
-        - "src/**/Sentry.SourceGenerators.csproj"
+        - "src/**/Sentry.Compiler.Extensions.csproj"
         - "src/**/*Android*.csproj"
         - "src/**/*Bindings.Android.csproj"
         - "src/**/*Bindings.Cocoa.csproj"
@@ -242,7 +229,7 @@ filterConfigs:
         - "src/**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryNoMobile.slnf
-    solution: .generated.NoMobile.sln
+    solution: .generated.NoMobile.slnx
     include:
       groups:
         - "allProjects"
@@ -250,6 +237,7 @@ filterConfigs:
       groups:
         - "artefacts"
         - "trimTests"
+        - "mobileOnly"
       patterns:
         - "**/*Bindings*.csproj"
         - "**/*Android*.csproj"

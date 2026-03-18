@@ -3,12 +3,12 @@ namespace Sentry.Maui.Internal;
 /// <inheritdoc />
 public class MauiImageButtonEventsBinder : IMauiElementEventBinder
 {
-    private Action<BreadcrumbEvent>? addBreadcrumbCallback;
+    private Action<BreadcrumbEvent>? _addBreadcrumbCallback;
 
     /// <inheritdoc />
     public void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb)
     {
-        addBreadcrumbCallback = addBreadcrumb;
+        _addBreadcrumbCallback = addBreadcrumb;
 
         if (element is ImageButton image)
         {
@@ -21,6 +21,7 @@ public class MauiImageButtonEventsBinder : IMauiElementEventBinder
     /// <inheritdoc />
     public void UnBind(VisualElement element)
     {
+        _addBreadcrumbCallback = null;
         if (element is ImageButton image)
         {
             image.Clicked -= OnButtonOnClicked;
@@ -31,11 +32,11 @@ public class MauiImageButtonEventsBinder : IMauiElementEventBinder
 
 
     private void OnButtonOnClicked(object? sender, EventArgs _)
-        => addBreadcrumbCallback?.Invoke(new(sender, nameof(ImageButton.Clicked)));
+        => _addBreadcrumbCallback?.Invoke(new(sender, nameof(ImageButton.Clicked)));
 
     private void OnButtonOnPressed(object? sender, EventArgs _)
-        => addBreadcrumbCallback?.Invoke(new(sender, nameof(ImageButton.Pressed)));
+        => _addBreadcrumbCallback?.Invoke(new(sender, nameof(ImageButton.Pressed)));
 
     private void OnButtonOnReleased(object? sender, EventArgs _)
-        => addBreadcrumbCallback?.Invoke(new(sender, nameof(ImageButton.Released)));
+        => _addBreadcrumbCallback?.Invoke(new(sender, nameof(ImageButton.Released)));
 }

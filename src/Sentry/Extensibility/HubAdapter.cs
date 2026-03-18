@@ -1,6 +1,5 @@
 using Sentry.Infrastructure;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry.Extensibility;
 
@@ -31,6 +30,21 @@ public sealed class HubAdapter : IHub
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     public SentryId LastEventId { [DebuggerStepThrough] get => SentrySdk.LastEventId; }
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    public SentryStructuredLogger Logger { [DebuggerStepThrough] get => SentrySdk.Logger; }
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    public SentryMetricEmitter Metrics { [DebuggerStepThrough] get => SentrySdk.Metrics; }
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    public bool IsSessionActive { [DebuggerStepThrough] get => SentrySdk.IsSessionActive; }
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -134,6 +148,13 @@ public sealed class HubAdapter : IHub
     [DebuggerStepThrough]
     public BaggageHeader? GetBaggage()
         => SentrySdk.GetBaggage();
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public W3CTraceparentHeader? GetTraceparentHeader()
+        => SentrySdk.GetTraceparentHeader();
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -255,16 +276,18 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
-        => SentrySdk.CaptureFeedback(feedback, configureScope, hint);
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
+        => SentrySdk.CaptureFeedback(feedback, out result, configureScope, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
-        => SentrySdk.CaptureFeedback(feedback, scope, hint);
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result, Scope? scope = null,
+        SentryHint? hint = null)
+        => SentrySdk.CaptureFeedback(feedback, out result, scope, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -330,13 +353,4 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Task FlushAsync(TimeSpan timeout)
         => SentrySdk.FlushAsync(timeout);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>
-    /// </summary>
-    [DebuggerStepThrough]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback sentryUserFeedback)
-        => SentrySdk.CaptureUserFeedback(sentryUserFeedback);
 }

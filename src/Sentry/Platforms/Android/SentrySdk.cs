@@ -4,7 +4,9 @@ using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
 using Sentry.Extensibility;
+using Sentry.JavaSdk;
 using Sentry.JavaSdk.Android.Core;
+using Sentry.JavaSdk.Android.Core.Internal.Util;
 
 // Don't let the Sentry Android SDK auto-init, as we do that manually in SentrySdk.Init
 // See https://docs.sentry.io/platforms/android/configuration/manual-init/
@@ -142,6 +144,10 @@ public static partial class SentrySdk
                 (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate;
             o.SessionReplay.SetMaskAllImages(options.Native.ExperimentalOptions.SessionReplay.MaskAllImages);
             o.SessionReplay.SetMaskAllText(options.Native.ExperimentalOptions.SessionReplay.MaskAllText);
+            if (o.ReplayController is { } replayController)
+            {
+                replayController.BreadcrumbConverter = new DotnetReplayBreadcrumbConverter(o);
+            }
 
             // These options are intentionally set and not exposed for modification
             o.EnableExternalConfiguration = false;
@@ -155,6 +161,16 @@ public static partial class SentrySdk
 
             // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
             o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
+
+            // Deliver network and system event breadcrumbs in the main thread
+            // See https://github.com/getsentry/sentry-dotnet/issues/3828
+            var networkLogger = new AndroidDiagnosticLogger(options.DiagnosticLogger);
+            var buildInfoProvider = new BuildInfoProvider(networkLogger);
+            var timeProvider = AndroidCurrentDateProvider.Instance!;
+            var mainHandler = new AndroidHandler(AndroidLooper.MainLooper!);
+            o.ConnectionStatusProvider =
+                new AndroidConnectionStatusProvider(AppContext, o, buildInfoProvider, timeProvider, mainHandler).JavaCast<IConnectionStatusProvider>();
+            o.AddIntegration(new SystemEventsBreadcrumbsIntegration(AppContext, mainHandler).JavaCast<JavaSdk.IIntegration>());
         });
 
         // Now initialize the Android SDK (with a logger only if we're debugging)
@@ -177,6 +193,8 @@ public static partial class SentrySdk
         options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
         options.ScopeObserver = new AndroidScopeObserver(options);
+        // Don't capture Java Runtime exceptions in the managed SDK, since we already capture them in the native SDK
+        options.AddExceptionFilterForType<Java.Lang.RuntimeException>();
 
         // TODO: Pause/Resume
     }

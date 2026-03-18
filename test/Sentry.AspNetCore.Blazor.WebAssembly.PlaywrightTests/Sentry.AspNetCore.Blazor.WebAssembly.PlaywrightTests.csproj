@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Remove Sentry-specific global usings — this project doesn't reference Sentry -->
+  <ItemGroup>
+    <Using Remove="Sentry" />
+    <Using Remove="Sentry.DsnSamples" />
+    <Using Remove="Sentry.Extensibility" />
+    <Using Remove="Sentry.Infrastructure" />
+    <Using Remove="Sentry.Integrations" />
+    <Using Remove="Sentry.Internal" />
+    <Using Remove="Sentry.Internal.Extensions" />
+    <Using Remove="Sentry.Protocol" />
+    <Using Remove="Sentry.Protocol.Envelopes" />
+    <Using Remove="Sentry.Reflection" />
+    <Using Remove="Sentry.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Playwright" Version="1.51.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Build dependency only — ensures the test app is compiled before tests run -->
+    <ProjectReference Include="..\Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp\Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp.csproj"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>
