@@ -104,6 +104,9 @@
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.util']/*[starts-with(@name,'SentryFrameMetricsCollector')]" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AndroidProfiler']/*" />
 
+  <!-- SentryShakeDetector implements SensorEventListener whose nullability changed in Android 36 SDK -->
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='SentryShakeDetector']" />
+
   <!-- Remove problematic classes for profiling that create a stack overflow during code generation, which appears as:
       error MSB6006: "dotnet" exited with code 134
   -->

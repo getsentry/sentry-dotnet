@@ -16,6 +16,12 @@ using Sentry.JavaSdk.Android.Core.Internal.Util;
 // Set the hybrid SDK name
 [assembly: MetaData("io.sentry.sdk.name", Value = "sentry.java.android.dotnet")]
 
+// Preload NDK backend (installs signal handlers before Mono) to ensure the
+// correct handler chain order: mono -> sentry-native -> debuggerd. This way
+// Mono handles managed exceptions first, and native crashes chain to
+// sentry-native.
+[assembly: MetaData("io.sentry.ndk.preload", Value = "true")]
+
 // ReSharper disable once CheckNamespace
 namespace Sentry;
 

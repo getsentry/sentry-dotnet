@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
-    <SentryAndroidSdkVersion>8.35.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>8.36.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <!-- This gets resolved by the DownloadSentryAndroidSdk unless using local maven references -->
-    <SentryNativeNdkVersion></SentryNativeNdkVersion>
+    <SentryNativeNdkVersion>0.13.3</SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
 
     <!--
@@ -21,7 +21,7 @@
       2. You will need to manually set the `SentryNativeNdkVersion` property as this no longer gets resolved from
          the POM files from the Java SDK when using local maven artifacts.
     -->
-    <UseLocalSentryMavenRepo>false</UseLocalSentryMavenRepo>
+    <UseLocalSentryMavenRepo>true</UseLocalSentryMavenRepo>
     <LocalSentryMavenRepoDir Condition="'$(LocalSentryMavenRepoDir)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.UserProfile))/.m2/repository/</LocalSentryMavenRepoDir>
     <LocalSentryJarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar</LocalSentryJarPath>
     <LocalSentryAndroidCoreAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar</LocalSentryAndroidCoreAarPath>
@@ -123,7 +123,7 @@
 
   <!-- A light-weight replacement for protobuf-javalite (see https://github.com/getsentry/sentry-java/pull/5157) -->
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.1.0" Bind="false" />
+    <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.1.1" Bind="false" />
   </ItemGroup>
 
   <ItemGroup>
