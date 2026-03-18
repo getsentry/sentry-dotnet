@@ -43,5 +43,23 @@
     Args: [
       WinUIUnhandledExceptionIntegration
     ]
+  },
+  {
+    Message: Registering integration: '{0}'.,
+    Args: [
+      GlobalRootScopeIntegration
+    ]
+  },
+  {
+    Message: Created directory for installation ID file ({0}).,
+    Args: [
+      {UserProfile}\AppData\Local\Sentry\E071FE7F4BE9BFA6EDB6089C375F386F4142AD01
+    ]
+  },
+  {
+    Message: Resolved installation ID '{0}'.,
+    Args: [
+      Guid_1
+    ]
   }
 ]
