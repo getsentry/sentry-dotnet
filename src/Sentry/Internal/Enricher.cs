@@ -12,7 +12,7 @@ internal class Enricher
 
     private readonly Lazy<Runtime> _runtimeLazy = new(() =>
     {
-        var current = PlatformAbstractions.SentryRuntime.Current;
+        var current = SentryRuntime.Current;
         return new Runtime
         {
             Name = current.Name,
@@ -36,7 +36,7 @@ internal class Enricher
         if (!eventLike.Contexts.ContainsKey(OperatingSystem.Type))
         {
             // RuntimeInformation.OSDescription is throwing on Mono 5.12
-            if (!PlatformAbstractions.SentryRuntime.Current.IsMono())
+            if (!SentryRuntime.Current.IsMono())
             {
 #if NETFRAMEWORK
                 // RuntimeInformation.* throws on .NET Framework on macOS/Linux
@@ -58,9 +58,8 @@ internal class Enricher
             }
         }
 
-        // SDK
         // SDK Name/Version might have be already set by an outer package
-        // e.g: ASP.NET Core can set itself as the SDK
+        // e.g.: ASP.NET Core can set itself as the SDK
         if (eventLike.Sdk.Version is null && eventLike.Sdk.Name is null)
         {
             eventLike.Sdk.Name = Constants.SdkName;
