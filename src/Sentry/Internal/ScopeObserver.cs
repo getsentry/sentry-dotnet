@@ -95,7 +95,7 @@ internal abstract class ScopeObserver : Sentry.IScopeObserver
 
     public abstract void SetTraceImpl(SentryId traceId, SpanId parentSpanId);
 
-    public virtual void AddAttachment(SentryAttachment attachment) { }
+    public abstract void AddAttachment(SentryAttachment attachment);
 
-    public virtual void ClearAttachments() { }
+    public abstract void ClearAttachments();
 }
