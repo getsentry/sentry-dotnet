@@ -399,8 +399,6 @@ public class Scope : IEventLike
         }
     }
 
-    internal void AddAttachmentWithoutObserver(SentryAttachment attachment) => _attachments.Add(attachment);
-
     internal void SetPropagationContext(SentryPropagationContext propagationContext)
     {
         PropagationContext = propagationContext;
@@ -548,7 +546,8 @@ public class Scope : IEventLike
 
         foreach (var attachment in Attachments)
         {
-            other.AddAttachmentWithoutObserver(attachment);
+            // Set the attachment directly to avoid triggering a scope sync
+            _attachments.Add(attachment);
         }
     }
 
