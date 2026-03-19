@@ -212,3 +212,22 @@ You'll also need to set `<UseLocalSentryMavenRepo>true</UseLocalSentryMavenRepo>
 in the `Sentry.Bindings.Android.csproj`file.
 
 To switch back again, simply revert those two build properties to their original values.
+
+## AI Workflows
+
+### AGENTS.md
+
+We guide coding agents via the [AGENTS.md](./AGENTS.md) file.
+See also https://agents.md/.
+
+And yes, Sentry has a [Skill](https://github.com/getsentry/skills) to maintain the `AGENTS.md` file.
+
+### .agents
+
+We use [dotagents](https://github.com/getsentry/dotagents) as a package manager for agent skills and more.
+See [agents.toml](./agents.toml) for our current configuration.
+
+### Warden
+
+We use [Warden](https://github.com/getsentry/warden) as a tool to run _Agent Skills_ against code changes, both locally and in CI.
+See [warden.toml](./warden.toml) for our current configuration.

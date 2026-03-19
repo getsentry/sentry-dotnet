@@ -7,6 +7,12 @@ Uses the .NET SDK (`dotnet` CLI). Key files:
 - `global.json` — pins .NET SDK and Workload versions
 - `Directory.Build.props` / `Directory.Build.targets` — shared MSBuild properties across all projects
 
+### MSBuild hierarchical structure
+
+MSBuild searches upward from each project file and uses the **nearest** `Directory.Build.props`/`.targets` it finds. Parent files are not automatically included. props/targets files in this repo explicitly `<Import>` parent/root files when appropriate.
+
+`integration-test/Directory.Build.props` / `integration-test/Directory.Build.targets` are intentionally isolated (do not import root).
+
 ## Solution Filters
 
 Use solution filters instead of the full `Sentry.slnx`:
@@ -132,6 +138,19 @@ gh pr view --json number -q '.number'
 - New features must be **opt-in** — extend `SentryOptions` or relevant options class with getters/setters
 - Maintain **backwards compatibility** — avoid breaking public API without strong justification
 - Platform-specific code lives in `src/Sentry/Platforms/` and is conditionally compiled
+
+## Adding New Options (AOT Compatibility)
+
+`SentryOptions` is **not** bound directly from configuration. Instead, a parallel `BindableSentryOptions` class (`src/Sentry/BindableSentryOptions.cs`) exists for AOT-safe configuration binding.
+
+When adding a configurable property to any of the classes descending from `SentryOptions`:
+
+1. Add the property to `SentryOptions` as normal.
+2. Add a matching **nullable** property to `BindableSentryOptions`. Use only simple/primitive types the source generator can handle. For complex types (e.g., `IReadOnlyList<StringOrRegex>`), use a simpler surrogate (e.g., `List<string>?`) and convert in `ApplyTo`.
+3. Add a line in `BindableSentryOptions.ApplyTo`: `options.MyProp = MyProp ?? options.MyProp;`
+4. Run the relevant bindable options test (e.g., `BindableSentryOptionsTests`) — the `BindableProperties_MatchOptionsProperties` test will fail if any bindable property is missing from the bindable class.
+
+The same pattern applies to `BindableSentryAspNetCoreOptions`, `BindableSentryMauiOptions`, `BindableSentryLoggingOptions`, and the platform-specific partial classes under `src/Sentry/Platforms/`.
 
 ## Commit Attribution
 

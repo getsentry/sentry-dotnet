@@ -471,6 +471,14 @@ interface SentryFrame : SentrySerializable
     [NullAllowed, Export("contextLine")]
     string ContextLine { get; set; }
 
+    // @property (copy, nonatomic) NSNumber * _Nullable parentIndex;
+    [NullAllowed, Export("parentIndex", ArgumentSemantic.Copy)]
+    NSNumber ParentIndex { get; set; }
+
+    // @property (copy, nonatomic) NSNumber * _Nullable sampleCount;
+    [NullAllowed, Export("sampleCount", ArgumentSemantic.Copy)]
+    NSNumber SampleCount { get; set; }
+
     // @property (copy, nonatomic) NSArray<NSString *> * _Nullable preContext;
     [NullAllowed, Export("preContext", ArgumentSemantic.Copy)]
     string[] PreContext { get; set; }
@@ -1642,6 +1650,11 @@ interface PrivateSentrySDKOnly
     [Export("optionsWithDictionary:didFailWithError:")]
     [return: NullAllowed]
     SentryOptions OptionsWithDictionary(NSDictionary<NSString, NSObject> options, [NullAllowed] out NSError error);
+
+    // +(void)setLogOutput:(void (^ _Nonnull)(NSString * _Nonnull))output;
+    [Static]
+    [Export("setLogOutput:")]
+    void SetLogOutput(Action<NSString> output);
 }
 
 // @interface SentryOptions : NSObject
@@ -2126,6 +2139,10 @@ interface SentryExperimentalOptions
     [Export("enableMetrics")]
     bool EnableMetrics { get; set; }
 
+    // @property (nonatomic) BOOL enableWatchdogTerminationsV2;
+    [Export("enableWatchdogTerminationsV2")]
+    bool EnableWatchdogTerminationsV2 { get; set; }
+
     // -(void)validateOptions:(NSDictionary<NSString *,id> * _Nullable)options;
     [Export("validateOptions:")]
     void ValidateOptions([NullAllowed] NSDictionary<NSString, NSObject> options);
@@ -2303,6 +2320,10 @@ interface SentryLog
     // @property (nonatomic, strong) SentryId * _Nonnull traceId;
     [Export("traceId", ArgumentSemantic.Strong)]
     SentryId TraceId { get; set; }
+
+    // @property (nonatomic, strong) SentrySpanId * _Nullable spanId;
+    [NullAllowed, Export("spanId", ArgumentSemantic.Strong)]
+    SentrySpanId SpanId { get; set; }
 
     // @property (nonatomic) enum SentryLogLevel level;
     [Export("level", ArgumentSemantic.Assign)]

@@ -51,6 +51,7 @@ namespace Sentry
         UnknownError = 1,
         DisabledHub = 2,
         EmptyMessage = 3,
+        DroppedByEventProcessor = 4,
     }
     public enum CheckInStatus
     {
@@ -197,7 +198,6 @@ namespace Sentry
         bool IsSessionActive { get; }
         Sentry.SentryId LastEventId { get; }
         Sentry.SentryStructuredLogger Logger { get; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat="https://github.com/getsentry/sentry-dotnet/discussions/4838")]
         Sentry.SentryMetricEmitter Metrics { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
@@ -806,10 +806,10 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableBackpressureHandling { get; set; }
         public bool EnableLogs { get; set; }
+        public bool EnableMetrics { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
-        public Sentry.SentryOptions.ExperimentalSentryOptions Experimental { get; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
@@ -896,14 +896,10 @@ namespace Sentry
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryEvent?> beforeSend) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryHint, Sentry.SentryEvent?> beforeSend) { }
         public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
+        public void SetBeforeSendMetric(System.Func<Sentry.SentryMetric, Sentry.SentryMetric?> beforeSendMetric) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public Sentry.SentryOptions UseStackTraceFactory(Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
-        public class ExperimentalSentryOptions
-        {
-            public bool EnableMetrics { get; set; }
-            public void SetBeforeSendMetric(System.Func<Sentry.SentryMetric, Sentry.SentryMetric?> beforeSendMetric) { }
-        }
     }
     public sealed class SentryPackage : Sentry.ISentryJsonSerializable
     {
@@ -933,11 +929,11 @@ namespace Sentry
     }
     public static class SentrySdk
     {
-        public static Sentry.SentrySdk.ExperimentalSentrySdk Experimental { get; }
         public static bool IsEnabled { get; }
         public static bool IsSessionActive { get; }
         public static Sentry.SentryId LastEventId { get; }
         public static Sentry.SentryStructuredLogger Logger { get; }
+        public static Sentry.SentryMetricEmitter Metrics { get; }
         public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
@@ -997,10 +993,6 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
         public static void UnsetTag(string key) { }
-        public sealed class ExperimentalSentrySdk
-        {
-            public Sentry.SentryMetricEmitter Metrics { get; }
-        }
     }
     public class SentrySession : Sentry.ISentrySession
     {
@@ -1492,7 +1484,6 @@ namespace Sentry.Extensibility
         public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat="https://github.com/getsentry/sentry-dotnet/discussions/4838")]
         public Sentry.SentryMetricEmitter Metrics { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
@@ -1541,7 +1532,6 @@ namespace Sentry.Extensibility
         public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat="https://github.com/getsentry/sentry-dotnet/discussions/4838")]
         public Sentry.SentryMetricEmitter Metrics { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }

@@ -62,7 +62,9 @@ internal class SentryMiddleware : IMiddleware
         IEnumerable<ISentryEventProcessor> eventProcessors,
         IEnumerable<ISentryTransactionProcessor> transactionProcessors)
     {
-        _getHub = getHub ?? throw new ArgumentNullException(nameof(getHub));
+        ArgumentNullException.ThrowIfNull(getHub);
+
+        _getHub = getHub;
         _options = options.Value;
         _hostingEnvironment = hostingEnvironment;
         _logger = logger;

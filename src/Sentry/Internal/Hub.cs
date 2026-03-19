@@ -8,7 +8,7 @@ namespace Sentry.Internal;
 
 internal class Hub : IHub, IDisposable
 {
-    private readonly object _sessionPauseLock = new();
+    private readonly Lock _sessionPauseLock = new();
 
     private readonly ISystemClock _clock;
     private readonly ISessionManager _sessionManager;

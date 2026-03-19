@@ -5,10 +5,31 @@
 ### Features
 
 - Add strict trace continuation support ([#4981](https://github.com/getsentry/sentry-dotnet/pull/4981))
+- GA release for Sentry Metrics ([#5023](https://github.com/getsentry/sentry-dotnet/pull/5023))
+
+### Fixes
+
+- Common tags such as `Environment` and `Release` and custom event processors are all now correctly applied to CaptureFeedback events ([#4942](https://github.com/getsentry/sentry-dotnet/pull/4942))
+
+## 6.2.0
+
+### Features
+
+- Outbound HTTP requests now show in the Network tab for Android Session Replays ([#4860](https://github.com/getsentry/sentry-dotnet/pull/4860))
 
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
+- Symbolication now works correctly with Android workloads 10.0.102 and later ([#4998](https://github.com/getsentry/sentry-dotnet/pull/4998))
+- `libmonosgen` and `libxamarin` frames no longer show as in-app ([#4960](https://github.com/getsentry/sentry-dotnet/pull/4960))
+
+### Dependencies
+
+- Bump Native SDK from v0.12.6 to v0.13.2 ([#4920](https://github.com/getsentry/sentry-dotnet/pull/4920), [#4929](https://github.com/getsentry/sentry-dotnet/pull/4929), [#4941](https://github.com/getsentry/sentry-dotnet/pull/4941), [#4964](https://github.com/getsentry/sentry-dotnet/pull/4964), [#4996](https://github.com/getsentry/sentry-dotnet/pull/4996))
+- Bump Cocoa SDK from v8.57.3 to v9.5.0 ([#4781](https://github.com/getsentry/sentry-dotnet/pull/4781), [#4928](https://github.com/getsentry/sentry-dotnet/pull/4928), [#4944](https://github.com/getsentry/sentry-dotnet/pull/4944))
+- Bump CLI from v2.58.2 to v3.3.0 ([#4805](https://github.com/getsentry/sentry-dotnet/pull/4805), [#4943](https://github.com/getsentry/sentry-dotnet/pull/4943), [#4973](https://github.com/getsentry/sentry-dotnet/pull/4973))
+  - NOTE: Sentry CLI v3 removed support for the legacy API key authentication method. Sentry CLI now only supports authenticating with Auth Tokens. If you are using API key authentication via `SentryApiKey`, you need to generate an [Auth Token](https://docs.sentry.io/account/auth-tokens/) and use `SentryAuthToken`, instead.
+- Bump Java SDK from v8.32.0 to v8.34.1 ([#4933](https://github.com/getsentry/sentry-dotnet/pull/4933), [#4986](https://github.com/getsentry/sentry-dotnet/pull/4986))
 
 ## 6.2.0-alpha.0
 
@@ -20,6 +41,7 @@
 
 - Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
 - Bumped CommunityToolkit.Mvvm to 8.4.0 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
+- Bump Java SDK from v8.29.0 to v8.32.0 ([#4843](https://github.com/getsentry/sentry-dotnet/pull/4843))
 
 ## 6.1.0
 
@@ -27,7 +49,6 @@
 
 - Add _experimental_ support for [Sentry trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
 - Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
-- Outbound HTTP requests now show in the Network tab for Android Session Replays ([#4860](https://github.com/getsentry/sentry-dotnet/pull/4860))
 
 ### Fixes
 
