@@ -43,6 +43,7 @@ namespace Sentry
     public class ByteAttachmentContent : Sentry.IAttachmentContent
     {
         public ByteAttachmentContent(byte[] bytes) { }
+        public byte[] Bytes { get; }
         public System.IO.Stream GetStream() { }
     }
     public enum CaptureFeedbackResult
