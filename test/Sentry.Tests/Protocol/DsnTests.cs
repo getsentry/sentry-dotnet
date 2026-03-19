@@ -279,15 +279,8 @@ public class DsnTests
 
     private static void AssertEqual(DsnTestCase @case, Dsn dsn)
     {
-        if (@case == null)
-        {
-            throw new ArgumentNullException(nameof(@case));
-        }
-
-        if (dsn == null)
-        {
-            throw new ArgumentNullException(nameof(dsn));
-        }
+        Assert.NotNull(@case);
+        Assert.NotNull(dsn);
 
         var uri = dsn.GetStoreEndpointUri();
 

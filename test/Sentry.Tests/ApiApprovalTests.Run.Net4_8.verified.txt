@@ -51,6 +51,7 @@ namespace Sentry
         UnknownError = 1,
         DisabledHub = 2,
         EmptyMessage = 3,
+        DroppedByEventProcessor = 4,
     }
     public enum CheckInStatus
     {

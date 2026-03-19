@@ -69,10 +69,7 @@ internal static class EnumerableExtensions
 {
     internal static bool TryGetNonEnumeratedCount<TSource>(this IEnumerable<TSource> source, out int count)
     {
-        if (source is null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
+        ArgumentNullException.ThrowIfNull(source);
 
         if (source is ICollection<TSource> genericCollection)
         {
@@ -88,6 +85,29 @@ internal static class EnumerableExtensions
 
         count = 0;
         return false;
+    }
+}
+#endif
+
+// TODO: remove when updating Polyfill: https://github.com/getsentry/sentry-dotnet/pull/4879
+#if !NET6_0_OR_GREATER
+internal static class ArgumentNullExceptionExtensions
+{
+    extension(ArgumentNullException)
+    {
+        public static void ThrowIfNull([NotNull] object? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
+        {
+            if (argument is null)
+            {
+                Throw(paramName);
+            }
+        }
+    }
+
+    [DoesNotReturn]
+    private static void Throw(string? paramName)
+    {
+        throw new ArgumentNullException(paramName);
     }
 }
 #endif
