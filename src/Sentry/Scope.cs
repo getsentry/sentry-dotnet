@@ -390,14 +390,16 @@ public class Scope : IEventLike
     /// <summary>
     /// Adds an attachment.
     /// </summary>
-    public void AddAttachment(SentryAttachment attachment, bool notifyObserver = true)
+    public void AddAttachment(SentryAttachment attachment)
     {
         _attachments.Add(attachment);
-        if (Options.EnableScopeSync && notifyObserver)
+        if (Options.EnableScopeSync)
         {
             Options.ScopeObserver?.AddAttachment(attachment);
         }
     }
+
+    internal void AddAttachmentWithoutObserver(SentryAttachment attachment) => _attachments.Add(attachment);
 
     internal void SetPropagationContext(SentryPropagationContext propagationContext)
     {
@@ -546,7 +548,7 @@ public class Scope : IEventLike
 
         foreach (var attachment in Attachments)
         {
-            other.AddAttachment(attachment, notifyObserver: false);
+            other.AddAttachmentWithoutObserver(attachment);
         }
     }
 
