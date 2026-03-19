@@ -547,7 +547,7 @@ public class Scope : IEventLike
         foreach (var attachment in Attachments)
         {
             // Set the attachment directly to avoid triggering a scope sync
-            _attachments.Add(attachment);
+            other._attachments.Add(attachment);
         }
     }
 
