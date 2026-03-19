@@ -110,7 +110,6 @@ public class SentryClient : ISentryClient, IDisposable
         // Evaluate and copy before invoking the callback
         scope.Evaluate();
         scope.Apply(evt);
-        _enricher.Apply(evt);
 
         if (scope.Level != null && scope.Level != SentryLevel.Info)
         {
