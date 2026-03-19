@@ -77,7 +77,7 @@ internal class SpotlightHttpTransport : HttpTransport
         private readonly ISystemClock _clock;
 
         private readonly Lock _lock = new();
-        private TimeSpan _retryDelay = TimeSpan.Zero;
+        private TimeSpan _retryDelay = InitialRetryDelay;
         private DateTimeOffset _retryAfter = DateTimeOffset.MinValue;
         private int _failureCount;
 
@@ -99,10 +99,8 @@ internal class SpotlightHttpTransport : HttpTransport
             lock (_lock)
             {
                 _failureCount++;
-                _retryDelay = _retryDelay == TimeSpan.Zero
-                    ? InitialRetryDelay
-                    : TimeSpan.FromTicks(Math.Min(_retryDelay.Ticks * 2, MaxRetryDelay.Ticks));
                 _retryAfter = _clock.GetUtcNow() + _retryDelay;
+                _retryDelay = TimeSpan.FromTicks(Math.Min(_retryDelay.Ticks * 2, MaxRetryDelay.Ticks));
                 return _failureCount;
             }
         }
@@ -112,7 +110,7 @@ internal class SpotlightHttpTransport : HttpTransport
             lock (_lock)
             {
                 _failureCount = 0;
-                _retryDelay = TimeSpan.Zero;
+                _retryDelay = InitialRetryDelay;
                 _retryAfter = DateTimeOffset.MinValue;
             }
         }
