@@ -98,6 +98,7 @@ namespace Sentry
     {
         public FileAttachmentContent(string filePath) { }
         public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
+        public string FilePath { get; }
         public System.IO.Stream GetStream() { }
     }
     public static class HasExtraExtensions

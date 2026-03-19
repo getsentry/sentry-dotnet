@@ -108,6 +108,7 @@ namespace Sentry
     {
         public FileAttachmentContent(string filePath) { }
         public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
+        public string FilePath { get; }
         public System.IO.Stream GetStream() { }
     }
     public static class HasExtraExtensions
@@ -218,7 +219,9 @@ namespace Sentry
     }
     public interface IScopeObserver
     {
+        void AddAttachment(Sentry.SentryAttachment attachment);
         void AddBreadcrumb(Sentry.Breadcrumb breadcrumb);
+        void ClearAttachments();
         void SetExtra(string key, object? value);
         void SetTag(string key, string value);
         void SetTrace(Sentry.SentryId traceId, Sentry.SpanId parentSpanId);
@@ -393,7 +396,7 @@ namespace Sentry
         public Sentry.ITransactionTracer? Transaction { get; set; }
         public string? TransactionName { get; set; }
         public Sentry.SentryUser User { get; set; }
-        public void AddAttachment(Sentry.SentryAttachment attachment) { }
+        public void AddAttachment(Sentry.SentryAttachment attachment, bool notifyObserver = true) { }
         public void AddAttachment(string filePath, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public void AddAttachment(System.IO.Stream stream, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public void AddAttachment(byte[] data, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
