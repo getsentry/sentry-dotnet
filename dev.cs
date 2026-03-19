@@ -177,8 +177,6 @@ public class DevCommands
             FileName = "which",
             Arguments = command,
             UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
             CreateNoWindow = true,
         };
 
