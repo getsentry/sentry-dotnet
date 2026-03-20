@@ -8,7 +8,7 @@ public class ByteAttachmentContent : IAttachmentContent
     /// <summary>
     /// The raw bytes of the attachment.
     /// </summary>
-    public byte[] Bytes { get; }
+    internal byte[] Bytes { get; }
 
     /// <summary>
     /// Creates a new instance of <see cref="ByteAttachmentContent"/>.

@@ -12,7 +12,7 @@ public class FileAttachmentContent : IAttachmentContent
     /// <summary>
     /// The path to the file to attach.
     /// </summary>
-    public string FilePath { get; }
+    internal string FilePath { get; }
 
     /// <summary>
     /// Creates a new instance of <see cref="FileAttachmentContent"/>.
