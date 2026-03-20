@@ -1,5 +1,29 @@
 namespace Sentry.Tests;
 
+public class ByteAttachmentContentTests
+{
+    [Fact]
+    public void Bytes_ReturnsConstructorValue()
+    {
+        var data = new byte[] { 1, 2, 3 };
+        var content = new ByteAttachmentContent(data);
+        Assert.Same(data, content.Bytes);
+    }
+
+    [Fact]
+    public void GetStream_ReturnsBytesContent()
+    {
+        var data = new byte[] { 10, 20, 30 };
+        var content = new ByteAttachmentContent(data);
+
+        using var stream = content.GetStream();
+        using var ms = new MemoryStream();
+        stream.CopyTo(ms);
+
+        Assert.Equal(data, ms.ToArray());
+    }
+}
+
 public class FileAttachmentContentTests
 {
     [Fact]

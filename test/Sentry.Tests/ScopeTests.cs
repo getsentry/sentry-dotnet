@@ -804,6 +804,62 @@ public class ScopeTests
         observer.DidNotReceive().AddAttachment(Arg.Any<SentryAttachment>());
     }
 
+    [Fact]
+    public void AddAttachment_ByteOverload_NotifiesObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+
+        // Act
+        scope.AddAttachment(new byte[] { 1, 2, 3 }, "bytes.bin");
+
+        // Assert
+        observer.Received(1).AddAttachment(Arg.Is<SentryAttachment>(a => a.FileName == "bytes.bin"));
+    }
+
+    [Fact]
+    public void AddAttachment_StreamOverload_NotifiesObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+
+        // Act
+        scope.AddAttachment(new MemoryStream(new byte[] { 1, 2, 3 }), "stream.bin");
+
+        // Assert
+        observer.Received(1).AddAttachment(Arg.Is<SentryAttachment>(a => a.FileName == "stream.bin"));
+    }
+
+    [Fact]
+    public void Clear_ObserverExist_NotifiesClearAttachments()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+        scope.AddAttachment(new SentryAttachment(default, default, default, "test.txt"));
+        observer.ClearReceivedCalls();
+
+        // Act
+        scope.Clear();
+
+        // Assert
+        observer.Received(1).ClearAttachments();
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
