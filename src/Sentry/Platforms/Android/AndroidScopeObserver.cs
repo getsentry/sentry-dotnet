@@ -107,13 +107,25 @@ internal sealed class AndroidScopeObserver : IScopeObserver
 
     public void AddAttachment(SentryAttachment attachment)
     {
-        // TODO: Missing corresponding functionality on the Android SDK
-        _innerObserver?.AddAttachment(attachment);
+        try
+        {
+            // TODO: Missing corresponding functionality on the Android SDK
+        }
+        finally
+        {
+            _innerObserver?.AddAttachment(attachment);
+        }
     }
 
     public void ClearAttachments()
     {
-        // TODO: Missing corresponding functionality on the Android SDK
-        _innerObserver?.ClearAttachments();
+        try
+        {
+            // TODO: Missing corresponding functionality on the Android SDK
+        }
+        finally
+        {
+            _innerObserver?.ClearAttachments();
+        }
     }
 }
