@@ -471,6 +471,14 @@ interface SentryFrame : SentrySerializable
     [NullAllowed, Export("contextLine")]
     string ContextLine { get; set; }
 
+    // @property (copy, nonatomic) NSNumber * _Nullable parentIndex;
+    [NullAllowed, Export("parentIndex", ArgumentSemantic.Copy)]
+    NSNumber ParentIndex { get; set; }
+
+    // @property (copy, nonatomic) NSNumber * _Nullable sampleCount;
+    [NullAllowed, Export("sampleCount", ArgumentSemantic.Copy)]
+    NSNumber SampleCount { get; set; }
+
     // @property (copy, nonatomic) NSArray<NSString *> * _Nullable preContext;
     [NullAllowed, Export("preContext", ArgumentSemantic.Copy)]
     string[] PreContext { get; set; }
