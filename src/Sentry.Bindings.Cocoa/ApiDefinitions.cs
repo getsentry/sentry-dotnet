@@ -1747,12 +1747,12 @@ interface SentryOptions
     SentryBeforeCaptureScreenshotCallback BeforeCaptureViewHierarchy { get; set; }
 
     // @property (copy, nonatomic) SWIFT_DEPRECATED_MSG("Use onLastRunStatusDetermined instead, which is called regardless of whether the app crashed.") SentryOnCrashedLastRunCallback onCrashedLastRun __attribute__((deprecated("Use onLastRunStatusDetermined instead, which is called regardless of whether the app crashed.")));
-    [Export("onCrashedLastRun", ArgumentSemantic.Copy)]
+    [NullAllowed, Export("onCrashedLastRun", ArgumentSemantic.Copy)]
     SentryOnCrashedLastRunCallback OnCrashedLastRun { get; set; }
 
     // @property (copy, nonatomic) void (^ _Nullable)(enum SentryLastRunStatus, SentryEvent * _Nullable) onLastRunStatusDetermined;
     [NullAllowed, Export("onLastRunStatusDetermined", ArgumentSemantic.Copy)]
-    Action<SentryLastRunStatus, SentryEvent> OnLastRunStatusDetermined { get; set; }
+    Action<SentryLastRunStatus, SentryEvent?> OnLastRunStatusDetermined { get; set; }
 
     // @property (nonatomic, strong) NSNumber * _Nullable sampleRate;
     [NullAllowed, Export("sampleRate", ArgumentSemantic.Strong)]
