@@ -91,7 +91,7 @@ internal class Enricher
 
             eventLike.User.IpAddress ??= DefaultIpAddress;
         }
-        // Set by the GlobalRootScopeIntegration In global mode so that it can be overridden by the user.
+        // Set by the GlobalRootScopeIntegration in global mode so that it can be overridden by the user.
         // In non-global mode (e.g. ASP.NET Core) the enricher sets it here as a fallback.
         if (!_options.IsGlobalModeEnabled)
         {
