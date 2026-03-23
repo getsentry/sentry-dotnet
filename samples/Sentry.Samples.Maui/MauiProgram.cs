@@ -61,6 +61,10 @@ public static class MauiProgram
                 // sentry:SessionReplay.Mask="Unmask" attribute to individual controls instead.
                 options.Native.ExperimentalOptions.SessionReplay.UnmaskControlsOfType<Button>();
 #endif
+#if __IOS__ || __MACCATALYST__
+                // SDK users must explicitly opt-in to Session Replay in unreliable environments
+                options.Native.ExperimentalOptions.SessionReplay.EnableSessionReplayInUnreliableEnvironment = true;
+#endif
 #endif
 
                 options.SetBeforeScreenshotCapture((@event, hint) =>
