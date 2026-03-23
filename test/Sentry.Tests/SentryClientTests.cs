@@ -1,4 +1,3 @@
-using NSubstitute.ReceivedExtensions;
 using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
@@ -305,11 +304,12 @@ public partial class SentryClientTests : IDisposable
     [SkippableFact]
     public void CaptureEvent_UserIsNull_SetsFallbackUserId()
     {
+#if NET5_0_OR_GREATER
         // In global mode the userid gets set at app startup via the GlobalRootScopeIntegration, rather than by an
         // enricher during capture... so this functionality in SentryClient only works when IsGlobalModeEnabled is false
         Skip.If(System.OperatingSystem.IsAndroid() || System.OperatingSystem.IsIOS(),
             "On mobile, User.Id is set by GlobalRootScopeIntegration at startup, not the enricher.");
-
+#endif
         // Arrange
         _fixture.SentryOptions.IsGlobalModeEnabled = false;
         var scope = new Scope(_fixture.SentryOptions);
@@ -1302,9 +1302,10 @@ public partial class SentryClientTests : IDisposable
     [SkippableFact]
     public void CaptureTransaction_UserIsNull_SetsFallbackUserId()
     {
+#if NET5_0_OR_GREATER
         Skip.If(System.OperatingSystem.IsAndroid() || System.OperatingSystem.IsIOS(),
             "On mobile, User.Id is set by GlobalRootScopeIntegration at startup, not the enricher.");
-
+#endif
         // Arrange
         // In global mode the userid gets set at app startup via the GlobalRootScopeIntegration, rather than by an
         // enricher during capture... so this functionality in SentryClient only works when IsGlobalModeEnabled is false
