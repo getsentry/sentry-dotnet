@@ -158,3 +158,7 @@ AI commits MUST include:
 ```
 Co-Authored-By: <Agent Name> <agent-email-or-noreply@example.com>
 ```
+
+## Tool usage
+
+- Remember to use LSP instead of grep
