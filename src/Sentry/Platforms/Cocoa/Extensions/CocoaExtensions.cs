@@ -204,7 +204,7 @@ internal static class CocoaExtensions
             return null;
         }
 
-        var dict = new NSDictionary<NSString, NSObject>();
+        var dict = new Dictionary<NSString, NSObject>();
 
         foreach (var (key, value) in source)
         {
@@ -213,14 +213,16 @@ internal static class CocoaExtensions
             if (key == SentryHttpMessageHandler.RequestStartKey && TryParseUnixMs(value, out var unixMs))
             {
                 var dto = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
-                dict[key] = dto.ToNSDate();
+                dict[(NSString)key] = dto.ToNSDate();
                 continue;
             }
 
-            dict[key] = NSObject.FromObject(value);
+            dict[(NSString)key] = NSObject.FromObject(value);
         }
 
-        return dict.Count == 0 ? null : dict;
+        return dict.Count == 0
+            ? null
+            : NSDictionary<NSString, NSObject>.FromObjectsAndKeys(dict.Values.ToArray(), dict.Keys.ToArray());
 
         static bool TryParseUnixMs(string value, out long unixMs) =>
             long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out unixMs);
