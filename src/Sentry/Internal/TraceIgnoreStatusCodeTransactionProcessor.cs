@@ -20,8 +20,8 @@ internal class TraceIgnoreStatusCodeTransactionProcessor : ISentryTransactionPro
         }
 
         if (transaction.Data.TryGetValue(OtelSemanticConventions.AttributeHttpResponseStatusCode, out var statusCodeObj)
-            && statusCodeObj is int statusCode
-            && _options.TraceIgnoreStatusCodes.ContainsStatusCode(statusCode))
+            && statusCodeObj is IConvertible convertible
+            && _options.TraceIgnoreStatusCodes.ContainsStatusCode(convertible.ToInt32(null)))
         {
             return null;
         }

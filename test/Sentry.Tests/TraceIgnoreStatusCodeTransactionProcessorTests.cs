@@ -112,6 +112,23 @@ public class TraceIgnoreStatusCodeTransactionProcessorTests
     }
 
     [Fact]
+    public void Process_StatusCodeStoredAsShort_IsDropped()
+    {
+        // Regression test: OTel stores the status code as short, not int.
+        // Arrange
+        var options = OptionsWithIgnoredCodes(404);
+        var processor = new TraceIgnoreStatusCodeTransactionProcessor(options);
+        var transaction = new SentryTransaction("name", "operation");
+        transaction.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, (short)404);
+
+        // Act
+        var result = processor.Process(transaction);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
     public void Process_MultipleIgnoredCodes_MatchesAny()
     {
         // Arrange
