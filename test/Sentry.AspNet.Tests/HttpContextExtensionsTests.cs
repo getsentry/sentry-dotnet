@@ -1,5 +1,5 @@
-using HttpCookie = System.Web.HttpCookie;
 using Sentry.Internal.OpenTelemetry;
+using HttpCookie = System.Web.HttpCookie;
 
 namespace Sentry.AspNet.Tests;
 
