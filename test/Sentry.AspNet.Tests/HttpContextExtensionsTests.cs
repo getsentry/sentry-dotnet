@@ -1,4 +1,5 @@
 using HttpCookie = System.Web.HttpCookie;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.AspNet.Tests;
 
@@ -73,6 +74,7 @@ public class HttpContextExtensionsTests
         // Assert
         transaction.IsFinished.Should().BeTrue();
         transaction.Status.Should().Be(SpanStatus.NotFound);
+        transaction.Data.Should().Contain(OtelSemanticConventions.AttributeHttpResponseStatusCode, 404);
     }
 
     [Fact]
