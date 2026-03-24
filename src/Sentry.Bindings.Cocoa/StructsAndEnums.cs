@@ -7,7 +7,6 @@
 using System.Runtime.InteropServices;
 using Foundation;
 using ObjCRuntime;
-using Sentry;
 
 namespace Sentry.CocoaSdk;
 
@@ -120,6 +119,14 @@ internal enum SentryHttpStatusCode : long
     ContentTooLarge = 413,
     TooManyRequests = 429,
     InternalServerError = 500
+}
+
+[Native]
+internal enum SentryLastRunStatus : long
+{
+    Unknown = 0,
+    DidNotCrash = 1,
+    DidCrash = 2
 }
 
 [Native]
