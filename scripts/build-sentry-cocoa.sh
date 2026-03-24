@@ -50,7 +50,8 @@ xcodebuild archive -project Sentry.xcodeproj \
     -sdk "$ios_sdk" \
     -archivePath ./Carthage/output-ios.xcarchive \
     SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
 ./scripts/remove-architectures.sh ./Carthage/output-ios.xcarchive arm64e
 xcodebuild archive -project Sentry.xcodeproj \
     -scheme Sentry \
@@ -58,7 +59,8 @@ xcodebuild archive -project Sentry.xcodeproj \
     -sdk "$ios_simulator_sdk" \
     -archivePath ./Carthage/output-iossimulator.xcarchive \
     SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
 xcodebuild -create-xcframework \
     -framework ./Carthage/output-ios.xcarchive/Products/Library/Frameworks/Sentry.framework \
     -framework ./Carthage/output-iossimulator.xcarchive/Products/Library/Frameworks/Sentry.framework \
@@ -73,7 +75,8 @@ xcodebuild archive -project Sentry.xcodeproj \
     -destination 'generic/platform=macOS,variant=Mac Catalyst' \
     -archivePath ./Carthage/output-maccatalyst.xcarchive \
     SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
 ./scripts/remove-architectures.sh ./Carthage/output-maccatalyst.xcarchive arm64e
 xcodebuild -create-xcframework \
     -framework ./Carthage/output-maccatalyst.xcarchive/Products/Library/Frameworks/Sentry.framework \

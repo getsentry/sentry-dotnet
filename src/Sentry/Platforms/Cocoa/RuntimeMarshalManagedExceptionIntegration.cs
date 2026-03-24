@@ -43,6 +43,25 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
 
             // This is likely a terminal exception so try to send the crash report before shutting down
             _hub?.Flush();
+
+            // Under Mono, Disable/UnwindNativeCode call mono_raise_exception which can unwind into
+            // a managed catch and never hit abort(). The thread-local ignore flag would then linger
+            // and silently swallow an unrelated later SIGABRT on this thread, so skip arming it. See
+            // https://github.com/dotnet/macios/blob/be8a2ca1057242f745ef58011a02ffe21326d180/runtime/runtime.m#L2215
+            var isMono = Type.GetType("Mono.Runtime") != null;
+            if (isMono && e.ExceptionMode is MarshalManagedExceptionMode.Disable
+                                          or MarshalManagedExceptionMode.UnwindNativeCode)
+            {
+                return;
+            }
+
+            // Otherwise the runtime will call abort() after we return — directly via
+            // xamarin_assertion_message, or indirectly via the uncaught-NSException handler for
+            // ThrowObjectiveCException. Tell SentryCrash to ignore that SIGABRT so we don't emit a
+            // duplicate native crash for an exception we've already captured. See
+            // https://github.com/dotnet/macios/blob/be8a2ca1057242f745ef58011a02ffe21326d180/runtime/runtime.m#L2285
+            const int SIGABRT = 6;
+            SentryCocoaHybridSdk.IgnoreNextSignal(SIGABRT);
         }
     }
 }
