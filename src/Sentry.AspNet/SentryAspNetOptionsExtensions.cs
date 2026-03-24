@@ -1,6 +1,7 @@
 using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry.AspNet;
 
@@ -36,6 +37,7 @@ public static class SentryAspNetOptionsExtensions
         options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
         options.AddEventProcessor(eventProcessor);
         options.AddDiagnosticSourceIntegration();
+        options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));
 
         return options;
     }
