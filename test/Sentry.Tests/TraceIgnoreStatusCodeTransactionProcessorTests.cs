@@ -100,7 +100,7 @@ public class TraceIgnoreStatusCodeTransactionProcessorTests
     public void Process_NoStatusCodeExtra_ReturnsTransaction()
     {
         // Arrange
-        var options = OptionsWithIgnoredCodes(404);
+        var options = OptionsWithIgnoredCodes((100, 599));
         var processor = new TraceIgnoreStatusCodeTransactionProcessor(options);
         var transaction = new SentryTransaction("name", "operation");
 
