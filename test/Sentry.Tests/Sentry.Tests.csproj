@@ -42,7 +42,7 @@
     <Compile Update="SentryMetricEmitterTests.Options.cs;SentryMetricEmitterTests.Types.cs;SentryMetricEmitterTests.Values.cs">
       <DependentUpon>SentryMetricEmitterTests.cs</DependentUpon>
     </Compile>
-    <Compile Update="SentryStructuredLoggerTests.Format.cs">
+    <Compile Update="SentryStructuredLoggerTests.Format.cs;SentryStructuredLoggerTests.Interpolation.cs">
       <DependentUpon>SentryStructuredLoggerTests.cs</DependentUpon>
     </Compile>
   </ItemGroup>

@@ -15,6 +15,12 @@ internal sealed class DisabledSentryStructuredLogger : SentryStructuredLogger
     }
 
     /// <inheritdoc />
+    private protected override void CaptureLog(SentryLogLevel level, string message, string template, ImmutableArray<KeyValuePair<string, object>> parameters, Action<SentryLog>? configureLog)
+    {
+        // disabled
+    }
+
+    /// <inheritdoc />
     protected internal override void CaptureLog(SentryLog log)
     {
         // disabled

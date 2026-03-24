@@ -75,6 +75,35 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
     }
 
     /// <inheritdoc />
+    private protected override void CaptureLog(SentryLogLevel level, string message, string template, ImmutableArray<KeyValuePair<string, object>> parameters, Action<SentryLog>? configureLog)
+    {
+        var timestamp = _clock.GetUtcNow();
+        _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
+
+        SentryLog log = new(timestamp, traceId, level, message)
+        {
+            Template = template,
+            Parameters = parameters,
+            SpanId = spanId,
+        };
+
+        try
+        {
+            configureLog?.Invoke(log);
+        }
+        catch (Exception e)
+        {
+            _options.DiagnosticLogger?.LogError(e, "The configureLog callback threw an exception. The Log will be dropped.");
+            return;
+        }
+
+        var scope = _hub.GetScope();
+        log.SetDefaultAttributes(_options, scope?.Sdk ?? SdkVersion.Instance);
+
+        CaptureLog(log);
+    }
+
+    /// <inheritdoc />
     protected internal override void CaptureLog(SentryLog log)
     {
         var configuredLog = log;

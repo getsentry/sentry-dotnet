@@ -198,7 +198,7 @@
     <Compile Update="SentryMetricEmitter.Counter.cs;SentryMetricEmitter.Distribution.cs;SentryMetricEmitter.Gauge.cs">
       <DependentUpon>SentryMetricEmitter.cs</DependentUpon>
     </Compile>
-    <Compile Update="SentryStructuredLogger.Format.cs">
+    <Compile Update="SentryStructuredLogger.Format.cs;SentryStructuredLogger.Interpolation.cs">
       <DependentUpon>SentryStructuredLogger.cs</DependentUpon>
     </Compile>
   </ItemGroup>

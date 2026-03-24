@@ -33,6 +33,11 @@ public abstract partial class SentryStructuredLogger
     private protected abstract void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog);
 
     /// <summary>
+    /// TODO
+    /// </summary>
+    private protected abstract void CaptureLog(SentryLogLevel level, string message, string template, ImmutableArray<KeyValuePair<string, object>> parameters, Action<SentryLog>? configureLog);
+
+    /// <summary>
     /// Buffers a <see href="https://develop.sentry.dev/sdk/telemetry/logs">Sentry Log</see> message
     /// via the associated <see href="https://develop.sentry.dev/sdk/telemetry/spans/batch-processor">Batch Processor</see>.
     /// </summary>
