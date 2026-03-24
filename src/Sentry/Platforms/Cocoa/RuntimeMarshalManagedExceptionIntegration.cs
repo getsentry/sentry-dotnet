@@ -43,6 +43,12 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
 
             // This is likely a terminal exception so try to send the crash report before shutting down
             _hub?.Flush();
+
+            // The Xamarin runtime will call abort() after this handler returns, which raises
+            // SIGABRT. Tell SentryCrash to ignore it on this thread so we don't get a duplicate
+            // native crash event for a managed exception we've already captured.
+            const int SIGABRT = 6;
+            SentryCocoaHybridSdk.IgnoreNextSignal(SIGABRT);
         }
     }
 }

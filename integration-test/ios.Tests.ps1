@@ -99,9 +99,8 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
 
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
-        # TODO: fix redundant SIGABRT (#3954)
-        { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`"" } | Should -Throw
-        { $result.Envelopes() | Should -HaveCount 1 } | Should -Throw
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"(EXC_[A-Z_]+|SIG[A-Z]+)`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 
     It 'captures native crash (<configuration>)' {
@@ -112,7 +111,7 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
         }
 
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"EXC_[A-Z_]+`""
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"(EXC_[A-Z_]+|SIG[A-Z]+)`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
         $result.Envelopes() | Should -HaveCount 1
     }
@@ -126,12 +125,7 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
 
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
-        # TODO: fix redundant EXC_BAD_ACCESS in Release (#3954)
-        if ($configuration -eq 'Release') {
-            { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"EXC_BAD_ACCESS`"" } | Should -Throw
-        } else {
-            $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"EXC_BAD_ACCESS`""
-            $result.Envelopes() | Should -HaveCount 1
-        }
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"(EXC_[A-Z_]+|SIG[A-Z]+)`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 }
