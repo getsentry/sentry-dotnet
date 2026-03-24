@@ -162,7 +162,7 @@ jobs:
       - name: Select Java 17
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
-          distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
+          distribution: temurin
           java-version: '17'
 
       - name: Checkout github-workflows
