@@ -1012,6 +1012,7 @@ public partial class SentryClientTests : IDisposable
         var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
         var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
         @event.Environment.Should().Be("testing 123");
+        @event.Sdk.InternalPackages.Should().ContainSingle().Which.Name.Should().Be("nuget:sentry.dotnet");
     }
 
     [Fact]
