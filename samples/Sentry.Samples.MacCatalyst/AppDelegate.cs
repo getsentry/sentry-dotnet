@@ -25,7 +25,7 @@ public class AppDelegate : UIApplicationDelegate
             options.Debug = true;
 
             // If your app doesn't have sensitive data, you can get screenshots on error events automatically
-            // https://docs.sentry.io/platforms/apple/guides/mac-catalyst/configuration/options/#attach-screenshot
+            // https://docs.sentry.io/platforms/apple/guides/ios/configuration/options/#attachScreenshot
             options.Native.AttachScreenshot = true;
         });
 

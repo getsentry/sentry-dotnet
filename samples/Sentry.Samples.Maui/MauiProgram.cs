@@ -31,6 +31,7 @@ public static class MauiProgram
                 options.MaxBreadcrumbs = 1000;
 
                 // If your app doesn't have sensitive data, you can get screenshots on error events automatically
+                // https://docs.sentry.io/platforms/dotnet/guides/maui/configuration/options/#AttachScreenshot
                 options.AttachScreenshot = true;
 
                 options.Debug = true;

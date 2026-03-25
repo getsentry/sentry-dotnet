@@ -33,8 +33,7 @@ public class MainActivity : Activity
 
             // If your app doesn't have sensitive data, you can attach screenshots automatically when a Java/native
             // error is captured.
-            // Note: this only applies to Java-based errors; .NET managed exceptions are not currently supported.
-            // https://docs.sentry.io/platforms/android/enriching-events/screenshots/
+            // https://docs.sentry.io/platforms/android/configuration/options/#attachScreenshot
             options.Native.AttachScreenshot = true;
 
             // Currently experimental support is only available on Android
