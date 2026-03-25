@@ -25,11 +25,12 @@ public class RuntimeInfoTests(ITestOutputHelper output)
             Assert.Equal(".NET Framework", actual.Name);
             actual.FrameworkInstallation.Should().NotBeNull("FrameworkInstallation is null");
             // TODO: Windows ARM64 broke in CI... the timing wasn't very good (same day .NET 10 was announced) and I
-            // don't have a Windows ARM64 device to test on. Will need to debug in CI when we've released V6.
-            if (RuntimeInformation.ProcessArchitecture != Architecture.Arm64)
-            {
+            // don't have a Windows ARM64 device to test on. Will need to debug in CI when we've released V6. Note that
+            // this probably just needs another entry in FrameworkInfo.NetFxReleaseVersionMap
+            //if (RuntimeInformation.ProcessArchitecture != Architecture.Arm64)
+            //{
                 actual.FrameworkInstallation.Version.Should().NotBeNull("FrameworkInstallation.Version is null");
-            }
+            //}
         }
         else
         {
