@@ -29,6 +29,7 @@ try
         $Tfm = 'net10.0'
     }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
+    $udid = $null
     if ($Platform -eq 'android')
     {
         $Tfm += '-android'
@@ -84,13 +85,40 @@ try
     {
         Install-XHarness
         Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
+
+        if ($Platform -eq 'ios' -and $udid)
+        {
+            Write-Host "Ensuring simulator is booted and ready..."
+            xcrun simctl boot $udid 2>&1 | Out-Null  # no-op if already booted
+            xcrun simctl bootstatus $udid -b          # block until fully operational
+        }
+
         try
         {
             if ($VerbosePreference)
             {
                 $arguments += '-v'
             }
-            xharness $group test $arguments --output-directory=test_output
+
+            $maxAttempts = 3
+            for ($attempt = 1; $attempt -le $maxAttempts; $attempt++)
+            {
+                if ($attempt -gt 1)
+                {
+                    Write-Host "Retrying xharness (attempt $attempt of $maxAttempts)..."
+                    Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
+                    if ($Platform -eq 'ios' -and $udid)
+                    {
+                        Write-Host "Resetting simulator before retry..."
+                        xcrun simctl shutdown $udid 2>&1 | Out-Null
+                        xcrun simctl boot $udid 2>&1 | Out-Null
+                        xcrun simctl bootstatus $udid -b
+                    }
+                }
+                xharness $group test $arguments --output-directory=test_output
+                if ($LASTEXITCODE -eq 0) { break }
+            }
+
             if ($LASTEXITCODE -ne 0)
             {
                 $testResultsXml = './test_output/TestResults.xml'
