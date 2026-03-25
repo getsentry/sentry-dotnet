@@ -111,6 +111,7 @@ try
                     {
                         Write-Host "Resetting simulator before retry..."
                         xcrun simctl shutdown $udid 2>&1 | Out-Null
+                        xcrun simctl erase $udid            # wipe state so boot starts clean after a crash
                         xcrun simctl boot $udid 2>&1 | Out-Null
                         xcrun simctl bootstatus $udid -b
                     }
