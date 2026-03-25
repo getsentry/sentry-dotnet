@@ -167,16 +167,16 @@ public class DevCommands
 
     private static async Task<bool> IsCommandAvailableAsync(string command)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return await Task.FromResult(true);
-        }
+        // Use 'where.exe' on Windows, 'which' on Unix
+        var finder = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where.exe" : "which";
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = "which",
+            FileName = finder,
             Arguments = command,
             UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
             CreateNoWindow = true,
         };
 
@@ -194,7 +194,12 @@ public class DevCommands
             return false;
         }
 
-        await process.WaitForExitAsync();
+        // Consume streams to avoid pipe buffer deadlock, then wait for exit
+        await Task.WhenAll(
+            process.StandardOutput.ReadToEndAsync(),
+            process.StandardError.ReadToEndAsync(),
+            process.WaitForExitAsync());
+
         return process.ExitCode == 0;
     }
 }
