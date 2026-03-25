@@ -19,7 +19,7 @@ internal static class BreadcrumbExtensions
             Timestamp = breadcrumb.Timestamp.ToNSDate(),
             Message = breadcrumb.Message,
             Type = breadcrumb.Type,
-            Data = breadcrumb.Data?.ToNullableNSDictionary(),
+            Data = breadcrumb.Data?.ToCocoaBreadcrumbData(),
             Category = breadcrumb.Category ?? "",
             Level = breadcrumb.Level.ToCocoaSentryLevel()
         };
