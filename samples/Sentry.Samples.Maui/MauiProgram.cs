@@ -62,7 +62,8 @@ public static class MauiProgram
                 options.Native.ExperimentalOptions.SessionReplay.UnmaskControlsOfType<Button>();
 #endif
 #if __IOS__ || __MACCATALYST__
-                // SDK users must explicitly opt-in to Session Replay in unreliable environments
+                // SDK users must explicitly opt-in to Session Replay in unreliable environments - when running liquid
+                // glass on iOS 26.0 or later
                 options.Native.ExperimentalOptions.SessionReplay.EnableSessionReplayInUnreliableEnvironment = true;
 #endif
 #endif
