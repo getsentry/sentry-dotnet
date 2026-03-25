@@ -89,6 +89,12 @@ try
         if ($Platform -eq 'ios' -and $udid)
         {
             Write-Host "Ensuring simulator is booted and ready..."
+            if ($CI)
+            {
+                # Runners are reused across jobs; erase any stale state from a previous run
+                xcrun simctl shutdown $udid 2>&1 | Out-Null
+                xcrun simctl erase $udid
+            }
             xcrun simctl boot $udid 2>&1 | Out-Null  # no-op if already booted
             xcrun simctl bootstatus $udid -b          # block until fully operational
         }
