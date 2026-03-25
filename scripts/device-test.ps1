@@ -65,8 +65,11 @@ try
 
         $udid = Get-IosSimulatorUdid -Verbose
         if ($udid) {
+            $simInfo = $udid   # Get-IosSimulatorUdid now returns an object
+            $udid = $simInfo.Udid
             $arguments += @('--device', $udid)
         } else {
+            $simInfo = $null
             Write-Host "No suitable simulator found; proceeding without a specific --device"
         }
     }
@@ -91,12 +94,21 @@ try
             Write-Host "Ensuring simulator is booted and ready..."
             if ($CI)
             {
-                # Runners are reused across jobs; erase any stale state from a previous run
-                xcrun simctl shutdown $udid 2>&1 | Out-Null
-                xcrun simctl erase $udid
+                # On CI, do a full reset to guarantee a clean simulator
+                $udid = Reset-IosSimulator -SimInfo $simInfo
+                # Update arguments with new UDID
+                for ($i = 0; $i -lt $arguments.Count; $i++) {
+                    if ($arguments[$i] -eq '--device' -and ($i + 1) -lt $arguments.Count) {
+                        $arguments[$i + 1] = $udid
+                        break
+                    }
+                }
             }
-            xcrun simctl boot $udid 2>&1 | Out-Null  # no-op if already booted
-            xcrun simctl bootstatus $udid -b          # block until fully operational
+            else
+            {
+                xcrun simctl boot $udid 2>&1 | Out-Null  # no-op if already booted
+                xcrun simctl bootstatus $udid -b          # block until fully operational
+            }
         }
 
         try
@@ -113,13 +125,16 @@ try
                 {
                     Write-Host "Retrying xharness (attempt $attempt of $maxAttempts)..."
                     Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
-                    if ($Platform -eq 'ios' -and $udid)
+                    if ($Platform -eq 'ios' -and $simInfo)
                     {
-                        Write-Host "Resetting simulator before retry..."
-                        xcrun simctl shutdown $udid 2>&1 | Out-Null
-                        xcrun simctl erase $udid            # wipe state so boot starts clean after a crash
-                        xcrun simctl boot $udid 2>&1 | Out-Null
-                        xcrun simctl bootstatus $udid -b
+                        $udid = Reset-IosSimulator -SimInfo $simInfo
+                        # Update arguments with new UDID
+                        for ($i = 0; $i -lt $arguments.Count; $i++) {
+                            if ($arguments[$i] -eq '--device' -and ($i + 1) -lt $arguments.Count) {
+                                $arguments[$i + 1] = $udid
+                                break
+                            }
+                        }
                     }
                 }
                 xharness $group test $arguments --output-directory=test_output

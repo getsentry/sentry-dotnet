@@ -1,3 +1,37 @@
+function Reset-IosSimulator {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [PSCustomObject]$SimInfo
+    )
+
+    $udid = $SimInfo.Udid
+
+    Write-Host "Hard-resetting simulator $($SimInfo.Name) [$udid]..."
+
+    # Shut down & delete the old device
+    xcrun simctl shutdown $udid 2>&1 | Out-Null
+    xcrun simctl delete $udid 2>&1 | Out-Null
+
+    # Restart the CoreSimulator service to clear any daemon-level state left
+    # over from a simulator crash (this is what makes a fresh runner "work").
+    Write-Host "Restarting CoreSimulator service..."
+    sudo launchctl kickstart -kp system/com.apple.CoreSimulator.CoreSimulatorService 2>&1 | Out-Null
+    Start-Sleep -Seconds 5   # give the daemon time to re-initialise
+
+    # Create a brand-new simulator with the same device type & runtime
+    $newUdid = (& xcrun simctl create $SimInfo.Name $SimInfo.DeviceType $SimInfo.Runtime).Trim()
+    Write-Host "Created new simulator $($SimInfo.Name) [$newUdid]"
+
+    # Boot and wait
+    xcrun simctl boot $newUdid 2>&1 | Out-Null
+    xcrun simctl bootstatus $newUdid -b
+
+    # Return updated info
+    $SimInfo.Udid = $newUdid
+    return $newUdid
+}
+
 function Install-XHarness
 {
     if (!(Get-Command xharness -ErrorAction SilentlyContinue))
@@ -120,5 +154,10 @@ function Get-IosSimulatorUdid {
     }
 
     Write-Verbose ("Selected simulator: {0} ({1}) [{2}]" -f $selected.Device.name, $selected.Device.deviceTypeIdentifier, $selected.Device.udid)
-    return $selected.Device.udid
+    return [PSCustomObject]@{
+        Udid       = $selected.Device.udid
+        Name       = $selected.Device.name
+        DeviceType = $selected.Device.deviceTypeIdentifier
+        Runtime    = $runtimeKey
+    }
 }
