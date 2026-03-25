@@ -50,13 +50,13 @@ runs:
       shell: bash
       run: sudo xcode-select --switch /Applications/Xcode_26.2.app
 
-    # Java 17 is needed for Android SDK setup step
-    - name: Install Java 17
+    # Java 21 is needed by .NET Android
+    - name: Install Java 21
       if: ${{ !matrix.container }}
       uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
       with:
-        distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
-        java-version: '17'
+        distribution: temurin
+        java-version: '21'
 
     - name: Setup Android SDK
       if: ${{ !matrix.container }}
@@ -65,14 +65,6 @@ runs:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
         packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
-
-    # Java 11 is needed by .NET Android
-    - name: Install Java 11
-      if: ${{ !matrix.container }}
-      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
-      with:
-        distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
-        java-version: '11'
 
     - name: Install Mono (macOS)
       if: runner.os == 'macOS'
