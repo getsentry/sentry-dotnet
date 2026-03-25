@@ -45,7 +45,9 @@ public class SentryClient : ISentryClient, IDisposable
         ISessionManager? sessionManager = null,
         BackpressureMonitor? backpressureMonitor = null)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
+
+        _options = options;
         _backpressureMonitor = backpressureMonitor;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
@@ -108,7 +110,6 @@ public class SentryClient : ISentryClient, IDisposable
         // Evaluate and copy before invoking the callback
         scope.Evaluate();
         scope.Apply(evt);
-        _enricher.Apply(evt);
 
         if (scope.Level != null && scope.Level != SentryLevel.Info)
         {
