@@ -128,11 +128,17 @@ Describe 'MAUI (<framework>)' -ForEach @(
         (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
 
         Push-Location $name
-        dotnet remove "${name}.csproj" package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
-        Pop-Location
-        if ($LASTEXITCODE -ne 0)
+        try
         {
-            throw "Failed to remove package"
+            dotnet remove "${name}.csproj" package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "Failed to remove package"
+            }
+        }
+        finally
+        {
+            Pop-Location
         }
 
         if (Test-Path env:CI)
