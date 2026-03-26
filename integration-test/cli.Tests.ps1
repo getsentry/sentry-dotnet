@@ -127,10 +127,18 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $tfs = $IsMacos ? "$framework-android$androidTpv;$framework-ios$iosTpv;$framework-maccatalyst$iosTpv" : "$framework-android$androidTpv"
         (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
 
-        dotnet remove $name/$name.csproj package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
-        if ($LASTEXITCODE -ne 0)
+        Push-Location $name
+        try
         {
-            throw "Failed to remove package"
+            dotnet remove "${name}.csproj" package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "Failed to remove package"
+            }
+        }
+        finally
+        {
+            Pop-Location
         }
 
         if (Test-Path env:CI)
