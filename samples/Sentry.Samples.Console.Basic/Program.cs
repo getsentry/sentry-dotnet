@@ -33,12 +33,12 @@ SentrySdk.Init(options =>
     // This option is recommended, which enables Sentry's "Release Health" feature.
     options.AutoSessionTracking = true;
 
-    // This option is recommended for client applications only. It ensures all threads use the same global scope.
-    // If you are writing a background service of any kind, you should remove this.
-    options.IsGlobalModeEnabled = true;
+// This option is recommended for client applications only. It ensures all threads use the same global scope.
+// If you are writing a background service of any kind, you should remove this.
+options.IsGlobalModeEnabled = true;
 
-    // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
-    options.TracesSampleRate = 1.0;
+        // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
+        options.TracesSampleRate = 1.0;
 
     // This option enables Sentry Logs created via SentrySdk.Logger.
     options.EnableLogs = true;
