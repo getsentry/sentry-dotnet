@@ -4,6 +4,7 @@
 
 ### Features
 
+- Add strict trace continuation support ([#4981](https://github.com/getsentry/sentry-dotnet/pull/4981))
 - GA release for Sentry Metrics ([#5023](https://github.com/getsentry/sentry-dotnet/pull/5023))
 
 ### Fixes
