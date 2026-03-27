@@ -876,6 +876,37 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public void FromFeedback_NullAttachment_Skipped()
+    {
+        // Arrange
+        var feedback = new SentryFeedback(
+            "Everything is great!",
+            "foo@bar.com",
+            "Someone Nice",
+            "fake-replay-id",
+            "https://www.example.com",
+            SentryId.Create()
+        );
+        var evt = new SentryEvent
+        {
+            Level = SentryLevel.Info,
+            Contexts =
+            {
+                Feedback = feedback
+            }
+        };
+        List<SentryAttachment> attachments = [
+            null!, AttachmentHelper.FakeAttachment("file1.txt")
+        ];
+
+        // Act
+        using var envelope = Envelope.FromFeedback(evt, attachments: attachments);
+
+        // Assert
+        envelope.Items.Count(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment).Should().Be(1);
+    }
+
+    [Fact]
     public async Task Roundtrip_WithSession_Success()
     {
         // Arrange
