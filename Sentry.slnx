@@ -57,13 +57,22 @@
   <Folder Name="/root/">
     <File Path=".codecov.yml" />
     <File Path=".gitignore" />
+    <File Path="AGENTS.md" />
+    <File Path="agents.toml" />
+    <File Path="before.Sentry.sln.targets" />
+    <File Path="build.cmd" />
+    <File Path="build.sh" />
     <File Path="CHANGELOG.md" />
+    <File Path="CodeCoverage.runsettings" />
     <File Path="CONTRIBUTING.md" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
     <File Path="global.json" />
+    <File Path="GlobalUsings.cs" />
+    <File Path="LICENSE" />
     <File Path="nuget.config" />
     <File Path="README.md" />
+    <File Path="warden.toml" />
   </Folder>
   <Folder Name="/samples/">
     <Project Path="samples/Sentry.Samples.Android/Sentry.Samples.Android.csproj" />
