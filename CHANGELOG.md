@@ -22,6 +22,7 @@
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
 - Symbolication now works correctly with Android workloads 10.0.102 and later ([#4998](https://github.com/getsentry/sentry-dotnet/pull/4998))
 - `libmonosgen` and `libxamarin` frames no longer show as in-app ([#4960](https://github.com/getsentry/sentry-dotnet/pull/4960))
+- The SDK now logs only the first consecutive error when sending envelopes to Spotlight, and uses exponential backoff before subsequent attempts ([#5025](https://github.com/getsentry/sentry-dotnet/pull/5025))
 
 ### Dependencies
 
