@@ -43,6 +43,7 @@
 
   <PropertyGroup Condition="'$(SolutionName)' == '.generated.NoMobile'">
     <NO_MOBILE>true</NO_MOBILE>
+    <ValidateXcodeVersion>false</ValidateXcodeVersion>
   </PropertyGroup>
 
   <!-- NO_MOBILE can be passed in via an environment variable or a build property to disable all mobile targets -->
