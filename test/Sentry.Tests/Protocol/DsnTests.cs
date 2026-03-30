@@ -277,6 +277,41 @@ public class DsnTests
         public static implicit operator Uri(DsnTestCase @case) => new($"{@case.Scheme}://{@case.Host}:{@case.Port}{@case.Path}/api/{@case.ProjectId}/store/");
     }
 
+    [Fact]
+    public void Parse_DsnWithOrgId_ParsesOrgId()
+    {
+        var dsn = Dsn.Parse("https://key@o1.ingest.us.sentry.io/123");
+        Assert.Equal("1", dsn.OrgId);
+    }
+
+    [Fact]
+    public void Parse_DsnWithLargeOrgId_ParsesOrgId()
+    {
+        var dsn = Dsn.Parse("https://key@o123456.ingest.us.sentry.io/123");
+        Assert.Equal("123456", dsn.OrgId);
+    }
+
+    [Fact]
+    public void Parse_DsnWithoutOrgId_OrgIdIsNull()
+    {
+        var dsn = Dsn.Parse("https://key@sentry.io/123");
+        Assert.Null(dsn.OrgId);
+    }
+
+    [Fact]
+    public void Parse_DsnWithNonNumericOrgId_OrgIdIsNull()
+    {
+        var dsn = Dsn.Parse("https://key@oabc.ingest.us.sentry.io/123");
+        Assert.Null(dsn.OrgId);
+    }
+
+    [Fact]
+    public void Parse_StandardValidDsn_NoOrgId()
+    {
+        var dsn = Dsn.Parse(ValidDsn);
+        Assert.Null(dsn.OrgId);
+    }
+
     private static void AssertEqual(DsnTestCase @case, Dsn dsn)
     {
         Assert.NotNull(@case);

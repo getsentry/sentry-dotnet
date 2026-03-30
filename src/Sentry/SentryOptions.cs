@@ -448,6 +448,24 @@ public class SentryOptions
     internal Dsn? _parsedDsn;
     internal Dsn ParsedDsn => _parsedDsn ??= Sentry.Dsn.Parse(Dsn!);
 
+    /// <summary>
+    /// Returns the effective org ID, preferring <see cref="OrgId"/> if set, otherwise falling back to the DSN-parsed value.
+    /// </summary>
+    internal string? GetEffectiveOrgId()
+    {
+        if (!string.IsNullOrWhiteSpace(OrgId))
+        {
+            return OrgId;
+        }
+
+        if (!string.IsNullOrWhiteSpace(Dsn))
+        {
+            return ParsedDsn.OrgId;
+        }
+
+        return null;
+    }
+
     private readonly Lazy<string> _sentryBaseUrl;
 
     internal bool IsSentryRequest(string? requestUri) =>
@@ -1057,6 +1075,28 @@ public class SentryOptions
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
     public bool PropagateTraceparent { get; set; }
+
+    /// <summary>
+    /// Controls trace continuation from third-party services that happen to be instrumented by Sentry.
+    /// </summary>
+    /// <remarks>
+    /// When enabled, the SDK will require org IDs from baggage to match for continuing the trace.
+    /// If the incoming trace does not contain an org ID and this option is <c>true</c>, a new trace will be started.
+    /// When disabled (default), incoming traces without org IDs will be continued as normal,
+    /// but mismatched org IDs will always cause a new trace to be started regardless of this setting.
+    /// </remarks>
+    public bool StrictTraceContinuation { get; set; }
+
+    /// <summary>
+    /// Configures the org ID used for trace propagation and features like <see cref="StrictTraceContinuation"/>.
+    /// </summary>
+    /// <remarks>
+    /// In most cases the org ID is already parsed from the DSN (e.g., <c>o1</c> in
+    /// <c>https://key@o1.ingest.us.sentry.io/123</c> yields org ID <c>"1"</c>).
+    /// Use this option when non-standard Sentry DSNs are used, such as self-hosted or when using a local Relay.
+    /// When set, this value overrides the org ID parsed from the DSN.
+    /// </remarks>
+    public string? OrgId { get; set; }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
