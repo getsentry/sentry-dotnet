@@ -169,4 +169,7 @@
   <!-- Remove UpdateStatus to avoid CS0108 for conflicting _members fields in nested subclasses -->
   <remove-node path="/api/package[@name='io.sentry']/class[@name='UpdateStatus']" />
 
+  <!-- Remove SentryShakeDetector to avoid CS8767 nullability mismatch with ISensorEventListener -->
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='SentryShakeDetector']" />
+
 </metadata>

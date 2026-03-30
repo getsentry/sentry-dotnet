@@ -213,8 +213,8 @@ interface SentryBreadcrumb : SentrySerializable
     [NullAllowed, Export("origin")]
     string Origin { get; set; }
 
-    // @property (nonatomic, strong) NSDictionary<NSString *,id> * _Nullable data;
-    [NullAllowed, Export("data", ArgumentSemantic.Strong)]
+    // @property (copy, nonatomic) NSDictionary<NSString *,id> * _Nullable data;
+    [NullAllowed, Export("data", ArgumentSemantic.Copy)]
     NSDictionary<NSString, NSObject> Data { get; set; }
 
     // -(instancetype _Nonnull)initWithLevel:(SentryLevel)level category:(NSString * _Nonnull)category;
@@ -1746,9 +1746,13 @@ interface SentryOptions
     [NullAllowed, Export("beforeCaptureViewHierarchy", ArgumentSemantic.Copy)]
     SentryBeforeCaptureScreenshotCallback BeforeCaptureViewHierarchy { get; set; }
 
-    // @property (copy, nonatomic) SentryOnCrashedLastRunCallback _Nullable onCrashedLastRun;
+    // @property (copy, nonatomic) SWIFT_DEPRECATED_MSG("Use onLastRunStatusDetermined instead, which is called regardless of whether the app crashed.") SentryOnCrashedLastRunCallback onCrashedLastRun __attribute__((deprecated("Use onLastRunStatusDetermined instead, which is called regardless of whether the app crashed.")));
     [NullAllowed, Export("onCrashedLastRun", ArgumentSemantic.Copy)]
     SentryOnCrashedLastRunCallback OnCrashedLastRun { get; set; }
+
+    // @property (copy, nonatomic) void (^ _Nullable)(enum SentryLastRunStatus, SentryEvent * _Nullable) onLastRunStatusDetermined;
+    [NullAllowed, Export("onLastRunStatusDetermined", ArgumentSemantic.Copy)]
+    Action<SentryLastRunStatus, SentryEvent?> OnLastRunStatusDetermined { get; set; }
 
     // @property (nonatomic, strong) NSNumber * _Nullable sampleRate;
     [NullAllowed, Export("sampleRate", ArgumentSemantic.Strong)]
@@ -2736,10 +2740,15 @@ interface SentrySDK
     [Export("configureScope:")]
     void ConfigureScope(Action<SentryScope> callback);
 
-    // @property (readonly, nonatomic, class) BOOL crashedLastRun;
+    // @property (readonly, nonatomic, class) BOOL crashedLastRun __attribute__((deprecated("Use lastRunStatus instead, which distinguishes between 'did not crash' and 'unknown'.")));
     [Static]
     [Export("crashedLastRun")]
     bool CrashedLastRun { get; }
+
+    // @property (readonly, nonatomic, class) enum SentryLastRunStatus lastRunStatus;
+    [Static]
+    [Export("lastRunStatus")]
+    SentryLastRunStatus LastRunStatus { get; }
 
     // @property (readonly, nonatomic, class) BOOL detectedStartUpCrash;
     [Static]

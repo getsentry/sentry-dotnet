@@ -123,6 +123,14 @@ internal enum SentryHttpStatusCode : long
 }
 
 [Native]
+internal enum SentryLastRunStatus : long
+{
+    Unknown = 0,
+    DidNotCrash = 1,
+    DidCrash = 2
+}
+
+[Native]
 internal enum SentryLogLevel : long
 {
     Trace = 0,
