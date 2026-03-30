@@ -264,7 +264,7 @@ public class GlobalSessionManagerTests
     public void TryRecoverPersistedSession_NoSessionFile_LogDebug()
     {
         // Arrange
-        _fixture.PersistedSessionProvider = _ => throw new FileNotFoundException();
+        _fixture.PersistedSessionProvider = _ => throw new UnreachableException("Unexpected attempt to read a file that does not exist.");
         var sut = _fixture.GetSut();
 
         // Act
