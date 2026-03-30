@@ -201,6 +201,12 @@ internal class GlobalSessionManager : ISessionManager
 
             return sessionUpdate;
         }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+        {
+            _options.LogDebug(ex, "A persisted session file was not found at '{0}'.", filePath);
+
+            return null;
+        }
         catch (Exception ex)
         {
             _options.LogError(ex, "Failed to recover persisted session from the file system '{0}'.", filePath);
