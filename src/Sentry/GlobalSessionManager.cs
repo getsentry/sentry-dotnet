@@ -151,6 +151,12 @@ internal class GlobalSessionManager : ISessionManager
         }
 
         var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
+        if (!_options.FileSystem.FileExists(filePath))
+        {
+            _options.LogDebug("A persisted session file was not found at '{0}'.", filePath);
+            return null;
+        }
+
         try
         {
             var recoveredUpdate = _persistedSessionProvider(filePath);
@@ -194,12 +200,6 @@ internal class GlobalSessionManager : ISessionManager
                 recoveredUpdate.PendingUnhandled);
 
             return sessionUpdate;
-        }
-        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
-        {
-            // Not a notable error
-            _options.LogDebug("A persisted session does not exist ({0}) at {1}.", ex.GetType().Name, filePath);
-            return null;
         }
         catch (Exception ex)
         {

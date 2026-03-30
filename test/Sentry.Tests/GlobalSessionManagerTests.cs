@@ -261,45 +261,28 @@ public class GlobalSessionManagerTests
     }
 
     [Fact]
-    public void TryRecoverPersistedSession_FileNotFoundException_LogDebug()
+    public void TryRecoverPersistedSession_NoSessionFile_LogDebug()
     {
         // Arrange
+        _fixture.PersistedSessionProvider = _ => throw new FileNotFoundException();
         var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
-            _fixture.Options,
-            persistedSessionProvider: _ => throw new FileNotFoundException());
 
         // Act
         sut.TryRecoverPersistedSession();
 
         // Assert
-        _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Debug);
-    }
-
-    [Fact]
-    public void TryRecoverPersistedSession_DirectoryNotFoundException_LogDebug()
-    {
-        // Arrange
-        var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
-            _fixture.Options,
-            persistedSessionProvider: _ => throw new DirectoryNotFoundException());
-
-        // Act
-        sut.TryRecoverPersistedSession();
-
-        // Assert
-        _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Debug);
+        _fixture.Logger.Entries.Should().Contain(e =>
+            e.Level == SentryLevel.Debug
+            && e.Message.Contains("A persisted session file was not found"));
     }
 
     [Fact]
     public void TryRecoverPersistedSession_EndOfStreamException_LogError()
     {
         // Arrange
+        _fixture.PersistedSessionProvider = _ => throw new EndOfStreamException();
         var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
-            _fixture.Options,
-            persistedSessionProvider: _ => throw new EndOfStreamException());
+        sut.StartSession();
 
         // Act
         sut.TryRecoverPersistedSession();
@@ -383,14 +366,14 @@ public class GlobalSessionManagerTests
     public void TryRecoverPersistedSession_CrashDelegateReturnsTrueWithPauseTimestamp_EndsAsCrashed()
     {
         // Arrange
-        _fixture.Options.CrashedLastRun = () => true;
-        // Session was paused before persisted:
-        var pausedTimestamp = DateTimeOffset.Now;
+        var pausedTimestamp = DateTimeOffset.Now; // Session was paused before persisted:
         _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
             AnySessionUpdate(),
             pausedTimestamp);
+        _fixture.Options.CrashedLastRun = () => true;
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
@@ -412,6 +395,7 @@ public class GlobalSessionManagerTests
             pausedTimestamp);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
