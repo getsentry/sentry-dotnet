@@ -166,7 +166,6 @@ Prefer LSP over Grep/Read for code navigation — it's faster, precise, and avoi
 - `workspaceSymbol` to find where something is defined
 - `findReferences` to see all usages across the codebase
 - `goToDefinition` / `goToImplementation` to jump to source
-- `hover` for type info without reading the file
 
 Use Grep only when LSP isn't available or for text/pattern searches (comments, strings, config).
 
