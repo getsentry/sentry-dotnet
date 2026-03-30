@@ -157,7 +157,7 @@ public partial class SentryOptions
         /// <summary>
         /// Gets or sets the strategy for how Sentry Native's signal handler interacts with the CLR/Mono
         /// signal handler.
-        /// The default value is <c>SignalHandlerStrategy.Default</c> (enabled).
+        /// The default value is <see cref="Android.SignalHandlerStrategy.Default"/>.
         /// </summary>
         /// <remarks>
         /// .NET runtimes 10.0.0–10.0.3 (.NET SDKs 10.0.100–10.0.301) are not compatible with

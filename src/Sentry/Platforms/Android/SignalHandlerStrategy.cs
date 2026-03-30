@@ -7,13 +7,16 @@ namespace Sentry.Android;
 public enum SignalHandlerStrategy
 {
     /// <summary>
-    /// Invokes the CLR/Mono signal handler at the end of Sentry Native's signal
-    /// handler.
+    /// Sentry Native captures the crash first, then invokes the .NET runtime's signal
+    /// handler. The runtime may convert the same signal into a managed exception (e.g.,
+    /// <c>SIGSEGV</c> into <c>NullReferenceException</c>), which can result in duplicate
+    /// crash reports.
     /// </summary>
     Default,
     /// <summary>
-    /// Invokes the CLR/Mono signal handler at the start of Sentry Native's
-    /// signal handler.
+    /// Sentry Native invokes the .NET runtime's signal handler first, then captures the
+    /// native crash. This avoids duplicate crash reports from both the native signal and
+    /// the managed exception.
     /// </summary>
     /// <remarks>
     /// .NET runtimes 10.0.0–10.0.3 (.NET SDKs 10.0.100–10.0.301) are not compatible with
