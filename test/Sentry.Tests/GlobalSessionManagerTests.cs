@@ -366,11 +366,12 @@ public class GlobalSessionManagerTests
     public void TryRecoverPersistedSession_CrashDelegateReturnsTrueWithPauseTimestamp_EndsAsCrashed()
     {
         // Arrange
-        var pausedTimestamp = DateTimeOffset.Now; // Session was paused before persisted:
+        _fixture.Options.CrashedLastRun = () => true;
+        // Session was paused before persisted:
+        var pausedTimestamp = DateTimeOffset.Now;
         _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
             AnySessionUpdate(),
             pausedTimestamp);
-        _fixture.Options.CrashedLastRun = () => true;
 
         var sut = _fixture.GetSut();
         sut.StartSession();
@@ -552,6 +553,7 @@ public class GlobalSessionManagerTests
             pendingUnhandled: true);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
@@ -572,6 +574,7 @@ public class GlobalSessionManagerTests
             pendingUnhandled: true);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
@@ -593,6 +596,7 @@ public class GlobalSessionManagerTests
             pendingUnhandled: true);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
