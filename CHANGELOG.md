@@ -1,15 +1,23 @@
 # Changelog
 
-## Unreleased
+## 6.3.0
 
 ### Features
 
-- GA release for Sentry Metrics ([#5023](https://github.com/getsentry/sentry-dotnet/pull/5023))
+- The _Metrics_ APIs are now stable: removed `Experimental` from `SentrySdk`, `SentryOptions` and `IHub` ([#5023](https://github.com/getsentry/sentry-dotnet/pull/5023))
+- Report a new _Diagnostic_ (`SENTRY1001`) when a Metrics-API is invoked with an unsupported numeric type ([#4840](https://github.com/getsentry/sentry-dotnet/pull/4840))
 
 ### Fixes
 
 - Common tags such as `Environment` and `Release` and custom event processors are all now correctly applied to CaptureFeedback events ([#4942](https://github.com/getsentry/sentry-dotnet/pull/4942))
 - Include `Data` set via `ITransactionTracer` in `SentryTransaction` ([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
+
+### Dependencies
+
+- Bump Cocoa SDK from v9.5.0 to v9.7.0 ([#4958](https://github.com/getsentry/sentry-dotnet/pull/4958), [#5015](https://github.com/getsentry/sentry-dotnet/pull/5015))
+- Bump CLI from v3.3.0 to v3.3.3 ([#5002](https://github.com/getsentry/sentry-dotnet/pull/5002))
+- Bump Java SDK from v8.34.1 to v8.35.0 ([#5017](https://github.com/getsentry/sentry-dotnet/pull/5017))
+- Bump Native SDK from v0.13.2 to v0.13.3 ([#5045](https://github.com/getsentry/sentry-dotnet/pull/5045))
 
 ## 6.2.0
 
