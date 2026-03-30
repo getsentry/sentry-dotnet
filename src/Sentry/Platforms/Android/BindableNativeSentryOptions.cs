@@ -26,7 +26,6 @@ internal partial class BindableSentryOptions
         public bool? EnableAutoActivityLifecycleTracing { get; set; }
         public bool? EnableActivityLifecycleTracingAutoFinish { get; set; }
         public bool? EnableUserInteractionTracing { get; set; }
-        public SignalHandlerStrategy? SignalHandlerStrategy { get; set; }
         public bool? AttachThreads { get; set; }
         public TimeSpan? ConnectionTimeout { get; set; }
         public bool? EnableNdk { get; set; }
@@ -43,6 +42,7 @@ internal partial class BindableSentryOptions
         internal class NativeExperimentalOptions
         {
             public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+            public SignalHandlerStrategy? SignalHandlerStrategy { get; set; }
         }
 
         internal class NativeSentryReplayOptions
@@ -69,7 +69,6 @@ internal partial class BindableSentryOptions
             options.EnableAutoActivityLifecycleTracing = EnableAutoActivityLifecycleTracing ?? options.EnableAutoActivityLifecycleTracing;
             options.EnableActivityLifecycleTracingAutoFinish = EnableActivityLifecycleTracingAutoFinish ?? options.EnableActivityLifecycleTracingAutoFinish;
             options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
-            options.SignalHandlerStrategy = SignalHandlerStrategy ?? options.SignalHandlerStrategy;
             options.AttachThreads = AttachThreads ?? options.AttachThreads;
             options.ConnectionTimeout = ConnectionTimeout ?? options.ConnectionTimeout;
             options.EnableNdk = EnableNdk ?? options.EnableNdk;
@@ -95,6 +94,10 @@ internal partial class BindableSentryOptions
             }
             ExperimentalOptions.SessionReplay.RedactAllText = options.ExperimentalOptions.SessionReplay.MaskAllText;
             ExperimentalOptions.SessionReplay.RedactAllImages = options.ExperimentalOptions.SessionReplay.MaskAllImages;
+            if (ExperimentalOptions.SignalHandlerStrategy is { } signalHandlerStrategy)
+            {
+                options.ExperimentalOptions.SignalHandlerStrategy = signalHandlerStrategy;
+            }
         }
     }
 }

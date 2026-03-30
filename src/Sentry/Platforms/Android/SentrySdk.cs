@@ -64,7 +64,7 @@ public static partial class SentrySdk
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
-            var signalHandlerStrategy = options.Native.SignalHandlerStrategy;
+            var signalHandlerStrategy = options.Native.ExperimentalOptions.SignalHandlerStrategy;
             if (signalHandlerStrategy == SignalHandlerStrategy.ChainAtStart
                 && System.Environment.Version is { Major: 10, Minor: 0, Build: < 4 })
             {
