@@ -22,6 +22,9 @@ updates:
   directory: "/"
   schedule:
     interval: weekly
+  ignore:
+  - dependency-name: "gradle/actions/setup-gradle"
+    versions: '>= 6.0.0' # license change: the bundled 'gradle-actions-caching' component is licensed and governed by a separate license (no longer MIT)
 
 - package-ecosystem: "npm"
   directory: "/"
