@@ -16,7 +16,9 @@ public enum SignalHandlerStrategy
     /// <summary>
     /// Sentry Native invokes the .NET runtime's signal handler first, then captures the
     /// native crash. This avoids duplicate crash reports from both the native signal and
-    /// the managed exception.
+    /// the managed exception. This strategy is supported on Android 8.0 (API level 26)
+    /// and later; on older versions, Sentry Native silently falls back to
+    /// <see cref="Default"/>.
     /// </summary>
     /// <remarks>
     /// .NET runtimes 10.0.0–10.0.3 (.NET SDKs 10.0.100–10.0.301) are not compatible with
