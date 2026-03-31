@@ -68,10 +68,11 @@ public static partial class SentrySdk
             if (signalHandlerStrategy == SignalHandlerStrategy.ChainAtStart
                 && System.Environment.Version is { Major: 10, Minor: 0, Build: < 4 })
             {
-                var msg = $"SignalHandlerStrategy.ChainAtStart is not compatible with .NET runtime " +
-                    $"{System.Environment.Version}. Update to .NET runtime 10.0.4 or later.";
-                options.LogFatal(msg);
-                throw new InvalidOperationException(msg);
+                options.LogWarning(
+                    "SignalHandlerStrategy.ChainAtStart is not compatible with .NET runtime {0}. " +
+                    "Falling back to SignalHandlerStrategy.Default. Update to .NET runtime 10.0.4 or later.",
+                    System.Environment.Version);
+                signalHandlerStrategy = SignalHandlerStrategy.Default;
             }
             o.SetNativeHandlerStrategy(signalHandlerStrategy switch
             {
