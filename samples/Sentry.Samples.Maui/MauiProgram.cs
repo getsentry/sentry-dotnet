@@ -30,7 +30,8 @@ public static class MauiProgram
                 // If you want to see everything we can capture from MAUI, you may wish to use a larger value.
                 options.MaxBreadcrumbs = 1000;
 
-                // Be aware that screenshots may contain PII
+                // If your app doesn't have sensitive data, you can get screenshots on error events automatically
+                // https://docs.sentry.io/platforms/dotnet/guides/maui/configuration/options/#AttachScreenshot
                 options.AttachScreenshot = true;
 
                 options.Debug = true;
