@@ -71,6 +71,12 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      - name: Disable host crash reporter
+        # Avoids crash dialog popups and ReportCrash CPU overhead during simulator tests
+        run: |
+          launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist || true
+          sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist || true
+
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
 
