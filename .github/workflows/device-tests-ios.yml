@@ -86,6 +86,21 @@ jobs:
         timeout-minutes: 40
         run: pwsh scripts/device-test.ps1 ios -Run -Verbose
 
+      - name: Reset Simulator (before test retry)
+        if: steps.first-test-run.outcome == 'failure'
+        timeout-minutes: 5
+        run: |
+          if ! timeout 30 xcrun simctl list devices >/dev/null 2>&1; then
+            echo "CoreSimulatorService unresponsive, restarting..."
+            sudo launchctl kickstart -kp system/com.apple.CoreSimulator.CoreSimulatorService
+            for i in $(seq 1 30); do
+              timeout 5 xcrun simctl list devices >/dev/null 2>&1 && break
+              echo "Waiting for CoreSimulatorService... ($i)"
+              sleep 1
+            done
+          fi
+          timeout 30 xcrun simctl shutdown all 2>/dev/null || true
+
       - name: Retry Tests (if previous failed to run)
         if: steps.first-test-run.outcome == 'failure'
         timeout-minutes: 40
@@ -98,6 +113,21 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test@26f565c05d0dd49f703d238706b775883037d76b # 3.3.0
         with:
           path: integration-test/ios.Tests.ps1
+
+      - name: Reset Simulator (before integration test retry)
+        if: steps.first-integration-test-run.outcome == 'failure'
+        timeout-minutes: 5
+        run: |
+          if ! timeout 30 xcrun simctl list devices >/dev/null 2>&1; then
+            echo "CoreSimulatorService unresponsive, restarting..."
+            sudo launchctl kickstart -kp system/com.apple.CoreSimulator.CoreSimulatorService
+            for i in $(seq 1 30); do
+              timeout 5 xcrun simctl list devices >/dev/null 2>&1 && break
+              echo "Waiting for CoreSimulatorService... ($i)"
+              sleep 1
+            done
+          fi
+          timeout 30 xcrun simctl shutdown all 2>/dev/null || true
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
