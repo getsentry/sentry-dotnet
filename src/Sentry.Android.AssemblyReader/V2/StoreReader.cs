@@ -42,6 +42,10 @@ internal partial class StoreReader : AssemblyStoreReader
             GetArchPath (AndroidTargetArch.Arm),
             GetArchPath (AndroidTargetArch.X86_64),
             GetArchPath (AndroidTargetArch.X86),
+            GetArchPath (AndroidTargetArch.Arm64, newBlobName: true),
+            GetArchPath (AndroidTargetArch.Arm, newBlobName: true),
+            GetArchPath (AndroidTargetArch.X86_64, newBlobName: true),
+            GetArchPath (AndroidTargetArch.X86, newBlobName: true),
         };
         ApkPaths = paths.AsReadOnly();
         AabBasePaths = ApkPaths;
@@ -52,10 +56,14 @@ internal partial class StoreReader : AssemblyStoreReader
             GetArchPath (AndroidTargetArch.Arm, AabBaseDir),
             GetArchPath (AndroidTargetArch.X86_64, AabBaseDir),
             GetArchPath (AndroidTargetArch.X86, AabBaseDir),
+            GetArchPath (AndroidTargetArch.Arm64, AabBaseDir, true),
+            GetArchPath (AndroidTargetArch.Arm, AabBaseDir, true),
+            GetArchPath (AndroidTargetArch.X86_64, AabBaseDir, true),
+            GetArchPath (AndroidTargetArch.X86, AabBaseDir, true),
         };
         AabPaths = paths.AsReadOnly();
 
-        string GetArchPath(AndroidTargetArch arch, string? root = null)
+        string GetArchPath(AndroidTargetArch arch, string? root = null, bool newBlobName = false)
         {
             const string LibDirName = "lib";
 
@@ -70,7 +78,7 @@ internal partial class StoreReader : AssemblyStoreReader
                 root = LibDirName;
             }
             parts.Add(abi);
-            parts.Add(GetBlobName(abi));
+            parts.Add(newBlobName ? NewBlobName : GetOldBlobName(abi));
 
             return MonoAndroidHelper.MakeZipArchivePath(root, parts);
         }
@@ -87,7 +95,16 @@ internal partial class StoreReader : AssemblyStoreReader
         };
     }
 
-    private static string GetBlobName(string abi) => $"libassemblies.{abi}.blob.so";
+    /// <summary>
+    /// This method returns the expected blob name for a given ABI for dotnet/android workload versions 10.0.101.1 and earlier
+    /// </summary>
+    private static string GetOldBlobName(string abi) => $"libassemblies.{abi}.blob.so";
+
+    /// <summary>
+    /// More recent versions of the dotnet/android workload (starting with 10.0.102) switched to a single blob name for
+    /// all ABIs. See: https://github.com/dotnet/android/pull/10638
+    /// </summary>
+    private const string NewBlobName = "libassembly-store.so";
 
     protected override ulong GetStoreStartDataOffset() => elfOffset;
 

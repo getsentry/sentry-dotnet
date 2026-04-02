@@ -10,7 +10,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
-    private readonly object _innerHandlerLock = new();
+    private readonly Lock _innerHandlerLock = new();
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryMessageHandler"/>.

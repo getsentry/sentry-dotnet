@@ -989,4 +989,87 @@ public partial class HttpTransportTests
         recorder.DiscardedEvents.Should().ContainKey(DiscardReason.SendError.WithCategory(DataCategory.Error));
         recorder.DiscardedEvents.Should().NotContainKey(DiscardReason.NetworkError.WithCategory(DataCategory.Error));
     }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response429WithJsonMessage_LogsWarning()
+    {
+        // Arrange
+        const string expectedDetail = "Sentry dropped data due to a quota or internal rate limit being reached.";
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetJsonErrorResponse((HttpStatusCode)429, expectedDetail));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var warningEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Warning &&
+            e.Message.Contains("due to rate limiting"));
+
+        warningEntry.Should().NotBeNull();
+        warningEntry!.Message.Should().Contain("exceeded your quota");
+        warningEntry.Args[2].ToString().Should().Contain(expectedDetail);
+
+        // Should NOT have an error-level log for this
+        logger.Entries.Should().NotContain(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("Sentry rejected the envelope"));
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response429WithTextMessage_LogsWarning()
+    {
+        // Arrange
+        const string expectedMessage = "Rate limited";
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetTextErrorResponse((HttpStatusCode)429, expectedMessage));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var warningEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Warning &&
+            e.Message.Contains("due to rate limiting"));
+
+        warningEntry.Should().NotBeNull();
+        warningEntry!.Args[2].ToString().Should().Contain(expectedMessage);
+
+        // Should NOT have an error-level log for this
+        logger.Entries.Should().NotContain(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("Sentry rejected the envelope"));
+    }
 }

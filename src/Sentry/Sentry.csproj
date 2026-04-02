@@ -65,7 +65,7 @@
     https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.32.0" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="1.33.2" PrivateAssets="all" />
   </ItemGroup>
 
   <!--
@@ -107,13 +107,13 @@
       <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
     </PropertyGroup>
     <ItemGroup>
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="f84d5716d74ea4b1355c64ef6cb6a14f2097ab2541c9747b7aee4bad39a647e4" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="e95fa80e6f06797c56eb4f18f65f82a4c859599c572d940e7a156885cbd8dd21" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="3853e2071623941d96c7b69a99929f1d3222a4b696f4b74c875be340aa75926a" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="a995decaad61160bfac84634b280f005003931726e14fd964f8c3cf6ce00aa20" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="61b1c19345694ce31ac663e9875194d45f4f317f2b9134269605f810132df88b" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="29290444fd2b796fe14c5d058eafe883293257f9f650fe20080bd37214b2ffe5" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="e89a23566d5e17a5fb2fe40e182e6e0a6cf07134330c7588d5b6025071bcae3f" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="fd03e1efafb3a9fe8a5a1edb2462c39c277a40075d72ef9fe7574af5fdeb4352" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="906127f3f22c5fdbf5d04e456a2ba19220dde58b09a33287e7add3cc8e998df1" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="a7ed9089f28466ee830219100f70b6f13e9a7a7d03d54f9840e9b84436468661" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="40c892f02bea9049914ce058530a7a947a06b8ad1072c9c466978932e9077ecd" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="81bda3da764c957cdc9ddc6d368f9a2e1e4a1e385b6272180a0373830acaecdb" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="655b357dd622acd5b9eaff824037b648ff1468f8a9a868fac5a89cfa45963494" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="74f88d12c1909797bda612dcac07b2f25e7419d7c06404f3a0ca94747c03892d" />
     </ItemGroup>
 
     <!-- Download the files -->
@@ -137,6 +137,7 @@
     <InternalsVisibleTo Include="Sentry.Android.AssemblyReader.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNet" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNet.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.AspNetCore.Blazor.WebAssembly" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc.Tests" PublicKey="$(SentryPublicKey)" />
@@ -182,6 +183,24 @@
     <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="build\Sentry.props" />
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="PlatformAbstractions\FrameworkInfo.NetFx.cs;PlatformAbstractions\FrameworkInfo.NetStandard.cs">
+      <DependentUpon>FrameworkInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Update="MeasurementUnit.Duration.cs;MeasurementUnit.Fraction.cs;MeasurementUnit.Information.cs">
+      <DependentUpon>MeasurementUnit.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryMetric.Factory.cs;SentryMetric.Generic.cs">
+      <DependentUpon>SentryMetric.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryMetricEmitter.Counter.cs;SentryMetricEmitter.Distribution.cs;SentryMetricEmitter.Gauge.cs">
+      <DependentUpon>SentryMetricEmitter.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryStructuredLogger.Format.cs">
+      <DependentUpon>SentryStructuredLogger.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

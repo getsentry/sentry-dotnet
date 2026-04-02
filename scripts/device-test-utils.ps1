@@ -4,7 +4,7 @@ function Install-XHarness
     {
         $CI = Test-Path env:CI
         Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/tmp')
-        dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease.25466.1' `
+        dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '11.0.0-prerelease.26117.1' `
             --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
         Pop-Location
     }
@@ -29,11 +29,11 @@ function Get-AndroidEmulatorId
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
-        [string]$IosVersion = '26.0',
+        [string]$IosVersion = '26.2',
         [string[]]$PreferredDeviceTypes = @(
-            'com.apple.CoreSimulator.SimDeviceType.iPhone-XS',
-            'com.apple.CoreSimulator.SimDeviceType.iPhone-17',
-            'com.apple.CoreSimulator.SimDeviceType.iPhone-16'
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-17'
         ),
         [string[]]$PreferredStates = @('Shutdown','Booted')
     )

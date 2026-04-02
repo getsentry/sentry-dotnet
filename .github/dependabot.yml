@@ -1,5 +1,11 @@
 version: 2
 updates:
+- package-ecosystem: "dotnet-sdk"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+  open-pull-requests-limit: 1
+
 - package-ecosystem: nuget
   directory: "/samples"
   schedule:
@@ -10,9 +16,12 @@ updates:
   directory: "/test"
   schedule:
     interval: weekly
-  open-pull-requests-limit: 2 
-  
+  open-pull-requests-limit: 2
+
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
-      interval: weekly
+    interval: weekly
+  ignore:
+  - dependency-name: "gradle/actions/setup-gradle"
+    versions: ['>= 6.0.0'] # license change: the bundled 'gradle-actions-caching' component is licensed and governed by a separate license (no longer MIT)

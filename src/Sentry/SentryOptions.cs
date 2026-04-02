@@ -569,6 +569,32 @@ public class SentryOptions
         _beforeSendLog = beforeSendLog;
     }
 
+    /// <summary>
+    /// When set to <see langword="false"/>, the SDK does not generate and send metrics to Sentry via <see cref="SentrySdk.Metrics"/>.
+    /// Defaults to <see langword="true"/>.
+    /// </summary>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+    public bool EnableMetrics { get; set; } = true;
+
+    private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
+
+    internal Func<SentryMetric, SentryMetric?>? BeforeSendMetricInternal => _beforeSendMetric;
+
+    /// <summary>
+    /// Sets a callback function to be invoked before sending the metric to Sentry.
+    /// When the delegate throws an <see cref="Exception"/> during invocation, the metric will not be captured.
+    /// </summary>
+    /// <remarks>
+    /// It can be used to modify the metric object before being sent to Sentry.
+    /// To prevent the metric from being sent to Sentry, return <see langword="null"/>.
+    /// Supported numeric value types are <see langword="byte"/>, <see langword="short"/>, <see langword="int"/>, <see langword="long"/>, <see langword="float"/>, and <see langword="double"/>.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+    public void SetBeforeSendMetric(Func<SentryMetric, SentryMetric?> beforeSendMetric)
+    {
+        _beforeSendMetric = beforeSendMetric;
+    }
+
     private int _maxQueueItems = 30;
 
     /// <summary>
@@ -1178,10 +1204,7 @@ public class SentryOptions
     public void AddJsonConverter(JsonConverter converter)
     {
         // protect against null because user may not have nullability annotations enabled
-        if (converter == null!)
-        {
-            throw new ArgumentNullException(nameof(converter));
-        }
+        ArgumentNullException.ThrowIfNull(converter);
 
         JsonExtensions.AddJsonConverter(converter);
     }
@@ -1202,10 +1225,7 @@ public class SentryOptions
         where T : JsonSerializerContext
     {
         // protect against null because user may not have nullability annotations enabled
-        if (contextBuilder == null!)
-        {
-            throw new ArgumentNullException(nameof(contextBuilder));
-        }
+        ArgumentNullException.ThrowIfNull(contextBuilder);
 
         JsonExtensions.AddJsonSerializerContext(contextBuilder);
     }
@@ -1691,7 +1711,9 @@ public class SentryOptions
     /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
     public SentryOptions UseStackTraceFactory(ISentryStackTraceFactory sentryStackTraceFactory)
     {
-        SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
+        ArgumentNullException.ThrowIfNull(sentryStackTraceFactory);
+
+        SentryStackTraceFactory = sentryStackTraceFactory;
         return this;
     }
 
@@ -1904,52 +1926,7 @@ public class SentryOptions
         "Grpc",
         "ServiceStack",
         "Java.Interop",
+        InAppExcludeRegexes.LibMonoSgen,
+        InAppExcludeRegexes.LibXamarin
     ];
-
-    /// <summary>
-    /// Sentry features that are currently in an experimental state.
-    /// </summary>
-    /// <remarks>
-    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
-    /// </remarks>
-    public ExperimentalSentryOptions Experimental { get; } = new ExperimentalSentryOptions();
-
-    /// <summary>
-    /// Sentry features that are currently in an experimental state.
-    /// </summary>
-    /// <remarks>
-    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
-    /// </remarks>
-    public class ExperimentalSentryOptions
-    {
-        private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
-
-        internal ExperimentalSentryOptions()
-        {
-        }
-
-        internal Func<SentryMetric, SentryMetric?>? BeforeSendMetricInternal => _beforeSendMetric;
-
-        /// <summary>
-        /// When set to <see langword="false"/>, the SDK does not generate and send metrics to Sentry via <see cref="SentrySdk"/>.
-        /// Defaults to <see langword="true"/>.
-        /// </summary>
-        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
-        public bool EnableMetrics { get; set; } = true;
-
-        /// <summary>
-        /// Sets a callback function to be invoked before sending the metric to Sentry.
-        /// When the delegate throws an <see cref="Exception"/> during invocation, the metric will not be captured.
-        /// </summary>
-        /// <remarks>
-        /// It can be used to modify the metric object before being sent to Sentry.
-        /// To prevent the metric from being sent to Sentry, return <see langword="null"/>.
-        /// Supported numeric value types are <see langword="byte"/>, <see langword="short"/>, <see langword="int"/>, <see langword="long"/>, <see langword="float"/>, and <see langword="double"/>.
-        /// </remarks>
-        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
-        public void SetBeforeSendMetric(Func<SentryMetric, SentryMetric?> beforeSendMetric)
-        {
-            _beforeSendMetric = beforeSendMetric;
-        }
-    }
 }

@@ -153,15 +153,12 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _data = new();
-
     /// <inheritdoc />
     [Obsolete("Use Data")]
-    public IReadOnlyDictionary<string, object?> Extra => _data;
+    public IReadOnlyDictionary<string, object?> Extra => _contexts.Trace.Data;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Data => _data;
-
+    public IReadOnlyDictionary<string, object?> Data => _contexts.Trace.Data;
 
     private readonly ConcurrentDictionary<string, string> _tags = new();
 
@@ -271,10 +268,10 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     /// <inheritdoc />
     [Obsolete("Use SetData")]
-    public void SetExtra(string key, object? value) => _data[key] = value;
+    public void SetExtra(string key, object? value) => _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
-    public void SetData(string key, object? value) => _data[key] = value;
+    public void SetData(string key, object? value) => _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
     public void SetTag(string key, string value) => _tags[key] = value;
@@ -316,7 +313,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private class LastActiveSpanTracker
     {
-        private readonly object _lock = new object();
+        private readonly Lock _lock = new();
 
         private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
         private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
