@@ -76,6 +76,23 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// </remarks>
     public bool AttachScreenshot { get; set; }
 
+    /// <summary>
+    /// Automatically starts a Sentry transaction when the user navigates to a new page and sets it on the scope,
+    /// allowing child spans (e.g. HTTP requests, database calls) to be attached during page load.
+    /// The transaction finishes automatically after <see cref="NavigationTransactionIdleTimeout"/> if not
+    /// finished explicitly first (e.g. by a subsequent navigation).
+    /// Requires <see cref="SentryOptions.TracesSampleRate"/> or <see cref="SentryOptions.TracesSampler"/> to
+    /// be configured.
+    /// The default is <c>true</c>.
+    /// </summary>
+    public bool EnableNavigationTransactions { get; set; } = true;
+
+    /// <summary>
+    /// Controls how long an automatic navigation transaction waits before finishing itself when not explicitly
+    /// finished. Defaults to 3 seconds.
+    /// </summary>
+    public TimeSpan NavigationTransactionIdleTimeout { get; set; } = TimeSpan.FromSeconds(3);
+
     private Func<SentryEvent, SentryHint, bool>? _beforeCapture;
     /// <summary>
     /// Action performed before attaching a screenshot

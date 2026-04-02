@@ -1,10 +1,11 @@
+using Sentry.Internal;
 using Sentry.Maui.Internal;
 
 namespace Sentry.Maui.Tests;
 
 internal class MauiEventsBinderFixture
 {
-    public IHub Hub { get; }
+    public IHubInternal Hub { get; }
 
     public MauiEventsBinder Binder { get; }
 
@@ -14,7 +15,7 @@ internal class MauiEventsBinderFixture
 
     public MauiEventsBinderFixture(params IEnumerable<IMauiElementEventBinder> elementEventBinders)
     {
-        Hub = Substitute.For<IHub>();
+        Hub = Substitute.For<IHubInternal>();
         Hub.SubstituteConfigureScope(Scope);
 
         Scope.Transaction = Substitute.For<ITransactionTracer>();
