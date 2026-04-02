@@ -664,6 +664,16 @@ static partial class SentrySdk
         => CurrentHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext);
 
     /// <summary>
+    /// Starts a transaction that will automatically finish after <paramref name="idleTimeout"/> if not
+    /// finished explicitly first.
+    /// </summary>
+    [DebuggerStepThrough]
+    internal static ITransactionTracer StartTransaction(ITransactionContext context, TimeSpan? idleTimeout)
+        => CurrentHub is IHubInternal internalHub
+            ? internalHub.StartTransaction(context, idleTimeout)
+            : CurrentHub.StartTransaction(context);
+
+    /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
