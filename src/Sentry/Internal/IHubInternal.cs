@@ -11,5 +11,5 @@ internal interface IHubInternal : IHub
     /// Starts a transaction that will automatically finish after <paramref name="idleTimeout"/> if not
     /// finished explicitly first.
     /// </summary>
-    ITransactionTracer StartTransaction(ITransactionContext context, TimeSpan? idleTimeout);
+    public ITransactionTracer StartTransaction(ITransactionContext context, TimeSpan? idleTimeout);
 }
