@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore.Blazor.WebAssembly.Internal;
 using Sentry.Extensions.Logging;
+using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace - Discoverability
 namespace Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -31,6 +32,7 @@ public static class WebAssemblyHostBuilderExtensions
             blazorOptions.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
             // Since the WebAssemblyHost is a client-side application
             blazorOptions.IsGlobalModeEnabled = true;
+            blazorOptions.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(blazorOptions));
         });
 
         builder.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>, BlazorWasmOptionsSetup>();
