@@ -42,7 +42,7 @@ public class SentryMetricTests
             Unit = "test_unit",
         };
         metric.SetAttribute("attribute", "value");
-        metric.SetDefaultAttributes(options, sdk);
+        metric.Attributes.SetDefaultAttributes(options, sdk);
 
         metric.Timestamp.Should().Be(Timestamp);
         metric.TraceId.Should().Be(TraceId);
@@ -52,18 +52,12 @@ public class SentryMetricTests
         metric.SpanId.Should().Be(SpanId);
         metric.Unit.Should().BeEquivalentTo("test_unit");
 
-        metric.TryGetAttribute<string>("attribute", out var attribute).Should().BeTrue();
-        attribute.Should().Be("value");
-        metric.TryGetAttribute<string>("sentry.environment", out var environment).Should().BeTrue();
-        environment.Should().Be(options.Environment);
-        metric.TryGetAttribute<string>("sentry.release", out var release).Should().BeTrue();
-        release.Should().Be(options.Release);
-        metric.TryGetAttribute<string>("sentry.sdk.name", out var name).Should().BeTrue();
-        name.Should().Be(sdk.Name);
-        metric.TryGetAttribute<string>("sentry.sdk.version", out var version).Should().BeTrue();
-        version.Should().Be(sdk.Version);
-        metric.TryGetAttribute<object>("not-found", out var notFound).Should().BeFalse();
-        notFound.Should().BeNull();
+        metric.Attributes.ShouldContain("attribute", "value");
+        metric.Attributes.ShouldContain("sentry.environment", options.Environment);
+        metric.Attributes.ShouldContain("sentry.release", options.Release);
+        metric.Attributes.ShouldContain("sentry.sdk.name", sdk.Name);
+        metric.Attributes.ShouldContain("sentry.sdk.version", sdk.Version);
+        metric.Attributes.ShouldNotContain<string>("not-found");
     }
 
     [Fact]
@@ -76,7 +70,7 @@ public class SentryMetricTests
         };
 
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
-        metric.SetDefaultAttributes(options, new SdkVersion());
+        metric.Attributes.SetDefaultAttributes(options, new SdkVersion());
 
         var envelope = Envelope.FromMetric(new TraceMetric([metric]));
 
@@ -154,7 +148,7 @@ public class SentryMetricTests
         metric.SetAttribute("boolean-attribute", true);
         metric.SetAttribute("integer-attribute", 3);
         metric.SetAttribute("double-attribute", 4.4);
-        metric.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
+        metric.Attributes.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
 
         var envelope = EnvelopeItem.FromMetric(new TraceMetric([metric]));
 
@@ -360,7 +354,7 @@ public class SentryMetricTests
 #else
         metric.SetAttribute("object", new KeyValuePair<string, string>("key", "value"));
 #endif
-        metric.SetAttribute("null", null!);
+        metric.Attributes.SetAttribute("null", null!);
 
         var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var attributes = document.RootElement.GetProperty("attributes");
