@@ -25,6 +25,8 @@ public sealed class SentryLog
         Message = message;
         // 7 is the number of built-in attributes, so we start with that.
         _attributes = new Dictionary<string, SentryAttribute>(7);
+        // ensure the ImmutableArray`1 is not default, so we can omit IsDefault checks before accessing other members
+        Parameters = ImmutableArray<KeyValuePair<string, object>>.Empty;
     }
 
     /// <summary>
@@ -190,6 +192,8 @@ public sealed class SentryLog
 
     internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
+        Debug.Assert(!Parameters.IsDefault);
+
         writer.WriteStartObject();
 
 #if NET9_0_OR_GREATER
@@ -222,17 +226,14 @@ public sealed class SentryLog
 
         // the SDK MUST NOT attach a sentry.message.template attribute if there are no parameters
         // https://develop.sentry.dev/sdk/telemetry/logs/#default-attributes
-        if (Template is not null && !Parameters.IsDefaultOrEmpty)
+        if (Template is not null && !Parameters.IsEmpty)
         {
             SentryAttributeSerializer.WriteStringAttribute(writer, "sentry.message.template", Template);
         }
 
-        if (!Parameters.IsDefault)
+        foreach (var parameter in Parameters)
         {
-            foreach (var parameter in Parameters)
-            {
-                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{parameter.Key}", parameter.Value, logger);
-            }
+            SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{parameter.Key}", parameter.Value, logger);
         }
 
         foreach (var attribute in _attributes)

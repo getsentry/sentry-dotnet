@@ -29,7 +29,9 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         var timestamp = _clock.GetUtcNow();
         _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
-        var message = template;
+        string message;
+        ImmutableArray<KeyValuePair<string, object>> @params;
+
         if (parameters is { Length: > 0 })
         {
             try
@@ -41,15 +43,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
                 _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
                 return;
             }
-        }
-        else
-        {
-            template = null!;
-        }
 
-        ImmutableArray<KeyValuePair<string, object>> @params;
-        if (parameters is { Length: > 0 })
-        {
             var builder = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>(parameters.Length);
             for (var index = 0; index < parameters.Length; index++)
             {
@@ -59,6 +53,8 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         }
         else
         {
+            message = template;
+            template = null!;
             @params = ImmutableArray<KeyValuePair<string, object>>.Empty;
         }
 
