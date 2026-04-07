@@ -93,7 +93,7 @@ public partial class SentryStructuredLoggerTests
     [InlineData(SentryLogLevel.Fatal)]
     public void Log_WithoutParameters_DoesNotAttachTemplateAttribute(SentryLogLevel level)
     {
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -109,6 +109,9 @@ public partial class SentryStructuredLoggerTests
         log.Message.Should().Be("Message Text");
         log.Template.Should().BeNull();
         log.Parameters.Should().BeEmpty();
+
+        log.TryGetAttribute("sentry.message.template", out object? template).Should().BeFalse();
+        template.Should().BeNull();
     }
 }
 
