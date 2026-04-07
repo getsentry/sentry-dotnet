@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -11,11 +12,11 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
-    private readonly Timer? _idleTimer;
+    private readonly ISentryTimer? _idleTimer;
+    private readonly TimeSpan? _idleTimeout;
+    private int _activeSpanCount;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
     private InterlockedBoolean _hasFinished;
-
-    private InterlockedBoolean _cancelIdleTimeout;
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -223,7 +224,8 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <summary>
     /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null)
+    internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null,
+        Func<Action, ISentryTimer>? timerFactory = null)
     {
         _hub = hub;
         _options = _hub.GetSentryOptions();
@@ -243,24 +245,34 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             Origin = transactionContext.Origin;
         }
 
-        // Set idle timer only if an idle timeout has been provided directly
         if (idleTimeout.HasValue)
         {
-            _cancelIdleTimeout = true;  // Timer will be cancelled once, atomically setting this back to false
-            _idleTimer = new Timer(state =>
-            {
-                if (state is not TransactionTracer transactionTracer)
-                {
-                    _options?.LogDebug(
-                        $"Idle timeout callback received nor non-TransactionTracer state. " +
-                        "Unable to finish transaction automatically."
-                    );
-                    return;
-                }
-
-                transactionTracer.Finish(Status ?? SpanStatus.Ok);
-            }, this, idleTimeout.Value, Timeout.InfiniteTimeSpan);
+            _idleTimeout = idleTimeout;
+            var factory = timerFactory ?? (cb => new SystemTimer(cb));
+            _idleTimer = factory(OnIdleTimeout);
+            _idleTimer.Start(idleTimeout.Value);
         }
+    }
+
+    private void OnIdleTimeout()
+    {
+        if (IsSentryRequest)
+        {
+            _options?.LogDebug("Transaction '{0}' is a Sentry Request. Don't complete.", SpanId);
+            return;
+        }
+
+        // Discard if no child spans were ever started
+        if (_spans.IsEmpty)
+        {
+            _options?.LogDebug("Idle transaction '{0}' has no child spans. Discarding.", SpanId);
+            _hasFinished.Exchange(true);
+            _idleTimer?.Dispose();
+            _hub.ConfigureScope(static (scope, tracer) => scope.ResetTransaction(tracer), this);
+            return;
+        }
+
+        Finish(Status ?? SpanStatus.Ok);
     }
 
     /// <inheritdoc />
@@ -308,6 +320,28 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         {
             _spans.Add(span);
             _activeSpanTracker.Push(span);
+            // Pause the idle timer while a child span is in flight
+            if (_idleTimeout.HasValue)
+            {
+                Interlocked.Increment(ref _activeSpanCount);
+                _idleTimer?.Cancel();
+            }
+        }
+    }
+
+    internal void ChildSpanFinished()
+    {
+        if (!_idleTimeout.HasValue || _hasFinished)
+        {
+            return;
+        }
+
+        // Only restart the idle timer when there are no more active (unfinished) child spans
+        var remaining = Interlocked.Decrement(ref _activeSpanCount);
+        if (remaining <= 0)
+        {
+            _activeSpanCount = 0; // guard against underflow
+            _idleTimer?.Start(_idleTimeout.Value);
         }
     }
 
@@ -357,6 +391,17 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
 
+    /// <summary>
+    /// Resets the idle timer. Only has an effect on transactions created with an idle timeout.
+    /// </summary>
+    public void ResetIdleTimeout()
+    {
+        if (_idleTimeout.HasValue && !_hasFinished)
+        {
+            _idleTimer?.Start(_idleTimeout.Value);
+        }
+    }
+
     /// <inheritdoc />
     public void Finish()
     {
@@ -366,12 +411,8 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         }
 
         _options?.LogDebug("Attempting to finish Transaction '{0}'.", SpanId);
-        if (_cancelIdleTimeout.Exchange(false) == true)
-        {
-            _options?.LogDebug("Disposing of idle timer for Transaction '{0}'.", SpanId);
-            _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-            _idleTimer?.Dispose();
-        }
+        _idleTimer?.Cancel();
+        _idleTimer?.Dispose();
 
         if (IsSentryRequest)
         {
@@ -384,7 +425,21 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
-        EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
+
+        // For idle transactions, trim end time to the last finished child span
+        if (_idleTimeout.HasValue)
+        {
+            var latestSpanEnd = _spans
+                .Where(s => s.IsFinished)
+                .Select(s => s.EndTimestamp)
+                .Max();
+            EndTimestamp = latestSpanEnd ?? _stopwatch.CurrentDateTimeOffset;
+        }
+        else
+        {
+            EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
+        }
+
         _options?.LogDebug("Finished Transaction '{0}'.", SpanId);
 
         // Clear the transaction from the scope and regenerate the Propagation Context

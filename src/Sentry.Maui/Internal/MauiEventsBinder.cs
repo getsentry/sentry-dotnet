@@ -324,9 +324,31 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private ITransactionTracer StartNavigationTransaction(string name)
+    private ITransactionTracer? StartNavigationTransaction(string name)
     {
-        // Finish any previous navigation transaction before starting a new one
+        // If there's already a transaction on the scope that we didn't create, it was put there
+        // manually by the user — don't override it.
+        _hub.ConfigureScope(scope =>
+        {
+            if (scope.Transaction is { } existing && !ReferenceEquals(existing, _currentTransaction))
+            {
+                _manualTransactionOnScope = true;
+            }
+        });
+        if (_manualTransactionOnScope)
+        {
+            return null;
+        }
+
+        // Same destination as the current transaction — reset the idle timeout instead of
+        // creating a new transaction.
+        if (_currentTransaction is { IsFinished: false } current && current.Name == name)
+        {
+            current.ResetIdleTimeout();
+            return current;
+        }
+
+        // Finish any previous SDK-owned navigation transaction before starting a new one.
         _currentTransaction?.Finish(SpanStatus.Ok);
 
         var context = new TransactionContext(name, "ui.load")
@@ -342,6 +364,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
         _currentTransaction = transaction;
         return transaction;
     }
+
+    // Set to true when we detect a user-created transaction on the scope; cleared on the next
+    // navigation so we re-evaluate (the user's transaction may have finished by then).
+    private bool _manualTransactionOnScope;
 
     // Application Events
 

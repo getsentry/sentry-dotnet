@@ -18,8 +18,6 @@ internal class MauiEventsBinderFixture
         Hub = Substitute.For<IHubInternal>();
         Hub.SubstituteConfigureScope(Scope);
 
-        Scope.Transaction = Substitute.For<ITransactionTracer>();
-
         Options.Debug = true;
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);

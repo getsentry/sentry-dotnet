@@ -116,7 +116,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigating_StartsNavigationTransaction()
+    public void Shell_Navigating_EnableNavigationTransactions_StartsNavigationTransaction()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -136,7 +136,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigating_DisabledOption_DoesNotStartTransaction()
+    public void Shell_Navigating_DisableNavigationTransactions_DoesNotStartTransaction()
     {
         // Arrange
         _fixture.Options.EnableNavigationTransactions = false;
@@ -191,6 +191,50 @@ public partial class MauiEventsBinderTests
 
         // Assert
         mockTransaction.Name.Should().Be("//resolved/bar");
+    }
+
+    [Fact]
+    public void Shell_Navigating_ManualTransactionOnScope_IsNotOverridden()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+
+        // Simulate the user setting their own transaction on the scope before navigation
+        var userTransaction = Substitute.For<ITransactionTracer>();
+        _fixture.Scope.Transaction = userTransaction;
+
+        // Act
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Assert - SDK should NOT start a new transaction when there's a user-created one
+        _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+        Assert.Same(userTransaction, _fixture.Scope.Transaction);
+    }
+
+    [Fact]
+    public void Shell_Navigating_SameRoute_ResetsTimeoutButDoesNotStartNewTransaction()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var firstTransaction = Substitute.For<ITransactionTracer>();
+        firstTransaction.Name.Returns("bar");
+        firstTransaction.IsFinished.Returns(false);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(firstTransaction);
+
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Act - navigate to the same route again
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("bar"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Assert - only one transaction was started, and its idle timeout was reset
+        _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+        firstTransaction.Received(1).ResetIdleTimeout();
     }
 
     [Fact]
