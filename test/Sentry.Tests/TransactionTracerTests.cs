@@ -97,6 +97,24 @@ public class TransactionTracerTests
         Assert.Empty(transaction.Spans);
     }
 
+    [Fact]
+    public void Finish_ClearsTransactionFromScope()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var scope = new Scope();
+        hub.SubstituteConfigureScope(scope);
+
+        var transaction = new TransactionTracer(hub, new TransactionContext("name", "op"));
+        scope.Transaction = transaction;
+
+        // Act
+        transaction.Finish();
+
+        // Assert
+        Assert.Null(scope.Transaction);
+    }
+
     // --- Idle timeout scenarios (only apply when idleTimeout is non-null) ---
 
     [Fact]

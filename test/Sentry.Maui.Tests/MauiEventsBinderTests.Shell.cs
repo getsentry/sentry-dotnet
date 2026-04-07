@@ -116,7 +116,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigating_EnableNavigationTransactions_StartsNavigationTransaction()
+    public void Shell_Navigating_FirstNavigation_SetsTransactionOnScope()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -130,13 +130,49 @@ public partial class MauiEventsBinderTests
             new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
 
         // Assert
+        Assert.Same(mockTransaction, _fixture.Scope.Transaction);
+    }
+
+    [Fact]
+    public void Shell_Navigating_UsesRouteAsTransactionName()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(Substitute.For<ITransactionTracer>());
+
+        // Act
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Assert
         _fixture.Hub.Received(1).StartTransaction(
-            Arg.Is<ITransactionContext>(c => c.Name == "bar" && c.Operation == "ui.load"),
+            Arg.Is<ITransactionContext>(c => c.Name == "bar"),
             Arg.Any<TimeSpan?>());
     }
 
     [Fact]
-    public void Shell_Navigating_DisableNavigationTransactions_DoesNotStartTransaction()
+    public void Shell_Navigating_UsesUiLoadAsOperation()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(Substitute.For<ITransactionTracer>());
+
+        // Act
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Assert
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Is<ITransactionContext>(c => c.Operation == "ui.load"),
+            Arg.Any<TimeSpan?>());
+    }
+
+    [Fact]
+    public void Shell_Navigating_NavigationTransactionsDisabled_DoesNotStartTransaction()
     {
         // Arrange
         _fixture.Options.EnableNavigationTransactions = false;
@@ -149,6 +185,28 @@ public partial class MauiEventsBinderTests
 
         // Assert
         _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+    }
+
+    [Fact]
+    public void Shell_Navigating_DifferentDestination_ClearsTransactionFromScope()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var firstTransaction = Substitute.For<ITransactionTracer>();
+        var secondTransaction = Substitute.For<ITransactionTracer>();
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(firstTransaction, secondTransaction);
+
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Act - navigate to a different destination, finishing the first transaction
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("bar"), new ShellNavigationState("baz"), ShellNavigationSource.Push, false));
+
+        // Assert - scope now holds the new transaction, not the old one
+        Assert.Same(secondTransaction, _fixture.Scope.Transaction);
     }
 
     [Fact]
@@ -244,7 +302,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigating_SameRoute_ResetsTimeoutButDoesNotStartNewTransaction()
+    public void Shell_Navigating_SameRoute_ActiveTransaction_ResetsIdleTimeout()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -315,4 +373,5 @@ public partial class MauiEventsBinderTests
         // Assert
         mockTransaction.Received(1).Finish(SpanStatus.Ok);
     }
+
 }

@@ -41,6 +41,8 @@ public static class MauiProgram
                 // but only if tracing is enabled. Here we capture all traces (in a production app you'd probably only
                 // capture a certain percentage)
                 options.TracesSampleRate = 1.0F;
+
+                // Automatically create traces for navigation events
                 options.EnableNavigationTransactions = true;
 
                 // Automatically create traces for async relay commands in the MVVM Community Toolkit
