@@ -173,6 +173,30 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
+    public void Shell_Navigating_DifferentRoute_ReplacesScopeTransaction()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var firstTransaction = Substitute.For<ITransactionTracer>();
+        var secondTransaction = Substitute.For<ITransactionTracer>();
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(firstTransaction, secondTransaction);
+
+        // Act - first navigation binds firstTransaction to scope
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+        Assert.Same(firstTransaction, _fixture.Scope.Transaction);
+
+        // Act - second navigation to a different route
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("bar"), new ShellNavigationState("baz"), ShellNavigationSource.Push, false));
+
+        // Assert - scope transaction replaced with the new one
+        Assert.Same(secondTransaction, _fixture.Scope.Transaction);
+    }
+
+    [Fact]
     public void Shell_Navigated_UpdatesTransactionName()
     {
         // Arrange
@@ -241,6 +265,33 @@ public partial class MauiEventsBinderTests
         // Assert - only one transaction was started, and its idle timeout was reset
         _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
         firstTransaction.Received(1).ResetIdleTimeout();
+    }
+
+    [Fact]
+    public void Shell_Navigating_SameRoute_PreviousTransactionFinished_StartsNewTransaction()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var firstTransaction = Substitute.For<ITransactionTracer>();
+        var secondTransaction = Substitute.For<ITransactionTracer>();
+        firstTransaction.Name.Returns("bar");
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(firstTransaction, secondTransaction);
+
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Simulate the idle timeout firing and auto-finishing the transaction
+        firstTransaction.IsFinished.Returns(true);
+
+        // Act - same route, but the previous transaction has already finished
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("bar"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Assert - a new transaction is started rather than reusing the finished one
+        _fixture.Hub.Received(2).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+        Assert.Same(secondTransaction, _fixture.Scope.Transaction);
     }
 
     [Fact]
