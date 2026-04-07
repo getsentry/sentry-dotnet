@@ -62,7 +62,7 @@ find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Car
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 rm -rf Carthage/output-*
 
-cp .git/HEAD Carthage/.built-from-sha
+cp "$(git rev-parse --git-dir)/HEAD" Carthage/.built-from-sha
 echo ""
 
 popd >/dev/null
