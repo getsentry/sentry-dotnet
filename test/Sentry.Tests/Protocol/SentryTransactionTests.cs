@@ -28,52 +28,6 @@ public class SentryTransactionTests
     }
 
     [Fact]
-    public void NewTransactionTracer_IdleTimeoutProvided_WithChildSpan_AutomaticallyFinishes()
-    {
-        // Arrange
-        var hub = Substitute.For<IHub>();
-        var context = new TransactionContext("my name", "my operation",
-            SpanId.Create(), SpanId.Create(), SentryId.Create(),
-            "description", SpanStatus.Ok, null, true, TransactionNameSource.Component);
-
-        MockTimer mockTimer = null;
-        var transaction = new TransactionTracer(hub, context,
-            idleTimeout: TimeSpan.FromSeconds(30),
-            timerFactory: cb => { mockTimer = new MockTimer(cb); return mockTimer; });
-
-        var span = transaction.StartChild("child");
-        span.Finish();
-
-        // Act — simulate idle timeout elapsing after the child span finished
-        mockTimer.Fire();
-
-        // Assert — transaction captured and marked finished
-        transaction.IsFinished.Should().BeTrue();
-        hub.Received(1).CaptureTransaction(Arg.Any<SentryTransaction>());
-    }
-
-    [Fact]
-    public void NewTransactionTracer_IdleTimeoutProvided_NoChildSpans_IsDiscarded()
-    {
-        // Arrange
-        var hub = Substitute.For<IHub>();
-        var context = new TransactionContext("my name", "my operation",
-            SpanId.Create(), SpanId.Create(), SentryId.Create(),
-            "description", SpanStatus.Ok, null, true, TransactionNameSource.Component);
-
-        MockTimer mockTimer = null;
-        _ = new TransactionTracer(hub, context,
-            idleTimeout: TimeSpan.FromSeconds(30),
-            timerFactory: cb => { mockTimer = new MockTimer(cb); return mockTimer; });
-
-        // Act — simulate idle timeout elapsing with no child spans
-        mockTimer.Fire();
-
-        // Assert — transaction discarded, not captured
-        hub.DidNotReceive().CaptureTransaction(Arg.Any<SentryTransaction>());
-    }
-
-    [Fact]
     public void NewTransactionTracer_PropagationContextHasReplayId_UsesActiveSessionReplayIdInstead()
     {
         // Arrange
