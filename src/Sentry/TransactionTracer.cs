@@ -14,7 +14,6 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     private readonly SentryOptions? _options;
     private readonly ISentryTimer? _idleTimer;
     private readonly TimeSpan? _idleTimeout;
-    private int _activeSpanCount;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
     private InterlockedBoolean _hasFinished;
 
@@ -320,12 +319,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         {
             _spans.Add(span);
             _activeSpanTracker.Push(span);
-            // Pause the idle timer while a child span is in flight
-            if (_idleTimeout.HasValue)
-            {
-                Interlocked.Increment(ref _activeSpanCount);
-                _idleTimer?.Cancel();
-            }
+            _idleTimer?.Cancel(); // Pause the idle timer while a child span is in flight
         }
     }
 
@@ -337,11 +331,8 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         }
 
         // Only restart the idle timer when there are no more active (unfinished) child spans
-        var remaining = Interlocked.Decrement(ref _activeSpanCount);
-        if (remaining <= 0)
+        if (_activeSpanTracker.PeekActive() == null)
         {
-            // Guard against underflow atomically to avoid racing with concurrent Increment
-            Interlocked.CompareExchange(ref _activeSpanCount, 0, remaining);
             _idleTimer?.Start(_idleTimeout.Value);
         }
     }
