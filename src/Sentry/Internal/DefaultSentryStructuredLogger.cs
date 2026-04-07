@@ -29,7 +29,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         var timestamp = _clock.GetUtcNow();
         _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
-        string message = template;
+        var message = template;
         if (parameters is { Length: > 0 })
         {
             try
@@ -42,8 +42,12 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
                 return;
             }
         }
+        else
+        {
+            template = null!;
+        }
 
-        ImmutableArray<KeyValuePair<string, object>> @params = default;
+        ImmutableArray<KeyValuePair<string, object>> @params;
         if (parameters is { Length: > 0 })
         {
             var builder = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>(parameters.Length);
@@ -52,6 +56,10 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
                 builder.Add(new KeyValuePair<string, object>(index.ToString(), parameters[index]));
             }
             @params = builder.DrainToImmutable();
+        }
+        else
+        {
+            @params = ImmutableArray<KeyValuePair<string, object>>.Empty;
         }
 
         SentryLog log = new(timestamp, traceId, level, message)
