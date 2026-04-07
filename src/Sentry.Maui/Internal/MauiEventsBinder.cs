@@ -326,21 +326,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     private ITransactionTracer? StartNavigationTransaction(string name)
     {
-        // If there's already a transaction on the scope that we didn't create, it was put there
-        // manually by the user — don't override it.
-        var manualTransactionOnScope = false;
-        _hub.ConfigureScope(scope =>
-        {
-            if (scope.Transaction is { } existing && !ReferenceEquals(existing, _currentTransaction))
-            {
-                manualTransactionOnScope = true;
-            }
-        });
-        if (manualTransactionOnScope)
-        {
-            return null;
-        }
-
         // Reset the idle timeout instead of creating a new transaction if the destination is the same
         if (_currentTransaction is { IsFinished: false } current && current.Name == name)
         {
@@ -360,7 +345,22 @@ internal class MauiEventsBinder : IMauiEventsBinder
             ? internalHub.StartTransaction(context, _options.NavigationTransactionIdleTimeout)
             : _hub.StartTransaction(context);
 
-        _hub.ConfigureScope(static (scope, t) => scope.Transaction = t, transaction);
+        // Only bind to scope if there is no user-created transaction already there.
+        // Re-evaluated on each navigation so a user transaction that finishes later is handled correctly.
+        var hasUserTransaction = false;
+        _hub.ConfigureScope(scope =>
+        {
+            if (scope.Transaction is { } existing && !ReferenceEquals(existing, _currentTransaction))
+            {
+                hasUserTransaction = true;
+            }
+        });
+
+        if (!hasUserTransaction)
+        {
+            _hub.ConfigureScope(static (scope, t) => scope.Transaction = t, transaction);
+        }
+
         _currentTransaction = transaction;
         return transaction;
     }

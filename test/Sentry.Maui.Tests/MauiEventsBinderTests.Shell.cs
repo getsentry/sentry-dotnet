@@ -194,7 +194,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigating_ManualTransactionOnScope_IsNotOverridden()
+    public void Shell_Navigating_ManualTransactionOnScope_AutoTransactionCreatedButNotBoundToScope()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -204,12 +204,18 @@ public partial class MauiEventsBinderTests
         var userTransaction = Substitute.For<ITransactionTracer>();
         _fixture.Scope.Transaction = userTransaction;
 
+        var autoTransaction = Substitute.For<ITransactionTracer>();
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(autoTransaction);
+
         // Act
         shell.RaiseEvent(nameof(Shell.Navigating),
             new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
 
-        // Assert - SDK should NOT start a new transaction when there's a user-created one
-        _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+        // Assert - SDK still starts the auto transaction, but does NOT replace the user's scope transaction
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Is<ITransactionContext>(c => c.Name == "bar" && c.Operation == "ui.load"),
+            Arg.Any<TimeSpan?>());
         Assert.Same(userTransaction, _fixture.Scope.Transaction);
     }
 
