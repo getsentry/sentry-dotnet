@@ -340,7 +340,8 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         var remaining = Interlocked.Decrement(ref _activeSpanCount);
         if (remaining <= 0)
         {
-            _activeSpanCount = 0; // guard against underflow
+            // Guard against underflow atomically to avoid racing with concurrent Increment
+            Interlocked.CompareExchange(ref _activeSpanCount, 0, remaining);
             _idleTimer?.Start(_idleTimeout.Value);
         }
     }
@@ -396,9 +397,18 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// </summary>
     public void ResetIdleTimeout()
     {
-        if (_idleTimeout.HasValue && !_hasFinished)
+        if (!_idleTimeout.HasValue || _hasFinished)
+        {
+            return;
+        }
+        try
         {
             _idleTimer?.Start(_idleTimeout.Value);
+        }
+        catch (ObjectDisposedException)
+        {
+            // Finish() may dispose the timer concurrently between the _hasFinished check and Start().
+            // Swallow the exception — the transaction is already finishing.
         }
     }
 
