@@ -210,6 +210,11 @@ static partial class SentrySdk
 
     internal static IDisposable UseHub(IHub hub)
     {
+        if (hub is HubAdapter)
+        {
+            hub.GetSentryOptions()?.LogError("Attempting to initianise the SentrySdk with a HubAdapter can lead to infinite recursion. Initialisation cancelled.");
+            return DisabledHub.Instance;
+        }
         var oldHub = Interlocked.Exchange(ref CurrentHub, hub);
         (oldHub as IDisposable)?.Dispose();
         return new DisposeHandle(hub);
