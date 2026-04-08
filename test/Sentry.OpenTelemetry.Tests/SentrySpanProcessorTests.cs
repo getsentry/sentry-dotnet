@@ -463,6 +463,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         using (new AssertionScope())
         {
             transaction.Contexts.Response.StatusCode.Should().Be(404);
+            transaction.Data.Should().Contain(OtelSemanticConventions.AttributeHttpResponseStatusCode, 404);
         }
     }
 

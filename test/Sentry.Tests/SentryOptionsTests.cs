@@ -490,6 +490,13 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
+    public void GetAllTransactionProcessors_ByDefault_DoesNotIncludeTraceIgnoreStatusCodeTransactionProcessor()
+    {
+        var sut = new SentryOptions();
+        Assert.DoesNotContain(sut.GetAllTransactionProcessors(), p => p is TraceIgnoreStatusCodeTransactionProcessor);
+    }
+
+    [Fact]
     public void AddTransactionProcessor_StoredInOptions()
     {
         var sut = new SentryOptions();
