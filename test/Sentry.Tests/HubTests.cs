@@ -1441,6 +1441,26 @@ public partial class HubTests : IDisposable
         Assert.Contains("sentry-trace_id=43365712692146d08ee11a729dfbcaca", baggage!.ToString());
     }
 
+    [Fact]
+    public void GetBaggage_OtelInstrumenter_ReturnsEmptyBaggage()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.AddDiagnosticLoggerSubsititute();
+        var hub = _fixture.GetSut();
+
+        // Act
+        var baggage = hub.GetBaggage();
+
+        // Assert
+        baggage.Members.Should().BeEmpty();
+        _fixture.Options.DiagnosticLogger.Received(1).Log(
+            SentryLevel.Warning,
+            Arg.Is<string>(s => s.Contains("GetBaggage should not be called when using OpenTelemetry.")),
+            null,
+            Arg.Any<object[]>());
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -1510,8 +1530,8 @@ public partial class HubTests : IDisposable
         {
             scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
             scope.PropagationContext.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
-            Assert.NotNull(scope.PropagationContext._dynamicSamplingContext);
-            scope.PropagationContext._dynamicSamplingContext.Items.Should().Contain(baggageHeader.GetSentryMembers());
+            Assert.NotNull(scope.PropagationContext.DynamicSamplingContext);
+            scope.PropagationContext.DynamicSamplingContext.Items.Should().Contain(baggageHeader.GetSentryMembers());
         });
 
         transactionContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
@@ -1531,7 +1551,7 @@ public partial class HubTests : IDisposable
         hub.ScopeManager.ConfigureScope(scope =>
         {
             Assert.Null(scope.PropagationContext.ParentSpanId);
-            Assert.Null(scope.PropagationContext._dynamicSamplingContext);
+            Assert.Null(scope.PropagationContext.DynamicSamplingContext);
         });
 
         transactionContext.Name.Should().Be("test-name");
@@ -1564,8 +1584,8 @@ public partial class HubTests : IDisposable
         {
             scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
             scope.PropagationContext.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
-            Assert.NotNull(scope.PropagationContext._dynamicSamplingContext);
-            scope.PropagationContext._dynamicSamplingContext.ToBaggageHeader().Members.Should().Contain(BaggageHeader.TryParse(baggageHeader)!.Members);
+            Assert.NotNull(scope.PropagationContext.DynamicSamplingContext);
+            scope.PropagationContext.DynamicSamplingContext.ToBaggageHeader().Members.Should().Contain(BaggageHeader.TryParse(baggageHeader)!.Members);
         });
 
         transactionContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
@@ -1585,7 +1605,7 @@ public partial class HubTests : IDisposable
         hub.ScopeManager.ConfigureScope(scope =>
         {
             Assert.Null(scope.PropagationContext.ParentSpanId);
-            Assert.Null(scope.PropagationContext._dynamicSamplingContext);
+            Assert.Null(scope.PropagationContext.DynamicSamplingContext);
         });
 
         transactionContext.Name.Should().Be("test-name");
@@ -2550,9 +2570,7 @@ public partial class HubTests : IDisposable
     public void CaptureFeedback_InvalidEmail_FeedbackDropped(string email)
     {
         // Arrange
-        _fixture.Options.Debug = true;
-        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        _fixture.Options.AddDiagnosticLoggerSubsititute();
         var hub = _fixture.GetSut();
         var feedback = new SentryFeedback("Test feedback", email);
 
@@ -2628,9 +2646,7 @@ public partial class HubTests : IDisposable
         _fixture.Options.AddIntegration(integration1);
         _fixture.Options.AddIntegration(integration2);
         _fixture.Options.AddIntegration(integration3);
-        _fixture.Options.Debug = true;
-        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        _fixture.Options.AddDiagnosticLoggerSubsititute();
         var hub = _fixture.GetSut();
 
         // Act

@@ -32,12 +32,12 @@ public class SentryPropagationContextTests
 
         Assert.Equal(original.TraceId, copy.TraceId);
         Assert.Equal(original.SpanId, copy.SpanId);
-        Assert.Equal(original._dynamicSamplingContext!.Items.Count, copy._dynamicSamplingContext!.Items.Count);
-        foreach (var dscItem in original._dynamicSamplingContext!.Items)
+        Assert.Equal(original.DynamicSamplingContext!.Items.Count, copy.DynamicSamplingContext!.Items.Count);
+        foreach (var dscItem in original.DynamicSamplingContext!.Items)
         {
             if (dscItem.Key == "replay_id")
             {
-                copy._dynamicSamplingContext!.Items["replay_id"].Should().Be(replaySessionIsActive
+                copy.DynamicSamplingContext!.Items["replay_id"].Should().Be(replaySessionIsActive
                     // We overwrite the replay_id when we have an active replay session
                     ? _fixture.ActiveReplayId.ToString()
                     // Otherwise we propagate whatever was in the baggage header
@@ -45,7 +45,7 @@ public class SentryPropagationContextTests
             }
             else
             {
-                copy._dynamicSamplingContext!.Items.Should()
+                copy.DynamicSamplingContext!.Items.Should()
                     .Contain(kvp => kvp.Key == dscItem.Key && kvp.Value == dscItem.Value);
             }
         }
@@ -59,18 +59,18 @@ public class SentryPropagationContextTests
         var options = new SentryOptions { Dsn = ValidDsn };
         var propagationContext = new SentryPropagationContext();
 
-        Assert.Null(propagationContext._dynamicSamplingContext); // Sanity check
+        Assert.Null(propagationContext.DynamicSamplingContext); // Sanity check
         _ = propagationContext.GetOrCreateDynamicSamplingContext(options, replaySessionIsActive ? _fixture.ActiveReplaySession : _fixture.InactiveReplaySession);
 
-        Assert.NotNull(propagationContext._dynamicSamplingContext);
+        Assert.NotNull(propagationContext.DynamicSamplingContext);
         if (replaySessionIsActive)
         {
             // We add the replay_id automatically when we have an active replay session
-            Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", propagationContext._dynamicSamplingContext.Items));
+            Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", propagationContext.DynamicSamplingContext.Items));
         }
         else
         {
-            Assert.DoesNotContain("replay_id", propagationContext._dynamicSamplingContext.Items);
+            Assert.DoesNotContain("replay_id", propagationContext.DynamicSamplingContext.Items);
         }
     }
 
@@ -95,7 +95,7 @@ public class SentryPropagationContextTests
 
         Assert.NotEqual(propagationContext.TraceId, SentryId.Empty);
         Assert.NotEqual(propagationContext.SpanId, SpanId.Empty);
-        Assert.Null(propagationContext._dynamicSamplingContext);
+        Assert.Null(propagationContext.DynamicSamplingContext);
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public class SentryPropagationContextTests
         Assert.Equal(traceHeader.TraceId, propagationContext.TraceId);
         Assert.NotEqual(traceHeader.SpanId, propagationContext.SpanId); // Sanity check
         Assert.Equal(traceHeader.SpanId, propagationContext.ParentSpanId);
-        Assert.Null(propagationContext._dynamicSamplingContext);
+        Assert.Null(propagationContext.DynamicSamplingContext);
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public class SentryPropagationContextTests
 
         var propagationContext = SentryPropagationContext.CreateFromHeaders(null, null, baggageHeader, _fixture.InactiveReplaySession);
 
-        Assert.Null(propagationContext._dynamicSamplingContext);
+        Assert.Null(propagationContext.DynamicSamplingContext);
     }
 
     [Theory]
