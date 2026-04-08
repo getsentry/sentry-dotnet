@@ -183,6 +183,74 @@ internal class FakeTransport : ITransport
     }
 }
 
+# Integration Tests for Sentry.Profiling
+Describe 'Console app with Profiling on <framework>' -ForEach @(
+    foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
+) {
+    BeforeAll {
+        ResetLocalPackages
+        RegisterLocalPackage 'Sentry.Profiling'
+
+        $path = "./console-app-with-profiling-on-$framework"
+        DotnetNew 'console' $path $framework
+        AddPackageReference $path 'Sentry.Profiling'
+
+        @'
+using Sentry;
+using Sentry.Extensibility;
+using Sentry.Protocol.Envelopes;
+
+SentrySdk.Init(options =>
+{
+    options.Dsn = args[0];
+    options.Debug = true;
+    options.Transport = new FakeTransport();
+
+    options.TracesSampleRate = 1.0;
+    options.ProfilesSampleRate = 1.0;
+    options.AddProfilingIntegration(TimeSpan.FromMilliseconds(1_000));
+});
+
+InvokeMethod();
+
+Console.WriteLine("Application completed successfully.");
+
+static void InvokeMethod()
+{
+    var transaction = SentrySdk.StartTransaction("app", "run");
+    Console.WriteLine("Hello World!");
+    transaction.Finish();
+}
+
+internal class FakeTransport : ITransport
+{
+    public virtual Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+    {
+        envelope.Serialize(Console.OpenStandardOutput(), null);
+        return Task.CompletedTask;
+    }
+}
+'@ | Out-File $path/Program.cs
+    }
+
+    AfterAll {
+        Remove-Item -Recurse -Force -Path $path -ErrorAction SilentlyContinue
+    }
+
+    # see https://github.com/getsentry/sentry-dotnet/issues/4815
+    It 'Profiling integration does not cause ReflectionTypeLoadException on startup' {
+        $dsn = 'http://key@127.0.0.1:9999/123'
+
+        $output = DotnetRun $path $framework $dsn
+
+        $output | Should -Not -AnyElementMatch 'ReflectionTypeLoadException'
+        $output | Should -Not -AnyElementMatch 'Dia2Lib'
+        $output | Should -Not -AnyElementMatch 'TraceReloggerLib'
+        $output | Should -AnyElementMatch 'Profiling stopped on transaction finish.'
+        $output | Should -AnyElementMatch 'Application completed successfully.'
+    }
+}
+
 # This ensures we don't have a regression for https://github.com/getsentry/sentry-dotnet/issues/2825
 Describe 'Console app regression (missing System.Reflection.Metadata)' {
     BeforeAll {
