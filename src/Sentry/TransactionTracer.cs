@@ -433,6 +433,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             var latestSpanEnd = _spans
                 .Where(s => s.IsFinished)
                 .Select(s => s.EndTimestamp)
+                .DefaultIfEmpty()
                 .Max();
             EndTimestamp = latestSpanEnd ?? _stopwatch.CurrentDateTimeOffset;
         }
