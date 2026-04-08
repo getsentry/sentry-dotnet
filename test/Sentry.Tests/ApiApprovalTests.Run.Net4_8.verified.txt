@@ -297,6 +297,7 @@ namespace Sentry
         new string Name { get; set; }
         System.Collections.Generic.IReadOnlyCollection<Sentry.ISpan> Spans { get; }
         Sentry.ISpan? GetLastActiveSpan();
+        void ResetIdleTimeout();
     }
     public enum InstructionAddressAdjustment
     {
@@ -1367,6 +1368,7 @@ namespace Sentry
         public void Finish(System.Exception exception, Sentry.SpanStatus status) { }
         public Sentry.ISpan? GetLastActiveSpan() { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
+        public void ResetIdleTimeout() { }
         public void SetData(string key, object? value) { }
         [System.Obsolete("Use SetData")]
         public void SetExtra(string key, object? value) { }
@@ -1498,6 +1500,7 @@ namespace Sentry.Extensibility
         public void SetTag(string key, string value) { }
         public void StartSession() { }
         public Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
+        public Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.TimeSpan? idleTimeout) { }
         public void UnsetTag(string key) { }
     }
     public class FormRequestPayloadExtractor : Sentry.Extensibility.BaseRequestPayloadExtractor
