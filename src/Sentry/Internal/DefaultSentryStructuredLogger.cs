@@ -54,7 +54,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         else
         {
             message = template;
-            template = null!;
+            template = null!; // SentryLog.Template is declared nullable (string?)
             @params = ImmutableArray<KeyValuePair<string, object>>.Empty;
         }
 
