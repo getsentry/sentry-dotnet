@@ -72,6 +72,11 @@ Console.WriteLine("Hello, Sentry!");
         $LASTEXITCODE | Should -Be 0
     }
 
+    It 'MSBuildTreatWarningsAsErrors' -Skip:(!$IsWindows) {
+        dotnet publish -c Release -p:MSBuildTreatWarningsAsErrors=true | Write-Host
+        $LASTEXITCODE | Should -Be 0
+    }
+
     It 'Container' -Skip:(!$IsLinux -or !(Get-Command docker -ErrorAction SilentlyContinue)) {
         dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer | Write-Host
         $LASTEXITCODE | Should -Be 0
