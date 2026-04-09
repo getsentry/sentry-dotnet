@@ -1,5 +1,31 @@
 # Changelog
 
+## 6.3.1
+
+### Fixes 🐛
+
+- fix: Workaround FileNotFoundException on Android when recovering sessions by @jamescrosswell in [#5084](https://github.com/getsentry/sentry-dotnet/pull/5084)
+- fix: `CaptureFeedback` now supports multiple attachments correctly by @bitsandfoxes in [#5077](https://github.com/getsentry/sentry-dotnet/pull/5077)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Native SDK to v0.13.5 by @github-actions in [#5119](https://github.com/getsentry/sentry-dotnet/pull/5119)
+- chore(deps): update CLI to v3.3.5 by @github-actions in [#5093](https://github.com/getsentry/sentry-dotnet/pull/5093)
+- chore(deps): update Native SDK to v0.13.4 by @github-actions in [#5081](https://github.com/getsentry/sentry-dotnet/pull/5081)
+- chore(deps): update Java SDK to v8.37.1 by @github-actions in [#5071](https://github.com/getsentry/sentry-dotnet/pull/5071)
+- chore(deps): update CLI to v3.3.4 by @github-actions in [#5068](https://github.com/getsentry/sentry-dotnet/pull/5068)
+- chore(deps): update Java SDK to v8.37.0 by @github-actions in [#5069](https://github.com/getsentry/sentry-dotnet/pull/5069)
+- chore(deps): update Cocoa SDK to v9.8.0 by @github-actions in [#5044](https://github.com/getsentry/sentry-dotnet/pull/5044)
+- chore(deps): update Java SDK to v8.36.0 by @github-actions in [#5036](https://github.com/getsentry/sentry-dotnet/pull/5036)
+- chore(deps): update epitaph to 0.1.1 by @github-actions in [#5036](https://github.com/getsentry/sentry-dotnet/pull/5036)
+
+### Other
+
+- chore: Update validate-pr workflow by @stephanie-anderson in [#5108](https://github.com/getsentry/sentry-dotnet/pull/5108)
+- ci: fix workflows that always fail for fork PRs by @jamescrosswell in [#5065](https://github.com/getsentry/sentry-dotnet/pull/5065)
+
 ## 6.3.0
 
 ### Features
