@@ -156,6 +156,7 @@ public sealed class SpanTracer : IBaseTracer, ISpan
     {
         Status ??= SpanStatus.Ok;
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
+        Transaction?.ChildSpanFinished();
     }
 
     /// <inheritdoc />
