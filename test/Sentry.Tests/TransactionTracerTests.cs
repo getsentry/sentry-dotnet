@@ -6,6 +6,29 @@ public class TransactionTracerTests
 {
     private static readonly TimeSpan AnyTimeout = TimeSpan.FromSeconds(30);
 
+    private sealed class ThrowOnDisposedTimer : ISentryTimer
+    {
+        private bool _isDisposed;
+
+        public ThrowOnDisposedTimer(Action _)
+        {
+        }
+
+        public void Start(TimeSpan timeout)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(ThrowOnDisposedTimer));
+            }
+        }
+
+        public void Cancel()
+        {
+        }
+
+        public void Dispose() => _isDisposed = true;
+    }
+
     private static (TransactionTracer transaction, MockTimer timer) CreateIdleTransaction(
         IHub hub, string name = "name", string op = "op")
     {
@@ -122,13 +145,39 @@ public class TransactionTracerTests
     {
         // Given an auto-generated UI event transaction with no child spans
         var hub = Substitute.For<IHub>();
-        var (_, timer) = CreateIdleTransaction(hub);
+        var (transaction, timer) = CreateIdleTransaction(hub);
 
         // When the idleTimeout fires
         timer.Fire();
 
         // Then the SDK discards the transaction (does not capture it)
         hub.DidNotReceive().CaptureTransaction(Arg.Any<SentryTransaction>());
+        transaction.IsFinished.Should().BeTrue();
+        transaction.EndTimestamp.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void ChildSpanFinished_DisposedIdleTimer_DoesNotThrow()
+    {
+        // Given an idle transaction whose timer has been disposed after the finished-state check
+        var hub = Substitute.For<IHub>();
+        ThrowOnDisposedTimer? disposedTimer = null;
+        var transaction = new TransactionTracer(
+            hub,
+            new TransactionContext("name", "op"),
+            idleTimeout: AnyTimeout,
+            timerFactory: callback =>
+            {
+                disposedTimer = new ThrowOnDisposedTimer(callback);
+                return disposedTimer;
+            });
+        disposedTimer!.Dispose();
+
+        // When ChildSpanFinished attempts to restart the disposed timer
+        var action = () => transaction.ChildSpanFinished();
+
+        // Then no ObjectDisposedException escapes
+        action.Should().NotThrow();
     }
 
     [Fact]

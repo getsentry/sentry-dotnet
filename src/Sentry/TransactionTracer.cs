@@ -287,6 +287,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         if (shouldDiscard)
         {
             _options?.LogDebug("Idle transaction '{0}' has no child spans. Discarding.", SpanId);
+            EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
             _idleTimer?.Dispose();
             _hub.ConfigureScope(static (scope, tracer) => scope.ResetTransaction(tracer), this);
             return;
@@ -378,7 +379,15 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         // Only restart the idle timer when there are no more active (unfinished) child spans
         if (_activeSpanTracker.PeekActive() == null)
         {
-            _idleTimer?.Start(_idleTimeout.Value);
+            try
+            {
+                _idleTimer?.Start(_idleTimeout.Value);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Finish() may dispose the timer concurrently between the _hasFinished check and Start().
+                // Swallow the exception — the transaction is already finishing.
+            }
         }
     }
 
