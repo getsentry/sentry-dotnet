@@ -4,6 +4,8 @@
 // If changes are required, update the script instead.
 // -----------------------------------------------------------------------------
 
+#nullable enable
+
 using System;
 using CoreFoundation;
 using CoreGraphics;
@@ -1778,6 +1780,10 @@ interface SentryOptions
     [Export("attachStacktrace")]
     bool AttachStacktrace { get; set; }
 
+    // @property (nonatomic) BOOL attachAllThreads;
+    [Export("attachAllThreads")]
+    bool AttachAllThreads { get; set; }
+
     // @property (nonatomic) NSUInteger maxAttachmentSize;
     [Export("maxAttachmentSize")]
     nuint MaxAttachmentSize { get; set; }
@@ -2645,6 +2651,11 @@ interface SentrySDK
     [Export("captureEvent:withScopeBlock:")]
     SentryId CaptureEvent(SentryEvent @event, Action<SentryScope> block);
 
+    // +(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event attachAllThreads:(BOOL)attachAllThreads;
+    [Static]
+    [Export("captureEvent:attachAllThreads:")]
+    SentryId CaptureEvent(SentryEvent @event, bool attachAllThreads);
+
     // +(id<SentrySpan> _Nonnull)startTransactionWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation;
     [Static]
     [Export("startTransactionWithName:operation:")]
@@ -2690,6 +2701,11 @@ interface SentrySDK
     [Export("captureError:withScopeBlock:")]
     SentryId CaptureError(NSError error, Action<SentryScope> block);
 
+    // +(SentryId * _Nonnull)captureError:(NSError * _Nonnull)error attachAllThreads:(BOOL)attachAllThreads;
+    [Static]
+    [Export("captureError:attachAllThreads:")]
+    SentryId CaptureError(NSError error, bool attachAllThreads);
+
     // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception;
     [Static]
     [Export("captureException:")]
@@ -2705,6 +2721,11 @@ interface SentrySDK
     [Export("captureException:withScopeBlock:")]
     SentryId CaptureException(NSException exception, Action<SentryScope> block);
 
+    // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception attachAllThreads:(BOOL)attachAllThreads;
+    [Static]
+    [Export("captureException:attachAllThreads:")]
+    SentryId CaptureException(NSException exception, bool attachAllThreads);
+
     // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message;
     [Static]
     [Export("captureMessage:")]
@@ -2719,6 +2740,11 @@ interface SentrySDK
     [Static]
     [Export("captureMessage:withScopeBlock:")]
     SentryId CaptureMessage(string message, Action<SentryScope> block);
+
+    // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message attachAllThreads:(BOOL)attachAllThreads;
+    [Static]
+    [Export("captureMessage:attachAllThreads:")]
+    SentryId CaptureMessage(string message, bool attachAllThreads);
 
     // +(void)captureFeedback:(SentryFeedback * _Nonnull)feedback;
     [Static]
