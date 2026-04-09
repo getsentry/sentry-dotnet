@@ -10,12 +10,15 @@ namespace Sentry;
 /// </summary>
 public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 {
+    private const int SpanLimit = 1000;
+
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly ISentryTimer? _idleTimer;
     private readonly TimeSpan? _idleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
-    private InterlockedBoolean _hasFinished;
+    private bool _hasFinished;
+    private readonly ReaderWriterLockSlim _finishLock = new();
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -262,10 +265,28 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         }
 
         // Discard if no child spans were ever started
-        if (_spans.IsEmpty)
+        bool shouldDiscard;
+        _finishLock.EnterWriteLock();
+        try
+        {
+            if (_spans.IsEmpty && !_hasFinished)
+            {
+                _hasFinished = true;
+                shouldDiscard = true;
+            }
+            else
+            {
+                shouldDiscard = false;
+            }
+        }
+        finally
+        {
+            _finishLock.ExitWriteLock();
+        }
+
+        if (shouldDiscard)
         {
             _options?.LogDebug("Idle transaction '{0}' has no child spans. Discarding.", SpanId);
-            _hasFinished.Exchange(true);
             _idleTimer?.Dispose();
             _hub.ConfigureScope(static (scope, tracer) => scope.ResetTransaction(tracer), this);
             return;
@@ -312,22 +333,46 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     private void AddChildSpan(SpanTracer span)
     {
         // Limit spans to 1000
-        var isOutOfLimit = _spans.Count >= 1000;
+        var isOutOfLimit = _spans.Count >= SpanLimit;
         span.IsSampled = isOutOfLimit ? false : IsSampled;
-
-        if (!isOutOfLimit)
+        if (isOutOfLimit)
         {
+            _options?.LogDebug("Discarding child span '{0}' due to {1} span limit", SpanId, SpanLimit);
+            return;
+        }
+
+        _finishLock.EnterReadLock();
+        try
+        {
+            if (_hasFinished)
+            {
+                _options?.LogDebug("Discarding child span '{0}' as the trace has already finished", SpanId);
+                return;
+            }
+
             _spans.Add(span);
             _activeSpanTracker.Push(span);
             _idleTimer?.Cancel(); // Pause the idle timer while a child span is in flight
+        }
+        finally
+        {
+            _finishLock.ExitReadLock();
         }
     }
 
     internal void ChildSpanFinished()
     {
-        if (!_idleTimeout.HasValue || _hasFinished)
+        _finishLock.EnterReadLock();
+        try
         {
-            return;
+            if (!_idleTimeout.HasValue || _hasFinished)
+            {
+                return;
+            }
+        }
+        finally
+        {
+            _finishLock.ExitReadLock();
         }
 
         // Only restart the idle timer when there are no more active (unfinished) child spans
@@ -388,9 +433,17 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// </summary>
     public void ResetIdleTimeout()
     {
-        if (!_idleTimeout.HasValue || _hasFinished)
+        _finishLock.EnterReadLock();
+        try
         {
-            return;
+            if (!_idleTimeout.HasValue || _hasFinished)
+            {
+                return;
+            }
+        }
+        finally
+        {
+            _finishLock.ExitReadLock();
         }
         try
         {
@@ -406,9 +459,18 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public void Finish()
     {
-        if (_hasFinished.Exchange(true))
+        _finishLock.EnterWriteLock();
+        try
         {
-            return;
+            if (_hasFinished)
+            {
+                return;
+            }
+            _hasFinished = true;
+        }
+        finally
+        {
+            _finishLock.ExitWriteLock();
         }
 
         _options?.LogDebug("Attempting to finish Transaction '{0}'.", SpanId);
