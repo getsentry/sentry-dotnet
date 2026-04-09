@@ -23,6 +23,28 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void Create_Default_HasMinimalSpecification()
+    {
+        var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message");
+
+        log.Timestamp.Should().Be(Timestamp);
+        log.TraceId.Should().Be(TraceId);
+        log.Level.Should().Be((SentryLogLevel)24);
+        log.Message.Should().Be("message");
+        log.Template.Should().Be(null);
+        log.Parameters.Should().BeEmpty();
+        log.SpanId.Should().Be(null);
+
+#if DEBUG
+        var assignDefault = static () => new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
+        {
+            Parameters = default,
+        };
+        assignDefault.Should().Throw<Exception>("Disallow default ImmutableArray");
+#endif
+    }
+
+    [Fact]
     public void Protocol_Default_VerifyAttributes()
     {
         var options = new SentryOptions

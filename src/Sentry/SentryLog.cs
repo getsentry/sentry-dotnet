@@ -60,7 +60,15 @@ public sealed class SentryLog
     /// <summary>
     /// The parameters to the template string.
     /// </summary>
-    public ImmutableArray<KeyValuePair<string, object>> Parameters { get; init; }
+    public ImmutableArray<KeyValuePair<string, object>> Parameters
+    {
+        get;
+        init
+        {
+            Debug.Assert(!value.IsDefault); // DEBUG-only check as .ctor is internal and set-accessor is init-only
+            field = value;
+        }
+    }
 
     /// <summary>
     /// The span id of the span that was active when the log was collected.
