@@ -272,6 +272,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             if (_spans.IsEmpty && !_hasFinished)
             {
                 _hasFinished = true;
+                _idleTimer?.Dispose();
                 shouldDiscard = true;
             }
             else
@@ -287,7 +288,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         if (shouldDiscard)
         {
             _options?.LogDebug("Idle transaction '{0}' has no child spans. Discarding.", SpanId);
-            _idleTimer?.Dispose();
+            EndTimestamp = _stopwatch.CurrentDateTimeOffset; // Prevent MauiEventsBinder from reusing
             _hub.ConfigureScope(static (scope, tracer) => scope.ResetTransaction(tracer), this);
             return;
         }
@@ -332,7 +333,6 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private void AddChildSpan(SpanTracer span)
     {
-        // Limit spans to 1000
         var isOutOfLimit = _spans.Count >= SpanLimit;
         span.IsSampled = isOutOfLimit ? false : IsSampled;
         if (isOutOfLimit)
@@ -350,9 +350,9 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
                 return;
             }
 
+            _idleTimer?.Cancel(); // Pause the idle timer while a child span is in flight
             _spans.Add(span);
             _activeSpanTracker.Push(span);
-            _idleTimer?.Cancel(); // Pause the idle timer while a child span is in flight
         }
         finally
         {
@@ -369,16 +369,16 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             {
                 return;
             }
+
+            // Only restart the idle timer when there are no more active (unfinished) child spans
+            if (_activeSpanTracker.PeekActive() == null)
+            {
+                _idleTimer?.Start(_idleTimeout.Value);
+            }
         }
         finally
         {
             _finishLock.ExitReadLock();
-        }
-
-        // Only restart the idle timer when there are no more active (unfinished) child spans
-        if (_activeSpanTracker.PeekActive() == null)
-        {
-            _idleTimer?.Start(_idleTimeout.Value);
         }
     }
 
@@ -440,43 +440,43 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             {
                 return;
             }
+            _idleTimer?.Start(_idleTimeout.Value);
         }
         finally
         {
             _finishLock.ExitReadLock();
         }
-        try
-        {
-            _idleTimer?.Start(_idleTimeout.Value);
-        }
-        catch (ObjectDisposedException)
-        {
-            // Finish() may dispose the timer concurrently between the _hasFinished check and Start().
-            // Swallow the exception — the transaction is already finishing.
-        }
     }
 
-    /// <inheritdoc />
-    public void Finish()
+    private bool TryFinishOnce()
     {
         _finishLock.EnterWriteLock();
         try
         {
             if (_hasFinished)
             {
-                return;
+                return false;
             }
             _hasFinished = true;
+            _idleTimer?.Cancel();
+            _idleTimer?.Dispose();
+            return true;
         }
         finally
         {
             _finishLock.ExitWriteLock();
         }
+    }
+
+    /// <inheritdoc />
+    public void Finish()
+    {
+        if (!TryFinishOnce())
+        {
+            return;
+        }
 
         _options?.LogDebug("Attempting to finish Transaction '{0}'.", SpanId);
-        _idleTimer?.Cancel();
-        _idleTimer?.Dispose();
-
         if (IsSentryRequest)
         {
             // Normally we wouldn't start transactions for Sentry requests but when instrumenting with OpenTelemetry

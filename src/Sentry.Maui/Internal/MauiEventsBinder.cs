@@ -346,7 +346,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
             : _hub.StartTransaction(context);
 
         // Only bind to scope if there is no user-created transaction already there.
-        // Re-evaluated on each navigation so a user transaction that finishes later is handled correctly.
         var hasUserTransaction = false;
         _hub.ConfigureScope(scope =>
         {
@@ -355,7 +354,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 hasUserTransaction = true;
             }
         });
-
         if (!hasUserTransaction)
         {
             _hub.ConfigureScope(static (scope, t) => scope.Transaction = t, transaction);
