@@ -65,7 +65,7 @@ public sealed class SentryLog
         get;
         init
         {
-            Debug.Assert(!value.IsDefault); // DEBUG-only check as .ctor is internal and set-accessor is init-only
+            Debug.Assert(!value.IsDefault); // DEBUG-only check, because .ctor is internal and set-accessor is init-only
             field = value;
         }
     }
