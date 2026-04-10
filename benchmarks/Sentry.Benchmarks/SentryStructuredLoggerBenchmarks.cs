@@ -49,6 +49,7 @@ public class SentryStructuredLoggerBenchmarks
     [GlobalCleanup]
     public void Cleanup()
     {
+        (_logger as IDisposable)?.Dispose();
         _hub.Dispose();
 
         if (_lastLog is null)
