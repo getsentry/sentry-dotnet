@@ -21,8 +21,12 @@
   <PropertyGroup Condition="Exists('$(SentryCocoaCache).git')">
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
     <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/**/*.h</SentryCocoaBindingInputs>
+    <!-- Resolve path to modules/sentry-cocoa/.git -->
     <SentryCocoaGitFile>$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
-    <SentryCocoaGitDir>$([System.IO.File]::ReadAllText('$(SentryCocoaGitFile)').Trim().Replace('gitdir: ', ''))</SentryCocoaGitDir>
+    <!-- Standalone clone: .git is a directory -->
+    <SentryCocoaGitDir Condition="Exists('$(SentryCocoaCache).git\HEAD')">.git</SentryCocoaGitDir>
+    <!-- Submodule: .git is a file pointing at the real gitdir -->
+    <SentryCocoaGitDir Condition="'$(SentryCocoaGitDir)' == ''">$([System.IO.File]::ReadAllText('$(SentryCocoaGitFile)').Trim().Replace('gitdir: ', ''))</SentryCocoaGitDir>
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
