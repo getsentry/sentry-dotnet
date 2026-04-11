@@ -4,7 +4,23 @@ set -euo pipefail
 pushd "$(dirname "$0")" >/dev/null
 cd ../modules/sentry-cocoa
 
-rm -rf Carthage
+mkdir -p Carthage
+LOCK_DIR="$PWD/Carthage/.lock.d"
+
+# Serialize concurrent invocations; parallel xcodebuilds race on DerivedData.
+LOCK_HELD=0
+trap 'if [[ $LOCK_HELD -eq 1 ]]; then rmdir "$LOCK_DIR" 2>/dev/null || true; fi' EXIT
+while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+    sleep 0.2
+done
+LOCK_HELD=1
+
+if [[ -f Carthage/.built-from-sha ]] && [[ "$(cat Carthage/.built-from-sha)" == "$(git rev-parse HEAD)" ]]; then
+    popd >/dev/null
+    exit 0
+fi
+
+rm -rf Carthage/output-*.xcarchive Carthage/Build-* Carthage/Headers Carthage/.built-from-sha
 
 # Grabbing the first SDK versions
 sdks=$(xcodebuild -showsdks)
@@ -65,7 +81,7 @@ find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Car
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 rm -rf Carthage/output-*
 
-cp "$(git rev-parse --git-dir)/HEAD" Carthage/.built-from-sha
+git rev-parse HEAD > Carthage/.built-from-sha
 echo ""
 
 popd >/dev/null
