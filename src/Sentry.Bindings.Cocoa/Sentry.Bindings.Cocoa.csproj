@@ -127,7 +127,8 @@
           Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
   <Target Name="CleanCocoaSDK" AfterTargets="Clean" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-    <RemoveDir Directories="$(SentryCocoaCache)" ContinueOnError="true" />
+    <RemoveDir Directories="$(SentryCocoaCache)Carthage;$(SentryCocoaFramework);$(SentryCocoaFrameworkHeaders)" ContinueOnError="true" />
+    <Delete Files="$(SentryCocoaFramework).zip;$(SentryCocoaFramework).sanitized.stamp" ContinueOnError="true" />
   </Target>
 
   <!-- Generate bindings -->
