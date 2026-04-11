@@ -5,17 +5,22 @@ pushd "$(dirname "$0")" >/dev/null
 cd ../modules/sentry-cocoa
 
 mkdir -p Carthage
-LOCK_DIR="$PWD/Carthage/.lock.d"
+PID_FILE="$PWD/Carthage/.build.pid"
+trap 'if [[ "$(cat "$PID_FILE" 2>/dev/null)" == "$$" ]]; then rm -f "$PID_FILE"; fi' EXIT
 
 # Serialize concurrent invocations; parallel xcodebuilds race on DerivedData.
-LOCK_HELD=0
-trap 'if [[ $LOCK_HELD -eq 1 ]]; then rmdir "$LOCK_DIR" 2>/dev/null || true; fi' EXIT
-while ! mkdir "$LOCK_DIR" 2>/dev/null; do
-    sleep 0.2
+while ! (set -C; echo $$ > "$PID_FILE") 2>/dev/null; do
+    build_pid=$(cat "$PID_FILE" 2>/dev/null || true)
+    if [[ -n "$build_pid" ]] && ! kill -0 "$build_pid" 2>/dev/null; then
+        echo "Previous build did not complete (pid $build_pid); cleaning up and retrying" >&2
+        rm -f "$PID_FILE"
+        continue
+    fi
+    sleep 2
 done
-LOCK_HELD=1
 
-if [[ -f Carthage/.built-from-sha ]] && [[ "$(cat Carthage/.built-from-sha)" == "$(git rev-parse HEAD)" ]]; then
+current_sha=$(git rev-parse HEAD)
+if [[ -f Carthage/.built-from-sha ]] && [[ "$(cat Carthage/.built-from-sha)" == "$current_sha" ]]; then
     popd >/dev/null
     exit 0
 fi
@@ -81,7 +86,7 @@ find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Car
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 rm -rf Carthage/output-*
 
-git rev-parse HEAD > Carthage/.built-from-sha
+echo "$current_sha" > Carthage/.built-from-sha
 echo ""
 
 popd >/dev/null
