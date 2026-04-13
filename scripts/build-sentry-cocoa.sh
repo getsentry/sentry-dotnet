@@ -5,19 +5,23 @@ pushd "$(dirname "$0")" >/dev/null
 cd ../modules/sentry-cocoa
 
 mkdir -p Carthage
-PID_FILE="$PWD/Carthage/.build.pid"
-trap 'if [[ "$(cat "$PID_FILE" 2>/dev/null)" == "$$" ]]; then rm -f "$PID_FILE"; fi' EXIT
+LOCK_DIR="$PWD/Carthage/.build.lock"
+trap 'if [[ "$(cat "$LOCK_DIR/pid" 2>/dev/null)" == "$$" ]]; then rm -rf "$LOCK_DIR"; fi' EXIT
 
 # Serialize concurrent invocations; parallel xcodebuilds race on DerivedData.
-while ! (set -C; echo $$ > "$PID_FILE") 2>/dev/null; do
-    build_pid=$(cat "$PID_FILE" 2>/dev/null || true)
+while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+    build_pid=$(cat "$LOCK_DIR/pid" 2>/dev/null || true)
     if [[ -n "$build_pid" ]] && ! kill -0 "$build_pid" 2>/dev/null; then
         echo "Previous build did not complete (pid $build_pid); cleaning up and retrying" >&2
-        rm -f "$PID_FILE"
+        # Atomically claim the stale dir via rename
+        if mv "$LOCK_DIR" "$LOCK_DIR.stale.$$" 2>/dev/null; then
+            rm -rf "$LOCK_DIR.stale.$$"
+        fi
         continue
     fi
     sleep 2
 done
+echo $$ > "$LOCK_DIR/pid"
 
 current_sha=$(git rev-parse HEAD)
 if [[ -f Carthage/.built-from-sha ]] && [[ "$(cat Carthage/.built-from-sha)" == "$current_sha" ]]; then
