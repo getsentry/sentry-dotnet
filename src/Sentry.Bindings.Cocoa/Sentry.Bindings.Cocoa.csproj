@@ -8,17 +8,17 @@
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
     <SentryCocoaCache>..\..\modules\sentry-cocoa\</SentryCocoaCache>
+    <SentryCocoaProperties>$(MSBuildThisFileDirectory)..\..\modules\sentry-cocoa.properties</SentryCocoaProperties>
     <SentryCocoaFrameworkHeaders>$(SentryCocoaCache)Sentry.framework\</SentryCocoaFrameworkHeaders>
     <!-- SentrySpan.g.cs: error CS0108: 'ISentrySpan.Serialize()' hides inherited member 'ISentrySerializable.Serialize()'. Use the new keyword if hiding was intended -->
     <NoWarn>$(NoWarn);CS0108</NoWarn>
   </PropertyGroup>
 
   <!-- Released Cocoa SDK builds -->
-  <PropertyGroup Condition="!Exists('$(SentryCocoaCache).git')">
-    <SentryCocoaProperties>$([System.IO.File]::ReadAllText("$(MSBuildThisFileDirectory)../../modules/sentry-cocoa.properties"))</SentryCocoaProperties>
-    <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(SentryCocoaProperties), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
+  <PropertyGroup Condition="Exists('$(SentryCocoaProperties)') And !Exists('$(SentryCocoaCache).git')">
+    <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(SentryCocoaProperties)')), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
     <SentryCocoaFramework>$(SentryCocoaCache)Sentry-$(SentryCocoaVersion).xcframework</SentryCocoaFramework>
-    <SentryCocoaBindingInputs>../../modules/sentry-cocoa.properties;../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaFrameworkHeaders)**/*.h</SentryCocoaBindingInputs>
+    <SentryCocoaBindingInputs>$(SentryCocoaProperties);../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaFrameworkHeaders)**/*.h</SentryCocoaBindingInputs>
   </PropertyGroup>
 
   <!-- Override values for local Cocoa SDK builds -->
@@ -68,7 +68,7 @@
 
   <!-- Downloads and sets up the Cocoa SDK: dotnet msbuild /t:setupCocoaSDK src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj -->
   <Target Name="_DownloadCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaCache).git') And !Exists('$(SentryCocoaFramework)')">
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(SentryCocoaProperties)') And !Exists('$(SentryCocoaCache).git') And !Exists('$(SentryCocoaFramework)')">
 
     <Message Importance="High" Text="Setting up the Cocoa SDK version '$(SentryCocoaVersion)'." />
 
