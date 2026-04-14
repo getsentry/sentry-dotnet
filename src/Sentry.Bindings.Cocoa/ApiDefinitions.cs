@@ -158,6 +158,10 @@ interface SentryBaggage
     [NullAllowed, Export("replayId", ArgumentSemantic.Strong)]
     string ReplayId { get; set; }
 
+    // @property (readonly, nonatomic) NSString * _Nullable orgId;
+    [NullAllowed, Export("orgId")]
+    string OrgId { get; }
+
     // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction sampleRate:(NSString * _Nullable)sampleRate sampled:(NSString * _Nullable)sampled replayId:(NSString * _Nullable)replayId;
     [Export("initWithTraceId:publicKey:releaseName:environment:transaction:sampleRate:sampled:replayId:")]
     NativeHandle Constructor(SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string sampleRate, [NullAllowed] string sampled, [NullAllowed] string replayId);
@@ -165,6 +169,10 @@ interface SentryBaggage
     // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction sampleRate:(NSString * _Nullable)sampleRate sampleRand:(NSString * _Nullable)sampleRand sampled:(NSString * _Nullable)sampled replayId:(NSString * _Nullable)replayId;
     [Export("initWithTraceId:publicKey:releaseName:environment:transaction:sampleRate:sampleRand:sampled:replayId:")]
     NativeHandle Constructor(SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string sampleRate, [NullAllowed] string sampleRand, [NullAllowed] string sampled, [NullAllowed] string replayId);
+
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction sampleRate:(NSString * _Nullable)sampleRate sampleRand:(NSString * _Nullable)sampleRand sampled:(NSString * _Nullable)sampled replayId:(NSString * _Nullable)replayId orgId:(NSString * _Nullable)orgId;
+    [Export("initWithTraceId:publicKey:releaseName:environment:transaction:sampleRate:sampleRand:sampled:replayId:orgId:")]
+    NativeHandle Constructor(SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string sampleRate, [NullAllowed] string sampleRand, [NullAllowed] string sampled, [NullAllowed] string replayId, [NullAllowed] string orgId);
 
     // -(NSString * _Nonnull)toHTTPHeaderWithOriginalBaggage:(NSDictionary * _Nullable)originalBaggage;
     [Export("toHTTPHeaderWithOriginalBaggage:")]
@@ -1368,6 +1376,10 @@ interface SentryTraceContext : SentrySerializable
     [NullAllowed, Export("replayId")]
     string ReplayId { get; }
 
+    // @property (readonly, nonatomic) NSString * _Nullable orgId;
+    [NullAllowed, Export("orgId")]
+    string OrgId { get; }
+
     // -(SentryBaggage * _Nonnull)toBaggage;
     [Export("toBaggage")]
     SentryBaggage ToBaggage();
@@ -1656,6 +1668,11 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export("setLogOutput:")]
     void SetLogOutput(Action<NSString> output);
+
+    // +(void)ignoreNextSignal:(int)signum;
+    [Static]
+    [Export("ignoreNextSignal:")]
+    void IgnoreNextSignal(int signum);
 }
 
 // @interface SentryOptions : NSObject
@@ -1987,6 +2004,18 @@ interface SentryOptions
     [Export("spotlightUrl")]
     string SpotlightUrl { get; set; }
 
+    // @property (nonatomic) BOOL strictTraceContinuation;
+    [Export("strictTraceContinuation")]
+    bool StrictTraceContinuation { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nullable orgId;
+    [NullAllowed, Export("orgId")]
+    string OrgId { get; set; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nullable effectiveOrgId;
+    [NullAllowed, Export("effectiveOrgId")]
+    string EffectiveOrgId { get; }
+
     // @property (nonatomic, strong) SentryExperimentalOptions * _Nonnull experimental;
     [Export("experimental", ArgumentSemantic.Strong)]
     SentryExperimentalOptions Experimental { get; set; }
@@ -2129,6 +2158,10 @@ interface SentryDsn
     // -(NSURL * _Nonnull)getEnvelopeEndpoint __attribute__((warn_unused_result("")));
     [Export("getEnvelopeEndpoint")]
     NSUrl EnvelopeEndpoint { get; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nullable orgId;
+    [NullAllowed, Export("orgId")]
+    string OrgId { get; }
 }
 
 // @interface SentryExperimentalOptions : NSObject
