@@ -259,11 +259,7 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
 
-#if NETSTANDARD2_0 || NETFRAMEWORK
-    private ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
-#else
-    private readonly ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
-#endif
+    private readonly ConcurrentQueueLite<Breadcrumb> _breadcrumbs = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
@@ -443,12 +439,7 @@ public class Scope : IEventLike
     /// </summary>
     public void ClearBreadcrumbs()
     {
-#if NETSTANDARD2_0 || NETFRAMEWORK
-        // No Clear method on ConcurrentQueue for these target frameworks
-        Interlocked.Exchange(ref _breadcrumbs, new());
-#else
         _breadcrumbs.Clear();
-#endif
     }
 
     /// <summary>
