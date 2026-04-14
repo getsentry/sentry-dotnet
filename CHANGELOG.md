@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.3.2
+
+### Dependencies ⬆️
+
+- chore(deps): update Native SDK to v0.13.6 by @github-actions in [#5128](https://github.com/getsentry/sentry-dotnet/pull/5128)
+
 ## 6.3.1
 
 ### Fixes 🐛
