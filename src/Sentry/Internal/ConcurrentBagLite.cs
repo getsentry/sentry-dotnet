@@ -6,7 +6,7 @@ namespace Sentry.Internal;
 /// We're using this to avoid the same class of memory leak that <see cref="ConcurrentQueueLite{T}"/>
 /// was introduced to avoid. See https://github.com/getsentry/sentry-dotnet/issues/5113
 /// </summary>
-internal class ConcurrentBagLite<T> : IEnumerable<T>
+internal class ConcurrentBagLite<T> : IReadOnlyCollection<T>
 {
     private readonly List<T> _items;
 
