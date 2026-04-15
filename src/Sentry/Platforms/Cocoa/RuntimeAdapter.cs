@@ -6,8 +6,8 @@ internal interface IRuntime
 {
     internal event MarshalManagedExceptionHandler MarshalManagedException;
     internal event MarshalObjectiveCExceptionHandler MarshalObjectiveCException;
-    public bool IsMono { get; }
-    public void IgnoreNextSignal(int signal);
+    internal bool IsMono { get; }
+    internal void IgnoreNextSignal(int signal);
 }
 
 internal sealed class RuntimeAdapter : IRuntime
