@@ -66,5 +66,61 @@ public class RuntimeMarshalManagedExceptionIntegrationTests
 
         _fixture.Runtime.Received().MarshalManagedException += sut.Handle;
     }
+
+    [Theory]
+    [InlineData(MarshalManagedExceptionMode.Default)]
+    [InlineData(MarshalManagedExceptionMode.ThrowObjectiveCException)]
+    [InlineData(MarshalManagedExceptionMode.Abort)]
+    public void Handle_Mono_AbortingMode_IgnoresSigabrt(MarshalManagedExceptionMode mode)
+    {
+        _fixture.Runtime.IsMono.Returns(true);
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+
+        sut.Handle(this, new MarshalManagedExceptionEventArgs { Exception = new Exception(), ExceptionMode = mode });
+
+        _fixture.Runtime.Received(1).IgnoreNextSignal(6);
+    }
+
+    [Theory]
+    [InlineData(MarshalManagedExceptionMode.Disable)]
+    [InlineData(MarshalManagedExceptionMode.UnwindNativeCode)]
+    public void Handle_Mono_NonAbortingMode_DoesNotIgnoreSigabrt(MarshalManagedExceptionMode mode)
+    {
+        _fixture.Runtime.IsMono.Returns(true);
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+
+        sut.Handle(this, new MarshalManagedExceptionEventArgs { Exception = new Exception(), ExceptionMode = mode });
+
+        _fixture.Runtime.DidNotReceive().IgnoreNextSignal(Arg.Any<int>());
+    }
+
+    [Theory]
+    [InlineData(MarshalManagedExceptionMode.Disable)]
+    [InlineData(MarshalManagedExceptionMode.UnwindNativeCode)]
+    [InlineData(MarshalManagedExceptionMode.ThrowObjectiveCException)]
+    [InlineData(MarshalManagedExceptionMode.Abort)]
+    public void Handle_CoreCLR_AnyMode_IgnoresSigabrt(MarshalManagedExceptionMode mode)
+    {
+        _fixture.Runtime.IsMono.Returns(false);
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+
+        sut.Handle(this, new MarshalManagedExceptionEventArgs { Exception = new Exception(), ExceptionMode = mode });
+
+        _fixture.Runtime.Received(1).IgnoreNextSignal(6);
+    }
+
+    [Fact]
+    public void Handle_NoException_DoesNotIgnoreSigabrt()
+    {
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+
+        sut.Handle(this, new MarshalManagedExceptionEventArgs());
+
+        _fixture.Runtime.DidNotReceive().IgnoreNextSignal(Arg.Any<int>());
+    }
 }
 #endif

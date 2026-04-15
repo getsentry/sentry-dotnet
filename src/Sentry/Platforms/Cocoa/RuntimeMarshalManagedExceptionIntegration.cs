@@ -48,9 +48,8 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
             // a managed catch and never hit abort(). The thread-local ignore flag would then linger
             // and silently swallow an unrelated later SIGABRT on this thread, so skip arming it. See
             // https://github.com/dotnet/macios/blob/be8a2ca1057242f745ef58011a02ffe21326d180/runtime/runtime.m#L2215
-            var isMono = Type.GetType("Mono.Runtime") != null;
-            if (isMono && e.ExceptionMode is MarshalManagedExceptionMode.Disable
-                                          or MarshalManagedExceptionMode.UnwindNativeCode)
+            if (_runtime.IsMono && e.ExceptionMode is MarshalManagedExceptionMode.Disable
+                                                   or MarshalManagedExceptionMode.UnwindNativeCode)
             {
                 return;
             }
@@ -61,7 +60,7 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
             // duplicate native crash for an exception we've already captured. See
             // https://github.com/dotnet/macios/blob/be8a2ca1057242f745ef58011a02ffe21326d180/runtime/runtime.m#L2285
             const int SIGABRT = 6;
-            SentryCocoaHybridSdk.IgnoreNextSignal(SIGABRT);
+            _runtime.IgnoreNextSignal(SIGABRT);
         }
     }
 }
