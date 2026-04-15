@@ -1,5 +1,27 @@
 # Changelog
 
+## 6.4.0
+
+### Features ✨
+
+- feat: Add network details for session replay on iOS by @jamescrosswell in [#4891](https://github.com/getsentry/sentry-dotnet/pull/4891)
+- feat: Add option to exclude certain HTTP statuses from tracing by @jamescrosswell in [#5034](https://github.com/getsentry/sentry-dotnet/pull/5034)
+
+### Fixes 🐛
+
+- fix: memory leak when profiling is enabled by @jamescrosswell in [#5133](https://github.com/getsentry/sentry-dotnet/pull/5133)
+- fix: prevent redundant native exceptions on iOS by @jpnurmi in [#5126](https://github.com/getsentry/sentry-dotnet/pull/5126)
+- fix: prevent redundant native exceptions on Android/Mono by @jpnurmi in [#4676](https://github.com/getsentry/sentry-dotnet/pull/4676)
+  - Note: opt in by setting `options.Native.ExperimentalOptions.SignalHandlerStrategy` to `Sentry.Android.SignalHandlerStrategy.ChainAtStart`
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.10.0 by @github-actions in [#5132](https://github.com/getsentry/sentry-dotnet/pull/5132)
+- chore(deps): update Cocoa SDK to v9.9.0 by @github-actions in [#5115](https://github.com/getsentry/sentry-dotnet/pull/5115)
+- chore(deps): update Java SDK to v8.38.0 by @github-actions in [#5124](https://github.com/getsentry/sentry-dotnet/pull/5124)
+
 ## 6.3.2
 
 ### Dependencies ⬆️
