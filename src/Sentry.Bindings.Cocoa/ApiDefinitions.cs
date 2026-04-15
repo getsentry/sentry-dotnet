@@ -11,7 +11,6 @@ using CoreFoundation;
 using CoreGraphics;
 using Foundation;
 using ObjCRuntime;
-using Sentry;
 using UIKit;
 
 namespace Sentry.CocoaSdk;
