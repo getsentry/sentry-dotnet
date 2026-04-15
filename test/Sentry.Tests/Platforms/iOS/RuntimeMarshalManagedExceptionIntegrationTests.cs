@@ -97,6 +97,7 @@ public class RuntimeMarshalManagedExceptionIntegrationTests
     }
 
     [Theory]
+    [InlineData(MarshalManagedExceptionMode.Default)]
     [InlineData(MarshalManagedExceptionMode.Disable)]
     [InlineData(MarshalManagedExceptionMode.UnwindNativeCode)]
     [InlineData(MarshalManagedExceptionMode.ThrowObjectiveCException)]
