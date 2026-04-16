@@ -18,11 +18,16 @@ BeforeDiscovery {
 }
 
 $cases = @(
-    @{ configuration = 'Release'; runtime = 'mono'    }
-    @{ configuration = 'Release'; runtime = 'coreclr' }
-    @{ configuration = 'Debug';   runtime = 'mono'    }
-    @{ configuration = 'Debug';   runtime = 'coreclr' }
+    @{ configuration = 'Release'; runtime = 'mono' }
+    @{ configuration = 'Debug';   runtime = 'mono' }
 )
+# CoreCLR on Android requires .NET 10 or later
+if ($dotnet_version -ne 'net9.0') {
+    $cases += @(
+        @{ configuration = 'Release'; runtime = 'coreclr' }
+        @{ configuration = 'Debug';   runtime = 'coreclr' }
+    )
+}
 Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
