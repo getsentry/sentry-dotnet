@@ -1,7 +1,3 @@
 <Project>
   <!-- Don't include parent Directory.Build.targets -->
-
-  <!-- Needed for SetAndroidNdkPreload (buildTransitive doesn't apply via ProjectReference) -->
-  <Import Project="../src/Sentry/buildTransitive/Sentry.props" Condition="Exists('../src/Sentry/buildTransitive/Sentry.props')" />
-  <Import Project="../src/Sentry/buildTransitive/Sentry.targets" Condition="Exists('../src/Sentry/buildTransitive/Sentry.targets')" />
 </Project>
