@@ -34,10 +34,6 @@ name = "create-branch"
 source = "getsentry/skills"
 
 [[skills]]
-name = "create-pr"
-source = "getsentry/skills"
-
-[[skills]]
 name = "find-bugs"
 source = "getsentry/skills"
 
