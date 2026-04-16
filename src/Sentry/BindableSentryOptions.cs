@@ -38,6 +38,7 @@ internal partial class BindableSentryOptions
     public string? CacheDirectoryPath { get; set; }
     public bool? CaptureFailedRequests { get; set; }
     public List<string>? FailedRequestTargets { get; set; }
+    public List<int>? TraceIgnoreStatusCodes { get; set; }
     public bool? DisableFileWrite { get; set; }
     public TimeSpan? InitCacheFlushTimeout { get; set; }
     public Dictionary<string, string>? DefaultTags { get; set; }
@@ -90,6 +91,7 @@ internal partial class BindableSentryOptions
         options.CacheDirectoryPath = CacheDirectoryPath ?? options.CacheDirectoryPath;
         options.CaptureFailedRequests = CaptureFailedRequests ?? options.CaptureFailedRequests;
         options.FailedRequestTargets = FailedRequestTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.FailedRequestTargets;
+        options.TraceIgnoreStatusCodes = TraceIgnoreStatusCodes?.Select(code => new HttpStatusCodeRange(code)).ToList<HttpStatusCodeRange>() ?? options.TraceIgnoreStatusCodes;
         options.DisableFileWrite = DisableFileWrite ?? options.DisableFileWrite;
         options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
         options.DefaultTags = DefaultTags ?? options.DefaultTags;

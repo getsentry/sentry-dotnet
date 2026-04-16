@@ -51,29 +51,29 @@ public class Scope : IEventLike
     /// </summary>
     internal bool HasEvaluated => _hasEvaluated;
 
-    private readonly Lazy<ConcurrentBag<ISentryEventExceptionProcessor>> _lazyExceptionProcessors =
+    private readonly Lazy<ConcurrentBagLite<ISentryEventExceptionProcessor>> _lazyExceptionProcessors =
         new(LazyThreadSafetyMode.PublicationOnly);
 
     /// <summary>
     /// A list of exception processors.
     /// </summary>
-    internal ConcurrentBag<ISentryEventExceptionProcessor> ExceptionProcessors => _lazyExceptionProcessors.Value;
+    internal ConcurrentBagLite<ISentryEventExceptionProcessor> ExceptionProcessors => _lazyExceptionProcessors.Value;
 
-    private readonly Lazy<ConcurrentBag<ISentryEventProcessor>> _lazyEventProcessors =
+    private readonly Lazy<ConcurrentBagLite<ISentryEventProcessor>> _lazyEventProcessors =
         new(LazyThreadSafetyMode.PublicationOnly);
 
-    private readonly Lazy<ConcurrentBag<ISentryTransactionProcessor>> _lazyTransactionProcessors =
+    private readonly Lazy<ConcurrentBagLite<ISentryTransactionProcessor>> _lazyTransactionProcessors =
         new(LazyThreadSafetyMode.PublicationOnly);
 
     /// <summary>
     /// A list of event processors.
     /// </summary>
-    internal ConcurrentBag<ISentryEventProcessor> EventProcessors => _lazyEventProcessors.Value;
+    internal ConcurrentBagLite<ISentryEventProcessor> EventProcessors => _lazyEventProcessors.Value;
 
     /// <summary>
     /// A list of event processors.
     /// </summary>
-    internal ConcurrentBag<ISentryTransactionProcessor> TransactionProcessors => _lazyTransactionProcessors.Value;
+    internal ConcurrentBagLite<ISentryTransactionProcessor> TransactionProcessors => _lazyTransactionProcessors.Value;
 
     /// <summary>
     /// An event that fires when the scope evaluates.
@@ -259,11 +259,7 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
 
-#if NETSTANDARD2_0 || NETFRAMEWORK
-    private ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
-#else
-    private readonly ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
-#endif
+    private readonly ConcurrentQueueLite<Breadcrumb> _breadcrumbs = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
@@ -278,11 +274,7 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-#if NETSTANDARD2_0 || NETFRAMEWORK
-    private ConcurrentBag<SentryAttachment> _attachments = new();
-#else
-    private readonly ConcurrentBag<SentryAttachment> _attachments = new();
-#endif
+    private readonly ConcurrentBagLite<SentryAttachment> _attachments = new();
 
     /// <summary>
     /// Attachments.
@@ -435,11 +427,7 @@ public class Scope : IEventLike
     /// </summary>
     public void ClearAttachments()
     {
-#if NETSTANDARD2_0 || NETFRAMEWORK
-        Interlocked.Exchange(ref _attachments, new());
-#else
         _attachments.Clear();
-#endif
         if (Options.EnableScopeSync)
         {
             Options.ScopeObserver?.ClearAttachments();
@@ -451,12 +439,7 @@ public class Scope : IEventLike
     /// </summary>
     public void ClearBreadcrumbs()
     {
-#if NETSTANDARD2_0 || NETFRAMEWORK
-        // No Clear method on ConcurrentQueue for these target frameworks
-        Interlocked.Exchange(ref _breadcrumbs, new());
-#else
         _breadcrumbs.Clear();
-#endif
     }
 
     /// <summary>

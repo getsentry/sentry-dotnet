@@ -4,10 +4,11 @@
 // If changes are required, update the script instead.
 // -----------------------------------------------------------------------------
 
+#nullable enable
+
 using System.Runtime.InteropServices;
 using Foundation;
 using ObjCRuntime;
-using Sentry;
 
 namespace Sentry.CocoaSdk;
 

@@ -842,6 +842,7 @@ namespace Sentry
         public string SpotlightUrl { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> TagFilters { get; set; }
+        public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> TraceIgnoreStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> TracePropagationTargets { get; set; }
         public double? TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }

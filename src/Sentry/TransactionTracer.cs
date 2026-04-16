@@ -151,7 +151,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         set => _fingerprint = value;
     }
 
-    private readonly ConcurrentBag<Breadcrumb> _breadcrumbs = new();
+    private readonly ConcurrentBagLite<Breadcrumb> _breadcrumbs = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
@@ -168,11 +168,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-    private readonly ConcurrentBag<ISpan> _spans = new();
-#else
-    private ConcurrentBag<ISpan> _spans = new();
-#endif
+    private readonly ConcurrentBagLite<ISpan> _spans = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<ISpan> Spans => _spans;
@@ -547,11 +543,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private void ReleaseSpans()
     {
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
         _spans.Clear();
-#else
-        _spans = new ConcurrentBag<ISpan>();
-#endif
         _activeSpanTracker.Clear();
     }
 
