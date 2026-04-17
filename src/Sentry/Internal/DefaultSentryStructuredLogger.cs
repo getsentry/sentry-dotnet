@@ -30,25 +30,32 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
         string message;
-        try
-        {
-            message = string.Format(CultureInfo.InvariantCulture, template, parameters ?? []);
-        }
-        catch (FormatException e)
-        {
-            _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
-            return;
-        }
+        ImmutableArray<KeyValuePair<string, object>> @params;
 
-        ImmutableArray<KeyValuePair<string, object>> @params = default;
         if (parameters is { Length: > 0 })
         {
+            try
+            {
+                message = string.Format(CultureInfo.InvariantCulture, template, parameters);
+            }
+            catch (FormatException e)
+            {
+                _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
+                return;
+            }
+
             var builder = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>(parameters.Length);
             for (var index = 0; index < parameters.Length; index++)
             {
                 builder.Add(new KeyValuePair<string, object>(index.ToString(), parameters[index]));
             }
             @params = builder.DrainToImmutable();
+        }
+        else
+        {
+            message = template;
+            template = null!; // SentryLog.Template is declared nullable (string?)
+            @params = ImmutableArray<KeyValuePair<string, object>>.Empty;
         }
 
         SentryLog log = new(timestamp, traceId, level, message)
