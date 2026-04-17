@@ -77,21 +77,34 @@ public class SentryMauiOptions : SentryLoggingOptions
     public bool AttachScreenshot { get; set; }
 
     /// <summary>
-    /// Automatically starts a Sentry transaction when the user navigates to a new page and sets it on the scope,
-    /// allowing child spans (e.g. HTTP requests, database calls) to be attached during page load.
-    /// The transaction finishes automatically after <see cref="NavigationTransactionIdleTimeout"/> if not
-    /// finished explicitly first (e.g. by a subsequent navigation).
+    /// Automatically starts Sentry transactions for navigation events (e.g. Shell navigation, modal push/pop)
+    /// and, when <see cref="EnableUserInteractionTracing"/> is also enabled, for user-interaction events
+    /// (e.g. Button clicks). The transaction is set on the scope so child spans (e.g. HTTP requests,
+    /// database calls) can be attached.
+    /// Transactions finish automatically after <see cref="AutoTransactionIdleTimeout"/> if not finished
+    /// explicitly first (e.g. by a subsequent navigation).
     /// Requires <see cref="SentryOptions.TracesSampleRate"/> or <see cref="SentryOptions.TracesSampler"/> to
     /// be configured.
     /// The default is <c>true</c>.
     /// </summary>
-    public bool EnableNavigationTransactions { get; set; } = true;
+    public bool EnableAutoTransactions { get; set; } = true;
 
     /// <summary>
-    /// Controls how long an automatic navigation transaction waits before finishing itself when not explicitly
-    /// finished. Defaults to 3 seconds.
+    /// Controls how long an automatic transaction (navigation or user interaction) waits before finishing
+    /// itself when not explicitly finished. Defaults to 3 seconds.
     /// </summary>
-    public TimeSpan NavigationTransactionIdleTimeout { get; set; } = TimeSpan.FromSeconds(3);
+    public TimeSpan AutoTransactionIdleTimeout { get; set; } = TimeSpan.FromSeconds(3);
+
+    /// <summary>
+    /// Automatically starts a Sentry transaction for user-interaction events (currently: Button clicks).
+    /// Requires <see cref="EnableAutoTransactions"/> to be enabled as well as
+    /// <see cref="SentryOptions.TracesSampleRate"/> or <see cref="SentryOptions.TracesSampler"/> to be
+    /// configured. Interaction transactions are named <c>&lt;PageType&gt;.&lt;AutomationId|StyleId&gt;</c>.
+    /// If the element has neither <see cref="Element.AutomationId"/> nor <see cref="Element.StyleId"/> the
+    /// transaction is skipped and a warning is logged.
+    /// The default is <c>true</c>.
+    /// </summary>
+    public bool EnableUserInteractionTracing { get; set; } = true;
 
     private Func<SentryEvent, SentryHint, bool>? _beforeCapture;
     /// <summary>

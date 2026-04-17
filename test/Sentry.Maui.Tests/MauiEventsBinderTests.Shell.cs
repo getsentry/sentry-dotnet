@@ -175,7 +175,7 @@ public partial class MauiEventsBinderTests
     public void Shell_Navigating_NavigationTransactionsDisabled_DoesNotStartTransaction()
     {
         // Arrange
-        _fixture.Options.EnableNavigationTransactions = false;
+        _fixture.Options.EnableAutoTransactions = false;
         var shell = new Shell { StyleId = "shell" };
         _fixture.Binder.HandleShellEvents(shell);
 
