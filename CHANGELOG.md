@@ -1,5 +1,18 @@
 # Changelog
 
+## 6.4.1
+
+### Fixes 🐛
+
+- fix: prevent redundant native exceptions on Android/CoreCLR by @jpnurmi in [#5127](https://github.com/getsentry/sentry-dotnet/pull/5127)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Java SDK to v8.39.0 by @github-actions in [#5137](https://github.com/getsentry/sentry-dotnet/pull/5137)
+- chore(deps): update Native SDK to v0.13.7 by @github-actions in [#5136](https://github.com/getsentry/sentry-dotnet/pull/5136)
+
 ## 6.4.0
 
 ### Features ✨
