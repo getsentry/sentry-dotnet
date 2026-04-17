@@ -43,8 +43,8 @@ public static class MauiProgram
                 // capture a certain percentage)
                 options.TracesSampleRate = 1.0F;
 
-                // Automatically create traces for navigation events
-                options.EnableNavigationTransactions = true;
+                // Automatically create traces for navigation and user-interaction events
+                options.EnableAutoTransactions = true;
 
                 // Automatically create traces for async relay commands in the MVVM Community Toolkit
                 options.AddCommunityToolkitIntegration();

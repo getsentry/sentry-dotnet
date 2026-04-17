@@ -218,7 +218,7 @@ public partial class MauiEventsBinderTests
     public void Application_ModalPushed_DisabledOption_DoesNotStartTransaction()
     {
         // Arrange
-        _fixture.Options.EnableNavigationTransactions = false;
+        _fixture.Options.EnableAutoTransactions = false;
         var application = MockApplication.Create();
         _fixture.Binder.HandleApplicationEvents(application);
         var modalPage = new ContentPage { StyleId = "TestModalPage" };

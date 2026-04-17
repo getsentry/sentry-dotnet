@@ -18,6 +18,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
     // (e.g. when the next navigation begins) before the idle timeout would fire.
     private ITransactionTracer? _currentTransaction;
 
+    // Tracks the active auto-finishing user-interaction (click) transaction, separate from navigation
+    // so that a new navigation can cancel a live interaction transaction without clobbering it.
+    private ITransactionTracer? _currentInteractionTransaction;
+
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
     internal const string NavigationType = "navigation";
@@ -27,6 +31,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     internal const string NavigationCategory = "navigation";
     internal const string RenderingCategory = "ui.rendering";
     internal const string UserActionCategory = "ui.useraction";
+    internal const string UserInteractionClickOp = "ui.action.click";
 
     public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options, IEnumerable<IMauiElementEventBinder> elementEventBinders)
     {
@@ -128,6 +133,13 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 }
                 break;
         }
+
+        if (_options.EnableAutoTransactions
+            && _options.EnableUserInteractionTracing
+            && e.Element is Button button)
+        {
+            button.Clicked += OnButtonClickedForTransaction;
+        }
     }
 
     internal void OnBreadcrumbCreateCallback(BreadcrumbEvent breadcrumb)
@@ -180,6 +192,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
                     }
                 }
                 break;
+        }
+
+        if (e.Element is Button button)
+        {
+            button.Clicked -= OnButtonClickedForTransaction;
         }
     }
 
@@ -326,6 +343,14 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     private ITransactionTracer? StartNavigationTransaction(string name)
     {
+        // A new navigation supersedes any live interaction transaction — finish the interaction as
+        // cancelled (per #5109 Scenario: "Ongoing UI event transaction").
+        if (_currentInteractionTransaction is { IsFinished: false } liveInteraction)
+        {
+            liveInteraction.Finish(SpanStatus.Cancelled);
+            _currentInteractionTransaction = null;
+        }
+
         // Reset the idle timeout instead of creating a new transaction if the destination is the same
         if (_currentTransaction is { IsFinished: false } current && current.Name == name)
         {
@@ -342,7 +367,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         };
 
         var transaction = _hub is IHubInternal internalHub
-            ? internalHub.StartTransaction(context, _options.NavigationTransactionIdleTimeout)
+            ? internalHub.StartTransaction(context, _options.AutoTransactionIdleTimeout)
             : _hub.StartTransaction(context);
 
         // Only bind to scope if there is no user-created transaction already there.
@@ -363,6 +388,75 @@ internal class MauiEventsBinder : IMauiEventsBinder
         return transaction;
     }
 
+    private void OnButtonClickedForTransaction(object? sender, EventArgs _)
+    {
+        if (sender is not Button button)
+        {
+            return;
+        }
+
+        string? identifier = null;
+        if (!string.IsNullOrEmpty(button.AutomationId))
+        {
+            identifier = button.AutomationId;
+        }
+        else if (!string.IsNullOrEmpty(button.StyleId))
+        {
+            identifier = button.StyleId;
+        }
+
+        if (identifier is null)
+        {
+            _options.DiagnosticLogger?.Log(
+                SentryLevel.Warning,
+                "Button click transaction skipped: element has no AutomationId or StyleId");
+            return;
+        }
+
+        var pageName = button.FindContainingPage()?.GetType().Name;
+        var name = pageName != null ? $"{pageName}.{identifier}" : identifier;
+        StartUserInteractionTransaction(name);
+    }
+
+    private ITransactionTracer? StartUserInteractionTransaction(string name)
+    {
+        // Reset the idle timeout instead of creating a new transaction if the same button was clicked again
+        if (_currentInteractionTransaction is { IsFinished: false } current && current.Name == name)
+        {
+            current.ResetIdleTimeout();
+            return current;
+        }
+
+        // Finish any previous SDK-owned interaction transaction before starting a new one.
+        _currentInteractionTransaction?.Finish(SpanStatus.Ok);
+
+        var context = new TransactionContext(name, UserInteractionClickOp)
+        {
+            NameSource = TransactionNameSource.Component
+        };
+
+        var transaction = _hub is IHubInternal internalHub
+            ? internalHub.StartTransaction(context, _options.AutoTransactionIdleTimeout)
+            : _hub.StartTransaction(context);
+
+        // Only bind to scope if there is no other transaction already there (user-created or SDK-owned navigation).
+        var hasOtherTransaction = false;
+        _hub.ConfigureScope(scope =>
+        {
+            if (scope.Transaction is { } existing && !ReferenceEquals(existing, _currentInteractionTransaction))
+            {
+                hasOtherTransaction = true;
+            }
+        });
+        if (!hasOtherTransaction)
+        {
+            _hub.ConfigureScope(static (scope, t) => scope.Transaction = t, transaction);
+        }
+
+        _currentInteractionTransaction = transaction;
+        return transaction;
+    }
+
     // Application Events
 
     private void OnApplicationOnPageAppearing(object? sender, Page page) =>
@@ -373,7 +467,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e)
     {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        if (_options.EnableNavigationTransactions)
+        if (_options.EnableAutoTransactions)
         {
             StartNavigationTransaction(e.Modal.GetType().Name);
         }
@@ -382,7 +476,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e)
     {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        if (_options.EnableNavigationTransactions)
+        if (_options.EnableAutoTransactions)
         {
             _currentTransaction?.Finish(SpanStatus.Ok);
             _currentTransaction = null;
@@ -402,10 +496,12 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnWindowOnStopped(object? sender, EventArgs _)
     {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Stopped), SystemType, LifecycleCategory);
-        if (_options.EnableNavigationTransactions)
+        if (_options.EnableAutoTransactions)
         {
             _currentTransaction?.Finish(SpanStatus.Ok);
             _currentTransaction = null;
+            _currentInteractionTransaction?.Finish(SpanStatus.Ok);
+            _currentInteractionTransaction = null;
         }
     }
 
@@ -494,7 +590,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             data.Add(nameof(e.Source), e.Source.ToString());
         });
 
-        if (_options.EnableNavigationTransactions)
+        if (_options.EnableAutoTransactions)
         {
             StartNavigationTransaction(e.Target?.Location.ToString() ?? "Unknown");
         }
@@ -510,7 +606,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         });
 
         // Update the transaction name to the final resolved route now that navigation is confirmed
-        if (_options.EnableNavigationTransactions && _currentTransaction != null)
+        if (_options.EnableAutoTransactions && _currentTransaction != null)
         {
             _currentTransaction.Name = e.Current?.Location.ToString() ?? _currentTransaction.Name;
         }
