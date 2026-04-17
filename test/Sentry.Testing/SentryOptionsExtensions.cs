@@ -31,6 +31,14 @@ public static class SentryOptionsExtensions
         return substitute;
     }
 
+    public static SentryOptions AddDiagnosticLoggerSubsititute(this SentryOptions substitute)
+    {
+        substitute.Debug = true;
+        substitute.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+        substitute.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        return substitute;
+    }
+
     public static SentryOptions ReceivedLogDebug(this SentryOptions substitute)
         => ReceivedLog(substitute, SentryLevel.Debug);
 

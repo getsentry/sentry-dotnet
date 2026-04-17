@@ -2,9 +2,11 @@
 
   <PropertyGroup>
     <Description>Official OpenTelemetry integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
-    <PackageTags>$(PackageTags);OpenTelemetry</PackageTags>
+    <PackageTags>$(PackageTags);OpenTelemetry;OTLP</PackageTags>
     <TargetFrameworks>$(CurrentTfms);netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Todo: work out a proper solution to this bug in the Roslyn analysers -->
+    <NoWarn>$(NoWarn);AD0001</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(EnableAot)' == 'true'">
@@ -13,23 +15,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
-    <!--For the sake of two tiny files, it didn't seem worth creating another NuGet package... so as a quick and dirty
-       hack, we're just including the code that is needed by both packages here. We'll eventually be deprecating the
-       Sentry.OpenTelemetry package in favor of the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol package,
-       so this is a temporary solution.
-       -->
-    <Compile Include="..\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol\SentryPropagator.cs" />
-    <Compile Include="..\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol\ActivityExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Version 1.6.0 is the minimum version that does not have trim warnings   -->
-    <PackageReference Include="OpenTelemetry" Version="1.6.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="Sentry.OpenTelemetry.AspNetCore" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.OpenTelemetry.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Benchmarks" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
