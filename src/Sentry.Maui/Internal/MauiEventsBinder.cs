@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Sentry.Internal;
 
 namespace Sentry.Maui.Internal;
 
@@ -12,6 +13,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;
     internal readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
+
+    // Tracks the active auto-finishing navigation transaction so we can explicitly finish it early
+    // (e.g. when the next navigation begins) before the idle timeout would fire.
+    private ITransactionTracer? _currentTransaction;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
@@ -319,16 +324,70 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
+    private ITransactionTracer? StartNavigationTransaction(string name)
+    {
+        // Reset the idle timeout instead of creating a new transaction if the destination is the same
+        if (_currentTransaction is { IsFinished: false } current && current.Name == name)
+        {
+            current.ResetIdleTimeout();
+            return current;
+        }
+
+        // Finish any previous SDK-owned navigation transaction before starting a new one.
+        _currentTransaction?.Finish(SpanStatus.Ok);
+
+        var context = new TransactionContext(name, "ui.load")
+        {
+            NameSource = TransactionNameSource.Route
+        };
+
+        var transaction = _hub is IHubInternal internalHub
+            ? internalHub.StartTransaction(context, _options.NavigationTransactionIdleTimeout)
+            : _hub.StartTransaction(context);
+
+        // Only bind to scope if there is no user-created transaction already there.
+        var hasUserTransaction = false;
+        _hub.ConfigureScope(scope =>
+        {
+            if (scope.Transaction is { } existing && !ReferenceEquals(existing, _currentTransaction))
+            {
+                hasUserTransaction = true;
+            }
+        });
+        if (!hasUserTransaction)
+        {
+            _hub.ConfigureScope(static (scope, t) => scope.Transaction = t, transaction);
+        }
+
+        _currentTransaction = transaction;
+        return transaction;
+    }
+
     // Application Events
 
     private void OnApplicationOnPageAppearing(object? sender, Page page) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageAppearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
     private void OnApplicationOnPageDisappearing(object? sender, Page page) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
-    private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e) =>
+
+    private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-    private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e) =>
+        if (_options.EnableNavigationTransactions)
+        {
+            StartNavigationTransaction(e.Modal.GetType().Name);
+        }
+    }
+
+    private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
+        if (_options.EnableNavigationTransactions)
+        {
+            _currentTransaction?.Finish(SpanStatus.Ok);
+            _currentTransaction = null;
+        }
+    }
     private void OnApplicationOnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.RequestedThemeChanged), SystemType, RenderingCategory, data => data.Add(nameof(e.RequestedTheme), e.RequestedTheme.ToString()));
 
@@ -340,8 +399,15 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnWindowOnDeactivated(object? sender, EventArgs _) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Deactivated), SystemType, LifecycleCategory);
 
-    private void OnWindowOnStopped(object? sender, EventArgs _) =>
+    private void OnWindowOnStopped(object? sender, EventArgs _)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Stopped), SystemType, LifecycleCategory);
+        if (_options.EnableNavigationTransactions)
+        {
+            _currentTransaction?.Finish(SpanStatus.Ok);
+            _currentTransaction = null;
+        }
+    }
 
     private void OnWindowOnResumed(object? sender, EventArgs _) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Resumed), SystemType, LifecycleCategory);
@@ -419,7 +485,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     // Shell Events
 
-    private void OnShellOnNavigating(object? sender, ShellNavigatingEventArgs e) =>
+    private void OnShellOnNavigating(object? sender, ShellNavigatingEventArgs e)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Shell.Navigating), NavigationType, NavigationCategory, data =>
         {
             data.Add("from", e.Current?.Location.ToString() ?? "");
@@ -427,13 +494,27 @@ internal class MauiEventsBinder : IMauiEventsBinder
             data.Add(nameof(e.Source), e.Source.ToString());
         });
 
-    private void OnShellOnNavigated(object? sender, ShellNavigatedEventArgs e) =>
+        if (_options.EnableNavigationTransactions)
+        {
+            StartNavigationTransaction(e.Target?.Location.ToString() ?? "Unknown");
+        }
+    }
+
+    private void OnShellOnNavigated(object? sender, ShellNavigatedEventArgs e)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Shell.Navigated), NavigationType, NavigationCategory, data =>
         {
             data.Add("from", e.Previous?.Location.ToString() ?? "");
             data.Add("to", e.Current?.Location.ToString() ?? "");
             data.Add(nameof(e.Source), e.Source.ToString());
         });
+
+        // Update the transaction name to the final resolved route now that navigation is confirmed
+        if (_options.EnableNavigationTransactions && _currentTransaction != null)
+        {
+            _currentTransaction.Name = e.Current?.Location.ToString() ?? _currentTransaction.Name;
+        }
+    }
 
     // Page Events
 

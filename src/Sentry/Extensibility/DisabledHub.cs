@@ -6,7 +6,7 @@ namespace Sentry.Extensibility;
 /// <summary>
 /// Disabled Hub.
 /// </summary>
-public class DisabledHub : IHub, IDisposable
+public class DisabledHub : IHub, IHubInternal, IDisposable
 {
     /// <summary>
     /// The singleton instance.
@@ -80,6 +80,12 @@ public class DisabledHub : IHub, IDisposable
     /// </summary>
     public ITransactionTracer StartTransaction(ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext) => NoOpTransaction.Instance;
+
+    /// <summary>
+    /// Returns a dummy transaction.
+    /// </summary>
+    public ITransactionTracer StartTransaction(ITransactionContext context, TimeSpan? idleTimeout)
+        => NoOpTransaction.Instance;
 
     /// <summary>
     /// No-Op.
