@@ -113,6 +113,33 @@ public partial class SentryStructuredLoggerTests
         log.TryGetAttribute("sentry.message.template", out object? template).Should().BeFalse();
         template.Should().BeNull();
     }
+
+    [Theory]
+    [InlineData(SentryLogLevel.Trace)]
+    [InlineData(SentryLogLevel.Debug)]
+    [InlineData(SentryLogLevel.Info)]
+    [InlineData(SentryLogLevel.Warning)]
+    [InlineData(SentryLogLevel.Error)]
+    [InlineData(SentryLogLevel.Fatal)]
+    public void Log_InvalidFormatButWithoutParameters_CapturesEnvelope(SentryLogLevel level)
+    {
+        _fixture.Options.EnableLogs = true;
+        var logger = _fixture.GetSut();
+
+        Envelope envelope = null!;
+        _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
+
+        logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", []);
+        logger.Flush();
+
+        _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
+        var log = envelope.ShouldContainSingleLog();
+
+        log.Level.Should().Be(level);
+        log.Message.Should().Be("Template string with arguments: {0}, {1}, {2}, {3}");
+        log.Template.Should().BeNull();
+        log.Parameters.Should().BeEmpty();
+    }
 }
 
 file static class SentryStructuredLoggerExtensions
