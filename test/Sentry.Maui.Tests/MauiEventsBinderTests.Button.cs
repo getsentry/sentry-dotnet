@@ -1,12 +1,13 @@
 using Sentry.Internal;
 using Sentry.Maui.Internal;
+using Sentry.Maui.Tests.Mocks;
 
 namespace Sentry.Maui.Tests;
 
 public partial class MauiEventsBinderTests
 {
     [Fact]
-    public void Button_Clicked_StartsTransactionWithClickOp()
+    public void Button_Pressed_StartsTransactionWithClickOp()
     {
         // Arrange
         var button = new Button { AutomationId = "my-btn" };
@@ -15,7 +16,7 @@ public partial class MauiEventsBinderTests
             .Returns(Substitute.For<ITransactionTracer>());
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.Received(1).StartTransaction(
@@ -24,7 +25,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_UsesAutomationIdAsIdentifier()
+    public void Button_Pressed_UsesAutomationIdAsIdentifier()
     {
         // Arrange
         var button = new Button { AutomationId = "my-btn", StyleId = "styleId-ignored" };
@@ -33,7 +34,7 @@ public partial class MauiEventsBinderTests
             .Returns(Substitute.For<ITransactionTracer>());
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert - AutomationId wins over StyleId
         _fixture.Hub.Received(1).StartTransaction(
@@ -42,7 +43,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_FallsBackToStyleIdWhenNoAutomationId()
+    public void Button_Pressed_FallsBackToStyleIdWhenNoAutomationId()
     {
         // Arrange
         var button = new Button { StyleId = "my-btn" };
@@ -51,7 +52,7 @@ public partial class MauiEventsBinderTests
             .Returns(Substitute.For<ITransactionTracer>());
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.Received(1).StartTransaction(
@@ -60,14 +61,14 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_NoAutomationIdOrStyleId_DoesNotStartTransaction()
+    public void Button_Pressed_NoAutomationIdOrStyleId_DoesNotStartTransaction()
     {
         // Arrange
         var button = new Button();
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
@@ -79,7 +80,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_UsesPageTypeNameInTransactionName()
+    public void Button_Pressed_UsesPageTypeNameInTransactionName()
     {
         // Arrange
         var button = new Button { AutomationId = "my-btn" };
@@ -89,7 +90,7 @@ public partial class MauiEventsBinderTests
             .Returns(Substitute.For<ITransactionTracer>());
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.Received(1).StartTransaction(
@@ -98,7 +99,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_NoContainingPage_UsesIdentifierOnly()
+    public void Button_Pressed_NoContainingPage_UsesIdentifierOnly()
     {
         // Arrange - button not attached to any page
         var button = new Button { AutomationId = "my-btn" };
@@ -107,7 +108,7 @@ public partial class MauiEventsBinderTests
             .Returns(Substitute.For<ITransactionTracer>());
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.Received(1).StartTransaction(
@@ -116,7 +117,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_TransactionNameSourceIsComponent()
+    public void Button_Pressed_TransactionNameSourceIsComponent()
     {
         // Arrange
         var button = new Button { AutomationId = "my-btn" };
@@ -125,7 +126,7 @@ public partial class MauiEventsBinderTests
             .Returns(Substitute.For<ITransactionTracer>());
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.Received(1).StartTransaction(
@@ -134,7 +135,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_EnableUserInteractionTracingFalse_DoesNotStart()
+    public void Button_Pressed_EnableUserInteractionTracingFalse_DoesNotStart()
     {
         // Arrange
         _fixture.Options.EnableUserInteractionTracing = false;
@@ -142,14 +143,14 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
     }
 
     [Fact]
-    public void Button_Clicked_EnableAutoTransactionsFalse_DoesNotStart()
+    public void Button_Pressed_EnableAutoTransactionsFalse_DoesNotStart()
     {
         // Arrange
         _fixture.Options.EnableAutoTransactions = false;
@@ -157,14 +158,14 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
     }
 
     [Fact]
-    public void Button_Clicked_SameButton_ResetsIdleTimeoutAndDoesNotStartNew()
+    public void Button_Pressed_SameButton_ResetsIdleTimeoutAndDoesNotStartNew()
     {
         // Arrange
         var button = new Button { AutomationId = "my-btn" };
@@ -175,10 +176,10 @@ public partial class MauiEventsBinderTests
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(transaction);
 
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
-        // Act - click the same button again
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        // Act - press the same button again
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
@@ -186,7 +187,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_DifferentButton_FinishesPreviousAndStartsNew()
+    public void Button_Pressed_DifferentButton_FinishesPreviousAndStartsNew()
     {
         // Arrange
         var firstButton = new Button { AutomationId = "first" };
@@ -200,8 +201,8 @@ public partial class MauiEventsBinderTests
             .Returns(firstTransaction, secondTransaction);
 
         // Act
-        firstButton.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
-        secondButton.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        firstButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+        secondButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         firstTransaction.Received(1).Finish(SpanStatus.Ok);
@@ -209,7 +210,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_ManualTransactionOnScope_NotBoundToScope()
+    public void Button_Pressed_ManualTransactionOnScope_NotBoundToScope()
     {
         // Arrange
         var button = new Button { AutomationId = "my-btn" };
@@ -223,7 +224,7 @@ public partial class MauiEventsBinderTests
             .Returns(autoTransaction);
 
         // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert - SDK starts the auto transaction but does NOT bind to scope
         _fixture.Hub.Received(1).StartTransaction(
@@ -233,7 +234,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Clicked_NavigationTransactionOnScope_NotBoundToScope()
+    public void Button_Pressed_NavigationTransactionOnScope_NotBoundToScope()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -251,8 +252,8 @@ public partial class MauiEventsBinderTests
             new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
         Assert.Same(navTransaction, _fixture.Scope.Transaction);
 
-        // Act - click while nav transaction is on scope
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        // Act - press while nav transaction is on scope
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert - click transaction was started but scope still holds the navigation transaction
         _fixture.Hub.Received(1).StartTransaction(
@@ -262,7 +263,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigating_WhileInteractionTransactionActive_FinishesInteractionAsCancelled()
+    public void Button_Pressed_ThenShellNavigating_NavigationIsChildSpanOfClick()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -270,20 +271,128 @@ public partial class MauiEventsBinderTests
         var button = new Button { AutomationId = "my-btn" };
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
 
+        var navSpan = Substitute.For<ISpan>();
         var clickTransaction = Substitute.For<ITransactionTracer>();
         clickTransaction.IsFinished.Returns(false);
-        var navTransaction = Substitute.For<ITransactionTracer>();
+        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction, navTransaction);
+            .Returns(clickTransaction);
 
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
-
-        // Act - navigation starts while click transaction is still live
+        // Act - press button, then navigate
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
         shell.RaiseEvent(nameof(Shell.Navigating),
             new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
 
-        // Assert - click transaction finished as Cancelled
-        clickTransaction.Received(1).Finish(SpanStatus.Cancelled);
+        // Assert - only one transaction created (click), navigation is a child span
+        _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+        clickTransaction.Received(1).StartChild("ui.load");
+    }
+
+    [Fact]
+    public void Button_Pressed_ThenModalPush_NavigationIsChildSpanOfClick()
+    {
+        // Arrange
+        var application = MockApplication.Create();
+        _fixture.Binder.HandleApplicationEvents(application);
+        var button = new Button { AutomationId = "my-btn" };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        var navSpan = Substitute.For<ISpan>();
+        var clickTransaction = Substitute.For<ITransactionTracer>();
+        clickTransaction.IsFinished.Returns(false);
+        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(clickTransaction);
+
+        var modalPage = new ContentPage { StyleId = "TestModalPage" };
+
+        // Act - press button, then push modal
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
+
+        // Assert - only one transaction created (click), navigation is a child span
+        _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+        clickTransaction.Received(1).StartChild("ui.load");
+    }
+
+    [Fact]
+    public void Button_Pressed_ModalPopped_FinishesSpanNotTransaction()
+    {
+        // Arrange
+        var application = MockApplication.Create();
+        _fixture.Binder.HandleApplicationEvents(application);
+        var button = new Button { AutomationId = "my-btn" };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        var navSpan = Substitute.For<ISpan>();
+        navSpan.IsFinished.Returns(false);
+        var clickTransaction = Substitute.For<ITransactionTracer>();
+        clickTransaction.IsFinished.Returns(false);
+        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(clickTransaction);
+
+        var modalPage = new ContentPage { StyleId = "TestModalPage" };
+
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
+
+        // Act - pop modal
+        application.RaiseEvent(nameof(Application.ModalPopped), new ModalPoppedEventArgs(modalPage));
+
+        // Assert - child span finished, click transaction NOT finished (idle timeout manages it)
+        navSpan.Received(1).Finish(SpanStatus.Ok);
+        clickTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+    }
+
+    [Fact]
+    public void Button_Pressed_ShellNavigated_UpdatesSpanDescription()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var button = new Button { AutomationId = "my-btn" };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        var navSpan = Substitute.For<ISpan>();
+        navSpan.IsFinished.Returns(false);
+        var clickTransaction = Substitute.For<ITransactionTracer>();
+        clickTransaction.IsFinished.Returns(false);
+        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(clickTransaction);
+
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Act - navigated with resolved route
+        shell.RaiseEvent(nameof(Shell.Navigated),
+            new ShellNavigatedEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("//resolved/bar"), ShellNavigationSource.Push));
+
+        // Assert - span description updated (not transaction name)
+        navSpan.Description.Should().Be("//resolved/bar");
+    }
+
+    [Fact]
+    public void StandaloneNavigation_NoClick_BehaviorUnchanged()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var navTransaction = Substitute.For<ITransactionTracer>();
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(navTransaction);
+
+        // Act - navigate without any button press
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Assert - standalone navigation transaction created as before
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Is<ITransactionContext>(c => c.Operation == "ui.load"),
+            Arg.Any<TimeSpan?>());
+        Assert.Same(navTransaction, _fixture.Scope.Transaction);
     }
 
     [Fact]
@@ -299,12 +408,43 @@ public partial class MauiEventsBinderTests
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(clickTransaction);
 
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Act
         window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
 
         // Assert
+        clickTransaction.Received(1).Finish(SpanStatus.Ok);
+    }
+
+    [Fact]
+    public void Window_Stopped_CleansUpNavigationSpan()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var button = new Button { AutomationId = "my-btn" };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        var navSpan = Substitute.For<ISpan>();
+        navSpan.IsFinished.Returns(false);
+        var clickTransaction = Substitute.For<ITransactionTracer>();
+        clickTransaction.IsFinished.Returns(false);
+        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(clickTransaction);
+
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+
+        // Act
+        window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
+
+        // Assert - both the nav span and click transaction are cleaned up
+        navSpan.Received(1).Finish(SpanStatus.Ok);
         clickTransaction.Received(1).Finish(SpanStatus.Ok);
     }
 
@@ -316,9 +456,9 @@ public partial class MauiEventsBinderTests
         var el = new ElementEventArgs(button);
         _fixture.Binder.OnApplicationOnDescendantAdded(null, el);
 
-        // Act - unbind, then click
+        // Act - unbind, then press
         _fixture.Binder.OnApplicationOnDescendantRemoved(null, el);
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Assert
         _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());

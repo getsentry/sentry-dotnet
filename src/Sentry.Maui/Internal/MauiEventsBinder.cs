@@ -19,8 +19,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private ITransactionTracer? _currentTransaction;
 
     // Tracks the active auto-finishing user-interaction (click) transaction, separate from navigation
-    // so that a new navigation can cancel a live interaction transaction without clobbering it.
+    // so that navigation can become a child span of the click transaction.
     private ITransactionTracer? _currentInteractionTransaction;
+
+    // Tracks the navigation child span when navigation is nested under a click transaction.
+    private ISpan? _currentNavigationSpan;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
@@ -138,7 +141,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             && _options.EnableUserInteractionTracing
             && e.Element is Button button)
         {
-            button.Clicked += OnButtonClickedForTransaction;
+            button.Pressed += OnButtonPressedForTransaction;
         }
     }
 
@@ -196,7 +199,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
         if (e.Element is Button button)
         {
-            button.Clicked -= OnButtonClickedForTransaction;
+            button.Pressed -= OnButtonPressedForTransaction;
         }
     }
 
@@ -343,13 +346,20 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     private ITransactionTracer? StartNavigationTransaction(string name)
     {
-        // A new navigation supersedes any live interaction transaction — finish the interaction as
-        // cancelled (per #5109 Scenario: "Ongoing UI event transaction").
-        if (_currentInteractionTransaction is { IsFinished: false } liveInteraction)
+        // When a click transaction is active, navigation becomes a child span of it.
+        if (_currentInteractionTransaction is { IsFinished: false } clickTx)
         {
-            liveInteraction.Finish(SpanStatus.Cancelled);
-            _currentInteractionTransaction = null;
+            _currentTransaction?.Finish(SpanStatus.Ok);
+            _currentTransaction = null;
+
+            _currentNavigationSpan?.Finish(SpanStatus.Ok);
+            _currentNavigationSpan = clickTx.StartChild("ui.load", name);
+            clickTx.ResetIdleTimeout();
+            return clickTx;
         }
+
+        // Standalone navigation — no active click transaction.
+        _currentNavigationSpan = null;
 
         // Reset the idle timeout instead of creating a new transaction if the destination is the same
         if (_currentTransaction is { IsFinished: false } current && current.Name == name)
@@ -388,7 +398,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         return transaction;
     }
 
-    private void OnButtonClickedForTransaction(object? sender, EventArgs _)
+    private void OnButtonPressedForTransaction(object? sender, EventArgs _)
     {
         if (sender is not Button button)
         {
@@ -427,7 +437,12 @@ internal class MauiEventsBinder : IMauiEventsBinder
             return current;
         }
 
-        // Finish any previous SDK-owned interaction transaction before starting a new one.
+        // Finish any previous SDK-owned interaction transaction (and its navigation child span).
+        if (_currentNavigationSpan is { IsFinished: false })
+        {
+            _currentNavigationSpan.Finish(SpanStatus.Cancelled);
+            _currentNavigationSpan = null;
+        }
         _currentInteractionTransaction?.Finish(SpanStatus.Ok);
 
         var context = new TransactionContext(name, UserInteractionClickOp)
@@ -478,8 +493,16 @@ internal class MauiEventsBinder : IMauiEventsBinder
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         if (_options.EnableAutoTransactions)
         {
-            _currentTransaction?.Finish(SpanStatus.Ok);
-            _currentTransaction = null;
+            if (_currentNavigationSpan is { IsFinished: false } navSpan)
+            {
+                navSpan.Finish(SpanStatus.Ok);
+                _currentNavigationSpan = null;
+            }
+            else
+            {
+                _currentTransaction?.Finish(SpanStatus.Ok);
+                _currentTransaction = null;
+            }
         }
     }
     private void OnApplicationOnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e) =>
@@ -498,6 +521,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Stopped), SystemType, LifecycleCategory);
         if (_options.EnableAutoTransactions)
         {
+            _currentNavigationSpan?.Finish(SpanStatus.Ok);
+            _currentNavigationSpan = null;
             _currentTransaction?.Finish(SpanStatus.Ok);
             _currentTransaction = null;
             _currentInteractionTransaction?.Finish(SpanStatus.Ok);
@@ -605,10 +630,23 @@ internal class MauiEventsBinder : IMauiEventsBinder
             data.Add(nameof(e.Source), e.Source.ToString());
         });
 
-        // Update the transaction name to the final resolved route now that navigation is confirmed
-        if (_options.EnableAutoTransactions && _currentTransaction != null)
+        // Update to the final resolved route now that navigation is confirmed
+        if (_options.EnableAutoTransactions)
         {
-            _currentTransaction.Name = e.Current?.Location.ToString() ?? _currentTransaction.Name;
+            var resolvedRoute = e.Current?.Location.ToString();
+            if (resolvedRoute == null)
+            {
+                return;
+            }
+
+            if (_currentNavigationSpan is { IsFinished: false } navSpan)
+            {
+                navSpan.Description = resolvedRoute;
+            }
+            else if (_currentTransaction != null)
+            {
+                _currentTransaction.Name = resolvedRoute;
+            }
         }
     }
 
