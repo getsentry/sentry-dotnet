@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
+using Sentry.Internal;
 
 namespace Sentry.AspNetCore;
 
@@ -28,6 +29,7 @@ internal sealed class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationO
         base.Configure(options);
         options.AddDiagnosticSourceIntegration();
         options.DeduplicateUnhandledException();
+        options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));
     }
 }
 
@@ -65,6 +67,7 @@ internal sealed class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAsp
         bindable.ApplyTo(options);
 
         options.DeduplicateUnhandledException();
+        options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));
     }
 }
 #endif

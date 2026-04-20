@@ -18,6 +18,8 @@ const string Header = @"// -----------------------------------------------------
 // If changes are required, update the script instead.
 // -----------------------------------------------------------------------------
 
+#nullable enable
+
 ";
 var code = Header + File.ReadAllText(args[0]);
 

@@ -36,6 +36,10 @@ public class AppDelegate : UIApplicationDelegate
             // Enable Native iOS SDK App Hangs detection
             options.Native.EnableAppHangTracking = true;
 
+            // If your app doesn't have sensitive data, you can get screenshots on error events automatically
+            // https://docs.sentry.io/platforms/apple/guides/ios/configuration/options/#attachScreenshot
+            options.Native.AttachScreenshot = true;
+
             options.CacheDirectoryPath = Path.GetTempPath();
 
             options.SetBeforeSend(evt =>

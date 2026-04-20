@@ -4,12 +4,13 @@
 // If changes are required, update the script instead.
 // -----------------------------------------------------------------------------
 
+#nullable enable
+
 using System;
 using CoreFoundation;
 using CoreGraphics;
 using Foundation;
 using ObjCRuntime;
-using Sentry;
 using UIKit;
 
 namespace Sentry.CocoaSdk;
@@ -157,6 +158,10 @@ interface SentryBaggage
     [NullAllowed, Export("replayId", ArgumentSemantic.Strong)]
     string ReplayId { get; set; }
 
+    // @property (readonly, nonatomic) NSString * _Nullable orgId;
+    [NullAllowed, Export("orgId")]
+    string OrgId { get; }
+
     // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction sampleRate:(NSString * _Nullable)sampleRate sampled:(NSString * _Nullable)sampled replayId:(NSString * _Nullable)replayId;
     [Export("initWithTraceId:publicKey:releaseName:environment:transaction:sampleRate:sampled:replayId:")]
     NativeHandle Constructor(SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string sampleRate, [NullAllowed] string sampled, [NullAllowed] string replayId);
@@ -164,6 +169,10 @@ interface SentryBaggage
     // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction sampleRate:(NSString * _Nullable)sampleRate sampleRand:(NSString * _Nullable)sampleRand sampled:(NSString * _Nullable)sampled replayId:(NSString * _Nullable)replayId;
     [Export("initWithTraceId:publicKey:releaseName:environment:transaction:sampleRate:sampleRand:sampled:replayId:")]
     NativeHandle Constructor(SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string sampleRate, [NullAllowed] string sampleRand, [NullAllowed] string sampled, [NullAllowed] string replayId);
+
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction sampleRate:(NSString * _Nullable)sampleRate sampleRand:(NSString * _Nullable)sampleRand sampled:(NSString * _Nullable)sampled replayId:(NSString * _Nullable)replayId orgId:(NSString * _Nullable)orgId;
+    [Export("initWithTraceId:publicKey:releaseName:environment:transaction:sampleRate:sampleRand:sampled:replayId:orgId:")]
+    NativeHandle Constructor(SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string sampleRate, [NullAllowed] string sampleRand, [NullAllowed] string sampled, [NullAllowed] string replayId, [NullAllowed] string orgId);
 
     // -(NSString * _Nonnull)toHTTPHeaderWithOriginalBaggage:(NSDictionary * _Nullable)originalBaggage;
     [Export("toHTTPHeaderWithOriginalBaggage:")]
@@ -1367,6 +1376,10 @@ interface SentryTraceContext : SentrySerializable
     [NullAllowed, Export("replayId")]
     string ReplayId { get; }
 
+    // @property (readonly, nonatomic) NSString * _Nullable orgId;
+    [NullAllowed, Export("orgId")]
+    string OrgId { get; }
+
     // -(SentryBaggage * _Nonnull)toBaggage;
     [Export("toBaggage")]
     SentryBaggage ToBaggage();
@@ -1655,6 +1668,11 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export("setLogOutput:")]
     void SetLogOutput(Action<NSString> output);
+
+    // +(void)ignoreNextSignal:(int)signum;
+    [Static]
+    [Export("ignoreNextSignal:")]
+    void IgnoreNextSignal(int signum);
 }
 
 // @interface SentryOptions : NSObject
@@ -1777,6 +1795,10 @@ interface SentryOptions
     // @property (nonatomic) BOOL attachStacktrace;
     [Export("attachStacktrace")]
     bool AttachStacktrace { get; set; }
+
+    // @property (nonatomic) BOOL attachAllThreads;
+    [Export("attachAllThreads")]
+    bool AttachAllThreads { get; set; }
 
     // @property (nonatomic) NSUInteger maxAttachmentSize;
     [Export("maxAttachmentSize")]
@@ -1982,6 +2004,18 @@ interface SentryOptions
     [Export("spotlightUrl")]
     string SpotlightUrl { get; set; }
 
+    // @property (nonatomic) BOOL strictTraceContinuation;
+    [Export("strictTraceContinuation")]
+    bool StrictTraceContinuation { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nullable orgId;
+    [NullAllowed, Export("orgId")]
+    string OrgId { get; set; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nullable effectiveOrgId;
+    [NullAllowed, Export("effectiveOrgId")]
+    string EffectiveOrgId { get; }
+
     // @property (nonatomic, strong) SentryExperimentalOptions * _Nonnull experimental;
     [Export("experimental", ArgumentSemantic.Strong)]
     SentryExperimentalOptions Experimental { get; set; }
@@ -2124,6 +2158,10 @@ interface SentryDsn
     // -(NSURL * _Nonnull)getEnvelopeEndpoint __attribute__((warn_unused_result("")));
     [Export("getEnvelopeEndpoint")]
     NSUrl EnvelopeEndpoint { get; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nullable orgId;
+    [NullAllowed, Export("orgId")]
+    string OrgId { get; }
 }
 
 // @interface SentryExperimentalOptions : NSObject
@@ -2645,6 +2683,11 @@ interface SentrySDK
     [Export("captureEvent:withScopeBlock:")]
     SentryId CaptureEvent(SentryEvent @event, Action<SentryScope> block);
 
+    // +(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event attachAllThreads:(BOOL)attachAllThreads;
+    [Static]
+    [Export("captureEvent:attachAllThreads:")]
+    SentryId CaptureEvent(SentryEvent @event, bool attachAllThreads);
+
     // +(id<SentrySpan> _Nonnull)startTransactionWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation;
     [Static]
     [Export("startTransactionWithName:operation:")]
@@ -2690,6 +2733,11 @@ interface SentrySDK
     [Export("captureError:withScopeBlock:")]
     SentryId CaptureError(NSError error, Action<SentryScope> block);
 
+    // +(SentryId * _Nonnull)captureError:(NSError * _Nonnull)error attachAllThreads:(BOOL)attachAllThreads;
+    [Static]
+    [Export("captureError:attachAllThreads:")]
+    SentryId CaptureError(NSError error, bool attachAllThreads);
+
     // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception;
     [Static]
     [Export("captureException:")]
@@ -2705,6 +2753,11 @@ interface SentrySDK
     [Export("captureException:withScopeBlock:")]
     SentryId CaptureException(NSException exception, Action<SentryScope> block);
 
+    // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception attachAllThreads:(BOOL)attachAllThreads;
+    [Static]
+    [Export("captureException:attachAllThreads:")]
+    SentryId CaptureException(NSException exception, bool attachAllThreads);
+
     // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message;
     [Static]
     [Export("captureMessage:")]
@@ -2719,6 +2772,11 @@ interface SentrySDK
     [Static]
     [Export("captureMessage:withScopeBlock:")]
     SentryId CaptureMessage(string message, Action<SentryScope> block);
+
+    // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message attachAllThreads:(BOOL)attachAllThreads;
+    [Static]
+    [Export("captureMessage:attachAllThreads:")]
+    SentryId CaptureMessage(string message, bool attachAllThreads);
 
     // +(void)captureFeedback:(SentryFeedback * _Nonnull)feedback;
     [Static]

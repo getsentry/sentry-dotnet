@@ -64,7 +64,30 @@ public static partial class SentrySdk
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
-            o.SetNativeHandlerStrategy(JavaSdk.Android.Core.NdkHandlerStrategy.SentryHandlerStrategyDefault);
+
+            var signalHandlerStrategy = options.Native.ExperimentalOptions.SignalHandlerStrategy;
+            if (signalHandlerStrategy == SignalHandlerStrategy.ChainAtStart
+                && Type.GetType("Mono.RuntimeStructs") == null)
+            {
+                options.LogInfo(
+                    "Using SignalHandlerStrategy.Default on .NET CoreCLR. " +
+                    "SignalHandlerStrategy.ChainAtStart is only required on the Mono runtime.");
+                signalHandlerStrategy = SignalHandlerStrategy.Default;
+            }
+            if (signalHandlerStrategy == SignalHandlerStrategy.ChainAtStart
+                && System.Environment.Version is { Major: 10, Minor: 0, Build: < 4 })
+            {
+                options.LogWarning(
+                    "SignalHandlerStrategy.ChainAtStart is not compatible with .NET runtime {0}. " +
+                    "Falling back to SignalHandlerStrategy.Default. Update to .NET runtime 10.0.4 or later.",
+                    System.Environment.Version);
+                signalHandlerStrategy = SignalHandlerStrategy.Default;
+            }
+            o.SetNativeHandlerStrategy(signalHandlerStrategy switch
+            {
+                SignalHandlerStrategy.ChainAtStart => NdkHandlerStrategy.SentryHandlerStrategyChainAtStart,
+                _ => NdkHandlerStrategy.SentryHandlerStrategyDefault
+            });
 
             if (options.CacheDirectoryPath is { } cacheDirectoryPath)
             {
