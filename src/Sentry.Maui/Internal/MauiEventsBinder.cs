@@ -600,8 +600,15 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnWindowOnModalPopped(object? sender, ModalPoppedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopped), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
 
-    private void OnWindowOnPopCanceled(object? sender, EventArgs _) =>
+    private void OnWindowOnPopCanceled(object? sender, EventArgs _)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.PopCanceled), NavigationType, NavigationCategory);
+        if (_options.EnableAutoTransactions && _currentNavigationSpan is { IsFinished: false } navSpan)
+        {
+            navSpan.Finish(SpanStatus.Cancelled);
+            _currentNavigationSpan = null;
+        }
+    }
 
     // Element Events
 

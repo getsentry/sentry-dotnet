@@ -222,6 +222,39 @@ public partial class MauiEventsBinderTests
         Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
+    [Fact]
+    public void Window_PopCanceled_FinishesActiveNavigationSpan()
+    {
+        // Arrange
+        var application = Mocks.MockApplication.Create();
+        _fixture.Binder.HandleApplicationEvents(application);
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var button = new Button { AutomationId = "my-btn" };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        var navSpan = Substitute.For<ISpan>();
+        navSpan.IsFinished.Returns(false);
+        var clickTransaction = Substitute.For<ITransactionTracer>();
+        clickTransaction.IsFinished.Returns(false);
+        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(clickTransaction);
+
+        var modalPage = new ContentPage { StyleId = "TestModalPage" };
+
+        // Click button, then start popping a modal (navigation span created)
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+        application.RaiseEvent(nameof(Application.ModalPopping), new ModalPoppingEventArgs(modalPage));
+
+        // Act - pop is cancelled
+        window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
+
+        // Assert - navigation span finished as cancelled, click tx NOT finished
+        navSpan.Received(1).Finish(SpanStatus.Cancelled);
+        clickTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+    }
+
     [Theory]
     [MemberData(nameof(WindowModalEventsData))]
     public void Window_ModalEvents_AddsBreadcrumb(string eventName, object eventArgs)
