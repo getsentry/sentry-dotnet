@@ -289,7 +289,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Pressed_ThenModalPush_NavigationIsChildSpanOfClick()
+    public void Button_Pressed_ThenModalPushing_NavigationIsChildSpanOfClick()
     {
         // Arrange
         var application = MockApplication.Create();
@@ -306,9 +306,9 @@ public partial class MauiEventsBinderTests
 
         var modalPage = new ContentPage { StyleId = "TestModalPage" };
 
-        // Act - press button, then push modal
+        // Act - press button, then modal starts pushing
         button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
+        application.RaiseEvent(nameof(Application.ModalPushing), new ModalPushingEventArgs(modalPage));
 
         // Assert - only one transaction created (click), navigation is a child span
         _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
@@ -316,7 +316,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Pressed_ModalPopped_FinishesSpanNotTransaction()
+    public void Button_Pressed_ModalPushed_FinishesSpanNotTransaction()
     {
         // Arrange
         var application = MockApplication.Create();
@@ -335,10 +335,10 @@ public partial class MauiEventsBinderTests
         var modalPage = new ContentPage { StyleId = "TestModalPage" };
 
         button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
+        application.RaiseEvent(nameof(Application.ModalPushing), new ModalPushingEventArgs(modalPage));
 
-        // Act - pop modal
-        application.RaiseEvent(nameof(Application.ModalPopped), new ModalPoppedEventArgs(modalPage));
+        // Act - modal finishes pushing (page loaded)
+        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
 
         // Assert - child span finished, click transaction NOT finished (idle timeout manages it)
         navSpan.Received(1).Finish(SpanStatus.Ok);
@@ -370,29 +370,35 @@ public partial class MauiEventsBinderTests
         shell.RaiseEvent(nameof(Shell.Navigated),
             new ShellNavigatedEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("//resolved/bar"), ShellNavigationSource.Push));
 
-        // Assert - span description updated (not transaction name)
+        // Assert - span description updated and span finished
         navSpan.Description.Should().Be("//resolved/bar");
+        navSpan.Received(1).Finish(SpanStatus.Ok);
+        clickTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
     }
 
     [Fact]
-    public void StandaloneNavigation_NoClick_BehaviorUnchanged()
+    public void StandaloneNavigation_NoClick_CreatesAndFinishesTransaction()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
         _fixture.Binder.HandleShellEvents(shell);
         var navTransaction = Substitute.For<ITransactionTracer>();
+        navTransaction.IsFinished.Returns(false);
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(navTransaction);
 
-        // Act - navigate without any button press
+        // Act - navigate without any button press (Navigating starts, Navigated finishes)
         shell.RaiseEvent(nameof(Shell.Navigating),
             new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+        shell.RaiseEvent(nameof(Shell.Navigated),
+            new ShellNavigatedEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("//resolved/bar"), ShellNavigationSource.Push));
 
-        // Assert - standalone navigation transaction created as before
+        // Assert - standalone navigation transaction created, name updated, and finished
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Is<ITransactionContext>(c => c.Operation == "ui.load"),
             Arg.Any<TimeSpan?>());
-        Assert.Same(navTransaction, _fixture.Scope.Transaction);
+        navTransaction.Name.Should().Be("//resolved/bar");
+        navTransaction.Received(1).Finish(SpanStatus.Ok);
     }
 
     [Fact]

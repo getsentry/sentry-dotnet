@@ -255,12 +255,13 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigated_UpdatesTransactionName()
+    public void Shell_Navigated_UpdatesTransactionNameAndFinishes()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
         _fixture.Binder.HandleShellEvents(shell);
         var mockTransaction = Substitute.For<ITransactionTracer>();
+        mockTransaction.IsFinished.Returns(false);
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(mockTransaction);
 
@@ -271,8 +272,9 @@ public partial class MauiEventsBinderTests
         shell.RaiseEvent(nameof(Shell.Navigated),
             new ShellNavigatedEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("//resolved/bar"), ShellNavigationSource.Push));
 
-        // Assert
+        // Assert - transaction name updated to resolved route and transaction finished
         mockTransaction.Name.Should().Be("//resolved/bar");
+        mockTransaction.Received(1).Finish(SpanStatus.Ok);
     }
 
     [Fact]

@@ -188,6 +188,7 @@ public partial class MauiEventsBinderTests
             return new List<object[]>
             {
                 // Note, these are distinct from the Window events with the same names.
+                new object[] {nameof(Application.ModalPushing), new ModalPushingEventArgs(modelPage)},
                 new object[] {nameof(Application.ModalPushed), new ModalPushedEventArgs(modelPage)},
                 new object[] {nameof(Application.ModalPopped), new ModalPoppedEventArgs(modelPage)}
             };
@@ -195,7 +196,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Application_ModalPushed_StartsNavigationTransaction()
+    public void Application_ModalPushing_StartsNavigationTransaction()
     {
         // Arrange
         var application = MockApplication.Create();
@@ -206,7 +207,7 @@ public partial class MauiEventsBinderTests
         var modalPage = new ContentPage { StyleId = "TestModalPage" };
 
         // Act
-        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
+        application.RaiseEvent(nameof(Application.ModalPushing), new ModalPushingEventArgs(modalPage));
 
         // Assert
         _fixture.Hub.Received(1).StartTransaction(
@@ -215,7 +216,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Application_ModalPushed_DisabledOption_DoesNotStartTransaction()
+    public void Application_ModalPushing_DisabledOption_DoesNotStartTransaction()
     {
         // Arrange
         _fixture.Options.EnableAutoTransactions = false;
@@ -224,27 +225,29 @@ public partial class MauiEventsBinderTests
         var modalPage = new ContentPage { StyleId = "TestModalPage" };
 
         // Act
-        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
+        application.RaiseEvent(nameof(Application.ModalPushing), new ModalPushingEventArgs(modalPage));
 
         // Assert
         _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
     }
 
     [Fact]
-    public void Application_ModalPopped_FinishesActiveTransaction()
+    public void Application_ModalPushed_FinishesActiveTransaction()
     {
         // Arrange
         var application = MockApplication.Create();
         _fixture.Binder.HandleApplicationEvents(application);
         var mockTransaction = Substitute.For<ITransactionTracer>();
+        mockTransaction.IsFinished.Returns(false);
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(mockTransaction);
         var modalPage = new ContentPage { StyleId = "TestModalPage" };
 
-        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
+        // ModalPushing starts the transaction
+        application.RaiseEvent(nameof(Application.ModalPushing), new ModalPushingEventArgs(modalPage));
 
-        // Act
-        application.RaiseEvent(nameof(Application.ModalPopped), new ModalPoppedEventArgs(modalPage));
+        // Act - ModalPushed finishes it
+        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
 
         // Assert
         mockTransaction.Received(1).Finish(SpanStatus.Ok);

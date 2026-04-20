@@ -74,6 +74,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             // Navigation events
             application.PageAppearing += OnApplicationOnPageAppearing;
             application.PageDisappearing += OnApplicationOnPageDisappearing;
+            application.ModalPushing += OnApplicationOnModalPushing;
             application.ModalPushed += OnApplicationOnModalPushed;
             application.ModalPopped += OnApplicationOnModalPopped;
 
@@ -93,6 +94,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // Navigation events
         application.PageAppearing -= OnApplicationOnPageAppearing;
         application.PageDisappearing -= OnApplicationOnPageDisappearing;
+        application.ModalPushing -= OnApplicationOnModalPushing;
         application.ModalPushed -= OnApplicationOnModalPushed;
         application.ModalPopped -= OnApplicationOnModalPopped;
 
@@ -354,7 +356,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
             _currentNavigationSpan?.Finish(SpanStatus.Ok);
             _currentNavigationSpan = clickTx.StartChild("ui.load", name);
-            clickTx.ResetIdleTimeout();
             return clickTx;
         }
 
@@ -472,6 +473,20 @@ internal class MauiEventsBinder : IMauiEventsBinder
         return transaction;
     }
 
+    private void FinishNavigationSpanOrTransaction()
+    {
+        if (_currentNavigationSpan is { IsFinished: false } navSpan)
+        {
+            navSpan.Finish(SpanStatus.Ok);
+            _currentNavigationSpan = null;
+        }
+        else if (_currentTransaction is { IsFinished: false })
+        {
+            _currentTransaction.Finish(SpanStatus.Ok);
+            _currentTransaction = null;
+        }
+    }
+
     // Application Events
 
     private void OnApplicationOnPageAppearing(object? sender, Page page) =>
@@ -479,32 +494,26 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnApplicationOnPageDisappearing(object? sender, Page page) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
 
-    private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e)
+    private void OnApplicationOnModalPushing(object? sender, ModalPushingEventArgs e)
     {
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
+        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         if (_options.EnableAutoTransactions)
         {
             StartNavigationTransaction(e.Modal.GetType().Name);
         }
     }
 
-    private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e)
+    private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e)
     {
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
+        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         if (_options.EnableAutoTransactions)
         {
-            if (_currentNavigationSpan is { IsFinished: false } navSpan)
-            {
-                navSpan.Finish(SpanStatus.Ok);
-                _currentNavigationSpan = null;
-            }
-            else
-            {
-                _currentTransaction?.Finish(SpanStatus.Ok);
-                _currentTransaction = null;
-            }
+            FinishNavigationSpanOrTransaction();
         }
     }
+
+    private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e) =>
+        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
     private void OnApplicationOnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.RequestedThemeChanged), SystemType, RenderingCategory, data => data.Add(nameof(e.RequestedTheme), e.RequestedTheme.ToString()));
 
@@ -630,7 +639,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             data.Add(nameof(e.Source), e.Source.ToString());
         });
 
-        // Update to the final resolved route now that navigation is confirmed
+        // Update to the final resolved route now that navigation is confirmed, then finish
         if (_options.EnableAutoTransactions)
         {
             var resolvedRoute = e.Current?.Location.ToString();
@@ -647,6 +656,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
             {
                 _currentTransaction.Name = resolvedRoute;
             }
+
+            FinishNavigationSpanOrTransaction();
         }
     }
 
