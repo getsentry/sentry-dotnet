@@ -504,41 +504,17 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnApplicationOnPageDisappearing(object? sender, Page page) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
 
-    private void OnApplicationOnModalPushing(object? sender, ModalPushingEventArgs e)
-    {
+    private void OnApplicationOnModalPushing(object? sender, ModalPushingEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        if (_options.EnableAutoTransactions)
-        {
-            StartNavigationTransaction(e.Modal.GetType().Name);
-        }
-    }
 
-    private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e)
-    {
+    private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        if (_options.EnableAutoTransactions)
-        {
-            FinishNavigationSpanOrTransaction();
-        }
-    }
 
-    private void OnApplicationOnModalPopping(object? sender, ModalPoppingEventArgs e)
-    {
+    private void OnApplicationOnModalPopping(object? sender, ModalPoppingEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopping), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        if (_options.EnableAutoTransactions)
-        {
-            StartNavigationTransaction(e.Modal.GetType().Name);
-        }
-    }
 
-    private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e)
-    {
+    private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        if (_options.EnableAutoTransactions)
-        {
-            FinishNavigationSpanOrTransaction();
-        }
-    }
     private void OnApplicationOnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.RequestedThemeChanged), SystemType, RenderingCategory, data => data.Add(nameof(e.RequestedTheme), e.RequestedTheme.ToString()));
 

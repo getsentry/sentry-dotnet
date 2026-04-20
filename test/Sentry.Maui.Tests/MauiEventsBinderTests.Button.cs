@@ -317,63 +317,6 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Pressed_ThenModalPushing_NavigationIsChildSpanOfClick()
-    {
-        // Arrange
-        var application = MockApplication.Create();
-        _fixture.Binder.HandleApplicationEvents(application);
-        var button = new Button { AutomationId = "my-btn" };
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
-
-        var navSpan = Substitute.For<ISpan>();
-        var clickTransaction = Substitute.For<ITransactionTracer>();
-        clickTransaction.IsFinished.Returns(false);
-        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction);
-
-        var modalPage = new ContentPage { StyleId = "TestModalPage" };
-
-        // Act - press button, then modal starts pushing
-        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        application.RaiseEvent(nameof(Application.ModalPushing), new ModalPushingEventArgs(modalPage));
-
-        // Assert - only one transaction created (click), navigation is a child span
-        _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
-        clickTransaction.Received(1).StartChild("ui.load");
-    }
-
-    [Fact]
-    public void Button_Pressed_ModalPushed_FinishesSpanNotTransaction()
-    {
-        // Arrange
-        var application = MockApplication.Create();
-        _fixture.Binder.HandleApplicationEvents(application);
-        var button = new Button { AutomationId = "my-btn" };
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
-
-        var navSpan = Substitute.For<ISpan>();
-        navSpan.IsFinished.Returns(false);
-        var clickTransaction = Substitute.For<ITransactionTracer>();
-        clickTransaction.IsFinished.Returns(false);
-        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction);
-
-        var modalPage = new ContentPage { StyleId = "TestModalPage" };
-
-        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        application.RaiseEvent(nameof(Application.ModalPushing), new ModalPushingEventArgs(modalPage));
-
-        // Act - modal finishes pushing (page loaded)
-        application.RaiseEvent(nameof(Application.ModalPushed), new ModalPushedEventArgs(modalPage));
-
-        // Assert - child span finished, click transaction NOT finished (idle timeout manages it)
-        navSpan.Received(1).Finish(SpanStatus.Ok);
-        clickTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
-    }
-
-    [Fact]
     public void Button_Pressed_ShellNavigated_UpdatesSpanDescription()
     {
         // Arrange

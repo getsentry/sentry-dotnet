@@ -226,8 +226,8 @@ public partial class MauiEventsBinderTests
     public void Window_PopCanceled_FinishesActiveNavigationSpan()
     {
         // Arrange
-        var application = Mocks.MockApplication.Create();
-        _fixture.Binder.HandleApplicationEvents(application);
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
         var window = new Window();
         _fixture.Binder.HandleWindowEvents(window);
         var button = new Button { AutomationId = "my-btn" };
@@ -241,11 +241,10 @@ public partial class MauiEventsBinderTests
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(clickTransaction);
 
-        var modalPage = new ContentPage { StyleId = "TestModalPage" };
-
-        // Click button, then start popping a modal (navigation span created)
+        // Click button, then start navigating (navigation span created)
         button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        application.RaiseEvent(nameof(Application.ModalPopping), new ModalPoppingEventArgs(modalPage));
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
 
         // Act - pop is cancelled
         window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
