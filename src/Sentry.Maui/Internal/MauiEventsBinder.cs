@@ -142,10 +142,17 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
 
         if (_options.EnableAutoTransactions
-            && _options.EnableUserInteractionTracing
-            && e.Element is Button button)
+            && _options.EnableUserInteractionTracing)
         {
-            button.Pressed += OnButtonPressedForTransaction;
+            switch (e.Element)
+            {
+                case Button button:
+                    button.Pressed += OnElementPressedForTransaction;
+                    break;
+                case ImageButton imageButton:
+                    imageButton.Pressed += OnElementPressedForTransaction;
+                    break;
+            }
         }
     }
 
@@ -201,9 +208,14 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 break;
         }
 
-        if (e.Element is Button button)
+        switch (e.Element)
         {
-            button.Pressed -= OnButtonPressedForTransaction;
+            case Button button:
+                button.Pressed -= OnElementPressedForTransaction;
+                break;
+            case ImageButton imageButton:
+                imageButton.Pressed -= OnElementPressedForTransaction;
+                break;
         }
     }
 
@@ -412,32 +424,32 @@ internal class MauiEventsBinder : IMauiEventsBinder
         return transaction;
     }
 
-    private void OnButtonPressedForTransaction(object? sender, EventArgs _)
+    private void OnElementPressedForTransaction(object? sender, EventArgs _)
     {
-        if (sender is not Button button)
+        if (sender is not Element element)
         {
             return;
         }
 
         string? identifier = null;
-        if (!string.IsNullOrEmpty(button.AutomationId))
+        if (!string.IsNullOrEmpty(element.AutomationId))
         {
-            identifier = button.AutomationId;
+            identifier = element.AutomationId;
         }
-        else if (!string.IsNullOrEmpty(button.StyleId))
+        else if (!string.IsNullOrEmpty(element.StyleId))
         {
-            identifier = button.StyleId;
+            identifier = element.StyleId;
         }
 
         if (identifier is null)
         {
             _options.DiagnosticLogger?.Log(
                 SentryLevel.Warning,
-                "Button click transaction skipped: element has no AutomationId or StyleId");
+                "Click transaction skipped: element has no AutomationId or StyleId");
             return;
         }
 
-        var pageName = button.FindContainingPage()?.GetType().Name;
+        var pageName = element.FindContainingPage()?.GetType().Name;
         var name = pageName != null ? $"{pageName}.{identifier}" : identifier;
         StartUserInteractionTransaction(name);
     }

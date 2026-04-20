@@ -74,7 +74,7 @@ public partial class MauiEventsBinderTests
         _fixture.Hub.DidNotReceive().StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
         _fixture.Options.DiagnosticLogger!.Received(1).Log(
             SentryLevel.Warning,
-            Arg.Is<string>(m => m.Contains("AutomationId") && m.Contains("StyleId")),
+            Arg.Is<string>(m => m.Contains("AutomationId") && m.Contains("StyleId") && m.Contains("Click transaction skipped")),
             Arg.Any<Exception>(),
             Arg.Any<object[]>());
     }
