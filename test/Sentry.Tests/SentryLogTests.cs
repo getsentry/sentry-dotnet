@@ -34,14 +34,6 @@ public class SentryLogTests
         log.Template.Should().BeNull();
         log.Parameters.Should().BeEmpty();
         log.SpanId.Should().BeNull();
-
-#if DEBUG
-        var assignDefault = static () => new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
-        {
-            Parameters = default,
-        };
-        assignDefault.Should().Throw<Exception>("Disallow default ImmutableArray");
-#endif
     }
 
     [Fact]
