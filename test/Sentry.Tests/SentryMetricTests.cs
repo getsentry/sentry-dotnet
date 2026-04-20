@@ -32,8 +32,8 @@ public class SentryMetricTests
         metric.Type.Should().Be(SentryMetricType.Counter);
         metric.Name.Should().Be("sentry_tests.sentry_metric_tests.counter");
         metric.Value.Should().Be(1);
-        metric.SpanId.Should().Be(null);
-        metric.Unit.Should().BeEquivalentTo(null);
+        metric.SpanId.Should().BeNull();
+        metric.Unit.Should().BeNull();
     }
 
     [Fact]

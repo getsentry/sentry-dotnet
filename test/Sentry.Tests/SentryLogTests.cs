@@ -31,9 +31,9 @@ public class SentryLogTests
         log.TraceId.Should().Be(TraceId);
         log.Level.Should().Be((SentryLogLevel)24);
         log.Message.Should().Be("message");
-        log.Template.Should().Be(null);
+        log.Template.Should().BeNull();
         log.Parameters.Should().BeEmpty();
-        log.SpanId.Should().Be(null);
+        log.SpanId.Should().BeNull();
 
 #if DEBUG
         var assignDefault = static () => new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
