@@ -165,29 +165,31 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Pressed_SameButton_ResetsIdleTimeoutAndDoesNotStartNew()
+    public void Button_Pressed_SameButton_AlwaysCreatesNewTransaction()
     {
         // Arrange
         var button = new Button { AutomationId = "my-btn" };
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
-        var transaction = Substitute.For<ITransactionTracer>();
-        transaction.Name.Returns("my-btn");
-        transaction.IsFinished.Returns(false);
+        var firstTransaction = Substitute.For<ITransactionTracer>();
+        firstTransaction.Name.Returns("my-btn");
+        firstTransaction.IsFinished.Returns(false);
+        var secondTransaction = Substitute.For<ITransactionTracer>();
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(transaction);
+            .Returns(firstTransaction, secondTransaction);
 
         button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
         // Act - press the same button again
         button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
-        // Assert
-        _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
-        transaction.Received(1).ResetIdleTimeout();
+        // Assert - each click creates a new transaction
+        _fixture.Hub.Received(2).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+        // Previous childless transaction not explicitly finished — idle timeout will discard it
+        firstTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
     }
 
     [Fact]
-    public void Button_Pressed_DifferentButton_FinishesPreviousAndStartsNew()
+    public void Button_Pressed_DifferentButton_ChildlessPrevious_NotExplicitlyFinished()
     {
         // Arrange
         var firstButton = new Button { AutomationId = "first" };
@@ -196,6 +198,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(secondButton));
         var firstTransaction = Substitute.For<ITransactionTracer>();
         firstTransaction.Name.Returns("first");
+        firstTransaction.IsFinished.Returns(false);
         var secondTransaction = Substitute.For<ITransactionTracer>();
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(firstTransaction, secondTransaction);
@@ -204,7 +207,32 @@ public partial class MauiEventsBinderTests
         firstButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
         secondButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
-        // Assert
+        // Assert - childless first tx not explicitly finished; idle timeout will discard
+        firstTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+        _fixture.Hub.Received(2).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+    }
+
+    [Fact]
+    public void Button_Pressed_DifferentButton_PreviousWithChildren_FinishesPrevious()
+    {
+        // Arrange
+        var firstButton = new Button { AutomationId = "first" };
+        var secondButton = new Button { AutomationId = "second" };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(firstButton));
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(secondButton));
+        var firstTransaction = Substitute.For<ITransactionTracer>();
+        firstTransaction.Name.Returns("first");
+        firstTransaction.IsFinished.Returns(false);
+        firstTransaction.Spans.Returns(new[] { Substitute.For<ISpan>() }); // has a child span
+        var secondTransaction = Substitute.For<ITransactionTracer>();
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(firstTransaction, secondTransaction);
+
+        // Act
+        firstButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+        secondButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+
+        // Assert - first tx has children, so it IS explicitly finished
         firstTransaction.Received(1).Finish(SpanStatus.Ok);
         _fixture.Hub.Received(2).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
     }
@@ -377,7 +405,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void StandaloneNavigation_NoClick_CreatesAndFinishesTransaction()
+    public void StandaloneNavigation_NoClick_NotExplicitlyFinished()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -387,18 +415,19 @@ public partial class MauiEventsBinderTests
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(navTransaction);
 
-        // Act - navigate without any button press (Navigating starts, Navigated finishes)
+        // Act - navigate without any button press
         shell.RaiseEvent(nameof(Shell.Navigating),
             new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
         shell.RaiseEvent(nameof(Shell.Navigated),
             new ShellNavigatedEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("//resolved/bar"), ShellNavigationSource.Push));
 
-        // Assert - standalone navigation transaction created, name updated, and finished
+        // Assert - transaction created and name updated, but NOT explicitly finished.
+        // Idle timeout will capture if it has child spans, or discard if not.
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Is<ITransactionContext>(c => c.Operation == "ui.load"),
             Arg.Any<TimeSpan?>());
         navTransaction.Name.Should().Be("//resolved/bar");
-        navTransaction.Received(1).Finish(SpanStatus.Ok);
+        navTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
     }
 
     [Fact]

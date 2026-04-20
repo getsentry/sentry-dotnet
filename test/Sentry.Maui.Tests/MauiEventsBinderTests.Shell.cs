@@ -210,12 +210,13 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigating_FinishesPreviousTransaction()
+    public void Shell_Navigating_ChildlessPreviousTransaction_NotExplicitlyFinished()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
         _fixture.Binder.HandleShellEvents(shell);
         var firstTransaction = Substitute.For<ITransactionTracer>();
+        firstTransaction.IsFinished.Returns(false);
         var secondTransaction = Substitute.For<ITransactionTracer>();
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(firstTransaction, secondTransaction);
@@ -226,7 +227,30 @@ public partial class MauiEventsBinderTests
         shell.RaiseEvent(nameof(Shell.Navigating),
             new ShellNavigatingEventArgs(new ShellNavigationState("bar"), new ShellNavigationState("baz"), ShellNavigationSource.Push, false));
 
-        // Assert - first transaction was finished before the second started
+        // Assert - childless first tx not explicitly finished; idle timeout will discard
+        firstTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+    }
+
+    [Fact]
+    public void Shell_Navigating_PreviousTransactionWithChildren_FinishesPrevious()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var firstTransaction = Substitute.For<ITransactionTracer>();
+        firstTransaction.IsFinished.Returns(false);
+        firstTransaction.Spans.Returns(new[] { Substitute.For<ISpan>() }); // has a child span
+        var secondTransaction = Substitute.For<ITransactionTracer>();
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(firstTransaction, secondTransaction);
+
+        // Act - navigate twice
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
+        shell.RaiseEvent(nameof(Shell.Navigating),
+            new ShellNavigatingEventArgs(new ShellNavigationState("bar"), new ShellNavigationState("baz"), ShellNavigationSource.Push, false));
+
+        // Assert - first tx has children, so it IS explicitly finished
         firstTransaction.Received(1).Finish(SpanStatus.Ok);
     }
 
@@ -255,7 +279,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Shell_Navigated_UpdatesTransactionNameAndFinishes()
+    public void Shell_Navigated_UpdatesTransactionName()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -272,9 +296,9 @@ public partial class MauiEventsBinderTests
         shell.RaiseEvent(nameof(Shell.Navigated),
             new ShellNavigatedEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("//resolved/bar"), ShellNavigationSource.Push));
 
-        // Assert - transaction name updated to resolved route and transaction finished
+        // Assert - name updated, but standalone tx NOT explicitly finished (idle timeout handles it)
         mockTransaction.Name.Should().Be("//resolved/bar");
-        mockTransaction.Received(1).Finish(SpanStatus.Ok);
+        mockTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
     }
 
     [Fact]
