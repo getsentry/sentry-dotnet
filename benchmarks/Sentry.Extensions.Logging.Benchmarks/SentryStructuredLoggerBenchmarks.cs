@@ -1,5 +1,3 @@
-#nullable enable
-
 using BenchmarkDotNet.Attributes;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
@@ -7,7 +5,7 @@ using Sentry.Extensions.Logging;
 using Sentry.Internal;
 using Sentry.Testing;
 
-namespace Sentry.Benchmarks.Extensions.Logging;
+namespace Sentry.Extensions.Logging.Benchmarks;
 
 public class SentryStructuredLoggerBenchmarks
 {
