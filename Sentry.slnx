@@ -29,10 +29,12 @@
     <File Path=".github/workflows/device-tests-android.yml" />
     <File Path=".github/workflows/device-tests-ios.yml" />
     <File Path=".github/workflows/format-code.yml" />
+    <File Path=".github/workflows/needs-repro.yml" />
+    <File Path=".github/workflows/playwright-blazor-wasm.yml" />
     <File Path=".github/workflows/release.yml" />
     <File Path=".github/workflows/update-deps.yml" />
+    <File Path=".github/workflows/validate-pr.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
-    <File Path=".github/workflows/playwright-blazor-wasm.yml" />
     <File Path=".github/workflows/watch-upstream.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
