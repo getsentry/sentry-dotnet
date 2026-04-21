@@ -1,7 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
-using Sentry.Extensions.Logging;
 using Sentry.Internal;
 using Sentry.Testing;
 
@@ -10,7 +9,7 @@ namespace Sentry.Extensions.Logging.Benchmarks;
 public class SentryStructuredLoggerBenchmarks
 {
     private Hub _hub = null!;
-    private Sentry.Extensions.Logging.SentryStructuredLogger _logger = null!;
+    private SentryStructuredLogger _logger = null!;
     private LogRecord _logRecord = null!;
     private SentryLog? _lastLog;
 
@@ -36,7 +35,7 @@ public class SentryStructuredLoggerBenchmarks
         };
 
         _hub = new Hub(options, DisabledHub.Instance);
-        _logger = new Sentry.Extensions.Logging.SentryStructuredLogger("CategoryName", options, _hub, clock, sdk);
+        _logger = new SentryStructuredLogger("CategoryName", options, _hub, clock, sdk);
         _logRecord = new LogRecord(LogLevel.Information, new EventId(2025, "EventName"), new InvalidOperationException("exception-message"), "Number={Number}, Text={Text}", 2018, "message");
     }
 
