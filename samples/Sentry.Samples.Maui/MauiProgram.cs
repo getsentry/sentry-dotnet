@@ -85,6 +85,7 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                fonts.AddFont("fa-solid-900.ttf", "FontAwesomeSolid");
             });
 
         // Configure Logging, including Structured Logs sent to Sentry (see 'EnableLogs = true')
