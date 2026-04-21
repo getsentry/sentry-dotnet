@@ -14,16 +14,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private readonly SentryMauiOptions _options;
     internal readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
 
-    // Tracks the active auto-finishing navigation transaction so we can explicitly finish it early
-    // (e.g. when the next navigation begins) before the idle timeout would fire.
-    private ITransactionTracer? _currentTransaction;
-
-    // Tracks the active auto-finishing user-interaction (click) transaction, separate from navigation
-    // so that navigation can become a child span of the click transaction.
-    private ITransactionTracer? _currentInteractionTransaction;
+    // Tracks the active auto-finishing navigation transaction so we can reset the idle timeout as appropriate
+    private ITransactionTracer? _currentUiTx;
 
     // Tracks the navigation child span when navigation is nested under a click transaction.
-    private ISpan? _currentNavigationSpan;
+    private ISpan? _currentNavSpan;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
@@ -74,9 +69,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             // Navigation events
             application.PageAppearing += OnApplicationOnPageAppearing;
             application.PageDisappearing += OnApplicationOnPageDisappearing;
-            application.ModalPushing += OnApplicationOnModalPushing;
             application.ModalPushed += OnApplicationOnModalPushed;
-            application.ModalPopping += OnApplicationOnModalPopping;
             application.ModalPopped += OnApplicationOnModalPopped;
 
             // Theme changed event
@@ -95,9 +88,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // Navigation events
         application.PageAppearing -= OnApplicationOnPageAppearing;
         application.PageDisappearing -= OnApplicationOnPageDisappearing;
-        application.ModalPushing -= OnApplicationOnModalPushing;
         application.ModalPushed -= OnApplicationOnModalPushed;
-        application.ModalPopping -= OnApplicationOnModalPopping;
         application.ModalPopped -= OnApplicationOnModalPopped;
 
         // Theme changed event
@@ -141,16 +132,15 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 break;
         }
 
-        if (_options.EnableAutoTransactions
-            && _options.EnableUserInteractionTracing)
+        if (_options is { EnableAutoTransactions: true, EnableUserInteractionTracing: true })
         {
             switch (e.Element)
             {
                 case Button button:
-                    button.Pressed += OnElementPressedForTransaction;
+                    button.Pressed += OnElementPressed;
                     break;
                 case ImageButton imageButton:
-                    imageButton.Pressed += OnElementPressedForTransaction;
+                    imageButton.Pressed += OnElementPressed;
                     break;
             }
         }
@@ -211,10 +201,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
         switch (e.Element)
         {
             case Button button:
-                button.Pressed -= OnElementPressedForTransaction;
+                button.Pressed -= OnElementPressed;
                 break;
             case ImageButton imageButton:
-                imageButton.Pressed -= OnElementPressedForTransaction;
+                imageButton.Pressed -= OnElementPressed;
                 break;
         }
     }
@@ -360,71 +350,33 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private ITransactionTracer? StartNavigationTransaction(string name)
+    private ISpan? StartNavigationSpan(string name)
     {
-        // When a click transaction is active, navigation becomes a child span of it.
-        if (_currentInteractionTransaction is { IsFinished: false } clickTx)
+        // Nav events only ever get captured as child spans
+        if (_hub.GetSpan() is not { IsFinished: false } parentSpan)
         {
-            // Only explicitly finish a previous standalone nav tx if it has child spans.
-            if (_currentTransaction is { IsFinished: false } prevNavTx && prevNavTx.Spans.Count > 0)
-            {
-                prevNavTx.Finish(SpanStatus.Ok);
-            }
-            _currentTransaction = null;
-
-            _currentNavigationSpan?.Finish(SpanStatus.Ok);
-            _currentNavigationSpan = clickTx.StartChild("ui.load", name);
-            return clickTx;
+            return null;
         }
 
-        // Standalone navigation — no active click transaction.
-        _currentNavigationSpan = null;
+        _currentUiTx?.ResetIdleTimeout();
 
-        if (_currentTransaction is { IsFinished: false } previousTx)
-        {
-            if (previousTx.Name == name)
-            {
-                // Same destination — reset idle timeout instead of starting a new transaction.
-                previousTx.ResetIdleTimeout();
-                return previousTx;
-            }
-
-            // Different destination — only finish if it has child spans.
-            // Childless transactions will be discarded by the idle timeout.
-            if (previousTx.Spans.Count > 0)
-            {
-                previousTx.Finish(SpanStatus.Ok);
-            }
-        }
-
-        var context = new TransactionContext(name, "ui.load")
-        {
-            NameSource = TransactionNameSource.Route
-        };
-
-        var transaction = _hub is IHubInternal internalHub
-            ? internalHub.StartTransaction(context, _options.AutoTransactionIdleTimeout)
-            : _hub.StartTransaction(context);
-
-        // Only bind to scope if there is no user-created transaction already there.
-        var hasUserTransaction = false;
-        _hub.ConfigureScope(scope =>
-        {
-            if (scope.Transaction is { } existing && !ReferenceEquals(existing, _currentTransaction))
-            {
-                hasUserTransaction = true;
-            }
-        });
-        if (!hasUserTransaction)
-        {
-            _hub.ConfigureScope(static (scope, t) => scope.Transaction = t, transaction);
-        }
-
-        _currentTransaction = transaction;
-        return transaction;
+        _currentNavSpan?.Finish(SpanStatus.Ok);
+        _currentNavSpan = parentSpan.StartChild("ui.load", name);
+        return _currentNavSpan;
     }
 
-    private void OnElementPressedForTransaction(object? sender, EventArgs _)
+    private void FinishNavigationSpan()
+    {
+        if (_currentNavSpan is not { IsFinished: false } navSpan)
+        {
+            return;
+        }
+
+        navSpan.Finish(SpanStatus.Ok);
+        _currentNavSpan = null;
+    }
+
+    private void OnElementPressed(object? sender, EventArgs _)
     {
         if (sender is not Element element)
         {
@@ -440,8 +392,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         {
             identifier = element.StyleId;
         }
-
-        if (identifier is null)
+        else
         {
             _options.DiagnosticLogger?.Log(
                 SentryLevel.Warning,
@@ -454,59 +405,32 @@ internal class MauiEventsBinder : IMauiEventsBinder
         StartUserInteractionTransaction(name);
     }
 
-    private ITransactionTracer? StartUserInteractionTransaction(string name)
+    private void StartUserInteractionTransaction(string name)
     {
-        // Each click always creates a new transaction.
-        // Finish any previous SDK-owned interaction transaction (and its navigation child span).
-        if (_currentNavigationSpan is { IsFinished: false })
+        // Each UI interaction is always a separate transaction... we don't want three separate button clicks to be
+        // grouped into a single transaction.
+        if (_currentNavSpan is { IsFinished: false })
         {
-            _currentNavigationSpan.Finish(SpanStatus.Cancelled);
-            _currentNavigationSpan = null;
+            _currentNavSpan.Finish(SpanStatus.Cancelled);
+            _currentNavSpan = null;
         }
-        // Only explicitly finish the previous click transaction if it has child spans.
-        // Childless transactions will be discarded by the idle timeout.
-        if (_currentInteractionTransaction is { IsFinished: false } prevTx && prevTx.Spans.Count > 0)
+        if (_currentUiTx is { IsFinished: false, Spans.Count: > 0 })
         {
-            prevTx.Finish(SpanStatus.Ok);
+            _currentUiTx.Finish(SpanStatus.Ok);
         }
+        _currentUiTx = null;
 
         var context = new TransactionContext(name, UserInteractionClickOp)
         {
             NameSource = TransactionNameSource.Component
         };
-
-        var transaction = _hub is IHubInternal internalHub
+        _currentUiTx = _hub is IHubInternal internalHub
             ? internalHub.StartTransaction(context, _options.AutoTransactionIdleTimeout)
+            // never called in practice... all our hubs implement IHubInternal
             : _hub.StartTransaction(context);
 
         // Only bind to scope if there is no other transaction already there (user-created or SDK-owned navigation).
-        var hasOtherTransaction = false;
-        _hub.ConfigureScope(scope =>
-        {
-            if (scope.Transaction is { } existing && !ReferenceEquals(existing, _currentInteractionTransaction))
-            {
-                hasOtherTransaction = true;
-            }
-        });
-        if (!hasOtherTransaction)
-        {
-            _hub.ConfigureScope(static (scope, t) => scope.Transaction = t, transaction);
-        }
-
-        _currentInteractionTransaction = transaction;
-        return transaction;
-    }
-
-    private void FinishNavigationSpanOrTransaction()
-    {
-        if (_currentNavigationSpan is { IsFinished: false } navSpan)
-        {
-            navSpan.Finish(SpanStatus.Ok);
-            _currentNavigationSpan = null;
-        }
-        // For standalone navigation transactions, don't explicitly finish.
-        // The idle timeout will capture them if they have child spans,
-        // or discard them if they don't.
+        _hub.ConfigureScope(scope => scope.Transaction ??= _currentUiTx);
     }
 
     // Application Events
@@ -516,14 +440,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnApplicationOnPageDisappearing(object? sender, Page page) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
 
-    private void OnApplicationOnModalPushing(object? sender, ModalPushingEventArgs e) =>
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-
     private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-
-    private void OnApplicationOnModalPopping(object? sender, ModalPoppingEventArgs e) =>
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopping), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
 
     private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
@@ -543,12 +461,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Stopped), SystemType, LifecycleCategory);
         if (_options.EnableAutoTransactions)
         {
-            _currentNavigationSpan?.Finish(SpanStatus.Ok);
-            _currentNavigationSpan = null;
-            _currentTransaction?.Finish(SpanStatus.Ok);
-            _currentTransaction = null;
-            _currentInteractionTransaction?.Finish(SpanStatus.Ok);
-            _currentInteractionTransaction = null;
+            _currentNavSpan?.Finish(SpanStatus.Ok);
+            _currentNavSpan = null;
+            _currentUiTx?.Finish(SpanStatus.Ok);
+            _currentUiTx = null;
         }
     }
 
@@ -591,10 +507,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnWindowOnPopCanceled(object? sender, EventArgs _)
     {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.PopCanceled), NavigationType, NavigationCategory);
-        if (_options.EnableAutoTransactions && _currentNavigationSpan is { IsFinished: false } navSpan)
+        if (_options.EnableAutoTransactions && _currentNavSpan is { IsFinished: false } navSpan)
         {
             navSpan.Finish(SpanStatus.Cancelled);
-            _currentNavigationSpan = null;
+            _currentNavSpan = null;
         }
     }
 
@@ -646,7 +562,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
         if (_options.EnableAutoTransactions)
         {
-            StartNavigationTransaction(e.Target?.Location.ToString() ?? "Unknown");
+            StartNavigationSpan(e.Target?.Location.ToString() ?? "Unknown");
         }
     }
 
@@ -668,16 +584,12 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 return;
             }
 
-            if (_currentNavigationSpan is { IsFinished: false } navSpan)
+            if (_currentNavSpan is { IsFinished: false } navSpan)
             {
                 navSpan.Description = resolvedRoute;
             }
-            else if (_currentTransaction != null)
-            {
-                _currentTransaction.Name = resolvedRoute;
-            }
 
-            FinishNavigationSpanOrTransaction();
+            FinishNavigationSpan();
         }
     }
 
