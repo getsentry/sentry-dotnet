@@ -575,18 +575,12 @@ internal class MauiEventsBinder : IMauiEventsBinder
             data.Add(nameof(e.Source), e.Source.ToString());
         });
 
-        // Update to the final resolved route now that navigation is confirmed, then finish
         if (_options.EnableAutoTransactions)
         {
-            var resolvedRoute = e.Current?.Location.ToString();
-            if (resolvedRoute == null)
+            // Update to the final resolved route now that navigation is confirmed
+            if (e.Current?.Location.ToString() is {} resovedRoute)
             {
-                return;
-            }
-
-            if (CurrentNavSpan is { IsFinished: false } navSpan)
-            {
-                navSpan.Description = resolvedRoute;
+                CurrentNavSpan?.Description = resovedRoute;
             }
 
             FinishNavigationSpan();

@@ -18,7 +18,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     private readonly TimeSpan? _idleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
     private bool _hasFinished;
-    private readonly ReaderWriterLockSlim _finishLock = new();
+    private readonly object _finishLock = new();
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -262,8 +262,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
         // Discard if no child spans were ever started
         bool shouldDiscard;
-        _finishLock.EnterWriteLock();
-        try
+        lock (_finishLock)
         {
             if (_spans.IsEmpty && !_hasFinished)
             {
@@ -275,10 +274,6 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             {
                 shouldDiscard = false;
             }
-        }
-        finally
-        {
-            _finishLock.ExitWriteLock();
         }
 
         if (shouldDiscard)
@@ -337,8 +332,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             return;
         }
 
-        _finishLock.EnterReadLock();
-        try
+        lock (_finishLock)
         {
             if (_hasFinished)
             {
@@ -350,16 +344,11 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             _spans.Add(span);
             _activeSpanTracker.Push(span);
         }
-        finally
-        {
-            _finishLock.ExitReadLock();
-        }
     }
 
     internal void ChildSpanFinished()
     {
-        _finishLock.EnterReadLock();
-        try
+        lock (_finishLock)
         {
             if (!_idleTimeout.HasValue || _hasFinished)
             {
@@ -371,10 +360,6 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             {
                 _idleTimer?.Start(_idleTimeout.Value);
             }
-        }
-        finally
-        {
-            _finishLock.ExitReadLock();
         }
     }
 
@@ -429,8 +414,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// </summary>
     public void ResetIdleTimeout()
     {
-        _finishLock.EnterReadLock();
-        try
+        lock (_finishLock)
         {
             if (!_idleTimeout.HasValue || _hasFinished)
             {
@@ -438,16 +422,11 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             }
             _idleTimer?.Start(_idleTimeout.Value);
         }
-        finally
-        {
-            _finishLock.ExitReadLock();
-        }
     }
 
     private bool TryFinishOnce()
     {
-        _finishLock.EnterWriteLock();
-        try
+        lock (_finishLock)
         {
             if (_hasFinished)
             {
@@ -457,10 +436,6 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             _idleTimer?.Cancel();
             _idleTimer?.Dispose();
             return true;
-        }
-        finally
-        {
-            _finishLock.ExitWriteLock();
         }
     }
 
