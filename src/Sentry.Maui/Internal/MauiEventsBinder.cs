@@ -578,7 +578,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         if (_options.EnableAutoTransactions)
         {
             // Update to the final resolved route now that navigation is confirmed
-            if (e.Current?.Location.ToString() is {} resovedRoute)
+            if (e.Current?.Location.ToString() is { } resovedRoute)
             {
                 CurrentNavSpan?.Description = resovedRoute;
             }
