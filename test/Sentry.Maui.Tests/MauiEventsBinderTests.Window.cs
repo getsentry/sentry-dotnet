@@ -179,7 +179,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void OnWindowOnPopCanceled_AddsBreadcrumb()
+    public void Window_PopCanceled__AddsBreadcrumb()
     {
         // Arrange
         var window = new Window
@@ -198,6 +198,28 @@ public partial class MauiEventsBinderTests
         Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
         Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Window)}.Name", "window");
+    }
+
+    [Fact]
+    public void Window_UnbindPopCanceled_DoesNotAddBreadcrumb()
+    {
+        // Arrange
+        var window = new Window
+        {
+            StyleId = "window"
+        };
+        _fixture.Binder.HandleWindowEvents(window);
+
+        window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
+
+        _fixture.Binder.HandleWindowEvents(window, bind: false);
+
+        // Act
+        window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
+
+        // Assert
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Theory]
