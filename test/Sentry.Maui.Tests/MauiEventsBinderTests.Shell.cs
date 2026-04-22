@@ -171,26 +171,4 @@ public partial class MauiEventsBinderTests
         navSpan.Description.Should().Be("//resolved/bar");
         navSpan.Received(1).Finish(SpanStatus.Ok);
     }
-
-    [Fact]
-    public void OnWindowOnStopped_FinishesActiveTransaction()
-    {
-        // Arrange
-        var shell = new Shell { StyleId = "shell" };
-        _fixture.Binder.HandleShellEvents(shell);
-        var window = new Window();
-        _fixture.Binder.HandleWindowEvents(window);
-        var mockTransaction = Substitute.For<ITransactionTracer>();
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(mockTransaction);
-
-        shell.RaiseEvent(nameof(Shell.Navigating),
-            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
-
-        // Act
-        window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
-
-        // Assert
-        mockTransaction.Received(1).Finish(SpanStatus.Ok);
-    }
 }

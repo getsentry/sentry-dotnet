@@ -200,38 +200,6 @@ public partial class MauiEventsBinderTests
         crumb.Data.Should().Contain($"{nameof(Window)}.Name", "window");
     }
 
-    [Fact]
-    public void OnWindowOnPopCanceled_FinishesActiveNavigationSpan()
-    {
-        // Arrange
-        var shell = new Shell { StyleId = "shell" };
-        _fixture.Binder.HandleShellEvents(shell);
-        var window = new Window();
-        _fixture.Binder.HandleWindowEvents(window);
-        var button = new Button { AutomationId = "my-btn" };
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
-
-        var navSpan = Substitute.For<ISpan>();
-        navSpan.IsFinished.Returns(false);
-        var clickTransaction = Substitute.For<ITransactionTracer>();
-        clickTransaction.IsFinished.Returns(false);
-        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction);
-
-        // Click button, then start navigating (navigation span created)
-        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        shell.RaiseEvent(nameof(Shell.Navigating),
-            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
-
-        // Act - pop is cancelled
-        window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
-
-        // Assert - navigation span finished as cancelled, click tx NOT finished
-        navSpan.Received(1).Finish(SpanStatus.Cancelled);
-        clickTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
-    }
-
     [Theory]
     [MemberData(nameof(WindowModalEventsData))]
     public void Window_ModalEvents_AddsBreadcrumb(string eventName, object eventArgs)
@@ -296,5 +264,55 @@ public partial class MauiEventsBinderTests
                 new object[] {nameof(Window.ModalPopped), new ModalPoppedEventArgs(modelPage)}
             };
         }
+    }
+
+    [Fact]
+    public void OnWindowOnStopped_FinishesActiveTransaction()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var uiTransaction = Substitute.For<ITransactionTracer>();
+        uiTransaction.Name.Returns("bar");
+        uiTransaction.IsFinished.Returns(false);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(uiTransaction);
+        _fixture.Binder.StartUiTransaction("btnClick");
+
+        // Act
+        window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
+
+        // Assert
+        uiTransaction.Received(1).Finish(SpanStatus.Ok);
+    }
+
+    [Fact]
+    public void OnWindowOnPopCanceled_FinishesActiveNavigationSpan()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var uiTransaction = Substitute.For<ITransactionTracer>();
+        uiTransaction.Name.Returns("bar");
+        uiTransaction.IsFinished.Returns(false);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(uiTransaction);
+        _fixture.Binder.StartUiTransaction("btnClick");
+
+        _fixture.Hub.GetSpan().Returns(uiTransaction);
+        uiTransaction.StartChild(Arg.Any<string>())
+            .Returns(Substitute.For<ISpan>());
+        var navSpan = _fixture.Binder.StartNavigationSpan("..");
+
+        // Act
+        window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
+
+        // Assert
+        navSpan.Received(1).Finish(SpanStatus.Cancelled);
+        uiTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
     }
 }

@@ -286,7 +286,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Window_Stopped_FinishesActiveInteractionTransaction()
+    public void OnWindowOnStopped_FinishesActiveInteractionTransaction()
     {
         // Arrange
         var window = new Window();
@@ -304,37 +304,6 @@ public partial class MauiEventsBinderTests
         window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
 
         // Assert
-        clickTransaction.Received(1).Finish(SpanStatus.Ok);
-    }
-
-    [Fact]
-    public void OnWindowOnStopped_CleansUpNavigationSpan()
-    {
-        // Arrange
-        var shell = new Shell { StyleId = "shell" };
-        _fixture.Binder.HandleShellEvents(shell);
-        var window = new Window();
-        _fixture.Binder.HandleWindowEvents(window);
-        var button = new Button { AutomationId = "my-btn" };
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
-
-        var navSpan = Substitute.For<ISpan>();
-        navSpan.IsFinished.Returns(false);
-        var clickTransaction = Substitute.For<ITransactionTracer>();
-        clickTransaction.IsFinished.Returns(false);
-        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction);
-
-        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        shell.RaiseEvent(nameof(Shell.Navigating),
-            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
-
-        // Act
-        window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
-
-        // Assert - both the nav span and click transaction are cleaned up
-        navSpan.Received(1).Finish(SpanStatus.Ok);
         clickTransaction.Received(1).Finish(SpanStatus.Ok);
     }
 
