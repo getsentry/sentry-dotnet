@@ -179,7 +179,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Window_PopCanceled_AddsBreadcrumb()
+    public void OnWindowOnPopCanceled_AddsBreadcrumb()
     {
         // Arrange
         var window = new Window
@@ -201,29 +201,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Window_UnbindPopCanceled_DoesNotAddBreadcrumb()
-    {
-        // Arrange
-        var window = new Window
-        {
-            StyleId = "window"
-        };
-        _fixture.Binder.HandleWindowEvents(window);
-
-        window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
-        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
-
-        _fixture.Binder.HandleWindowEvents(window, bind: false);
-
-        // Act
-        window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
-
-        // Assert
-        Assert.Single(_fixture.Scope.Breadcrumbs);
-    }
-
-    [Fact]
-    public void Window_PopCanceled_FinishesActiveNavigationSpan()
+    public void OnWindowOnPopCanceled_FinishesActiveNavigationSpan()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };

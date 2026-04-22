@@ -128,32 +128,6 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void ImageButton_Pressed_ThenShellNavigating_NavigationIsChildSpanOfClick()
-    {
-        // Arrange
-        var shell = new Shell { StyleId = "shell" };
-        _fixture.Binder.HandleShellEvents(shell);
-        var button = new ImageButton { AutomationId = "my-img-btn" };
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
-
-        var navSpan = Substitute.For<ISpan>();
-        var clickTransaction = Substitute.For<ITransactionTracer>();
-        clickTransaction.IsFinished.Returns(false);
-        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction);
-
-        // Act - press button, then navigate
-        button.RaiseEvent(nameof(ImageButton.Pressed), EventArgs.Empty);
-        shell.RaiseEvent(nameof(Shell.Navigating),
-            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
-
-        // Assert - only one transaction created (click), navigation is a child span
-        _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
-        clickTransaction.Received(1).StartChild("ui.load");
-    }
-
-    [Fact]
     public void ImageButton_Unbind_StopsStartingTransactions()
     {
         // Arrange

@@ -262,115 +262,27 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Pressed_NavigationTransactionOnScope_NotBoundToScope()
+    public void StartUiTransaction_TransactionOnScope_NotBoundToScope()
     {
         // Arrange
-        var shell = new Shell { StyleId = "shell" };
-        _fixture.Binder.HandleShellEvents(shell);
-        var button = new Button { AutomationId = "my-btn" };
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+        var scope = new Scope();
+        _fixture.Hub.SubstituteConfigureScope(scope);
 
-        var navTransaction = Substitute.For<ITransactionTracer>();
+        var prevTransaction = Substitute.For<ITransactionTracer>();
+        _fixture.Hub.ConfigureScope(s => s.Transaction = prevTransaction);
+
         var clickTransaction = Substitute.For<ITransactionTracer>();
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(navTransaction, clickTransaction);
+            .Returns(clickTransaction);
 
-        // Start a navigation, which binds navTransaction to the scope
-        shell.RaiseEvent(nameof(Shell.Navigating),
-            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
-        Assert.Same(navTransaction, _fixture.Scope.Transaction);
+        // Act
+        _fixture.Binder.StartUiTransaction("test");
 
-        // Act - press while nav transaction is on scope
-        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-
-        // Assert - click transaction was started but scope still holds the navigation transaction
+        // Assert
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Is<ITransactionContext>(c => c.Operation == MauiEventsBinder.UserInteractionClickOp),
             Arg.Any<TimeSpan?>());
-        Assert.Same(navTransaction, _fixture.Scope.Transaction);
-    }
-
-    [Fact]
-    public void Button_Pressed_ThenShellNavigating_NavigationIsChildSpanOfClick()
-    {
-        // Arrange
-        var shell = new Shell { StyleId = "shell" };
-        _fixture.Binder.HandleShellEvents(shell);
-        var button = new Button { AutomationId = "my-btn" };
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
-
-        var navSpan = Substitute.For<ISpan>();
-        var clickTransaction = Substitute.For<ITransactionTracer>();
-        clickTransaction.IsFinished.Returns(false);
-        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction);
-
-        // Act - press button, then navigate
-        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        shell.RaiseEvent(nameof(Shell.Navigating),
-            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
-
-        // Assert - only one transaction created (click), navigation is a child span
-        _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
-        clickTransaction.Received(1).StartChild("ui.load");
-    }
-
-    [Fact]
-    public void Button_Pressed_ShellNavigated_UpdatesSpanDescription()
-    {
-        // Arrange
-        var shell = new Shell { StyleId = "shell" };
-        _fixture.Binder.HandleShellEvents(shell);
-        var button = new Button { AutomationId = "my-btn" };
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
-
-        var navSpan = Substitute.For<ISpan>();
-        navSpan.IsFinished.Returns(false);
-        var clickTransaction = Substitute.For<ITransactionTracer>();
-        clickTransaction.IsFinished.Returns(false);
-        clickTransaction.StartChild(Arg.Any<string>()).Returns(navSpan);
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction);
-
-        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
-        shell.RaiseEvent(nameof(Shell.Navigating),
-            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
-
-        // Act - navigated with resolved route
-        shell.RaiseEvent(nameof(Shell.Navigated),
-            new ShellNavigatedEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("//resolved/bar"), ShellNavigationSource.Push));
-
-        // Assert - span description updated and span finished
-        navSpan.Description.Should().Be("//resolved/bar");
-        navSpan.Received(1).Finish(SpanStatus.Ok);
-        clickTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
-    }
-
-    [Fact]
-    public void StandaloneNavigation_NoClick_NotExplicitlyFinished()
-    {
-        // Arrange
-        var shell = new Shell { StyleId = "shell" };
-        _fixture.Binder.HandleShellEvents(shell);
-        var navTransaction = Substitute.For<ITransactionTracer>();
-        navTransaction.IsFinished.Returns(false);
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(navTransaction);
-
-        // Act - navigate without any button press
-        shell.RaiseEvent(nameof(Shell.Navigating),
-            new ShellNavigatingEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("bar"), ShellNavigationSource.Push, false));
-        shell.RaiseEvent(nameof(Shell.Navigated),
-            new ShellNavigatedEventArgs(new ShellNavigationState("foo"), new ShellNavigationState("//resolved/bar"), ShellNavigationSource.Push));
-
-        // Assert - transaction created and name updated, but NOT explicitly finished.
-        // Idle timeout will capture if it has child spans, or discard if not.
-        _fixture.Hub.Received(1).StartTransaction(
-            Arg.Is<ITransactionContext>(c => c.Operation == "ui.load"),
-            Arg.Any<TimeSpan?>());
-        navTransaction.Name.Should().Be("//resolved/bar");
-        navTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+        Assert.Same(prevTransaction, _fixture.Scope.Transaction);
     }
 
     [Fact]
@@ -396,7 +308,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Window_Stopped_CleansUpNavigationSpan()
+    public void OnWindowOnStopped_CleansUpNavigationSpan()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };

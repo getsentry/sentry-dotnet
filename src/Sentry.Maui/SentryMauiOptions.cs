@@ -77,16 +77,12 @@ public class SentryMauiOptions : SentryLoggingOptions
     public bool AttachScreenshot { get; set; }
 
     /// <summary>
-    /// Automatically starts Sentry transactions for navigation events (e.g. Shell navigation, modal push/pop)
-    /// and, when <see cref="EnableUserInteractionTracing"/> is also enabled, for user-interaction events
-    /// (e.g. Button clicks). The transaction is set on the scope so child spans (e.g. HTTP requests,
-    /// database calls) can be attached.
-    /// Transactions finish automatically after <see cref="AutoTransactionIdleTimeout"/> if not finished
-    /// explicitly first (e.g. by a subsequent navigation).
-    /// Requires <see cref="SentryOptions.TracesSampleRate"/> or <see cref="SentryOptions.TracesSampler"/> to
-    /// be configured.
-    /// The default is <c>true</c>.
+    /// Determines whethec spans are created automatically for App navigation events. Set EnableAutoTransactions to
+    /// <c>false</c> if you only want to track navigation breadcrumbs.
     /// </summary>
+    /// <remarks>
+    /// The default is <c>true</c>.
+    /// </remarks>
     public bool EnableAutoTransactions { get; set; } = true;
 
     /// <summary>
