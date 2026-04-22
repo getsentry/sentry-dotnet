@@ -1,4 +1,3 @@
-using Sentry.Internal;
 using Sentry.Maui.Internal;
 using Sentry.Maui.Tests.Mocks;
 

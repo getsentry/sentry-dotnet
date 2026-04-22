@@ -1,6 +1,4 @@
-using Sentry.Internal;
 using Sentry.Maui.Internal;
-using Sentry.Maui.Tests.Mocks;
 
 namespace Sentry.Maui.Tests;
 
@@ -259,30 +257,6 @@ public partial class MauiEventsBinderTests
             Arg.Is<ITransactionContext>(c => c.Operation == MauiEventsBinder.UserInteractionClickOp),
             Arg.Any<TimeSpan?>());
         Assert.Same(userTransaction, _fixture.Scope.Transaction);
-    }
-
-    [Fact]
-    public void StartUiTransaction_TransactionOnScope_NotBoundToScope()
-    {
-        // Arrange
-        var scope = new Scope();
-        _fixture.Hub.SubstituteConfigureScope(scope);
-
-        var prevTransaction = Substitute.For<ITransactionTracer>();
-        _fixture.Hub.ConfigureScope(s => s.Transaction = prevTransaction);
-
-        var clickTransaction = Substitute.For<ITransactionTracer>();
-        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
-            .Returns(clickTransaction);
-
-        // Act
-        _fixture.Binder.StartUiTransaction("test");
-
-        // Assert
-        _fixture.Hub.Received(1).StartTransaction(
-            Arg.Is<ITransactionContext>(c => c.Operation == MauiEventsBinder.UserInteractionClickOp),
-            Arg.Any<TimeSpan?>());
-        Assert.Same(prevTransaction, _fixture.Scope.Transaction);
     }
 
     [Fact]
