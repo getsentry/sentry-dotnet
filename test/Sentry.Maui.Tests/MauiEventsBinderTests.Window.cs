@@ -179,7 +179,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Window_PopCanceled__AddsBreadcrumb()
+    public void Window_PopCanceled_AddsBreadcrumb()
     {
         // Arrange
         var window = new Window
