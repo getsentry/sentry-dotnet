@@ -64,6 +64,20 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     public TransactionNameProvider? TransactionNameProvider { get; set; }
 
     /// <summary>
+    /// Controls whether <see cref="TransactionNameProvider"/> runs on every request, or only
+    /// when routing fails to resolve a template.
+    /// </summary>
+    /// <remarks>
+    /// When <c>false</c> (default), the provider is only invoked as a fallback for unresolved routes —
+    /// matching the legacy behaviour. When <c>true</c>, the provider is invoked for every request
+    /// after routing; a non-empty return value sets the transaction name. If the provider returns
+    /// <c>null</c> or empty for a routed request, the name falls back to the URL path (the route
+    /// template is <b>not</b> retained); callers that want to preserve the route template should
+    /// return it themselves from the provider.
+    /// </remarks>
+    public bool AlwaysCallTransactionNameProvider { get; set; }
+
+    /// <summary>
     /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />
     /// is adjusted when setting the Sentry environment. Defaults to true.
     /// </summary>

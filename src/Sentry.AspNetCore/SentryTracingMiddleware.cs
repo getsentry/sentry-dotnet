@@ -178,7 +178,8 @@ internal class SentryTracingMiddleware
                 var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
 
                 // If no Name was found for Transaction, then we don't have the route.
-                if (transaction.Name == string.Empty)
+                // Also run this block if the caller has opted into always calling the TransactionNameProvider.
+                if (transaction.Name == string.Empty || _options.AlwaysCallTransactionNameProvider)
                 {
                     var method = context.Request.Method.ToUpperInvariant();
 
