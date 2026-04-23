@@ -414,7 +414,7 @@ public class SentryClient : ISentryClient, IDisposable
         if (CaptureEnvelope(envelope))
         {
 #if SENTRY_UNITY
-            @event.WasCaptured = true; // See SentryEvent.unity.cs for more details.
+            @event.IsCaptured = true; // See SentryEvent.Unity.cs for more details.
 #endif
             return processedEvent.EventId;
         }
