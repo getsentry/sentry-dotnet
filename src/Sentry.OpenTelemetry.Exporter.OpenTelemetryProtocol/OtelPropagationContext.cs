@@ -9,7 +9,19 @@ internal class OtelPropagationContext : IPropagationContext
 
     public SentryId TraceId => Activity.Current?.TraceId.AsSentryId() ?? default;
     public SpanId SpanId => Activity.Current?.SpanId.AsSentrySpanId() ?? default;
-    public SpanId? ParentSpanId => Activity.Current?.ParentSpanId.AsSentrySpanId();
+    public SpanId? ParentSpanId
+    {
+        get
+        {
+            var activity = Activity.Current;
+            if (activity is null)
+            {
+                return null;
+            }
+            var parentSpanId = activity.ParentSpanId;
+            return parentSpanId == default ? null : parentSpanId.AsSentrySpanId();
+        }
+    }
 
     /// <summary>
     /// Warning: this method may throw an exception if Activity.Current is null.

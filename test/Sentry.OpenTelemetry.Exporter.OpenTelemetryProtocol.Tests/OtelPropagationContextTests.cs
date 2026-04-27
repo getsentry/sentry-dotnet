@@ -94,6 +94,20 @@ public class OtelPropagationContextTests : ActivitySourceTests
     }
 
     [Fact]
+    public void ParentSpanId_WithRootActivityCurrent_ReturnsNull()
+    {
+        // Arrange - root activity has no parent, so ParentSpanId is default(ActivitySpanId)
+        using var rootActivity = new Activity("root").Start();
+        var sut = new OtelPropagationContext();
+
+        // Act
+        var parentSpanId = sut.ParentSpanId;
+
+        // Assert
+        parentSpanId.Should().BeNull();
+    }
+
+    [Fact]
     public void ParentSpanId_WithActivityCurrent_ReturnsParentSpanIdFromActivity()
     {
         // Arrange
