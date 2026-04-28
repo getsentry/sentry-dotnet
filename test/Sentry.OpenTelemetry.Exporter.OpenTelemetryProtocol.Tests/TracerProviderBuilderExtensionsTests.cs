@@ -20,13 +20,13 @@ public class TracerProviderBuilderExtensionsTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("foo")]
-    public void AddSentryOltp_InvalidDsn_ThrowsArgumentException(string dsn)
+    public void AddSentryOtlpExporter_InvalidDsn_ThrowsArgumentException(string dsn)
     {
         // Arrange
         var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
 
         // Act
-        Action act = () => tracerProviderBuilder.AddSentryOtlp(dsn);
+        Action act = () => tracerProviderBuilder.AddSentryOtlpExporter(dsn);
 
         // Assert
         act.Should().Throw<ArgumentException>()

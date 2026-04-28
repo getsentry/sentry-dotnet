@@ -39,7 +39,7 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    public static TracerProviderBuilder AddSentryOtlp(this TracerProviderBuilder tracerProviderBuilder, string dsnString,
+    public static TracerProviderBuilder AddSentryOtlpExporter(this TracerProviderBuilder tracerProviderBuilder, string dsnString,
         TextMapPropagator? defaultTextMapPropagator = null)
     {
         if (Dsn.TryParse(dsnString) is not { } dsn)

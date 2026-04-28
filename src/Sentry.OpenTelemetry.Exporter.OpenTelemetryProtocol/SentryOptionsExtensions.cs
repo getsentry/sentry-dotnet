@@ -35,7 +35,7 @@ public static class SentryOptionsExtensions
         {
             throw new ArgumentException("Sentry DSN must be set before calling `SentryOptions.UseOTLP`", nameof(options.Dsn));
         }
-        tracerProviderBuilder.AddSentryOtlp(options.Dsn, defaultTextMapPropagator);
+        tracerProviderBuilder.AddSentryOtlpExporter(options.Dsn, defaultTextMapPropagator);
         options.UseOtlp();
     }
 
@@ -49,7 +49,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <remarks>
     /// Note: if you are using this overload to configure Sentry to work with OpenTelemetry, you will also have to call
-    /// <see cref="TracerProviderBuilderExtensions.AddSentryOtlp"/>, when building your <see cref="TracerProviderBuilder"/>
+    /// <see cref="TracerProviderBuilderExtensions.AddSentryOtlpExporter"/>, when building your <see cref="TracerProviderBuilder"/>
     /// to ensure OpenTelemetry sends trace information to Sentry.
     /// </remarks>
     /// <param name="options">The <see cref="SentryOptions"/> instance.</param>

@@ -21,7 +21,7 @@ var host = new HostBuilder()
         services.AddOpenTelemetry().WithTracing(builder =>
         {
             builder
-                .AddSentryOtlp(dsn) // <-- Configure OpenTelemetry to send traces to Sentry
+                .AddSentryOtlpExporter(dsn) // <-- Configure OpenTelemetry to send traces to Sentry
                 .AddHttpClientInstrumentation(); // From OpenTelemetry.Instrumentation.Http... adds automatic tracing for outgoing HTTP requests
         });
     })

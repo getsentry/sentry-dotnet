@@ -33,7 +33,7 @@ SentrySdk.Init(options =>
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource(activitySource.Name)
     .AddHttpClientInstrumentation()
-    .AddSentryOtlp(dsn) // <-- Configure OpenTelemetry to send traces to Sentry over OTLP
+    .AddSentryOtlpExporter(dsn) // <-- Configure OpenTelemetry to send traces to Sentry over OTLP
     .Build();
 
 Console.WriteLine("Hello World!");
