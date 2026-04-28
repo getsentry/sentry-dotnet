@@ -1,5 +1,3 @@
-using Sentry.Internal.OpenTelemetry;
-
 namespace Sentry.OpenTelemetry.Tests;
 
 public class OpenTelemetryTransactionProcessorTests : ActivitySourceTests

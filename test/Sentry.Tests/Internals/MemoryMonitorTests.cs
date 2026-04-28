@@ -27,7 +27,7 @@ public class MemoryMonitorTests
 
         public MemoryMonitor GetSut()
         {
-            Options.AddDiagnosticLoggerSubsititute();
+            Options.AddDiagnosticLoggerSubstitute();
             return new MemoryMonitor(Options, OnDumpCollected, OnCaptureDump, GCImplementation ?? MockGCImplementation());
         }
     }

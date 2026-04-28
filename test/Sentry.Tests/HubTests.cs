@@ -1446,7 +1446,7 @@ public partial class HubTests : IDisposable
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        _fixture.Options.AddDiagnosticLoggerSubsititute();
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
         var hub = _fixture.GetSut();
 
         // Act
@@ -2570,7 +2570,7 @@ public partial class HubTests : IDisposable
     public void CaptureFeedback_InvalidEmail_FeedbackDropped(string email)
     {
         // Arrange
-        _fixture.Options.AddDiagnosticLoggerSubsititute();
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
         var hub = _fixture.GetSut();
         var feedback = new SentryFeedback("Test feedback", email);
 
@@ -2646,7 +2646,7 @@ public partial class HubTests : IDisposable
         _fixture.Options.AddIntegration(integration1);
         _fixture.Options.AddIntegration(integration2);
         _fixture.Options.AddIntegration(integration3);
-        _fixture.Options.AddDiagnosticLoggerSubsititute();
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
         var hub = _fixture.GetSut();
 
         // Act

@@ -31,7 +31,7 @@ public static class SentryOptionsExtensions
         return substitute;
     }
 
-    public static SentryOptions AddDiagnosticLoggerSubsititute(this SentryOptions substitute)
+    public static SentryOptions AddDiagnosticLoggerSubstitute(this SentryOptions substitute)
     {
         substitute.Debug = true;
         substitute.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
