@@ -48,15 +48,15 @@ runs:
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_26.2.app
+      run: sudo xcode-select --switch /Applications/Xcode_26.3.app
 
-    # Java 17 is needed for Android SDK setup step
-    - name: Install Java 17
+    # Java 21 is needed by .NET Android
+    - name: Install Java 21
       if: ${{ !matrix.container }}
       uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
       with:
-        distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
-        java-version: '17'
+        distribution: temurin
+        java-version: '21'
 
     - name: Setup Android SDK
       if: ${{ !matrix.container }}
@@ -65,14 +65,6 @@ runs:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
         packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
-
-    # Java 11 is needed by .NET Android
-    - name: Install Java 11
-      if: ${{ !matrix.container }}
-      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
-      with:
-        distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
-        java-version: '11'
 
     - name: Install Mono (macOS)
       if: runner.os == 'macOS'
@@ -92,7 +84,7 @@ runs:
         sudo chmod -R a+rw /usr/share/dotnet
 
     - name: Install .NET SDK
-      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
       with:
         global-json-file: global.json
         dotnet-version: |
@@ -102,7 +94,7 @@ runs:
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
       if: ${{ runner.os != 'macOS' || runner.arch != 'ARM64' }}
-      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
       with:
         dotnet-version: 5.0.x
 

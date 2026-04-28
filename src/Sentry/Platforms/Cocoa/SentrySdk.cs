@@ -295,7 +295,8 @@ public static partial class SentrySdk
             }
 
             var sentryEvent = evt.ToSentryEvent();
-            if (SentryEventHelper.ProcessEvent(sentryEvent, manualProcessors, null, options) is not { } processedEvent)
+            if (SentryEventHelper.ProcessEvent(sentryEvent, manualProcessors, null, options, DataCategory.Error)
+                is not { } processedEvent)
             {
                 return null;
             }

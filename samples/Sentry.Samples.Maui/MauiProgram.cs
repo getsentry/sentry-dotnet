@@ -30,7 +30,8 @@ public static class MauiProgram
                 // If you want to see everything we can capture from MAUI, you may wish to use a larger value.
                 options.MaxBreadcrumbs = 1000;
 
-                // Be aware that screenshots may contain PII
+                // If your app doesn't have sensitive data, you can get screenshots on error events automatically
+                // https://docs.sentry.io/platforms/dotnet/guides/maui/configuration/options/#AttachScreenshot
                 options.AttachScreenshot = true;
 
                 options.Debug = true;
@@ -60,6 +61,11 @@ public static class MauiProgram
                 // page, this option may cause performance issues. In such cases, consider applying the
                 // sentry:SessionReplay.Mask="Unmask" attribute to individual controls instead.
                 options.Native.ExperimentalOptions.SessionReplay.UnmaskControlsOfType<Button>();
+#endif
+#if __IOS__ || __MACCATALYST__
+                // SDK users must explicitly opt-in to Session Replay in unreliable environments - when running liquid
+                // glass on iOS 26.0 or later
+                options.Native.ExperimentalOptions.SessionReplay.EnableSessionReplayInUnreliableEnvironment = true;
 #endif
 #endif
 

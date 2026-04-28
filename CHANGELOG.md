@@ -1,6 +1,96 @@
 # Changelog
 
-## Unreleased
+## 6.4.1
+
+### Fixes 🐛
+
+- fix: prevent redundant native exceptions on Android/CoreCLR by @jpnurmi in [#5127](https://github.com/getsentry/sentry-dotnet/pull/5127)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Java SDK to v8.39.0 by @github-actions in [#5137](https://github.com/getsentry/sentry-dotnet/pull/5137)
+- chore(deps): update Native SDK to v0.13.7 by @github-actions in [#5136](https://github.com/getsentry/sentry-dotnet/pull/5136)
+
+## 6.4.0
+
+### Features ✨
+
+- feat: Add network details for session replay on iOS by @jamescrosswell in [#4891](https://github.com/getsentry/sentry-dotnet/pull/4891)
+- feat: Add option to exclude certain HTTP statuses from tracing by @jamescrosswell in [#5034](https://github.com/getsentry/sentry-dotnet/pull/5034)
+
+### Fixes 🐛
+
+- fix: memory leak when profiling is enabled by @jamescrosswell in [#5133](https://github.com/getsentry/sentry-dotnet/pull/5133)
+- fix: prevent redundant native exceptions on iOS by @jpnurmi in [#5126](https://github.com/getsentry/sentry-dotnet/pull/5126)
+- fix: prevent redundant native exceptions on Android/Mono by @jpnurmi in [#4676](https://github.com/getsentry/sentry-dotnet/pull/4676)
+  - Note: opt in by setting `options.Native.ExperimentalOptions.SignalHandlerStrategy` to `Sentry.Android.SignalHandlerStrategy.ChainAtStart`
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.10.0 by @github-actions in [#5132](https://github.com/getsentry/sentry-dotnet/pull/5132)
+- chore(deps): update Cocoa SDK to v9.9.0 by @github-actions in [#5115](https://github.com/getsentry/sentry-dotnet/pull/5115)
+- chore(deps): update Java SDK to v8.38.0 by @github-actions in [#5124](https://github.com/getsentry/sentry-dotnet/pull/5124)
+
+## 6.3.2
+
+### Dependencies ⬆️
+
+- chore(deps): update Native SDK to v0.13.6 by @github-actions in [#5128](https://github.com/getsentry/sentry-dotnet/pull/5128)
+
+## 6.3.1
+
+### Fixes 🐛
+
+- fix: Workaround FileNotFoundException on Android when recovering sessions by @jamescrosswell in [#5084](https://github.com/getsentry/sentry-dotnet/pull/5084)
+- fix: `CaptureFeedback` now supports multiple attachments correctly by @bitsandfoxes in [#5077](https://github.com/getsentry/sentry-dotnet/pull/5077)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Native SDK to v0.13.5 by @github-actions in [#5119](https://github.com/getsentry/sentry-dotnet/pull/5119)
+- chore(deps): update CLI to v3.3.5 by @github-actions in [#5093](https://github.com/getsentry/sentry-dotnet/pull/5093)
+- chore(deps): update Native SDK to v0.13.4 by @github-actions in [#5081](https://github.com/getsentry/sentry-dotnet/pull/5081)
+- chore(deps): update Java SDK to v8.37.1 by @github-actions in [#5071](https://github.com/getsentry/sentry-dotnet/pull/5071)
+- chore(deps): update CLI to v3.3.4 by @github-actions in [#5068](https://github.com/getsentry/sentry-dotnet/pull/5068)
+- chore(deps): update Java SDK to v8.37.0 by @github-actions in [#5069](https://github.com/getsentry/sentry-dotnet/pull/5069)
+- chore(deps): update Cocoa SDK to v9.8.0 by @github-actions in [#5044](https://github.com/getsentry/sentry-dotnet/pull/5044)
+- chore(deps): update Java SDK to v8.36.0 by @github-actions in [#5036](https://github.com/getsentry/sentry-dotnet/pull/5036)
+- chore(deps): update epitaph to 0.1.1 by @github-actions in [#5036](https://github.com/getsentry/sentry-dotnet/pull/5036)
+
+### Other
+
+- chore: Update validate-pr workflow by @stephanie-anderson in [#5108](https://github.com/getsentry/sentry-dotnet/pull/5108)
+- ci: fix workflows that always fail for fork PRs by @jamescrosswell in [#5065](https://github.com/getsentry/sentry-dotnet/pull/5065)
+
+## 6.3.0
+
+### Features
+
+- The _Metrics_ APIs are now stable: removed `Experimental` from `SentrySdk`, `SentryOptions` and `IHub` ([#5023](https://github.com/getsentry/sentry-dotnet/pull/5023))
+- Report a new _Diagnostic_ (`SENTRY1001`) when a Metrics-API is invoked with an unsupported numeric type ([#4840](https://github.com/getsentry/sentry-dotnet/pull/4840))
+
+### Fixes
+
+- Common tags such as `Environment` and `Release` and custom event processors are all now correctly applied to CaptureFeedback events ([#4942](https://github.com/getsentry/sentry-dotnet/pull/4942))
+- Include `Data` set via `ITransactionTracer` in `SentryTransaction` ([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
+
+### Dependencies
+
+- Bump Cocoa SDK from v9.5.0 to v9.7.0 ([#4958](https://github.com/getsentry/sentry-dotnet/pull/4958), [#5015](https://github.com/getsentry/sentry-dotnet/pull/5015))
+- Bump CLI from v3.3.0 to v3.3.3 ([#5002](https://github.com/getsentry/sentry-dotnet/pull/5002))
+- Bump Java SDK from v8.34.1 to v8.35.0 ([#5017](https://github.com/getsentry/sentry-dotnet/pull/5017))
+- Bump Native SDK from v0.13.2 to v0.13.3 ([#5045](https://github.com/getsentry/sentry-dotnet/pull/5045))
+
+## 6.2.0
+
+### Features
+
+- Outbound HTTP requests now show in the Network tab for Android Session Replays ([#4860](https://github.com/getsentry/sentry-dotnet/pull/4860))
 
 ### Features
 
@@ -9,6 +99,16 @@
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
+- Symbolication now works correctly with Android workloads 10.0.102 and later ([#4998](https://github.com/getsentry/sentry-dotnet/pull/4998))
+- `libmonosgen` and `libxamarin` frames no longer show as in-app ([#4960](https://github.com/getsentry/sentry-dotnet/pull/4960))
+
+### Dependencies
+
+- Bump Native SDK from v0.12.6 to v0.13.2 ([#4920](https://github.com/getsentry/sentry-dotnet/pull/4920), [#4929](https://github.com/getsentry/sentry-dotnet/pull/4929), [#4941](https://github.com/getsentry/sentry-dotnet/pull/4941), [#4964](https://github.com/getsentry/sentry-dotnet/pull/4964), [#4996](https://github.com/getsentry/sentry-dotnet/pull/4996))
+- Bump Cocoa SDK from v8.57.3 to v9.5.0 ([#4781](https://github.com/getsentry/sentry-dotnet/pull/4781), [#4928](https://github.com/getsentry/sentry-dotnet/pull/4928), [#4944](https://github.com/getsentry/sentry-dotnet/pull/4944))
+- Bump CLI from v2.58.2 to v3.3.0 ([#4805](https://github.com/getsentry/sentry-dotnet/pull/4805), [#4943](https://github.com/getsentry/sentry-dotnet/pull/4943), [#4973](https://github.com/getsentry/sentry-dotnet/pull/4973))
+  - NOTE: Sentry CLI v3 removed support for the legacy API key authentication method. Sentry CLI now only supports authenticating with Auth Tokens. If you are using API key authentication via `SentryApiKey`, you need to generate an [Auth Token](https://docs.sentry.io/account/auth-tokens/) and use `SentryAuthToken`, instead.
+- Bump Java SDK from v8.32.0 to v8.34.1 ([#4933](https://github.com/getsentry/sentry-dotnet/pull/4933), [#4986](https://github.com/getsentry/sentry-dotnet/pull/4986))
 
 ## 6.2.0-alpha.0
 
@@ -20,6 +120,7 @@
 
 - Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
 - Bumped CommunityToolkit.Mvvm to 8.4.0 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
+- Bump Java SDK from v8.29.0 to v8.32.0 ([#4843](https://github.com/getsentry/sentry-dotnet/pull/4843))
 
 ## 6.1.0
 

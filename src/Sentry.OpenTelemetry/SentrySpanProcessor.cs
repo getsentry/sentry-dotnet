@@ -239,6 +239,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             if (statusCode is { } responseStatusCode)
             {
                 transaction.Contexts.Response.StatusCode = responseStatusCode;
+                transaction.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, responseStatusCode);
             }
 
             // Use the end timestamp from the activity data.

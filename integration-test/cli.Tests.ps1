@@ -127,10 +127,18 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $tfs = $IsMacos ? "$framework-android$androidTpv;$framework-ios$iosTpv;$framework-maccatalyst$iosTpv" : "$framework-android$androidTpv"
         (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
 
-        dotnet remove $name/$name.csproj package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
-        if ($LASTEXITCODE -ne 0)
+        Push-Location $name
+        try
         {
-            throw "Failed to remove package"
+            dotnet remove "${name}.csproj" package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "Failed to remove package"
+            }
+        }
+        finally
+        {
+            Pop-Location
         }
 
         if (Test-Path env:CI)
@@ -149,13 +157,13 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android$androidTpv"
         Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            '/proguard/a5fb4278-bcb5-4464-8585-d811dc3c3959.txt',
             'libsentry-android.so',
             'libsentry.so',
             'libsentrysupplemental.so',
             'libxamarin-app.so',
             'maui-app.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
         $result.ScriptOutput | Should -AnyElementMatch "Found 23 debug information files \(1 with embedded sources\)"
     }
 

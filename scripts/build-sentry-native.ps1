@@ -84,17 +84,23 @@ try
         --config RelWithDebInfo `
         --parallel
 
-    $srcFile = "$actualBuildDir/${libPrefix}sentry$libExtension"
-    $outFile = "$outDir/${libPrefix}sentry-native$libExtension"
+    function Deploy-Library($srcFile, $outFile)
+    {
+        # New-Item creates the directory if it doesn't exist.
+        New-Item -ItemType File -Path $outFile -Force | Out-Null
 
-    # New-Item creates the directory if it doesn't exist.
-    New-Item -ItemType File -Path $outFile -Force | Out-Null
+        Write-Host "Copying $srcFile to $outFile"
+        Copy-Item -Force -Path $srcFile -Destination $outFile
 
-    Write-Host "Copying $srcFile to $outFile"
-    Copy-Item -Force -Path $srcFile -Destination $outFile
+        # Touch the file to mark it as up-to-date for MSBuild
+        (Get-Item $outFile).LastWriteTime = Get-Date
+    }
 
-    # Touch the file to mark it as up-to-date for MSBuild
-    (Get-Item $outFile).LastWriteTime = Get-Date
+    Deploy-Library "$actualBuildDir/${libPrefix}sentry$libExtension" "$outDir/${libPrefix}sentry-native$libExtension"
+    if ($IsLinux)
+    {
+        Deploy-Library "$actualBuildDir/vendor/libunwind/${libPrefix}unwind$libExtension" "$outDir/${libPrefix}unwind$libExtension"
+    }
 }
 finally
 {

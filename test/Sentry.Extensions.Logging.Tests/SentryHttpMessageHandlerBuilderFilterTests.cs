@@ -7,8 +7,8 @@ public class SentryHttpMessageHandlerBuilderFilterTests
     [SkippableFact]
     public void Configure_HandlerEnabled_ShouldAddSentryHttpMessageHandler()
     {
-#if __ANDROID__
-        Skip.If(true, "Can't create proxies for classes without parameterless constructors on Android");
+#if __MOBILE__
+        Skip.If(true, "Can't create proxies for classes without parameterless constructors on mobile");
 #endif
 
         // Arrange
@@ -31,8 +31,8 @@ public class SentryHttpMessageHandlerBuilderFilterTests
     [SkippableFact]
     public void Configure_HandlerDisabled_ShouldNotAddSentryHttpMessageHandler()
     {
-#if __ANDROID__
-        Skip.If(true, "Can't create proxies for classes without parameterless constructors on Android");
+#if __MOBILE__
+        Skip.If(true, "Can't create proxies for classes without parameterless constructors on mobile");
 #endif
 
         // Arrange

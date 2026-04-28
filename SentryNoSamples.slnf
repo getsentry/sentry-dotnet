@@ -3,6 +3,7 @@
     "path": "Sentry.slnx",
     "projects": [
       "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
+      "benchmarks\\Sentry.Extensions.Logging.Benchmarks\\Sentry.Extensions.Logging.Benchmarks.csproj",
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
       "src\\Sentry.AspNet\\Sentry.AspNet.csproj",

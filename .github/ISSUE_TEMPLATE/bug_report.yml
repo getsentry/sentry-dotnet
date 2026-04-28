@@ -2,6 +2,11 @@ name: 🐞 Bug Report
 description: Tell us about something that's not working the way we (probably) intend.
 labels: [".NET", "Bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |-
+        Before filling in this form, please check if a similar issue already exists.
+        If you need help creating a minimal reproduction, see our [repro guide](https://github.com/getsentry/sentry-dotnet/blob/main/.github/repro.md).
   - type: dropdown
     id: nuget
     attributes:
@@ -93,6 +98,25 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: other_error_monitoring
+    attributes:
+      description: Are you using any other error monitoring solution alongside Sentry?
+      label: Other Error Monitoring Solution
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+
+  - type: input
+    id: other_error_monitoring_name
+    attributes:
+      label: Other Error Monitoring Solution Name
+      description: If you're using another error monitoring solution side-by-side, please enter the name of the other solution.
+    validations:
+      required: false
+
   - type: input
     id: sentry_sdk_version
     attributes:
@@ -130,7 +154,11 @@ body:
     id: repro
     attributes:
       label: Steps to Reproduce
-      description: How can we see what you're seeing? Specific is terrific.
+      description: >-
+        How can we see what you're seeing? Specific is terrific. Ideally, please provide a link
+        to a minimal reproduction project on GitHub. See our
+        [repro guide](https://github.com/getsentry/sentry-dotnet/blob/main/.github/repro.md)
+        for tips on creating one.
       placeholder: |-
         1. foo
         2. bar

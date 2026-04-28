@@ -46,12 +46,12 @@ public class SdkVersionTests
             {
               "packages": [
                 {
-                  "name": "Sentry",
-                  "version": "1.0"
-                },
-                {
                   "name": "Sentry.AspNetCore",
                   "version": "2.0"
+                },
+                {
+                  "name": "Sentry",
+                  "version": "1.0"
                 }
               ],
               "name": "Sentry.Test.SDK",
@@ -78,7 +78,7 @@ public class SdkVersionTests
         var sdk = new SdkVersion();
         sdk.AddPackage("b", "2");
         sdk.AddPackage("a", "1");
-        yield return new object[] { (sdk, """{"packages":[{"name":"a","version":"1"},{"name":"b","version":"2"}]}""") };
+        yield return new object[] { (sdk, """{"packages":[{"name":"b","version":"2"},{"name":"a","version":"1"}]}""") };
     }
 
     [Fact]
@@ -98,12 +98,12 @@ public class SdkVersionTests
 {
    ""packages"": [
         {
-            ""name"": ""Bar"",
-            ""version"": ""Beta""
-        },
-        {
             ""name"": ""Foo"",
             ""version"": ""Alpha""
+        },
+        {
+            ""name"": ""Bar"",
+            ""version"": ""Beta""
         }
     ],
     ""name"": ""Sentry.Test.SDK"",
