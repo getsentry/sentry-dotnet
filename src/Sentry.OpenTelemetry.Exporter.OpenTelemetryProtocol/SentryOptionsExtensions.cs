@@ -1,5 +1,6 @@
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
+using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
 
 namespace Sentry;
 
@@ -21,11 +22,11 @@ public static class SentryOptionsExtensions
     /// <param name="defaultTextMapPropagator">
     ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
     ///     <para>
-    ///         If this parameter is not supplied, the <see cref="SentryPropagator"/> will be used, which propagates the
+    ///         If this parameter is not supplied, the <see cref="OpenTelemetry.SentryPropagator"/> will be used, which propagates the
     ///         baggage header as well as Sentry trace headers.
     ///     </para>
     ///     <para>
-    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work, but you
+    ///         The <see cref="OpenTelemetry.SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work, but you
     ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
     ///     </para>
     /// </param>

@@ -1,12 +1,10 @@
-using Microsoft.Extensions.DependencyInjection;
-using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Trace;
-using Sentry.Extensibility;
-using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
+using Sentry;
+using Sentry.OpenTelemetry;
 
-namespace Sentry.OpenTelemetry;
+// ReSharper disable once CheckNamespace -- Discoverability
+namespace OpenTelemetry.Trace;
 
 /// <summary>
 /// Contains extension methods for the <see cref="TracerProviderBuilder"/> class.
