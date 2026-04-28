@@ -3,7 +3,7 @@ using OpenTelemetry.Trace;
 
 namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests;
 
-public class TracerProviderBuilderExtensionsTests
+public class SentryTracerProviderBuilderExtensionsTests
 {
     [Theory]
     [InlineData(null)]
@@ -19,7 +19,7 @@ public class TracerProviderBuilderExtensionsTests
 
         // Assert
         act.Should().Throw<ArgumentException>()
-            .WithMessage($"{TracerProviderBuilderExtensions.MissingDsnWarning}*");
+            .WithMessage($"{SentryTracerProviderBuilderExtensions.MissingDsnWarning}*");
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public class TracerProviderBuilderExtensionsTests
         var options = new OtlpExporterOptions();
 
         // Act
-        TracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
+        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
 
         // Assert
         options.Endpoint.Should().Be(dsn.GetOtlpTracesEndpointUri());
@@ -44,7 +44,7 @@ public class TracerProviderBuilderExtensionsTests
         var options = new OtlpExporterOptions();
 
         // Act
-        TracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
+        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
 
         // Assert
         options.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
@@ -58,7 +58,7 @@ public class TracerProviderBuilderExtensionsTests
         var options = new OtlpExporterOptions();
 
         // Act
-        TracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
+        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
         var client = options.HttpClientFactory!.Invoke();
 
         // Assert

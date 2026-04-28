@@ -9,7 +9,7 @@ namespace OpenTelemetry.Trace;
 /// <summary>
 /// Contains extension methods for the <see cref="TracerProviderBuilder"/> class.
 /// </summary>
-public static class TracerProviderBuilderExtensions
+public static class SentryTracerProviderBuilderExtensions
 {
     internal const string MissingDsnWarning = "Invalid DSN passed to AddSentryOtlp";
 

@@ -50,7 +50,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <remarks>
     /// Note: if you are using this overload to configure Sentry to work with OpenTelemetry, you will also have to call
-    /// <see cref="TracerProviderBuilderExtensions.AddSentryOtlpExporter"/>, when building your <see cref="TracerProviderBuilder"/>
+    /// <see cref="SentryTracerProviderBuilderExtensions.AddSentryOtlpExporter"/>, when building your <see cref="TracerProviderBuilder"/>
     /// to ensure OpenTelemetry sends trace information to Sentry.
     /// </remarks>
     /// <param name="options">The <see cref="SentryOptions"/> instance.</param>
