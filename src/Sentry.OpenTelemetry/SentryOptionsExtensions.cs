@@ -29,7 +29,7 @@ public static class SentryOptionsExtensions
     /// unexpected results. It is <c>false</c> by default for backward compatibility only.
     /// </param>
     /// <remarks>
-    /// This method of initialising the Sentry OpenTelemetry integration will be depricated in a future major release.
+    /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
     /// We recommend you use the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol integration instead.
     /// </remarks>
     public static void UseOpenTelemetry(this SentryOptions options, TracerProviderBuilder traceProviderBuilder,
@@ -53,7 +53,7 @@ public static class SentryOptionsExtensions
     /// unexpected results. It is <c>false</c> by default for backward compatibility only.
     /// </param>
     /// <remarks>
-    /// This method of initialising the Sentry OpenTelemetry integration will be depricated in a future major release.
+    /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
     /// We recommend you use the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol integration instead.
     /// </remarks>
     public static void UseOpenTelemetry(this SentryOptions options, bool disableSentryTracing = false)

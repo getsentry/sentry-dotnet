@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Official OpenTelemetry integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
-    <PackageTags>$(PackageTags);OpenTelemetry;OTLP</PackageTags>
+    <PackageTags>$(PackageTags);OpenTelemetry;Exporter;OTLP</PackageTags>
     <TargetFrameworks>$(CurrentTfms);netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Todo: work out a proper solution to this bug in the Roslyn analysers -->
@@ -18,14 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Version 1.6.0 is the minimum version that does not have trim warnings   -->
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Sentry.OpenTelemetry.AspNetCore" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.Benchmarks" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>

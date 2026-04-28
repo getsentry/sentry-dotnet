@@ -1,7 +1,7 @@
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
 
-namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
+namespace Sentry;
 
 /// <summary>
 /// OpenTelemetry Extensions for <see cref="SentryOptions"/>.
@@ -9,7 +9,7 @@ namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
 public static class SentryOptionsExtensions
 {
     /// <summary>
-    /// <para>Configures Sentry to use OpenTelemetry for distributed tracing. Sentry instrumented traces will be
+    /// <para>Configures Sentry to use OpenTelemetry for distributed tracing. Sentry-instrumented traces will be
     /// disabled (so all tracing instrumentation must be done using the OpenTelemetry <see cref="Activity"/> classes).
     /// </para>
     /// <para>
@@ -25,7 +25,7 @@ public static class SentryOptionsExtensions
     ///         baggage header as well as Sentry trace headers.
     ///     </para>
     ///     <para>
-    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work but you
+    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work, but you
     ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
     ///     </para>
     /// </param>
@@ -33,14 +33,14 @@ public static class SentryOptionsExtensions
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
-            throw new ArgumentException("Sentry DSN must be set before calling `SentryOptions.UseOTLP`", nameof(options.Dsn));
+            throw new ArgumentException("Sentry DSN must be set before calling `SentryOptions.UseOtlp`", nameof(options.Dsn));
         }
         tracerProviderBuilder.AddSentryOtlpExporter(options.Dsn, defaultTextMapPropagator);
         options.UseOtlp();
     }
 
     /// <summary>
-    /// <para>Configures Sentry to use OpenTelemetry for distributed tracing. Sentry instrumented traces will be
+    /// <para>Configures Sentry to use OpenTelemetry for distributed tracing. Sentry-instrumented traces will be
     /// disabled (so all tracing instrumentation must be done using the OpenTelemetry <see cref="Activity"/> classes).
     /// </para>
     /// <para>

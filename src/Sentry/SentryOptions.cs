@@ -1163,7 +1163,7 @@ public class SentryOptions
     /// <summary>
     /// During the transition period to OTLP we give SDK users the option to keep using Sentry's tracing in conjunction
     /// with OTEL instrumentation. Setting this to true will disable Sentry's tracing entirely, which is the recommended
-    /// setting but would be a moajor change in behaviour, so we've made it opt-in for now.
+    /// setting but would be a major change in behaviour, so we've made it opt-in for now.
     /// TODO: Remove this option in a future major release and make it true / non-optional when using OTEL (i.e. implied by the Instrumenter)
     /// </summary>
     internal bool DisableSentryTracing { get; set; } = false;

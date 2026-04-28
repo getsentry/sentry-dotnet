@@ -133,7 +133,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
             }
         }
 
-        // We only propogate trace headers for Sentry's native intstumentation. It isn't possible to propogate
+        // We only propagate trace headers for Sentry's native instrumentation. It isn't possible to propagate
         // headers when OTEL instrumentation is used since the traceId can be SentryId.Empty if there is no active
         // OTEL span... which would result in an exception being thrown when trying to create the
         // DynamicSamplingContext.

@@ -36,7 +36,7 @@ public static class TracerProviderBuilderExtensions
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
     /// <remarks>
-    /// This method of initialising the Sentry OpenTelemetry integration will be depricated in a future major release.
+    /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
     /// We recommend you use the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol integration instead.
     /// </remarks>
     public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder,

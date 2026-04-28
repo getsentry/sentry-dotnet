@@ -13,7 +13,7 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class TracerProviderBuilderExtensions
 {
-    internal const string MissingDsnWarning = "Invalid DSN passed to AddSentryOTLP";
+    internal const string MissingDsnWarning = "Invalid DSN passed to AddSentryOtlp";
 
     /// <summary>
     /// <para>
@@ -34,7 +34,7 @@ public static class TracerProviderBuilderExtensions
     ///         baggage header as well as Sentry trace headers.
     ///     </para>
     ///     <para>
-    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work but you
+    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work, but you
     ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
     ///     </para>
     /// </param>
