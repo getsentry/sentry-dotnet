@@ -5,12 +5,9 @@
     <PackageTags>$(PackageTags);OpenTelemetry;Exporter;OTLP</PackageTags>
     <TargetFrameworks>$(CurrentTfms);netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
+    <IsAotCompatible>true</IsAotCompatible>
     <!-- Todo: work out a proper solution to this bug in the Roslyn analysers -->
     <NoWarn>$(NoWarn);AD0001</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(EnableAot)' == 'true'">
-    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>
