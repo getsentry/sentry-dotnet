@@ -5,17 +5,6 @@ namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests;
 
 public class TracerProviderBuilderExtensionsTests
 {
-    private class Fixture
-    {
-        public IServiceProvider ServiceProvider { get; } = Substitute.For<IServiceProvider>();
-        public IHub Hub { get; } = Substitute.For<IHub>();
-
-        public Fixture()
-        {
-            ServiceProvider.GetService(typeof(IHub)).Returns(Hub);
-        }
-    }
-
     [Theory]
     [InlineData(null)]
     [InlineData("")]
