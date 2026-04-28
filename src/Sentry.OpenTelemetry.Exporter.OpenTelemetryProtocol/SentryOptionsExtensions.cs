@@ -17,8 +17,8 @@ public static class SentryOptionsExtensions
     /// </para>
     /// </summary>
     /// <param name="options">The <see cref="SentryOptions"/> instance.</param>
-    /// <param name="builder"><see cref="TracerProviderBuilder"/></param>
-    /// <param name="textMapPropagator">
+    /// <param name="tracerProviderBuilder"><see cref="TracerProviderBuilder"/></param>
+    /// <param name="defaultTextMapPropagator">
     ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
     ///     <para>
     ///         If this parameter is not supplied, the <see cref="SentryPropagator"/> will be used, which propagates the
@@ -29,13 +29,13 @@ public static class SentryOptionsExtensions
     ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
     ///     </para>
     /// </param>
-    public static void UseOtlp(this SentryOptions options, TracerProviderBuilder builder, TextMapPropagator? textMapPropagator = null)
+    public static void UseOtlp(this SentryOptions options, TracerProviderBuilder tracerProviderBuilder, TextMapPropagator? defaultTextMapPropagator = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
             throw new ArgumentException("Sentry DSN must be set before calling `SentryOptions.UseOTLP`", nameof(options.Dsn));
         }
-        builder.AddSentryOtlp(options.Dsn, textMapPropagator);
+        tracerProviderBuilder.AddSentryOtlp(options.Dsn, defaultTextMapPropagator);
         options.UseOtlp();
     }
 
