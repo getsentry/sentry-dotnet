@@ -30,7 +30,7 @@ public static class SentryOptionsExtensions
     /// </param>
     /// <remarks>
     /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
-    /// We recommend you use the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol integration instead.
+    /// We recommend you use the Sentry.OpenTelemetry.Exporter integration instead.
     /// </remarks>
     public static void UseOpenTelemetry(this SentryOptions options, TracerProviderBuilder traceProviderBuilder,
         TextMapPropagator? defaultTextMapPropagator = null, bool disableSentryTracing = false)
@@ -54,7 +54,7 @@ public static class SentryOptionsExtensions
     /// </param>
     /// <remarks>
     /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
-    /// We recommend you use the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol integration instead.
+    /// We recommend you use the Sentry.OpenTelemetry.Exporter integration instead.
     /// </remarks>
     public static void UseOpenTelemetry(this SentryOptions options, bool disableSentryTracing = false)
     {

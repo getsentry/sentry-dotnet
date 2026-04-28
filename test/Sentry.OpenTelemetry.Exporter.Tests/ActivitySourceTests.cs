@@ -2,7 +2,7 @@ using OpenTelemetry;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry.Tests.OpenTelemetry;
 
-namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests;
+namespace Sentry.OpenTelemetry.Exporter.Tests;
 
 public abstract class ActivitySourceTests : IDisposable
 {

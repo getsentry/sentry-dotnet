@@ -1,6 +1,6 @@
 using Sentry.OpenTelemetry.Tests;
 
-namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests;
+namespace Sentry.OpenTelemetry.Exporter.Tests;
 
 public class OtelPropagationContextTests : ActivitySourceTests
 {

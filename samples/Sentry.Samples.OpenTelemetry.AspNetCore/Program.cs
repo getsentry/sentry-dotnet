@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
-using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
+using Sentry.OpenTelemetry.Exporter;
 using Sentry.Samples.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);

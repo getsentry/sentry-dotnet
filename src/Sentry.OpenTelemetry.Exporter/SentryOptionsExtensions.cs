@@ -1,6 +1,6 @@
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
-using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
+using Sentry.OpenTelemetry.Exporter;
 
 namespace Sentry;
 

@@ -1,7 +1,7 @@
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Trace;
 
-namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests;
+namespace Sentry.OpenTelemetry.Exporter.Tests;
 
 public class SentryTracerProviderBuilderExtensionsTests
 {

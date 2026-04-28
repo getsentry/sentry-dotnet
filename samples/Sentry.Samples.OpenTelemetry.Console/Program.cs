@@ -9,7 +9,7 @@ using System.Diagnostics;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
-using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
+using Sentry.OpenTelemetry.Exporter;
 
 #if SENTRY_DSN_DEFINED_IN_ENV
 var dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
