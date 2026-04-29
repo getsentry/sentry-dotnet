@@ -260,7 +260,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void OnWindowOnStopped_FinishesActiveInteractionTransaction()
+    public void OnWindowOnStopped_ChildlessInteractionTransaction_NotExplicitlyFinished()
     {
         // Arrange
         var window = new Window();
@@ -269,6 +269,31 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
 
         var clickTransaction = Substitute.For<ITransactionTracer>();
+        clickTransaction.IsFinished.Returns(false);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(clickTransaction);
+
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+
+        // Act
+        window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
+
+        // Assert - childless tx not explicitly finished; idle timeout will discard
+        clickTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+    }
+
+    [Fact]
+    public void OnWindowOnStopped_InteractionTransactionWithChildren_FinishesTransaction()
+    {
+        // Arrange
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var button = new Button { AutomationId = "my-btn" };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        var clickTransaction = Substitute.For<ITransactionTracer>();
+        clickTransaction.IsFinished.Returns(false);
+        clickTransaction.Spans.Returns(new[] { Substitute.For<ISpan>() }); // has a child span
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(clickTransaction);
 

@@ -289,7 +289,7 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void OnWindowOnStopped_FinishesActiveTransaction()
+    public void OnWindowOnStopped_ChildlessTransaction_NotExplicitlyFinished()
     {
         // Arrange
         var shell = new Shell { StyleId = "shell" };
@@ -299,6 +299,29 @@ public partial class MauiEventsBinderTests
         var uiTransaction = Substitute.For<ITransactionTracer>();
         uiTransaction.Name.Returns("bar");
         uiTransaction.IsFinished.Returns(false);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(uiTransaction);
+        _fixture.Binder.StartUiTransaction("btnClick");
+
+        // Act
+        window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
+
+        // Assert - childless tx not explicitly finished; idle timeout will discard
+        uiTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+    }
+
+    [Fact]
+    public void OnWindowOnStopped_TransactionWithChildren_FinishesTransaction()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var uiTransaction = Substitute.For<ITransactionTracer>();
+        uiTransaction.Name.Returns("bar");
+        uiTransaction.IsFinished.Returns(false);
+        uiTransaction.Spans.Returns(new[] { Substitute.For<ISpan>() }); // has a child span
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(uiTransaction);
         _fixture.Binder.StartUiTransaction("btnClick");

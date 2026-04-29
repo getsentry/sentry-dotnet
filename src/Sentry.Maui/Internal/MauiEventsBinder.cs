@@ -463,7 +463,12 @@ internal class MauiEventsBinder : IMauiEventsBinder
         {
             CurrentNavSpan?.Finish(SpanStatus.Ok);
             CurrentNavSpan = null;
-            CurrentUiTx?.Finish(SpanStatus.Ok);
+            // Only finish UI transactions with child spans.
+            // Childless transactions will be discarded by the idle timeout.
+            if (CurrentUiTx is { IsFinished: false } uiTx && uiTx.Spans.Count > 0)
+            {
+                uiTx.Finish(SpanStatus.Ok);
+            }
             CurrentUiTx = null;
         }
     }
