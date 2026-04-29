@@ -45,7 +45,8 @@ internal class OtelPropagationContext : IExternalPropagationContext
     public double? SampleRand =>
         // OTel keeps a trace when rv ≥ th; Sentry keeps it when sample_rand < sample_rate.
         // Mapping sample_rand = 1 − rv makes the decisions equivalent: 1 − rv < 1 − th ↔ rv > th
-        GetOtelTraceStateValue("rv") is { } rv && ParseOtelHexFraction(rv) is { } v ? 1.0 - v : null;
+        // Guard: rv=0 would produce 1.0, which is out of range for sample_rand — return null instead.
+        GetOtelTraceStateValue("rv") is { } rv && ParseOtelHexFraction(rv) is { } v && v > 0.0 ? 1.0 - v : null;
 
     /// <summary>
     /// <para>

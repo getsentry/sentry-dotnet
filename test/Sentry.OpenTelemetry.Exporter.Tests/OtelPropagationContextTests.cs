@@ -293,4 +293,17 @@ public class OtelPropagationContextTests : ActivitySourceTests
 
         sut.SampleRand.Should().BeApproximately(0.75, 1e-15);
     }
+
+    [Fact]
+    public void SampleRand_ActivityWithRvZero_ReturnsNull()
+    {
+        // rv=0 would invert to 1.0, which is out of range for sample_rand — must return null
+        // to avoid an ArgumentOutOfRangeException in DynamicSamplingContext.
+        // In this case the DSC generates its own sample rand... there's a 1 / 2^56 chance of this happening.
+        using var activity = new Activity("test").Start();
+        activity.TraceStateString = "ot=rv:0";
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRand.Should().BeNull();
+    }
 }
