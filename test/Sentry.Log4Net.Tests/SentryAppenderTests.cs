@@ -506,7 +506,7 @@ public class SentryAppenderTests : IDisposable
     }
 
     [Fact]
-    public void DoAppend_StructuredLogging__LogLevel()
+    public void DoAppend_StructuredLogging_Properties()
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
@@ -532,7 +532,7 @@ public class SentryAppenderTests : IDisposable
         sut.DoAppend(loggingEvent);
 
         var log = capturer.Logs.Should().ContainSingle().Which;
-        log.Level.Should().Be(SentryLogLevel.Warning);
+        log.Level.Should().Be(SentryLogLevel.Info);
         log.Message.Should().Be("Test Message");
 
         //TODO: assert Count/Length of Attributes
