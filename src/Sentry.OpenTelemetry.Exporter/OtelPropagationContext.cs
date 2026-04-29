@@ -65,10 +65,11 @@ internal class OtelPropagationContext : IExternalPropagationContext
 
         foreach (var entry in traceState.Split(','))
         {
-            if (!entry.StartsWith("ot=", StringComparison.Ordinal))
+            var trimmed = entry.Trim();
+            if (!trimmed.StartsWith("ot=", StringComparison.Ordinal))
                 continue;
 
-            foreach (var subEntry in entry.Substring(3).Split(';'))
+            foreach (var subEntry in trimmed.Substring(3).Split(';'))
             {
                 var colonIdx = subEntry.IndexOf(':');
                 if (colonIdx < 0)

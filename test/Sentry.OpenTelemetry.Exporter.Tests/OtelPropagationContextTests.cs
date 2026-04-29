@@ -234,6 +234,17 @@ public class OtelPropagationContextTests : ActivitySourceTests
     }
 
     [Fact]
+    public void SampleRate_ActivityWithWhitespaceAroundCommas_ParsesOtEntry()
+    {
+        // W3C tracestate allows OWS (optional whitespace) around the comma separator
+        using var activity = new Activity("test").Start();
+        activity.TraceStateString = "other=value, ot=th:8, another=x";
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRate.Should().BeApproximately(0.5, 1e-15);
+    }
+
+    [Fact]
     public void SampleRand_NoActivity_ReturnsNull()
     {
         Activity.Current = null;
