@@ -57,7 +57,8 @@ internal class OtelPropagationContext : IExternalPropagationContext
             foreach (var subEntry in entry.Substring(3).Split(';'))
             {
                 var colonIdx = subEntry.IndexOf(':');
-                if (colonIdx < 0) continue;
+                if (colonIdx < 0)
+                    continue;
                 if (subEntry.Substring(0, colonIdx) == subKey)
                     return subEntry.Substring(colonIdx + 1);
             }
