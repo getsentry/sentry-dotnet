@@ -107,7 +107,7 @@ public class SentryAppender : AppenderSkeleton
 
                 foreach (var property in loggingEvent.GetProperties())
                 {
-                    if (property is DictionaryEntry { Key: string key, Value: { } value})
+                    if (property is DictionaryEntry { Key: string key, Value: { } value })
                     {
                         if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase))
                         {
