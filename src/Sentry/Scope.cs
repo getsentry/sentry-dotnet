@@ -1,7 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
-using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
 
@@ -245,7 +244,7 @@ public class Scope : IEventLike
         }
     }
 
-    internal IPropagationContext PropagationContext { get; private set; }
+    internal SentryPropagationContext PropagationContext { get; private set; }
 
     internal SessionUpdate? SessionUpdate { get; set; }
 
@@ -285,10 +284,10 @@ public class Scope : IEventLike
     {
     }
 
-    internal Scope(SentryOptions? options, IPropagationContext? propagationContext)
+    internal Scope(SentryOptions? options, SentryPropagationContext? propagationContext)
     {
         Options = options ?? new SentryOptions();
-        PropagationContext = Options.PropagationContextFactory(propagationContext);
+        PropagationContext = new SentryPropagationContext(propagationContext);
     }
 
     // For testing. Should explicitly require SentryOptions.
@@ -415,7 +414,7 @@ public class Scope : IEventLike
         _extra.Clear();
         _tags.Clear();
         ClearAttachments();
-        PropagationContext = Options.PropagationContextFactory(null);
+        PropagationContext = new();
     }
 
     /// <summary>

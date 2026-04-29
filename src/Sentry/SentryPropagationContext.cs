@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry;
 
-internal class SentryPropagationContext : IPropagationContext
+internal class SentryPropagationContext
 {
     public SentryId TraceId { get; }
     public SpanId SpanId { get; }
@@ -39,7 +39,7 @@ internal class SentryPropagationContext : IPropagationContext
         SpanId = SpanId.Create();
     }
 
-    public SentryPropagationContext(IPropagationContext? other)
+    public SentryPropagationContext(SentryPropagationContext? other)
     {
         TraceId = other?.TraceId ?? SentryId.Create();
         SpanId = other?.SpanId ?? SpanId.Create();

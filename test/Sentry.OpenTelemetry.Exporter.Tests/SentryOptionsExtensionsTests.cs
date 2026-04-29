@@ -32,7 +32,7 @@ public class SentryOptionsExtensionsTests
     }
 
     [Fact]
-    public void UseOtlp_SetsPropagationContextFactoryToOtelPropagationContext()
+    public void UseOtlp_SetsExternalPropagationContextToOtelPropagationContext()
     {
         // Arrange
         var options = new SentryOptions { Dsn = ValidDsn };
@@ -41,8 +41,8 @@ public class SentryOptionsExtensionsTests
         options.UseOtlp();
 
         // Assert
-        options.PropagationContextFactory.Should().NotBeNull();
-        options.PropagationContextFactory!(null).Should().BeOfType<OtelPropagationContext>();
+        options.ExternalPropagationContext.Should().NotBeNull();
+        options.ExternalPropagationContext!.Should().BeOfType<OtelPropagationContext>();
     }
 
     [Theory]
@@ -88,21 +88,6 @@ public class SentryOptionsExtensionsTests
 
         // Assert
         options.DisableSentryTracing.Should().BeTrue();
-    }
-
-    [Fact]
-    public void UseOtlp_WithTracerProviderBuilder_SetsPropagationContextFactoryToOtelPropagationContext()
-    {
-        // Arrange
-        var options = new SentryOptions { Dsn = ValidDsn };
-        var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
-
-        // Act
-        options.UseOtlp(tracerProviderBuilder);
-
-        // Assert
-        options.PropagationContextFactory.Should().NotBeNull();
-        options.PropagationContextFactory!(null).Should().BeOfType<OtelPropagationContext>();
     }
 
     [Fact]

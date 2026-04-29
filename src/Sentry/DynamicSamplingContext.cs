@@ -227,16 +227,8 @@ internal class DynamicSamplingContext
             replaySession);
     }
 
-    /// <summary>
-    /// Creates a <see cref="DynamicSamplingContext"/> from the given <see cref="IPropagationContext"/>.
-    /// </summary>
-    /// <remarks>
-    /// This method should not be used when instrumenting with OTEL.
-    /// It will throw an exception if Activity.Current is null.
-    /// </remarks>
-    public static DynamicSamplingContext CreateFromPropagationContext(IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
     {
-        Debug.Assert(options.Instrumenter is not Instrumenter.OpenTelemetry, "This method should not be used when instrumenting with OTEL.");
         var traceId = propagationContext.TraceId;
         var publicKey = options.ParsedDsn.PublicKey;
         var release = options.SettingLocator.GetRelease();
@@ -246,6 +238,29 @@ internal class DynamicSamplingContext
             traceId,
             publicKey,
             null,
+            release: release,
+            environment: environment,
+            replaySession: replaySession
+            );
+    }
+
+    public static DynamicSamplingContext? CreateFromExternalPropagationContext(
+        IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    {
+        if (propagationContext.TraceId is not {} traceId || traceId == SentryId.Empty)
+        {
+            return null;
+        }
+        var publicKey = options.ParsedDsn.PublicKey;
+        var release = options.SettingLocator.GetRelease();
+        var environment = options.SettingLocator.GetEnvironment();
+
+        return new DynamicSamplingContext(
+            traceId,
+            publicKey,
+            propagationContext.IsSampled,
+            propagationContext.SampleRate,
+            propagationContext.SampleRand,
             release: release,
             environment: environment,
             replaySession: replaySession
@@ -264,13 +279,9 @@ internal static class DynamicSamplingContextExtensions
     public static DynamicSamplingContext CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromUnsampledTransaction(transaction, options, replaySession);
 
-    /// <summary>
-    /// Creates a <see cref="DynamicSamplingContext"/> from the given <see cref="IPropagationContext"/>.
-    /// </summary>
-    /// <remarks>
-    /// This method should not be used when instrumenting with OTEL.
-    /// It will throw an exception if Activity.Current is null.
-    /// </remarks>
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
+
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+        => DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, replaySession);
 }

@@ -1201,10 +1201,9 @@ public class SentryOptions
     internal bool DisableSentryTracing { get; set; } = false;
 
     /// <summary>
-    /// The default factory creates SentryPropagationContext instances... this should be replaced when using OTEL
+    /// An optional external propagation context - used when using Sentry with OLTP
     /// </summary>
-    internal Func<IPropagationContext?, IPropagationContext> PropagationContextFactory { get; set; } = sourceContext =>
-        new SentryPropagationContext(sourceContext);
+    internal IExternalPropagationContext? ExternalPropagationContext { get; set; }
 
     /// <summary>
     /// <para>

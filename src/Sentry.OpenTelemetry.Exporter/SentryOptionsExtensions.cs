@@ -58,6 +58,6 @@ public static class SentryOptionsExtensions
     {
         options.Instrumenter = Instrumenter.OpenTelemetry;
         options.DisableSentryTracing = true;
-        options.PropagationContextFactory = _ => new OtelPropagationContext();
+        options.ExternalPropagationContext = new OtelPropagationContext();
     }
 }

@@ -297,6 +297,13 @@ public static class HubExtensions
     /// </remarks>
     internal static void GetTraceIdAndSpanId(this IHub hub, out SentryId traceId, out SpanId? spanId)
     {
+        if (hub.GetSentryOptions()?.ExternalPropagationContext is { TraceId: not null } externalPropagationContext)
+        {
+            traceId = externalPropagationContext.TraceId.Value;
+            spanId = externalPropagationContext.SpanId;
+            return;
+        }
+
         var activeSpan = hub.GetSpan();
         if (activeSpan is not null)
         {

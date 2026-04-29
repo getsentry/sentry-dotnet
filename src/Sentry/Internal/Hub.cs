@@ -299,6 +299,11 @@ internal class Hub : IHub, IDisposable
 
     public SentryTraceHeader GetTraceHeader()
     {
+        if (_options.ExternalPropagationContext is { TraceId: not null, SpanId: not null } externalPropagationContext)
+        {
+            return new SentryTraceHeader(externalPropagationContext.TraceId.Value,
+                externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
+        }
         if (GetSpan()?.GetTraceHeader() is { } traceHeader)
         {
             return traceHeader;
@@ -312,10 +317,9 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
-        if (_options.Instrumenter is Instrumenter.OpenTelemetry)
+        if (_options.ExternalPropagationContext is {} externalPropagationContext)
         {
-            _options.LogWarning("GetBaggage should not be called when using OpenTelemetry.");
-            return BaggageHeader.Create([]);
+            return externalPropagationContext.GetBaggageHeader();
         }
 
         var span = GetSpan();
@@ -330,6 +334,17 @@ internal class Hub : IHub, IDisposable
 
     public W3CTraceparentHeader? GetTraceparentHeader()
     {
+        if (_options.ExternalPropagationContext is {} externalPropagationContext)
+        {
+            if (externalPropagationContext.TraceId is null || externalPropagationContext.SpanId is null)
+            {
+                return null;
+            }
+
+            return new W3CTraceparentHeader(externalPropagationContext.TraceId.Value,
+                externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
+        }
+
         if (GetSpan()?.GetTraceHeader() is { } traceHeader)
         {
             return new W3CTraceparentHeader(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled);
@@ -490,15 +505,20 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, IPropagationContext propagationContext)
+    private void ApplyTraceContextToEvent(SentryEvent evt, SentryPropagationContext propagationContext)
     {
         evt.Contexts.Trace.TraceId = propagationContext.TraceId;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        if (_options.Instrumenter is Instrumenter.Sentry)
-        {
-            evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
-        }
+        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
+    }
+
+    private void ApplyTraceContextToEvent(SentryEvent evt, IExternalPropagationContext propagationContext)
+    {
+        evt.Contexts.Trace.TraceId = propagationContext.TraceId ?? default;
+        evt.Contexts.Trace.SpanId = propagationContext.SpanId ?? default;
+        evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
+        evt.DynamicSamplingContext = propagationContext.GetDynamicSamplingContext(_options, _replaySession);
     }
 
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
@@ -585,9 +605,15 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            // We get the span linked to the event or fall back to the current span
-            var span = GetLinkedSpan(evt) ?? scope.Span;
-            if (span is not null)
+            // Prefer ExternalPropagationContext then linked span and then finally fall back to the propagation context
+            // TODO: Consider how to resolve the DSC... maybe we should be storing an ExternalPropagationContext factory
+            // on the options and using this to create an external context with the relevant DSC - e.g. when continuing
+            // upstream traces.
+            if (_options.ExternalPropagationContext is {} externalPropagationContext)
+            {
+                ApplyTraceContextToEvent(evt, externalPropagationContext);
+            }
+            else if ((GetLinkedSpan(evt) ?? scope.Span) is { } span)
             {
                 ApplyTraceContextToEvent(evt, span);
             }

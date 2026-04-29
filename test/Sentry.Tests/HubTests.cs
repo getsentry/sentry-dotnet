@@ -1442,9 +1442,13 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void GetBaggage_OtelInstrumenter_ReturnsEmptyBaggage()
+    public void GetBaggage_ExternalPropagationContext_ReturnsBaggageFromExternalPropagationContext()
     {
         // Arrange
+        var expectedBaggageHeader = BaggageHeader.Create([]);
+        var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.GetBaggageHeader().Returns(expectedBaggageHeader);
+        _fixture.Options.ExternalPropagationContext = externalContext;
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.Options.AddDiagnosticLoggerSubstitute();
         var hub = _fixture.GetSut();
@@ -1453,12 +1457,7 @@ public partial class HubTests : IDisposable
         var baggage = hub.GetBaggage();
 
         // Assert
-        baggage.Members.Should().BeEmpty();
-        _fixture.Options.DiagnosticLogger.Received(1).Log(
-            SentryLevel.Warning,
-            Arg.Is<string>(s => s.Contains("GetBaggage should not be called when using OpenTelemetry.")),
-            null,
-            Arg.Any<object[]>());
+        baggage.Should().Be(expectedBaggageHeader);
     }
 
     [Theory]

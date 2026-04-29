@@ -22,7 +22,7 @@ public class OtelPropagationContextTests : ActivitySourceTests
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public void TraceId_NoActivityCurrent_ReturnsDefault()
+    public void TraceId_NoActivityCurrent_ReturnsNull()
     {
         // Arrange
         var sut = new OtelPropagationContext();
@@ -32,7 +32,7 @@ public class OtelPropagationContextTests : ActivitySourceTests
         var traceId = sut.TraceId;
 
         // Assert
-        traceId.Should().Be(default(SentryId));
+        traceId.Should().BeNull();
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class OtelPropagationContextTests : ActivitySourceTests
     }
 
     [Fact]
-    public void SpanId_NoActivityCurrent_ReturnsDefault()
+    public void SpanId_NoActivityCurrent_ReturnsNull()
     {
         // Arrange
         var sut = new OtelPropagationContext();
@@ -61,7 +61,7 @@ public class OtelPropagationContextTests : ActivitySourceTests
         var spanId = sut.SpanId;
 
         // Assert
-        spanId.Should().Be(default(SpanId));
+        spanId.Should().BeNull();
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public class OtelPropagationContextTests : ActivitySourceTests
     }
 
     [Fact]
-    public void GetOrCreateDynamicSamplingContext_DynamicSamplingContextIsNull_CreatesDynamicSamplingContext()
+    public void GetDynamicSamplingContext_DynamicSamplingContextIsNull_CreatesDynamicSamplingContext()
     {
         // Arrange
         using var activity = Tracer.StartActivity();
@@ -142,7 +142,7 @@ public class OtelPropagationContextTests : ActivitySourceTests
         sut.DynamicSamplingContext.Should().BeNull();
 
         // Act
-        var result = sut.GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
+        var result = sut.GetDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
 
         // Assert
         result.Should().NotBeNull();
@@ -151,15 +151,15 @@ public class OtelPropagationContextTests : ActivitySourceTests
     }
 
     [Fact]
-    public void GetOrCreateDynamicSamplingContext_DynamicSamplingContextIsNotNull_ReturnsSameDynamicSamplingContext()
+    public void GetDynamicSamplingContext_DynamicSamplingContextIsNotNull_ReturnsSameDynamicSamplingContext()
     {
         // Arrange
         using var activity = Tracer.StartActivity();
         var sut = new OtelPropagationContext();
-        var firstResult = sut.GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
+        var firstResult = sut.GetDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
 
         // Act
-        var secondResult = sut.GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
+        var secondResult = sut.GetDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
 
         // Assert
         firstResult.Should().BeSameAs(secondResult);
@@ -167,14 +167,14 @@ public class OtelPropagationContextTests : ActivitySourceTests
     }
 
     [Fact]
-    public void GetOrCreateDynamicSamplingContext_WithActiveReplaySession_IncludesReplayIdInDynamicSamplingContext()
+    public void GetDynamicSamplingContext_WithActiveReplaySession_IncludesReplayIdInDynamicSamplingContext()
     {
         // Arrange
         using var activity = Tracer.StartActivity();
         var sut = new OtelPropagationContext();
 
         // Act
-        var result = sut.GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
+        var result = sut.GetDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
 
         // Assert
         result.Should().NotBeNull();
