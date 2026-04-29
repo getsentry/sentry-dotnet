@@ -304,14 +304,14 @@ public static class HubExtensions
             return;
         }
 
-        if (hub.GetSpan() is {} activeSpan)
+        if (hub.GetSpan() is { } activeSpan)
         {
             traceId = activeSpan.TraceId;
             spanId = activeSpan.SpanId;
             return;
         }
 
-        if (hub.GetScope() is {} scope)
+        if (hub.GetScope() is { } scope)
         {
             traceId = scope.PropagationContext.TraceId;
             spanId = null;
