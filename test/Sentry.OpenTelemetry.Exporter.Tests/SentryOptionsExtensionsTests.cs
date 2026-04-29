@@ -99,7 +99,7 @@ public class SentryOptionsExtensionsTests
         var customPropagator = Substitute.For<TextMapPropagator>();
 
         // Act
-        var act = () => options.UseOtlp(tracerProviderBuilder, customPropagator);
+        var act = () => options.UseOtlp(tracerProviderBuilder, defaultTextMapPropagator: customPropagator);
 
         // Assert
         act.Should().NotThrow();

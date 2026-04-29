@@ -30,7 +30,7 @@ public class SentryTracerProviderBuilderExtensionsTests
         var options = new OtlpExporterOptions();
 
         // Act
-        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
+        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn.GetOtlpTracesEndpointUri(), dsn.PublicKey);
 
         // Assert
         options.Endpoint.Should().Be(dsn.GetOtlpTracesEndpointUri());
@@ -44,7 +44,7 @@ public class SentryTracerProviderBuilderExtensionsTests
         var options = new OtlpExporterOptions();
 
         // Act
-        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
+        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn.GetOtlpTracesEndpointUri(), dsn.PublicKey);
 
         // Assert
         options.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
@@ -58,7 +58,7 @@ public class SentryTracerProviderBuilderExtensionsTests
         var options = new OtlpExporterOptions();
 
         // Act
-        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn);
+        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, dsn.GetOtlpTracesEndpointUri(), dsn.PublicKey);
         var client = options.HttpClientFactory!.Invoke();
 
         // Assert

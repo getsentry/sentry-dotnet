@@ -25,6 +25,8 @@ public static class SentryTracerProviderBuilderExtensions
     /// </summary>
     /// <param name="tracerProviderBuilder">The <see cref="TracerProviderBuilder"/>.</param>
     /// <param name="dsnString">The DSN for your Sentry project</param>
+    /// <param name="collectorUrl">A custom endpoint to export OLTP trace information to. If no url is provided, the
+    /// endpoint will be inferred automatically from the DSN.</param>
     /// <param name="defaultTextMapPropagator">
     ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
     ///     <para>
@@ -37,8 +39,8 @@ public static class SentryTracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    public static TracerProviderBuilder AddSentryOtlpExporter(this TracerProviderBuilder tracerProviderBuilder, string dsnString,
-        TextMapPropagator? defaultTextMapPropagator = null)
+    public static TracerProviderBuilder AddSentryOtlpExporter(this TracerProviderBuilder tracerProviderBuilder,
+        string dsnString, Uri? collectorUrl = null, TextMapPropagator? defaultTextMapPropagator = null)
     {
         if (Dsn.TryParse(dsnString) is not { } dsn)
         {
@@ -48,19 +50,20 @@ public static class SentryTracerProviderBuilderExtensions
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
 
-        tracerProviderBuilder.AddOtlpExporter(options => OtlpConfigurationCallback(options, dsn));
+        collectorUrl ??= dsn.GetOtlpTracesEndpointUri();
+        tracerProviderBuilder.AddOtlpExporter(options => OtlpConfigurationCallback(options, collectorUrl, dsn.PublicKey));
         return tracerProviderBuilder;
     }
 
     // Internal helper method for testing purposes
-    internal static void OtlpConfigurationCallback(OtlpExporterOptions options, Dsn dsn)
+    internal static void OtlpConfigurationCallback(OtlpExporterOptions options, Uri collectorUrl, string publicKey)
     {
-        options.Endpoint = dsn.GetOtlpTracesEndpointUri();
+        options.Endpoint = collectorUrl;
         options.Protocol = OtlpExportProtocol.HttpProtobuf;
         options.HttpClientFactory = () =>
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-Sentry-Auth", $"sentry sentry_key={dsn.PublicKey}");
+            client.DefaultRequestHeaders.Add("X-Sentry-Auth", $"sentry sentry_key={publicKey}");
             return client;
         };
     }
