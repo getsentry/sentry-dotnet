@@ -91,6 +91,36 @@ public class SentryOptionsExtensionsTests
     }
 
     [Fact]
+    public void UseOtlp_WithTracerProviderBuilder_SetsExternalPropagationContextToOtelPropagationContext()
+    {
+        // Arrange
+        var options = new SentryOptions { Dsn = ValidDsn };
+        var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
+
+        // Act
+        options.UseOtlp(tracerProviderBuilder);
+
+        // Assert
+        options.ExternalPropagationContext.Should().NotBeNull();
+        options.ExternalPropagationContext!.Should().BeOfType<OtelPropagationContext>();
+    }
+
+    [Fact]
+    public void UseOtlp_WithTracerProviderBuilder_WithCustomCollectorUrl_DoesNotThrow()
+    {
+        // Arrange
+        var options = new SentryOptions { Dsn = ValidDsn };
+        var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
+        var collectorUrl = new Uri("https://custom-collector.example.com/api/traces");
+
+        // Act
+        var act = () => options.UseOtlp(tracerProviderBuilder, collectorUrl);
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
     public void UseOtlp_WithCustomPropagator_DoesNotThrow()
     {
         // Arrange

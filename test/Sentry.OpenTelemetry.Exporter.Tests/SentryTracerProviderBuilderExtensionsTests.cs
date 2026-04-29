@@ -23,6 +23,21 @@ public class SentryTracerProviderBuilderExtensionsTests
     }
 
     [Fact]
+    public void OtlpConfigurationCallback_WithCustomCollectorUrl_SetsEndpointToCustomUrl()
+    {
+        // Arrange
+        var dsn = Dsn.Parse("https://examplePublicKey@o0.ingest.sentry.io/123456");
+        var customUrl = new Uri("https://custom-collector.example.com/api/traces");
+        var options = new OtlpExporterOptions();
+
+        // Act
+        SentryTracerProviderBuilderExtensions.OtlpConfigurationCallback(options, customUrl, dsn.PublicKey);
+
+        // Assert
+        options.Endpoint.Should().Be(customUrl);
+    }
+
+    [Fact]
     public void OtlpConfigurationCallback_SetsEndpointFromDsn()
     {
         // Arrange
