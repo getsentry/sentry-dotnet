@@ -8,7 +8,14 @@ namespace Sentry.OpenTelemetry.Exporter;
 /// </summary>
 internal class OtelPropagationContext : IExternalPropagationContext
 {
-    public DynamicSamplingContext? DynamicSamplingContext { get; private set; }
+    /// <summary>
+    /// We cache the DSC on the current activity so we don't have to regenerate this every time we use it
+    /// </summary>
+    public DynamicSamplingContext? DynamicSamplingContext
+    {
+        get => Activity.Current?.GetFused<DynamicSamplingContext>();
+        private set => Activity.Current?.SetFused(value);
+    }
     public SentryId? TraceId => Activity.Current?.TraceId.AsSentryId();
     public SpanId? SpanId => Activity.Current?.SpanId.AsSentrySpanId();
     public SpanId? ParentSpanId
@@ -54,7 +61,7 @@ internal class OtelPropagationContext : IExternalPropagationContext
         {
             foreach (var item in baggage)
             {
-                items.Add(item.Key, item.Value ?? string.Empty);
+                items[item.Key] = item.Value ?? string.Empty;
             }
         }
         return BaggageHeader.Create(items);
