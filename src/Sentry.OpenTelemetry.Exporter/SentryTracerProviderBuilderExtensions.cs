@@ -63,7 +63,10 @@ public static class SentryTracerProviderBuilderExtensions
         options.HttpClientFactory = () =>
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-Sentry-Auth", $"sentry sentry_key={publicKey}");
+            client.DefaultRequestHeaders.Add("X-Sentry-Auth",
+                $"Sentry sentry_version={SentryConstants.ProtocolVersion}," +
+                $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
+                $"sentry_key={publicKey}");
             return client;
         };
     }

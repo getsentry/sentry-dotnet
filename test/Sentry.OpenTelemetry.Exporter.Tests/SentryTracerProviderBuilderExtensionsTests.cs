@@ -79,6 +79,9 @@ public class SentryTracerProviderBuilderExtensionsTests
         // Assert
         client.DefaultRequestHeaders.Should().Contain(h => h.Key == "X-Sentry-Auth");
         var headerValues = client.DefaultRequestHeaders.GetValues("X-Sentry-Auth");
-        headerValues.Should().ContainSingle(v => v == $"sentry sentry_key={dsn.PublicKey}");
+        headerValues.Should().ContainSingle(v =>
+            v == $"Sentry sentry_version={SentryConstants.ProtocolVersion}," +
+                 $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
+                 $"sentry_key={dsn.PublicKey}");
     }
 }
