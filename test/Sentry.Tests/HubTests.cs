@@ -1346,6 +1346,26 @@ public partial class HubTests : IDisposable
         transaction.IsSampled.Should().BeFalse();
     }
 
+    [Fact]
+    public void StartTransaction_DisableSentryTracing_DropsTransactionAndLogsWarning()
+    {
+        // Arrange
+        _fixture.Options.DisableSentryTracing = true;
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar");
+
+        // Assert
+        transaction.Should().Be(NoOpTransaction.Instance);
+        _fixture.Options.DiagnosticLogger.Received(1).Log(
+            SentryLevel.Warning,
+            Arg.Is<string>(s => s.Contains("Sentry transaction dropped because OpenTelemetry is enabled")),
+            null,
+            Arg.Any<object[]>());
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -1385,6 +1405,28 @@ public partial class HubTests : IDisposable
         header.SpanId.Should().Be(propagationContext.SpanId);
         header.TraceId.Should().Be(propagationContext.TraceId);
         header.IsSampled.Should().BeNull();
+    }
+
+    [Fact]
+    public void GetTraceHeader_ExternalPropagationContext_ReturnsHeaderFromExternalContext()
+    {
+        // Arrange
+        var traceId = SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8");
+        var spanId = SpanId.Parse("2000000000000000");
+        var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.TraceId.Returns(traceId);
+        externalContext.SpanId.Returns(spanId);
+        externalContext.IsSampled.Returns(true);
+        _fixture.Options.ExternalPropagationContext = externalContext;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var header = hub.GetTraceHeader();
+
+        // Assert
+        header.TraceId.Should().Be(traceId);
+        header.SpanId.Should().Be(spanId);
+        header.IsSampled.Should().BeTrue();
     }
 
     [Theory]
@@ -1499,6 +1541,69 @@ public partial class HubTests : IDisposable
         header.SpanId.Should().Be(propagationContext.SpanId);
         header.TraceId.Should().Be(propagationContext.TraceId);
         header.IsSampled.Should().BeNull();
+    }
+
+    [Fact]
+    public void GetTraceparentHeader_ExternalPropagationContext_ReturnsHeaderFromExternalContext()
+    {
+        // Arrange
+        var traceId = SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8");
+        var spanId = SpanId.Parse("2000000000000000");
+        var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.TraceId.Returns(traceId);
+        externalContext.SpanId.Returns(spanId);
+        externalContext.IsSampled.Returns(true);
+        _fixture.Options.ExternalPropagationContext = externalContext;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var header = hub.GetTraceparentHeader();
+
+        // Assert
+        header.Should().NotBeNull();
+        header!.TraceId.Should().Be(traceId);
+        header.SpanId.Should().Be(spanId);
+        header.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CaptureEvent_ExternalPropagationContext_PrefersExternalContext()
+    {
+        // Arrange
+        var traceId = SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737");
+        var parentSpanId = SpanId.Parse("3000000000000000");
+        var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.TraceId.Returns(traceId);
+        externalContext.SpanId.Returns((SpanId?)null);
+        externalContext.ParentSpanId.Returns(parentSpanId);
+
+        var dynamicSamplingContext = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "5bd5f6d346b442dd9177dce9302fd737"},
+            {"sentry-public_key", "49d0f7386ad645858ae85020e393bef3"},
+            {"sentry-sample_rate", "1.0"}
+        }).CreateDynamicSamplingContext(_fixture.ReplaySession);
+        externalContext.GetDynamicSamplingContext(Arg.Any<SentryOptions>(), Arg.Any<IReplaySession>())
+            .Returns(dynamicSamplingContext);
+
+        _fixture.Options.ExternalPropagationContext = externalContext;
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        // Also set a scope transaction to verify external context wins over span-based context.
+        var transaction = hub.StartTransaction("foo", "bar");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var evt = new SentryEvent(new Exception("error"));
+
+        // Act
+        hub.CaptureEvent(evt);
+
+        // Assert
+        evt.Contexts.Trace.TraceId.Should().Be(traceId);
+        evt.Contexts.Trace.SpanId.Should().Be(default(SpanId));
+        evt.Contexts.Trace.ParentSpanId.Should().Be(parentSpanId);
+        evt.DynamicSamplingContext.Should().Be(dynamicSamplingContext);
     }
 
     [Fact]
