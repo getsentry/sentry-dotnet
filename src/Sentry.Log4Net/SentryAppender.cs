@@ -15,6 +15,12 @@ public class SentryAppender : AppenderSkeleton
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryAppender).Assembly.GetNameAndVersion();
 
+    private static readonly SdkVersion Sdk = new()
+    {
+        Name = SdkName,
+        Version = NameAndVersion.Version,
+    };
+
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     private readonly IHub _hub;
@@ -81,6 +87,36 @@ public class SentryAppender : AppenderSkeleton
             {
                 // ReSharper disable once NonAtomicCompoundOperator Double init guarded by the lock
                 _sdkHandle ??= _initAction(Dsn);
+            }
+        }
+
+        var options = _hub.GetSentryOptions();
+        if (options is { EnableLogs: true })
+        {
+            var level = loggingEvent.ToSentryLogLevel();
+            if (level.HasValue)
+            {
+                DateTimeOffset timestamp = new(loggingEvent.TimeStampUtc);
+                string? template = null; // cannot get format-string from `log4net.Util.SystemStringFormat` via `LoggingEvent.MessageObject`
+                var parameters = ImmutableArray<KeyValuePair<string, object>>.Empty; // cannot get arguments from `log4net.Util.SystemStringFormat` via `LoggingEvent.MessageObject`
+
+                var log = SentryLog.Create(_hub, timestamp, level.Value, loggingEvent.RenderedMessage, template, parameters);
+
+                log.SetDefaultAttributes(options, Sdk);
+                log.SetOrigin("auto.log.log4net");
+
+                foreach (var property in loggingEvent.GetProperties())
+                {
+                    if (property is DictionaryEntry { Key: string key, Value: { } value})
+                    {
+                        if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            log.SetAttribute($"property.{key}", value);
+                        }
+                    }
+                }
+
+                _hub.Logger.CaptureLog(log);
             }
         }
 
