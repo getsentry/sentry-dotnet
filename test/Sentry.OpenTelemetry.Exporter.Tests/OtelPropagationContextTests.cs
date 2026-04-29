@@ -180,4 +180,106 @@ public class OtelPropagationContextTests : ActivitySourceTests
         result.Should().NotBeNull();
         result.Items.Should().Contain(kvp => kvp.Key == "replay_id" && kvp.Value == _fixture.ActiveReplayId.ToString());
     }
+
+    [Fact]
+    public void SampleRate_NoActivity_ReturnsNull()
+    {
+        Activity.Current = null;
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRate.Should().BeNull();
+    }
+
+    [Fact]
+    public void SampleRate_ActivityWithNoTraceState_ReturnsNull()
+    {
+        using var activity = new Activity("test").Start();
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRate.Should().BeNull();
+    }
+
+    [Fact]
+    public void SampleRate_ActivityWithOtEntryButNoThKey_ReturnsNull()
+    {
+        using var activity = new Activity("test").Start();
+        activity.TraceStateString = "ot=rv:a0000000000000";
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRate.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData("8", 0.5)]           // "8" -> 0x80000000000000 / 2^56 = 0.5
+    [InlineData("4", 0.25)]          // "4" -> 0x40000000000000 / 2^56 = 0.25
+    [InlineData("0", 0.0)]           // threshold 0 = never sample
+    [InlineData("ffffffffffffff", 1.0 - 1.0 / (1UL << 56))]  // max 56-bit value
+    public void SampleRate_ActivityWithThValue_ReturnsParsedRate(string th, double expected)
+    {
+        using var activity = new Activity("test").Start();
+        activity.TraceStateString = $"ot=th:{th}";
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRate.Should().BeApproximately(expected, 1e-15);
+    }
+
+    [Fact]
+    public void SampleRate_ActivityWithMultipleVendors_ParsesOtEntry()
+    {
+        using var activity = new Activity("test").Start();
+        activity.TraceStateString = "other=value,ot=th:8,another=x";
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRate.Should().BeApproximately(0.5, 1e-15);
+    }
+
+    [Fact]
+    public void SampleRand_NoActivity_ReturnsNull()
+    {
+        Activity.Current = null;
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRand.Should().BeNull();
+    }
+
+    [Fact]
+    public void SampleRand_ActivityWithNoTraceState_ReturnsNull()
+    {
+        using var activity = new Activity("test").Start();
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRand.Should().BeNull();
+    }
+
+    [Fact]
+    public void SampleRand_ActivityWithOtEntryButNoRvKey_ReturnsNull()
+    {
+        using var activity = new Activity("test").Start();
+        activity.TraceStateString = "ot=th:8";
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRand.Should().BeNull();
+    }
+
+    [Fact]
+    public void SampleRand_ActivityWithRvValue_ReturnsParsedValue()
+    {
+        // "a" -> 0xa0000000000000 / 2^56 = 0.625
+        using var activity = new Activity("test").Start();
+        activity.TraceStateString = "ot=rv:a";
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRand.Should().BeApproximately(0.625, 1e-15);
+    }
+
+    [Fact]
+    public void SampleRand_ActivityWithBothThAndRv_ReturnsRvValue()
+    {
+        // "4" -> 0x40000000000000 / 2^56 = 0.25
+        using var activity = new Activity("test").Start();
+        activity.TraceStateString = "ot=th:8;rv:4";
+        var sut = new OtelPropagationContext();
+
+        sut.SampleRand.Should().BeApproximately(0.25, 1e-15);
+    }
 }

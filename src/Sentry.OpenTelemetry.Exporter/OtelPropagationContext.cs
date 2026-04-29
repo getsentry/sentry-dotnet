@@ -34,24 +34,51 @@ internal class OtelPropagationContext : IExternalPropagationContext
 
     public bool IsSampled => Activity.Current?.Recorded ?? false;
 
-    public double? SampleRate
+    // https://opentelemetry.io/docs/specs/otel/trace/tracestate-handling/#predefined-opentelemetry-sub-keys
+    public double? SampleRate => GetOtelTraceStateValue("th") is { } th ? ParseOtelHexFraction(th) : null;
+
+    // https://opentelemetry.io/docs/specs/otel/trace/tracestate-handling/#predefined-opentelemetry-sub-keys
+    public double? SampleRand => GetOtelTraceStateValue("rv") is { } rv ? ParseOtelHexFraction(rv) : null;
+
+    // Parses a sub-key value from the OTel vendor entry in the W3C tracestate string.
+    // The tracestate format is comma-separated vendor entries (e.g. "ot=th:8;rv:a0b1c2d3e4f5a0,other=x").
+    // The OTel entry uses semicolon-separated sub-keys with colon-delimited values (e.g. "th:8;rv:...").
+    private static string? GetOtelTraceStateValue(string subKey)
     {
-        get
-        {
-            // TODO: Try to parse this from the `th` value in the TraceStateString
-            // https://opentelemetry.io/docs/specs/otel/trace/tracestate-handling/#predefined-opentelemetry-sub-keys
+        var traceState = Activity.Current?.TraceStateString;
+        if (string.IsNullOrEmpty(traceState))
             return null;
+
+        foreach (var entry in traceState.Split(','))
+        {
+            if (!entry.StartsWith("ot=", StringComparison.Ordinal))
+                continue;
+
+            foreach (var subEntry in entry.Substring(3).Split(';'))
+            {
+                var colonIdx = subEntry.IndexOf(':');
+                if (colonIdx < 0) continue;
+                if (subEntry.Substring(0, colonIdx) == subKey)
+                    return subEntry.Substring(colonIdx + 1);
+            }
+            break; // found "ot" entry but sub-key was absent
         }
+
+        return null;
     }
 
-    public double? SampleRand
+    // Converts an OTel 56-bit hex fraction to a double in [0, 1).
+    // The value is encoded as up to 14 lowercase hex digits with trailing zeros omitted, so "8" means 0.5.
+    private static double? ParseOtelHexFraction(string hexValue)
     {
-        get
-        {
-            // TODO: Try to parse this from the `rv` value in the TraceStateString
-            // https://opentelemetry.io/docs/specs/otel/trace/tracestate-handling/#predefined-opentelemetry-sub-keys
+        if (hexValue.Length == 0 || hexValue.Length > 14)
             return null;
-        }
+
+        // Restore trailing zeros so we always have a 56-bit (14 hex digit) number, then divide by 2^56
+        if (!ulong.TryParse(hexValue.PadRight(14, '0'), NumberStyles.HexNumber, null, out var raw))
+            return null;
+
+        return raw / (double)(1UL << 56);
     }
 
     public BaggageHeader GetBaggageHeader()
