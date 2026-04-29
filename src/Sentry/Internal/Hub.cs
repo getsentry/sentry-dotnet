@@ -317,7 +317,7 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
-        if (_options.ExternalPropagationContext is {} externalPropagationContext)
+        if (_options.ExternalPropagationContext is { } externalPropagationContext)
         {
             return externalPropagationContext.GetBaggageHeader();
         }
@@ -334,7 +334,7 @@ internal class Hub : IHub, IDisposable
 
     public W3CTraceparentHeader? GetTraceparentHeader()
     {
-        if (_options.ExternalPropagationContext is {} externalPropagationContext)
+        if (_options.ExternalPropagationContext is { } externalPropagationContext)
         {
             if (externalPropagationContext.TraceId is null || externalPropagationContext.SpanId is null)
             {
@@ -609,7 +609,7 @@ internal class Hub : IHub, IDisposable
             // TODO: Consider how to resolve the DSC... maybe we should be storing an ExternalPropagationContext factory
             // on the options and using this to create an external context with the relevant DSC - e.g. when continuing
             // upstream traces.
-            if (_options.ExternalPropagationContext is {} externalPropagationContext)
+            if (_options.ExternalPropagationContext is { } externalPropagationContext)
             {
                 ApplyTraceContextToEvent(evt, externalPropagationContext);
             }

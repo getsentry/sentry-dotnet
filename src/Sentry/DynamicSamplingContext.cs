@@ -247,7 +247,7 @@ internal class DynamicSamplingContext
     public static DynamicSamplingContext? CreateFromExternalPropagationContext(
         IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
     {
-        if (propagationContext.TraceId is not {} traceId || traceId == SentryId.Empty)
+        if (propagationContext.TraceId is not { } traceId || traceId == SentryId.Empty)
         {
             return null;
         }

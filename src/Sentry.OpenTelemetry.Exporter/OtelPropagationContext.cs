@@ -50,7 +50,7 @@ internal class OtelPropagationContext : IExternalPropagationContext
     public BaggageHeader GetBaggageHeader()
     {
         var items = new Dictionary<string, string>();
-        if (Activity.Current?.Baggage is {} baggage)
+        if (Activity.Current?.Baggage is { } baggage)
         {
             foreach (var item in baggage)
             {
