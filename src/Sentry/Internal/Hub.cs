@@ -304,6 +304,7 @@ internal class Hub : IHub, IDisposable
             return new SentryTraceHeader(externalPropagationContext.TraceId.Value,
                 externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
         }
+
         if (GetSpan()?.GetTraceHeader() is { } traceHeader)
         {
             return traceHeader;
@@ -334,13 +335,8 @@ internal class Hub : IHub, IDisposable
 
     public W3CTraceparentHeader? GetTraceparentHeader()
     {
-        if (_options.ExternalPropagationContext is { } externalPropagationContext)
+        if (_options.ExternalPropagationContext is { TraceId: not null, SpanId: not null } externalPropagationContext)
         {
-            if (externalPropagationContext.TraceId is null || externalPropagationContext.SpanId is null)
-            {
-                return null;
-            }
-
             return new W3CTraceparentHeader(externalPropagationContext.TraceId.Value,
                 externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
         }
@@ -605,11 +601,9 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            // Prefer ExternalPropagationContext then linked span and then finally fall back to the propagation context
-            // TODO: Consider how to resolve the DSC... maybe we should be storing an ExternalPropagationContext factory
-            // on the options and using this to create an external context with the relevant DSC - e.g. when continuing
-            // upstream traces.
-            if (_options.ExternalPropagationContext is { } externalPropagationContext)
+            // Prefer ExternalPropagationContext then linked span, then scop span and finally fall back to the
+            // propagation context
+            if (_options.ExternalPropagationContext is { TraceId: not null } externalPropagationContext)
             {
                 ApplyTraceContextToEvent(evt, externalPropagationContext);
             }
