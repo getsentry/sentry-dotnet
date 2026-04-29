@@ -210,10 +210,10 @@ public class OtelPropagationContextTests : ActivitySourceTests
     }
 
     [Theory]
-    [InlineData("8", 0.5)]           // "8" -> 0x80000000000000 / 2^56 = 0.5
-    [InlineData("4", 0.25)]          // "4" -> 0x40000000000000 / 2^56 = 0.25
-    [InlineData("0", 0.0)]           // threshold 0 = never sample
-    [InlineData("ffffffffffffff", 1.0 - 1.0 / (1UL << 56))]  // max 56-bit value
+    [InlineData("8", 0.5)]             // th=0.5 rejection → 50% sample rate
+    [InlineData("4", 0.75)]            // th=0.25 rejection → 75% sample rate
+    [InlineData("0", 1.0)]             // th=0 (no rejection) → 100% sample rate
+    [InlineData("ffffffffffffff", 1.0 / (1UL << 56))]  // max rejection → nearly 0% sample rate
     public void SampleRate_ActivityWithThValue_ReturnsParsedRate(string th, double expected)
     {
         using var activity = new Activity("test").Start();
@@ -264,22 +264,22 @@ public class OtelPropagationContextTests : ActivitySourceTests
     [Fact]
     public void SampleRand_ActivityWithRvValue_ReturnsParsedValue()
     {
-        // "a" -> 0xa0000000000000 / 2^56 = 0.625
+        // "a" -> 0xa0000000000000 / 2^56 = 0.625; inverted → 0.375
         using var activity = new Activity("test").Start();
         activity.TraceStateString = "ot=rv:a";
         var sut = new OtelPropagationContext();
 
-        sut.SampleRand.Should().BeApproximately(0.625, 1e-15);
+        sut.SampleRand.Should().BeApproximately(0.375, 1e-15);
     }
 
     [Fact]
     public void SampleRand_ActivityWithBothThAndRv_ReturnsRvValue()
     {
-        // "4" -> 0x40000000000000 / 2^56 = 0.25
+        // "4" -> 0x40000000000000 / 2^56 = 0.25; inverted → 0.75
         using var activity = new Activity("test").Start();
         activity.TraceStateString = "ot=th:8;rv:4";
         var sut = new OtelPropagationContext();
 
-        sut.SampleRand.Should().BeApproximately(0.25, 1e-15);
+        sut.SampleRand.Should().BeApproximately(0.75, 1e-15);
     }
 }

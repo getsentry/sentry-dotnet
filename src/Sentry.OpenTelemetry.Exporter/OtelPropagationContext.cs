@@ -34,15 +34,29 @@ internal class OtelPropagationContext : IExternalPropagationContext
 
     public bool IsSampled => Activity.Current?.Recorded ?? false;
 
-    // https://opentelemetry.io/docs/specs/otel/trace/tracestate-handling/#predefined-opentelemetry-sub-keys
-    public double? SampleRate => GetOtelTraceStateValue("th") is { } th ? ParseOtelHexFraction(th) : null;
+    /// <summary>
+    /// th is a rejection threshold: T = (1 - sampling_probability) * 2^56, so we invert to get the sample rate.
+    /// </summary>
+    public double? SampleRate => GetOtelTraceStateValue("th") is { } th && ParseOtelHexFraction(th) is { } v ? 1.0 - v : null;
 
-    // https://opentelemetry.io/docs/specs/otel/trace/tracestate-handling/#predefined-opentelemetry-sub-keys
-    public double? SampleRand => GetOtelTraceStateValue("rv") is { } rv ? ParseOtelHexFraction(rv) : null;
+    /// <summary>
+    /// Parses the SampleRand from the rv (random value) OTEL equivalent from the TraceStateString
+    /// </summary>
+    public double? SampleRand =>
+        // OTel keeps a trace when rv ≥ th; Sentry keeps it when sample_rand < sample_rate.
+        // Mapping sample_rand = 1 − rv makes the decisions equivalent: 1 − rv < 1 − th ↔ rv > th
+        GetOtelTraceStateValue("rv") is { } rv && ParseOtelHexFraction(rv) is { } v ? 1.0 - v : null;
 
-    // Parses a sub-key value from the OTel vendor entry in the W3C tracestate string.
-    // The tracestate format is comma-separated vendor entries (e.g. "ot=th:8;rv:a0b1c2d3e4f5a0,other=x").
-    // The OTel entry uses semicolon-separated sub-keys with colon-delimited values (e.g. "th:8;rv:...").
+    /// <summary>
+    /// <para>
+    /// Parses a sub-key value from the OTel vendor entry in the W3C tracestate string.
+    /// The tracestate format is comma-separated vendor entries (e.g. "ot=th:8;rv:a0b1c2d3e4f5a0,other=x").
+    /// The OTel entry uses semicolon-separated sub-keys with colon-delimited values (e.g. "th:8;rv:...").
+    /// </para>
+    /// <para>
+    /// See https://opentelemetry.io/docs/specs/otel/trace/tracestate-handling/
+    /// </para>
+    /// </summary>
     private static string? GetOtelTraceStateValue(string subKey)
     {
         var traceState = Activity.Current?.TraceStateString;
@@ -68,8 +82,10 @@ internal class OtelPropagationContext : IExternalPropagationContext
         return null;
     }
 
-    // Converts an OTel 56-bit hex fraction to a double in [0, 1).
-    // The value is encoded as up to 14 lowercase hex digits with trailing zeros omitted, so "8" means 0.5.
+    /// <summary>
+    /// Converts an OTel 56-bit hex fraction to a double in [0, 1).
+    /// The value is encoded as up to 14 lowercase hex digits with trailing zeros omitted, so "8" means 0.5.
+    /// </summary>
     private static double? ParseOtelHexFraction(string hexValue)
     {
         if (hexValue.Length == 0 || hexValue.Length > 14)
