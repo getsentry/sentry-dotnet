@@ -11,18 +11,9 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(PreviousTfm)'">
-    <!-- Use the previous TFM to test netstandard2.1 -->
-    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry.Exporter\Sentry.OpenTelemetry.Exporter.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' != '$(PreviousTfm)'">
-    <!-- Use default target framework resolution for everything else -->
-    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry.Exporter\Sentry.OpenTelemetry.Exporter.csproj" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry.Exporter\Sentry.OpenTelemetry.Exporter.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
