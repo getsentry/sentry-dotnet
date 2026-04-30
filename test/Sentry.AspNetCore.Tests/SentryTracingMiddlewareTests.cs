@@ -840,7 +840,7 @@ public class SentryTracingMiddlewareTests
     }
 
     [Fact]
-    public async Task Transaction_AlwaysCallTransactionNameProviderWithNullReturn_FallsBackToUrlPath()
+    public async Task Transaction_AlwaysCallTransactionNameProviderWithNullReturn_PreservesRouteName()
     {
         // Arrange
         SentryTransaction transaction = null;
@@ -879,7 +879,7 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         transaction.Should().NotBeNull();
-        transaction.Name.Should().Be("GET /person/13");
-        transaction.NameSource.Should().Be(TransactionNameSource.Url);
+        transaction.Name.Should().Be("GET /person/{id}");
+        transaction.NameSource.Should().Be(TransactionNameSource.Route);
     }
 }

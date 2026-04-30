@@ -70,10 +70,9 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// <remarks>
     /// When <c>false</c> (default), the provider is only invoked as a fallback for unresolved routes —
     /// matching the legacy behaviour. When <c>true</c>, the provider is invoked for every request
-    /// after routing; a non-empty return value sets the transaction name. If the provider returns
-    /// <c>null</c> or empty for a routed request, the name falls back to the URL path (the route
-    /// template is <b>not</b> retained); callers that want to preserve the route template should
-    /// return it themselves from the provider.
+    /// after routing; a non-empty return value overrides the route-derived name. If the provider
+    /// returns <c>null</c> or <see cref="string.Empty"/>, the routed name is preserved (or the URL-path
+    /// fallback applies when no route was resolved).
     /// </remarks>
     public bool AlwaysCallTransactionNameProvider { get; set; }
 
