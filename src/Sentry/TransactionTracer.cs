@@ -268,6 +268,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
             {
                 _hasFinished = true;
                 _idleTimer?.Dispose();
+                EndTimestamp = _stopwatch.CurrentDateTimeOffset;
                 shouldDiscard = true;
             }
             else
@@ -279,7 +280,6 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         if (shouldDiscard)
         {
             _options?.LogDebug("Idle transaction '{0}' has no child spans. Discarding.", SpanId);
-            EndTimestamp = _stopwatch.CurrentDateTimeOffset; // Prevent MauiEventsBinder from reusing
             _hub.ConfigureScope(static (scope, tracer) => scope.ResetTransaction(tracer), this);
             return;
         }
