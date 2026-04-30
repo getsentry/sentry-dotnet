@@ -238,6 +238,27 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
+    public void Button_Pressed_NoPreviousTransaction_PreservesPropagationContext()
+    {
+        // Regression: when no UI tx is active, StartUiTransaction must not call
+        // ResetTransaction(null) — that would wipe the existing PropagationContext
+        // (e.g., one propagated from app startup) and break distributed trace continuity.
+        // Arrange
+        var button = new Button { AutomationId = "my-btn" };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(Substitute.For<ITransactionTracer>());
+
+        var initialTraceId = _fixture.Scope.PropagationContext.TraceId;
+
+        // Act - first ever click; CurrentUiTx is null
+        button.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+
+        // Assert - propagation context (and its TraceId) unchanged
+        Assert.Equal(initialTraceId, _fixture.Scope.PropagationContext.TraceId);
+    }
+
+    [Fact]
     public void Button_Pressed_ManualTransactionOnScope_NotBoundToScope()
     {
         // Arrange
