@@ -348,9 +348,15 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     internal void ChildSpanFinished()
     {
+        // Fast path: only idle-timeout transactions need to react to child finishes.
+        // _idleTimeout is readonly, so this check is safe outside the lock.
+        if (!_idleTimeout.HasValue)
+        {
+            return;
+        }
         lock (_finishLock)
         {
-            if (!_idleTimeout.HasValue || _hasFinished)
+            if (_hasFinished)
             {
                 return;
             }
