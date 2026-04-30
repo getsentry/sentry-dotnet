@@ -4,8 +4,17 @@ on:
   # Run every day.
   schedule:
     - cron: "0 3 * * *"
+  # And on every PR merge so we get the updated dependencies ASAP, and to make sure the changelog doesn't conflict.
+  push:
+    branches:
+      - main
   # Allow a manual trigger to be able to run the update when there are new dependencies or after a PR merge to resolve CHANGELOG conflicts.
   workflow_dispatch:
+
+permissions:
+  contents: write      # To modify files and create commits
+  pull-requests: write # To create and update pull requests
+  actions: write       # To cancel previous workflow runs
 
 jobs:
   deps:
