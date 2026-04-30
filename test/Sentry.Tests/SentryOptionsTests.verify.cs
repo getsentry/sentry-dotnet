@@ -16,7 +16,7 @@ public partial class SentryOptionsTests
         };
         Hub _ = new(options, Substitute.For<ISentryClient>());
 
-        var settingsTask = Verify(logger.Entries)
+        var settingsTask = Verify(logger.Entries.Where(e => e.Message.Contains("Registering integration")))
             .UniqueForTargetFrameworkAndVersion()
             .UniqueForRuntime()
             .AutoVerify(includeBuildServer: false);

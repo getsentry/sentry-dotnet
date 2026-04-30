@@ -220,6 +220,11 @@ public class SentryOptions
             }
 #endif
 
+            if ((_defaultIntegrations & DefaultIntegrations.GlobalRootScopeIntegration) != 0)
+            {
+                yield return new GlobalRootScopeIntegration();
+            }
+
             foreach (var integration in _integrations)
             {
                 yield return integration;
@@ -1366,6 +1371,7 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
                                | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
 #endif
+                               | DefaultIntegrations.GlobalRootScopeIntegration
                                ;
 
 #if ANDROID
@@ -1833,6 +1839,7 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
         SystemDiagnosticsMetricsIntegration = 1 << 7,
 #endif
+        GlobalRootScopeIntegration = 1 << 8,
     }
 
     internal void SetupLogging()
