@@ -93,5 +93,7 @@ internal class NoOpTransaction : NoOpSpan, ITransactionTracer
 
     public ISpan? GetLastActiveSpan() => default;
 
+    public void ResetIdleTimeout() { }
+
     public void AddBreadcrumb(Breadcrumb breadcrumb) { }
 }

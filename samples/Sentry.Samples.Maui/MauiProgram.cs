@@ -43,6 +43,9 @@ public static class MauiProgram
                 // capture a certain percentage)
                 options.TracesSampleRate = 1.0F;
 
+                // Automatically create traces for navigation and user-interaction events
+                options.EnableAutoTransactions = true;
+
                 // Automatically create traces for async relay commands in the MVVM Community Toolkit
                 options.AddCommunityToolkitIntegration();
 
@@ -82,6 +85,7 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                fonts.AddFont("fa-solid-900.ttf", "FontAwesomeSolid");
             });
 
         // Configure Logging, including Structured Logs sent to Sentry (see 'EnableLogs = true')

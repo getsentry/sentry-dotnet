@@ -210,6 +210,11 @@ static partial class SentrySdk
 
     internal static IDisposable UseHub(IHub hub)
     {
+        if (hub is HubAdapter)
+        {
+            hub.GetSentryOptions()?.LogError("Attempting to initianise the SentrySdk with a HubAdapter can lead to infinite recursion. Initialisation cancelled.");
+            return DisabledHub.Instance;
+        }
         var oldHub = Interlocked.Exchange(ref CurrentHub, hub);
         (oldHub as IDisposable)?.Dispose();
         return new DisposeHandle(hub);
@@ -662,6 +667,16 @@ static partial class SentrySdk
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
         => CurrentHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext);
+
+    /// <summary>
+    /// Starts a transaction that will automatically finish after <paramref name="idleTimeout"/> if not
+    /// finished explicitly first.
+    /// </summary>
+    [DebuggerStepThrough]
+    internal static ITransactionTracer StartTransaction(ITransactionContext context, TimeSpan? idleTimeout)
+        => CurrentHub is IHubInternal internalHub
+            ? internalHub.StartTransaction(context, idleTimeout)
+            : CurrentHub.StartTransaction(context);
 
     /// <summary>
     /// Starts a transaction.
