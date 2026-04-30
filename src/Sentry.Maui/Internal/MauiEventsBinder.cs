@@ -414,7 +414,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             CurrentNavSpan = null;
         }
 
-        if (CurrentUiTx is  not null)
+        if (CurrentUiTx is not null)
         {
             // Idle timer will clean up any previous UI transaction, but we don't want any more child spans on it
             _hub.ConfigureScope(scope => scope.ResetTransaction(CurrentUiTx));
