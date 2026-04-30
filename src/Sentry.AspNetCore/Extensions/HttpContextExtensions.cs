@@ -27,8 +27,11 @@ internal static class HttpContextExtensions
                 : null;
     }
 
-    internal static string? TryGetCustomTransactionName(this HttpContext context) =>
-        context.Features.Get<TransactionNameProvider>()?.Invoke(context);
+    internal static string? TryGetCustomTransactionName(this HttpContext context)
+    {
+        var customName = context.Features.Get<TransactionNameProvider>()?.Invoke(context);
+        return !string.IsNullOrEmpty(customName) ? customName : null;
+    }
 
     public static string? TryGetTransactionName(this HttpContext context)
     {
