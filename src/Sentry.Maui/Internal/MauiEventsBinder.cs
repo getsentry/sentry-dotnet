@@ -407,17 +407,15 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     internal void StartUiTransaction(string name)
     {
-        // Each UI interaction is always a separate transaction... we don't want three separate button clicks to be
-        // grouped into a single transaction.
+        // Each UI interaction is a separate tx... we don't want separate button clicks grouped as a single tx.
         if (CurrentNavSpan is { IsFinished: false })
         {
             CurrentNavSpan.Finish(SpanStatus.Cancelled);
             CurrentNavSpan = null;
         }
-        if (CurrentUiTx is { IsFinished: false, Spans.Count: > 0 })
-        {
-            CurrentUiTx.Finish(SpanStatus.Ok);
-        }
+
+        // Idle timer will clean up any previous UI tx but we don't want any more child spans on it
+        _hub.ConfigureScope(scope => scope.ResetTransaction(CurrentUiTx));
         CurrentUiTx = null;
 
         var context = new TransactionContext(name, UserInteractionClickOp)

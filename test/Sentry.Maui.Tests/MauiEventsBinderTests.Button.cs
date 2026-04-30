@@ -187,15 +187,16 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Button_Pressed_DifferentButton_ChildlessPrevious_NotExplicitlyFinished()
+    public void Button_Pressed_DifferentButton_PreviousNotExplicitlyFinished()
     {
+        // The previous UI tx is left for its own idle timer to finalize (capture if it has
+        // child spans, discard if not). We don't duplicate that logic here.
         // Arrange
         var firstButton = new Button { AutomationId = "first" };
         var secondButton = new Button { AutomationId = "second" };
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(firstButton));
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(secondButton));
         var firstTransaction = Substitute.For<ITransactionTracer>();
-        firstTransaction.Name.Returns("first");
         firstTransaction.IsFinished.Returns(false);
         var secondTransaction = Substitute.For<ITransactionTracer>();
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
@@ -205,34 +206,35 @@ public partial class MauiEventsBinderTests
         firstButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
         secondButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
-        // Assert - childless first tx not explicitly finished; idle timeout will discard
+        // Assert
         firstTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
         _fixture.Hub.Received(2).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
     }
 
     [Fact]
-    public void Button_Pressed_DifferentButton_PreviousWithChildren_FinishesPrevious()
+    public void Button_Pressed_DifferentButton_ScopeReplacedWithNewTransaction()
     {
+        // Regression: a stale previous tx was left on scope, causing later navigation
+        // spans to attach to the wrong button click.
         // Arrange
         var firstButton = new Button { AutomationId = "first" };
         var secondButton = new Button { AutomationId = "second" };
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(firstButton));
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(secondButton));
         var firstTransaction = Substitute.For<ITransactionTracer>();
-        firstTransaction.Name.Returns("first");
         firstTransaction.IsFinished.Returns(false);
-        firstTransaction.Spans.Returns(new[] { Substitute.For<ISpan>() }); // has a child span
         var secondTransaction = Substitute.For<ITransactionTracer>();
+        secondTransaction.IsFinished.Returns(false);
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(firstTransaction, secondTransaction);
 
         // Act
         firstButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
+        Assert.Same(firstTransaction, _fixture.Scope.Transaction); // sanity
         secondButton.RaiseEvent(nameof(Button.Pressed), EventArgs.Empty);
 
-        // Assert - first tx has children, so it IS explicitly finished
-        firstTransaction.Received(1).Finish(SpanStatus.Ok);
-        _fixture.Hub.Received(2).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
+        // Assert - scope swapped from stale tx1 to fresh tx2
+        Assert.Same(secondTransaction, _fixture.Scope.Transaction);
     }
 
     [Fact]
