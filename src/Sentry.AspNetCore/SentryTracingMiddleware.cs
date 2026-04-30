@@ -186,7 +186,7 @@ internal class SentryTracingMiddleware
                     var method = context.Request.Method.ToUpperInvariant();
 
                     // If we've set a TransactionNameProvider, use that here
-                    if (customName.Value is {} customTransactionName)
+                    if (customName.Value is { } customTransactionName)
                     {
                         transaction.Name = $"{method} {customTransactionName}";
                         tracer.NameSource = TransactionNameSource.Custom;
