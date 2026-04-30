@@ -67,6 +67,14 @@ public static partial class SentrySdk
 
             var signalHandlerStrategy = options.Native.ExperimentalOptions.SignalHandlerStrategy;
             if (signalHandlerStrategy == SignalHandlerStrategy.ChainAtStart
+                && Type.GetType("Mono.RuntimeStructs") == null)
+            {
+                options.LogInfo(
+                    "Using SignalHandlerStrategy.Default on .NET CoreCLR. " +
+                    "SignalHandlerStrategy.ChainAtStart is only required on the Mono runtime.");
+                signalHandlerStrategy = SignalHandlerStrategy.Default;
+            }
+            if (signalHandlerStrategy == SignalHandlerStrategy.ChainAtStart
                 && System.Environment.Version is { Major: 10, Minor: 0, Build: < 4 })
             {
                 options.LogWarning(
