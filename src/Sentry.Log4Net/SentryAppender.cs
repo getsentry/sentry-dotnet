@@ -5,7 +5,7 @@ namespace Sentry.Log4Net;
 /// <summary>
 /// Sentry appender for log4net.
 /// </summary>
-public class SentryAppender : AppenderSkeleton
+public partial class SentryAppender : AppenderSkeleton
 {
     private readonly Func<string, IDisposable> _initAction;
     private volatile IDisposable? _sdkHandle;
@@ -14,6 +14,12 @@ public class SentryAppender : AppenderSkeleton
 
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryAppender).Assembly.GetNameAndVersion();
+
+    private static readonly SdkVersion Sdk = new()
+    {
+        Name = SdkName,
+        Version = NameAndVersion.Version,
+    };
 
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
@@ -82,6 +88,12 @@ public class SentryAppender : AppenderSkeleton
                 // ReSharper disable once NonAtomicCompoundOperator Double init guarded by the lock
                 _sdkHandle ??= _initAction(Dsn);
             }
+        }
+
+        var options = _hub.GetSentryOptions();
+        if (options is { EnableLogs: true })
+        {
+            CaptureStructuredLog(_hub, options, loggingEvent);
         }
 
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;

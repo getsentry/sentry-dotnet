@@ -26,4 +26,10 @@
     <InternalsVisibleTo Include="Sentry.Log4Net.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="SentryAppender.Structured.cs">
+      <DependentUpon>SentryAppender.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
