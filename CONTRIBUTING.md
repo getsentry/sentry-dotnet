@@ -22,6 +22,24 @@ For a big feature it's advised to raise an issue to discuss it first.
 * To quickly get up and running, you can just run `dotnet build SentryNoMobile.slnf` (you're skipping the mobile targets)
 * To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
 
+## Git Hooks (Optional but Recommended)
+
+To automatically verify code formatting before committing, you can set up a pre-commit hook:
+
+```bash
+./scripts/setup-hooks.sh
+```
+
+This configures git to run `dotnet format --verify-no-changes` before each commit. If formatting issues are found, the commit will be prevented and you'll need to run:
+
+```bash
+dotnet format Sentry.slnx --no-restore --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs
+```
+
+Then stage the formatting changes and commit again. This helps catch formatting issues early and reduces CI failures.
+
+**Note:** You can bypass the hook for a specific commit using `git commit --no-verify` if needed.
+
 ## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
