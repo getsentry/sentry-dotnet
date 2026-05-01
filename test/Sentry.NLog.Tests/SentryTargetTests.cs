@@ -2,7 +2,7 @@ using Target = NLog.Targets.Target;
 
 namespace Sentry.NLog.Tests;
 
-public class SentryTargetTests
+public partial class SentryTargetTests
 {
     private const string DefaultMessage = "This is a logged message";
 
@@ -590,6 +590,30 @@ public class SentryTargetTests
         const string expected = "Debug";
         target.MinimumBreadcrumbLevel = expected;
         Assert.Equal(expected, target.MinimumBreadcrumbLevel);
+    }
+
+    [Fact]
+    public void EnableLogs_Default_False()
+    {
+        var target = (SentryTarget)_fixture.GetTarget();
+        Assert.False(target.EnableLogs);
+    }
+
+    [Fact]
+    public void EnableLogs_SetInOptions_ReturnsValue()
+    {
+        _fixture.Options.EnableLogs = true;
+        var target = (SentryTarget)_fixture.GetTarget();
+        Assert.True(target.EnableLogs);
+    }
+
+    [Fact]
+    public void EnableLogs_SetterReplacesOptions()
+    {
+        _fixture.Options.EnableLogs = false;
+        var target = (SentryTarget)_fixture.GetTarget();
+        target.EnableLogs = true;
+        Assert.True(target.EnableLogs);
     }
 
     [Fact]

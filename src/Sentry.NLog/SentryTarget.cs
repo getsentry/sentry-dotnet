@@ -4,7 +4,7 @@ namespace Sentry.NLog;
 /// Sentry NLog Target.
 /// </summary>
 [Target("Sentry")]
-public sealed class SentryTarget : TargetWithContext
+public sealed partial class SentryTarget : TargetWithContext
 {
     // For testing:
     internal Func<IHub> HubAccessor { get; }
@@ -13,6 +13,12 @@ public sealed class SentryTarget : TargetWithContext
     private IDisposable? _sdkDisposable;
 
     internal static readonly SdkVersion NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
+
+    private static readonly SdkVersion Sdk = new()
+    {
+        Name = Constants.SdkName,
+        Version = NameAndVersion.Version,
+    };
 
     internal static readonly string AdditionalGroupingKeyProperty = "AdditionalGroupingKey";
 
@@ -127,6 +133,15 @@ public sealed class SentryTarget : TargetWithContext
     {
         get => Options.MinimumBreadcrumbLevel?.ToString() ?? LogLevel.Off.ToString();
         set => Options.MinimumBreadcrumbLevel = LogLevel.FromString(value);
+    }
+
+    /// <summary>
+    /// Controls whether logs are generated and sent.
+    /// </summary>
+    public bool EnableLogs
+    {
+        get => Options.EnableLogs;
+        set => Options.EnableLogs = value;
     }
 
     /// <summary>
@@ -330,6 +345,11 @@ public sealed class SentryTarget : TargetWithContext
         var exception = logEvent.Exception;
         var shouldOnlyLogExceptions = exception == null && IgnoreEventsWithNoException;
         var shouldIncludeProperties = ContextProperties?.Count > 0 || ShouldIncludeProperties(logEvent);
+
+        if (Options.EnableLogs)
+        {
+            CaptureStructuredLog(hub, Options, logEvent);
+        }
 
         if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
         {
