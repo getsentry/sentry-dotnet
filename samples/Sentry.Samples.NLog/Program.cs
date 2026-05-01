@@ -115,6 +115,7 @@ public static class Program
                 options.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
 
                 options.AttachStacktrace = true;
+                options.EnableLogs = true; // send structured logs to Sentry
                 options.SendDefaultPii = true; // Send Personal Identifiable information like the username of the user logged in to the device
 
                 options.IncludeEventDataOnBreadcrumbs = true; // Optionally include event properties with breadcrumbs
