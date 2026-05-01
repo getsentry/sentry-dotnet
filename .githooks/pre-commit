@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+
+echo "🔍 Checking code formatting..."
+
+# Run dotnet format in verify mode (check only, don't modify)
+# This matches the CI command exactly
+if dotnet format Sentry.slnx --verify-no-changes --no-restore \
+  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs 2>&1 | grep -q "formatted"; then
+
+  echo ""
+  echo "❌ Code formatting issues found!"
+  echo ""
+  echo "Please run the following command to fix formatting:"
+  echo ""
+  echo "  dotnet format Sentry.slnx --no-restore --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs"
+  echo ""
+  echo "Then stage the changes and commit again:"
+  echo ""
+  echo "  git add -u"
+  echo "  git commit"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Code formatting looks good!"
+exit 0
