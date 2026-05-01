@@ -12,7 +12,7 @@ namespace Sentry;
 /// Sentry .NET SDK Docs: <see href="https://docs.sentry.io/platforms/dotnet/logs/"/>.
 /// </remarks>
 [DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
-public sealed class SentryLog
+public sealed partial class SentryLog
 {
     private readonly Dictionary<string, SentryAttribute> _attributes;
 
