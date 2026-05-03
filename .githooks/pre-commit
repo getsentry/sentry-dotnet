@@ -4,9 +4,9 @@ set -e
 echo "🔍 Checking code formatting..."
 
 # Run dotnet format in verify mode (check only, don't modify)
-# This matches the CI command exactly
-if dotnet format Sentry.slnx --verify-no-changes --no-restore \
-  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs 2>&1 | grep -q "formatted"; then
+# --verify-no-changes returns non-zero when formatting is needed
+if ! dotnet format Sentry.slnx --verify-no-changes --no-restore \
+  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs > /dev/null 2>&1; then
 
   echo ""
   echo "❌ Code formatting issues found!"
