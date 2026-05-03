@@ -3,11 +3,28 @@ set -e
 
 echo "🔍 Checking code formatting..."
 
-# Run dotnet format in verify mode (check only, don't modify)
-# --verify-no-changes returns non-zero when formatting is needed
-if ! dotnet format Sentry.slnx --verify-no-changes --no-restore \
-  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs > /dev/null 2>&1; then
+# Stash unstaged changes (keep staged changes in working tree)
+# This ensures we only check formatting on what's being committed
+STASH_NAME="pre-commit-$(date +%s)"
+git stash push --keep-index --quiet --message "$STASH_NAME" || true
 
+# Run dotnet format (matches CI command exactly)
+dotnet format Sentry.slnx --no-restore \
+  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs > /dev/null 2>&1
+
+# Check if dotnet format made any changes
+FORMAT_CHANGED=false
+if ! git diff --quiet; then
+  FORMAT_CHANGED=true
+fi
+
+# Restore unstaged changes
+if git stash list | grep -q "$STASH_NAME"; then
+  git stash pop --quiet 2>/dev/null || true
+fi
+
+# If formatting changes were detected, fail the commit
+if [ "$FORMAT_CHANGED" = true ]; then
   echo ""
   echo "❌ Code formatting issues found!"
   echo ""
