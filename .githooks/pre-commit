@@ -10,8 +10,12 @@ restore_stash() {
   if git stash list | grep -q "$STASH_NAME"; then
     git stash pop 2>/dev/null || {
       echo ""
-      echo "⚠️  Your unstaged changes could not be restored automatically (stash conflict)."
-      echo "   Run 'git stash pop' to restore them manually."
+      echo "⚠️  Your unstaged changes could not be restored automatically."
+      echo "   dotnet format modified lines that overlap with your unstaged edits."
+      echo "   Resolve the conflict markers in the affected files, then run:"
+      echo ""
+      echo "     git stash drop"
+      echo ""
     }
   fi
 }
