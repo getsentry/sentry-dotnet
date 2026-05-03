@@ -3,9 +3,22 @@ set -e
 
 echo "🔍 Checking code formatting..."
 
+STASH_NAME="pre-commit-$(date +%s)"
+
+# Runs on any exit — ensures stashed changes are always restored
+restore_stash() {
+  if git stash list | grep -q "$STASH_NAME"; then
+    git stash pop 2>/dev/null || {
+      echo ""
+      echo "⚠️  Your unstaged changes could not be restored automatically (stash conflict)."
+      echo "   Run 'git stash pop' to restore them manually."
+    }
+  fi
+}
+trap restore_stash EXIT
+
 # Stash unstaged changes (keep staged changes in working tree)
 # This ensures we only check formatting on what's being committed
-STASH_NAME="pre-commit-$(date +%s)"
 git stash push --keep-index --quiet --message "$STASH_NAME" || true
 
 # Run dotnet format (matches CI command exactly)
@@ -16,11 +29,6 @@ dotnet format Sentry.slnx --no-restore \
 FORMAT_CHANGED=false
 if ! git diff --quiet; then
   FORMAT_CHANGED=true
-fi
-
-# Restore unstaged changes
-if git stash list | grep -q "$STASH_NAME"; then
-  git stash pop --quiet 2>/dev/null || true
 fi
 
 # If formatting changes were detected, fail the commit
