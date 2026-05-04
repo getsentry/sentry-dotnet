@@ -11,7 +11,7 @@ namespace OpenTelemetry.Trace;
 /// </summary>
 public static class SentryTracerProviderBuilderExtensions
 {
-    internal const string MissingDsnWarning = "Invalid DSN passed to AddSentryOtlp";
+    internal const string MissingDsnWarning = $"Invalid DSN passed to {nameof(AddSentryOtlpExporter)}.";
 
     /// <summary>
     /// <para>

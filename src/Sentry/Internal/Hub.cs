@@ -601,7 +601,7 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            // Prefer ExternalPropagationContext then linked span, then scop span and finally fall back to the
+            // Prefer ExternalPropagationContext then linked span, then scope span and finally fall back to the
             // propagation context
             if (_options.ExternalPropagationContext is { TraceId: not null } externalPropagationContext)
             {
