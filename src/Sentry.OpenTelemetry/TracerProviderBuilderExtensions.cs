@@ -51,8 +51,7 @@ public static class TracerProviderBuilderExtensions
             var options = hub.GetSentryOptions();
             if (options is { IsPerformanceMonitoringEnabled: false })
             {
-                var logger = services.GetService<IDiagnosticLogger>();
-                logger?.LogInfo(
+                options.DiagnosticLogger?.LogInfo(
                     "Sentry performance monitoring is disabled (TracesSampleRate is 0 and no TracesSampler " +
                     "is configured). Skipping SentrySpanProcessor registration to avoid memory overhead " +
                     "from unsampled transactions.");
@@ -62,8 +61,8 @@ public static class TracerProviderBuilderExtensions
             return new SentrySpanProcessor(hub, enrichers);
         }
 
-        var disabledLogger = services.GetService<IDiagnosticLogger>();
-        disabledLogger?.LogWarning("Sentry is disabled so no OpenTelemetry spans will be sent to Sentry.");
+        var logger = services.GetService<IDiagnosticLogger>();
+        logger?.LogWarning("Sentry is disabled so no OpenTelemetry spans will be sent to Sentry.");
         return DisabledSpanProcessor.Instance;
     }
 }
