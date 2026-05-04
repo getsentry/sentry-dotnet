@@ -140,8 +140,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             spanTracer.StartTimestamp = data.StartTimeUtc;
             // Used to filter out spans that are not recorded when finishing a transaction.
             spanTracer.SetFused(data);
-            // Treat a GC'd activity (null) as filtered — if the activity is gone, we don't want the span in the trace.
-            spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is null or { IsAllDataRequested: false, Recorded: false };
+            spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
         }
         _map[data.SpanId] = span;
     }
