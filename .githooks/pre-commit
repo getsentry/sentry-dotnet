@@ -3,7 +3,15 @@ set -e
 
 echo "🔍 Checking code formatting..."
 
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' | tr '\n' ' ')
+
+if [ -z "$STAGED" ]; then
+  echo "✅ No C# files staged."
+  exit 0
+fi
+
 dotnet format Sentry.slnx --no-restore \
+  --include $STAGED \
   --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs > /dev/null 2>&1
 
 if ! git diff --quiet; then
