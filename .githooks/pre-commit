@@ -3,15 +3,18 @@ set -e
 
 echo "🔍 Checking code formatting..."
 
-STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' | tr '\n' ' ') || true
+INCLUDE_ARGS=()
+while IFS= read -r f; do
+  INCLUDE_ARGS+=(--include "$f")
+done < <(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' || true)
 
-if [ -z "$STAGED" ]; then
+if [ ${#INCLUDE_ARGS[@]} -eq 0 ]; then
   echo "✅ No C# files staged."
   exit 0
 fi
 
 dotnet format Sentry.slnx --no-restore \
-  --include $STAGED \
+  "${INCLUDE_ARGS[@]}" \
   --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs > /dev/null 2>&1
 
 if ! git diff --quiet; then
