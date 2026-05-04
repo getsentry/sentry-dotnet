@@ -134,10 +134,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         };
 
         var span = parentSpan.StartChild(context);
-        // Fuse the Activity on all span types so PruneFilteredSpans can distinguish
-        // unfinished-but-live spans (Recorded: true) from filtered ones (Recorded: false).
-        // Without this, non-SpanTracer spans (e.g. UnsampledSpan) would have a null fused
-        // Activity and be incorrectly pruned before OnEnd fires.
+        // Used to filter out spans that are not recorded when finishing a transaction
         span.SetFused(data);
         if (span is SpanTracer spanTracer)
         {
