@@ -110,6 +110,13 @@ public class DevCommands
         return RunStepAsync("git config core.hooksPath", "git", "config core.hooksPath .githooks", options.DryRun);
     }
 
+    [Command("remove-hooks", Description = "Restore default git hooks behaviour (stops using .githooks/).")]
+    public Task<int> RemoveHooksAsync(GlobalOptions options = default!)
+    {
+        Console.WriteLine("[dev] Restoring default git hooks path");
+        return RunStepAsync("git config --unset core.hooksPath", "git", "config --unset core.hooksPath", options.DryRun);
+    }
+
     [Command("nrest", Description = "Restore the default CI solution.")]
     public Task<int> SolutionRestoreAsync(
         [Argument("solution", Description = "Solution file to restore. Defaults to platform-specific CI solution if omitted.")] string? solution = null,
