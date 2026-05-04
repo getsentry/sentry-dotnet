@@ -125,6 +125,40 @@ public class SentrySerilogSinkExtensionsTests
         Assert.Equal(_fixture.MinimumBreadcrumbLevel, sut.MinimumBreadcrumbLevel);
     }
 
+    [Fact]
+    public void Sentry_WithRestrictedToMinimumLevel_FiltersLogsBelow()
+    {
+        using var logger = new LoggerConfiguration()
+            .WriteTo.Sentry(o =>
+            {
+                o.InitializeSdk = false;
+                o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
+                o.MinimumEventLevel = LogEventLevel.Debug;
+            }, restrictedToMinimumLevel: LogEventLevel.Error)
+            .CreateLogger();
+
+        // Below restrictedToMinimumLevel — should not reach the sink
+        logger.Warning("This should be filtered by Serilog before reaching the sink");
+
+        // At or above restrictedToMinimumLevel — should reach the sink
+        logger.Error("This should reach the sink");
+    }
+
+    [Fact]
+    public void Sentry_WithRestrictedToMinimumLevel_NoDsn_ParameterIsAccepted()
+    {
+        // Verify the no-DSN overload accepts restrictedToMinimumLevel without throwing
+        var ex = Record.Exception(() =>
+            new LoggerConfiguration()
+                .WriteTo.Sentry(
+                    minimumBreadcrumbLevel: LogEventLevel.Verbose,
+                    minimumEventLevel: LogEventLevel.Error,
+                    restrictedToMinimumLevel: LogEventLevel.Warning)
+                .CreateLogger());
+
+        Assert.Null(ex);
+    }
+
     private static void AssertEqualDeep(object expected, object actual)
     {
         var serializedLeftObject = JsonSerializer.Serialize(expected);
