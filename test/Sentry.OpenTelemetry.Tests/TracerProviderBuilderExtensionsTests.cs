@@ -15,7 +15,15 @@ public class TracerProviderBuilderExtensionsTests
         public SentryOptions GetOptions(string dsn = "https://123@o456.ingest.sentry.io/789") => new()
         {
             Instrumenter = Instrumenter.OpenTelemetry,
-            Dsn = dsn
+            Dsn = dsn,
+            TracesSampleRate = 1.0
+        };
+
+        public SentryOptions GetOptionsWithTracingDisabled(string dsn = "https://123@o456.ingest.sentry.io/789") => new()
+        {
+            Instrumenter = Instrumenter.OpenTelemetry,
+            Dsn = dsn,
+            TracesSampleRate = 0.0
         };
 
         public IServiceProvider GetServiceProvider() => ServiceProvider;
@@ -90,5 +98,24 @@ public class TracerProviderBuilderExtensionsTests
 
         // Assert
         result.Should().BeOfType<DisabledSpanProcessor>(); // FluentAssertions
+    }
+
+    [Fact]
+    public void ImplementationFactory_WithTracingDisabled_ReturnsDisabledSpanProcessor()
+    {
+        // Arrange
+        var fixture = new Fixture();
+        SentryClientExtensions.SentryOptionsForTestingOnly = fixture.GetOptionsWithTracingDisabled();
+        fixture.Hub.IsEnabled.Returns(true);
+        var services = fixture.GetServiceProvider();
+
+        // Act
+        var result = TracerProviderBuilderExtensions.ImplementationFactory(services);
+
+        // Assert
+        // When TracesSampleRate = 0 and no TracesSampler is configured, registering SentrySpanProcessor
+        // would create UnsampledTransaction + UnsampledSpan objects per Activity that accumulate in
+        // ThreadLocal storage and are never released, causing a managed memory leak.
+        result.Should().BeOfType<DisabledSpanProcessor>();
     }
 }
