@@ -3,7 +3,7 @@ set -e
 
 echo "🔍 Checking code formatting..."
 
-STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' | tr '\n' ' ')
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' | tr '\n' ' ') || true
 
 if [ -z "$STAGED" ]; then
   echo "✅ No C# files staged."
