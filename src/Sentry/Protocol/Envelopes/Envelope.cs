@@ -337,7 +337,10 @@ public sealed class Envelope : ISerializable, IDisposable
     /// <summary>
     /// Creates an envelope that contains a single transaction.
     /// </summary>
-    public static Envelope FromTransaction(SentryTransaction transaction)
+    public static Envelope FromTransaction(
+        SentryTransaction transaction,
+        IDiagnosticLogger? logger = null,
+        IReadOnlyCollection<SentryAttachment>? attachments = null)
     {
         var eventId = transaction.EventId;
         var header = CreateHeader(eventId, transaction.DynamicSamplingContext);
@@ -355,6 +358,20 @@ public sealed class Envelope : ISerializable, IDisposable
             if (profiler.Collect(transaction) is { } profileInfo)
             {
                 items.Add(EnvelopeItem.FromProfileInfo(profileInfo));
+            }
+        }
+
+        if (attachments is not null)
+        {
+            foreach (var attachment in attachments)
+            {
+                if (attachment.IsNull())
+                {
+                    logger?.LogWarning("Encountered a null attachment.  Skipping.");
+                    continue;
+                }
+
+                AddEnvelopeItemFromAttachment(items, attachment, logger);
             }
         }
 
