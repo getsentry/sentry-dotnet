@@ -140,7 +140,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             spanTracer.StartTimestamp = data.StartTimeUtc;
             // Used to filter out spans that are not recorded when finishing a transaction.
             spanTracer.SetFused(data);
-            spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+            // Treat a GC'd activity (null) as filtered — if the activity is gone, we don't want the span in the trace.
+            spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is null or { IsAllDataRequested: false, Recorded: false };
         }
         _map[data.SpanId] = span;
     }
@@ -302,7 +303,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             var (spanId, span) = mappedItem;
             var activity = span.GetFused<Activity>();
-            if (activity is { Recorded: false, IsAllDataRequested: false })
+            // Also prune when the activity has been GC'd (weak ref returns null): the activity is gone, so it
+            // can never call OnEnd, and the span will never be removed otherwise — causing a memory leak.
+            if (activity is null or { Recorded: false, IsAllDataRequested: false })
             {
                 _map.TryRemove(spanId, out _);
             }

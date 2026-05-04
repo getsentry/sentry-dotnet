@@ -920,6 +920,26 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void PruneFilteredSpans_GarbageCollectedActivity_Pruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        // Simulate a span whose fused activity has been GC'd (GetFused<Activity>() returns null).
+        // This can happen when a filtered activity is short-lived and collected before PruneFilteredSpans runs.
+        var spanId = ActivitySpanId.CreateRandom();
+        var orphanedSpan = Substitute.For<ISpan>();
+        sut._map[spanId] = orphanedSpan;
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.False(sut._map.TryGetValue(spanId, out _));
+    }
+
+    [Fact]
     public void PruneFilteredSpans_RecentlyPruned_DoesNothing()
     {
         // Arrange
