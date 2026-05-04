@@ -2029,6 +2029,10 @@ interface SentryOptions
     [Static]
     [Export("defaultEnvironment")]
     string DefaultEnvironment { get; }
+
+    // @property (nonatomic) BOOL enableMetrics;
+    [Export("enableMetrics")]
+    bool EnableMetrics { get; set; }
 }
 
 // @interface SentryClient : NSObject
@@ -2173,17 +2177,13 @@ interface SentryExperimentalOptions
     [Export("enableUnhandledCPPExceptionsV2")]
     bool EnableUnhandledCPPExceptionsV2 { get; set; }
 
-    // @property (nonatomic) BOOL enableSessionReplayInUnreliableEnvironment;
-    [Export("enableSessionReplayInUnreliableEnvironment")]
-    bool EnableSessionReplayInUnreliableEnvironment { get; set; }
-
-    // @property (nonatomic) BOOL enableMetrics;
-    [Export("enableMetrics")]
-    bool EnableMetrics { get; set; }
-
     // @property (nonatomic) BOOL enableWatchdogTerminationsV2;
     [Export("enableWatchdogTerminationsV2")]
     bool EnableWatchdogTerminationsV2 { get; set; }
+
+    // @property (nonatomic) BOOL enableReplayNetworkDetailsCapturing;
+    [Export("enableReplayNetworkDetailsCapturing")]
+    bool EnableReplayNetworkDetailsCapturing { get; set; }
 
     // -(void)validateOptions:(NSDictionary<NSString *,id> * _Nullable)options;
     [Export("validateOptions:")]
@@ -2600,6 +2600,18 @@ interface SentryReplayOptions : SentryRedactOptions
     [Export("enableFastViewRendering")]
     bool EnableFastViewRendering { get; set; }
 
+    // @property (nonatomic) BOOL networkCaptureBodies;
+    [Export("networkCaptureBodies")]
+    bool NetworkCaptureBodies { get; set; }
+
+    // @property (copy, nonatomic) NSArray<NSString *> * _Nonnull networkRequestHeaders;
+    [Export("networkRequestHeaders", ArgumentSemantic.Copy)]
+    string[] NetworkRequestHeaders { get; set; }
+
+    // @property (copy, nonatomic) NSArray<NSString *> * _Nonnull networkResponseHeaders;
+    [Export("networkResponseHeaders", ArgumentSemantic.Copy)]
+    string[] NetworkResponseHeaders { get; set; }
+
     // @property (readonly, nonatomic) NSInteger replayBitRate;
     [Export("replayBitRate")]
     nint ReplayBitRate { get; }
@@ -2623,6 +2635,10 @@ interface SentryReplayOptions : SentryRedactOptions
     // @property (nonatomic) NSTimeInterval maximumDuration;
     [Export("maximumDuration")]
     double MaximumDuration { get; set; }
+
+    // -(BOOL)isNetworkDetailCaptureEnabledFor:(NSString * _Nonnull)urlString __attribute__((warn_unused_result("")));
+    [Export("isNetworkDetailCaptureEnabledFor:")]
+    bool IsNetworkDetailCaptureEnabledFor(string urlString);
 
     // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
     [Export("initWithDictionary:")]
