@@ -101,7 +101,8 @@ internal enum SentryExtensionType : long
     Widget = 0,
     Intent = 1,
     Action = 2,
-    Share = 3
+    Share = 3,
+    NotificationService = 4
 }
 
 [Native]

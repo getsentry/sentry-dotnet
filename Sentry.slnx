@@ -38,7 +38,9 @@
     <File Path=".github/workflows/watch-upstream.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
+    <File Path="benchmarks\Directory.Build.props" />
     <Project Path="benchmarks/Sentry.Benchmarks/Sentry.Benchmarks.csproj" />
+    <Project Path="benchmarks/Sentry.Extensions.Logging.Benchmarks/Sentry.Extensions.Logging.Benchmarks.csproj" />
   </Folder>
   <Folder Name="/integration-test/">
     <File Path="integration-test/android.Tests.ps1" />
