@@ -85,8 +85,6 @@ internal static class C
 
         // Note: DSN is not null because options.IsValid() must have returned true for this to be called.
         sentry_options_set_dsn(cOptions, options.Dsn!);
-        sentry_options_set_enable_logs(cOptions, options.EnableLogs ? 1 : 0);
-        sentry_options_set_enable_metrics(cOptions, options.EnableMetrics ? 1 : 0);
 
         if (options.Release is not null)
         {
@@ -383,10 +381,6 @@ internal static class C
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_auto_session_tracking(IntPtr options, int debug);
-    [DllImport("sentry-native")]
-    private static extern void sentry_options_set_enable_logs(IntPtr options, int enable);
-    [DllImport("sentry-native")]
-    private static extern void sentry_options_set_enable_metrics(IntPtr options, int enable);
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_transport(IntPtr options, IntPtr transport);
