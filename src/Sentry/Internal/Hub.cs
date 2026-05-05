@@ -318,7 +318,7 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
-        if (_options.ExternalPropagationContext?.Snapshot() is { } externalPropagationContext)
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null } externalPropagationContext)
         {
             return externalPropagationContext.GetBaggageHeader();
         }

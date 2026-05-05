@@ -1491,6 +1491,7 @@ public partial class HubTests : IDisposable
         var expectedBaggageHeader = BaggageHeader.Create([]);
         var externalContext = Substitute.For<IExternalPropagationContext>();
         externalContext.Snapshot().Returns(externalContext);
+        externalContext.TraceId.Returns(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
         externalContext.GetBaggageHeader().Returns(expectedBaggageHeader);
         _fixture.Options.ExternalPropagationContext = externalContext;
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
@@ -1502,6 +1503,26 @@ public partial class HubTests : IDisposable
 
         // Assert
         baggage.Should().Be(expectedBaggageHeader);
+    }
+
+    [Fact]
+    public void GetBaggage_ExternalPropagationContext_NoActiveActivity_FallsThroughToPropagationContext()
+    {
+        // Arrange — external context has no active activity (TraceId is null)
+        var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.Snapshot().Returns(externalContext);
+        externalContext.TraceId.Returns((SentryId?)null);
+        _fixture.Options.ExternalPropagationContext = externalContext;
+        var propagationContext = new SentryPropagationContext(
+            SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
+        var hub = _fixture.GetSut();
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
+
+        // Act
+        var baggage = hub.GetBaggage();
+
+        // Assert — should use the scope's propagation context, not an empty baggage header
+        baggage.ToString().Should().Contain("sentry-trace_id=43365712692146d08ee11a729dfbcaca");
     }
 
     [Theory]
