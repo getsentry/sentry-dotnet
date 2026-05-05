@@ -185,6 +185,12 @@ internal class Hub : IHub, IDisposable
             return NoOpTransaction.Instance;
         }
 
+        if (_options.DisableSentryTracing)
+        {
+            _options.LogWarning("Sentry transaction dropped because OpenTelemetry is enabled");
+            return NoOpTransaction.Instance;
+        }
+
         bool? isSampled = null;
         double? sampleRate = null;
         DiscardReason? discardReason = null;
@@ -293,6 +299,12 @@ internal class Hub : IHub, IDisposable
 
     public SentryTraceHeader GetTraceHeader()
     {
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null, SpanId: not null } externalPropagationContext)
+        {
+            return new SentryTraceHeader(externalPropagationContext.TraceId.Value,
+                externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
+        }
+
         if (GetSpan()?.GetTraceHeader() is { } traceHeader)
         {
             return traceHeader;
@@ -306,6 +318,11 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null } externalPropagationContext)
+        {
+            return externalPropagationContext.GetBaggageHeader();
+        }
+
         var span = GetSpan();
         if (span?.GetTransaction().GetDynamicSamplingContext() is { IsEmpty: false } dsc)
         {
@@ -318,6 +335,12 @@ internal class Hub : IHub, IDisposable
 
     public W3CTraceparentHeader? GetTraceparentHeader()
     {
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null, SpanId: not null } externalPropagationContext)
+        {
+            return new W3CTraceparentHeader(externalPropagationContext.TraceId.Value,
+                externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
+        }
+
         if (GetSpan()?.GetTraceHeader() is { } traceHeader)
         {
             return new W3CTraceparentHeader(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled);
@@ -486,6 +509,14 @@ internal class Hub : IHub, IDisposable
         evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
     }
 
+    private void ApplyTraceContextToEvent(SentryEvent evt, IExternalPropagationContext propagationContext)
+    {
+        evt.Contexts.Trace.TraceId = propagationContext.TraceId ?? default;
+        evt.Contexts.Trace.SpanId = propagationContext.SpanId ?? default;
+        evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
+        evt.DynamicSamplingContext = propagationContext.GetDynamicSamplingContext(_options, _replaySession);
+    }
+
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
 
     private void AddBreadcrumbForException(SentryEvent evt, Scope scope)
@@ -570,9 +601,13 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            // We get the span linked to the event or fall back to the current span
-            var span = GetLinkedSpan(evt) ?? scope.Span;
-            if (span is not null)
+            // Prefer ExternalPropagationContext then linked span, then scope span and finally fall back to the
+            // propagation context
+            if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null } externalPropagationContext)
+            {
+                ApplyTraceContextToEvent(evt, externalPropagationContext);
+            }
+            else if ((GetLinkedSpan(evt) ?? scope.Span) is { } span)
             {
                 ApplyTraceContextToEvent(evt, span);
             }
