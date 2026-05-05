@@ -29,6 +29,8 @@ public class SentrySerilogSinkExtensionsTests
         public bool InitializeSdk { get; } = false;
         public LogEventLevel MinimumEventLevel { get; } = LogEventLevel.Verbose;
         public LogEventLevel MinimumBreadcrumbLevel { get; } = LogEventLevel.Fatal;
+        public LogEventLevel RestrictedToMinimumLevel { get; } = LogEventLevel.Warning;
+        public LoggingLevelSwitch LevelSwitch { get; } = new(LogEventLevel.Error);
 
         public static SentrySerilogOptions GetSut() => new();
     }
@@ -98,7 +100,8 @@ public class SentrySerilogSinkExtensionsTests
             _fixture.SampleRate, _fixture.Release, _fixture.Environment, _fixture.MaxQueueItems,
             _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
             _fixture.RequestBodyCompressionBuffered, _fixture.Debug, _fixture.DiagnosticLevel,
-            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode, null, _fixture.EnableLogs);
+            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode, null, _fixture.EnableLogs,
+            _fixture.RestrictedToMinimumLevel, _fixture.LevelSwitch);
 
         // Compare individual properties
         Assert.Equal(_fixture.SendDefaultPii, sut.SendDefaultPii);
@@ -123,24 +126,28 @@ public class SentrySerilogSinkExtensionsTests
         Assert.True(sut.InitializeSdk);
         Assert.Equal(_fixture.MinimumEventLevel, sut.MinimumEventLevel);
         Assert.Equal(_fixture.MinimumBreadcrumbLevel, sut.MinimumBreadcrumbLevel);
+        Assert.Equal(_fixture.RestrictedToMinimumLevel, sut.RestrictedToMinimumLevel);
+        Assert.Same(_fixture.LevelSwitch, sut.LevelSwitch);
     }
 
     [Fact]
-    public void Sentry_WithRestrictedToMinimumLevel_FiltersLogsBelow()
+    public void Sentry_WithRestrictedToMinimumLevel_ConfigureOptions_FiltersLogsBelow()
     {
+        // Verify RestrictedToMinimumLevel can be set via the options callback (e.g. for MAUI users)
         using var logger = new LoggerConfiguration()
             .WriteTo.Sentry(o =>
             {
                 o.InitializeSdk = false;
                 o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
                 o.MinimumEventLevel = LogEventLevel.Debug;
-            }, restrictedToMinimumLevel: LogEventLevel.Error)
+                o.RestrictedToMinimumLevel = LogEventLevel.Error;
+            })
             .CreateLogger();
 
-        // Below restrictedToMinimumLevel — should not reach the sink
+        // Below RestrictedToMinimumLevel — Serilog filters this before it reaches the sink
         logger.Warning("This should be filtered by Serilog before reaching the sink");
 
-        // At or above restrictedToMinimumLevel — should reach the sink
+        // At or above RestrictedToMinimumLevel — should reach the sink
         logger.Error("This should reach the sink");
     }
 
