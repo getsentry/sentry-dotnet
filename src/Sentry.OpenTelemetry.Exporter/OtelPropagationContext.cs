@@ -115,12 +115,13 @@ internal class OtelPropagationContext : IExternalPropagationContext
 
     public DynamicSamplingContext? GetDynamicSamplingContext(SentryOptions options, IReplaySession replaySession)
     {
-        if (DynamicSamplingContext is null)
+        if (DynamicSamplingContext is not { } dsc)
         {
             options.LogDebug("Creating Dynamic Sampling Context from the External Propagation Context.");
-            DynamicSamplingContext = this.CreateDynamicSamplingContext(options, replaySession);
+            dsc = this.CreateDynamicSamplingContext(options, replaySession);
+            DynamicSamplingContext = dsc;
         }
 
-        return DynamicSamplingContext;
+        return dsc;
     }
 }
