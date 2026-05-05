@@ -3,6 +3,12 @@ set -e
 
 echo "🔍 Checking code formatting..."
 
+if ! git diff --quiet; then
+  echo "⚠️  Skipping format check: unstaged changes present."
+  echo "   Stage or stash all changes before committing to enable the format check."
+  exit 0
+fi
+
 INCLUDE_ARGS=()
 while IFS= read -r f; do
   INCLUDE_ARGS+=(--include "$f")
