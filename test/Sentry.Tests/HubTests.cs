@@ -1414,6 +1414,7 @@ public partial class HubTests : IDisposable
         var traceId = SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8");
         var spanId = SpanId.Parse("2000000000000000");
         var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.Snapshot().Returns(externalContext);
         externalContext.TraceId.Returns(traceId);
         externalContext.SpanId.Returns(spanId);
         externalContext.IsSampled.Returns(true);
@@ -1489,6 +1490,7 @@ public partial class HubTests : IDisposable
         // Arrange
         var expectedBaggageHeader = BaggageHeader.Create([]);
         var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.Snapshot().Returns(externalContext);
         externalContext.GetBaggageHeader().Returns(expectedBaggageHeader);
         _fixture.Options.ExternalPropagationContext = externalContext;
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
@@ -1550,6 +1552,7 @@ public partial class HubTests : IDisposable
         var traceId = SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8");
         var spanId = SpanId.Parse("2000000000000000");
         var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.Snapshot().Returns(externalContext);
         externalContext.TraceId.Returns(traceId);
         externalContext.SpanId.Returns(spanId);
         externalContext.IsSampled.Returns(true);
@@ -1573,6 +1576,7 @@ public partial class HubTests : IDisposable
         var traceId = SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737");
         var parentSpanId = SpanId.Parse("3000000000000000");
         var externalContext = Substitute.For<IExternalPropagationContext>();
+        externalContext.Snapshot().Returns(externalContext);
         externalContext.TraceId.Returns(traceId);
         externalContext.SpanId.Returns((SpanId?)null);
         externalContext.ParentSpanId.Returns(parentSpanId);

@@ -8,21 +8,36 @@ namespace Sentry.OpenTelemetry.Exporter;
 /// </summary>
 internal class OtelPropagationContext : IExternalPropagationContext
 {
+    // When non-null, all property reads use this pinned activity instead of Activity.Current.
+    // This avoids TOCTOU races when multiple properties are read in sequence.
+    private readonly Activity? _pinnedActivity;
+
+    public OtelPropagationContext() { }
+
+    private OtelPropagationContext(Activity? activity)
+    {
+        _pinnedActivity = activity;
+    }
+
+    private Activity? Current => _pinnedActivity ?? Activity.Current;
+
+    public IExternalPropagationContext Snapshot() => new OtelPropagationContext(Activity.Current);
+
     /// <summary>
     /// We cache the DSC on the current activity so we don't have to regenerate this every time we use it
     /// </summary>
     public DynamicSamplingContext? DynamicSamplingContext
     {
-        get => Activity.Current?.GetFused<DynamicSamplingContext>();
-        private set => Activity.Current?.SetFused(value);
+        get => Current?.GetFused<DynamicSamplingContext>();
+        private set => Current?.SetFused(value);
     }
-    public SentryId? TraceId => Activity.Current?.TraceId.AsSentryId();
-    public SpanId? SpanId => Activity.Current?.SpanId.AsSentrySpanId();
+    public SentryId? TraceId => Current?.TraceId.AsSentryId();
+    public SpanId? SpanId => Current?.SpanId.AsSentrySpanId();
     public SpanId? ParentSpanId
     {
         get
         {
-            var activity = Activity.Current;
+            var activity = Current;
             if (activity is null)
             {
                 return null;
@@ -32,7 +47,7 @@ internal class OtelPropagationContext : IExternalPropagationContext
         }
     }
 
-    public bool IsSampled => Activity.Current?.Recorded ?? false;
+    public bool IsSampled => Current?.Recorded ?? false;
 
     /// <summary>
     /// th is a rejection threshold: T = (1 - sampling_probability) * 2^56, so we invert to get the sample rate.
@@ -41,7 +56,7 @@ internal class OtelPropagationContext : IExternalPropagationContext
     {
         get
         {
-            var th = GetOtelTraceStateValue("th");
+            var th = GetOtelTraceStateValue(Current, "th");
             return !th.IsEmpty && ParseOtelHexFraction(th) is { } v ? 1.0 - v : null;
         }
     }
@@ -56,7 +71,7 @@ internal class OtelPropagationContext : IExternalPropagationContext
             // OTel keeps a trace when rv ≥ th; Sentry keeps it when sample_rand < sample_rate.
             // Mapping sample_rand = 1 − rv makes the decisions equivalent: 1 − rv < 1 − th ↔ rv > th
             // Guard: rv=0 would produce 1.0, which is out of range for sample_rand — return null instead.
-            var rv = GetOtelTraceStateValue("rv");
+            var rv = GetOtelTraceStateValue(Current, "rv");
             return !rv.IsEmpty && ParseOtelHexFraction(rv) is { } v && v > 0.0 ? 1.0 - v : null;
         }
     }
@@ -71,9 +86,9 @@ internal class OtelPropagationContext : IExternalPropagationContext
     /// See https://opentelemetry.io/docs/specs/otel/trace/tracestate-handling/
     /// </para>
     /// </summary>
-    private static ReadOnlySpan<char> GetOtelTraceStateValue(ReadOnlySpan<char> subKey)
+    private static ReadOnlySpan<char> GetOtelTraceStateValue(Activity? activity, ReadOnlySpan<char> subKey)
     {
-        var traceState = Activity.Current?.TraceStateString;
+        var traceState = activity?.TraceStateString;
         if (string.IsNullOrEmpty(traceState))
             return default;
 
@@ -130,7 +145,7 @@ internal class OtelPropagationContext : IExternalPropagationContext
     public BaggageHeader GetBaggageHeader()
     {
         var items = new Dictionary<string, string>();
-        if (Activity.Current?.Baggage is { } baggage)
+        if (Current?.Baggage is { } baggage)
         {
             foreach (var item in baggage)
             {

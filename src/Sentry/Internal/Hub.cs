@@ -299,7 +299,7 @@ internal class Hub : IHub, IDisposable
 
     public SentryTraceHeader GetTraceHeader()
     {
-        if (_options.ExternalPropagationContext is { TraceId: not null, SpanId: not null } externalPropagationContext)
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null, SpanId: not null } externalPropagationContext)
         {
             return new SentryTraceHeader(externalPropagationContext.TraceId.Value,
                 externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
@@ -318,7 +318,7 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
-        if (_options.ExternalPropagationContext is { } externalPropagationContext)
+        if (_options.ExternalPropagationContext?.Snapshot() is { } externalPropagationContext)
         {
             return externalPropagationContext.GetBaggageHeader();
         }
@@ -335,7 +335,7 @@ internal class Hub : IHub, IDisposable
 
     public W3CTraceparentHeader? GetTraceparentHeader()
     {
-        if (_options.ExternalPropagationContext is { TraceId: not null, SpanId: not null } externalPropagationContext)
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null, SpanId: not null } externalPropagationContext)
         {
             return new W3CTraceparentHeader(externalPropagationContext.TraceId.Value,
                 externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
@@ -603,7 +603,7 @@ internal class Hub : IHub, IDisposable
         {
             // Prefer ExternalPropagationContext then linked span, then scope span and finally fall back to the
             // propagation context
-            if (_options.ExternalPropagationContext is { TraceId: not null } externalPropagationContext)
+            if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null } externalPropagationContext)
             {
                 ApplyTraceContextToEvent(evt, externalPropagationContext);
             }
