@@ -133,22 +133,30 @@ public class SentrySerilogSinkExtensionsTests
     [Fact]
     public void Sentry_WithRestrictedToMinimumLevel_ConfigureOptions_FiltersLogsBelow()
     {
-        // Verify RestrictedToMinimumLevel can be set via the options callback (e.g. for MAUI users)
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        var options = new SentrySerilogOptions
+        {
+            InitializeSdk = false,
+            MinimumBreadcrumbLevel = LogEventLevel.Verbose,
+            MinimumEventLevel = LogEventLevel.Verbose,
+            RestrictedToMinimumLevel = LogEventLevel.Error,
+        };
+        var sink = new SentrySink(options, () => hub, null, new MockClock());
         using var logger = new LoggerConfiguration()
-            .WriteTo.Sentry(o =>
-            {
-                o.InitializeSdk = false;
-                o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
-                o.MinimumEventLevel = LogEventLevel.Debug;
-                o.RestrictedToMinimumLevel = LogEventLevel.Error;
-            })
+            .MinimumLevel.Verbose()
+            .WriteTo.Sink(sink, options.RestrictedToMinimumLevel, options.LevelSwitch)
             .CreateLogger();
 
-        // Below RestrictedToMinimumLevel — Serilog filters this before it reaches the sink
-        logger.Warning("This should be filtered by Serilog before reaching the sink");
+        // Act
+        logger.Warning("Below threshold");
+        logger.Error("At threshold");
 
-        // At or above RestrictedToMinimumLevel — should reach the sink
-        logger.Error("This should reach the sink");
+        // Assert: Warning is filtered by Serilog before reaching the sink; only Error gets through
+        hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+        hub.DidNotReceive().CaptureEvent(Arg.Is<SentryEvent>(e =>
+            e.Message.Message == "Below threshold"));
     }
 
     [Fact]
