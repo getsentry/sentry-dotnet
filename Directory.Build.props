@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.2.0</VersionPrefix>
+    <VersionPrefix>6.4.1</VersionPrefix>
     <LangVersion>14.0</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -43,6 +43,7 @@
 
   <PropertyGroup Condition="'$(SolutionName)' == '.generated.NoMobile'">
     <NO_MOBILE>true</NO_MOBILE>
+    <ValidateXcodeVersion>false</ValidateXcodeVersion>
   </PropertyGroup>
 
   <!-- NO_MOBILE can be passed in via an environment variable or a build property to disable all mobile targets -->
@@ -99,7 +100,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>3.3.3</SentryCLIVersion>
+    <SentryCLIVersion>3.4.1</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 

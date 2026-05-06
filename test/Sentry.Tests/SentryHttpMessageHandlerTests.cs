@@ -631,10 +631,9 @@ public class SentryHttpMessageHandlerTests
         // Assert
         failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
     }
-
 #endif
 
-#if ANDROID
+#if ANDROID || IOS || MACCATALYST
     [Fact]
     public void HandleResponse_SpanExists_AddsReplayBreadcrumbData()
     {
@@ -666,6 +665,7 @@ public class SentryHttpMessageHandlerTests
         breadcrumb.Category.Should().Be("http");
 
         breadcrumb.Data.Should().NotBeNull();
+#if ANDROID
         breadcrumb.Data!.Should().ContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
         breadcrumb.Data.Should().ContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
 
@@ -673,11 +673,17 @@ public class SentryHttpMessageHandlerTests
             .Should().BeTrue();
         long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.HttpEndTimestampKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var endMs)
             .Should().BeTrue();
-
         startMs.Should().BeGreaterThan(0);
         startMs.Should().Be(span.StartTimestamp.ToUnixTimeMilliseconds());
         endMs.Should().BeGreaterThan(0);
         endMs.Should().BeGreaterOrEqualTo(startMs);
+#elif IOS || MACCATALYST
+        breadcrumb.Data!.Should().ContainKey(SentryHttpMessageHandler.RequestStartKey);
+        long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.RequestStartKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var startMs)
+            .Should().BeTrue();
+        startMs.Should().BeGreaterThan(0);
+        startMs.Should().Be(span.StartTimestamp.ToUnixTimeMilliseconds());
+#endif
     }
 
     [Fact]
@@ -702,6 +708,7 @@ public class SentryHttpMessageHandlerTests
         breadcrumb.Data.Should().NotBeNull();
         breadcrumb.Data!.Should().NotContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
         breadcrumb.Data.Should().NotContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
+        breadcrumb.Data.Should().NotContainKey(SentryHttpMessageHandler.RequestStartKey);
     }
 #endif
 }

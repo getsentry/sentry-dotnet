@@ -87,6 +87,7 @@ scripts/              # Build and maintenance scripts
 - **macOS only**. Requires Xcode.
 - `Sentry.Bindings.Cocoa` wraps the native Cocoa SDK.
 - Device tests run in CI only.
+- `src/Sentry.Bindings.Cocoa/ApiDefinitions.cs` and `StructsAndEnums.cs` are **auto-generated** — do not edit them directly. All changes must go in `scripts/patch-cocoa-bindings.cs` and be applied by running `scripts/generate-cocoa-bindings.ps1`.
 
 ### MAUI
 - Requires MAUI workloads: `sudo dotnet workload restore` (macOS/Linux) or `dotnet workload restore` (Windows).
@@ -158,3 +159,15 @@ AI commits MUST include:
 ```
 Co-Authored-By: <Agent Name> <agent-email-or-noreply@example.com>
 ```
+
+### Code Intelligence
+
+Prefer LSP over Grep/Read for code navigation — it's faster, precise, and avoids reading entire files:
+
+- `workspaceSymbol` to find where something is defined
+- `findReferences` to see all usages across the codebase
+- `goToDefinition` / `goToImplementation` to jump to source
+
+Use Grep only when LSP isn't available or for text/pattern searches (comments, strings, config).
+
+After writing or editing code, check LSP diagnostics and fix errors before proceeding.

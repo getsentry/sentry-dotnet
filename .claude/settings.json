@@ -30,5 +30,11 @@
       "Bash(mv:*)"
     ],
     "deny": []
+  },
+  "enabledPlugins": {
+    "csharp-lsp@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "jdtls-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true
   }
 }

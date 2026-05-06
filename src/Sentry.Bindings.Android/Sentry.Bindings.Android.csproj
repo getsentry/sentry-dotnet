@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
-    <SentryAndroidSdkVersion>8.35.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>8.40.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <!-- This gets resolved by the DownloadSentryAndroidSdk unless using local maven references -->
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
@@ -123,7 +123,7 @@
 
   <!-- A light-weight replacement for protobuf-javalite (see https://github.com/getsentry/sentry-java/pull/5157) -->
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.1.0" Bind="false" />
+    <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.1.1" Bind="false" />
   </ItemGroup>
 
   <ItemGroup>

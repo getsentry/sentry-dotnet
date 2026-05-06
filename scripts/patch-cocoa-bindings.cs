@@ -18,6 +18,8 @@ const string Header = @"// -----------------------------------------------------
 // If changes are required, update the script instead.
 // -----------------------------------------------------------------------------
 
+#nullable enable
+
 ";
 var code = Header + File.ReadAllText(args[0]);
 
@@ -77,6 +79,10 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "NullAllowed")
     .WithAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "return: NullAllowed")
     .WithAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "return: NullAllowed")
+    // Fix nullable property attributes
+    .WithPropertyAttribute("SentryOptions", "OnCrashedLastRun", "NullAllowed")
+    // Fix nullable generic type arguments
+    .ChangePropertyType("SentryOptions", "OnLastRunStatusDetermined", "Action<SentryLastRunStatus, SentryEvent?>")
     // For PrivateApiDefinitions.cs
     .WithModifier("SentryScope", "partial")
     // error CS0246: The type or namespace name 'iOS' could not be found
@@ -307,6 +313,30 @@ internal static class FilterExtensions
             .OfType<MethodDeclarationSyntax>()
             .Where(node => node.Identifier.Matches(name) && node.HasParent(type) && !node.HasAttribute(attribute));
         return root.ReplaceNodes(nodes, (node, _) => node.WithAttribute(attribute));
+    }
+
+    public static CompilationUnitSyntax WithPropertyAttribute(
+        this CompilationUnitSyntax root,
+        string type,
+        string name,
+        string attribute)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<PropertyDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(name) && node.HasParent(type) && !node.HasAttribute(attribute));
+        return root.ReplaceNodes(nodes, (node, _) =>
+        {
+            var newAttr = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(attribute));
+            if (node.AttributeLists.Count > 0)
+            {
+                // Prepend into the first existing attribute list (e.g. [NullAllowed, Export(...)])
+                var first = node.AttributeLists[0];
+                var prepended = first.WithAttributes(
+                    SyntaxFactory.SeparatedList(new[] { newAttr }.Concat(first.Attributes)));
+                return node.WithAttributeLists(node.AttributeLists.Replace(first, prepended));
+            }
+            return (PropertyDeclarationSyntax)node.WithAttribute(attribute);
+        });
     }
 
     public static CompilationUnitSyntax AsInternal(

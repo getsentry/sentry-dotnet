@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.OpenTelemetry;
 using Sentry.Protocol;
 
 namespace Sentry.AspNet;
@@ -145,7 +146,8 @@ public static class HttpContextExtensions
             return;
         }
 
-        var status = SpanStatusConverter.FromHttpStatusCode(httpContext.Response.StatusCode);
-        transaction.Finish(status);
+        var statusCode = httpContext.Response.StatusCode;
+        transaction.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, statusCode);
+        transaction.Finish(SpanStatusConverter.FromHttpStatusCode(statusCode));
     }
 }

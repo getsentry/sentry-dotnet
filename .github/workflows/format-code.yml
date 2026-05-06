@@ -39,7 +39,7 @@ jobs:
 
       - name: Upload Format Report
         if: ${{ always() }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           archive: false
           path: ./dotnet-format-report/
@@ -54,5 +54,18 @@ jobs:
       # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
       # we need to pass the current branch, otherwise we can't commit the changes.
       # GITHUB_HEAD_REF is the name of the head branch. GitHub Actions only sets this for PRs.
+      #
+      # For fork PRs we can't push back to the contributor's branch, so we fail the check
+      # instead — prompting the contributor to run dotnet format locally.
       - name: Commit Formatted Code
-        run: ./scripts/commit-formatted-code.sh $GITHUB_HEAD_REF
+        run: |
+          if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+            if [[ $(git status) != *"nothing to commit"* ]]; then
+              echo "::error::Formatting issues found. Please run the following command locally and push the result:"
+              echo "::error::  dotnet format Sentry.slnx --no-restore --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs"
+              exit 1
+            fi
+            echo "All code formatted correctly."
+          else
+            ./scripts/commit-formatted-code.sh $GITHUB_HEAD_REF
+          fi
