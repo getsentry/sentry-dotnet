@@ -19,9 +19,15 @@ if [ ${#INCLUDE_ARGS[@]} -eq 0 ]; then
   exit 0
 fi
 
-dotnet format Sentry.slnx --no-restore \
+FORMAT_OUTPUT=$(dotnet format Sentry.slnx --no-restore \
   "${INCLUDE_ARGS[@]}" \
-  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs > /dev/null 2>&1
+  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs 2>&1) || {
+  echo ""
+  echo "❌ dotnet format failed:"
+  echo "$FORMAT_OUTPUT"
+  echo ""
+  exit 1
+}
 
 if ! git diff --quiet; then
   echo ""
