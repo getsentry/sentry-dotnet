@@ -24,21 +24,28 @@ For a big feature it's advised to raise an issue to discuss it first.
 
 ## Git Hooks (Optional but Recommended)
 
-To automatically verify code formatting before committing, you can set up a pre-commit hook:
+To automatically check and fix code formatting before committing, you can set up a pre-commit hook:
 
 ```bash
-./scripts/setup-hooks.sh
+./dev.cs setup-hooks
 ```
 
-This configures git to run `dotnet format --verify-no-changes` before each commit. If formatting issues are found, the commit will be prevented and you'll need to run:
+Before each commit, the hook runs `dotnet format` against your staged `.cs` files and auto-fixes any formatting issues. If fixes were applied, the commit is blocked — just stage the fixes and try again:
 
 ```bash
-dotnet format Sentry.slnx --no-restore --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs
+git add -u
+git commit
 ```
 
-Then stage the formatting changes and commit again. This helps catch formatting issues early and reduces CI failures.
+Note: the hook skips automatically if you have unstaged changes, to avoid touching work in progress.
 
-**Note:** You can bypass the hook for a specific commit using `git commit --no-verify` if needed.
+To opt out at any time:
+
+```bash
+./dev.cs remove-hooks
+```
+
+**Note:** You can also bypass the hook for a specific commit using `git commit --no-verify` if needed.
 
 ## Minimal Dependencies
 
