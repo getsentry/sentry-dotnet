@@ -308,7 +308,7 @@ public partial class SentryClientTests : IDisposable
         // In global mode the userid gets set at app startup via the GlobalRootScopeIntegration, rather than by an
         // enricher during capture... so this functionality in SentryClient only works when IsGlobalModeEnabled is false
         Skip.If(System.OperatingSystem.IsAndroid() || System.OperatingSystem.IsIOS(),
-            "On mobile, User.Id is set by GlobalRootScopeIntegration at startup, not the enricher.");
+            $"On mobile, User.Id is set by {nameof(GlobalRootScopeIntegration)} at startup, not the enricher.");
 #endif
         // Arrange
         _fixture.SentryOptions.IsGlobalModeEnabled = false;
@@ -1305,7 +1305,7 @@ public partial class SentryClientTests : IDisposable
     {
 #if NET5_0_OR_GREATER
         Skip.If(System.OperatingSystem.IsAndroid() || System.OperatingSystem.IsIOS(),
-            "On mobile, User.Id is set by GlobalRootScopeIntegration at startup, not the enricher.");
+            $"On mobile, User.Id is set by {nameof(GlobalRootScopeIntegration)} at startup, not the enricher.");
 #endif
         // Arrange
         // In global mode the userid gets set at app startup via the GlobalRootScopeIntegration, rather than by an
