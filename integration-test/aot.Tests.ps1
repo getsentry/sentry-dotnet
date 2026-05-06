@@ -52,8 +52,16 @@ Console.WriteLine("Hello, Sentry!");
     It 'Aot' {
         $rid = $env:RuntimeIdentifier
         $baseImage = $env:ContainerBaseImage
-        $publishArgs = @('-c', 'Release')
-        if ($rid) {
+        # To exclude specific warnings without disabling warnings-as-errors entirely, add:
+        #   '-p:WarningsNotAsErrors=CS####;IL####'        # compiler/analyzer warnings (CS, IL2###, IL3###)
+        #   '-p:MSBuildWarningsNotAsErrors=MSB####'       # MSBuild task warnings (MSB###)
+        $publishArgs = @(
+            '-c', 'Release',
+            '-p:TreatWarningsAsErrors=true',
+            '-p:MSBuildTreatWarningsAsErrors=true'
+        )
+        if ($rid)
+        {
             Write-Host "Environment RuntimeIdentifier: $rid"
             $publishArgs += @('-r', $rid)
         }

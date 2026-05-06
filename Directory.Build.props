@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.2.0-alpha.0</VersionPrefix>
+    <VersionPrefix>6.5.0</VersionPrefix>
     <LangVersion>14.0</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -13,7 +13,6 @@
 
     <!-- Ignore our own diagnostic ids - these are meant to be external warnings only -->
     <NoWarn>$(NoWarn);SENTRY0001</NoWarn>
-    <NoWarn>$(NoWarn);SENTRYTRACECONNECTEDMETRICS</NoWarn> <!--https://github.com/getsentry/sentry-dotnet/discussions/4838-->
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -44,6 +43,7 @@
 
   <PropertyGroup Condition="'$(SolutionName)' == '.generated.NoMobile'">
     <NO_MOBILE>true</NO_MOBILE>
+    <ValidateXcodeVersion>false</ValidateXcodeVersion>
   </PropertyGroup>
 
   <!-- NO_MOBILE can be passed in via an environment variable or a build property to disable all mobile targets -->
@@ -100,7 +100,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.58.2</SentryCLIVersion>
+    <SentryCLIVersion>3.4.1</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 

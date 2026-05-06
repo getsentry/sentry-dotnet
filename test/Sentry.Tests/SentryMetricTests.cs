@@ -23,6 +23,20 @@ public class SentryMetricTests
     }
 
     [Fact]
+    public void Create_Default_HasMinimalSpecification()
+    {
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        metric.Timestamp.Should().Be(Timestamp);
+        metric.TraceId.Should().Be(TraceId);
+        metric.Type.Should().Be(SentryMetricType.Counter);
+        metric.Name.Should().Be("sentry_tests.sentry_metric_tests.counter");
+        metric.Value.Should().Be(1);
+        metric.SpanId.Should().BeNull();
+        metric.Unit.Should().BeNull();
+    }
+
+    [Fact]
     public void Protocol_Default_VerifyAttributes()
     {
         var options = new SentryOptions

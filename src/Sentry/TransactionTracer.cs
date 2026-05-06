@@ -148,31 +148,24 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
         set => _fingerprint = value;
     }
 
-    private readonly ConcurrentBag<Breadcrumb> _breadcrumbs = new();
+    private readonly ConcurrentBagLite<Breadcrumb> _breadcrumbs = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _data = new();
-
     /// <inheritdoc />
     [Obsolete("Use Data")]
-    public IReadOnlyDictionary<string, object?> Extra => _data;
+    public IReadOnlyDictionary<string, object?> Extra => _contexts.Trace.Data;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Data => _data;
-
+    public IReadOnlyDictionary<string, object?> Data => _contexts.Trace.Data;
 
     private readonly ConcurrentDictionary<string, string> _tags = new();
 
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-    private readonly ConcurrentBag<ISpan> _spans = new();
-#else
-    private ConcurrentBag<ISpan> _spans = new();
-#endif
+    private readonly ConcurrentBagLite<ISpan> _spans = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<ISpan> Spans => _spans;
@@ -271,10 +264,10 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     /// <inheritdoc />
     [Obsolete("Use SetData")]
-    public void SetExtra(string key, object? value) => _data[key] = value;
+    public void SetExtra(string key, object? value) => _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
-    public void SetData(string key, object? value) => _data[key] = value;
+    public void SetData(string key, object? value) => _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
     public void SetTag(string key, string value) => _tags[key] = value;
@@ -316,7 +309,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private class LastActiveSpanTracker
     {
-        private readonly object _lock = new object();
+        private readonly Lock _lock = new();
 
         private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
         private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
@@ -431,11 +424,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private void ReleaseSpans()
     {
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
         _spans.Clear();
-#else
-        _spans = new ConcurrentBag<ISpan>();
-#endif
         _activeSpanTracker.Clear();
     }
 

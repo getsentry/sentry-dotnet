@@ -22,6 +22,7 @@ internal partial class BindableSentryOptions
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
     public bool? EnableLogs { get; set; }
+    public bool? EnableMetrics { get; set; }
     public int? MaxQueueItems { get; set; }
     public int? MaxCacheItems { get; set; }
     public TimeSpan? ShutdownTimeout { get; set; }
@@ -37,6 +38,7 @@ internal partial class BindableSentryOptions
     public string? CacheDirectoryPath { get; set; }
     public bool? CaptureFailedRequests { get; set; }
     public List<string>? FailedRequestTargets { get; set; }
+    public List<int>? TraceIgnoreStatusCodes { get; set; }
     public bool? DisableFileWrite { get; set; }
     public TimeSpan? InitCacheFlushTimeout { get; set; }
     public Dictionary<string, string>? DefaultTags { get; set; }
@@ -56,8 +58,6 @@ internal partial class BindableSentryOptions
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
 
-    public ExperimentalSentryOptions? Experimental { get; set; }
-
     public void ApplyTo(SentryOptions options)
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
@@ -75,6 +75,7 @@ internal partial class BindableSentryOptions
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
         options.EnableLogs = EnableLogs ?? options.EnableLogs;
+        options.EnableMetrics = EnableMetrics ?? options.EnableMetrics;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;
@@ -90,6 +91,7 @@ internal partial class BindableSentryOptions
         options.CacheDirectoryPath = CacheDirectoryPath ?? options.CacheDirectoryPath;
         options.CaptureFailedRequests = CaptureFailedRequests ?? options.CaptureFailedRequests;
         options.FailedRequestTargets = FailedRequestTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.FailedRequestTargets;
+        options.TraceIgnoreStatusCodes = TraceIgnoreStatusCodes?.Select(code => new HttpStatusCodeRange(code)).ToList<HttpStatusCodeRange>() ?? options.TraceIgnoreStatusCodes;
         options.DisableFileWrite = DisableFileWrite ?? options.DisableFileWrite;
         options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
         options.DefaultTags = DefaultTags ?? options.DefaultTags;
@@ -108,24 +110,11 @@ internal partial class BindableSentryOptions
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
 
-        if (Experimental is { } experimental)
-        {
-            options.Experimental.EnableMetrics = experimental.EnableMetrics ?? options.Experimental.EnableMetrics;
-        }
-
 #if ANDROID
         Android.ApplyTo(options.Android);
         Native.ApplyTo(options.Native);
 #elif __IOS__
         Native.ApplyTo(options.Native);
 #endif
-    }
-
-    /// <summary>
-    /// Bindable Options for <see cref="SentryOptions.ExperimentalSentryOptions"/>.
-    /// </summary>
-    internal class ExperimentalSentryOptions
-    {
-        public bool? EnableMetrics { get; set; }
     }
 }

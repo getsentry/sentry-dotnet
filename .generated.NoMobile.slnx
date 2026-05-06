@@ -29,12 +29,18 @@
     <File Path=".github/workflows/device-tests-android.yml" />
     <File Path=".github/workflows/device-tests-ios.yml" />
     <File Path=".github/workflows/format-code.yml" />
+    <File Path=".github/workflows/needs-repro.yml" />
+    <File Path=".github/workflows/playwright-blazor-wasm.yml" />
     <File Path=".github/workflows/release.yml" />
     <File Path=".github/workflows/update-deps.yml" />
+    <File Path=".github/workflows/validate-pr.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
+    <File Path=".github/workflows/watch-upstream.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
+    <File Path="benchmarks\Directory.Build.props" />
     <Project Path="benchmarks/Sentry.Benchmarks/Sentry.Benchmarks.csproj" />
+    <Project Path="benchmarks/Sentry.Extensions.Logging.Benchmarks/Sentry.Extensions.Logging.Benchmarks.csproj" />
   </Folder>
   <Folder Name="/integration-test/">
     <File Path="integration-test/android.Tests.ps1" />
@@ -55,13 +61,22 @@
   <Folder Name="/root/">
     <File Path=".codecov.yml" />
     <File Path=".gitignore" />
+    <File Path="AGENTS.md" />
+    <File Path="agents.toml" />
+    <File Path="before.Sentry.sln.targets" />
+    <File Path="build.cmd" />
+    <File Path="build.sh" />
     <File Path="CHANGELOG.md" />
+    <File Path="CodeCoverage.runsettings" />
     <File Path="CONTRIBUTING.md" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
     <File Path="global.json" />
+    <File Path="GlobalUsings.cs" />
+    <File Path="LICENSE" />
     <File Path="nuget.config" />
     <File Path="README.md" />
+    <File Path="warden.toml" />
   </Folder>
   <Folder Name="/samples/">
     <Project Path="samples/Sentry.Samples.Android/Sentry.Samples.Android.csproj" />
@@ -119,6 +134,7 @@
     <File Path="scripts/update-cli.ps1" />
     <File Path="scripts/update-java.ps1" />
     <File Path="scripts/update-project-xml.ps1" />
+    <File Path="scripts/watch-upstream.sh" />
   </Folder>
   <Folder Name="/src/">
     <File Path="src/Directory.Build.props" />
@@ -142,6 +158,7 @@
     <Project Path="src/Sentry.Maui.CommunityToolkit.Mvvm/Sentry.Maui.CommunityToolkit.Mvvm.csproj" />
     <Project Path="src/Sentry.Maui/Sentry.Maui.csproj" />
     <Project Path="src/Sentry.NLog/Sentry.NLog.csproj" />
+    <Project Path="src/Sentry.OpenTelemetry.Exporter/Sentry.OpenTelemetry.Exporter.csproj" />
     <Project Path="src/Sentry.OpenTelemetry/Sentry.OpenTelemetry.csproj" />
     <Project Path="src/Sentry.Profiling/Sentry.Profiling.csproj" />
     <Project Path="src/Sentry.Serilog/Sentry.Serilog.csproj" />
@@ -171,6 +188,7 @@
     <Project Path="test/Sentry.Maui.Tests/Sentry.Maui.Tests.csproj" />
     <Project Path="test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj" />
     <Project Path="test/Sentry.NLog.Tests/Sentry.NLog.Tests.csproj" />
+    <Project Path="test/Sentry.OpenTelemetry.Exporter.Tests/Sentry.OpenTelemetry.Exporter.Tests.csproj" />
     <Project Path="test/Sentry.OpenTelemetry.Tests/Sentry.OpenTelemetry.Tests.csproj" />
     <Project Path="test/Sentry.Profiling.Tests/Sentry.Profiling.Tests.csproj" />
     <Project Path="test/Sentry.Serilog.Tests/Sentry.Serilog.Tests.csproj" />

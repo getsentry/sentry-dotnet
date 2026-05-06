@@ -1,5 +1,11 @@
 version: 2
 updates:
+- package-ecosystem: "dotnet-sdk"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+  open-pull-requests-limit: 1
+
 - package-ecosystem: nuget
   directory: "/samples"
   schedule:
@@ -10,9 +16,11 @@ updates:
   directory: "/test"
   schedule:
     interval: weekly
-  open-pull-requests-limit: 2 
-  
+  open-pull-requests-limit: 2
+
 - package-ecosystem: "github-actions"
-  directory: "/"
+  directories:
+    - "/"
+    - "/.github/actions/*"
   schedule:
-      interval: weekly
+    interval: weekly

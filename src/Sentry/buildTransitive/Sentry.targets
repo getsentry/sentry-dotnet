@@ -110,7 +110,6 @@
       The defaults can be set either via config file, or environment variables, per: https://docs.sentry.io/product/cli/configuration/
     -->
     <PropertyGroup>
-      <SentryCLIBaseOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIBaseOptions) --api-key $(SentryApiKey)</SentryCLIBaseOptions>
       <SentryCLIBaseOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIBaseOptions) --auth-token $(SentryAuthToken)</SentryCLIBaseOptions>
       <SentryCLIBaseOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIBaseOptions) --url $(SentryUrl)</SentryCLIBaseOptions>
       <SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</SentryCLIBaseCommand>
@@ -278,6 +277,22 @@
       <AssemblyAttribute Include="Android.App.MetaData">
         <_Parameter1>io.sentry.proguard-uuid</_Parameter1>
         <Value>$(SentryProGuardUUID)</Value>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
+  <!-- Preload NDK to ensure sentry-native's signal handlers are installed before .NET runtime's.
+       Disabled on Mono until: https://github.com/dotnet/runtime/pull/125835 -->
+  <Target Name="SetAndroidNdkPreload"
+          BeforeTargets="GetAssemblyAttributes"
+          Condition="'$(AndroidApplication)' == 'True'
+            and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'
+            and '$(_SentryIsNet10OrGreater)' == 'true'
+            and '$(UseMonoRuntime)' != 'true'">
+    <ItemGroup>
+      <AssemblyAttribute Include="Android.App.MetaData">
+        <_Parameter1>io.sentry.ndk.preload</_Parameter1>
+        <Value>true</Value>
       </AssemblyAttribute>
     </ItemGroup>
   </Target>

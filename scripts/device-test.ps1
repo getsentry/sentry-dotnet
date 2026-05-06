@@ -52,8 +52,6 @@ try
     {
         $Tfm += '-ios'
         $group = 'apple'
-        # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
-        $arch = 'x64'
         $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/iossimulator-$arch"
         $envValue = $CI ? 'true' : 'false'
         $arguments = @(
@@ -95,6 +93,16 @@ try
             xharness $group test $arguments --output-directory=test_output
             if ($LASTEXITCODE -ne 0)
             {
+                $testResultsXml = './test_output/TestResults.xml'
+                if (Test-Path $testResultsXml)
+                {
+                    $failedTests = Select-String -Path $testResultsXml -Pattern 'result="Fail"'
+                    if ($failedTests)
+                    {
+                        Write-Host "`nFailed tests:"
+                        $failedTests | ForEach-Object { Write-Host $_.Line }
+                    }
+                }
                 throw 'xharness run failed with non-zero exit code'
             }
         }
@@ -102,9 +110,12 @@ try
         {
             if ($CI)
             {
-                scripts/parse-xunit2-xml.ps1 (Get-Item ./test_output/*.xml).FullName | Out-File $env:GITHUB_STEP_SUMMARY
+                $xmlFiles = Get-Item ./test_output/*.xml -ErrorAction SilentlyContinue
+                if ($xmlFiles)
+                {
+                    scripts/parse-xunit2-xml.ps1 $xmlFiles.FullName | Out-File $env:GITHUB_STEP_SUMMARY
+                }
             }
-
         }
     }
 }

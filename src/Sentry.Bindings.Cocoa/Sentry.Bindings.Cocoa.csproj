@@ -8,19 +8,29 @@
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
     <SentryCocoaCache>..\..\modules\sentry-cocoa\</SentryCocoaCache>
+    <SentryCocoaProperties>$(MSBuildThisFileDirectory)..\..\modules\sentry-cocoa.properties</SentryCocoaProperties>
     <SentryCocoaFrameworkHeaders>$(SentryCocoaCache)Sentry.framework\</SentryCocoaFrameworkHeaders>
-    <SentryCocoaProperties>$([System.IO.File]::ReadAllText("$(MSBuildThisFileDirectory)../../modules/sentry-cocoa.properties"))</SentryCocoaProperties>
-    <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(SentryCocoaProperties), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
-    <SentryCocoaFramework>$(SentryCocoaCache)Sentry-$(SentryCocoaVersion).xcframework</SentryCocoaFramework>
-    <SentryCocoaBindingInputs>../../modules/sentry-cocoa.properties;../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaFrameworkHeaders)**/*.h</SentryCocoaBindingInputs>
     <!-- SentrySpan.g.cs: error CS0108: 'ISentrySpan.Serialize()' hides inherited member 'ISentrySerializable.Serialize()'. Use the new keyword if hiding was intended -->
     <NoWarn>$(NoWarn);CS0108</NoWarn>
+  </PropertyGroup>
+
+  <!-- Released Cocoa SDK builds -->
+  <PropertyGroup Condition="Exists('$(SentryCocoaProperties)') And !Exists('$(SentryCocoaCache).git')">
+    <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(SentryCocoaProperties)')), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
+    <SentryCocoaFramework>$(SentryCocoaCache)Sentry-$(SentryCocoaVersion).xcframework</SentryCocoaFramework>
+    <SentryCocoaBindingInputs>$(SentryCocoaProperties);../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaFrameworkHeaders)**/*.h</SentryCocoaBindingInputs>
   </PropertyGroup>
 
   <!-- Override values for local Cocoa SDK builds -->
   <PropertyGroup Condition="Exists('$(SentryCocoaCache).git')">
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
     <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/**/*.h</SentryCocoaBindingInputs>
+    <!-- Resolve path to modules/sentry-cocoa/.git -->
+    <SentryCocoaGitFile>$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
+    <!-- Standalone clone: .git is a directory -->
+    <SentryCocoaGitDir Condition="Exists('$(SentryCocoaCache).git\HEAD')">.git</SentryCocoaGitDir>
+    <!-- Submodule: .git is a file pointing at the real gitdir -->
+    <SentryCocoaGitDir Condition="'$(SentryCocoaGitDir)' == ''">$([System.IO.File]::ReadAllText('$(SentryCocoaGitFile)').Trim().Replace('gitdir: ', ''))</SentryCocoaGitDir>
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
@@ -58,7 +68,7 @@
 
   <!-- Downloads and sets up the Cocoa SDK: dotnet msbuild /t:setupCocoaSDK src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj -->
   <Target Name="_DownloadCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaCache).git') And !Exists('$(SentryCocoaFramework)')">
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(SentryCocoaProperties)') And !Exists('$(SentryCocoaCache).git') And !Exists('$(SentryCocoaFramework)')">
 
     <Message Importance="High" Text="Setting up the Cocoa SDK version '$(SentryCocoaVersion)'." />
 
@@ -79,6 +89,11 @@
       Condition="Exists('$(SentryCocoaFramework).zip') and !Exists('$(SentryCocoaFramework)')"
       Command="unzip -o $(SentryCocoaFramework).zip -d $(SentryCocoaCache) &amp;&amp; mv $(SentryCocoaCache)Sentry-Dynamic.xcframework $(SentryCocoaFramework)" />
 
+    <!-- Invalidate any stale sanitization stamp left over from a previous extraction.
+         Without this, if the xcframework directory is deleted while the zip survives, the stamp
+         would prevent SanitizeSentryCocoaFramework from running on the freshly extracted framework. -->
+    <Delete Files="$(SentryCocoaFramework).sanitized.stamp" />
+
     <!-- Make a copy of the header files before we butcher these to suite objective sharpie -->
     <MakeDir Directories="$(SentryCocoaFrameworkHeaders)" />
     <ItemGroup>
@@ -92,7 +107,7 @@
   <!-- Build the Sentry Cocoa SDK from source -->
   <Target Name="_BuildCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(SentryCocoaCache).git')"
-          Inputs="..\..\modules\sentry-cocoa\.git\HEAD;..\..\scripts\build-sentry-cocoa.sh" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
+          Inputs="$(SentryCocoaCache)$(SentryCocoaGitDir)\HEAD;..\..\scripts\build-sentry-cocoa.sh" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
 
     <Message Importance="High" Text="Building the Cocoa SDK from source." />
     <Exec Command="bash ../../scripts/build-sentry-cocoa.sh" IgnoreStandardErrorWarningFormat="true" />
@@ -103,20 +118,25 @@
           DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK;_GenerateSentryCocoaBindings;SanitizeSentryCocoaFramework"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
-  <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
+  <!-- Outer build (multi-TFM): runs _SetupCocoaSDK once before MSBuild fans out to inner per-TFM builds.  -->
   <Target Name="SetupCocoaSDKBeforeOuterBuild" DependsOnTargets="_SetupCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           BeforeTargets="DispatchToInnerBuilds" />
 
+  <!--
+    Inner build (single-TFM) or direct single-TFM invocation (-f flag): runs _SetupCocoaSDK as a
+    direct dependency, without a recursive MSBuild call. The recursive call pattern caused a circular
+    dependency (SetupCocoaSDK → BeforeBuild → SetupCocoaSDK) that newer MSBuild versions detect as an error.
+    All subtargets are idempotent, so if the outer build already ran them this is a no-op.
+  -->
   <Target Name="SetupCocoaSDK"
+          DependsOnTargets="_SetupCocoaSDK"
           BeforeTargets="BeforeBuild"
-          Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-    <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_SetupCocoaSDK" RemoveProperties="TargetFramework" />
-  </Target>
+          Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
   <Target Name="CleanCocoaSDK" AfterTargets="Clean" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-    <RemoveDir Directories="$(SentryCocoaCache)" ContinueOnError="true" />
+    <RemoveDir Directories="$(SentryCocoaCache)Carthage;$(SentryCocoaFramework);$(SentryCocoaFrameworkHeaders)" ContinueOnError="true" />
+    <Delete Files="$(SentryCocoaFramework).zip;$(SentryCocoaFramework).sanitized.stamp" ContinueOnError="true" />
   </Target>
 
   <!-- Generate bindings -->
@@ -133,10 +153,12 @@
   </Target>
 
   <!-- Sanitize the xcframework before NativeReference resolution and packing -->
+  <!-- Stamp file ensures this only runs once even when invoked from multiple inner TFM builds -->
   <Target Name="SanitizeSentryCocoaFramework"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFramework)')">
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFramework)') and !Exists('$(SentryCocoaFramework).sanitized.stamp')">
     <Message Importance="High" Text="Sanitizing $(SentryCocoaFramework): removing dSYMs, Headers, Modules, PrivateHeaders (including symlinks)." />
     <Exec Command="find &quot;$(SentryCocoaFramework)&quot; -depth \( -name dSYMs -o -name Headers -o -name Modules -o -name PrivateHeaders \) -exec echo Removing {} \; -exec rm -rf {} + 2&gt;/dev/null || true" />
+    <Touch Files="$(SentryCocoaFramework).sanitized.stamp" AlwaysCreate="true" />
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->

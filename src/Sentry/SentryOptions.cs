@@ -206,7 +206,7 @@ public class SentryOptions
 #endif
 
 #if HAS_DIAGNOSTIC_INTEGRATION
-            if ((_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
+            if (!DisableSentryTracing && (_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
             {
                 yield return new SentryDiagnosticListenerIntegration();
             }
@@ -222,6 +222,10 @@ public class SentryOptions
 
             foreach (var integration in _integrations)
             {
+                if (DisableSentryTracing && integration is ISentryTracingIntegration)
+                {
+                    continue;
+                }
                 yield return integration;
             }
         }
@@ -569,6 +573,32 @@ public class SentryOptions
         _beforeSendLog = beforeSendLog;
     }
 
+    /// <summary>
+    /// When set to <see langword="false"/>, the SDK does not generate and send metrics to Sentry via <see cref="SentrySdk.Metrics"/>.
+    /// Defaults to <see langword="true"/>.
+    /// </summary>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+    public bool EnableMetrics { get; set; } = true;
+
+    private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
+
+    internal Func<SentryMetric, SentryMetric?>? BeforeSendMetricInternal => _beforeSendMetric;
+
+    /// <summary>
+    /// Sets a callback function to be invoked before sending the metric to Sentry.
+    /// When the delegate throws an <see cref="Exception"/> during invocation, the metric will not be captured.
+    /// </summary>
+    /// <remarks>
+    /// It can be used to modify the metric object before being sent to Sentry.
+    /// To prevent the metric from being sent to Sentry, return <see langword="null"/>.
+    /// Supported numeric value types are <see langword="byte"/>, <see langword="short"/>, <see langword="int"/>, <see langword="long"/>, <see langword="float"/>, and <see langword="double"/>.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+    public void SetBeforeSendMetric(Func<SentryMetric, SentryMetric?> beforeSendMetric)
+    {
+        _beforeSendMetric = beforeSendMetric;
+    }
+
     private int _maxQueueItems = 30;
 
     /// <summary>
@@ -830,6 +860,12 @@ public class SentryOptions
     {
         (500, 599)
     };
+
+    /// <summary>
+    /// <para>Transactions will be dropped if the HTTP Response status code matches any of the configured ranges.</para>
+    /// <para>Defaults to an empty collection (all transactions are captured regardless of status code).</para>
+    /// </summary>
+    public IList<HttpStatusCodeRange> TraceIgnoreStatusCodes { get; set; } = [];
 
     // The default failed request target list will match anything, but adding to the list should clear that.
     private Lazy<IList<StringOrRegex>> _failedRequestTargets = new(() =>
@@ -1157,6 +1193,19 @@ public class SentryOptions
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
 
     /// <summary>
+    /// During the transition period to OTLP we give SDK users the option to keep using Sentry's tracing in conjunction
+    /// with OTEL instrumentation. Setting this to true will disable Sentry's tracing entirely, which is the recommended
+    /// setting but would be a major change in behaviour, so we've made it opt-in for now.
+    /// TODO: Remove this option in a future major release and make it true / non-optional when using OTEL (i.e. implied by the Instrumenter)
+    /// </summary>
+    internal bool DisableSentryTracing { get; set; } = false;
+
+    /// <summary>
+    /// An optional external propagation context - used when using Sentry with OLTP
+    /// </summary>
+    internal IExternalPropagationContext? ExternalPropagationContext { get; set; }
+
+    /// <summary>
     /// <para>
     /// Set to `true` to prevents Sentry from automatically registering <see cref="SentryHttpMessageHandler"/>.
     /// </para>
@@ -1178,10 +1227,7 @@ public class SentryOptions
     public void AddJsonConverter(JsonConverter converter)
     {
         // protect against null because user may not have nullability annotations enabled
-        if (converter == null!)
-        {
-            throw new ArgumentNullException(nameof(converter));
-        }
+        ArgumentNullException.ThrowIfNull(converter);
 
         JsonExtensions.AddJsonConverter(converter);
     }
@@ -1202,10 +1248,7 @@ public class SentryOptions
         where T : JsonSerializerContext
     {
         // protect against null because user may not have nullability annotations enabled
-        if (contextBuilder == null!)
-        {
-            throw new ArgumentNullException(nameof(contextBuilder));
-        }
+        ArgumentNullException.ThrowIfNull(contextBuilder);
 
         JsonExtensions.AddJsonSerializerContext(contextBuilder);
     }
@@ -1291,9 +1334,7 @@ public class SentryOptions
         SettingLocator = new SettingLocator(this);
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 
-        TransactionProcessorsProviders = new() {
-            () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
-        };
+        TransactionProcessorsProviders = [() => TransactionProcessors ?? []];
 
         _clientReportRecorder = new Lazy<IClientReportRecorder>(() => new ClientReportRecorder(this));
 
@@ -1691,7 +1732,9 @@ public class SentryOptions
     /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
     public SentryOptions UseStackTraceFactory(ISentryStackTraceFactory sentryStackTraceFactory)
     {
-        SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
+        ArgumentNullException.ThrowIfNull(sentryStackTraceFactory);
+
+        SentryStackTraceFactory = sentryStackTraceFactory;
         return this;
     }
 
@@ -1904,52 +1947,7 @@ public class SentryOptions
         "Grpc",
         "ServiceStack",
         "Java.Interop",
+        InAppExcludeRegexes.LibMonoSgen,
+        InAppExcludeRegexes.LibXamarin
     ];
-
-    /// <summary>
-    /// Sentry features that are currently in an experimental state.
-    /// </summary>
-    /// <remarks>
-    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
-    /// </remarks>
-    public ExperimentalSentryOptions Experimental { get; } = new ExperimentalSentryOptions();
-
-    /// <summary>
-    /// Sentry features that are currently in an experimental state.
-    /// </summary>
-    /// <remarks>
-    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
-    /// </remarks>
-    public class ExperimentalSentryOptions
-    {
-        private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
-
-        internal ExperimentalSentryOptions()
-        {
-        }
-
-        internal Func<SentryMetric, SentryMetric?>? BeforeSendMetricInternal => _beforeSendMetric;
-
-        /// <summary>
-        /// When set to <see langword="false"/>, the SDK does not generate and send metrics to Sentry via <see cref="SentrySdk"/>.
-        /// Defaults to <see langword="true"/>.
-        /// </summary>
-        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
-        public bool EnableMetrics { get; set; } = true;
-
-        /// <summary>
-        /// Sets a callback function to be invoked before sending the metric to Sentry.
-        /// When the delegate throws an <see cref="Exception"/> during invocation, the metric will not be captured.
-        /// </summary>
-        /// <remarks>
-        /// It can be used to modify the metric object before being sent to Sentry.
-        /// To prevent the metric from being sent to Sentry, return <see langword="null"/>.
-        /// Supported numeric value types are <see langword="byte"/>, <see langword="short"/>, <see langword="int"/>, <see langword="long"/>, <see langword="float"/>, and <see langword="double"/>.
-        /// </remarks>
-        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
-        public void SetBeforeSendMetric(Func<SentryMetric, SentryMetric?> beforeSendMetric)
-        {
-            _beforeSendMetric = beforeSendMetric;
-        }
-    }
 }

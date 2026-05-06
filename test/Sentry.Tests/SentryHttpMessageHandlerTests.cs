@@ -632,4 +632,83 @@ public class SentryHttpMessageHandlerTests
         failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
     }
 #endif
+
+#if ANDROID || IOS || MACCATALYST
+    [Fact]
+    public void HandleResponse_SpanExists_AddsReplayBreadcrumbData()
+    {
+        // Arrange
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = false
+        };
+
+        var sut = new SentryHttpMessageHandler(hub, options);
+
+        var method = "GET";
+        var url = "https://localhost/";
+        var response = new HttpResponseMessage(HttpStatusCode.OK);
+
+        var span = Substitute.For<ISpan>();
+        span.StartTimestamp.Returns(DateTimeOffset.UtcNow.AddMilliseconds(-50));
+
+        // Act
+        sut.HandleResponse(response, span, method, url);
+
+        // Assert
+        var breadcrumb = scope.Breadcrumbs.First();
+        breadcrumb.Type.Should().Be("http");
+        breadcrumb.Category.Should().Be("http");
+
+        breadcrumb.Data.Should().NotBeNull();
+#if ANDROID
+        breadcrumb.Data!.Should().ContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
+        breadcrumb.Data.Should().ContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
+
+        long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.HttpStartTimestampKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var startMs)
+            .Should().BeTrue();
+        long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.HttpEndTimestampKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var endMs)
+            .Should().BeTrue();
+        startMs.Should().BeGreaterThan(0);
+        startMs.Should().Be(span.StartTimestamp.ToUnixTimeMilliseconds());
+        endMs.Should().BeGreaterThan(0);
+        endMs.Should().BeGreaterOrEqualTo(startMs);
+#elif IOS || MACCATALYST
+        breadcrumb.Data!.Should().ContainKey(SentryHttpMessageHandler.RequestStartKey);
+        long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.RequestStartKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var startMs)
+            .Should().BeTrue();
+        startMs.Should().BeGreaterThan(0);
+        startMs.Should().Be(span.StartTimestamp.ToUnixTimeMilliseconds());
+#endif
+    }
+
+    [Fact]
+    public void HandleResponse_NoSpanExists_NoReplayBreadcrumbData()
+    {
+        // Arrange
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+
+        var sut = new SentryHttpMessageHandler(hub, null);
+
+        var method = "GET";
+        var url = "https://localhost/";
+        var response = new HttpResponseMessage(HttpStatusCode.OK);
+
+        // Act
+        sut.HandleResponse(response, span: null, method, url);
+
+        // Assert
+        var breadcrumb = scope.Breadcrumbs.First();
+        breadcrumb.Data.Should().NotBeNull();
+        breadcrumb.Data!.Should().NotContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
+        breadcrumb.Data.Should().NotContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
+        breadcrumb.Data.Should().NotContainKey(SentryHttpMessageHandler.RequestStartKey);
+    }
+#endif
 }
