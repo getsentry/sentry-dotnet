@@ -14,8 +14,10 @@ public class GlobalRootScopeIntegrationTests
             IsGlobalModeEnabled = false,
             AutoSessionTracking = false
         };
+        var scope = new Scope();
 
         var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
         var integration = new GlobalRootScopeIntegration();
 
         // Act
@@ -23,6 +25,7 @@ public class GlobalRootScopeIntegrationTests
 
         // Assert
         hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
+        scope.User.Id.Should().BeNull();
     }
 
     [Fact]
@@ -45,6 +48,7 @@ public class GlobalRootScopeIntegrationTests
         integration.Register(hub, options);
 
         // Assert
+        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
         scope.User.Id.Should().Be(options.InstallationId);
     }
 
@@ -75,6 +79,7 @@ public class GlobalRootScopeIntegrationTests
         integration.Register(hub, options);
 
         // Assert
+        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
         scope.User.Id.Should().Be(oldId);
     }
 
