@@ -193,12 +193,12 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
             return ExceptionType.None;
         }
 
-        if (HasUnhandledNonTerminalException())
+        if (this.IsFromUnhandledException() && !this.IsFromTerminalException())
         {
             return ExceptionType.UnhandledNonTerminal;
         }
 
-        if (HasUnhandledException())
+        if (this.IsFromUnhandledException())
         {
             return ExceptionType.UnhandledTerminal;
         }
@@ -207,37 +207,6 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
     }
 
     private bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
-
-    private bool HasUnhandledException()
-    {
-        if (Exception?.Data[Mechanism.HandledKey] is false)
-        {
-            return true;
-        }
-
-        return SentryExceptions?.Any(e => e.Mechanism is { Handled: false }) ?? false;
-    }
-
-    private bool HasUnhandledNonTerminalException()
-    {
-        // Generally, an unhandled exception is considered terminal.
-        // Exception: If it is an unhandled exception but the terminal flag is explicitly set to false.
-        // I.e. captured through the UnobservedTaskExceptionIntegration, or the exception capture integrations in the Unity SDK
-
-        if (Exception?.Data[Mechanism.HandledKey] is false)
-        {
-            if (Exception.Data[Mechanism.TerminalKey] is false)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        return SentryExceptions?.Any(e =>
-            e.Mechanism is { Handled: false, Terminal: false }
-        ) ?? false;
-    }
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
