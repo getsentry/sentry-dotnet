@@ -604,4 +604,38 @@ public class DynamicSamplingContextTests
             Assert.DoesNotContain("replay_id", dsc.Items);
         }
     }
+
+    [Fact]
+    public void CreateFromExternalPropagationContext_WithOrgIdDsn_IncludesOrgId()
+    {
+        var options = new SentryOptions { Dsn = ValidDsnWithOrgId };
+
+        var propagationContext = Substitute.For<IExternalPropagationContext>();
+        propagationContext.TraceId.Returns(SentryId.Create());
+        propagationContext.IsSampled.Returns(true);
+        propagationContext.SampleRate.Returns(1.0);
+        propagationContext.SampleRand.Returns(0.5);
+
+        var dsc = DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, _fixture.InactiveReplaySession);
+
+        Assert.NotNull(dsc);
+        Assert.Equal("123", Assert.Contains("org_id", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromExternalPropagationContext_WithoutOrgIdDsn_ExcludesOrgId()
+    {
+        var options = new SentryOptions { Dsn = ValidDsn };
+
+        var propagationContext = Substitute.For<IExternalPropagationContext>();
+        propagationContext.TraceId.Returns(SentryId.Create());
+        propagationContext.IsSampled.Returns(true);
+        propagationContext.SampleRate.Returns(1.0);
+        propagationContext.SampleRand.Returns(0.5);
+
+        var dsc = DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, _fixture.InactiveReplaySession);
+
+        Assert.NotNull(dsc);
+        Assert.DoesNotContain("org_id", dsc.Items);
+    }
 }

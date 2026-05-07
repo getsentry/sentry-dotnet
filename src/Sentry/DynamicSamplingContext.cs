@@ -272,7 +272,8 @@ internal class DynamicSamplingContext
             propagationContext.SampleRand,
             release: release,
             environment: environment,
-            replaySession: replaySession
+            replaySession: replaySession,
+            orgId: options.GetEffectiveOrgId()
             );
     }
 }
