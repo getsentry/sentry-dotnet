@@ -1,5 +1,4 @@
 using Sentry.Internal;
-using Sentry.Internal.Extensions;
 
 namespace Sentry;
 
@@ -244,6 +243,29 @@ internal class DynamicSamplingContext
             replaySession: replaySession
             );
     }
+
+    public static DynamicSamplingContext? CreateFromExternalPropagationContext(
+        IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    {
+        if (propagationContext.TraceId is not { } traceId || traceId == SentryId.Empty)
+        {
+            return null;
+        }
+        var publicKey = options.ParsedDsn.PublicKey;
+        var release = options.SettingLocator.GetRelease();
+        var environment = options.SettingLocator.GetEnvironment();
+
+        return new DynamicSamplingContext(
+            traceId,
+            publicKey,
+            propagationContext.IsSampled,
+            propagationContext.SampleRate,
+            propagationContext.SampleRand,
+            release: release,
+            environment: environment,
+            replaySession: replaySession
+            );
+    }
 }
 
 internal static class DynamicSamplingContextExtensions
@@ -259,4 +281,7 @@ internal static class DynamicSamplingContextExtensions
 
     public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
+
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+        => DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, replaySession);
 }

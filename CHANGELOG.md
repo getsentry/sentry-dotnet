@@ -1,5 +1,33 @@
 # Changelog
 
+## 6.5.0
+
+### Features ✨
+
+- feat: Add support to send OTEL traces via OTLP by @jamescrosswell in [#4899](https://github.com/getsentry/sentry-dotnet/pull/4899)
+
+### Fixes 🐛
+
+- fix(unity): update `SentryEvent` to have `IsCaptured` to allow dropping screenshots of filtered events by @JoshuaMoelans in [#5162](https://github.com/getsentry/sentry-dotnet/pull/5162)
+- fix: Memory leak when filtered Activities get garbage collected before `PruneFilteredSpans` runs by @jamescrosswell in [#5186](https://github.com/getsentry/sentry-dotnet/pull/5186)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.12.0 by @github-actions in [#5179](https://github.com/getsentry/sentry-dotnet/pull/5179)
+- chore(deps): update CLI to v3.4.1 by @github-actions in [#5171](https://github.com/getsentry/sentry-dotnet/pull/5171)
+- chore(deps): update Native SDK to v0.13.8 by @github-actions in [#5165](https://github.com/getsentry/sentry-dotnet/pull/5165)
+- chore(deps): update Java SDK to v8.40.0 by @github-actions in [#5161](https://github.com/getsentry/sentry-dotnet/pull/5161)
+- chore(deps): update Cocoa SDK to v9.11.0 by @github-actions in [#5160](https://github.com/getsentry/sentry-dotnet/pull/5160)
+- chore(deps): update CLI to v3.4.0 by @github-actions in [#5145](https://github.com/getsentry/sentry-dotnet/pull/5145)
+- chore(deps): update Java SDK to v8.39.1 by @github-actions in [#5144](https://github.com/getsentry/sentry-dotnet/pull/5144)
+
+### Other
+
+- perf(logs): avoid string allocation when no parameters are passed by @Flash0ver in [#4697](https://github.com/getsentry/sentry-dotnet/pull/4697)
+- chore: fix missing skill by @jamescrosswell in [#5134](https://github.com/getsentry/sentry-dotnet/pull/5134)
+
 ## 6.4.1
 
 ### Fixes 🐛
