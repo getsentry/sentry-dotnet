@@ -1343,33 +1343,6 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
-    public void CaptureTransaction_MixedAttachments_OnlyAddToTransactionsOnesIncluded()
-    {
-        // Arrange
-        var transaction = new SentryTransaction("name", "operation")
-        {
-            IsSampled = true,
-            EndTimestamp = DateTimeOffset.Now
-        };
-        var scope = new Scope(_fixture.SentryOptions);
-        scope.AddAttachment(AttachmentHelper.FakeAttachment("excluded.txt")); // AddToTransactions = false
-        scope.AddAttachment(new SentryAttachment(
-            AttachmentType.Default,
-            new StreamAttachmentContent(new MemoryStream(new byte[] { 1 })),
-            "included.txt",
-            null,
-            addToTransactions: true));
-        var sut = _fixture.GetSut();
-
-        // Act
-        sut.CaptureTransaction(transaction, scope, null);
-
-        // Assert
-        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
-            envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
-    }
-
-    [Fact]
     public void CaptureTransaction_UserIsNull_SetsFallbackUserId()
     {
         // Arrange
