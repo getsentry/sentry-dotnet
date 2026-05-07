@@ -120,10 +120,6 @@
 
 - Outbound HTTP requests now show in the Network tab for Android Session Replays ([#4860](https://github.com/getsentry/sentry-dotnet/pull/4860))
 
-### Features
-
-- Add strict trace continuation support ([#4981](https://github.com/getsentry/sentry-dotnet/pull/4981))
-
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
