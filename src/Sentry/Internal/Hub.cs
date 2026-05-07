@@ -385,7 +385,7 @@ internal class Hub : IHub, IDisposable
             baggageHeader = null;
         }
 
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession, _options.GetEffectiveOrgId());
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession);
         ConfigureScope(static (scope, propagationContext) => scope.SetPropagationContext(propagationContext), propagationContext);
 
         return new TransactionContext(

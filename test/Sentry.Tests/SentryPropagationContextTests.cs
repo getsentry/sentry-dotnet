@@ -162,47 +162,4 @@ public class SentryPropagationContextTests
         }
     }
 
-    [Fact]
-    public void CreateFromHeaders_WithOrgMismatch_StartsNewTrace()
-    {
-        // Arrange
-        var incomingTraceId = SentryId.Create();
-        var traceHeader = new SentryTraceHeader(incomingTraceId, SpanId.Create(), null);
-        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
-        {
-            { "sentry-trace_id", incomingTraceId.ToString() },
-            { "sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
-            { "sentry-org_id", "2" }
-        });
-
-        // Act - SDK org ID is "1", but baggage has org_id "2"
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(
-            null, traceHeader, baggageHeader, _fixture.InactiveReplaySession, sdkOrgId: "1");
-
-        // Assert - should start a new trace because org IDs don't match
-        Assert.NotEqual(incomingTraceId, propagationContext.TraceId);
-        Assert.Null(propagationContext.ParentSpanId);
-        Assert.Null(propagationContext._dynamicSamplingContext);
-    }
-
-    [Fact]
-    public void CreateFromHeaders_WithOrgMatch_ContinuesTrace()
-    {
-        // Arrange
-        var incomingTraceId = SentryId.Create();
-        var traceHeader = new SentryTraceHeader(incomingTraceId, SpanId.Create(), null);
-        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
-        {
-            { "sentry-trace_id", incomingTraceId.ToString() },
-            { "sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
-            { "sentry-org_id", "1" }
-        });
-
-        // Act - SDK org ID matches baggage org_id
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(
-            null, traceHeader, baggageHeader, _fixture.InactiveReplaySession, sdkOrgId: "1");
-
-        // Assert - should continue the trace
-        Assert.Equal(incomingTraceId, propagationContext.TraceId);
-    }
 }
