@@ -38,13 +38,20 @@ internal sealed class Dsn
     /// </summary>
     private Uri ApiBaseUri { get; }
 
+    /// <summary>
+    /// The organization ID parsed from the DSN host (e.g., <c>o1</c> in <c>o1.ingest.us.sentry.io</c> yields <c>"1"</c>).
+    /// Returns <c>null</c> if no org ID is present in the DSN.
+    /// </summary>
+    public string? OrgId { get; internal set; }
+
     private Dsn(
         string source,
         string projectId,
         string? path,
         string? secretKey,
         string publicKey,
-        Uri apiBaseUri)
+        Uri apiBaseUri,
+        string? orgId = null)
     {
         Source = source;
         ProjectId = projectId;
@@ -52,6 +59,7 @@ internal sealed class Dsn
         SecretKey = secretKey;
         PublicKey = publicKey;
         ApiBaseUri = apiBaseUri;
+        OrgId = orgId;
     }
 
     public Uri GetStoreEndpointUri() => new(ApiBaseUri, "store/");
@@ -95,6 +103,19 @@ internal sealed class Dsn
             throw new ArgumentException("Invalid DSN: A Project Id is required.");
         }
 
+        // Parse org ID from host (e.g., "o1.ingest.us.sentry.io" -> "1")
+        string? orgId = null;
+        var hostParts = uri.DnsSafeHost.Split('.');
+        if (hostParts.Length > 0)
+        {
+            var firstPart = hostParts[0];
+            if (firstPart.Length >= 2 && firstPart[0] == 'o' &&
+                ulong.TryParse(firstPart.Substring(1), out _))
+            {
+                orgId = firstPart.Substring(1);
+            }
+        }
+
         var apiBaseUri = new UriBuilder
         {
             Scheme = uri.Scheme,
@@ -109,7 +130,8 @@ internal sealed class Dsn
             path,
             secretKey,
             publicKey,
-            apiBaseUri);
+            apiBaseUri,
+            orgId);
     }
 
     public static Dsn? TryParse(string? dsn)

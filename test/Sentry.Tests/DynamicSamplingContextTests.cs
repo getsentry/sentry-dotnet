@@ -462,6 +462,122 @@ public class DynamicSamplingContextTests
         Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", dsc.Items));
     }
 
+    [Fact]
+    public void CreateFromTransaction_WithOrgIdDsn_IncludesOrgId()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsnWithOrgId,
+            Release = "foo@1.0.0",
+            Environment = "production"
+        };
+
+        var hub = Substitute.For<IHub>();
+        var ctx = Substitute.For<ITransactionContext>();
+        ctx.TraceId.Returns(SentryId.Create());
+
+        var transaction = new TransactionTracer(hub, ctx)
+        {
+            Name = "GET /test",
+            NameSource = TransactionNameSource.Route,
+            SampleRate = 1.0,
+            SampleRand = 0.5,
+        };
+
+        var dsc = transaction.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
+
+        Assert.Equal("123", Assert.Contains("org_id", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromTransaction_WithoutOrgIdDsn_ExcludesOrgId()
+    {
+        var options = new SentryOptions { Dsn = ValidDsn };
+
+        var hub = Substitute.For<IHub>();
+        var ctx = Substitute.For<ITransactionContext>();
+        ctx.TraceId.Returns(SentryId.Create());
+
+        var transaction = new TransactionTracer(hub, ctx)
+        {
+            Name = "GET /test",
+            NameSource = TransactionNameSource.Route,
+            SampleRate = 1.0,
+            SampleRand = 0.5,
+        };
+
+        var dsc = transaction.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
+
+        Assert.DoesNotContain("org_id", dsc.Items);
+    }
+
+    [Fact]
+    public void CreateFromUnsampledTransaction_WithOrgIdDsn_IncludesOrgId()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsnWithOrgId,
+            Release = "foo@1.0.0",
+            Environment = "production"
+        };
+
+        var hub = Substitute.For<IHub>();
+        var ctx = Substitute.For<ITransactionContext>();
+        ctx.TraceId.Returns(SentryId.Create());
+
+        var transaction = new UnsampledTransaction(hub, ctx)
+        {
+            SampleRate = 1.0,
+            SampleRand = 0.5,
+        };
+
+        var dsc = transaction.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
+
+        Assert.Equal("123", Assert.Contains("org_id", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromUnsampledTransaction_WithoutOrgIdDsn_ExcludesOrgId()
+    {
+        var options = new SentryOptions { Dsn = ValidDsn };
+
+        var hub = Substitute.For<IHub>();
+        var ctx = Substitute.For<ITransactionContext>();
+        ctx.TraceId.Returns(SentryId.Create());
+
+        var transaction = new UnsampledTransaction(hub, ctx)
+        {
+            SampleRate = 1.0,
+            SampleRand = 0.5,
+        };
+
+        var dsc = transaction.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
+
+        Assert.DoesNotContain("org_id", dsc.Items);
+    }
+
+    [Fact]
+    public void CreateFromPropagationContext_WithOrgIdDsn_IncludesOrgId()
+    {
+        var options = new SentryOptions { Dsn = ValidDsnWithOrgId };
+        var propagationContext = new SentryPropagationContext(SentryId.Create(), SpanId.Create());
+
+        var dsc = propagationContext.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
+
+        Assert.Equal("123", Assert.Contains("org_id", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromPropagationContext_WithoutOrgIdDsn_ExcludesOrgId()
+    {
+        var options = new SentryOptions { Dsn = "https://a@sentry.io/1" };
+        var propagationContext = new SentryPropagationContext(SentryId.Create(), SpanId.Create());
+
+        var dsc = propagationContext.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
+
+        Assert.DoesNotContain("org_id", dsc.Items);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -487,5 +603,39 @@ public class DynamicSamplingContextTests
         {
             Assert.DoesNotContain("replay_id", dsc.Items);
         }
+    }
+
+    [Fact]
+    public void CreateFromExternalPropagationContext_WithOrgIdDsn_IncludesOrgId()
+    {
+        var options = new SentryOptions { Dsn = ValidDsnWithOrgId };
+
+        var propagationContext = Substitute.For<IExternalPropagationContext>();
+        propagationContext.TraceId.Returns(SentryId.Create());
+        propagationContext.IsSampled.Returns(true);
+        propagationContext.SampleRate.Returns(1.0);
+        propagationContext.SampleRand.Returns(0.5);
+
+        var dsc = DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, _fixture.InactiveReplaySession);
+
+        Assert.NotNull(dsc);
+        Assert.Equal("123", Assert.Contains("org_id", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromExternalPropagationContext_WithoutOrgIdDsn_ExcludesOrgId()
+    {
+        var options = new SentryOptions { Dsn = ValidDsn };
+
+        var propagationContext = Substitute.For<IExternalPropagationContext>();
+        propagationContext.TraceId.Returns(SentryId.Create());
+        propagationContext.IsSampled.Returns(true);
+        propagationContext.SampleRate.Returns(1.0);
+        propagationContext.SampleRand.Returns(0.5);
+
+        var dsc = DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, _fixture.InactiveReplaySession);
+
+        Assert.NotNull(dsc);
+        Assert.DoesNotContain("org_id", dsc.Items);
     }
 }

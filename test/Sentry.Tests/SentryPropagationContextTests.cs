@@ -161,4 +161,5 @@ public class SentryPropagationContextTests
             Assert.Equal("bfd31b89a59d41c99d96dc2baf840ecd", Assert.Contains("replay_id", dsc.Items));
         }
     }
+
 }
