@@ -93,17 +93,14 @@ static partial class SentrySdk
 
         // Default tags are applied per-event by the Enricher to events going through the .NET pipeline,
         // but native crashes are captured and uploaded by the native SDK without going through that pipeline.
-        // Push them to the scope so the scope observer relays them to the native layer and they're attached
-        // to native crash reports.
-        if (options is { EnableScopeSync: true, ScopeObserver: not null } && options.DefaultTags.Count > 0)
+        // Forward them to the scope observer so the native layer attaches them to crash reports.
+        // Bypassing the .NET scope keeps scope.Tags identical between native and non-native apps.
+        if (options is { EnableScopeSync: true, ScopeObserver: { } observer } && options.DefaultTags.Count > 0)
         {
-            hub.ConfigureScope(static (scope, opts) =>
+            foreach (var tag in options.DefaultTags)
             {
-                foreach (var tag in opts.DefaultTags)
-                {
-                    scope.SetTag(tag.Key, tag.Value);
-                }
-            }, options);
+                observer.SetTag(tag.Key, tag.Value);
+            }
         }
 
         // Platform specific check for profiler misconfiguration.

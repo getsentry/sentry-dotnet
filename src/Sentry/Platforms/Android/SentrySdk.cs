@@ -95,8 +95,9 @@ public static partial class SentrySdk
                 o.CacheDirPath = Path.Combine(cacheDirectoryPath, "android");
             }
 
-            // NOTE: options.DefaultTags are pushed to the scope after the hub initializes (see SentrySdk.InitHub),
-            //       which relays them to the Android SDK via the scope observer so they're attached to native crashes.
+            // NOTE: options.DefaultTags are forwarded to the scope observer in SentrySdk.InitHub so the
+            //       Android SDK attaches them to native crashes. The Enricher continues to apply them to
+            //       managed events at send time.
 
             if (options.HttpProxy is System.Net.WebProxy proxy)
             {
