@@ -19,11 +19,22 @@ public readonly partial struct MeasurementUnit : IEquatable<MeasurementUnit>
         Custom = 4
     }
 
-    private static readonly string[] DurationNames = Enum.GetNames<Duration>();
+    private static readonly string[] DurationNames = CreateLowercaseNames<Duration>();
 
-    private static readonly string[] InformationNames = Enum.GetNames<Information>();
+    private static readonly string[] InformationNames = CreateLowercaseNames<Information>();
 
-    private static readonly string[] FractionNames = Enum.GetNames<Fraction>();
+    private static readonly string[] FractionNames = CreateLowercaseNames<Fraction>();
+
+    private static string[] CreateLowercaseNames<T>() where T : struct, Enum
+    {
+        var names = Enum.GetNames<T>();
+        for (var i = 0; i < names.Length; i++)
+        {
+            names[i] = names[i].ToLowerInvariant();
+        }
+
+        return names;
+    }
 
     private MeasurementUnit(Duration unit)
     {
