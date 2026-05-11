@@ -24,12 +24,14 @@ public static class SentryOptionsExtensions
     /// <param name="defaultTextMapPropagator">
     ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
     ///     <para>
-    ///         If this parameter is not supplied, the <see cref="OpenTelemetry.SentryPropagator"/> will be used, which propagates the
-    ///         baggage header as well as Sentry trace headers.
+    ///         If this parameter is not supplied, a <see cref="CompositeTextMapPropagator"/> containing both
+    ///         W3C <c>traceparent</c>/<c>tracestate</c> and
+    ///         <see cref="OpenTelemetry.SentryPropagator"/> (<c>sentry-trace</c> and <c>baggage</c>) will be used.
+    ///         This allows Sentry to interoperate with services that use W3C trace context headers.
     ///     </para>
     ///     <para>
-    ///         The <see cref="OpenTelemetry.SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work, but you
-    ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
+    ///         The <see cref="OpenTelemetry.SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work. Supply
+    ///         a custom propagator only if you need to replace the defaults entirely.
     ///     </para>
     /// </param>
     public static void UseOtlp(this SentryOptions options, TracerProviderBuilder tracerProviderBuilder, Uri? collectorUrl = null, TextMapPropagator? defaultTextMapPropagator = null)
