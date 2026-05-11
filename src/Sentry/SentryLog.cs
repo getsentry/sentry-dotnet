@@ -172,7 +172,7 @@ public sealed class SentryLog
         _attributes[key] = new SentryAttribute(value, "integer");
     }
 
-    internal void SetDefaultAttributes(SentryOptions options, Scope? scope)
+    internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion? sdk)
     {
         // Core Attributes
         var environment = options.SettingLocator.GetEnvironment();
@@ -184,12 +184,11 @@ public sealed class SentryLog
             SetAttribute("sentry.release", release);
         }
 
-        var sdk = scope?.Sdk ?? SdkVersion.Instance;
-        if (sdk.Name is { } name)
+        if (sdk?.Name is { } name)
         {
             SetAttribute("sentry.sdk.name", name);
         }
-        if (sdk.Version is { } version)
+        if (sdk?.Version is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
         }

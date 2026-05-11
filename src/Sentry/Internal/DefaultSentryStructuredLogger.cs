@@ -75,7 +75,8 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
             return;
         }
 
-        log.SetDefaultAttributes(_options, _hub.GetScope());
+        var scope = _hub.GetScope();
+        log.SetDefaultAttributes(_options, scope, scope?.Sdk);
 
         CaptureLog(log);
     }
