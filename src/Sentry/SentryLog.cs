@@ -172,7 +172,7 @@ public sealed class SentryLog
         _attributes[key] = new SentryAttribute(value, "integer");
     }
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
+    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk, Scope? scope = null)
     {
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
@@ -190,6 +190,22 @@ public sealed class SentryLog
         if (sdk.Version is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
+        }
+
+        if (scope?.User is { } user)
+        {
+            if (user.Id is { } userId)
+            {
+                SetAttribute("user.id", userId);
+            }
+            if (user.Username is { } username)
+            {
+                SetAttribute("user.name", username);
+            }
+            if (user.Email is { } email)
+            {
+                SetAttribute("user.email", email);
+            }
         }
     }
 

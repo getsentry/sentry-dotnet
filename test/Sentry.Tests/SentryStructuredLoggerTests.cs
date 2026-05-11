@@ -245,6 +245,58 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Args.Should().BeEquivalentTo([nameof(SentryLog)]);
     }
 
+    [Fact]
+    public void Log_WithScopeUser_SetsUserAttributes()
+    {
+        var scope = new Scope();
+        scope.User = new SentryUser { Id = "user-id", Username = "user-name", Email = "user@example.com" };
+        _fixture.Hub.SubstituteConfigureScope(scope);
+
+        SentryLog capturedLog = null!;
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog((SentryLog log) =>
+        {
+            capturedLog = log;
+            return log;
+        });
+        var logger = _fixture.GetSut();
+
+        logger.LogInfo("A message");
+        logger.Flush();
+
+        capturedLog.Should().NotBeNull();
+        capturedLog.TryGetAttribute("user.id", out string? userId).Should().BeTrue();
+        userId.Should().Be("user-id");
+        capturedLog.TryGetAttribute("user.name", out string? userName).Should().BeTrue();
+        userName.Should().Be("user-name");
+        capturedLog.TryGetAttribute("user.email", out string? userEmail).Should().BeTrue();
+        userEmail.Should().Be("user@example.com");
+    }
+
+    [Fact]
+    public void Log_WithoutScopeUser_DoesNotSetUserAttributes()
+    {
+        var scope = new Scope();
+        _fixture.Hub.SubstituteConfigureScope(scope);
+
+        SentryLog capturedLog = null!;
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog((SentryLog log) =>
+        {
+            capturedLog = log;
+            return log;
+        });
+        var logger = _fixture.GetSut();
+
+        logger.LogInfo("A message");
+        logger.Flush();
+
+        capturedLog.Should().NotBeNull();
+        capturedLog.TryGetAttribute("user.id", out object? _).Should().BeFalse();
+        capturedLog.TryGetAttribute("user.name", out object? _).Should().BeFalse();
+        capturedLog.TryGetAttribute("user.email", out object? _).Should().BeFalse();
+    }
+
     private static void ConfigureLog(SentryLog log)
     {
         log.SetAttribute("attribute-key", "attribute-value");
