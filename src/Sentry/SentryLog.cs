@@ -172,8 +172,9 @@ public sealed class SentryLog
         _attributes[key] = new SentryAttribute(value, "integer");
     }
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk, Scope? scope = null)
+    internal void SetDefaultAttributes(SentryOptions options, Scope? scope)
     {
+        // Core Attributes
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
 
@@ -183,6 +184,7 @@ public sealed class SentryLog
             SetAttribute("sentry.release", release);
         }
 
+        var sdk = scope?.Sdk ?? SdkVersion.Instance;
         if (sdk.Name is { } name)
         {
             SetAttribute("sentry.sdk.name", name);
@@ -192,6 +194,17 @@ public sealed class SentryLog
             SetAttribute("sentry.sdk.version", version);
         }
 
+        // Server Attributes
+        if (!string.IsNullOrEmpty(options.ServerName))
+        {
+            SetAttribute("server.address", options.ServerName!);
+        }
+        else if (options.SendDefaultPii)
+        {
+            SetAttribute("server.address", Environment.MachineName);
+        }
+
+        // User Attributes
         if (scope?.User is { } user)
         {
             if (user.Id is { } userId)
