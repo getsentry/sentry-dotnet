@@ -1295,6 +1295,54 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureTransaction_AttachmentWithAddToTransactionsTrue_IncludedInEnvelope()
+    {
+        // Arrange
+        var transaction = new SentryTransaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(new MemoryStream(new byte[] { 1 })),
+            "include.txt",
+            null,
+            addToTransactions: true);
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(attachment);
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
+    }
+
+    [Fact]
+    public void CaptureTransaction_AttachmentWithAddToTransactionsFalse_ExcludedFromEnvelope()
+    {
+        // Arrange
+        var transaction = new SentryTransaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("exclude.txt")); // default: AddToTransactions = false
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 0));
+    }
+
+    [Fact]
     public void CaptureTransaction_UserIsNull_SetsFallbackUserId()
     {
         // Arrange

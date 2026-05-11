@@ -215,7 +215,8 @@ public class SentryClient : ISentryClient, IDisposable
             processedTransaction.Redact();
         }
 
-        CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+        var attachments = hint.Attachments.Where(a => a.AddToTransactions).ToList();
+        CaptureEnvelope(Envelope.FromTransaction(processedTransaction, _options.DiagnosticLogger, attachments));
     }
 
 #if NET6_0_OR_GREATER
