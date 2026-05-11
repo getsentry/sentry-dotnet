@@ -184,12 +184,12 @@ public sealed class SentryLog
             SetAttribute("sentry.release", release);
         }
 
-        sdk ??= scope?.Sdk;
-        if (sdk?.Name is { } name)
+        sdk ??= scope?.Sdk ?? SdkVersion.Instance;
+        if (sdk.Name is { } name)
         {
             SetAttribute("sentry.sdk.name", name);
         }
-        if (sdk?.Version is { } version)
+        if (sdk.Version is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
         }
