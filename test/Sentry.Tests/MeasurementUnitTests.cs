@@ -1,5 +1,7 @@
 namespace Sentry.Tests;
 
+using System.Globalization;
+
 public class MeasurementUnitTests
 {
     [Fact]
@@ -125,5 +127,38 @@ public class MeasurementUnitTests
         var m1 = MeasurementUnit.Custom("second");
         var m2 = MeasurementUnit.Duration.Second;
         Assert.NotEqual(m1, m2);
+    }
+
+    [Fact]
+    public void DurationUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var value in Enum.GetValues<MeasurementUnit.Duration>())
+        {
+            MeasurementUnit unit = value;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
+    }
+
+    [Fact]
+    public void InformationUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var value in Enum.GetValues<MeasurementUnit.Information>())
+        {
+            MeasurementUnit unit = value;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
+    }
+
+    [Fact]
+    public void FractionUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var value in Enum.GetValues<MeasurementUnit.Fraction>())
+        {
+            MeasurementUnit unit = value;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
     }
 }
