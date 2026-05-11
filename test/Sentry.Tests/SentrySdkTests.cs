@@ -1005,6 +1005,7 @@ public class SentrySdkTests : IDisposable
             InitNativeSdks = false,
         };
         options.DefaultTags["env"] = "production";
+        options.DefaultTags["region"] = "us-east-1";
 
         // Act
         SentrySdk.InitHub(options);
