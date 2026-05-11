@@ -19,41 +19,11 @@ public readonly partial struct MeasurementUnit : IEquatable<MeasurementUnit>
         Custom = 4
     }
 
-    private static readonly string[] DurationNames =
-    [
-        "nanosecond",
-        "microsecond",
-        "millisecond",
-        "second",
-        "minute",
-        "hour",
-        "day",
-        "week"
-    ];
+    private static readonly string[] DurationNames = Enum.GetNames<Duration>();
 
-    private static readonly string[] InformationNames =
-    [
-        "bit",
-        "byte",
-        "kilobyte",
-        "kibibyte",
-        "megabyte",
-        "mebibyte",
-        "gigabyte",
-        "gibibyte",
-        "terabyte",
-        "tebibyte",
-        "petabyte",
-        "pebibyte",
-        "exabyte",
-        "exbibyte"
-    ];
+    private static readonly string[] InformationNames =   Enum.GetNames<Information>();
 
-    private static readonly string[] FractionNames =
-    [
-        "ratio",
-        "percent"
-    ];
+    private static readonly string[] FractionNames =  Enum.GetNames<Fraction>();
 
     private MeasurementUnit(Duration unit)
     {
