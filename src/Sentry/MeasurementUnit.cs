@@ -21,9 +21,9 @@ public readonly partial struct MeasurementUnit : IEquatable<MeasurementUnit>
 
     private static readonly string[] DurationNames = Enum.GetNames<Duration>();
 
-    private static readonly string[] InformationNames =   Enum.GetNames<Information>();
+    private static readonly string[] InformationNames = Enum.GetNames<Information>();
 
-    private static readonly string[] FractionNames =  Enum.GetNames<Fraction>();
+    private static readonly string[] FractionNames = Enum.GetNames<Fraction>();
 
     private MeasurementUnit(Duration unit)
     {
