@@ -412,7 +412,8 @@ public class SentryLogTests
             entry => entry.Message.Should().Match("*nuint*is not supported*64-bit*"),
 #endif
             entry => entry.Message.Should().Match("*decimal*is not supported*overflow*"),
-            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*")
+            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*"),
+            entry => entry.Message.Should().Match("*null*is not supported*ignored*")
         );
     }
 }

@@ -79,12 +79,7 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
     /// </summary>
     public void SetAttribute<TAttribute>(string key, TAttribute value) where TAttribute : notnull
     {
-        if (value is null)
-        {
-            return;
-        }
-
-        this[key] = new SentryAttribute(value);
+        this[key] = new SentryAttribute(value!);
     }
 
     internal void SetAttribute(string key, string value)
