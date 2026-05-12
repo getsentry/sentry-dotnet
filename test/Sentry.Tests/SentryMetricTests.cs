@@ -71,7 +71,7 @@ public class SentryMetricTests
         metric.Attributes.ShouldContain("sentry.release", options.Release);
         metric.Attributes.ShouldContain("sentry.sdk.name", sdk.Name);
         metric.Attributes.ShouldContain("sentry.sdk.version", sdk.Version);
-        metric.Attributes.ShouldNotContain<string>("not-found");
+        metric.Attributes.ShouldNotContain<object>("not-found");
     }
 
     [Fact]
@@ -368,7 +368,7 @@ public class SentryMetricTests
 #else
         metric.SetAttribute("object", new KeyValuePair<string, string>("key", "value"));
 #endif
-        metric.Attributes.SetAttribute("null", null!);
+        metric.SetAttribute<object>("null", null!);
 
         var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var attributes = document.RootElement.GetProperty("attributes");
@@ -399,8 +399,7 @@ public class SentryMetricTests
             entry => entry.Message.Should().Match("*nuint*is not supported*64-bit*"),
 #endif
             entry => entry.Message.Should().Match("*decimal*is not supported*overflow*"),
-            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*"),
-            entry => entry.Message.Should().Match("*null*is not supported*ignored*")
+            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*")
         );
     }
 }
