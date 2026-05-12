@@ -132,7 +132,7 @@ public class MeasurementUnitTests
     [Fact]
     public void DurationUnits_ToNullableString_MatchesLowercaseEnumNames()
     {
-        foreach (var value in Enum.GetValues<MeasurementUnit.Duration>())
+        foreach (MeasurementUnit.Duration value in Enum.GetValues(typeof(MeasurementUnit.Duration)))
         {
             MeasurementUnit unit = value;
             var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
@@ -143,7 +143,7 @@ public class MeasurementUnitTests
     [Fact]
     public void InformationUnits_ToNullableString_MatchesLowercaseEnumNames()
     {
-        foreach (var value in Enum.GetValues<MeasurementUnit.Information>())
+        foreach (MeasurementUnit.Information value in Enum.GetValues(typeof(MeasurementUnit.Information)))
         {
             MeasurementUnit unit = value;
             var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
@@ -154,7 +154,7 @@ public class MeasurementUnitTests
     [Fact]
     public void FractionUnits_ToNullableString_MatchesLowercaseEnumNames()
     {
-        foreach (var value in Enum.GetValues<MeasurementUnit.Fraction>())
+        foreach (MeasurementUnit.Fraction value in Enum.GetValues(typeof(MeasurementUnit.Fraction)))
         {
             MeasurementUnit unit = value;
             var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
