@@ -14,8 +14,6 @@ namespace Sentry;
 [DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
 public sealed class SentryLog
 {
-    private readonly SentryAttributes _attributes;
-
     [SetsRequiredMembers]
     internal SentryLog(DateTimeOffset timestamp, SentryId traceId, SentryLogLevel level, string message)
     {
@@ -24,7 +22,7 @@ public sealed class SentryLog
         Level = level;
         Message = message;
         // 7 is the number of built-in attributes, so we start with that.
-        _attributes = new SentryAttributes(7);
+        Attributes = new SentryAttributes(7);
         // ensure the ImmutableArray`1 is not default, so we can omit IsDefault checks before accessing other members
         Parameters = ImmutableArray<KeyValuePair<string, object>>.Empty;
     }
@@ -74,6 +72,8 @@ public sealed class SentryLog
     /// The span id of the span that was active when the log was collected.
     /// </summary>
     public SpanId? SpanId { get; init; }
+
+    internal SentryAttributes Attributes { get; }
 
     /// <summary>
     /// Gets the attribute value associated with the specified key.
@@ -126,26 +126,17 @@ public sealed class SentryLog
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
     public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value) =>
-        _attributes.TryGetAttribute(key, out value);
-
-    internal bool TryGetAttribute(string key, [NotNullWhen(true)] out string? value) =>
-        _attributes.TryGetAttribute(key, out value);
+        Attributes.TryGetAttribute(key, out value);
 
     /// <summary>
     /// Set a key-value pair of data attached to the log.
     /// </summary>
-    public void SetAttribute(string key, object value) => _attributes.SetAttribute(key, value);
-
-    internal void SetAttribute(string key, string value) => _attributes.SetAttribute(key, value);
-
-    internal void SetAttribute(string key, char value) => _attributes.SetAttribute(key, value);
-
-    internal void SetAttribute(string key, int value) => _attributes.SetAttribute(key, value);
+    public void SetAttribute(string key, object value) => Attributes.SetAttribute(key, value);
 
     internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk) =>
-        _attributes.SetDefaultAttributes(options, sdk);
+        Attributes.SetDefaultAttributes(options, sdk);
 
-    internal void SetOrigin(string origin) => SetAttribute("sentry.origin", origin);
+    internal void SetOrigin(string origin) => Attributes.SetAttribute("sentry.origin", origin);
 
     internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
@@ -193,7 +184,7 @@ public sealed class SentryLog
             SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{parameter.Key}", parameter.Value, logger);
         }
 
-        foreach (var attribute in _attributes)
+        foreach (var attribute in Attributes)
         {
             SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
         }
