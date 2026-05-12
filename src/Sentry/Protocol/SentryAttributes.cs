@@ -16,7 +16,7 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
     /// Gets the attribute value associated with the specified key.
     /// </summary>
     /// <remarks>
-    /// Returns <see langword="true"/> if this contains an attribute with the specified key which is of type <typeparamref name="TAttribute"/> and it's value is not <see langword="null"/>.
+    /// Returns <see langword="true"/> if this attribute collection contains an attribute with the specified key which is of type <typeparamref name="TAttribute"/> and it's value is not <see langword="null"/>.
     /// Otherwise <see langword="false"/>.
     /// Supported types:
     /// <list type="table">
@@ -61,7 +61,7 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
     ///   </item>
     /// </list>
     /// </remarks>
-    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/foundations/state-management/scopes/attributes/"/>
     public bool TryGetAttribute<TAttribute>(string key, [MaybeNullWhen(false)] out TAttribute value)
     {
         if (TryGetValue(key, out var attribute) && attribute.Value is TAttribute attributeValue)
@@ -75,11 +75,11 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
     }
 
     /// <summary>
-    /// Set a key-value pair of data attached to the attribute collection.
+    /// Set a key-value pair in this attribute collection.
     /// </summary>
     public void SetAttribute<TAttribute>(string key, TAttribute value) where TAttribute : notnull
     {
-        this[key] = new SentryAttribute(value!);
+        this[key] = new SentryAttribute(value);
     }
 
     internal void SetAttribute(string key, string value)

@@ -70,14 +70,12 @@ public class SentryLogTests
         // should only show up in sdk integrations
         log.Attributes.ShouldNotContain<string>("sentry.origin");
 
-        log.TryGetAttribute("attribute", out object attribute).Should().BeTrue();
-        attribute.Should().Be("value");
-        log.Attributes.ShouldContain<string>("sentry.environment", options.Environment!);
-        log.Attributes.ShouldContain<string>("sentry.release", options.Release!);
-        log.Attributes.ShouldContain<string>("sentry.sdk.name", sdk.Name!);
-        log.Attributes.ShouldContain<string>("sentry.sdk.version", sdk.Version!);
-        log.TryGetAttribute("not-found", out object notFound).Should().BeFalse();
-        notFound.Should().BeNull();
+        log.Attributes.ShouldContain<string>("attribute", "value");
+        log.Attributes.ShouldContain<string>("sentry.environment", options.Environment);
+        log.Attributes.ShouldContain<string>("sentry.release", options.Release);
+        log.Attributes.ShouldContain<string>("sentry.sdk.name", sdk.Name);
+        log.Attributes.ShouldContain<string>("sentry.sdk.version", sdk.Version);
+        log.Attributes.ShouldNotContain<object>("not-found");
     }
 
     [Theory]
