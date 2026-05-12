@@ -157,7 +157,7 @@ public static partial class SentrySdk
             o.PrintUncaughtStackTrace = options.Native.PrintUncaughtStackTrace;
             o.ReadTimeoutMillis = (int)options.Native.ReadTimeout.TotalMilliseconds;
             o.TombstoneEnabled = options.Native.TombstoneEnabled;
-            o.ReportHistoricalAnrs = options.Native.ReportHistoricalTombstones;
+            o.ReportHistoricalTombstones = options.Native.ReportHistoricalTombstones;
 
             // In-App Excludes and Includes to be passed to the Android SDK
             options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
