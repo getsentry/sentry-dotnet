@@ -87,7 +87,8 @@ internal sealed class SentryStructuredLogger : ILogger
             SpanId = spanId,
         };
 
-        log.SetDefaultAttributes(_options, _sdk);
+        var scope = _hub.GetScope();
+        log.SetDefaultAttributes(_options, scope, _sdk);
         log.SetOrigin("auto.log.extensions_logging");
 
         if (_categoryName is not null)

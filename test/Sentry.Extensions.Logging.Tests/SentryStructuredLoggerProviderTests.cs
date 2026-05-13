@@ -22,6 +22,7 @@ public class SentryStructuredLoggerProviderTests
 
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
+            Hub.SubstituteConfigureScope(new Scope(loggingOptions));
             Clock = new MockClock();
             Sdk = new SdkVersion
             {
