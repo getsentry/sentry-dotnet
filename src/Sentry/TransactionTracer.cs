@@ -166,6 +166,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
     private readonly ConcurrentBagLite<ISpan> _spans = new();
+    private readonly Lock _childSpanLock = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<ISpan> Spans => _spans;
@@ -296,14 +297,17 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private void AddChildSpan(SpanTracer span)
     {
-        // Limit spans to 1000
-        var isOutOfLimit = _spans.Count >= 1000;
-        span.IsSampled = isOutOfLimit ? false : IsSampled;
-
-        if (!isOutOfLimit)
+        lock (_childSpanLock)
         {
-            _spans.Add(span);
-            _activeSpanTracker.Push(span);
+            // Limit spans to 1000
+            var isOutOfLimit = _spans.Count >= 1000;
+            span.IsSampled = isOutOfLimit ? false : IsSampled;
+
+            if (!isOutOfLimit)
+            {
+                _spans.Add(span);
+                _activeSpanTracker.Push(span);
+            }
         }
     }
 
