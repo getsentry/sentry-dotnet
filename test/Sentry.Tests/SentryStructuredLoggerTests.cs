@@ -292,8 +292,7 @@ internal static class LoggerAssertionExtensions
 
         foreach (var expectedAttribute in fixture.ExpectedAttributes)
         {
-            log.TryGetAttribute(expectedAttribute.Key, out string? value).Should().BeTrue();
-            value.Should().Be(expectedAttribute.Value);
+            log.Attributes.ShouldContain<string>(expectedAttribute.Key, expectedAttribute.Value);
         }
     }
 
