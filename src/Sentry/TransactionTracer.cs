@@ -324,16 +324,16 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private void AddChildSpan(SpanTracer span)
     {
-        var isOutOfLimit = _spans.Count >= SpanLimit;
-        span.IsSampled = isOutOfLimit ? false : IsSampled;
-        if (isOutOfLimit)
-        {
-            _options?.LogDebug("Discarding child span '{0}' due to {1} span limit", SpanId, SpanLimit);
-            return;
-        }
-
         lock (_finishLock)
         {
+            var isOutOfLimit = _spans.Count >= SpanLimit;
+            span.IsSampled = isOutOfLimit ? false : IsSampled;
+            if (isOutOfLimit)
+            {
+                _options?.LogDebug("Discarding child span '{0}' due to {1} span limit", SpanId, SpanLimit);
+                return;
+            }
+
             if (_hasFinished)
             {
                 _options?.LogDebug("Discarding child span '{0}' as the trace has already finished", SpanId);

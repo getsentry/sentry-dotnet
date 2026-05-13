@@ -351,6 +351,21 @@ public class SentryTransactionTests
     }
 
     [Fact]
+    public void StartChild_Limit_Maintained_Concurrently()
+    {
+        // Arrange
+        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
+        var spans = new ConcurrentBag<ISpan>();
+
+        // Act
+        Parallel.For(0, 5000, i => spans.Add(transaction.StartChild("span " + i)));
+
+        // Assert
+        transaction.Spans.Should().HaveCount(1000);
+        spans.Count(s => s.IsSampled == true).Should().Be(1000);
+    }
+
+    [Fact]
     public void StartChild_SamplingInherited_True()
     {
         // Arrange
