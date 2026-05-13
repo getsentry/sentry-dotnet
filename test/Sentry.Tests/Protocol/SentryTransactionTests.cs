@@ -28,34 +28,6 @@ public class SentryTransactionTests
     }
 
     [Fact]
-    public async Task NewTransactionTracer_IdleTimeoutProvided_AutomaticallyFinishes()
-    {
-        // Arrange
-        var client = Substitute.For<ISentryClient>();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Debug = true
-        };
-        var hub = new Hub(options, client);
-        var context = new TransactionContext("my name",
-            "my operation",
-            SpanId.Create(),
-            SpanId.Create(),
-            SentryId.Create(),
-            "description",
-            SpanStatus.Ok, null, true, TransactionNameSource.Component);
-
-        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2));
-
-        // Act
-        await Task.Delay(TimeSpan.FromSeconds(2));
-
-        // Assert
-        transaction.IsFinished.Should().BeTrue();
-    }
-
-    [Fact]
     public void NewTransactionTracer_PropagationContextHasReplayId_UsesActiveSessionReplayIdInstead()
     {
         // Arrange

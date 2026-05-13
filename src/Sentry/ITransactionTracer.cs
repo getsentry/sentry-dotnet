@@ -26,4 +26,9 @@ public interface ITransactionTracer : ITransactionData, ISpan
     /// Gets the last active (not finished) span in this transaction.
     /// </summary>
     public ISpan? GetLastActiveSpan();
+
+    /// <summary>
+    /// Resets the idle timeout for auto-finishing transactions. No-op for transactions without an idle timeout.
+    /// </summary>
+    public void ResetIdleTimeout();
 }
