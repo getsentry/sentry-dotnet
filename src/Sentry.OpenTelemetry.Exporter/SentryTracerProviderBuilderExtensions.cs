@@ -30,12 +30,14 @@ public static class SentryTracerProviderBuilderExtensions
     /// <param name="defaultTextMapPropagator">
     ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
     ///     <para>
-    ///         If this parameter is not supplied, the <see cref="SentryPropagator"/> will be used, which propagates the
-    ///         baggage header as well as Sentry trace headers.
+    ///         If this parameter is not supplied, a <see cref="CompositeTextMapPropagator"/> containing both
+    ///         <see cref="TraceContextPropagator"/> (W3C <c>traceparent</c>/<c>tracestate</c>) and
+    ///         <see cref="SentryPropagator"/> (<c>sentry-trace</c> and <c>baggage</c>) will be used.
+    ///         This allows Sentry to interoperate with services that use W3C trace context headers.
     ///     </para>
     ///     <para>
-    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work, but you
-    ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
+    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work. Supply
+    ///         a custom propagator only if you need to replace the defaults entirely.
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
@@ -47,7 +49,11 @@ public static class SentryTracerProviderBuilderExtensions
             throw new ArgumentException(MissingDsnWarning, nameof(dsnString));
         }
 
-        defaultTextMapPropagator ??= new SentryPropagator();
+        defaultTextMapPropagator ??= new CompositeTextMapPropagator(new TextMapPropagator[]
+        {
+            new TraceContextPropagator(),
+            new SentryPropagator(),
+        });
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
 
         collectorUrl ??= dsn.GetOtlpTracesEndpointUri();

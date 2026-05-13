@@ -1,3 +1,5 @@
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Trace;
 
@@ -20,6 +22,37 @@ public class SentryTracerProviderBuilderExtensionsTests
         // Assert
         act.Should().Throw<ArgumentException>()
             .WithMessage($"{SentryTracerProviderBuilderExtensions.MissingDsnWarning}*");
+    }
+
+    [Fact]
+    public void AddSentryOtlpExporter_NoCustomPropagator_SetsCompositeDefaultPropagatorWithW3CAndSentry()
+    {
+        // Arrange
+        var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
+
+        // Act
+        tracerProviderBuilder.AddSentryOtlpExporter(ValidDsn);
+        var propagator = Propagators.DefaultTextMapPropagator;
+
+        // Assert
+        propagator.Should().BeOfType<CompositeTextMapPropagator>();
+        propagator.Fields.Should().Contain("traceparent", "W3C traceparent header should be propagated by default");
+        propagator.Fields.Should().Contain("sentry-trace", "Sentry trace header should be propagated by default");
+    }
+
+    [Fact]
+    public void AddSentryOtlpExporter_WithCustomPropagator_SetsCustomPropagatorAsDefault()
+    {
+        // Arrange
+        var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
+        var customPropagator = Substitute.For<TextMapPropagator>();
+
+        // Act
+        tracerProviderBuilder.AddSentryOtlpExporter(ValidDsn, defaultTextMapPropagator: customPropagator);
+        var propagator = Propagators.DefaultTextMapPropagator;
+
+        // Assert
+        propagator.Should().BeSameAs(customPropagator);
     }
 
     [Fact]
