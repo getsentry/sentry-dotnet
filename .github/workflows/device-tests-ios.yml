@@ -89,14 +89,14 @@ jobs:
         id: first-integration-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@26f565c05d0dd49f703d238706b775883037d76b # 3.3.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         with:
           path: integration-test/ios.Tests.ps1
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@26f565c05d0dd49f703d238706b775883037d76b # 3.3.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         with:
           path: integration-test/ios.Tests.ps1
 
