@@ -74,7 +74,7 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// returns <c>null</c> or <see cref="string.Empty"/>, the routed name is preserved (or the URL-path
     /// fallback applies when no route was resolved).
     /// </remarks>
-    public bool AlwaysCallTransactionNameProvider { get; set; }
+    public bool PreferTransactionNameProvider { get; set; }
 
     /// <summary>
     /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />

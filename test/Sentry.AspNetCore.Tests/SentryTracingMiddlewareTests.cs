@@ -772,7 +772,7 @@ public class SentryTracingMiddlewareTests
             .UseSentry(aspNetOptions =>
             {
                 aspNetOptions.TransactionNameProvider = _ => expectedName;
-                aspNetOptions.AlwaysCallTransactionNameProvider = true;
+                aspNetOptions.PreferTransactionNameProvider = true;
             })
             .ConfigureServices(services =>
             {
@@ -840,7 +840,7 @@ public class SentryTracingMiddlewareTests
     }
 
     [Fact]
-    public async Task Transaction_AlwaysCallTransactionNameProviderWithNullReturn_PreservesRouteName()
+    public async Task Transaction_PreferTransactionNameProviderWithNullReturn_PreservesRouteName()
     {
         // Arrange
         SentryTransaction transaction = null;
@@ -856,7 +856,7 @@ public class SentryTracingMiddlewareTests
             .UseSentry(aspNetOptions =>
             {
                 aspNetOptions.TransactionNameProvider = _ => null;
-                aspNetOptions.AlwaysCallTransactionNameProvider = true;
+                aspNetOptions.PreferTransactionNameProvider = true;
             })
             .ConfigureServices(services =>
             {

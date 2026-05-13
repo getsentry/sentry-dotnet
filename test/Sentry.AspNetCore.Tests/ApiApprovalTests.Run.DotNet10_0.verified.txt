@@ -43,7 +43,7 @@ namespace Sentry.AspNetCore
     {
         public SentryAspNetCoreOptions() { }
         public bool AdjustStandardEnvironmentNameCasing { get; set; }
-        public bool AlwaysCallTransactionNameProvider { get; set; }
+        public bool PreferTransactionNameProvider { get; set; }
         public bool AutoRegisterTracing { get; set; }
         public bool CaptureBlockingCalls { get; set; }
         public bool FlushOnCompletedRequest { get; set; }

@@ -17,7 +17,7 @@ internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
     public bool? AdjustStandardEnvironmentNameCasing { get; set; }
     public bool? AutoRegisterTracing { get; set; }
     public bool? CaptureBlockingCalls { get; set; }
-    public bool? AlwaysCallTransactionNameProvider { get; set; }
+    public bool? PreferTransactionNameProvider { get; set; }
 
     public void ApplyTo(SentryAspNetCoreOptions options)
     {
@@ -29,6 +29,6 @@ internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
         options.AdjustStandardEnvironmentNameCasing = AdjustStandardEnvironmentNameCasing ?? options.AdjustStandardEnvironmentNameCasing;
         options.AutoRegisterTracing = AutoRegisterTracing ?? options.AutoRegisterTracing;
         options.CaptureBlockingCalls = CaptureBlockingCalls ?? options.CaptureBlockingCalls;
-        options.AlwaysCallTransactionNameProvider = AlwaysCallTransactionNameProvider ?? options.AlwaysCallTransactionNameProvider;
+        options.PreferTransactionNameProvider = PreferTransactionNameProvider ?? options.PreferTransactionNameProvider;
     }
 }
