@@ -207,6 +207,18 @@ public partial class SentryOptions
         /// </summary>
         public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
+        /// <summary>
+        /// Gets or sets a value that indicates if native crash reporting via tombstones is enabled.
+        /// The default value is <c>false</c> (disabled).
+        /// </summary>
+        public bool TombstoneEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value that indicates if historical tombstones should be reported.
+        /// The default value is <c>false</c> (disabled).
+        /// </summary>
+        public bool ReportHistoricalTombstones { get; set; } = false;
+
         // ---------- Other ----------
 
         internal List<string>? InAppExcludes { get; private set; }

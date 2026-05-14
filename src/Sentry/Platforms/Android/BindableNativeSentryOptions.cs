@@ -34,6 +34,8 @@ internal partial class BindableSentryOptions
         public bool? PrintUncaughtStackTrace { get; set; }
         public double? ProfilesSampleRate { get; set; }
         public TimeSpan? ReadTimeout { get; set; }
+        public bool? TombstoneEnabled { get; set; }
+        public bool? ReportHistoricalTombstones { get; set; }
         public bool? EnableTracing { get; set; }
         public bool? EnableBeforeSend { get; set; }
 
@@ -77,6 +79,8 @@ internal partial class BindableSentryOptions
             options.PrintUncaughtStackTrace = PrintUncaughtStackTrace ?? options.PrintUncaughtStackTrace;
             options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
             options.ReadTimeout = ReadTimeout ?? options.ReadTimeout;
+            options.TombstoneEnabled = TombstoneEnabled ?? options.TombstoneEnabled;
+            options.ReportHistoricalTombstones = ReportHistoricalTombstones ?? options.ReportHistoricalTombstones;
             options.EnableTracing = EnableTracing ?? options.EnableTracing;
             options.EnableBeforeSend = EnableBeforeSend ?? options.EnableBeforeSend;
 
