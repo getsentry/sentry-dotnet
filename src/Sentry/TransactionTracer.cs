@@ -326,20 +326,21 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     {
         lock (_finishLock)
         {
-            var isOutOfLimit = _spans.Count >= SpanLimit;
-            span.IsSampled = isOutOfLimit ? false : IsSampled;
-            if (isOutOfLimit)
+            if (_spans.Count >= SpanLimit)
             {
                 _options?.LogDebug("Discarding child span '{0}' due to {1} span limit", SpanId, SpanLimit);
+                span.IsSampled = false;
                 return;
             }
 
             if (_hasFinished)
             {
                 _options?.LogDebug("Discarding child span '{0}' as the trace has already finished", SpanId);
+                span.IsSampled = false;
                 return;
             }
 
+            span.IsSampled = IsSampled;
             _idleTimer?.Cancel(); // Pause the idle timer while a child span is in flight
             _spans.Add(span);
             _activeSpanTracker.Push(span);
