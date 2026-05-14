@@ -48,6 +48,7 @@ namespace Sentry.AspNetCore
         public bool FlushOnCompletedRequest { get; set; }
         public bool IncludeActivityData { get; set; }
         public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }
+        public bool PreferTransactionNameProvider { get; set; }
         public Sentry.AspNetCore.TransactionNameProvider? TransactionNameProvider { get; set; }
     }
     public static class SentryBuilderExtensions
