@@ -59,6 +59,7 @@ namespace Sentry.NLog
         public NLog.Layouts.Layout? BreadcrumbCategory { get; set; }
         public NLog.Layouts.Layout? BreadcrumbLayout { get; set; }
         public NLog.Layouts.Layout? Dsn { get; set; }
+        public bool EnableLogs { get; set; }
         public NLog.Layouts.Layout? Environment { get; set; }
         public int FlushTimeoutSeconds { get; set; }
         public bool IgnoreEventsWithNoException { get; set; }

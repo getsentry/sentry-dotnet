@@ -21,4 +21,10 @@
 
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="SentryTargetTests.Structured.cs">
+      <DependentUpon>SentryTargetTests.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>

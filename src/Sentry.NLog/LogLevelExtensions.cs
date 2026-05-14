@@ -29,4 +29,19 @@ internal static class LogLevelExtensions
             _ => BreadcrumbLevel.Info
         };
     }
+
+    public static SentryLogLevel? ToSentryLogLevel(this LogLevel level)
+    {
+        return level.Name switch
+        {
+            nameof(LogLevel.Trace) => SentryLogLevel.Trace,
+            nameof(LogLevel.Debug) => SentryLogLevel.Debug,
+            nameof(LogLevel.Info) => SentryLogLevel.Info,
+            nameof(LogLevel.Warn) => SentryLogLevel.Warning,
+            nameof(LogLevel.Error) => SentryLogLevel.Error,
+            nameof(LogLevel.Fatal) => SentryLogLevel.Fatal,
+            nameof(LogLevel.Off) => null,
+            _ => null,
+        };
+    }
 }
