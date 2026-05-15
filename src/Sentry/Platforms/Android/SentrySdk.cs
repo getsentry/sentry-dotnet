@@ -95,8 +95,9 @@ public static partial class SentrySdk
                 o.CacheDirPath = Path.Combine(cacheDirectoryPath, "android");
             }
 
-            // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
-            //       one when sending events, which is relayed through the scope observer.
+            // NOTE: options.DefaultTags are forwarded to the scope observer in SentrySdk.InitHub so the
+            //       Android SDK attaches them to native crashes. The Enricher continues to apply them to
+            //       managed events at send time.
 
             if (options.HttpProxy is System.Net.WebProxy proxy)
             {

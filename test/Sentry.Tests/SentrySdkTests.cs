@@ -968,6 +968,53 @@ public class SentrySdkTests : IDisposable
 #endif
 
     [Fact]
+    public void InitHub_DefaultTagsWithScopeSync_RelayedToScopeObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            ScopeObserver = observer,
+            EnableScopeSync = true,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false,
+        };
+        options.DefaultTags["env"] = "production";
+        options.DefaultTags["region"] = "us-east-1";
+
+        // Act
+        SentrySdk.InitHub(options);
+
+        // Assert
+        observer.Received(1).SetTag("env", "production");
+        observer.Received(1).SetTag("region", "us-east-1");
+    }
+
+    [Fact]
+    public void InitHub_DefaultTagsWithoutScopeSync_NotRelayedToScopeObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            ScopeObserver = observer,
+            EnableScopeSync = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false,
+        };
+        options.DefaultTags["env"] = "production";
+        options.DefaultTags["region"] = "us-east-1";
+
+        // Act
+        SentrySdk.InitHub(options);
+
+        // Assert
+        observer.DidNotReceive().SetTag(Arg.Any<string>(), Arg.Any<string>());
+    }
+
+    [Fact]
     public void InitHub_DebugEnabled_DebugLogsLogged()
     {
         var options = new SentryOptions
