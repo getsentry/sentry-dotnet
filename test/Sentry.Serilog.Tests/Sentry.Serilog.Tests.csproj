@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
 
     <Using Include="Serilog" />
+    <Using Include="Serilog.Core" />
     <Using Include="Serilog.Events" />
     <Using Include="Serilog.Context" />
     <Using Include="Serilog.Formatting.Display" />

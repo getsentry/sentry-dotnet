@@ -29,6 +29,8 @@ public class SentrySerilogSinkExtensionsTests
         public bool InitializeSdk { get; } = false;
         public LogEventLevel MinimumEventLevel { get; } = LogEventLevel.Verbose;
         public LogEventLevel MinimumBreadcrumbLevel { get; } = LogEventLevel.Fatal;
+        public LogEventLevel RestrictedToMinimumLevel { get; } = LogEventLevel.Warning;
+        public LoggingLevelSwitch LevelSwitch { get; } = new(LogEventLevel.Error);
 
         public static SentrySerilogOptions GetSut() => new();
     }
@@ -98,7 +100,8 @@ public class SentrySerilogSinkExtensionsTests
             _fixture.SampleRate, _fixture.Release, _fixture.Environment, _fixture.MaxQueueItems,
             _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
             _fixture.RequestBodyCompressionBuffered, _fixture.Debug, _fixture.DiagnosticLevel,
-            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode, null, _fixture.EnableLogs);
+            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode, null, _fixture.EnableLogs,
+            _fixture.RestrictedToMinimumLevel, _fixture.LevelSwitch);
 
         // Compare individual properties
         Assert.Equal(_fixture.SendDefaultPii, sut.SendDefaultPii);
@@ -123,6 +126,52 @@ public class SentrySerilogSinkExtensionsTests
         Assert.True(sut.InitializeSdk);
         Assert.Equal(_fixture.MinimumEventLevel, sut.MinimumEventLevel);
         Assert.Equal(_fixture.MinimumBreadcrumbLevel, sut.MinimumBreadcrumbLevel);
+        Assert.Equal(_fixture.RestrictedToMinimumLevel, sut.RestrictedToMinimumLevel);
+        Assert.Same(_fixture.LevelSwitch, sut.LevelSwitch);
+    }
+
+    [Fact]
+    public void Sentry_WithRestrictedToMinimumLevel_ConfigureOptions_FiltersLogsBelow()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        var options = new SentrySerilogOptions
+        {
+            InitializeSdk = false,
+            MinimumBreadcrumbLevel = LogEventLevel.Verbose,
+            MinimumEventLevel = LogEventLevel.Verbose,
+            RestrictedToMinimumLevel = LogEventLevel.Error,
+        };
+        var sink = new SentrySink(options, () => hub, null, new MockClock());
+        using var logger = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+            .WriteTo.Sink(sink, options.RestrictedToMinimumLevel, options.LevelSwitch)
+            .CreateLogger();
+
+        // Act
+        logger.Warning("Below threshold");
+        logger.Error("At threshold");
+
+        // Assert: Warning is filtered by Serilog before reaching the sink; only Error gets through
+        hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+        hub.DidNotReceive().CaptureEvent(Arg.Is<SentryEvent>(e =>
+            e.Message.Message == "Below threshold"));
+    }
+
+    [Fact]
+    public void Sentry_WithRestrictedToMinimumLevel_NoDsn_ParameterIsAccepted()
+    {
+        // Verify the no-DSN overload accepts restrictedToMinimumLevel without throwing
+        var ex = Record.Exception(() =>
+            new LoggerConfiguration()
+                .WriteTo.Sentry(
+                    minimumBreadcrumbLevel: LogEventLevel.Verbose,
+                    minimumEventLevel: LogEventLevel.Error,
+                    restrictedToMinimumLevel: LogEventLevel.Warning)
+                .CreateLogger());
+
+        Assert.Null(ex);
     }
 
     private static void AssertEqualDeep(object expected, object actual)
