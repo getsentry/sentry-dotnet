@@ -19,4 +19,10 @@
     <Using Include="Sentry.Log4Net" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="SentryAppenderTests.Structured.cs">
+      <DependentUpon>SentryAppenderTests.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
