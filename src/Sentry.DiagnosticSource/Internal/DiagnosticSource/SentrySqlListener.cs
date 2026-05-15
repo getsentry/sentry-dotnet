@@ -1,3 +1,7 @@
+// SqlClient's DiagnosticSource integration is not supported on .NET Framework.
+// See: https://github.com/dotnet/SqlClient/issues/1529#issuecomment-1063166442
+#if !NETFRAMEWORK
+
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
@@ -274,3 +278,5 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
     }
 }
+
+#endif

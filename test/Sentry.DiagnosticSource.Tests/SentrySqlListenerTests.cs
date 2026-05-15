@@ -1,3 +1,4 @@
+#if !NETFRAMEWORK
 using Sentry.Internal.DiagnosticSource;
 using static Sentry.Internal.DiagnosticSource.SentrySqlListener;
 
@@ -685,3 +686,5 @@ public class SentrySqlListenerTests
         Assert.False(exceptionReceived);
     }
 }
+
+#endif
