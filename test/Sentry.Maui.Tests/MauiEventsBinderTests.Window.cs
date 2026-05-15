@@ -287,4 +287,77 @@ public partial class MauiEventsBinderTests
             };
         }
     }
+
+    [Fact]
+    public void OnWindowOnStopped_ChildlessTransaction_NotExplicitlyFinished()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var uiTransaction = Substitute.For<ITransactionTracer>();
+        uiTransaction.Name.Returns("bar");
+        uiTransaction.IsFinished.Returns(false);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(uiTransaction);
+        _fixture.Binder.StartUiTransaction("btnClick");
+
+        // Act
+        window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
+
+        // Assert - childless tx not explicitly finished; idle timeout will discard
+        uiTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+    }
+
+    [Fact]
+    public void OnWindowOnStopped_TransactionWithChildren_FinishesTransaction()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var uiTransaction = Substitute.For<ITransactionTracer>();
+        uiTransaction.Name.Returns("bar");
+        uiTransaction.IsFinished.Returns(false);
+        uiTransaction.Spans.Returns(new[] { Substitute.For<ISpan>() }); // has a child span
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(uiTransaction);
+        _fixture.Binder.StartUiTransaction("btnClick");
+
+        // Act
+        window.RaiseEvent(nameof(Window.Stopped), EventArgs.Empty);
+
+        // Assert
+        uiTransaction.Received(1).Finish(SpanStatus.Ok);
+    }
+
+    [Fact]
+    public void OnWindowOnPopCanceled_FinishesActiveNavigationSpan()
+    {
+        // Arrange
+        var shell = new Shell { StyleId = "shell" };
+        _fixture.Binder.HandleShellEvents(shell);
+        var window = new Window();
+        _fixture.Binder.HandleWindowEvents(window);
+        var uiTransaction = Substitute.For<ITransactionTracer>();
+        uiTransaction.Name.Returns("bar");
+        uiTransaction.IsFinished.Returns(false);
+        _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
+            .Returns(uiTransaction);
+        _fixture.Binder.StartUiTransaction("btnClick");
+
+        _fixture.Hub.GetSpan().Returns(uiTransaction);
+        uiTransaction.StartChild(Arg.Any<string>())
+            .Returns(Substitute.For<ISpan>());
+        var navSpan = _fixture.Binder.StartNavigationSpan("..");
+
+        // Act
+        window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
+
+        // Assert
+        navSpan.Received(1).Finish(SpanStatus.Cancelled);
+        uiTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+    }
 }
