@@ -1,5 +1,7 @@
 namespace Sentry.Tests;
 
+using System.Globalization;
+
 public class MeasurementUnitTests
 {
     [Fact]
@@ -125,5 +127,41 @@ public class MeasurementUnitTests
         var m1 = MeasurementUnit.Custom("second");
         var m2 = MeasurementUnit.Duration.Second;
         Assert.NotEqual(m1, m2);
+    }
+
+    [Fact]
+    public void DurationUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var raw in Enum.GetValues(typeof(MeasurementUnit.Duration)))
+        {
+            var value = (MeasurementUnit.Duration)raw;
+            MeasurementUnit unit = (MeasurementUnit.Duration)raw;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
+    }
+
+    [Fact]
+    public void InformationUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var raw in Enum.GetValues(typeof(MeasurementUnit.Information)))
+        {
+            var value = (MeasurementUnit.Information)raw;
+            MeasurementUnit unit = (MeasurementUnit.Information)raw;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
+    }
+
+    [Fact]
+    public void FractionUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var raw in Enum.GetValues(typeof(MeasurementUnit.Fraction)))
+        {
+            var value = (MeasurementUnit.Fraction)raw;
+            MeasurementUnit unit = (MeasurementUnit.Fraction)raw;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
     }
 }
