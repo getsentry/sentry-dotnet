@@ -116,13 +116,27 @@
       <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="572b4a6c04504302a46e2e1c196ec31cda266b574b1444605426aa8e41d46b8c" />
     </ItemGroup>
 
-    <!-- Download the files -->
+    <!-- Download the platform-specific CLI binaries. -->
     <DownloadFile SourceUrl="https://downloads.sentry-cdn.com/sentry-cli/$(SentryCLIVersion)/%(SentryCLIDownload.Identity)" DestinationFolder="$(SentryCLIDirectory)" Condition="!Exists('$(SentryCLIDirectory)%(Identity)')" Retries="3">
       <Output TaskParameter="DownloadedFile" ItemName="SentryCLIDownloadedFile" />
     </DownloadFile>
 
     <!-- Build will fail if any downloaded files don't match the expected hash. -->
     <VerifyFileHash File="$(SentryCLIDirectory)%(SentryCLIDownload.Identity)" Hash="%(FileHash)" />
+
+    <!--
+      Download the platform-independent ACKNOWLEDGEMENTS.md that lists third-party OSS
+      attributions compiled into the sentry-cli binary. Required for license compliance
+      when redistributing the CLI executables in the Sentry NuGet package.
+      ContinueOnError is temporary while getsentry/sentry-cli#2823 is in progress —
+      remove it once sentry-cli starts publishing this file in releases.
+    -->
+    <DownloadFile
+      SourceUrl="https://downloads.sentry-cdn.com/sentry-cli/$(SentryCLIVersion)/ACKNOWLEDGEMENTS.md"
+      DestinationFolder="$(SentryCLIDirectory)"
+      Condition="!Exists('$(SentryCLIDirectory)ACKNOWLEDGEMENTS.md')"
+      ContinueOnError="WarnAndContinue"
+      Retries="3" />
 
     <!-- Set executable permissions for local usage. -->
     <Exec Command="chmod +x $(SentryCLIDirectory)*" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
