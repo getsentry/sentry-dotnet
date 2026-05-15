@@ -38,7 +38,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         Debug.Assert(TimeSpan.FromSeconds(0) == TimeSpan.Zero);
         if (startupTimeout != TimeSpan.Zero && !_sessionTask.Wait(startupTimeout))
         {
-            options.LogWarning("Profiler session startup took longer then the given timeout {0:c}. Profilling will start once the first event is received.", startupTimeout);
+            options.LogWarning("Profiler session startup took longer then the given timeout {0:c}. Profiling will start once the first event is received.", startupTimeout);
             StartupTimedOut = true;
         }
     }
