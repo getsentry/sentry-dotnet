@@ -22,6 +22,31 @@ For a big feature it's advised to raise an issue to discuss it first.
 * To quickly get up and running, you can just run `dotnet build SentryNoMobile.slnf` (you're skipping the mobile targets)
 * To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
 
+## Git Hooks (Optional but Recommended)
+
+To automatically check and fix code formatting before committing, you can set up a pre-commit hook:
+
+```bash
+./dev.cs setup-hooks
+```
+
+Before each commit, the hook runs `dotnet format` against your staged `.cs` files and auto-fixes any formatting issues. If fixes were applied, the commit is blocked — just stage the fixes and try again:
+
+```bash
+git add -u
+git commit
+```
+
+Note: the hook skips automatically if you have unstaged changes, to avoid touching work in progress.
+
+To opt out at any time:
+
+```bash
+./dev.cs remove-hooks
+```
+
+**Note:** You can also bypass the hook for a specific commit using `git commit --no-verify` if needed.
+
 ## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
