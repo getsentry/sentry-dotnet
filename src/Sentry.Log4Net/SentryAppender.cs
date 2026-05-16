@@ -58,6 +58,8 @@ public class SentryAppender : AppenderSkeleton
         _hub = hubGetter;
     }
 
+    private static readonly AsyncLocal<bool> IsReentrant = new();
+
     /// <summary>
     /// Append log.
     /// </summary>
@@ -70,6 +72,24 @@ public class SentryAppender : AppenderSkeleton
             return;
         }
 
+        if (IsReentrant.Value)
+        {
+            return;
+        }
+
+        IsReentrant.Value = true;
+        try
+        {
+            AppendCore(loggingEvent);
+        }
+        finally
+        {
+            IsReentrant.Value = false;
+        }
+    }
+
+    private void AppendCore(LoggingEvent loggingEvent)
+    {
         if (!_hub.IsEnabled && _sdkHandle == null)
         {
             if (Dsn == null)
@@ -82,6 +102,11 @@ public class SentryAppender : AppenderSkeleton
                 // ReSharper disable once NonAtomicCompoundOperator Double init guarded by the lock
                 _sdkHandle ??= _initAction(Dsn);
             }
+        }
+
+        if (IsSentryLogger(loggingEvent.LoggerName))
+        {
+            return;
         }
 
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
@@ -138,6 +163,11 @@ public class SentryAppender : AppenderSkeleton
 
         _hub.CaptureEvent(evt);
     }
+
+    internal static bool IsSentryLogger(string? loggerName) =>
+        loggerName != null &&
+        (string.Equals(loggerName, "Sentry", StringComparison.Ordinal) ||
+         loggerName.StartsWith("Sentry.", StringComparison.Ordinal));
 
     private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LoggingEvent loggingEvent)
     {
