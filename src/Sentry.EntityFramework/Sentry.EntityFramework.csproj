@@ -21,11 +21,11 @@
     <Using Include="Sentry.Integrations" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(TargetFrameworkVersion)' == 'v4.6.2'">
     <PackageReference Include="EntityFramework" Version="6.2.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(TargetFrameworkVersion)' == 'v2.1'">
     <PackageReference Include="EntityFramework" Version="6.5.1" />
   </ItemGroup>
 

@@ -56,7 +56,7 @@
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(TargetFrameworkVersion)' == 'v4.6.2'">
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
