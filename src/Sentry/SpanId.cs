@@ -43,6 +43,42 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     /// <inheritdoc />
     public override string ToString() => _value.ToString("x8").PadLeft(16, '0');
 
+    internal bool TryFormat(Span<char> destination)
+    {
+        if (destination.Length < 16)
+        {
+            return false;
+        }
+
+        Span<byte> convertedBytes = stackalloc byte[sizeof(long)];
+        Unsafe.As<byte, long>(ref convertedBytes[0]) = _value;
+
+        // Going backwards through the array to preserve the order of the output hex string (i.e. `4e76` -> `76e4`)
+        for (var i = convertedBytes.Length - 1; i >= 0; i--)
+        {
+            var value = convertedBytes[i];
+            destination[(convertedBytes.Length - 1 - i) * 2] = HexChars[value >> 4];
+            destination[(convertedBytes.Length - 1 - i) * 2 + 1] = HexChars[value & 0xF];
+        }
+
+        return true;
+    }
+
+    internal bool TryWriteBytes(Span<byte> destination)
+    {
+        if (destination.Length < sizeof(long))
+        {
+            return false;
+        }
+
+        for (var i = 0; i < sizeof(long); i++)
+        {
+            destination[i] = (byte)(_value >> ((sizeof(long) - 1 - i) * 8));
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Generates a new Sentry ID.
     /// </summary>
@@ -69,18 +105,8 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
     {
-        Span<byte> convertedBytes = stackalloc byte[sizeof(long)];
-        Unsafe.As<byte, long>(ref convertedBytes[0]) = _value;
-
-        // Going backwards through the array to preserve the order of the output hex string (i.e. `4e76` -> `76e4`)
         Span<char> output = stackalloc char[16];
-        for (var i = convertedBytes.Length - 1; i >= 0; i--)
-        {
-            var value = convertedBytes[i];
-            output[(convertedBytes.Length - 1 - i) * 2] = HexChars[value >> 4];
-            output[(convertedBytes.Length - 1 - i) * 2 + 1] = HexChars[value & 0xF];
-        }
-
+        TryFormat(output);
         writer.WriteStringValue(output);
     }
 
