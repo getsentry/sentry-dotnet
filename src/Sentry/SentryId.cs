@@ -29,6 +29,46 @@ public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
     /// <returns>String representation of the event id.</returns>
     public override string ToString() => _guid.ToString("n");
 
+    internal bool TryFormat(Span<char> destination)
+    {
+#if NETSTANDARD2_0 || NET462
+        var value = ToString();
+        if (destination.Length < value.Length)
+        {
+            return false;
+        }
+
+        value.AsSpan().CopyTo(destination);
+        return true;
+#else
+        return _guid.TryFormat(destination, out var charsWritten, "n") && charsWritten == 32;
+#endif
+    }
+
+    internal bool TryWriteBytes(Span<byte> destination)
+    {
+        if (destination.Length < 16)
+        {
+            return false;
+        }
+
+#if NET8_0_OR_GREATER
+        return _guid.TryWriteBytes(destination, bigEndian: true, out var bytesWritten) && bytesWritten == 16;
+#else
+        var bytes = _guid.ToByteArray();
+        destination[0] = bytes[3];
+        destination[1] = bytes[2];
+        destination[2] = bytes[1];
+        destination[3] = bytes[0];
+        destination[4] = bytes[5];
+        destination[5] = bytes[4];
+        destination[6] = bytes[7];
+        destination[7] = bytes[6];
+        bytes.AsSpan(8).CopyTo(destination[8..]);
+        return true;
+#endif
+    }
+
     /// <inheritdoc />
     public bool Equals(SentryId other) => _guid.Equals(other._guid);
 
