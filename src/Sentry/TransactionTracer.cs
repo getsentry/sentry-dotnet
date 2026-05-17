@@ -8,7 +8,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
+public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransactionTracer
 {
     private const int SpanLimit = 1000;
 

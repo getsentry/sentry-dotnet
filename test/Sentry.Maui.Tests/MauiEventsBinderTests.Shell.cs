@@ -129,7 +129,7 @@ public partial class MauiEventsBinderTests
         // Arrange
         var shell = new Shell { StyleId = "shell" };
         _fixture.Binder.HandleShellEvents(shell);
-        var uiTransaction = Substitute.For<ITransactionTracer>();
+        var uiTransaction = Substitute.For<ITransactionTracer, IAutoTimeoutTracer>();
         uiTransaction.Name.Returns("bar");
         uiTransaction.IsFinished.Returns(false);
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
@@ -142,7 +142,7 @@ public partial class MauiEventsBinderTests
 
         // Assert - only one transaction was started, and its idle timeout was reset
         _fixture.Hub.Received(1).StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>());
-        uiTransaction.Received(1).ResetIdleTimeout();
+        ((IAutoTimeoutTracer)uiTransaction).Received(1).ResetIdleTimeout();
     }
 
     [Fact]

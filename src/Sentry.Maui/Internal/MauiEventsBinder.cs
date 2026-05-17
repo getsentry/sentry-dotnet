@@ -358,7 +358,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
             return null;
         }
 
-        CurrentUiTx?.ResetIdleTimeout();
+        if (CurrentUiTx is IAutoTimeoutTracer autoTimeoutTracer)
+        {
+            autoTimeoutTracer.ResetIdleTimeout();
+        }
 
         CurrentNavSpan?.Finish(SpanStatus.Ok);
         CurrentNavSpan = parentSpan.StartChild("ui.load", name);

@@ -309,7 +309,6 @@ namespace Sentry
         new string Name { get; set; }
         System.Collections.Generic.IReadOnlyCollection<Sentry.ISpan> Spans { get; }
         Sentry.ISpan? GetLastActiveSpan();
-        void ResetIdleTimeout();
     }
     public enum InstructionAddressAdjustment
     {
