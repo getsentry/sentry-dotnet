@@ -212,6 +212,7 @@ public partial class MauiEventsBinderTests
             .Returns(mockTransaction);
         mockTransaction.StartChild(Arg.Any<string>())
             .Returns(Substitute.For<ISpan>());
+        _fixture.Hub.GetSpan().Returns(mockTransaction);
         var navSpan = _fixture.Binder.StartNavigationSpan("oldName");
 
         // Act
