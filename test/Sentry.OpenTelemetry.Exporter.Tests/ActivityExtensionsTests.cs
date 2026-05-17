@@ -118,4 +118,21 @@ public class ActivityExtensionsTests
         // Assert
         activityTraceId.ToHexString().Should().Be("5bd5f6d346b442dd9177dce9302fd737");
     }
+
+    [Fact]
+    public void SentryIdTryFormat_OutputIsAcceptedByActivityTraceId()
+    {
+        // Arrange
+        var sentryId = SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737");
+        Span<char> buffer = stackalloc char[32];
+
+        // Act
+        var formatted = sentryId.TryFormat(buffer);
+        var activityTraceId = ActivityTraceId.CreateFromString(buffer);
+
+        // Assert
+        formatted.Should().BeTrue();
+        buffer.ToString().Should().Be("5bd5f6d346b442dd9177dce9302fd737");
+        activityTraceId.ToHexString().Should().Be("5bd5f6d346b442dd9177dce9302fd737");
+    }
 }

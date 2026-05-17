@@ -41,7 +41,7 @@ public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
         value.AsSpan().CopyTo(destination);
         return true;
 #else
-        return _guid.TryFormat(destination, out var charsWritten, "N") && charsWritten == 32;
+        return _guid.TryFormat(destination, out var charsWritten, "n") && charsWritten == 32;
 #endif
     }
 
