@@ -416,10 +416,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     /// <inheritdoc />
     public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
 
-    /// <summary>
-    /// Resets the idle timer. Only has an effect on transactions created with an idle timeout.
-    /// </summary>
-    public void ResetIdleTimeout()
+    void IAutoTimeoutTracer.ResetIdleTimeout()
     {
         lock (_finishLock)
         {

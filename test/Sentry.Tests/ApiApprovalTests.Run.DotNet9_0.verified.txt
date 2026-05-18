@@ -1387,7 +1387,6 @@ namespace Sentry
         public void Finish(System.Exception exception, Sentry.SpanStatus status) { }
         public Sentry.ISpan? GetLastActiveSpan() { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
-        public void ResetIdleTimeout() { }
         public void SetData(string key, object? value) { }
         [System.Obsolete("Use SetData")]
         public void SetExtra(string key, object? value) { }
