@@ -158,6 +158,7 @@
     <Project Path="src/Sentry.Maui.CommunityToolkit.Mvvm/Sentry.Maui.CommunityToolkit.Mvvm.csproj" />
     <Project Path="src/Sentry.Maui/Sentry.Maui.csproj" />
     <Project Path="src/Sentry.NLog/Sentry.NLog.csproj" />
+    <Project Path="src/Sentry.OpenTelemetry.Exporter/Sentry.OpenTelemetry.Exporter.csproj" />
     <Project Path="src/Sentry.OpenTelemetry/Sentry.OpenTelemetry.csproj" />
     <Project Path="src/Sentry.Profiling/Sentry.Profiling.csproj" />
     <Project Path="src/Sentry.Serilog/Sentry.Serilog.csproj" />
@@ -187,6 +188,7 @@
     <Project Path="test/Sentry.Maui.Tests/Sentry.Maui.Tests.csproj" />
     <Project Path="test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj" />
     <Project Path="test/Sentry.NLog.Tests/Sentry.NLog.Tests.csproj" />
+    <Project Path="test/Sentry.OpenTelemetry.Exporter.Tests/Sentry.OpenTelemetry.Exporter.Tests.csproj" />
     <Project Path="test/Sentry.OpenTelemetry.Tests/Sentry.OpenTelemetry.Tests.csproj" />
     <Project Path="test/Sentry.Profiling.Tests/Sentry.Profiling.Tests.csproj" />
     <Project Path="test/Sentry.Serilog.Tests/Sentry.Serilog.Tests.csproj" />

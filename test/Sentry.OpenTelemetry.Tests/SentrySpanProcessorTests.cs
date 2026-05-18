@@ -920,6 +920,52 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void PruneFilteredSpans_UnsampledSpanWithRecordedActivity_NotPruned()
+    {
+        // Arrange — Sentry drops the transaction (TracesSampleRate = 0), but OTel still records the Activity.
+        // CreateChildSpan produces an UnsampledSpan. PruneFilteredSpans must not remove it prematurely,
+        // otherwise OnEnd (which fires because Recorded = true) logs a "Span not found" error.
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 0.0;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity("Parent");
+        sut.OnStart(parent!);
+
+        using var child = Tracer.StartActivity("Child");
+        sut.OnStart(child!);
+
+        sut._map.TryGetValue(child!.SpanId, out var span).Should().BeTrue();
+        span.Should().BeOfType<UnsampledSpan>();
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert — the UnsampledSpan is still live (Recorded = true), so it must not be pruned.
+        sut._map.TryGetValue(child.SpanId, out _).Should().BeTrue();
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_GarbageCollectedActivity_Pruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        // Simulate a span whose fused activity has been GC'd (GetFused<Activity>() returns null).
+        // This can happen when a filtered activity is short-lived and collected before PruneFilteredSpans runs.
+        var spanId = ActivitySpanId.CreateRandom();
+        var orphanedSpan = Substitute.For<ISpan>();
+        sut._map[spanId] = orphanedSpan;
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.False(sut._map.TryGetValue(spanId, out _));
+    }
+
+    [Fact]
     public void PruneFilteredSpans_RecentlyPruned_DoesNothing()
     {
         // Arrange

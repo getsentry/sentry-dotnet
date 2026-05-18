@@ -13,6 +13,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
+    <!--For the sake of two tiny files, it didn't seem worth creating another NuGet package... so as a quick and dirty
+       hack, we're just including the code that is needed by both packages here. We'll eventually be deprecating the
+       Sentry.OpenTelemetry package in favor of the Sentry.OpenTelemetry.Exporter package,
+       so this is a temporary solution.
+       -->
+    <Compile Include="..\Sentry.OpenTelemetry.Exporter\SentryPropagator.cs" />
+    <Compile Include="..\Sentry.OpenTelemetry.Exporter\ActivityExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
