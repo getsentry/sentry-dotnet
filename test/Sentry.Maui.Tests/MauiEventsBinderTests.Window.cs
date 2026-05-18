@@ -308,6 +308,7 @@ public partial class MauiEventsBinderTests
 
         // Assert - childless tx not explicitly finished; idle timeout will discard
         uiTransaction.DidNotReceive().Finish(Arg.Any<SpanStatus>());
+        _fixture.Scope.Transaction.Should().BeNull();
     }
 
     [Fact]

@@ -467,11 +467,19 @@ internal class MauiEventsBinder : IMauiEventsBinder
         {
             CurrentNavSpan?.Finish(SpanStatus.Ok);
             CurrentNavSpan = null;
-            // Only finish UI transactions with child spans.
-            // Childless transactions will be discarded by the idle timeout.
-            if (CurrentUiTx is { IsFinished: false } uiTx && uiTx.Spans.Count > 0)
+            if (CurrentUiTx is { IsFinished: false } uiTx)
             {
-                uiTx.Finish(SpanStatus.Ok);
+                if (uiTx.Spans.Count > 0)
+                {
+                    // Only finish UI transactions with child spans.
+                    // Childless transactions will be discarded by the idle timeout.
+                    uiTx.Finish(SpanStatus.Ok);
+                }
+                else
+                {
+                    // No child spans, so just detach from scope and let idle timeout handle it.
+                    _hub.ConfigureScope(scope => scope.ResetTransaction(CurrentUiTx));
+                }
             }
             CurrentUiTx = null;
         }
