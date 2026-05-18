@@ -134,6 +134,7 @@ public partial class MauiEventsBinderTests
         uiTransaction.IsFinished.Returns(false);
         _fixture.Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<TimeSpan?>())
             .Returns(uiTransaction);
+        _fixture.Hub.GetSpan().Returns(uiTransaction);
         _fixture.Binder.StartUiTransaction("btnClick");
 
         // Act
