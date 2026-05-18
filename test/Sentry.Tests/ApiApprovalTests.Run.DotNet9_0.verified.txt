@@ -688,6 +688,8 @@ namespace Sentry
             where T :  struct { }
         public void EmitCounter<T>(string name, T value, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
             where T :  struct { }
+        public void EmitCounter<T>(string name, T value, in System.Diagnostics.TagList attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
         public void EmitDistribution<T>(string name, T value)
             where T :  struct { }
         public void EmitDistribution<T>(string name, T value, Sentry.MeasurementUnit unit)
@@ -710,6 +712,8 @@ namespace Sentry
             where T :  struct { }
         public void EmitDistribution<T>(string name, T value, Sentry.MeasurementUnit unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
             where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, Sentry.MeasurementUnit unit, in System.Diagnostics.TagList attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
         [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
             "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
             "d.")]
@@ -719,6 +723,11 @@ namespace Sentry
             "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
             "d.")]
         public void EmitDistribution<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
+        public void EmitDistribution<T>(string name, T value, string? unit, in System.Diagnostics.TagList attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         public void EmitGauge<T>(string name, T value)
             where T :  struct { }
@@ -742,6 +751,8 @@ namespace Sentry
             where T :  struct { }
         public void EmitGauge<T>(string name, T value, Sentry.MeasurementUnit unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
             where T :  struct { }
+        public void EmitGauge<T>(string name, T value, Sentry.MeasurementUnit unit, in System.Diagnostics.TagList attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
         [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
             "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
             "d.")]
@@ -751,6 +762,11 @@ namespace Sentry
             "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
             "d.")]
         public void EmitGauge<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
+        public void EmitGauge<T>(string name, T value, string? unit, in System.Diagnostics.TagList attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         protected abstract void Flush();
     }
