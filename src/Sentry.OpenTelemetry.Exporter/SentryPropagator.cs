@@ -2,6 +2,7 @@ using Microsoft.Extensions.Primitives;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.OpenTelemetry;
 
@@ -49,12 +50,12 @@ public class SentryPropagator : BaggagePropagator
     }
 
     /// <inheritdoc />
-    public override PropagationContext Extract<T>(PropagationContext context, T carrier, Func<T, string, IEnumerable<string>> getter)
+    public override PropagationContext Extract<T>(PropagationContext context, T carrier, Func<T, string, IEnumerable<string>?> getter)
     {
         Options?.LogDebug("SentryPropagator.Extract");
 
         var result = base.Extract(context, carrier, getter);
-        var baggage = result.Baggage; // The Otel .NET SDK takes care of baggage headers alread
+        var baggage = result.Baggage; // The Otel .NET SDK takes care of baggage headers already
 
         Options?.LogDebug("Baggage");
         foreach (var entry in baggage)
@@ -121,13 +122,17 @@ public class SentryPropagator : BaggagePropagator
         base.Inject(context, carrier, setter);
     }
 
-    private static SentryTraceHeader? TryGetSentryTraceHeader<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
+    private static SentryTraceHeader? TryGetSentryTraceHeader<T>(T carrier, Func<T, string, IEnumerable<string>?> getter)
     {
         var headerValue = getter(carrier, SentryTraceHeader.HttpHeaderName);
+        if (headerValue is null)
+        {
+            return null;
+        }
         try
         {
             var value = new StringValues(headerValue.ToArray());
-            return SentryTraceHeader.Parse(value);
+            return SentryTraceHeader.Parse(value!);
         }
         catch (Exception)
         {

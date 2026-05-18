@@ -9,6 +9,11 @@ public static class DsnSamples
     public const string ValidDsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647";
 
     /// <summary>
+    /// A DSN whose host has an org-ID prefix (e.g. o123.ingest.us.sentry.io), causing OrgId to be parsed as "123".
+    /// </summary>
+    public const string ValidDsnWithOrgId = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@o123.ingest.us.sentry.io/456";
+
+    /// <summary>
     /// Missing ProjectId
     /// </summary>
     public const string InvalidDsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/";

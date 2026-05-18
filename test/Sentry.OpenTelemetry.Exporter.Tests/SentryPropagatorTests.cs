@@ -2,7 +2,7 @@ using Microsoft.Extensions.Primitives;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 
-namespace Sentry.OpenTelemetry.Tests;
+namespace Sentry.OpenTelemetry.Exporter.Tests;
 
 public class SentryPropagatorTests
 {
