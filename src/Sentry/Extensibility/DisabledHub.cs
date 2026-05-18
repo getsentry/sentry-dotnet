@@ -84,7 +84,7 @@ public class DisabledHub : IHub, IHubInternal, IDisposable
     /// <summary>
     /// Returns a dummy transaction.
     /// </summary>
-    public ITransactionTracer StartTransaction(ITransactionContext context, TimeSpan? idleTimeout)
+    ITransactionTracer IHubInternal.StartTransaction(ITransactionContext context, TimeSpan? idleTimeout)
         => NoOpTransaction.Instance;
 
     /// <summary>
