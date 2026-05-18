@@ -144,16 +144,49 @@ public partial class SentryAppenderTests
             Properties = new PropertiesDictionary(),
             TimeStampUtc = DateTime.UtcNow,
         };
+        data.Properties[""] = "empty";
+        data.Properties["test.property.key"] = "test-property-value";
         LoggingEvent loggingEvent = new(data);
         sut.DoAppend(loggingEvent);
 
         var log = capturer.Logs.Should().ContainSingle().Which;
         log.Level.Should().Be(SentryLogLevel.Info);
         log.Message.Should().Be("Test Message");
+        log.Attributes.Should().NotContain(attribute => attribute.Key.Contains("log4net:"));
+        log.Attributes.Should().ContainSingle(attribute => attribute.Key.StartsWith("property."));
+        log.Attributes.Should().Contain(attribute => attribute.Key.Equals("property.test.property.key")).Which.Value.Value.Should().Be("test-property-value");
+    }
 
-        //TODO: assert Count/Length of Attributes
-        //requires: https://github.com/getsentry/sentry-dotnet/pull/4936
-        //should not contain "log4net:.." properties
+    [Fact]
+    public void DoAppend_StructuredLogging_DefaultProperties()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+
+        LoggingEventData data = new()
+        {
+            LoggerName = "TestLogger",
+            Level = Level.Info,
+            Message = "Test Message",
+            ThreadName = "1",
+            LocationInfo = new LocationInfo(null),
+            UserName = "TestUser",
+            Identity = "TestIdentity",
+            ExceptionString = "Exception",
+            Domain = "TestDomain",
+            TimeStampUtc = DateTime.UtcNow,
+        };
+        LoggingEvent loggingEvent = new(data);
+        sut.DoAppend(loggingEvent);
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Level.Should().Be(SentryLogLevel.Info);
+        log.Message.Should().Be("Test Message");
+        log.Attributes.Should().NotContain(attribute => attribute.Key.Contains("log4net:"));
+        log.Attributes.Should().NotContain(attribute => attribute.Key.StartsWith("property."));
     }
 
     [Fact]

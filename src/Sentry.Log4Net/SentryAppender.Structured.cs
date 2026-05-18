@@ -20,7 +20,7 @@ public partial class SentryAppender
             {
                 if (property is DictionaryEntry { Key: string key, Value: { } value })
                 {
-                    if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase))
+                    if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase) && !Guid.TryParse(key, out _))
                     {
                         log.SetAttribute($"property.{key}", value);
                     }
