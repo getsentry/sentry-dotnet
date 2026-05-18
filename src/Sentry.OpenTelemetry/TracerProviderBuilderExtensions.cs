@@ -12,9 +12,17 @@ namespace Sentry.OpenTelemetry;
 public static class TracerProviderBuilderExtensions
 {
     /// <summary>
-    /// Ensures OpenTelemetry trace information is sent to Sentry.
+    /// <para>
+    /// Ensures OpenTelemetry trace information is sent to Sentry. OpenTelemetry spans will be converted to Sentry spans
+    /// using a span processor.
+    /// </para>
+    /// <para>
+    /// Note that if you use this method to configure the trace builder, you will also need to call
+    /// <see cref="SentryOptionsExtensions.UseOpenTelemetry(SentryOptions, bool)"/> when initialising Sentry, for Sentry
+    /// to work properly with OpenTelemetry.
+    /// </para>
     /// </summary>
-    /// <param name="tracerProviderBuilder"><see cref="TracerProviderBuilder"/>.</param>
+    /// <param name="tracerProviderBuilder">The <see cref="TracerProviderBuilder"/>.</param>
     /// <param name="defaultTextMapPropagator">
     ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
     ///     <para>
@@ -27,7 +35,12 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder, TextMapPropagator? defaultTextMapPropagator = null)
+    /// <remarks>
+    /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
+    /// We recommend you use the Sentry.OpenTelemetry.Exporter integration instead.
+    /// </remarks>
+    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder,
+        TextMapPropagator? defaultTextMapPropagator = null)
     {
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
@@ -36,7 +49,7 @@ public static class TracerProviderBuilderExtensions
 
     internal static BaseProcessor<Activity> ImplementationFactory(IServiceProvider services)
     {
-        List<IOpenTelemetryEnricher> enrichers = new();
+        List<IOpenTelemetryEnricher> enrichers = [];
 
         // AspNetCoreEnricher
         var userFactory = services.GetService<ISentryUserFactory>();
