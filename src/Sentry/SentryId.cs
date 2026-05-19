@@ -7,6 +7,10 @@ namespace Sentry;
 /// </summary>
 public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
 {
+    private const int HexCharsPerByte = 2;
+    private static readonly int ByteCount = Unsafe.SizeOf<Guid>();
+    private static readonly int HexCharCount = ByteCount * HexCharsPerByte;
+
     private readonly Guid _guid;
 
     /// <summary>
@@ -41,21 +45,22 @@ public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
         value.AsSpan().CopyTo(destination);
         return true;
 #else
-        return _guid.TryFormat(destination, out var charsWritten, "n") && charsWritten == 32;
+        return _guid.TryFormat(destination, out var charsWritten, "n") && charsWritten == HexCharCount;
 #endif
     }
 
     internal bool TryWriteBytes(Span<byte> destination)
     {
-        if (destination.Length < 16)
+        if (destination.Length < ByteCount)
         {
             return false;
         }
 
 #if NET8_0_OR_GREATER
-        return _guid.TryWriteBytes(destination, bigEndian: true, out var bytesWritten) && bytesWritten == 16;
+        return _guid.TryWriteBytes(destination, bigEndian: true, out var bytesWritten) && bytesWritten == ByteCount;
 #else
         var bytes = _guid.ToByteArray();
+        // Guid.ToByteArray() returns little-endian bytes; reverse the first two 4-byte groups for big-endian
         destination[0] = bytes[3];
         destination[1] = bytes[2];
         destination[2] = bytes[1];
@@ -64,7 +69,8 @@ public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
         destination[5] = bytes[4];
         destination[6] = bytes[7];
         destination[7] = bytes[6];
-        bytes.AsSpan(8).CopyTo(destination[8..]);
+        // Copy the last 8 bytes unchanged
+        bytes.AsSpan(8..).CopyTo(destination[8..]);
         return true;
 #endif
     }

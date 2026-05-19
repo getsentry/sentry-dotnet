@@ -8,6 +8,10 @@ namespace Sentry;
 /// </summary>
 public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
 {
+    private const int ByteCount = sizeof(long);
+    private const int HexCharsPerByte = 2;
+    private const int HexCharCount = ByteCount * HexCharsPerByte;
+
     private static readonly char[] HexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
 
@@ -41,16 +45,16 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(_value);
 
     /// <inheritdoc />
-    public override string ToString() => _value.ToString("x8").PadLeft(16, '0');
+    public override string ToString() => _value.ToString("x8").PadLeft(HexCharCount, '0');
 
     internal bool TryFormat(Span<char> destination)
     {
-        if (destination.Length < 16)
+        if (destination.Length < HexCharCount)
         {
             return false;
         }
 
-        Span<byte> convertedBytes = stackalloc byte[sizeof(long)];
+        Span<byte> convertedBytes = stackalloc byte[ByteCount];
         Unsafe.As<byte, long>(ref convertedBytes[0]) = _value;
 
         // Going backwards through the array to preserve the order of the output hex string (i.e. `4e76` -> `76e4`)
@@ -66,14 +70,14 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
 
     internal bool TryWriteBytes(Span<byte> destination)
     {
-        if (destination.Length < sizeof(long))
+        if (destination.Length < ByteCount)
         {
             return false;
         }
 
-        for (var i = 0; i < sizeof(long); i++)
+        for (var i = 0; i < ByteCount; i++)
         {
-            destination[i] = (byte)(_value >> ((sizeof(long) - 1 - i) * 8));
+            destination[i] = (byte)(_value >> ((ByteCount - 1 - i) * 8));
         }
 
         return true;
@@ -85,9 +89,9 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     public static SpanId Create()
     {
 #if NETSTANDARD2_0 || NET462
-        byte[] buf = new byte[8];
+        byte[] buf = new byte[ByteCount];
 #else
-        Span<byte> buf = stackalloc byte[8];
+        Span<byte> buf = stackalloc byte[ByteCount];
 #endif
 
         Random.NextBytes(buf);
@@ -105,7 +109,7 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
     {
-        Span<char> output = stackalloc char[16];
+        Span<char> output = stackalloc char[HexCharCount];
         TryFormat(output);
         writer.WriteStringValue(output);
     }

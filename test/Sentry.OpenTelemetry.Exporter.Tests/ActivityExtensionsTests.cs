@@ -124,7 +124,7 @@ public class ActivityExtensionsTests
     {
         // Arrange
         var sentryId = SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737");
-        Span<char> buffer = stackalloc char[32];
+        Span<char> buffer = stackalloc char[ActivityExtensions.TraceIdHexCharCount];
 
         // Act
         var formatted = sentryId.TryFormat(buffer);
