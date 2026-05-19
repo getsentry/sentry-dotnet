@@ -116,7 +116,7 @@ internal static class ArgumentNullExceptionExtensions
 internal static partial class PolyfillExtensions
 {
     /// <summary>
-    /// Polyfill for <see cref="Guid.TryWriteBytes"/> on older TFMs (.NET Framework, .NET Standard 2.0/2.1, .NET 5–7).
+    /// Polyfill for Guid.TryWriteBytes on older TFMs (.NET Framework, .NET Standard 2.0/2.1, .NET 5–7).
     /// </summary>
     /// <remarks>
     /// On .NET 8+, this method exists natively on Guid.
@@ -124,9 +124,9 @@ internal static partial class PolyfillExtensions
     /// </remarks>
     public static bool TryWriteBytes(this Guid guid, Span<byte> destination, bool bigEndian, out int bytesWritten)
     {
-        const int GuidByteCount = 16;
+        const int guidByteCount = 16;
 
-        if (destination.Length < GuidByteCount)
+        if (destination.Length < guidByteCount)
         {
             bytesWritten = 0;
             return false;
@@ -149,7 +149,7 @@ internal static partial class PolyfillExtensions
             destination[6] = bytes[7];
             destination[7] = bytes[6];
             // Data4 bytes remain unchanged
-            bytes.AsSpan(8..).CopyTo(destination[8..]);
+            bytes.AsSpan(8).CopyTo(destination[8..]);
         }
         else
         {
@@ -157,7 +157,7 @@ internal static partial class PolyfillExtensions
             bytes.CopyTo(destination);
         }
 
-        bytesWritten = GuidByteCount;
+        bytesWritten = guidByteCount;
         return true;
     }
 }
