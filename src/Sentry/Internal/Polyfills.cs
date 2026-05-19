@@ -111,3 +111,55 @@ internal static class ArgumentNullExceptionExtensions
     }
 }
 #endif
+
+#if !NET8_0_OR_GREATER
+internal static partial class PolyfillExtensions
+{
+    /// <summary>
+    /// Polyfill for <see cref="Guid.TryWriteBytes"/> on older TFMs (.NET Framework, .NET Standard 2.0/2.1, .NET 5–7).
+    /// </summary>
+    /// <remarks>
+    /// On .NET 8+, this method exists natively on Guid.
+    /// On older TFMs, we provide a shim that handles byte-order conversion.
+    /// </remarks>
+    public static bool TryWriteBytes(this Guid guid, Span<byte> destination, bool bigEndian, out int bytesWritten)
+    {
+        const int GuidByteCount = 16;
+
+        if (destination.Length < GuidByteCount)
+        {
+            bytesWritten = 0;
+            return false;
+        }
+
+        var bytes = guid.ToByteArray();
+
+        if (bigEndian)
+        {
+            // Convert from Guid's mixed-endian byte layout to big-endian trace-id order:
+            // Data1 (4 bytes) and Data2/Data3 (2 bytes each) are little-endian in Guid.ToByteArray();
+            // Data4 (8 bytes) is stored in native byte order. We reverse the first 3 fields
+            // to get canonical big-endian trace-id byte order.
+            destination[0] = bytes[3];
+            destination[1] = bytes[2];
+            destination[2] = bytes[1];
+            destination[3] = bytes[0];
+            destination[4] = bytes[5];
+            destination[5] = bytes[4];
+            destination[6] = bytes[7];
+            destination[7] = bytes[6];
+            // Data4 bytes remain unchanged
+            bytes.AsSpan(8..).CopyTo(destination[8..]);
+        }
+        else
+        {
+            // Native byte order: copy as-is
+            bytes.CopyTo(destination);
+        }
+
+        bytesWritten = GuidByteCount;
+        return true;
+    }
+}
+#endif
+

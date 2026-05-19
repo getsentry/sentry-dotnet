@@ -56,23 +56,7 @@ public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
             return false;
         }
 
-#if NET8_0_OR_GREATER
         return _guid.TryWriteBytes(destination, bigEndian: true, out var bytesWritten) && bytesWritten == ByteCount;
-#else
-        var bytes = _guid.ToByteArray();
-        // Guid.ToByteArray() returns little-endian bytes; reverse the first two 4-byte groups for big-endian
-        destination[0] = bytes[3];
-        destination[1] = bytes[2];
-        destination[2] = bytes[1];
-        destination[3] = bytes[0];
-        destination[4] = bytes[5];
-        destination[5] = bytes[4];
-        destination[6] = bytes[7];
-        destination[7] = bytes[6];
-        // Copy the last 8 bytes unchanged
-        bytes.AsSpan(8..).CopyTo(destination[8..]);
-        return true;
-#endif
     }
 
     /// <inheritdoc />
