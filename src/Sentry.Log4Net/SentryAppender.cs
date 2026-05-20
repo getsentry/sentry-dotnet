@@ -104,11 +104,6 @@ public class SentryAppender : AppenderSkeleton
             }
         }
 
-        if (IsSentryLogger(loggingEvent.LoggerName))
-        {
-            return;
-        }
-
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
 
         if (MinimumEventLevel is not null && loggingEvent.Level < MinimumEventLevel)
@@ -163,11 +158,6 @@ public class SentryAppender : AppenderSkeleton
 
         _hub.CaptureEvent(evt);
     }
-
-    internal static bool IsSentryLogger(string? loggerName) =>
-        loggerName != null &&
-        (string.Equals(loggerName, "Sentry", StringComparison.Ordinal) ||
-         loggerName.StartsWith("Sentry.", StringComparison.Ordinal));
 
     private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LoggingEvent loggingEvent)
     {

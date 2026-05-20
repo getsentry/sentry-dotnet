@@ -396,44 +396,6 @@ public class SentryAppenderTests
         _fixture.SdkDisposeHandle.Received(1).Dispose();
     }
 
-    [Theory]
-    [InlineData("Sentry", true)]
-    [InlineData("Sentry.Internal.Http", true)]
-    [InlineData("Sentry.Extensions.Logging", true)]
-    [InlineData("sentry", false)]
-    [InlineData("MySentry.App", false)]
-    [InlineData("MyApp.Logger", false)]
-    [InlineData(null, false)]
-    public void IsSentryLogger_VariousLoggerNames_ReturnsExpected(string loggerName, bool expected)
-    {
-        Assert.Equal(expected, SentryAppender.IsSentryLogger(loggerName));
-    }
-
-    [Fact]
-    public void Append_SentryLoggerName_DoesNotCaptureEvent()
-    {
-        _ = _fixture.Hub.IsEnabled.Returns(true);
-        var sut = _fixture.GetSut();
-
-        var evt = new LoggingEvent(null, null, "Sentry.Internal.Http", Level.Error, "rate limited", null);
-        sut.DoAppend(evt);
-
-        _ = _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
-    [Fact]
-    public void Append_SentryLoggerName_DoesNotAddBreadcrumb()
-    {
-        _ = _fixture.Hub.IsEnabled.Returns(true);
-        var sut = _fixture.GetSut();
-        sut.MinimumEventLevel = Level.Error;
-
-        var evt = new LoggingEvent(null, null, "Sentry.Internal.Http", Level.Warn, "rate limited", null);
-        sut.DoAppend(evt);
-
-        Assert.Empty(_fixture.Scope.Breadcrumbs);
-    }
-
     [Fact]
     public void Append_ReentrantCall_DoesNotCaptureEvent()
     {
