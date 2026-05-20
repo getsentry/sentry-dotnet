@@ -93,10 +93,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      # No artifact is uploaded when the matrix produced no received files (clean PR).
-      # Tolerate the resulting "no matching artifacts" failure here.
+      # When the matrix produces no received files (clean PR), no artifact is uploaded.
+      # download-artifact's pattern branch tolerates zero matches without erroring, so
+      # we don't need `continue-on-error` here — that would mask genuine download failures.
       - name: Download Received API Files
-        continue-on-error: true
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: api-verify-received-*
@@ -152,7 +152,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Download Received API Files
-        continue-on-error: true
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: api-verify-received-*
