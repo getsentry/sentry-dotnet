@@ -587,16 +587,30 @@ public abstract class HttpTransportBase
             responseDetail);
     }
 
+    /// <summary>
+    /// See https://github.com/getsentry/sentry-dotnet/pull/5238
+    /// </summary>
+    [ThreadStatic]
+    internal static bool IsLoggingRateLimited;
+
     private void LogRateLimited(SentryId? eventId, string responseDetail)
     {
-        _options.LogWarning(
-            "{0}: Sentry rejected the envelope '{1}' due to rate limiting. " +
-            "This may indicate that you are sending too much data or have exceeded your quota. " +
-            "See https://docs.sentry.io/product/accounts/quotas/ for more information. " +
-            "Server response: {2}",
-            _typeName,
-            eventId,
-            responseDetail);
+        IsLoggingRateLimited = true;
+        try
+        {
+            _options.LogWarning(
+                "{0}: Sentry rejected the envelope '{1}' due to rate limiting. " +
+                "This may indicate that you are sending too much data or have exceeded your quota. " +
+                "See https://docs.sentry.io/product/accounts/quotas/ for more information. " +
+                "Server response: {2}",
+                _typeName,
+                eventId,
+                responseDetail);
+        }
+        finally
+        {
+            IsLoggingRateLimited = false;
+        }
     }
 
     private static bool HasJsonContent(HttpContent content) =>

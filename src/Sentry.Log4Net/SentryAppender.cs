@@ -1,3 +1,4 @@
+using Sentry.Http;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Log4Net;
@@ -72,7 +73,7 @@ public class SentryAppender : AppenderSkeleton
             return;
         }
 
-        if (IsReentrant.Value)
+        if (IsReentrant.Value || HttpTransportBase.IsLoggingRateLimited)
         {
             return;
         }
