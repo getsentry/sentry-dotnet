@@ -15,6 +15,11 @@ public abstract class HttpTransportBase
 {
     internal const string DefaultErrorMessage = "No message";
 
+    /// <summary>
+    /// See https://github.com/getsentry/sentry-dotnet/pull/5238
+    /// </summary>
+    internal static AsyncLocal<bool> IsLoggingRateLimited = new ();
+
     private readonly SentryOptions _options;
     private readonly BackpressureMonitor? _backpressureMonitor;
     private readonly ISystemClock _clock;
@@ -587,15 +592,9 @@ public abstract class HttpTransportBase
             responseDetail);
     }
 
-    /// <summary>
-    /// See https://github.com/getsentry/sentry-dotnet/pull/5238
-    /// </summary>
-    [ThreadStatic]
-    internal static bool IsLoggingRateLimited;
-
     private void LogRateLimited(SentryId? eventId, string responseDetail)
     {
-        IsLoggingRateLimited = true;
+        IsLoggingRateLimited.Value = true;
         try
         {
             _options.LogWarning(
@@ -609,7 +608,7 @@ public abstract class HttpTransportBase
         }
         finally
         {
-            IsLoggingRateLimited = false;
+            IsLoggingRateLimited.Value = false;
         }
     }
 

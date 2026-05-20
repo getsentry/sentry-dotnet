@@ -45,6 +45,8 @@ public class SentryAppender : AppenderSkeleton
     /// <see href="https://github.com/getsentry/sentry-release-registry" />
     internal const string SdkName = "sentry.dotnet.log4net";
 
+    internal Func<bool> _isLoggingRateLimited;
+
     /// <summary>
     /// Creates a new instance of the <see cref="SentryAppender"/>.
     /// </summary>
@@ -53,10 +55,13 @@ public class SentryAppender : AppenderSkeleton
 
     internal SentryAppender(
         Func<string, IDisposable> initAction,
-        IHub hubGetter)
+        IHub hubGetter,
+        Func<bool>? isLoggingRateLimitedResolver = null)
     {
         _initAction = initAction;
         _hub = hubGetter;
+        isLoggingRateLimitedResolver ??= () => HttpTransportBase.IsLoggingRateLimited.Value;
+        _isLoggingRateLimited = isLoggingRateLimitedResolver;
     }
 
     private static readonly AsyncLocal<bool> IsReentrant = new();
@@ -73,7 +78,7 @@ public class SentryAppender : AppenderSkeleton
             return;
         }
 
-        if (IsReentrant.Value || HttpTransportBase.IsLoggingRateLimited)
+        if (IsReentrant.Value || HttpTransportBase.IsLoggingRateLimited.Value)
         {
             return;
         }

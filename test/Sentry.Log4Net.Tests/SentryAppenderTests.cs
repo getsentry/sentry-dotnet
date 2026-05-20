@@ -4,6 +4,7 @@ public class SentryAppenderTests
 {
     private class Fixture
     {
+        public bool IsLoggingRateLimited { get; set; }
         public bool InitInvoked { get; set; }
         public string DsnReceivedOnInit { get; set; }
         public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
@@ -27,7 +28,7 @@ public class SentryAppenderTests
 
         public SentryAppender GetSut()
         {
-            var sut = new SentryAppender(InitAction, Hub)
+            var sut = new SentryAppender(InitAction, Hub, () => IsLoggingRateLimited)
             {
                 Dsn = Dsn
             };
@@ -409,6 +410,36 @@ public class SentryAppenderTests
                 var sut = _fixture.GetSut();
                 var reentrantEvt = new LoggingEvent(null, null, "app-logger", Level.Error, "reentrant", null);
                 sut.DoAppend(reentrantEvt);
+            });
+
+        var sut = _fixture.GetSut();
+        var evt = new LoggingEvent(null, null, "app-logger", Level.Error, "original", null);
+        sut.DoAppend(evt);
+
+        Assert.Equal(1, capturedEvents);
+    }
+
+    [Fact]
+    public void Append_IsLoggingRateLimited_DoesNotCaptureEvent()
+    {
+        _ = _fixture.Hub.IsEnabled.Returns(true);
+        var capturedEvents = 0;
+        _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
+            .Do(_ =>
+            {
+                capturedEvents++;
+                // Simulate 429 - the transport will set IsLoggingRateLimited before logging the 429
+                _fixture.IsLoggingRateLimited = true;
+                try
+                {
+                    var sut = _fixture.GetSut();
+                    var reentrantEvt = new LoggingEvent(null, null, "app-logger", Level.Error, "429", null);
+                    sut.DoAppend(reentrantEvt);
+                }
+                finally
+                {
+                    _fixture.IsLoggingRateLimited = false;
+                }
             });
 
         var sut = _fixture.GetSut();
