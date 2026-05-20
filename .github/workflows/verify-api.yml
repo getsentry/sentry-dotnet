@@ -7,14 +7,13 @@ on:
       - 'test/Sentry.Testing/ApiExtensions.cs'
       - '.github/workflows/verify-api.yml'
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   run-api-tests:
     name: Run API Approval Tests (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
+    # This job builds and runs untrusted PR code — keep the token read-only.
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false
@@ -84,6 +83,9 @@ jobs:
     needs: run-api-tests
     runs-on: ubuntu-22.04
     if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -142,6 +144,8 @@ jobs:
     needs: run-api-tests
     runs-on: ubuntu-22.04
     if: github.event.pull_request.head.repo.full_name != github.repository
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
