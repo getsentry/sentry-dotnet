@@ -18,7 +18,7 @@ public abstract class HttpTransportBase
     /// <summary>
     /// See https://github.com/getsentry/sentry-dotnet/pull/5238
     /// </summary>
-    internal static AsyncLocal<bool> IsLoggingRateLimited = new ();
+    internal static AsyncLocal<bool> IsLoggingRateLimited = new();
 
     private readonly SentryOptions _options;
     private readonly BackpressureMonitor? _backpressureMonitor;
