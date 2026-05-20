@@ -78,7 +78,7 @@ public class SentryAppender : AppenderSkeleton
             return;
         }
 
-        if (IsReentrant.Value || HttpTransportBase.IsLoggingRateLimited.Value)
+        if (IsReentrant.Value || _isLoggingRateLimited())
         {
             return;
         }
