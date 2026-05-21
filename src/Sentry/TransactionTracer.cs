@@ -18,21 +18,16 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     private readonly TimeSpan? _idleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
-    // Lifecycle state machine.
+    // The Running -> Finished transition happens exactly once, inside `_lock`, atomically
+    // with assigning `_endTimestamp` and disposing the idle timer. After the transition, no
+    // further spans are accepted and observers see a consistent view: `IsFinished == true`
+    // AND `EndTimestamp != null` AND `_spans` is frozen.
     //
-    // The transaction is either Running or Finished. The Running -> Finished transition
-    // happens exactly once, inside `_lock`, atomically with assigning `_endTimestamp` and
-    // disposing the idle timer. After the transition, no further spans are accepted and
-    // observers see a consistent view: `IsFinished == true` AND `EndTimestamp != null` AND
-    // `_spans` is frozen.
-    //
-    // `IsFinished` reads `_state` (not `EndTimestamp`) so the two observables can never
-    // diverge. The public `EndTimestamp` setter exists for back-compat with the existing
-    // API surface (tests, serialization round-trip); it routes writes through `_lock` so
-    // external use cannot create a torn view.
-    private const int StateRunning = 0;
-    private const int StateFinished = 1;
-    private int _state = StateRunning;
+    // `IsFinished` reads `_hasFinished` (not `EndTimestamp`) so the two observables can
+    // never diverge. The public `EndTimestamp` setter exists for back-compat with the
+    // existing API surface (tests, serialization round-trip); it routes writes through
+    // `_lock` so external use cannot create a torn view.
+    private bool _hasFinished;
     private readonly object _lock = new();
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
@@ -86,7 +81,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
 
     // Written exactly once during the Running -> Finished transition, inside `_lock`.
     // External writes via the setter also go through `_lock`. Reads are lock-free because
-    // the field becomes monotonically stable (non-null) the moment `_state == Finished`.
+    // the field becomes monotonically stable (non-null) the moment `_hasFinished` flips.
     private DateTimeOffset? _endTimestamp;
 
     /// <inheritdoc />
@@ -213,11 +208,11 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     internal bool HasMetrics => _metricsSummary.IsValueCreated;
 
     /// <inheritdoc />
-    // Derived from the lifecycle state field, not from `EndTimestamp`. This is the key
-    // invariant: anyone who observes `IsFinished == true` is guaranteed that `_state` has
-    // already transitioned, which means `_endTimestamp` was set inside the same critical
+    // Derived from the lifecycle flag, not from `EndTimestamp`. This is the key invariant:
+    // anyone who observes `IsFinished == true` is guaranteed that the transition flip
+    // already happened, which means `_endTimestamp` was set inside the same critical
     // section and `_spans` will no longer mutate.
-    public bool IsFinished => Volatile.Read(ref _state) != StateRunning;
+    public bool IsFinished => Volatile.Read(ref _hasFinished);
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
@@ -362,7 +357,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     {
         lock (_lock)
         {
-            if (_state != StateRunning)
+            if (_hasFinished)
             {
                 _options?.LogDebug("Discarding child span '{0}' as the trace has already finished", SpanId);
                 span.IsSampled = false;
@@ -395,7 +390,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
         }
         lock (_lock)
         {
-            if (_state != StateRunning)
+            if (_hasFinished)
             {
                 return;
             }
@@ -458,7 +453,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     {
         lock (_lock)
         {
-            if (!_idleTimeout.HasValue || _state != StateRunning)
+            if (!_idleTimeout.HasValue || _hasFinished)
             {
                 return;
             }
@@ -486,7 +481,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
         shouldDiscard = false;
         lock (_lock)
         {
-            if (_state != StateRunning)
+            if (_hasFinished)
             {
                 return false;
             }
@@ -533,10 +528,10 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
             _idleTimer?.Cancel();
             _idleTimer?.Dispose();
 
-            // State flip is the LAST write inside the lock. Use Volatile to publish the
-            // store; readers using `IsFinished` will, on observing `Finished`, also see
-            // the prior `_endTimestamp` write (release-store / acquire-load semantics).
-            Volatile.Write(ref _state, StateFinished);
+            // The flip is the LAST write inside the lock. Use Volatile to publish the
+            // store; readers using `IsFinished` will, on observing `true`, also see the
+            // prior `_endTimestamp` write (release-store / acquire-load semantics).
+            Volatile.Write(ref _hasFinished, true);
             return true;
         }
     }
@@ -565,7 +560,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
 
     // The non-locked work that follows a successful Running -> Finished transition: stop
     // the profiler, reset scope, capture the transaction, and release tracked spans. By
-    // the time we get here, `_state == Finished` and `_endTimestamp` is set, so any
+    // the time we get here, `_hasFinished == true` and `_endTimestamp` is set, so any
     // concurrent reader sees a coherent finished transaction.
     private void CompleteCapture()
     {
