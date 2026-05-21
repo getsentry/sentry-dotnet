@@ -381,9 +381,6 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
         }
     }
 
-    // All callers (`AddChildSpan`, `ChildSpanFinished`, `TryBeginFinish`, `ReleaseSpans`,
-    // and the public `GetLastActiveSpan` below) acquire the enclosing `TransactionTracer._lock`
-    // before touching this tracker, so it does not need its own lock.
     private class LastActiveSpanTracker
     {
         private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
