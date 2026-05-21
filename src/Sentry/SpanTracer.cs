@@ -34,11 +34,32 @@ public sealed class SpanTracer : IBaseTracer, ISpan
     /// <inheritdoc />
     public DateTimeOffset StartTimestamp { get; internal set; }
 
-    /// <inheritdoc />
-    public DateTimeOffset? EndTimestamp { get; internal set; }
+    private DateTimeOffset? _endTimestamp;
+    private bool _isFinished;
 
     /// <inheritdoc />
-    public bool IsFinished => EndTimestamp is not null;
+    public DateTimeOffset? EndTimestamp
+    {
+        get => Volatile.Read(ref _isFinished) ? _endTimestamp : null;
+        internal set
+        {
+            // Ordering is load-bearing: the gate-flip is release-ordered against the data write,
+            // so lock-free readers gating on `_isFinished` see a consistent (timestamp, finished) pair.
+            if (value is null)
+            {
+                Volatile.Write(ref _isFinished, false);
+                _endTimestamp = null;
+            }
+            else
+            {
+                _endTimestamp = value;
+                Volatile.Write(ref _isFinished, true);
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public bool IsFinished => Volatile.Read(ref _isFinished);
 
     // Not readonly because of deserialization
     internal Dictionary<string, Measurement>? InternalMeasurements { get; private set; }

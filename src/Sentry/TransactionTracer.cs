@@ -17,8 +17,14 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     private readonly ISentryTimer? _idleTimer;
     private readonly TimeSpan? _idleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+
+    /// <summary>
+    /// Set exactly once inside the `_lock` at the same time as setting `_endTimestamp` and disposing the idle timer.
+    /// `IsFinished` makes a volatile read of `_hasFinished` (no lock required as would be necessary for the more
+    /// complex `_endTimestamp` struct), which is essentially why we need this separate flag.
+    /// </summary>
     private bool _hasFinished;
-    private readonly object _finishLock = new();
+    private readonly Lock _lock = new();
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -69,8 +75,24 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     /// <inheritdoc />
     public DateTimeOffset StartTimestamp { get; internal set; }
 
+    /// <summary>
+    /// Guard writes with `_lock`
+    /// </summary>
+    private DateTimeOffset? _endTimestamp;
+
     /// <inheritdoc />
-    public DateTimeOffset? EndTimestamp { get; internal set; }
+    public DateTimeOffset? EndTimestamp
+    {
+        // get => _endTimestamp;
+        get => Volatile.Read(ref _hasFinished) ? _endTimestamp : null;
+        internal set
+        {
+            lock (_lock)
+            {
+                _endTimestamp = value;
+            }
+        }
+    }
 
     /// <inheritdoc cref="ISpan.Operation" />
     public string Operation
@@ -183,7 +205,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     internal bool HasMetrics => _metricsSummary.IsValueCreated;
 
     /// <inheritdoc />
-    public bool IsFinished => EndTimestamp is not null;
+    public bool IsFinished => Volatile.Read(ref _hasFinished);
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
@@ -260,21 +282,9 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
             return;
         }
 
-        // Discard if no child spans were ever started
-        bool shouldDiscard;
-        lock (_finishLock)
+        if (!TryBeginFinish(fromIdleTimer: true, out var shouldDiscard))
         {
-            if (_spans.IsEmpty && !_hasFinished)
-            {
-                _hasFinished = true;
-                _idleTimer?.Dispose();
-                EndTimestamp = _stopwatch.CurrentDateTimeOffset;
-                shouldDiscard = true;
-            }
-            else
-            {
-                shouldDiscard = false;
-            }
+            return;
         }
 
         if (shouldDiscard)
@@ -284,7 +294,8 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
             return;
         }
 
-        Finish(Status ?? SpanStatus.Ok);
+        Status ??= SpanStatus.Ok;
+        CompleteCapture();
     }
 
     /// <inheritdoc />
@@ -324,15 +335,8 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
 
     private void AddChildSpan(SpanTracer span)
     {
-        lock (_finishLock)
+        lock (_lock)
         {
-            if (_spans.Count >= SpanLimit)
-            {
-                _options?.LogDebug("Discarding child span '{0}' due to {1} span limit", SpanId, SpanLimit);
-                span.IsSampled = false;
-                return;
-            }
-
             if (_hasFinished)
             {
                 _options?.LogDebug("Discarding child span '{0}' as the trace has already finished", SpanId);
@@ -340,8 +344,15 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
                 return;
             }
 
+            if (_spans.Count >= SpanLimit)
+            {
+                _options?.LogDebug("Discarding child span '{0}' due to {1} span limit", SpanId, SpanLimit);
+                span.IsSampled = false;
+                return;
+            }
+
             span.IsSampled = IsSampled;
-            _idleTimer?.Cancel(); // Pause the idle timer while a child span is in flight
+            _idleTimer?.Cancel();
             _spans.Add(span);
             _activeSpanTracker.Push(span);
         }
@@ -350,12 +361,12 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     internal void ChildSpanFinished()
     {
         // Fast path: only idle-timeout transactions need to react to child finishes.
-        // _idleTimeout is readonly, so this check is safe outside the lock.
+        // `_idleTimeout` is readonly, so this check is safe outside the lock
         if (!_idleTimeout.HasValue)
         {
             return;
         }
-        lock (_finishLock)
+        lock (_lock)
         {
             if (_hasFinished)
             {
@@ -372,53 +383,40 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
 
     private class LastActiveSpanTracker
     {
-        private readonly Lock _lock = new();
-
         private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
         private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
 
-        public void Push(ISpan span)
-        {
-            lock (_lock)
-            {
-                TrackedSpans.Push(span);
-            }
-        }
+        public void Push(ISpan span) => TrackedSpans.Push(span);
 
         public ISpan? PeekActive()
         {
-            lock (_lock)
+            // Non-destructive: leave finished spans in place so SpanTracer.Unfinish() can resurrect them.
+            foreach (var span in TrackedSpans)
             {
-                while (TrackedSpans.Count > 0)
+                if (!span.IsFinished)
                 {
-                    // Stop tracking inactive spans
-                    var span = TrackedSpans.Peek();
-                    if (!span.IsFinished)
-                    {
-                        return span;
-                    }
-                    TrackedSpans.Pop();
+                    return span;
                 }
-                return null;
             }
+            return null;
         }
 
-        public void Clear()
-        {
-            lock (_lock)
-            {
-                TrackedSpans.Clear();
-            }
-        }
+        public void Clear() => TrackedSpans.Clear();
     }
     private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
 
     /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
+    public ISpan? GetLastActiveSpan()
+    {
+        lock (_lock)
+        {
+            return _activeSpanTracker.PeekActive();
+        }
+    }
 
     void IAutoTimeoutTracer.ResetIdleTimeout()
     {
-        lock (_finishLock)
+        lock (_lock)
         {
             if (!_idleTimeout.HasValue || _hasFinished)
             {
@@ -428,17 +426,75 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
         }
     }
 
-    private bool TryFinishOnce()
+    /// <summary>
+    /// The single atomic primitive for transitioning Running -> Finished. Returns true to
+    /// exactly one caller; all subsequent calls return false. The Running -> Finished flip,
+    /// the `EndTimestamp` write, and the timer disposal all happen inside the same critical
+    /// section, so no observer can ever see an inconsistent intermediate state.
+    /// </summary>
+    /// <param name="fromIdleTimer">
+    /// True when called from the idle-timer callback. In that case we also re-check whether
+    /// a child span is still active (it might have been added after the timer fired but
+    /// before we acquired the lock); if so, the firing is stale, and we refuse to finish.
+    /// </param>
+    /// <param name="shouldDiscard">
+    /// True if the transaction had no child spans and the caller (idle timer) should
+    /// discard rather than capture.
+    /// </param>
+    private bool TryBeginFinish(bool fromIdleTimer, out bool shouldDiscard)
     {
-        lock (_finishLock)
+        shouldDiscard = false;
+        lock (_lock)
         {
             if (_hasFinished)
             {
                 return false;
             }
-            _hasFinished = true;
+
+            if (fromIdleTimer)
+            {
+                // Defensive re-check: if a child span arrived between the timer firing and
+                // us acquiring the lock, AddChildSpan's `Cancel()` may have failed to stop
+                // the in-flight callback. The active-span check inside the lock is the
+                // authoritative answer.
+                if (_activeSpanTracker.PeekActive() != null)
+                {
+                    return false;
+                }
+
+                if (_spans.IsEmpty)
+                {
+                    shouldDiscard = true;
+                }
+            }
+
+            // Compute the end timestamp inside the lock. For idle transactions, trim to
+            // the latest finished child span when available. (Scanning `_spans` here is
+            // bounded by SpanLimit and only runs once per transaction.)
+            DateTimeOffset endTimestamp;
+            if (_idleTimeout.HasValue && !shouldDiscard)
+            {
+                DateTimeOffset latest = default;
+                foreach (var s in _spans)
+                {
+                    if (s.IsFinished && s.EndTimestamp is { } et && et > latest)
+                    {
+                        latest = et;
+                    }
+                }
+                endTimestamp = latest == default ? _stopwatch.CurrentDateTimeOffset : latest;
+            }
+            else
+            {
+                endTimestamp = _endTimestamp ?? _stopwatch.CurrentDateTimeOffset;
+            }
+
+            _endTimestamp = endTimestamp;
             _idleTimer?.Cancel();
             _idleTimer?.Dispose();
+
+            // MUST be the last write inside the lock for all logic that depends on volatile reads to work
+            Volatile.Write(ref _hasFinished, true);
             return true;
         }
     }
@@ -446,7 +502,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     /// <inheritdoc />
     public void Finish()
     {
-        if (!TryFinishOnce())
+        if (!TryBeginFinish(fromIdleTimer: false, out _))
         {
             return;
         }
@@ -456,28 +512,21 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
         {
             // Normally we wouldn't start transactions for Sentry requests but when instrumenting with OpenTelemetry
             // we are only able to determine whether it's a sentry request or not when closing a span... we leave these
-            // to be garbage collected and we don't want idle timers triggering on them
+            // to be garbage collected. The idle timer has already been disposed inside TryBeginFinish.
             _options?.LogDebug("Transaction '{0}' is a Sentry Request. Don't complete.", SpanId);
             return;
         }
 
-        TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
+        CompleteCapture();
+    }
 
-        // For idle transactions, trim end time to the last finished child span
-        if (_idleTimeout.HasValue)
-        {
-            var latestSpanEnd = _spans
-                .Where(s => s.IsFinished)
-                .Select(s => s.EndTimestamp)
-                .DefaultIfEmpty()
-                .Max();
-            EndTimestamp = latestSpanEnd ?? _stopwatch.CurrentDateTimeOffset;
-        }
-        else
-        {
-            EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
-        }
+    /// <summary>
+    /// Performs non-locked work that follows a successful Running -> Finished transition
+    /// </summary>
+    private void CompleteCapture()
+    {
+        TransactionProfiler?.Finish();
 
         _options?.LogDebug("Finished Transaction '{0}'.", SpanId);
 
