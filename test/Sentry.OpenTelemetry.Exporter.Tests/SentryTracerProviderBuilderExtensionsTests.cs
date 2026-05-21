@@ -7,7 +7,6 @@ public class SentryTracerProviderBuilderExtensionsTests
 {
     [Theory]
     [InlineData(null)]
-    [InlineData("")]
     [InlineData("foo")]
     public void AddSentryOtlpExporter_InvalidDsn_ThrowsArgumentException(string dsn)
     {
@@ -20,6 +19,20 @@ public class SentryTracerProviderBuilderExtensionsTests
         // Assert
         act.Should().Throw<ArgumentException>()
             .WithMessage($"{SentryTracerProviderBuilderExtensions.MissingDsnWarning}*");
+    }
+
+    [Fact]
+    public void AddSentryOtlpExporter_DisabledSdkDsn_ReturnsWithoutConfiguringExporter()
+    {
+        // Arrange
+        var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
+
+        // Act
+        var result = tracerProviderBuilder.AddSentryOtlpExporter(SentryConstants.DisableSdkDsnValue);
+
+        // Assert
+        result.Should().BeSameAs(tracerProviderBuilder);
+        tracerProviderBuilder.DidNotReceive().AddInstrumentation(Arg.Any<Func<object>>());
     }
 
     [Fact]
