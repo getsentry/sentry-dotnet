@@ -381,51 +381,43 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
         }
     }
 
+    // All callers (`AddChildSpan`, `ChildSpanFinished`, `TryBeginFinish`, `ReleaseSpans`,
+    // and the public `GetLastActiveSpan` below) acquire the enclosing `TransactionTracer._lock`
+    // before touching this tracker, so it does not need its own lock.
     private class LastActiveSpanTracker
     {
-        private readonly Lock _lock = new();
-
         private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
         private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
 
-        public void Push(ISpan span)
-        {
-            lock (_lock)
-            {
-                TrackedSpans.Push(span);
-            }
-        }
+        public void Push(ISpan span) => TrackedSpans.Push(span);
 
         public ISpan? PeekActive()
         {
-            lock (_lock)
+            while (TrackedSpans.Count > 0)
             {
-                while (TrackedSpans.Count > 0)
+                // Stop tracking inactive spans
+                var span = TrackedSpans.Peek();
+                if (!span.IsFinished)
                 {
-                    // Stop tracking inactive spans
-                    var span = TrackedSpans.Peek();
-                    if (!span.IsFinished)
-                    {
-                        return span;
-                    }
-                    TrackedSpans.Pop();
+                    return span;
                 }
-                return null;
+                TrackedSpans.Pop();
             }
+            return null;
         }
 
-        public void Clear()
-        {
-            lock (_lock)
-            {
-                TrackedSpans.Clear();
-            }
-        }
+        public void Clear() => TrackedSpans.Clear();
     }
     private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
 
     /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
+    public ISpan? GetLastActiveSpan()
+    {
+        lock (_lock)
+        {
+            return _activeSpanTracker.PeekActive();
+        }
+    }
 
     void IAutoTimeoutTracer.ResetIdleTimeout()
     {
