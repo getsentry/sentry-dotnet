@@ -390,15 +390,13 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
 
         public ISpan? PeekActive()
         {
-            while (TrackedSpans.Count > 0)
+            // Non-destructive: leave finished spans in place so SpanTracer.Unfinish() can resurrect them.
+            foreach (var span in TrackedSpans)
             {
-                // Stop tracking inactive spans
-                var span = TrackedSpans.Peek();
                 if (!span.IsFinished)
                 {
                     return span;
                 }
-                TrackedSpans.Pop();
             }
             return null;
         }

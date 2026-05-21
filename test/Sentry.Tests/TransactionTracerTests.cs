@@ -216,4 +216,37 @@ public class TransactionTracerTests
         // Then the transaction is captured
         hub.Received(1).CaptureTransaction(Arg.Any<SentryTransaction>());
     }
+
+    [Fact]
+    public void IdleTimeout_AfterUnfinishedChildSpan_DoesNotCaptureTransaction()
+    {
+        // Regression: prior to the fix, LastActiveSpanTracker.PeekActive() destructively popped
+        // finished spans off the stack. That created a hole when combined with SpanTracer.Unfinish()
+        // (used by EF for connection-pool reuse):
+        //
+        //   1. SpanTracer.Finish() sets EndTimestamp and calls Transaction.ChildSpanFinished().
+        //   2. ChildSpanFinished -> PeekActive() destructively pops the now-finished span.
+        //   3. Stack empty -> idle timer (re)starts.
+        //   4. SpanTracer.Unfinish() resets EndTimestamp = null on the span -- it is logically alive
+        //      again, but no longer in _activeSpanTracker.
+        //   5. PeekActive() returns null -- the idle timer fires unopposed.
+        //   6. TryBeginFinish sees PeekActive() == null and _spans.Count > 0, captures the transaction
+        //      while the unfinished span is still in-flight.
+        //
+        // Fix: PeekActive is non-destructive; an unfinished span stays in the tracker and is
+        // re-discoverable after Unfinish().
+
+        // Given an auto-generated UI event transaction with a child span that is finished then unfinished
+        var hub = Substitute.For<IHub>();
+        var (transaction, timer) = CreateIdleTransaction(hub);
+        var span = (SpanTracer)transaction.StartChild("child");
+        span.Finish();
+        span.Unfinish();
+
+        // When the idle timer fires
+        timer.Fire();
+
+        // Then the transaction is NOT captured because the unfinished span is still tracked as active
+        hub.DidNotReceive().CaptureTransaction(Arg.Any<SentryTransaction>());
+    }
 }
