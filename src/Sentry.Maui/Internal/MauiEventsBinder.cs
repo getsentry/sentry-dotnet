@@ -420,9 +420,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
         if (CurrentUiTx is not null)
         {
             // Idle timer will clean up any previous UI transaction, but we don't want any more child spans on it
-            _hub.ConfigureScope(scope => scope.ResetTransaction(CurrentUiTx));
+            _hub.ConfigureScope(static (scope, tx) => scope.ResetTransaction(tx), CurrentUiTx);
         }
-        CurrentUiTx = null;
 
         var context = new TransactionContext(name, UserInteractionClickOp)
         {
@@ -430,11 +429,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
         };
         CurrentUiTx = _hub is IHubInternal internalHub
             ? internalHub.StartTransaction(context, _options.AutoTransactionIdleTimeout)
-            // never called in practice... all our hubs implement IHubInternal
             : _hub.StartTransaction(context);
 
-        // Only bind to scope if there is no other transaction already there (user-created or SDK-owned navigation).
-        _hub.ConfigureScope(scope => scope.Transaction ??= CurrentUiTx);
+        // Bind to scope only if no other transaction is already there (user-installed or SDK-owned navigation).
+        _hub.ConfigureScope(static (scope, tx) => scope.Transaction ??= tx, CurrentUiTx);
     }
 
     // Application Events
@@ -472,13 +470,13 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 if (uiTx.Spans.Count > 0)
                 {
                     // Only finish UI transactions with child spans.
-                    // Childless transactions will be discarded by the idle timeout.
+                    // Childless transactions get discarded by the idle timeout.
                     uiTx.Finish(SpanStatus.Ok);
                 }
                 else
                 {
-                    // No child spans, so just detach from scope and let idle timeout handle it.
-                    _hub.ConfigureScope(scope => scope.ResetTransaction(CurrentUiTx));
+                    // No child spans, so just detach from scope and let idle timeout handle it
+                    _hub.ConfigureScope(static (scope, tx) => scope.ResetTransaction(tx), uiTx);
                 }
             }
             CurrentUiTx = null;
