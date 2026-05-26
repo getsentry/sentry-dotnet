@@ -2185,6 +2185,10 @@ interface SentryExperimentalOptions
     [Export("enableReplayNetworkDetailsCapturing")]
     bool EnableReplayNetworkDetailsCapturing { get; set; }
 
+    // @property (nonatomic) BOOL enableStandaloneAppStartTracing;
+    [Export("enableStandaloneAppStartTracing")]
+    bool EnableStandaloneAppStartTracing { get; set; }
+
     // -(void)validateOptions:(NSDictionary<NSString *,id> * _Nullable)options;
     [Export("validateOptions:")]
     void ValidateOptions([NullAllowed] NSDictionary<NSString, NSObject> options);
