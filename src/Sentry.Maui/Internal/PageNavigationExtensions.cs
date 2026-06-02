@@ -16,9 +16,9 @@ internal static class PageNavigationExtensions
             return;
         }
         DestinationPageProperty = typeof(NavigatedFromEventArgs)
-            .GetProperty("DestinationPage", BindingFlags.Instance | BindingFlags.Public);
+            .GetProperty("DestinationPage", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         PreviousPageProperty = typeof(NavigatedToEventArgs)
-            .GetProperty("PreviousPage", BindingFlags.Instance | BindingFlags.Public);
+            .GetProperty("PreviousPage", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
     }
 #endif
 
