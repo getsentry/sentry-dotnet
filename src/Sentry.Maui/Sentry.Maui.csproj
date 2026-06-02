@@ -10,7 +10,7 @@
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestIosTfm);$(PreviousIosTfm)</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestMacCatalystTfm);$(PreviousMacCatalystTfm)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_WINDOWS)' == '' And !$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);$(PreviousWindowsTfm);$(LatestWindowsTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_WINDOWS)' == '' And !$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);$(LatestWindowsTfm);$(PreviousWindowsTfm)</TargetFrameworks>
 
     <!--
       This flag allows us to target Windows-specific code when building on OSX, so we can build and pack all platforms on a single machine.
