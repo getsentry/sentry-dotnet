@@ -7,10 +7,37 @@ updates:
   open-pull-requests-limit: 1
 
 - package-ecosystem: nuget
+  directory: "/"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 2
+  allow:
+    - dependency-name: "UnoptimizedAssemblyDetector"
+    - dependency-name: "Roslynator.Analyzers"
+
+- package-ecosystem: nuget
+  directory: "/benchmarks"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 2
+  groups:
+    benchmarkdotnet:
+      patterns:
+        - "BenchmarkDotNet*"
+
+- package-ecosystem: nuget
   directory: "/samples"
   schedule:
     interval: monthly
   open-pull-requests-limit: 2
+
+- package-ecosystem: nuget
+  directory: "/src"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 1
+  allow:
+    - dependency-name: "SIL.ReleaseTasks"
 
 - package-ecosystem: nuget
   directory: "/test"
