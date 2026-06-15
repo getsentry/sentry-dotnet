@@ -2,14 +2,17 @@
 # https://github.com/getsentry/warden
 #
 # Warden reviews code using AI-powered skills triggered by GitHub events.
-# Skills live in .agents/skills/ or .claude/skills/
+# Built-in skills are available by name. Add more skills as needed.
 #
-# Add skills with: warden add <skill-name>
+# Add built-in reviews with:
+#   warden add security-review
+#   warden add code-review
 
 version = 1
 
 # Default settings inherited by all skills
 [defaults]
+runtime = "pi"
 # Severity levels: critical, high, medium, low, info
 # failOn: minimum severity that fails the check
 failOn = "high"
@@ -17,7 +20,9 @@ failOn = "high"
 reportOn = "medium"
 
 # Skills define what to analyze and when to run
-# Add skills with: warden add <skill-name>
+# Add built-in reviews with:
+#   warden add security-review
+#   warden add code-review
 #
 # Example skill with path filters and triggers:
 #
@@ -28,7 +33,9 @@ reportOn = "medium"
 #
 # [[skills.triggers]]
 # type = "pull_request"
-# actions = ["opened", "synchronize", "reopened"]
+# actions = ["opened", "synchronize", "reopened", "labeled"]
+# draft = false
+# labels = ["Warden"]
 
 [[skills]]
 name = "code-review"
@@ -36,7 +43,9 @@ remote = "getsentry/skills"
 
 [[skills.triggers]]
 type = "pull_request"
-actions = ["opened", "synchronize", "reopened"]
+actions = ["opened", "synchronize", "reopened", "labeled"]
+draft = false
+labels = ["Warden"]
 
 [[skills]]
 name = "find-bugs"
@@ -44,7 +53,9 @@ remote = "getsentry/skills"
 
 [[skills.triggers]]
 type = "pull_request"
-actions = ["opened", "synchronize", "reopened"]
+actions = ["opened", "synchronize", "reopened", "labeled"]
+draft = false
+labels = ["Warden"]
 
 [[skills]]
 name = "gha-security-review"
@@ -52,7 +63,9 @@ remote = "getsentry/skills"
 
 [[skills.triggers]]
 type = "pull_request"
-actions = ["opened", "synchronize", "reopened"]
+actions = ["opened", "synchronize", "reopened", "labeled"]
+draft = false
+labels = ["Warden"]
 
 [[skills]]
 name = "security-review"
@@ -60,4 +73,6 @@ remote = "getsentry/skills"
 
 [[skills.triggers]]
 type = "pull_request"
-actions = ["opened", "synchronize", "reopened"]
+actions = ["opened", "synchronize", "reopened", "labeled"]
+draft = false
+labels = ["Warden"]
