@@ -13,6 +13,7 @@ version = 1
 # Default settings inherited by all skills
 [defaults]
 runtime = "pi"
+model = "anthropic/claude-opus-4-5"
 # Severity levels: critical, high, medium, low, info
 # failOn: minimum severity that fails the check
 failOn = "high"
