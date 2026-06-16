@@ -151,4 +151,30 @@ public class HttpContextExtensionsTests
         // Assert
         transaction.Request.Cookies.Should().BeNull();
     }
+
+    [Fact]
+    public void StartSentryTransaction_WithEmptyTraceId_ReturnsNull()
+    {
+        // Arrange
+        using var _ = SentrySdk.UseHub(new Hub(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                TracesSampleRate = 0.0
+            },
+            Substitute.For<ISentryClient>()
+        ));
+
+        var context = HttpContextBuilder.BuildWithHeaders([(SentryTraceHeader.HttpHeaderName, "00000000000000000000000000000000-1000000000000000-1")]);
+
+        // Act
+        var transaction = context.StartSentryTransaction();
+        var traceHeader = transaction.GetTraceHeader();
+
+        // Assert
+        transaction.Should().BeOfType<UnsampledTransaction>();
+        traceHeader.TraceId.Should().NotBe(SentryId.Empty).And.Be(transaction.TraceId);
+        traceHeader.SpanId.Should().NotBe(SpanId.Empty).And.Be(transaction.SpanId);
+        traceHeader.IsSampled.Should().BeFalse();
+    }
 }

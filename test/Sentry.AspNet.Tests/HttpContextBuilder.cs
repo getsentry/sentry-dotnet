@@ -34,4 +34,30 @@ public static class HttpContextBuilder
         };
     }
 
+    public static HttpContext BuildWithHeaders(ReadOnlySpan<(string Key, string Value)> headers, int responseStatusCode = 200)
+    {
+        var httpRequest = new HttpRequest("test", "http://test/the/path", null);
+
+        var httpRequestType = httpRequest.GetType();
+        var setHeaderMethod = httpRequestType.GetMethod("SetHeader", BindingFlags.Instance | BindingFlags.NonPublic, null, [typeof(string), typeof(string)], null);
+        var setHeaderParameters = new object[2];
+        Assert.NotNull(setHeaderMethod);
+
+        foreach (var header in headers)
+        {
+            setHeaderParameters[0] = header.Key;
+            setHeaderParameters[1] = header.Value;
+            setHeaderMethod.Invoke(httpRequest, setHeaderParameters);
+        }
+
+        return new HttpContext(
+            httpRequest,
+            new HttpResponse(TextWriter.Null)
+            {
+                StatusCode = responseStatusCode
+            })
+        {
+            ApplicationInstance = new HttpApplication()
+        };
+    }
 }
