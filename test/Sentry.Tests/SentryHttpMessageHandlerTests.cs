@@ -130,6 +130,28 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task SendAsync_SentryTraceHeaderNotSet_DoesntSetHeader_WhenPropagationContextHasEmptyTraceId()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("00000000000000000000000000000000-1000000000000000-1"));
+
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().NotContain(h => h.Key == "sentry-trace");
+    }
+
+    [Fact]
     public async Task SendAsync_SentryTraceHeaderAlreadySet_NotOverwritten()
     {
         // Arrange
@@ -478,6 +500,28 @@ public class SentryHttpMessageHandlerTests
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
         using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        client.Get("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().NotContain(h => h.Key == "sentry-trace");
+    }
+
+    [Fact]
+    public void Send_SentryTraceHeaderNotSet_DoesntSetHeader_WhenPropagationContextHasEmptyTraceId()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("00000000000000000000000000000000-1000000000000000-1"));
+
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
         using var client = new HttpClient(sentryHandler);
 
         // Act

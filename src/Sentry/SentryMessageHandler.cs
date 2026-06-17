@@ -151,7 +151,10 @@ public abstract class SentryMessageHandler : DelegatingHandler
             // Use the span created by this integration as parent, instead of its own parent
             (parentSpan?.GetTraceHeader() ?? _hub.GetTraceHeader()) is { } traceHeader)
         {
-            request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
+            if (traceHeader.TraceId != SentryId.Empty)
+            {
+                request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
+            }
         }
     }
 
