@@ -1,0 +1,16 @@
+@HostAddress = http://localhost:59740
+
+GET {{HostAddress}}/throw/
+Accept: application/json
+
+###
+
+GET {{HostAddress}}/throw/error-message/
+Accept: application/json
+
+###
+
+GET {{HostAddress}}/not-found/
+Accept: application/json
+
+###
