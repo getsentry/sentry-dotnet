@@ -40,11 +40,14 @@ public static class HttpContextBuilder
     {
         var httpRequest = new HttpRequest("test", "http://test/the/path", null);
 
-#if WINDOWS
-        SetHeaders(httpRequest, headers);
-#else
-        SetReadOnlyHeaders(httpRequest, headers);
-#endif
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            SetHeaders(httpRequest, headers);
+        }
+        else
+        {
+            SetReadOnlyHeaders(httpRequest, headers);
+        }
 
         return new HttpContext(
             httpRequest,
