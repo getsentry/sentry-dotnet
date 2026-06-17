@@ -1,3 +1,5 @@
+using System.Runtime.Versioning;
+
 namespace Sentry.AspNet.Tests;
 
 public static class HttpContextBuilder
@@ -38,6 +40,35 @@ public static class HttpContextBuilder
     {
         var httpRequest = new HttpRequest("test", "http://test/the/path", null);
 
+#if WINDOWS
+        SetHeaders(httpRequest, headers);
+#else
+        SetReadOnlyHeaders(httpRequest, headers);
+#endif
+
+        return new HttpContext(
+            httpRequest,
+            new HttpResponse(TextWriter.Null)
+            {
+                StatusCode = responseStatusCode
+            })
+        {
+            ApplicationInstance = new HttpApplication()
+        };
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static void SetHeaders(HttpRequest httpRequest, ReadOnlySpan<(string Key, string Value)> headers)
+    {
+        foreach (var header in headers)
+        {
+            httpRequest.Headers.Add(header.Key, header.Value);
+        }
+    }
+
+    [UnsupportedOSPlatform("windows")]
+    private static void SetReadOnlyHeaders(HttpRequest httpRequest, ReadOnlySpan<(string Key, string Value)> headers)
+    {
         var httpRequestType = httpRequest.GetType();
         var setHeaderMethod = httpRequestType.GetMethod("SetHeader", BindingFlags.Instance | BindingFlags.NonPublic, null, [typeof(string), typeof(string)], null);
         var setHeaderParameters = new object[2];
@@ -49,15 +80,5 @@ public static class HttpContextBuilder
             setHeaderParameters[1] = header.Value;
             setHeaderMethod.Invoke(httpRequest, setHeaderParameters);
         }
-
-        return new HttpContext(
-            httpRequest,
-            new HttpResponse(TextWriter.Null)
-            {
-                StatusCode = responseStatusCode
-            })
-        {
-            ApplicationInstance = new HttpApplication()
-        };
     }
 }
