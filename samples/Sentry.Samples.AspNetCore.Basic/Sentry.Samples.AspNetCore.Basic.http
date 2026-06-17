@@ -5,7 +5,7 @@ Accept: application/json
 
 ###
 
-GET {{HostAddress}}/throw/error-message/
+GET {{HostAddress}}/throw/sample error message/
 Accept: application/json
 
 ###
