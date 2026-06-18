@@ -1,5 +1,3 @@
-using System.Runtime.Versioning;
-
 namespace Sentry.AspNet.Tests;
 
 public static class HttpContextBuilder
@@ -40,14 +38,12 @@ public static class HttpContextBuilder
     {
         var httpRequest = new HttpRequest("test", "http://test/the/path", null);
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        httpRequest.Headers.Unprotect();
+        foreach (var header in headers)
         {
-            SetHeaders(httpRequest, headers);
+            httpRequest.Headers.Add(header.Key, header.Value);
         }
-        else
-        {
-            SetReadOnlyHeaders(httpRequest, headers);
-        }
+        httpRequest.Headers.Protect();
 
         return new HttpContext(
             httpRequest,
@@ -59,29 +55,23 @@ public static class HttpContextBuilder
             ApplicationInstance = new HttpApplication()
         };
     }
+}
 
-    [SupportedOSPlatform("windows")]
-    private static void SetHeaders(HttpRequest httpRequest, ReadOnlySpan<(string Key, string Value)> headers)
+file static class NameValueCollectionExtensions
+{
+    private static readonly Type HeadersType = typeof(System.Collections.Specialized.NameValueCollection);
+    private static readonly PropertyInfo IsReadOnlyProperty = HeadersType.GetProperty("IsReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
+
+    extension(System.Collections.Specialized.NameValueCollection collection)
     {
-        foreach (var header in headers)
+        public void Protect()
         {
-            httpRequest.Headers.Add(header.Key, header.Value);
+            IsReadOnlyProperty.SetValue(collection, true);
         }
-    }
 
-    [UnsupportedOSPlatform("windows")]
-    private static void SetReadOnlyHeaders(HttpRequest httpRequest, ReadOnlySpan<(string Key, string Value)> headers)
-    {
-        var httpRequestType = httpRequest.GetType();
-        var setHeaderMethod = httpRequestType.GetMethod("SetHeader", BindingFlags.Instance | BindingFlags.NonPublic, null, [typeof(string), typeof(string)], null);
-        var setHeaderParameters = new object[2];
-        Assert.NotNull(setHeaderMethod);
-
-        foreach (var header in headers)
+        public void Unprotect()
         {
-            setHeaderParameters[0] = header.Key;
-            setHeaderParameters[1] = header.Value;
-            setHeaderMethod.Invoke(httpRequest, setHeaderParameters);
+            IsReadOnlyProperty.SetValue(collection, false);
         }
     }
 }
