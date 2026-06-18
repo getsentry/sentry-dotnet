@@ -152,9 +152,11 @@ public class HttpContextExtensionsTests
         transaction.Request.Cookies.Should().BeNull();
     }
 
-    [Fact]
+    [SkippableFact]
     public void StartSentryTransaction_WithTraceId_IsSampled()
     {
+        Skip.IfNot(HttpContextBuilder.IsHttpHeaderMutationSupported, nameof(HttpContextBuilder.IsHttpHeaderMutationSupported));
+
         // Arrange
         using var _ = SentrySdk.UseHub(new Hub(
             new SentryOptions
@@ -178,9 +180,11 @@ public class HttpContextExtensionsTests
         traceHeader.IsSampled.Should().BeTrue();
     }
 
-    [Fact]
+    [SkippableFact]
     public void StartSentryTransaction_WithEmptyTraceId_IsNotSampled()
     {
+        Skip.IfNot(HttpContextBuilder.IsHttpHeaderMutationSupported, nameof(HttpContextBuilder.IsHttpHeaderMutationSupported));
+
         // Arrange
         using var _ = SentrySdk.UseHub(new Hub(
             new SentryOptions

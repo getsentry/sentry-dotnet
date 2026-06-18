@@ -34,6 +34,9 @@ public static class HttpContextBuilder
         };
     }
 
+    internal static readonly bool IsHttpHeaderMutationSupported = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+    [System.Runtime.Versioning.UnsupportedOSPlatform("windows", "Works on Mono. But requires IIS7 on NetFx.")]
     public static HttpContext BuildWithHeaders(ReadOnlySpan<(string Key, string Value)> headers, int responseStatusCode = 200)
     {
         var httpRequest = new HttpRequest("test", "http://test/the/path", null);
