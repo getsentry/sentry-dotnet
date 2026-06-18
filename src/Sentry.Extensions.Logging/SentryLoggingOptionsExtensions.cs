@@ -30,7 +30,7 @@ public static class SentryLoggingOptionsExtensions
     /// The log entry is neither captured as <see cref="SentryEvent"/> nor added as <see cref="Breadcrumb"/> when any filter returns <see langword="true"/>.
     /// </remarks>
     /// <param name="options">The <see cref="SentryLoggingOptions"/> to hold the filter.</param>
-    /// <param name="filter">The filter <see langword="delegate"/>. Return <see langword="true"/> if the log entry should be filtered.</param>
+    /// <param name="filter">The filter <see langword="delegate"/>. Return <see langword="true"/> if the log entry should be filtered out.</param>
     public static void AddLogEntryFilter(
         this SentryLoggingOptions options,
         Func<string, LogLevel, EventId, Exception?, bool> filter)
