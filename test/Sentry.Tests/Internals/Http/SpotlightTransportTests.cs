@@ -34,7 +34,8 @@ public class SpotlightTransportTests
             Handler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ =>
                 {
-                    if (_shouldFail) throw new HttpRequestException("Connection refused");
+                    if (_shouldFail)
+                        throw new HttpRequestException("Connection refused");
                     return SentryResponses.GetOkResponse();
                 });
         }
