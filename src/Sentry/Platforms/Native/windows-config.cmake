@@ -1,12 +1,8 @@
 # Include debug info in the static library itself. See https://github.com/getsentry/sentry-native/issues/895 for context.
 set(_sentry_msvc_flags "/Z7 /O2 /Ob1 /DNDEBUG")
 
-# Build the static lib with Control Flow Guard metadata so a Native AOT consumer that links it
-# with <ControlFlowGuard>Guard</ControlFlowGuard> doesn't get LNK4291 against every __try/__except
-# translation unit ("module may contain '__except' but was not compiled with /guard:ehcont").
-# See https://github.com/getsentry/sentry-dotnet/issues/4801.
-# /guard:cf applies to both x64 and arm64; /guard:ehcont (EH continuation metadata) is x64-only,
-# and LNK4291 itself is an x64-only warning, so only emit ehcont for the x64 build.
+# Build with Control Flow Guard so a Native AOT consumer (ControlFlowGuard=Guard) doesn't hit LNK4291.
+# See https://github.com/getsentry/sentry-dotnet/pull/5298 for context. /guard:ehcont is x64-only.
 string(APPEND _sentry_msvc_flags " /guard:cf")
 if("$ENV{PROCESSOR_ARCHITECTURE}" STREQUAL "AMD64")
   string(APPEND _sentry_msvc_flags " /guard:ehcont")
