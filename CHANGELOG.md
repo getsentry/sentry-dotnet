@@ -1,11 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### Fixes 🐛
-
-- fix: LNK4291 when publishing a Native AOT `WinExe` with Control Flow Guard enabled by @jamescrosswell in [#5298](https://github.com/getsentry/sentry-dotnet/pull/5298)
-
 ## 6.6.0
 
 ### Features ✨
