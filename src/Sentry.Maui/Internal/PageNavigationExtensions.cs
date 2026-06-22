@@ -4,6 +4,7 @@ namespace Sentry.Maui.Internal;
 
 internal static class PageNavigationExtensions
 {
+#if !NET10_0_OR_GREATER
     private static readonly PropertyInfo? DestinationPageProperty;
     private static readonly PropertyInfo? PreviousPageProperty;
 
@@ -19,18 +20,25 @@ internal static class PageNavigationExtensions
         PreviousPageProperty = typeof(NavigatedToEventArgs)
             .GetProperty("PreviousPage", BindingFlags.Instance | BindingFlags.NonPublic);
     }
+#endif
 
     /// <summary>
-    /// Reads the (internal) NavigatedFromEventArgs.DestinationPage property via reflection.
-    /// Note that this will return null if trimming is enabled.
+    /// Gets the destination page from navigation arguments.
     /// </summary>
     public static Page? GetDestinationPage(this NavigatedFromEventArgs eventArgs) =>
+#if NET10_0_OR_GREATER
+        eventArgs.DestinationPage;
+#else
         DestinationPageProperty?.GetValue(eventArgs) as Page;
+#endif
 
     /// <summary>
-    /// Reads the (internal) NavigatedFromEventArgs.PreviousPage property via reflection.
-    /// Note that this will return null if trimming is enabled.
+    /// Gets the previous page from navigation arguments.
     /// </summary>
     public static Page? GetPreviousPage(this NavigatedToEventArgs eventArgs) =>
+#if NET10_0_OR_GREATER
+        eventArgs.PreviousPage;
+#else
         PreviousPageProperty?.GetValue(eventArgs) as Page;
+#endif
 }
