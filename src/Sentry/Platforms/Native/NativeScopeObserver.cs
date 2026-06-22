@@ -43,6 +43,16 @@ internal class NativeScopeObserver : ScopeObserver
     public override void SetTraceImpl(SentryId traceId, SpanId parentSpanId) =>
         C.sentry_set_trace(traceId.ToString(), parentSpanId.ToString());
 
+    public override void AddAttachmentImpl(SentryAttachment attachment)
+    {
+        // TODO: Missing corresponding functionality on the Native SDK
+    }
+
+    public override void ClearAttachmentsImpl()
+    {
+        // TODO: Missing corresponding functionality on the Native SDK
+    }
+
     private static string GetTimestamp(DateTimeOffset timestamp) =>
         // "o": Using ISO 8601 to make sure the timestamp makes it to the bridge correctly.
         // https://docs.microsoft.com/en-gb/dotnet/standard/base-types/standard-date-and-time-format-strings#Roundtrip

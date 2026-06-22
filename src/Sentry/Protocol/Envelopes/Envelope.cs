@@ -313,13 +313,17 @@ public sealed class Envelope : ISerializable, IDisposable
 
         if (attachments is { Count: > 0 })
         {
-            if (attachments.Count > 1)
+            foreach (var attachment in attachments)
             {
-                logger?.LogWarning("Feedback can only contain one attachment. Discarding {0} additional attachments.",
-                    attachments.Count - 1);
-            }
+                // Safety check, in case the user forcefully added a null attachment.
+                if (attachment.IsNull())
+                {
+                    logger?.LogWarning("Encountered a null attachment.  Skipping.");
+                    continue;
+                }
 
-            AddEnvelopeItemFromAttachment(items, attachments.First(), logger);
+                AddEnvelopeItemFromAttachment(items, attachment, logger);
+            }
         }
 
         if (sessionUpdate is not null)

@@ -4,10 +4,11 @@
 // If changes are required, update the script instead.
 // -----------------------------------------------------------------------------
 
+#nullable enable
+
 using System.Runtime.InteropServices;
 using Foundation;
 using ObjCRuntime;
-using Sentry;
 
 namespace Sentry.CocoaSdk;
 
@@ -100,7 +101,8 @@ internal enum SentryExtensionType : long
     Widget = 0,
     Intent = 1,
     Action = 2,
-    Share = 3
+    Share = 3,
+    NotificationService = 4
 }
 
 [Native]
@@ -120,6 +122,14 @@ internal enum SentryHttpStatusCode : long
     ContentTooLarge = 413,
     TooManyRequests = 429,
     InternalServerError = 500
+}
+
+[Native]
+internal enum SentryLastRunStatus : long
+{
+    Unknown = 0,
+    DidNotCrash = 1,
+    DidCrash = 2
 }
 
 [Native]

@@ -1,3 +1,5 @@
+using Sentry.Android;
+
 // ReSharper disable once CheckNamespace
 namespace Sentry;
 
@@ -40,6 +42,7 @@ internal partial class BindableSentryOptions
         internal class NativeExperimentalOptions
         {
             public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+            public SignalHandlerStrategy? SignalHandlerStrategy { get; set; }
         }
 
         internal class NativeSentryReplayOptions
@@ -91,6 +94,10 @@ internal partial class BindableSentryOptions
             }
             ExperimentalOptions.SessionReplay.RedactAllText = options.ExperimentalOptions.SessionReplay.MaskAllText;
             ExperimentalOptions.SessionReplay.RedactAllImages = options.ExperimentalOptions.SessionReplay.MaskAllImages;
+            if (ExperimentalOptions.SignalHandlerStrategy is { } signalHandlerStrategy)
+            {
+                options.ExperimentalOptions.SignalHandlerStrategy = signalHandlerStrategy;
+            }
         }
     }
 }

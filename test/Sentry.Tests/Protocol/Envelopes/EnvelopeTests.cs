@@ -845,7 +845,7 @@ public class EnvelopeTests
     }
 
     [Fact]
-    public void FromFeedback_MultipleAttachments_LogsWarning()
+    public void FromFeedback_MultipleAttachments_AddsAll()
     {
         // Arrange
         var feedback = new SentryFeedback(
@@ -864,23 +864,46 @@ public class EnvelopeTests
                 Feedback = feedback
             }
         };
-        var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-
         List<SentryAttachment> attachments = [
             AttachmentHelper.FakeAttachment("file1.txt"), AttachmentHelper.FakeAttachment("file2.txt")
         ];
 
         // Act
-        using var envelope = Envelope.FromFeedback(evt, logger, attachments);
+        using var envelope = Envelope.FromFeedback(evt, attachments: attachments);
 
         // Assert
-        logger.Received(1).Log(
-            SentryLevel.Warning,
-            Arg.Is<string>(m => m.Contains("Feedback can only contain one attachment")),
-            null,
-            Arg.Any<object[]>());
-        envelope.Items.Should().ContainSingle(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment);
+        envelope.Items.Count(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment).Should().Be(2);
+    }
+
+    [Fact]
+    public void FromFeedback_NullAttachment_Skipped()
+    {
+        // Arrange
+        var feedback = new SentryFeedback(
+            "Everything is great!",
+            "foo@bar.com",
+            "Someone Nice",
+            "fake-replay-id",
+            "https://www.example.com",
+            SentryId.Create()
+        );
+        var evt = new SentryEvent
+        {
+            Level = SentryLevel.Info,
+            Contexts =
+            {
+                Feedback = feedback
+            }
+        };
+        List<SentryAttachment> attachments = [
+            null!, AttachmentHelper.FakeAttachment("file1.txt")
+        ];
+
+        // Act
+        using var envelope = Envelope.FromFeedback(evt, attachments: attachments);
+
+        // Assert
+        envelope.Items.Count(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment).Should().Be(1);
     }
 
     [Fact]

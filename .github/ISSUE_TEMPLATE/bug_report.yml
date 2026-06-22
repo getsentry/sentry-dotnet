@@ -2,6 +2,11 @@ name: 🐞 Bug Report
 description: Tell us about something that's not working the way we (probably) intend.
 labels: [".NET", "Bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |-
+        Before filling in this form, please check if a similar issue already exists.
+        If you need help creating a minimal reproduction, see our [repro guide](https://github.com/getsentry/sentry-dotnet/blob/main/.github/repro.md).
   - type: dropdown
     id: nuget
     attributes:
@@ -149,7 +154,11 @@ body:
     id: repro
     attributes:
       label: Steps to Reproduce
-      description: How can we see what you're seeing? Specific is terrific.
+      description: >-
+        How can we see what you're seeing? Specific is terrific. Ideally, please provide a link
+        to a minimal reproduction project on GitHub. See our
+        [repro guide](https://github.com/getsentry/sentry-dotnet/blob/main/.github/repro.md)
+        for tips on creating one.
       placeholder: |-
         1. foo
         2. bar

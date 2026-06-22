@@ -91,6 +91,18 @@ static partial class SentrySdk
         }
         options.PostInitCallbacks.Clear();
 
+        // Default tags are applied per-event by the Enricher to events going through the .NET pipeline,
+        // but native crashes are captured and uploaded by the native SDK without going through that pipeline.
+        // Forward them to the scope observer so the native layer attaches them to crash reports.
+        // Bypassing the .NET scope keeps scope.Tags identical between native and non-native apps.
+        if (options is { EnableScopeSync: true, ScopeObserver: { } observer } && options.DefaultTags.Count > 0)
+        {
+            foreach (var tag in options.DefaultTags)
+            {
+                observer.SetTag(tag.Key, tag.Value);
+            }
+        }
+
         // Platform specific check for profiler misconfiguration.
 #if __IOS__
         // No user-facing warning necessary - the integration is part of InitSentryCocoaSdk().
@@ -287,6 +299,9 @@ static partial class SentrySdk
 
     /// <inheritdoc cref="IHub.Logger" />
     public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
+
+    /// <inheritdoc cref="IHub.Metrics" />
+    public static SentryMetricEmitter Metrics { [DebuggerStepThrough] get => CurrentHub.Metrics; }
 
     /// <summary>
     /// Creates a new scope that will terminate when disposed.
@@ -857,30 +872,4 @@ static partial class SentrySdk
     [DllImport("libc", EntryPoint = "strlen")]
     private static extern IntPtr NativeStrlenLibC(IntPtr strt);
 #endif
-
-    /// <summary>
-    /// Sentry features that are currently in an experimental state.
-    /// </summary>
-    /// <remarks>
-    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
-    /// </remarks>
-    public static ExperimentalSentrySdk Experimental { get; } = new();
-
-    /// <summary>
-    /// Sentry features that are currently in an experimental state.
-    /// </summary>
-    /// <remarks>
-    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
-    /// </remarks>
-    public sealed class ExperimentalSentrySdk
-    {
-        internal ExperimentalSentrySdk()
-        {
-        }
-
-#pragma warning disable SENTRYTRACECONNECTEDMETRICS
-        /// <inheritdoc cref="IHub.Metrics" />
-        public SentryMetricEmitter Metrics { [DebuggerStepThrough] get => CurrentHub.Metrics; }
-#pragma warning restore SENTRYTRACECONNECTEDMETRICS
-    }
 }

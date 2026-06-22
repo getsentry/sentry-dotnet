@@ -18,10 +18,17 @@ BeforeDiscovery {
 }
 
 $cases = @(
-    @{ configuration = 'Release' }
-    @{ configuration = 'Debug'   }
+    @{ configuration = 'Release'; runtime = 'mono' }
+    @{ configuration = 'Debug';   runtime = 'mono' }
 )
-Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-not $script:emulator) {
+# CoreCLR on Android requires .NET 10 or later
+if ($dotnet_version -ne 'net9.0') {
+    $cases += @(
+        @{ configuration = 'Release'; runtime = 'coreclr' }
+        @{ configuration = 'Debug';   runtime = 'coreclr' }
+    )
+}
+Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
 
@@ -38,10 +45,12 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
         $rid = "android-$arch"
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
+        $useMonoRuntime = if ($runtime -eq 'mono') { 'true' } else { 'false' }
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
             --configuration $configuration `
             --framework $tfm `
-            --runtime $rid
+            --runtime $rid `
+            -p:UseMonoRuntime=$useMonoRuntime
         | ForEach-Object { Write-Host $_ }
         Write-Host '::endgroup::'
         $LASTEXITCODE | Should -Be 0
@@ -177,13 +186,8 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
         $result.Events() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
-        # TODO: fix redundant SIGSEGV in Release (#3954)
-        if ($configuration -eq "Release") {
-            { $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`"" } | Should -Throw
-        } else {
-            $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
-            $result.Events() | Should -HaveCount 1
-        }
+        $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
+        $result.Events() | Should -HaveCount 1
     }
 
     It 'Delivers battery breadcrumbs in main thread (<configuration>)' {

@@ -281,6 +281,22 @@
     </ItemGroup>
   </Target>
 
+  <!-- Preload NDK to ensure sentry-native's signal handlers are installed before .NET runtime's.
+       Disabled on Mono until: https://github.com/dotnet/runtime/pull/125835 -->
+  <Target Name="SetAndroidNdkPreload"
+          BeforeTargets="GetAssemblyAttributes"
+          Condition="'$(AndroidApplication)' == 'True'
+            and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'
+            and '$(_SentryIsNet10OrGreater)' == 'true'
+            and '$(UseMonoRuntime)' != 'true'">
+    <ItemGroup>
+      <AssemblyAttribute Include="Android.App.MetaData">
+        <_Parameter1>io.sentry.ndk.preload</_Parameter1>
+        <Value>true</Value>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
   <!-- Upload Android ProGuard mapping file to Sentry after the build. -->
   <Target Name="UploadAndroidProGuardMappingFileToSentry" AfterTargets="Build" DependsOnTargets="PrepareSentryCLI"
           Condition="'$(SentryCLI)' != '' and '$(SentryUploadAndroidProGuardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">

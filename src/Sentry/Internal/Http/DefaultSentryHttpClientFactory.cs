@@ -15,10 +15,7 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     /// <param name="options">The HTTP options.</param>
     public HttpClient Create(SentryOptions options)
     {
-        if (options == null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options);
 
         var handler = options.CreateHttpMessageHandler?.Invoke() ?? new HttpClientHandler();
         if (handler is HttpClientHandler httpClientHandler)

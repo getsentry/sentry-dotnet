@@ -9,7 +9,7 @@ public partial class SentryMetricEmitterTests
     {
         var options = new SentryOptions();
 
-        options.Experimental.EnableMetrics.Should().BeTrue();
+        options.EnableMetrics.Should().BeTrue();
     }
 
     [Fact]
@@ -17,22 +17,22 @@ public partial class SentryMetricEmitterTests
     {
         var options = new SentryOptions();
 
-        options.Experimental.BeforeSendMetricInternal.Should().BeNull();
+        options.BeforeSendMetricInternal.Should().BeNull();
     }
 
     [Fact]
     public void BeforeSendMetric_Set_NotNull()
     {
-        _fixture.Options.Experimental.SetBeforeSendMetric(static (SentryMetric metric) => metric);
+        _fixture.Options.SetBeforeSendMetric(static (SentryMetric metric) => metric);
 
-        _fixture.Options.Experimental.BeforeSendMetricInternal.Should().NotBeNull();
+        _fixture.Options.BeforeSendMetricInternal.Should().NotBeNull();
     }
 
     [Fact]
     public void BeforeSendMetric_SetNull_Null()
     {
-        _fixture.Options.Experimental.SetBeforeSendMetric(null!);
+        _fixture.Options.SetBeforeSendMetric(null!);
 
-        _fixture.Options.Experimental.BeforeSendMetricInternal.Should().BeNull();
+        _fixture.Options.BeforeSendMetricInternal.Should().BeNull();
     }
 }

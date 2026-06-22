@@ -292,13 +292,22 @@ internal static class LoggerAssertionExtensions
 
         foreach (var expectedAttribute in fixture.ExpectedAttributes)
         {
-            log.TryGetAttribute(expectedAttribute.Key, out string? value).Should().BeTrue();
-            value.Should().Be(expectedAttribute.Value);
+            log.Attributes.ShouldContain<string>(expectedAttribute.Key, expectedAttribute.Value);
         }
     }
 
     private static KeyValuePair<string, object?> CreateHeader(string name, object? value)
     {
         return new KeyValuePair<string, object?>(name, value);
+    }
+
+    public static SentryLog ShouldContainSingleLog(this Envelope envelope)
+    {
+        var envelopeItem = envelope.Items.Should().ContainSingle().Which;
+        var serializable = envelopeItem.Payload.Should().BeOfType<JsonSerializable>().Which;
+        var log = serializable.Source.Should().BeOfType<StructuredLog>().Which;
+
+        log.Items.Length.Should().Be(1);
+        return log.Items[0];
     }
 }

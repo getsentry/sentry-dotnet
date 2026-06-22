@@ -1,4 +1,3 @@
-using NSubstitute.ReceivedExtensions;
 using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
@@ -302,10 +301,17 @@ public partial class SentryClientTests : IDisposable
         Assert.Equal(scope.Breadcrumbs, @event.Breadcrumbs);
     }
 
-    [Fact]
+    [SkippableFact]
     public void CaptureEvent_UserIsNull_SetsFallbackUserId()
     {
+#if NET5_0_OR_GREATER
+        Skip.If(System.OperatingSystem.IsAndroid() || System.OperatingSystem.IsIOS(),
+            $"On mobile, User.Id is set by {nameof(GlobalRootScopeIntegration)} at startup, not the enricher.");
+#endif
         // Arrange
+        // In global mode the userid gets set at app startup via the GlobalRootScopeIntegration, rather than by an
+        // enricher during capture... so this functionality in SentryClient only works when IsGlobalModeEnabled is false
+        _fixture.SentryOptions.IsGlobalModeEnabled = false;
         var scope = new Scope(_fixture.SentryOptions);
         var @event = new SentryEvent();
 
@@ -977,6 +983,59 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_WithEventProcessor_EventProcessorApplied()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        var eventProcessor = Substitute.For<ISentryEventProcessor>();
+        eventProcessor.Process(Arg.Any<SentryEvent>()).Returns(e =>
+        {
+            var evt = (SentryEvent)e[0];
+            evt.Environment = "testing 123";
+            return evt;
+        });
+        _fixture.SentryOptions.AddEventProcessor(eventProcessor);
+        var sut = _fixture.GetSut();
+
+        Envelope envelope = null;
+        sut.Worker.When(w => w.EnqueueEnvelope(Arg.Any<Envelope>()))
+            .Do(callback => envelope = callback.Arg<Envelope>());
+
+        //Act
+        var result = sut.CaptureFeedback(feedback);
+
+        //Assert
+        result.Should().NotBe(SentryId.Empty);
+        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        envelope.Should().NotBeNull();
+        envelope.Items.Should().Contain(item => item.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
+        @event.Environment.Should().Be("testing 123");
+        @event.Sdk.InternalPackages.Should().ContainSingle().Which.Name.Should().Be("nuget:sentry.dotnet");
+    }
+
+    [Fact]
+    public void CaptureFeedback_EventDropped_SendsClientReport()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        var eventProcessor = Substitute.For<ISentryEventProcessor>();
+        eventProcessor.Process(Arg.Any<SentryEvent>()).Returns(_ => null);
+        _fixture.SentryOptions.AddEventProcessor(eventProcessor);
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.DroppedByEventProcessor);
+        id.Should().Be(SentryId.Empty);
+        var expectedReason = DiscardReason.EventProcessor;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(expectedReason, DataCategory.Feedback);
+    }
+
+    [Fact]
     public void CaptureFeedback_WithHint_HasHintAttachment()
     {
         //Arrange
@@ -1241,10 +1300,17 @@ public partial class SentryClientTests : IDisposable
         hint.Attachments.Should().Contain(attachments);
     }
 
-    [Fact]
+    [SkippableFact]
     public void CaptureTransaction_UserIsNull_SetsFallbackUserId()
     {
+#if NET5_0_OR_GREATER
+        Skip.If(System.OperatingSystem.IsAndroid() || System.OperatingSystem.IsIOS(),
+            $"On mobile, User.Id is set by {nameof(GlobalRootScopeIntegration)} at startup, not the enricher.");
+#endif
         // Arrange
+        // In global mode the userid gets set at app startup via the GlobalRootScopeIntegration, rather than by an
+        // enricher during capture... so this functionality in SentryClient only works when IsGlobalModeEnabled is false
+        _fixture.SentryOptions.IsGlobalModeEnabled = false;
         var transaction = new SentryTransaction("name", "operation")
         {
             IsSampled = true,

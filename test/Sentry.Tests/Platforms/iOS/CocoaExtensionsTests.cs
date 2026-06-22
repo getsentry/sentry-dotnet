@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using FluentAssertions;
 using Foundation;
@@ -76,6 +77,63 @@ public class CocoaExtensionsTests
         };
         var managed = native.ToSentryEvent();
         AssertEqual(managed, native);
+    }
+
+    [Fact]
+    public void ToCocoaBreadcrumbData_EmptyDictionary_ReturnsNull()
+    {
+        var source = new Dictionary<string, string>();
+        var result = source.ToCocoaBreadcrumbData();
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public void ToCocoaBreadcrumbData_RegularKeys_ConvertsToNSObject()
+    {
+        var source = new Dictionary<string, string>
+        {
+            { "url", "https://example.com" },
+            { "method", "GET" }
+        };
+
+        var result = source.ToCocoaBreadcrumbData();
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(2);
+        result[(NSString)"url"].Should().Be(NSObject.FromObject("https://example.com"));
+        result[(NSString)"method"].Should().Be(NSObject.FromObject("GET"));
+    }
+
+    [Fact]
+    public void ToCocoaBreadcrumbData_RequestStartKey_ConvertsToNSDate()
+    {
+        var timestamp = DateTimeOffset.UtcNow;
+        var unixMs = timestamp.ToUnixTimeMilliseconds();
+        var source = new Dictionary<string, string>
+        {
+            { SentryHttpMessageHandler.RequestStartKey, unixMs.ToString("F0", CultureInfo.InvariantCulture) }
+        };
+
+        var result = source.ToCocoaBreadcrumbData();
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1);
+        result[(NSString)SentryHttpMessageHandler.RequestStartKey].Should().BeOfType<NSDate>();
+    }
+
+    [Fact]
+    public void ToCocoaBreadcrumbData_RequestStartKey_NonNumericValue_FallsBackToNSObject()
+    {
+        var source = new Dictionary<string, string>
+        {
+            { SentryHttpMessageHandler.RequestStartKey, "not-a-number" }
+        };
+
+        var result = source.ToCocoaBreadcrumbData();
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1);
+        result[(NSString)SentryHttpMessageHandler.RequestStartKey].Should().Be(NSObject.FromObject("not-a-number"));
     }
 
     private static void AssertEqual(SentryEvent managed, CocoaSdk.SentryEvent native)

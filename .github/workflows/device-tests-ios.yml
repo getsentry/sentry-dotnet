@@ -61,10 +61,10 @@ jobs:
     steps:
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
-        uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
+        uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           submodules: recursive
 
@@ -89,20 +89,20 @@ jobs:
         id: first-integration-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         with:
           path: integration-test/ios.Tests.ps1
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         with:
           path: integration-test/ios.Tests.ps1
 
       - name: Upload results
         if: success() || failure()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: device-test-ios-results
           path: |

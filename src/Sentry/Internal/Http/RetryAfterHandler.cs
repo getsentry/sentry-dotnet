@@ -28,7 +28,11 @@ internal class RetryAfterHandler : DelegatingHandler
 
     internal RetryAfterHandler(HttpMessageHandler innerHandler, ISystemClock clock)
         : base(innerHandler)
-        => _clock = clock ?? throw new ArgumentNullException(nameof(clock));
+    {
+        ArgumentNullException.ThrowIfNull(clock);
+
+        _clock = clock;
+    }
 
     /// <summary>
     /// Sends an HTTP request to the inner handler while verifying the Response status code for HTTP 429.

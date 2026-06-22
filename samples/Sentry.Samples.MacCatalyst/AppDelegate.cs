@@ -23,6 +23,10 @@ public class AppDelegate : UIApplicationDelegate
             options.Dsn = EnvironmentVariables.Dsn;
 #endif
             options.Debug = true;
+
+            // If your app doesn't have sensitive data, you can get screenshots on error events automatically
+            // https://docs.sentry.io/platforms/apple/guides/ios/configuration/options/#attachScreenshot
+            options.Native.AttachScreenshot = true;
         });
 
         // Try out the Sentry SDK

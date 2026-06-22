@@ -261,45 +261,28 @@ public class GlobalSessionManagerTests
     }
 
     [Fact]
-    public void TryRecoverPersistedSession_FileNotFoundException_LogDebug()
+    public void TryRecoverPersistedSession_NoSessionFile_LogDebug()
     {
         // Arrange
+        _fixture.PersistedSessionProvider = _ => throw new UnreachableException("Unexpected attempt to read a file that does not exist.");
         var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
-            _fixture.Options,
-            persistedSessionProvider: _ => throw new FileNotFoundException());
 
         // Act
         sut.TryRecoverPersistedSession();
 
         // Assert
-        _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Debug);
-    }
-
-    [Fact]
-    public void TryRecoverPersistedSession_DirectoryNotFoundException_LogDebug()
-    {
-        // Arrange
-        var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
-            _fixture.Options,
-            persistedSessionProvider: _ => throw new DirectoryNotFoundException());
-
-        // Act
-        sut.TryRecoverPersistedSession();
-
-        // Assert
-        _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Debug);
+        _fixture.Logger.Entries.Should().Contain(e =>
+            e.Level == SentryLevel.Debug
+            && e.Message.Contains("A persisted session file was not found"));
     }
 
     [Fact]
     public void TryRecoverPersistedSession_EndOfStreamException_LogError()
     {
         // Arrange
+        _fixture.PersistedSessionProvider = _ => throw new EndOfStreamException();
         var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
-            _fixture.Options,
-            persistedSessionProvider: _ => throw new EndOfStreamException());
+        sut.StartSession();
 
         // Act
         sut.TryRecoverPersistedSession();
@@ -391,6 +374,7 @@ public class GlobalSessionManagerTests
             pausedTimestamp);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
@@ -412,6 +396,7 @@ public class GlobalSessionManagerTests
             pausedTimestamp);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
@@ -568,6 +553,7 @@ public class GlobalSessionManagerTests
             pendingUnhandled: true);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
@@ -588,6 +574,7 @@ public class GlobalSessionManagerTests
             pendingUnhandled: true);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
@@ -609,6 +596,7 @@ public class GlobalSessionManagerTests
             pendingUnhandled: true);
 
         var sut = _fixture.GetSut();
+        sut.StartSession();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();

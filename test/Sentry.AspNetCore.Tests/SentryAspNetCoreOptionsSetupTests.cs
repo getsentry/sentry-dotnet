@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
+using Sentry.Internal;
 
 #if NETCOREAPP3_1_OR_GREATER
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
@@ -29,6 +30,14 @@ public class SentryAspNetCoreOptionsSetupTests
 
     private readonly Fixture _fixture = new();
     private readonly SentryAspNetCoreOptions _target = new();
+
+    [Fact]
+    public void Configure_RegistersTraceIgnoreStatusCodeTransactionProcessor()
+    {
+        var sut = _fixture.GetSut();
+        sut.Configure(_target);
+        Assert.Contains(_target.GetAllTransactionProcessors(), p => p is TraceIgnoreStatusCodeTransactionProcessor);
+    }
 
     [Fact]
     public void Filters_KestrelApplicationEvent_NoException_Filtered()

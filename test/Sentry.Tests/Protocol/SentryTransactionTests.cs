@@ -258,7 +258,7 @@ public class SentryTransactionTests
 
         // Act
         var finalTransaction = new SentryTransaction(transaction);
-        var actualString = finalTransaction.ToJsonString(_testOutputLogger);
+        var actualString = finalTransaction.ToJsonString(_testOutputLogger, indented: true);
         var actual = Json.Parse(actualString, SentryTransaction.FromJson);
 
         // Assert
@@ -278,6 +278,30 @@ public class SentryTransactionTests
 
             return o;
         });
+
+        Assert.Contains($$"""
+          "contexts": {
+            ".NET Framework": {
+              ".NET Framework": "\u0022v2.0.50727\u0022, \u0022v3.0\u0022, \u0022v3.5\u0022",
+              ".NET Framework Client": "\u0022v4.8\u0022, \u0022v4.0.0.0\u0022",
+              ".NET Framework Full": "\u0022v4.8\u0022"
+            },
+            "context_key": "context_value",
+            "trace": {
+              "type": "trace",
+              "span_id": "{{context.SpanId}}",
+              "parent_span_id": "{{context.ParentSpanId}}",
+              "trace_id": "{{context.TraceId}}",
+              "op": "op123",
+              "origin": "auto.serialize.transaction",
+              "description": "desc123",
+              "status": "aborted",
+              "data": {
+                "extra_key": "extra_value"
+              }
+            }
+          }
+        """, actualString);
     }
 
     [Fact]

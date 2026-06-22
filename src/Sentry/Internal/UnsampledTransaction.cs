@@ -12,11 +12,7 @@ internal sealed class UnsampledTransaction : NoOpTransaction
     // Although it's a little bit wasteful to create separate individual class instances here when all we're going to
     // report to sentry is the span count (in the client report), SDK users may refer to things like
     // `ITransaction.Spans.Count`, so we create an actual collection
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-    private readonly ConcurrentBag<ISpan> _spans = [];
-#else
-    private ConcurrentBag<ISpan> _spans = [];
-#endif
+    private readonly ConcurrentBagLite<ISpan> _spans = new();
 
     private readonly IHub _hub;
     private readonly ITransactionContext _context;
@@ -117,10 +113,6 @@ internal sealed class UnsampledTransaction : NoOpTransaction
 
     private void ReleaseSpans()
     {
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
         _spans.Clear();
-#else
-        _spans = [];
-#endif
     }
 }

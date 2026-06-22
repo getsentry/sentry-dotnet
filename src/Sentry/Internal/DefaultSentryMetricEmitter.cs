@@ -14,7 +14,7 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
     internal DefaultSentryMetricEmitter(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
         Debug.Assert(hub.IsEnabled);
-        Debug.Assert(options.Experimental is { EnableMetrics: true });
+        Debug.Assert(options is { EnableMetrics: true });
 
         _hub = hub;
         _options = options;
@@ -69,7 +69,7 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
 
         SentryMetric? configuredMetric = metric;
 
-        if (_options.Experimental.BeforeSendMetricInternal is { } beforeSendMetric)
+        if (_options.BeforeSendMetricInternal is { } beforeSendMetric)
         {
             try
             {

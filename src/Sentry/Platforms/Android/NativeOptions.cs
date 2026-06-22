@@ -1,3 +1,5 @@
+using Sentry.Android;
+
 // ReSharper disable once CheckNamespace
 namespace Sentry;
 
@@ -264,6 +266,20 @@ public partial class SentryOptions
         public class NativeExperimentalOptions
         {
             public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+
+            /// <summary>
+            /// Gets or sets the strategy for how Sentry Native's signal handler interacts with the CLR/Mono
+            /// signal handler.
+            /// The default value is <see cref="Android.SignalHandlerStrategy.Default"/>.
+            /// </summary>
+            /// <remarks>
+            /// .NET runtimes 10.0.0–10.0.3 (.NET SDKs 10.0.100–10.0.103) are not compatible with
+            /// <see cref="Android.SignalHandlerStrategy.ChainAtStart"/>. On affected versions,
+            /// the SDK automatically falls back to <see cref="Android.SignalHandlerStrategy.Default"/>.
+            /// The issue was resolved in .NET runtime 10.0.4 (.NET SDK 10.0.200). See
+            /// <see href="https://github.com/dotnet/runtime/pull/123346">dotnet/runtime#123346</see>.
+            /// </remarks>
+            public SignalHandlerStrategy SignalHandlerStrategy { get; set; } = SignalHandlerStrategy.Default;
         }
 
         public class NativeSentryReplayOptions

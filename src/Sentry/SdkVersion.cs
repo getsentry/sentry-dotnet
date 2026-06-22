@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Reflection;
 
@@ -19,8 +20,8 @@ public sealed class SdkVersion : ISentryJsonSerializable
 
     internal static SdkVersion Instance => InstanceLazy.Value;
 
-    internal ConcurrentBag<SentryPackage> InternalPackages { get; set; } = new();
-    internal ConcurrentBag<string> Integrations { get; set; } = new();
+    internal ConcurrentBagLite<SentryPackage> InternalPackages { get; set; } = new();
+    internal ConcurrentBagLite<string> Integrations { get; set; } = new();
 
     /// <summary>
     /// SDK packages.
@@ -104,8 +105,8 @@ public sealed class SdkVersion : ISentryJsonSerializable
 
         return new SdkVersion
         {
-            InternalPackages = new ConcurrentBag<SentryPackage>(packages),
-            Integrations = new ConcurrentBag<string>(integrations),
+            InternalPackages = new ConcurrentBagLite<SentryPackage>(packages),
+            Integrations = new ConcurrentBagLite<string>(integrations),
             Name = name,
             Version = version
         };

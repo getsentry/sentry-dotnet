@@ -190,7 +190,15 @@ Describe 'Console app regression (missing System.Reflection.Metadata)' {
     }
 
     AfterAll {
-        dotnet remove ./net4-console/console-app.csproj package Sentry
+        Push-Location ./net4-console
+        try
+        {
+            dotnet remove console-app.csproj package Sentry
+        }
+        finally
+        {
+            Pop-Location
+        }
     }
 
     It 'Ensure System.Reflection.Metadata is not missing' -Skip:(!$IsWindows) {

@@ -54,8 +54,8 @@ SentrySdk.Init(options =>
         return log.Level is SentryLogLevel.Info ? null : log;
     });
 
-    // Sentry (trace-connected) Metrics via SentrySdk.Experimental.Metrics are enabled by default.
-    options.Experimental.SetBeforeSendMetric(static metric =>
+    // Sentry (trace-connected) Metrics via SentrySdk.Metrics are enabled by default.
+    options.SetBeforeSendMetric(static metric =>
     {
         if (metric.TryGetValue(out int integer) && integer < 0)
         {
@@ -104,13 +104,13 @@ async Task FirstFunction()
     SentrySdk.Logger.LogInfo("HTTP Request completed.");
 
     // Counter-Metric prevented from being sent to Sentry via "BeforeSendMetric" callback
-    SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.ignore", -1);
+    SentrySdk.Metrics.EmitCounter("sentry.samples.console.basic.ignore", -1);
 
     // Counter-Metric modified before sending it to Sentry via "BeforeSendMetric" callback
-    SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.http_requests_completed", 1);
+    SentrySdk.Metrics.EmitCounter("sentry.samples.console.basic.http_requests_completed", 1);
 
     // Distribution-Metric sent as is (see "BeforeSendMetric" callback)
-    SentrySdk.Experimental.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, MeasurementUnit.Duration.Second,
+    SentrySdk.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, MeasurementUnit.Duration.Second,
         [new KeyValuePair<string, object>("http.request.method", HttpMethod.Get.Method), new KeyValuePair<string, object>("http.response.status_code", (int)HttpStatusCode.OK)]);
 }
 

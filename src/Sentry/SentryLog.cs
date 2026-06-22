@@ -14,8 +14,6 @@ namespace Sentry;
 [DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
 public sealed class SentryLog
 {
-    private readonly Dictionary<string, SentryAttribute> _attributes;
-
     [SetsRequiredMembers]
     internal SentryLog(DateTimeOffset timestamp, SentryId traceId, SentryLogLevel level, string message)
     {
@@ -24,7 +22,9 @@ public sealed class SentryLog
         Level = level;
         Message = message;
         // 7 is the number of built-in attributes, so we start with that.
-        _attributes = new Dictionary<string, SentryAttribute>(7);
+        Attributes = new SentryAttributes(7);
+        // ensure the ImmutableArray`1 is not default, so we can omit IsDefault checks before accessing other members
+        Parameters = ImmutableArray<KeyValuePair<string, object>>.Empty;
     }
 
     /// <summary>
@@ -58,12 +58,22 @@ public sealed class SentryLog
     /// <summary>
     /// The parameters to the template string.
     /// </summary>
-    public ImmutableArray<KeyValuePair<string, object>> Parameters { get; init; }
+    public ImmutableArray<KeyValuePair<string, object>> Parameters
+    {
+        get;
+        init
+        {
+            Debug.Assert(!value.IsDefault); // DEBUG-only check, because .ctor is internal and set-accessor is init-only
+            field = value;
+        }
+    }
 
     /// <summary>
     /// The span id of the span that was active when the log was collected.
     /// </summary>
     public SpanId? SpanId { get; init; }
+
+    internal SentryAttributes Attributes { get; }
 
     /// <summary>
     /// Gets the attribute value associated with the specified key.
@@ -115,81 +125,23 @@ public sealed class SentryLog
     /// </list>
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-    public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value)
-    {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Value is not null)
-        {
-            value = attribute.Value;
-            return true;
-        }
-
-        value = null;
-        return false;
-    }
-
-    internal bool TryGetAttribute(string key, [NotNullWhen(true)] out string? value)
-    {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "string" && attribute.Value is not null)
-        {
-            value = (string)attribute.Value;
-            return true;
-        }
-
-        value = null;
-        return false;
-    }
+    public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value) =>
+        Attributes.TryGetAttribute(key, out value);
 
     /// <summary>
     /// Set a key-value pair of data attached to the log.
     /// </summary>
-    public void SetAttribute(string key, object value)
-    {
-        _attributes[key] = new SentryAttribute(value);
-    }
+    public void SetAttribute(string key, object value) => Attributes.SetAttribute(key, value);
 
-    internal void SetAttribute(string key, string value)
-    {
-        _attributes[key] = new SentryAttribute(value, "string");
-    }
+    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk) =>
+        Attributes.SetDefaultAttributes(options, sdk);
 
-    internal void SetAttribute(string key, char value)
-    {
-        _attributes[key] = new SentryAttribute(value.ToString(), "string");
-    }
-
-    internal void SetAttribute(string key, int value)
-    {
-        _attributes[key] = new SentryAttribute(value, "integer");
-    }
-
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
-    {
-        var environment = options.SettingLocator.GetEnvironment();
-        SetAttribute("sentry.environment", environment);
-
-        var release = options.SettingLocator.GetRelease();
-        if (release is not null)
-        {
-            SetAttribute("sentry.release", release);
-        }
-
-        if (sdk.Name is { } name)
-        {
-            SetAttribute("sentry.sdk.name", name);
-        }
-        if (sdk.Version is { } version)
-        {
-            SetAttribute("sentry.sdk.version", version);
-        }
-    }
-
-    internal void SetOrigin(string origin)
-    {
-        SetAttribute("sentry.origin", origin);
-    }
+    internal void SetOrigin(string origin) => Attributes.SetAttribute("sentry.origin", origin);
 
     internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
+        Debug.Assert(!Parameters.IsDefault);
+
         writer.WriteStartObject();
 
 #if NET9_0_OR_GREATER
@@ -222,20 +174,17 @@ public sealed class SentryLog
 
         // the SDK MUST NOT attach a sentry.message.template attribute if there are no parameters
         // https://develop.sentry.dev/sdk/telemetry/logs/#default-attributes
-        if (Template is not null && !Parameters.IsDefaultOrEmpty)
+        if (Template is not null && !Parameters.IsEmpty)
         {
             SentryAttributeSerializer.WriteStringAttribute(writer, "sentry.message.template", Template);
         }
 
-        if (!Parameters.IsDefault)
+        foreach (var parameter in Parameters)
         {
-            foreach (var parameter in Parameters)
-            {
-                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{parameter.Key}", parameter.Value, logger);
-            }
+            SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{parameter.Key}", parameter.Value, logger);
         }
 
-        foreach (var attribute in _attributes)
+        foreach (var attribute in Attributes)
         {
             SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
         }

@@ -1,5 +1,6 @@
-minVersion: 1.1.1
+minVersion: 2.26.3
 changelogPolicy: auto
+preReleaseCommand: bash scripts/bump-version.sh
 targets:
   - name: nuget
   - name: github
@@ -20,5 +21,6 @@ targets:
       nuget:Sentry.Maui:
       nuget:Sentry.NLog:
       nuget:Sentry.OpenTelemetry:
+      nuget:Sentry.OpenTelemetry.Exporter:
       nuget:Sentry.Serilog:
       nuget:Sentry.Profiling:

@@ -11,12 +11,14 @@ BeforeDiscovery {
     $script:simulator = Get-IosSimulatorUdid -PreferredStates @('Booted')
 }
 
-Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
+Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
     # Note: we can't run against net10 and net9 becaus .NET 10 requires Xcode 26.2 and .NET 9 requires Xcode 26.0.
     # The macOS GitHub Actions runners only have Xcode 26.1+ installed and no support for Xcode 26.2 is planned for
     # net9.0-ios: https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
-    @{ tfm = "net10.0-ios26.2"; configuration = "Release" }
-    @{ tfm = "net10.0-ios26.2"; configuration = "Debug" }
+    #
+    # TODO: add coreclr when available
+    @{ tfm = "net10.0-ios26.2"; configuration = "Release"; runtime = "mono" }
+    @{ tfm = "net10.0-ios26.2"; configuration = "Debug";   runtime = "mono" }
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
@@ -29,10 +31,12 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
         $rid = "iossimulator-$arch"
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
+        $useMonoRuntime = if ($runtime -eq 'mono') { 'true' } else { 'false' }
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
             --configuration $configuration `
             --framework $tfm `
-            --runtime $rid
+            --runtime $rid `
+            -p:UseMonoRuntime=$useMonoRuntime
         | ForEach-Object { Write-Host $_ }
         Write-Host '::endgroup::'
         $LASTEXITCODE | Should -Be 0
@@ -90,7 +94,7 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
         UninstallIosApp
     }
 
-    It 'captures managed crash (<configuration>)' {
+    It 'captures managed crash (<configuration>, <runtime>)' {
         $result = Invoke-SentryServer {
             param([string]$url)
             RunIosApp -Dsn $url -TestArg "Managed"
@@ -99,12 +103,11 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
 
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
-        # TODO: fix redundant SIGABRT (#3954)
-        { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`"" } | Should -Throw
-        { $result.Envelopes() | Should -HaveCount 1 } | Should -Throw
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"(EXC_[A-Z_]+|SIG[A-Z]+)`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 
-    It 'captures native crash (<configuration>)' {
+    It 'captures native crash (<configuration>, <runtime>)' {
         $result = Invoke-SentryServer {
             param([string]$url)
             RunIosApp -Dsn $url -TestArg "Native"
@@ -112,12 +115,12 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
         }
 
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"EXC_[A-Z_]+`""
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"(EXC_[A-Z_]+|SIG[A-Z]+)`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
         $result.Envelopes() | Should -HaveCount 1
     }
 
-    It 'captures null reference exception (<configuration>)' {
+    It 'captures null reference exception (<configuration>, <runtime>)' {
         $result = Invoke-SentryServer {
             param([string]$url)
             RunIosApp -Dsn $url -TestArg "NullReferenceException"
@@ -126,12 +129,7 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
 
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
-        # TODO: fix redundant EXC_BAD_ACCESS in Release (#3954)
-        if ($configuration -eq 'Release') {
-            { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"EXC_BAD_ACCESS`"" } | Should -Throw
-        } else {
-            $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"EXC_BAD_ACCESS`""
-            $result.Envelopes() | Should -HaveCount 1
-        }
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"(EXC_[A-Z_]+|SIG[A-Z]+)`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 }

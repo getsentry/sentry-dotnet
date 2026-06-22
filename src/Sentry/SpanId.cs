@@ -8,6 +8,10 @@ namespace Sentry;
 /// </summary>
 public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
 {
+    private const int ByteCount = sizeof(long);
+    private const int HexCharsPerByte = 2;
+    private const int HexCharCount = ByteCount * HexCharsPerByte;
+
     private static readonly char[] HexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
 
@@ -41,7 +45,43 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(_value);
 
     /// <inheritdoc />
-    public override string ToString() => _value.ToString("x8").PadLeft(16, '0');
+    public override string ToString() => _value.ToString("x8").PadLeft(HexCharCount, '0');
+
+    internal bool TryFormat(Span<char> destination)
+    {
+        if (destination.Length < HexCharCount)
+        {
+            return false;
+        }
+
+        Span<byte> convertedBytes = stackalloc byte[ByteCount];
+        Unsafe.As<byte, long>(ref convertedBytes[0]) = _value;
+
+        // Going backwards through the array to preserve the order of the output hex string (i.e. `4e76` -> `76e4`)
+        for (var i = convertedBytes.Length - 1; i >= 0; i--)
+        {
+            var value = convertedBytes[i];
+            destination[(convertedBytes.Length - 1 - i) * 2] = HexChars[value >> 4];
+            destination[(convertedBytes.Length - 1 - i) * 2 + 1] = HexChars[value & 0xF];
+        }
+
+        return true;
+    }
+
+    internal bool TryWriteBytes(Span<byte> destination)
+    {
+        if (destination.Length < ByteCount)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < ByteCount; i++)
+        {
+            destination[i] = (byte)(_value >> ((ByteCount - 1 - i) * 8));
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Generates a new Sentry ID.
@@ -49,9 +89,9 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     public static SpanId Create()
     {
 #if NETSTANDARD2_0 || NET462
-        byte[] buf = new byte[8];
+        byte[] buf = new byte[ByteCount];
 #else
-        Span<byte> buf = stackalloc byte[8];
+        Span<byte> buf = stackalloc byte[ByteCount];
 #endif
 
         Random.NextBytes(buf);
@@ -69,18 +109,8 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
     {
-        Span<byte> convertedBytes = stackalloc byte[sizeof(long)];
-        Unsafe.As<byte, long>(ref convertedBytes[0]) = _value;
-
-        // Going backwards through the array to preserve the order of the output hex string (i.e. `4e76` -> `76e4`)
-        Span<char> output = stackalloc char[16];
-        for (var i = convertedBytes.Length - 1; i >= 0; i--)
-        {
-            var value = convertedBytes[i];
-            output[(convertedBytes.Length - 1 - i) * 2] = HexChars[value >> 4];
-            output[(convertedBytes.Length - 1 - i) * 2 + 1] = HexChars[value & 0xF];
-        }
-
+        Span<char> output = stackalloc char[HexCharCount];
+        TryFormat(output);
         writer.WriteStringValue(output);
     }
 

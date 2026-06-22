@@ -15,11 +15,25 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!--
+    We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.
+    https://github.com/SimonCropp/Polyfill
+  -->
+  <ItemGroup>
+    <PackageReference Include="Polyfill" Version="1.33.2" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Remove="System.Text.Json" />
     <Using Remove="System.Text.Json.Serialization" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Remove="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Remove="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
 </Project>

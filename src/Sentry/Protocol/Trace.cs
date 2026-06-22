@@ -50,7 +50,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
     /// <inheritdoc />
     public bool? IsSampled { get; internal set; }
 
-    private Dictionary<string, object?> _data = new();
+    private ConcurrentDictionary<string, object?> _data = new();
 
     /// <summary>
     /// Get the metadata
@@ -79,7 +79,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
         Origin = Origin,
         Status = Status,
         IsSampled = IsSampled,
-        _data = _data.ToDict()
+        _data = new ConcurrentDictionary<string, object?>(_data),
     };
 
     /// <summary>
@@ -137,7 +137,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
         var description = json.GetPropertyOrNull("description")?.GetString();
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
         var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
-        var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull() ?? new();
+        var data = json.GetPropertyOrNull("data")?.GetConcurrentDictionaryOrNull() ?? new();
 
         return new Trace
         {
@@ -149,7 +149,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
             Description = description,
             Status = status,
             IsSampled = isSampled,
-            _data = data
+            _data = data,
         };
     }
 }

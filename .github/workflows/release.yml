@@ -24,18 +24,18 @@ jobs:
     steps:
       - name: Get auth token
         id: token
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ vars.SENTRY_RELEASE_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SENTRY_RELEASE_BOT_PRIVATE_KEY }}
       - name: Check out current commit (${{ github.sha }})
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ steps.token.outputs.token }}
           fetch-depth: 0
 
       - name: Prepare release ${{ github.event.inputs.version }}
-        uses: getsentry/craft@013a7b2113c2cac0ff32d5180cfeaefc7c9ce5b6 # 2.24.1
+        uses: getsentry/craft@bc2e6a9952e62250e5469d5a853a7a438692ccc1 # 2.26.5
         env:
           GITHUB_TOKEN: ${{ steps.token.outputs.token }}
         with:

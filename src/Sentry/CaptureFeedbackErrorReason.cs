@@ -40,4 +40,8 @@ public enum CaptureFeedbackResult
     /// Capture failed because the <see cref="SentryFeedback.Message"/> message is empty.
     /// </summary>
     EmptyMessage,
+    /// <summary>
+    /// The <see cref="SentryFeedback"/> was discarded by an event processor.
+    /// </summary>
+    DroppedByEventProcessor,
 }

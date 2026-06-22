@@ -27,7 +27,9 @@ public class SentryGrpcInterceptor : Interceptor
         Func<IHub> hubAccessor,
         IOptions<SentryAspNetCoreOptions> options)
     {
-        _hubAccessor = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
+        ArgumentNullException.ThrowIfNull(hubAccessor);
+
+        _hubAccessor = hubAccessor;
         _options = options.Value;
         var hub = _hubAccessor();
         foreach (var callback in _options.ConfigureScopeCallbacks)
