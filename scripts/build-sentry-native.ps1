@@ -21,26 +21,27 @@ try
     }
     elseif ($IsWindows)
     {
-        $additionalArgs += @('-C', 'src/Sentry/Platforms/Native/windows-config.cmake')
         $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
         $libExtension = '.lib'
 
-        # Build with Control Flow Guard so a Native AOT consumer (ControlFlowGuard=Guard) doesn't hit LNK4291.
-        # /guard:ehcont is x64-only — decide here where we already know the target arch.
+        # /Z7 embeds debug info in the static lib (see https://github.com/getsentry/sentry-native/issues/895).
+        # /guard:cf + /guard:ehcont add Control Flow Guard metadata so a Native AOT consumer
+        # (ControlFlowGuard=Guard) doesn't hit LNK4291. /guard:ehcont is x64-only.
+        $msvcFlags = '/Z7 /O2 /Ob1 /DNDEBUG /guard:cf'
         if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
         {
             $outDir += '/win-arm64'
-            $extraMsvcFlags = '/guard:cf'
         }
         else
         {
             $outDir += '/win-x64'
-            $extraMsvcFlags = '/guard:cf /guard:ehcont'
+            $msvcFlags += ' /guard:ehcont'
         }
-        # -C cache-init scripts run before -D values are applied, so we can't pass the flags
-        # via -D. Use an env var instead, which is readable from windows-config.cmake.
-        $env:SENTRY_EXTRA_MSVC_FLAGS = $extraMsvcFlags
+        $additionalArgs += @(
+            '-D', "CMAKE_C_FLAGS_RELWITHDEBINFO=$msvcFlags",
+            '-D', "CMAKE_CXX_FLAGS_RELWITHDEBINFO=$msvcFlags"
+        )
     }
     elseif ($IsLinux)
     {

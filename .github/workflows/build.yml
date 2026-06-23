@@ -61,7 +61,7 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
       - run: scripts/build-sentry-native.ps1
@@ -143,7 +143,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-linux-x64-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-linux-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (linux-arm64)
@@ -151,7 +151,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-linux-arm64-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-linux-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (linux-musl-x64)
@@ -159,7 +159,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-linux-musl-x64-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-linux-musl-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (linux-musl-arm64)
@@ -167,7 +167,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-linux-musl-arm64-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-linux-musl-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (macos)
@@ -175,7 +175,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (win-x64)
@@ -183,7 +183,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
@@ -192,7 +192,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-win-arm64-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-win-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
@@ -314,7 +314,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
@@ -408,7 +408,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/windows-config.cmake') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Setup Environment
