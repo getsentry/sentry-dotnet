@@ -20,6 +20,8 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 2
+  allow:
+    - dependency-name: "BenchmarkDotNet*"
   groups:
     benchmarkdotnet:
       patterns:
