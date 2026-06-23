@@ -7,21 +7,25 @@ changelog:
       - dependabot
   categories:
     - title: Breaking Changes 🛠
+      semver: major
       labels:
         - "Changelog: Breaking Change"
       commit_patterns:
         - "^(?<type>\\w+(?:\\((?<scope>[^)]+)\\))?!:\\s*)"
     - title: Features ✨
+      semver: minor
       labels:
         - "Changelog: Feature"
       commit_patterns:
         - "^feat(?:\\([^\\)]+\\))?:\\s+"
     - title: Fixes 🐛
+      semver: patch
       labels:
         - "Changelog: Bugfix"
       commit_patterns:
         - "^(?:fix|bugfix)(?:\\([^\\)]+\\))?:\\s+"
     - title: Dependencies ⬆️
+      semver: patch
       labels:
         - "Changelog: Dependency Update"
       commit_patterns:
