@@ -111,8 +111,16 @@ internal partial class BindableSentryOptions
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
         options.DisableSentryHttpMessageHandler = DisableSentryHttpMessageHandler ?? options.DisableSentryHttpMessageHandler;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
-        options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
-        options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
+        // Deliberately not the usual `?? options.X` pattern: only assign when bound, to avoid marking
+        // these as explicitly set (which drives env-var precedence in SettingLocator.ResolveSpotlight).
+        if (EnableSpotlight.HasValue)
+        {
+            options.EnableSpotlight = EnableSpotlight.Value;
+        }
+        if (SpotlightUrl is not null)
+        {
+            options.SpotlightUrl = SpotlightUrl;
+        }
 
 #if ANDROID
         Android.ApplyTo(options.Android);

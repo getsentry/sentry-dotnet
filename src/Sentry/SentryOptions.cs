@@ -1339,12 +1339,25 @@ public class SentryOptions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Func<string, PEReader?>? AssemblyReader { get; set; }
 
+    internal const string DefaultSpotlightUrl = "http://localhost:8969/stream";
+
+    private string? _spotlightUrl;
+
     /// <summary>
     /// The Spotlight URL. Defaults to http://localhost:8969/stream
     /// <see cref="EnableSpotlight"/>
     /// <see href="https://spotlightjs.com/"/>
     /// </summary>
-    public string SpotlightUrl { get; set; } = "http://localhost:8969/stream";
+    // TODO: Change to `string?` default `null` in 7.0.0
+    public string SpotlightUrl
+    {
+        get => _spotlightUrl ?? DefaultSpotlightUrl;
+        set => _spotlightUrl = value;
+    }
+
+    internal bool SpotlightUrlExplicitlySet => _spotlightUrl is not null;
+
+    private bool? _enableSpotlight;
 
     /// <summary>
     /// Whether to enable Spotlight for local development.
@@ -1354,7 +1367,20 @@ public class SentryOptions
     /// </remarks>
     /// <see cref="SpotlightUrl"/>
     /// <see href="https://spotlightjs.com/"/>
-    public bool EnableSpotlight { get; set; }
+    // TODO: Change to `bool?` default `null` in 7.0.0
+    public bool EnableSpotlight
+    {
+        get => _enableSpotlight ?? false;
+        set => _enableSpotlight = value;
+    }
+
+    internal bool EnableSpotlightExplicitlySet => _enableSpotlight is not null;
+
+    /// <summary>
+    /// The transport used to send pre-serialized envelopes to Spotlight.
+    /// Set internally by the SDK during initialization.
+    /// </summary>
+    internal ISpotlightTransport? SpotlightTransport { get; set; }
 
     internal SettingLocator SettingLocator { get; set; }
 

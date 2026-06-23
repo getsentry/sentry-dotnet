@@ -304,6 +304,163 @@ public class SettingLocatorTests
         Assert.Null(options.Environment);
     }
 
+    // --- ResolveSpotlight tests ---
+
+    private const string SpotlightEnvironmentVariable = Constants.SpotlightEnvironmentVariable;
+
+    [Theory]
+    [InlineData("true")]
+    [InlineData("1")]
+    [InlineData("yes")]
+    [InlineData("on")]
+    [InlineData("t")]
+    [InlineData("y")]
+    [InlineData("TRUE")]
+    [InlineData("Yes")]
+    public void ResolveSpotlight_TruthyEnvVar_EnablesSpotlightWithDefaultUrl(string value)
+    {
+        var options = new SentryOptions();
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = value;
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.True(options.EnableSpotlight);
+        Assert.Equal(SentryOptions.DefaultSpotlightUrl, options.SpotlightUrl);
+    }
+
+    [Theory]
+    [InlineData("false")]
+    [InlineData("0")]
+    [InlineData("no")]
+    [InlineData("off")]
+    [InlineData("f")]
+    [InlineData("n")]
+    public void ResolveSpotlight_FalsyEnvVar_DoesNotEnableSpotlight(string value)
+    {
+        var options = new SentryOptions();
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = value;
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.False(options.EnableSpotlight);
+    }
+
+    [Fact]
+    public void ResolveSpotlight_UrlEnvVar_EnablesWithCustomUrl()
+    {
+        var options = new SentryOptions();
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = "http://custom:1234/stream";
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.True(options.EnableSpotlight);
+        Assert.Equal("http://custom:1234/stream", options.SpotlightUrl);
+    }
+
+    [Fact]
+    public void ResolveSpotlight_NoEnvVar_DoesNotChangeOptions()
+    {
+        var options = new SentryOptions();
+        options.FakeSettings(); // no env vars set
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.False(options.EnableSpotlight);
+        Assert.Equal(SentryOptions.DefaultSpotlightUrl, options.SpotlightUrl);
+    }
+
+    [Fact]
+    public void ResolveSpotlight_ConfigExplicitlyDisabled_EnvVarIgnored()
+    {
+        var options = new SentryOptions { EnableSpotlight = false };
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = "true";
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.False(options.EnableSpotlight);
+    }
+
+    [Fact]
+    public void ResolveSpotlight_ConfigExplicitlyDisabled_EnvVarUrlIgnored()
+    {
+        var options = new SentryOptions { EnableSpotlight = false };
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = "http://custom:1234/stream";
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.False(options.EnableSpotlight);
+    }
+
+    [Theory]
+    [InlineData("false")]
+    [InlineData("0")]
+    [InlineData("no")]
+    public void ResolveSpotlight_ConfigEnabled_FalsyEnvVar_StaysEnabled(string value)
+    {
+        var options = new SentryOptions { EnableSpotlight = true };
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = value;
+
+        options.SettingLocator.ResolveSpotlight();
+
+        // Config takes precedence over env var
+        Assert.True(options.EnableSpotlight);
+    }
+
+    [Fact]
+    public void ResolveSpotlight_ConfigEnabledWithDefaultUrl_EnvVarProvidesUrl()
+    {
+        // Per spec: config spotlight=true + env var URL → use env var URL
+        var options = new SentryOptions { EnableSpotlight = true };
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = "http://custom:1234/stream";
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.True(options.EnableSpotlight);
+        Assert.Equal("http://custom:1234/stream", options.SpotlightUrl);
+    }
+
+    [Fact]
+    public void ResolveSpotlight_ConfigExplicitUrl_EnvVarUrlIgnored()
+    {
+        // Per spec: if config specifies a string URL → config wins
+        var options = new SentryOptions
+        {
+            EnableSpotlight = true,
+            SpotlightUrl = "http://config:5555/stream"
+        };
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = "http://envvar:6666/stream";
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.True(options.EnableSpotlight);
+        Assert.Equal("http://config:5555/stream", options.SpotlightUrl);
+    }
+
+    [Fact]
+    public void ResolveSpotlight_TruthyEnvVar_AlreadyEnabled_NoChange()
+    {
+        var options = new SentryOptions { EnableSpotlight = true };
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = "true";
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.True(options.EnableSpotlight);
+        Assert.Equal(SentryOptions.DefaultSpotlightUrl, options.SpotlightUrl);
+    }
+
+    [Fact]
+    public void ResolveSpotlight_EnvVarWhitespace_TreatedAsEmpty()
+    {
+        var options = new SentryOptions();
+        options.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = "   ";
+
+        options.SettingLocator.ResolveSpotlight();
+
+        Assert.False(options.EnableSpotlight);
+    }
+
+    // --- GetRelease tests ---
+
     [Fact]
     public void GetRelease_WithEnvironmentVariable_ReturnsAndSetsRelease()
     {
