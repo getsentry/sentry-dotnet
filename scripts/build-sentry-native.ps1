@@ -26,14 +26,19 @@ try
         $libPrefix = ''
         $libExtension = '.lib'
 
+        # Build with Control Flow Guard so a Native AOT consumer (ControlFlowGuard=Guard) doesn't hit LNK4291.
+        # /guard:ehcont is x64-only — decide here where we already know the target arch.
         if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
         {
             $outDir += '/win-arm64'
+            $extraMsvcFlags = '/guard:cf'
         }
         else
         {
             $outDir += '/win-x64'
+            $extraMsvcFlags = '/guard:cf /guard:ehcont'
         }
+        $additionalArgs += @('-D', "SENTRY_EXTRA_MSVC_FLAGS=$extraMsvcFlags")
     }
     elseif ($IsLinux)
     {
