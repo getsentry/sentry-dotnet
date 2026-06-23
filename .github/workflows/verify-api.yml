@@ -7,6 +7,12 @@ on:
       - 'test/Sentry.Testing/ApiExtensions.cs'
       - '.github/workflows/verify-api.yml'
 
+# Serialize with format-code.yml so the two auto-commit workflows can't race
+# each other's git push on the same PR branch.
+concurrency:
+  group: pr-auto-commit-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   run-api-tests:
     name: Run API Approval Tests (${{ matrix.rid }})
