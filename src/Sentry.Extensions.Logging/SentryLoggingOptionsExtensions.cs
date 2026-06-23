@@ -14,7 +14,7 @@ public static class SentryLoggingOptionsExtensions
     /// <remarks>
     /// Filters are called before sending an event.
     /// This allows the filter to decide whether the log message should not be recorded at all.
-    /// The log entry is neither captured as <see cref="SentryEvent"/> nor added as <see cref="Breadcrumb"/> when any filter returns <see langword="true"/>.
+    /// The log entry is neither captured as a <see cref="SentryEvent"/> nor added as a <see cref="Breadcrumb"/> when any filter returns <see langword="true"/>.
     /// </remarks>
     /// <param name="options">The <see cref="SentryLoggingOptions"/> to hold the filter.</param>
     /// <param name="filter">The <see cref="ILogEntryFilter"/> filter.</param>
