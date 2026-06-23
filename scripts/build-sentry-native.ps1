@@ -38,7 +38,9 @@ try
             $outDir += '/win-x64'
             $extraMsvcFlags = '/guard:cf /guard:ehcont'
         }
-        $additionalArgs += @('-D', "SENTRY_EXTRA_MSVC_FLAGS=$extraMsvcFlags")
+        # -C cache-init scripts run before -D values are applied, so we can't pass the flags
+        # via -D. Use an env var instead, which is readable from windows-config.cmake.
+        $env:SENTRY_EXTRA_MSVC_FLAGS = $extraMsvcFlags
     }
     elseif ($IsLinux)
     {
