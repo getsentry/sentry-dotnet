@@ -78,6 +78,19 @@ jobs:
           path: "**/*.received.txt"
           if-no-files-found: ignore
 
+      # Fork PRs can't be auto-accepted (the bot can't push to a contributor's
+      # repo), so we fail the check here with the exact commands to run locally.
+      - name: Fail If Fork PR Has API Changes
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        shell: bash
+        run: |
+          if [[ -n "$(find . -name '*.received.txt' -print -quit)" ]]; then
+            echo "::error::Public API changes detected. Please run the following commands locally and push the result:"
+            echo "::error::  dotnet test ${{ matrix.slnf }} --filter \"FullyQualifiedName~ApiApprovalTests\""
+            echo "::error::  pwsh ./scripts/accept-verifier-changes.ps1"
+            exit 1
+          fi
+
   accept-api-changes:
     name: Accept and Commit API Changes
     needs: run-api-tests
@@ -134,38 +147,3 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh pr edit "${{ github.event.pull_request.number }}" --add-label "public API" --repo "${{ github.repository }}"
-
-  # Fork PRs can't be auto-committed since the bot can't push to a contributor's repo.
-  # Fail the check with guidance so the contributor accepts the changes locally.
-  report-fork-api-changes:
-    name: Report API Changes (Fork PR)
-    needs: run-api-tests
-    runs-on: ubuntu-22.04
-    if: github.event.pull_request.head.repo.full_name != github.repository
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Download Received API Files
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          pattern: api-verify-received-*
-          merge-multiple: true
-
-      - name: Accept Verifier Changes
-        shell: pwsh
-        run: pwsh ./scripts/accept-verifier-changes.ps1
-
-      - name: Fail If API Changes Detected
-        shell: bash
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "::error::Public API changes detected. Please run the following commands locally and push the result:"
-            echo "::error::  dotnet test SentryNoMobile.slnf --filter \"FullyQualifiedName~ApiApprovalTests\""
-            echo "::error::  pwsh ./scripts/accept-verifier-changes.ps1"
-            exit 1
-          fi
-          echo "No API verifier changes detected."
