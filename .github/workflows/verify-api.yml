@@ -163,8 +163,9 @@ jobs:
         shell: bash
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
-            echo "::error::Public API changes detected. Please run the following locally and push the result:"
-            echo "::error::  dotnet test && pwsh ./scripts/accept-verifier-changes.ps1"
+            echo "::error::Public API changes detected. Please run the following commands locally and push the result:"
+            echo "::error::  dotnet test SentryNoMobile.slnf --filter \"FullyQualifiedName~ApiApprovalTests\""
+            echo "::error::  pwsh ./scripts/accept-verifier-changes.ps1"
             exit 1
           fi
           echo "No API verifier changes detected."
