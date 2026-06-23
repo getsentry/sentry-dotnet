@@ -4,9 +4,6 @@
 *.slnx text=auto eol=lf
 *.sh eol=lf
 *.ps1 eol=lf
-# Keep eol stable so hashFiles() over this file yields the same cache key on every
-# runner OS (it's part of the sentry-native cache key in build.yml). See #5298.
-*.cmake eol=lf
 CHANGELOG.md merge=union
 
 
