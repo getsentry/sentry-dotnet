@@ -667,8 +667,22 @@ internal class Hub : IHub, IDisposable
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
-                _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                transaction.Finish(SpanStatus.Aborted);
+                // Exception: OpenTelemetry-instrumented transactions are owned and finished by the
+                // SentrySpanProcessor when the underlying Activity ends. That's also where the transaction
+                // name, operation and otel/response contexts get populated (from the http.route etc.
+                // attributes, which aren't available yet at this point). Finishing it early here would
+                // capture it before that enrichment, sending it with the raw activity name (e.g.
+                // "Microsoft.AspNetCore.Hosting.HttpRequestIn") and no otel context. See issue #5091.
+                if (transaction is IBaseTracer { IsOtelInstrumenter: true })
+                {
+                    _options.LogDebug(
+                        "Not ending OpenTelemetry transaction as Aborted; it is finished by the SentrySpanProcessor.");
+                }
+                else
+                {
+                    _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
+                    transaction.Finish(SpanStatus.Aborted);
+                }
             }
 
             return id;
