@@ -36,6 +36,7 @@
     <File Path=".github/workflows/validate-pr.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
     <File Path=".github/workflows/watch-upstream.yml" />
+    <File Path=".github\workflows\verify-api.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
     <File Path="benchmarks\Directory.Build.props" />
