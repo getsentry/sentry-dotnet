@@ -2802,8 +2802,6 @@ interface SentrySDK
     [Static]
     [Export("captureFeedback:")]
     void CaptureFeedback(SentryFeedback feedback);
-
-    // @property (readonly, nonatomic, strong, class) SentryFeedbackAPI * _Nonnull feedback;
     [Static]
     [Export("feedback", ArgumentSemantic.Strong)]
     SentryFeedbackAPI Feedback { get; }
@@ -2857,6 +2855,16 @@ interface SentrySDK
     [Static]
     [Export("reportFullyDisplayed")]
     void ReportFullyDisplayed();
+
+    // +(id<SentrySpan> _Nullable)extendAppLaunch;
+    [Static]
+    [NullAllowed, Export("extendAppLaunch")]
+    SentrySpan ExtendAppLaunch { get; }
+
+    // +(void)finishExtendedAppLaunch;
+    [Static]
+    [Export("finishExtendedAppLaunch")]
+    void FinishExtendedAppLaunch();
 
     // +(void)pauseAppHangTracking;
     [Static]
