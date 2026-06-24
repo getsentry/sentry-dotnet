@@ -1,3 +1,4 @@
+#!/usr/bin/env -S dotnet --
 #:package Microsoft.CodeAnalysis.CSharp@4.10.0
 #:package Microsoft.CodeAnalysis.CSharp.Workspaces@4.10.0
 
