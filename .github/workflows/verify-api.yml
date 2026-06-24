@@ -125,10 +125,14 @@ jobs:
       pull-requests: write
 
     steps:
+      # Pin to the same head.sha the matrix job snapshotted against. We push
+      # to the branch (head.ref) below — if the contributor pushed in the
+      # meantime, the push won't fast-forward and the workflow fails. Re-running
+      # generates a fresh snapshot against the new head. Self-healing.
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
 
       # When the matrix produces no received files (clean PR), no artifact is uploaded.
       # download-artifact's pattern branch tolerates zero matches without erroring, so
@@ -172,7 +176,10 @@ jobs:
           git config --global user.email 'bot+github-bot@sentry.io'
           git add -A
           git commit -m "Accept API verifier changes"
-          git push
+          # Push from detached HEAD to the PR branch. Fails non-fast-forward
+          # if the contributor pushed since we snapshotted head.sha — workflow
+          # fails red, re-run regenerates against the new head.
+          git push origin "HEAD:refs/heads/${{ github.event.pull_request.head.ref }}"
 
       - name: Label Public API PR
         if: steps.detect.outputs.has_changes == 'true'
