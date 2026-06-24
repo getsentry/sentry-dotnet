@@ -76,12 +76,25 @@ jobs:
         continue-on-error: true
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo --filter "FullyQualifiedName~ApiApprovalTests"
 
+      # upload-artifact strips the longest common parent from wildcard paths,
+      # which would flatten test/Sentry.Tests/... to Sentry.Tests/... on restore
+      # and break accept-verifier-changes.ps1 (it renames each .received.txt
+      # to a sibling .verified.txt). Tar first to preserve full paths.
+      - name: Package Received API Files
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          files=$(find . -name '*.received.txt' -not -path './received-*.tar.gz')
+          if [[ -n "$files" ]]; then
+            tar -czf received-${{ matrix.rid }}.tar.gz $files
+          fi
+
       - name: Upload Received API Files
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: api-verify-received-${{ matrix.rid }}
-          path: "**/*.received.txt"
+          path: received-${{ matrix.rid }}.tar.gz
           if-no-files-found: ignore
 
       # Fork PRs can't be auto-accepted (the bot can't push to a contributor's
@@ -120,6 +133,14 @@ jobs:
         with:
           pattern: api-verify-received-*
           merge-multiple: true
+
+      - name: Extract Received API Files
+        shell: bash
+        run: |
+          for archive in received-*.tar.gz; do
+            [[ -f "$archive" ]] && tar -xzf "$archive"
+          done
+          rm -f received-*.tar.gz
 
       - name: Accept Verifier Changes
         shell: pwsh
