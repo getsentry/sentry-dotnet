@@ -789,6 +789,7 @@ namespace Sentry
         public bool AttachStacktrace { get; set; }
         public bool AutoSessionTracking { get; set; }
         public System.TimeSpan AutoSessionTrackingInterval { get; set; }
+        public bool AutoSetScopeTransactions { get; set; }
         public Sentry.Extensibility.IBackgroundWorker? BackgroundWorker { get; set; }
         public string? CacheDirectoryPath { get; set; }
         public bool CaptureFailedRequests { get; set; }

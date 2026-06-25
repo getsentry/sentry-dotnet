@@ -144,14 +144,11 @@ internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEven
         {
             // Note that we may be creating a transaction here and if so we explicitly don't store it on
             // Scope.Transaction, because Scope.Transaction is AsyncLocal<T> and MAUI Apps have a global scope. The
-            // results would be that we would store the transaction on the scope, but it would never be cleared again,
+            // result would be that we would store the transaction on the scope, but it would never be cleared again,
             // since the next call to OnPropertyChanged for this RelayCommand will (likely) be from a different thread.
-            var span = hub.StartSpan(SpanName, SpanOp);
-            if (span is ITransactionTracer transaction)
-            {
-                hub.ConfigureScope(scope => scope.Transaction = transaction);
-            }
-
+            // We pass autoSetScopeTransaction: false so that this holds even when the user has globally enabled
+            // SentryOptions.AutoSetScopeTransactions.
+            var span = hub.StartSpan(SpanName, SpanOp, autoSetScopeTransaction: false);
             relay.SetFused(span);
         }
         else if (relay.GetFused<ISpan>() is { } span)

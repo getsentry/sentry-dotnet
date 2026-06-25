@@ -176,7 +176,8 @@ internal class Hub : IHub, IDisposable
     internal ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
-        DynamicSamplingContext? dynamicSamplingContext)
+        DynamicSamplingContext? dynamicSamplingContext,
+        bool? autoSetScopeTransaction = null)
     {
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.
@@ -258,6 +259,7 @@ internal class Hub : IHub, IDisposable
             // If no DSC was provided, create one based on this transaction.
             // Must be done AFTER the sampling decision has been made (the DSC propagates sampling decisions).
             unsampledTransaction.DynamicSamplingContext ??= unsampledTransaction.CreateDynamicSamplingContext(_options, _replaySession);
+            TryAutoSetScopeTransaction(unsampledTransaction, autoSetScopeTransaction);
             return unsampledTransaction;
         }
 
@@ -280,7 +282,23 @@ internal class Hub : IHub, IDisposable
 
         // A sampled out transaction still appears fully functional to the user
         // but will be dropped by the client and won't reach Sentry's servers.
+        TryAutoSetScopeTransaction(transaction, autoSetScopeTransaction);
         return transaction;
+    }
+
+    private void TryAutoSetScopeTransaction(ITransactionTracer transaction, bool? autoSetScopeTransaction)
+    {
+        // The per-call override (used by some integrations) takes precedence over the global option.
+        if (!(autoSetScopeTransaction ?? _options.AutoSetScopeTransactions))
+        {
+            return;
+        }
+
+        // Only set the transaction on the scope if there isn't already one set (manually by the user or by another
+        // integration). We never overwrite an existing transaction. There's no need to track whether we were the one
+        // to set it for clearing purposes: TransactionTracer.Finish calls Scope.ResetTransaction, which only clears
+        // the scope's transaction if it still references this exact instance.
+        ConfigureScope(static (scope, t) => scope.SetTransactionIfNull(t), transaction);
     }
 
     public void BindException(Exception exception, ISpan span)

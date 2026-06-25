@@ -54,11 +54,36 @@ public static class HubExtensions
     /// <summary>
     /// Starts a span or transaction if a transaction is not already active on the scope
     /// </summary>
-    public static ISpan StartSpan(this IHub hub, string operation, string description)
+    public static ISpan StartSpan(this IHub hub, string operation, string description) =>
+        hub.StartSpan(operation, description, null);
+
+    /// <summary>
+    /// Starts a span or transaction if a transaction is not already active on the scope.
+    /// <paramref name="autoSetScopeTransaction"/> overrides <see cref="SentryOptions.AutoSetScopeTransactions"/> for a
+    /// newly started transaction (it has no effect when a child span is started off an existing transaction). This lets
+    /// integrations control whether a transaction is stored on the scope independently of the user's global setting -
+    /// e.g. the MAUI CommunityToolkit binder opts out because the scope is global and AsyncLocal-backed.
+    /// </summary>
+    internal static ISpan StartSpan(this IHub hub, string operation, string description, bool? autoSetScopeTransaction)
     {
-        return hub.GetTransaction() is { } transaction
-            ? transaction.StartChild(operation, description)
-            : hub.StartTransaction(operation, description); // this is actually in the wrong order but changing it may break other things
+        if (hub.GetTransaction() is { } transaction)
+        {
+            return transaction.StartChild(operation, description);
+        }
+
+        // No active transaction - start a new one. Note the operation/description argument order below is intentionally
+        // preserved from the original (arguably wrong) behaviour of StartSpan; changing it may break other things.
+        if (hub is Hub fullHub)
+        {
+            return fullHub.StartTransaction(
+                new TransactionContext(operation, description),
+                new Dictionary<string, object?>(),
+                null,
+                autoSetScopeTransaction);
+        }
+
+        // Fallback for non-Hub IHub implementations, which can't honour the override.
+        return hub.StartTransaction(operation, description);
     }
 
     /// <summary>
