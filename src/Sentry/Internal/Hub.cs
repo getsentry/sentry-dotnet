@@ -294,10 +294,6 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        // Only set the transaction on the scope if there isn't already one set (manually by the user or by another
-        // integration). We never overwrite an existing transaction. There's no need to track whether we were the one
-        // to set it for clearing purposes: TransactionTracer.Finish calls Scope.ResetTransaction, which only clears
-        // the scope's transaction if it still references this exact instance.
         ConfigureScope(static (scope, t) => scope.SetTransactionIfNull(t), transaction);
     }
 

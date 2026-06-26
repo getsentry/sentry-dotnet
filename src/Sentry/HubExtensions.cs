@@ -83,6 +83,7 @@ public static class HubExtensions
         }
 
         // Fallback for non-Hub IHub implementations, which can't honour the override.
+        // In practice this means the DisabledHub or HubAdapter (only used for testing).
         return hub.StartTransaction(operation, description);
     }
 

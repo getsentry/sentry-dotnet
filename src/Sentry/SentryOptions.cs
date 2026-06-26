@@ -110,9 +110,7 @@ public class SentryOptions
     /// <c>SentrySdk.ConfigureScope(scope =&gt; scope.Transaction = transaction)</c>.
     /// </summary>
     /// <remarks>
-    /// Defaults to <c>false</c>. An automatically stored transaction is only ever cleared from the scope by the SDK if
-    /// the scope still references that exact transaction when it finishes, so a transaction set manually (or by another
-    /// integration) is never overwritten or cleared.
+    /// Defaults to <c>false</c>
     /// <para>
     /// Note that <see cref="Scope.Transaction"/> is backed by an <see cref="System.Threading.AsyncLocal{T}"/>. In global
     /// scope mode (see <see cref="IsGlobalModeEnabled"/>) the same caution that applies to setting
