@@ -158,12 +158,18 @@ public partial class SentryOptions
         /// Gets or sets a value that indicates if native crash reporting via tombstones is enabled.
         /// The default value is <c>false</c> (disabled).
         /// </summary>
+        /// <remarks>
+        /// See https://docs.sentry.io/platforms/android/configuration/tombstones/
+        /// </remarks>
         public bool TombstoneEnabled { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value that indicates if historical tombstones should be reported.
         /// The default value is <c>false</c> (disabled).
         /// </summary>
+        /// <remarks>
+        /// See https://docs.sentry.io/platforms/android/configuration/tombstones/
+        /// </remarks>
         public bool ReportHistoricalTombstones { get; set; } = false;
 
         // ---------- From SentryOptions.java ----------
