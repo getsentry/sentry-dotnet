@@ -264,9 +264,17 @@ interface SentryDebugMeta : SentrySerializable
     [NullAllowed, Export("imageAddress")]
     string ImageAddress { get; set; }
 
+    // @property (assign, nonatomic) uint64_t imageAddressRaw;
+    [Export("imageAddressRaw")]
+    ulong ImageAddressRaw { get; set; }
+
     // @property (copy, nonatomic) NSString * _Nullable imageVmAddress;
     [NullAllowed, Export("imageVmAddress")]
     string ImageVmAddress { get; set; }
+
+    // @property (assign, nonatomic) uint64_t imageVmAddressRaw;
+    [Export("imageVmAddressRaw")]
+    ulong ImageVmAddressRaw { get; set; }
 
     // @property (copy, nonatomic) NSString * _Nullable codeFile;
     [NullAllowed, Export("codeFile")]
@@ -2130,6 +2138,7 @@ interface SentryDebugImageProvider
 [Internal]
 interface SentryDependencyContainer
 {
+
     // +(SentryDependencyContainer * _Nonnull)sharedInstance __attribute__((warn_unused_result("")));
     [Static]
     [Export("sharedInstance")]
@@ -2856,15 +2865,20 @@ interface SentrySDK
     [Export("reportFullyDisplayed")]
     void ReportFullyDisplayed();
 
-    // +(id<SentrySpan> _Nullable)extendAppLaunch;
+    // +(void)extendAppStart;
     [Static]
-    [NullAllowed, Export("extendAppLaunch")]
-    SentrySpan ExtendAppLaunch { get; }
+    [Export("extendAppStart")]
+    void ExtendAppStart();
 
-    // +(void)finishExtendedAppLaunch;
+    // +(id<SentrySpan> _Nullable)getExtendedAppStartSpan __attribute__((warn_unused_result("")));
     [Static]
-    [Export("finishExtendedAppLaunch")]
-    void FinishExtendedAppLaunch();
+    [NullAllowed, Export("getExtendedAppStartSpan")]
+    SentrySpan ExtendedAppStartSpan { get; }
+
+    // +(void)finishExtendedAppStart;
+    [Static]
+    [Export("finishExtendedAppStart")]
+    void FinishExtendedAppStart();
 
     // +(void)pauseAppHangTracking;
     [Static]
