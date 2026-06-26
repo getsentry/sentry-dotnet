@@ -147,6 +147,8 @@ public static partial class SentrySdk
             o.EnableNetworkEventBreadcrumbs = options.Native.EnableNetworkEventBreadcrumbs;
             o.EnableUserInteractionBreadcrumbs = options.Native.EnableUserInteractionBreadcrumbs;
             o.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
+            o.TombstoneEnabled = options.Native.TombstoneEnabled;
+            o.ReportHistoricalTombstones = options.Native.ReportHistoricalTombstones;
 
             // These options are in Java.SentryOptions but not ours
             o.AttachThreads = options.Native.AttachThreads;
