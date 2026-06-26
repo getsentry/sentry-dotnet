@@ -154,6 +154,18 @@ public partial class SentryOptions
         /// </remarks>
         public bool EnableUserInteractionTracing { get; set; } = false;
 
+        /// <summary>
+        /// Gets or sets a value that indicates if native crash reporting via tombstones is enabled.
+        /// The default value is <c>false</c> (disabled).
+        /// </summary>
+        public bool TombstoneEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value that indicates if historical tombstones should be reported.
+        /// The default value is <c>false</c> (disabled).
+        /// </summary>
+        public bool ReportHistoricalTombstones { get; set; } = false;
+
         // ---------- From SentryOptions.java ----------
 
         /// <summary>
@@ -206,18 +218,6 @@ public partial class SentryOptions
         /// The default value is 5 seconds.
         /// </summary>
         public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromSeconds(5);
-
-        /// <summary>
-        /// Gets or sets a value that indicates if native crash reporting via tombstones is enabled.
-        /// The default value is <c>false</c> (disabled).
-        /// </summary>
-        public bool TombstoneEnabled { get; set; } = false;
-
-        /// <summary>
-        /// Gets or sets a value that indicates if historical tombstones should be reported.
-        /// The default value is <c>false</c> (disabled).
-        /// </summary>
-        public bool ReportHistoricalTombstones { get; set; } = false;
 
         // ---------- Other ----------
 

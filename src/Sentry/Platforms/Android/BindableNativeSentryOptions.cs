@@ -26,6 +26,8 @@ internal partial class BindableSentryOptions
         public bool? EnableAutoActivityLifecycleTracing { get; set; }
         public bool? EnableActivityLifecycleTracingAutoFinish { get; set; }
         public bool? EnableUserInteractionTracing { get; set; }
+        public bool? TombstoneEnabled { get; set; }
+        public bool? ReportHistoricalTombstones { get; set; }
         public bool? AttachThreads { get; set; }
         public TimeSpan? ConnectionTimeout { get; set; }
         public bool? EnableNdk { get; set; }
@@ -71,6 +73,8 @@ internal partial class BindableSentryOptions
             options.EnableAutoActivityLifecycleTracing = EnableAutoActivityLifecycleTracing ?? options.EnableAutoActivityLifecycleTracing;
             options.EnableActivityLifecycleTracingAutoFinish = EnableActivityLifecycleTracingAutoFinish ?? options.EnableActivityLifecycleTracingAutoFinish;
             options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
+            options.TombstoneEnabled = TombstoneEnabled ?? options.TombstoneEnabled;
+            options.ReportHistoricalTombstones = ReportHistoricalTombstones ?? options.ReportHistoricalTombstones;
             options.AttachThreads = AttachThreads ?? options.AttachThreads;
             options.ConnectionTimeout = ConnectionTimeout ?? options.ConnectionTimeout;
             options.EnableNdk = EnableNdk ?? options.EnableNdk;
@@ -79,8 +83,6 @@ internal partial class BindableSentryOptions
             options.PrintUncaughtStackTrace = PrintUncaughtStackTrace ?? options.PrintUncaughtStackTrace;
             options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
             options.ReadTimeout = ReadTimeout ?? options.ReadTimeout;
-            options.TombstoneEnabled = TombstoneEnabled ?? options.TombstoneEnabled;
-            options.ReportHistoricalTombstones = ReportHistoricalTombstones ?? options.ReportHistoricalTombstones;
             options.EnableTracing = EnableTracing ?? options.EnableTracing;
             options.EnableBeforeSend = EnableBeforeSend ?? options.EnableBeforeSend;
 

@@ -146,6 +146,8 @@ public static partial class SentrySdk
             o.EnableNetworkEventBreadcrumbs = options.Native.EnableNetworkEventBreadcrumbs;
             o.EnableUserInteractionBreadcrumbs = options.Native.EnableUserInteractionBreadcrumbs;
             o.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
+            o.TombstoneEnabled = options.Native.TombstoneEnabled;
+            o.ReportHistoricalTombstones = options.Native.ReportHistoricalTombstones;
 
             // These options are in Java.SentryOptions but not ours
             o.AttachThreads = options.Native.AttachThreads;
@@ -156,8 +158,6 @@ public static partial class SentrySdk
             o.ProfilesSampleRate = (JavaDouble?)options.Native.ProfilesSampleRate;
             o.PrintUncaughtStackTrace = options.Native.PrintUncaughtStackTrace;
             o.ReadTimeoutMillis = (int)options.Native.ReadTimeout.TotalMilliseconds;
-            o.TombstoneEnabled = options.Native.TombstoneEnabled;
-            o.ReportHistoricalTombstones = options.Native.ReportHistoricalTombstones;
 
             // In-App Excludes and Includes to be passed to the Android SDK
             options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
