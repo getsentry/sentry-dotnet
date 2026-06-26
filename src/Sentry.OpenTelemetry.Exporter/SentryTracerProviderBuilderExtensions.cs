@@ -27,9 +27,8 @@ public static class SentryTracerProviderBuilderExtensions
     /// endpoint will be inferred automatically from the DSN.</param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
     /// <remarks>
-    /// In line with the OTLP integration specification, this method does not configure an OpenTelemetry propagator.
-    /// Cross-service trace propagation should be enabled either via the <see cref="SentryOptions.PropagateTraceparent"/>
-    /// option or by configuring OpenTelemetry propagators yourself (e.g. by calling
+    /// This method does not configure an OpenTelemetry propagator.
+    /// Cross-service trace propagation should be enabled via the OpenTelemetry SDK (e.g. by calling
     /// <c>Sdk.SetDefaultTextMapPropagator</c>).
     /// </remarks>
     public static TracerProviderBuilder AddSentryOtlpExporter(this TracerProviderBuilder tracerProviderBuilder,

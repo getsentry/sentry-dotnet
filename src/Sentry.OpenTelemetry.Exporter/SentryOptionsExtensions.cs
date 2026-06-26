@@ -21,9 +21,8 @@ public static class SentryOptionsExtensions
     /// <param name="collectorUrl">A custom endpoint to export OLTP trace information to. If no url is provided, the
     /// endpoint will be inferred automatically from the DSN.</param>
     /// <remarks>
-    /// In line with the OTLP integration specification, this method does not configure an OpenTelemetry propagator.
-    /// Cross-service trace propagation should be enabled either via the <see cref="SentryOptions.PropagateTraceparent"/>
-    /// option or by configuring OpenTelemetry propagators yourself (e.g. by calling
+    /// This method does not configure an OpenTelemetry propagator.
+    /// Cross-service trace propagation should be enabled via the OpenTelemetry SDK (e.g. by calling
     /// <c>Sdk.SetDefaultTextMapPropagator</c>).
     /// </remarks>
     public static void UseOtlp(this SentryOptions options, TracerProviderBuilder tracerProviderBuilder, Uri? collectorUrl = null)
