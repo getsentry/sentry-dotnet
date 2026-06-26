@@ -1,4 +1,3 @@
-using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry.Exporter;
 
@@ -21,24 +20,19 @@ public static class SentryOptionsExtensions
     /// <param name="tracerProviderBuilder"><see cref="TracerProviderBuilder"/></param>
     /// <param name="collectorUrl">A custom endpoint to export OLTP trace information to. If no url is provided, the
     /// endpoint will be inferred automatically from the DSN.</param>
-    /// <param name="defaultTextMapPropagator">
-    ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
-    ///     <para>
-    ///         If this parameter is not supplied, the <see cref="OpenTelemetry.SentryPropagator"/> will be used, which propagates the
-    ///         baggage header as well as Sentry trace headers.
-    ///     </para>
-    ///     <para>
-    ///         The <see cref="OpenTelemetry.SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work, but you
-    ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
-    ///     </para>
-    /// </param>
-    public static void UseOtlp(this SentryOptions options, TracerProviderBuilder tracerProviderBuilder, Uri? collectorUrl = null, TextMapPropagator? defaultTextMapPropagator = null)
+    /// <remarks>
+    /// In line with the OTLP integration specification, this method does not configure an OpenTelemetry propagator.
+    /// Cross-service trace propagation should be enabled either via the <see cref="SentryOptions.PropagateTraceparent"/>
+    /// option or by configuring OpenTelemetry propagators yourself (e.g. by calling
+    /// <c>Sdk.SetDefaultTextMapPropagator</c>).
+    /// </remarks>
+    public static void UseOtlp(this SentryOptions options, TracerProviderBuilder tracerProviderBuilder, Uri? collectorUrl = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
             throw new ArgumentException("Sentry DSN must be set before calling `SentryOptions.UseOtlp`", nameof(options.Dsn));
         }
-        tracerProviderBuilder.AddSentryOtlpExporter(options.Dsn, collectorUrl, defaultTextMapPropagator);
+        tracerProviderBuilder.AddSentryOtlpExporter(options.Dsn, collectorUrl);
         options.UseOtlp();
     }
 
