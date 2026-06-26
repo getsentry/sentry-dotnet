@@ -36,8 +36,6 @@ internal partial class BindableSentryOptions
         public bool? PrintUncaughtStackTrace { get; set; }
         public double? ProfilesSampleRate { get; set; }
         public TimeSpan? ReadTimeout { get; set; }
-        public bool? TombstoneEnabled { get; set; }
-        public bool? ReportHistoricalTombstones { get; set; }
         public bool? EnableTracing { get; set; }
         public bool? EnableBeforeSend { get; set; }
 
