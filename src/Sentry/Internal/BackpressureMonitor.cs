@@ -40,7 +40,8 @@ internal class BackpressureMonitor : IDisposable
     internal long LastQueueOverflowTicks => Interlocked.Read(ref _lastQueueOverflow);
     internal long LastRateLimitEventTicks => Interlocked.Read(ref _lastRateLimitEvent);
 
-    public BackpressureMonitor(IDiagnosticLogger? logger, ISystemClock? clock = null, bool enablePeriodicHealthCheck = true)
+    public BackpressureMonitor(IDiagnosticLogger? logger, ISystemClock? clock = null, bool enablePeriodicHealthCheck = true,
+        TaskScheduler? scheduler = null)
     {
         _logger = logger;
         _clock = clock ?? SystemClock.Clock;
@@ -48,7 +49,12 @@ internal class BackpressureMonitor : IDisposable
         if (enablePeriodicHealthCheck)
         {
             _logger?.LogDebug("Starting BackpressureMonitor.");
-            _workerTask = Task.Run(() => DoWorkAsync(_cts.Token));
+            // Default to the thread pool. The scheduler is only injected by tests, to model single-threaded
+            // runtimes (e.g. Unity WebGL) where the worker and its continuations run on the same thread.
+            _workerTask = scheduler is null
+                ? Task.Run(() => DoWorkAsync(_cts.Token))
+                : Task.Factory.StartNew(() => DoWorkAsync(_cts.Token), _cts.Token, TaskCreationOptions.None, scheduler)
+                    .Unwrap();
         }
         else
         {
@@ -146,12 +152,14 @@ internal class BackpressureMonitor : IDisposable
     {
         try
         {
+            // Request cancellation but do NOT block on _workerTask here. On single-threaded runtimes
+            // (e.g. Unity WebGL / browser-wasm) the worker's cancellation continuation can only be scheduled
+            // on the calling thread, so a synchronous _workerTask.Wait() would block the only thread that
+            // could complete it - a deadlock. The worker observes the token, exits its Task.Delay loop and
+            // unwinds on its own; it produces no result we need to await, and the methods callers may still
+            // invoke after disposal (GetDownsampleFactor / RecordQueueOverflow / RecordRateLimitHit) don't
+            // touch the cancellation token source. See https://github.com/getsentry/sentry-dotnet/issues/5237
             _cts.Cancel();
-            _workerTask.Wait();
-        }
-        catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
-        {
-            // Ignore cancellation
         }
         catch (Exception ex)
         {

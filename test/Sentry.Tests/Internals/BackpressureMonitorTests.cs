@@ -160,4 +160,50 @@ public class BackpressureMonitorTests
         monitor.IsHealthy.Should().BeTrue();
         monitor.DownsampleLevel.Should().Be(0);
     }
+
+    [Fact]
+    public async Task Dispose_DoesNotBlockOnWorkerTask()
+    {
+        // Arrange
+        // Run the periodic worker on a scheduler we never pump, so the worker task never completes. This models
+        // a single-threaded runtime (e.g. Unity WebGL) where the only thread able to run the worker's
+        // cancellation continuation is the one calling Dispose. A blocking _workerTask.Wait() would deadlock
+        // there; Dispose must instead just cancel and return. See https://github.com/getsentry/sentry-dotnet/issues/5237
+        var scheduler = new NeverRunsTaskScheduler();
+        var monitor = new BackpressureMonitor(null, _fixture.Clock, enablePeriodicHealthCheck: true, scheduler: scheduler);
+
+        // Act
+        var disposed = Task.Run(() => monitor.Dispose());
+
+        // Assert
+        var completed = await Task.WhenAny(disposed, Task.Delay(TimeSpan.FromSeconds(10)));
+        completed.Should().BeSameAs(disposed, "Dispose must not block waiting on the worker task to complete");
+        await disposed; // surface any exception thrown by Dispose
+    }
+
+    /// <summary>
+    /// A scheduler that queues tasks but never executes them - lets us hold the worker task in a state that
+    /// never completes, so a Dispose that blocks on it would hang.
+    /// </summary>
+    private sealed class NeverRunsTaskScheduler : TaskScheduler
+    {
+        private readonly List<Task> _tasks = new();
+        protected override IEnumerable<Task> GetScheduledTasks()
+        {
+            lock (_tasks)
+            {
+                return _tasks.ToArray();
+            }
+        }
+
+        protected override void QueueTask(Task task)
+        {
+            lock (_tasks)
+            {
+                _tasks.Add(task);
+            }
+        }
+
+        protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued) => false;
+    }
 }
