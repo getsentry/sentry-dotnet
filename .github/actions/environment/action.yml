@@ -43,12 +43,12 @@ runs:
     - name: Install zstd on Windows ARM64
       uses: ./.github/actions/install-zstd
 
-    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
+    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md#xcode
     # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_26.3.app
+      run: sudo xcode-select --switch /Applications/Xcode_26.5.app
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21

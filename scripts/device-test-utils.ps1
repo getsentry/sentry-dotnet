@@ -29,7 +29,7 @@ function Get-AndroidEmulatorId
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
-        [string]$IosVersion = '26.2',
+        [string]$IosVersion = '26.5',
         [string[]]$PreferredDeviceTypes = @(
             'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
             'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
