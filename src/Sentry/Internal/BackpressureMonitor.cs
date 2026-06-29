@@ -153,12 +153,9 @@ internal class BackpressureMonitor : IDisposable
         try
         {
             // Request cancellation but do NOT block on _workerTask here. On single-threaded runtimes
-            // (e.g. Unity WebGL / browser-wasm) the worker's cancellation continuation can only be scheduled
-            // on the calling thread, so a synchronous _workerTask.Wait() would block the only thread that
-            // could complete it - a deadlock. The worker observes the token, exits its Task.Delay loop and
-            // unwinds on its own; it produces no result we need to await, and the methods callers may still
-            // invoke after disposal (GetDownsampleFactor / RecordQueueOverflow / RecordRateLimitHit) don't
-            // touch the cancellation token source. See https://github.com/getsentry/sentry-dotnet/issues/5237
+            // (e.g. Unity WebGL / browser-wasm) _workerTask.Wait() would cause a deadlock.
+            // The worker observes the token and unwinds on its own.
+            // See https://github.com/getsentry/sentry-dotnet/issues/5237
             _cts.Cancel();
         }
         catch (Exception ex)
