@@ -151,4 +151,60 @@ public class HttpContextExtensionsTests
         // Assert
         transaction.Request.Cookies.Should().BeNull();
     }
+
+    [SkippableFact]
+    public void StartSentryTransaction_WithTraceId_IsSampled()
+    {
+        Skip.IfNot(HttpContextBuilder.IsHttpHeaderMutationSupported, nameof(HttpContextBuilder.IsHttpHeaderMutationSupported));
+
+        // Arrange
+        using var _ = SentrySdk.UseHub(new Hub(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                TracesSampleRate = 0.0,
+            },
+            Substitute.For<ISentryClient>()
+        ));
+
+        var context = HttpContextBuilder.BuildWithHeaders([(SentryTraceHeader.HttpHeaderName, "5bd5f6d346b442dd9177dce9302fd737-b0d83d6cfec87606-1")]);
+
+        // Act
+        var transaction = context.StartSentryTransaction();
+        var traceHeader = transaction.GetTraceHeader();
+
+        // Assert
+        transaction.Should().BeOfType<TransactionTracer>();
+        traceHeader.TraceId.Should().NotBe(SentryId.Empty).And.Be(transaction.TraceId);
+        traceHeader.SpanId.Should().NotBe(SpanId.Empty).And.Be(transaction.SpanId);
+        traceHeader.IsSampled.Should().BeTrue();
+    }
+
+    [SkippableFact]
+    public void StartSentryTransaction_WithEmptyTraceId_IsNotSampled()
+    {
+        Skip.IfNot(HttpContextBuilder.IsHttpHeaderMutationSupported, nameof(HttpContextBuilder.IsHttpHeaderMutationSupported));
+
+        // Arrange
+        using var _ = SentrySdk.UseHub(new Hub(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                TracesSampleRate = 0.0,
+            },
+            Substitute.For<ISentryClient>()
+        ));
+
+        var context = HttpContextBuilder.BuildWithHeaders([(SentryTraceHeader.HttpHeaderName, "00000000000000000000000000000000-1000000000000000-1")]);
+
+        // Act
+        var transaction = context.StartSentryTransaction();
+        var traceHeader = transaction.GetTraceHeader();
+
+        // Assert
+        transaction.Should().BeOfType<UnsampledTransaction>();
+        traceHeader.TraceId.Should().NotBe(SentryId.Empty).And.Be(transaction.TraceId);
+        traceHeader.SpanId.Should().NotBe(SpanId.Empty).And.Be(transaction.SpanId);
+        traceHeader.IsSampled.Should().BeFalse();
+    }
 }
