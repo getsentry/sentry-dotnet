@@ -34,7 +34,7 @@ jobs:
               volumes:
                 - /tmp/node20:/__e/node20
                 - /tmp/node24:/__e/node24
-          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+          - os: macos-26 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
           - os: windows-latest
             rid: win-x64
@@ -100,7 +100,7 @@ jobs:
                 - /tmp/node20:/__e/node20
                 - /tmp/node24:/__e/node24
                 - /var/run/docker.sock:/var/run/docker.sock
-          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+          - os: macos-26 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
             slnf: Sentry-CI-Build-macOS.slnf
           - os: windows-latest
@@ -391,7 +391,7 @@ jobs:
   trim-analysis:
     needs: build-sentry-native
     name: Trim analysis
-    runs-on: macos-15
+    runs-on: macos-26
 
     steps:
       - name: Checkout
