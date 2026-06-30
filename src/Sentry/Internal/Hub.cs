@@ -943,9 +943,8 @@ internal class Hub : IHub, IDisposable
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
-        // Stop the backpressure monitor's worker so it doesn't outlive the hub. Its Dispose only cancels the
-        // worker (it does not block, and its public methods don't touch the cancellation token source), so the
-        // client can still safely read the downsample factor while it drains any remaining envelopes.
+        // Stop the backpressure monitor's worker so it doesn't outlive the hub...  this cancels the 
+        // worker but clients can still read the downsample factor while draining.
         _backpressureMonitor?.Dispose();
 
 #if __IOS__
