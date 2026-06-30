@@ -181,6 +181,24 @@ public class BackpressureMonitorTests
         await disposed; // surface any exception thrown by Dispose
     }
 
+    [Fact]
+    public async Task Dispose_WorkerRunsToCompletionWithoutFaulting()
+    {
+        // Arrange - a real worker on the thread pool. Dispose cancels the token while the worker may still be
+        // inside Task.Delay; the CancellationTokenSource must not be disposed out from under it (which would
+        // surface an unobserved ObjectDisposedException). See https://github.com/getsentry/sentry-dotnet/issues/5237
+        _fixture.Clock.GetUtcNow().Returns(_fixture.Now);
+        var monitor = new BackpressureMonitor(null, _fixture.Clock, enablePeriodicHealthCheck: true);
+        var worker = monitor.WorkerTask;
+
+        // Act
+        monitor.Dispose();
+        await worker; // observes the task; throws if it faulted
+
+        // Assert
+        worker.Status.Should().Be(TaskStatus.RanToCompletion);
+    }
+
     /// <summary>
     /// A scheduler that queues tasks but never executes them - lets us hold the worker task in a state that
     /// never completes, so a Dispose that blocks on it would hang.

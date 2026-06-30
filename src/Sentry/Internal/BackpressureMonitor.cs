@@ -36,6 +36,7 @@ internal class BackpressureMonitor : IDisposable
     private readonly CancellationTokenSource _cts = new();
 
     private readonly Task _workerTask;
+    internal Task WorkerTask => _workerTask;
     internal int DownsampleLevel => _downsampleLevel;
     internal long LastQueueOverflowTicks => Interlocked.Read(ref _lastQueueOverflow);
     internal long LastRateLimitEventTicks => Interlocked.Read(ref _lastRateLimitEvent);
@@ -168,7 +169,16 @@ internal class BackpressureMonitor : IDisposable
         }
         finally
         {
-            _cts.Dispose();
+            // Dispose the CancellationTokenSource only once the worker has stopped using the token, but
+            // without blocking the calling thread. Disposing it inline would race the worker: if it ran while
+            // the worker was registering its Task.Delay continuation, the worker could observe an
+            // ObjectDisposedException - which it doesn't catch - and fault with an unobserved task exception.
+            _workerTask.ContinueWith(
+                static (_, state) => ((CancellationTokenSource)state!).Dispose(),
+                _cts,
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
     }
 }
