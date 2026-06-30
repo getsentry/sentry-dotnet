@@ -174,10 +174,9 @@ internal class BackpressureMonitor : IDisposable
         }
         finally
         {
-            // Dispose the CancellationTokenSource only once the worker has stopped using the token, but
-            // without blocking the calling thread. Disposing it inline would race the worker: if it ran while
-            // the worker was registering its Task.Delay continuation, the worker could observe an
-            // ObjectDisposedException - which it doesn't catch - and fault with an unobserved task exception.
+            // Dispose the CTS once the worker has stopped using the token, but
+            // without blocking the calling thread. Disposing it inline would race the worker 
+            //  and could lead to an ObjectDisposedException
             _workerTask.ContinueWith(
                 static (_, state) => ((CancellationTokenSource)state!).Dispose(),
                 _cts,
