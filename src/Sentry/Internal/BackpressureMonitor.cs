@@ -36,6 +36,7 @@ internal class BackpressureMonitor : IDisposable
     private readonly CancellationTokenSource _cts = new();
 
     private readonly Task _workerTask;
+    private int _disposed;
     internal Task WorkerTask => _workerTask;
     internal int DownsampleLevel => _downsampleLevel;
     internal long LastQueueOverflowTicks => Interlocked.Read(ref _lastQueueOverflow);
@@ -151,6 +152,13 @@ internal class BackpressureMonitor : IDisposable
 
     public void Dispose()
     {
+        // Idempotent and thread-safe: only the first caller runs the disposal logic. Without this guard a
+        // second call would hit an already-disposed _cts and log a spurious ObjectDisposedException.
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
         try
         {
             // Request cancellation but do NOT block on _workerTask here. On single-threaded runtimes

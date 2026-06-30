@@ -199,6 +199,24 @@ public class BackpressureMonitorTests
         worker.Status.Should().Be(TaskStatus.RanToCompletion);
     }
 
+    [Fact]
+    public void Dispose_CalledMultipleTimes_IsIdempotent()
+    {
+        // Arrange
+        var logger = Substitute.For<IDiagnosticLogger>();
+        _fixture.Clock.GetUtcNow().Returns(_fixture.Now);
+        var monitor = new BackpressureMonitor(logger, _fixture.Clock, enablePeriodicHealthCheck: false);
+
+        // Act
+        monitor.Dispose();
+        monitor.Dispose();
+        monitor.Dispose();
+
+        // Assert - the second and third calls are no-ops; no ObjectDisposedException is logged.
+        logger.DidNotReceive().Log(
+            SentryLevel.Warning, Arg.Any<string>(), Arg.Any<Exception>(), Arg.Any<object[]>());
+    }
+
     /// <summary>
     /// A scheduler that queues tasks but never executes them - lets us hold the worker task in a state that
     /// never completes, so a Dispose that blocks on it would hang.
