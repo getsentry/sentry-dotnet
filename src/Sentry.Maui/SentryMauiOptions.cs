@@ -76,6 +76,32 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// </remarks>
     public bool AttachScreenshot { get; set; }
 
+    /// <summary>
+    /// Determines whethec spans are created automatically for App navigation events. Set EnableAutoTransactions to
+    /// <c>false</c> if you only want to track navigation breadcrumbs.
+    /// </summary>
+    /// <remarks>
+    /// The default is <c>true</c>.
+    /// </remarks>
+    public bool EnableAutoTransactions { get; set; } = true;
+
+    /// <summary>
+    /// Controls how long an automatic transaction (navigation or user interaction) waits before finishing
+    /// itself when not explicitly finished. Defaults to 3 seconds.
+    /// </summary>
+    public TimeSpan AutoTransactionIdleTimeout { get; set; } = TimeSpan.FromSeconds(3);
+
+    /// <summary>
+    /// Automatically starts a Sentry transaction for user-interaction events (currently: Button clicks).
+    /// Requires <see cref="EnableAutoTransactions"/> to be enabled as well as
+    /// <see cref="SentryOptions.TracesSampleRate"/> or <see cref="SentryOptions.TracesSampler"/> to be
+    /// configured. Interaction transactions are named <c>&lt;PageType&gt;.&lt;AutomationId|StyleId&gt;</c>.
+    /// If the element has neither <see cref="Element.AutomationId"/> nor <see cref="Element.StyleId"/> the
+    /// transaction is skipped and a warning is logged.
+    /// The default is <c>true</c>.
+    /// </summary>
+    public bool EnableUserInteractionTracing { get; set; } = true;
+
     private Func<SentryEvent, SentryHint, bool>? _beforeCapture;
     /// <summary>
     /// Action performed before attaching a screenshot
