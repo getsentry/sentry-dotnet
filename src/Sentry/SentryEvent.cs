@@ -198,7 +198,7 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
             return ExceptionType.UnhandledNonTerminal;
         }
 
-        if (HasUnhandledException())
+        if (this.IsFromUnhandledException())
         {
             return ExceptionType.UnhandledTerminal;
         }
@@ -207,16 +207,6 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
     }
 
     private bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
-
-    private bool HasUnhandledException()
-    {
-        if (Exception?.Data[Mechanism.HandledKey] is false)
-        {
-            return true;
-        }
-
-        return SentryExceptions?.Any(e => e.Mechanism is { Handled: false }) ?? false;
-    }
 
     private bool HasUnhandledNonTerminalException()
     {
