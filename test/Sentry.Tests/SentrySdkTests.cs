@@ -1202,6 +1202,73 @@ public class SentrySdkTests : IDisposable
     }
 #endif
 
+    [SkippableFact]
+    public void Init_SpotlightEnabledNoDsn_SdkIsEnabled()
+    {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.EnableSpotlight = true;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        Assert.True(SentrySdk.IsEnabled);
+    }
+
+    [SkippableFact]
+    public void Init_SpotlightDisabledNoDsn_SdkIsDisabled()
+    {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
+        // When Spotlight is off and no DSN is provided, the SDK is disabled via empty DSN
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = string.Empty;
+            o.EnableSpotlight = false;
+            o.AutoSessionTracking = false;
+            o.InitNativeSdks = false;
+        });
+
+        Assert.False(SentrySdk.IsEnabled);
+    }
+
+    [SkippableFact]
+    public void Init_SpotlightEnvVarNoDsn_SdkIsEnabled()
+    {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.FakeSettings().EnvironmentVariables[SpotlightEnvironmentVariable] = "true";
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        Assert.True(SentrySdk.IsEnabled);
+    }
+
+    [Fact]
+    public void Init_SpotlightEnabledWithDsn_SdkIsEnabled()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.EnableSpotlight = true;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        Assert.True(SentrySdk.IsEnabled);
+    }
+
     public void Dispose()
     {
         SentrySdk.Close();

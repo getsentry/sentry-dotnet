@@ -31,7 +31,9 @@ internal class SettingLocator
      *  Except when already assigned, any non-null value resolved should be assigned to the SentryOptions property.
      */
 
-    public string GetDsn()
+    public string GetDsn() => GetDsn(required: true);
+
+    public string GetDsn(bool required)
     {
         // For DSN only
 
@@ -60,6 +62,13 @@ internal class SettingLocator
         // By conventions, skip this if the DSN is not `null` i.e. `string.Empty`
         if (_options.Dsn is null && dsn is null)
         {
+            if (!required)
+            {
+                // When DSN is not required (e.g. Spotlight-only mode), treat as disabled
+                _options.Dsn = string.Empty;
+                return string.Empty;
+            }
+
             throw new ArgumentNullException("You must supply a DSN to use Sentry." +
                                             "To disable Sentry, pass an empty string: \"\"." +
                                             "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn");
@@ -100,6 +109,83 @@ internal class SettingLocator
 
         _options.Environment = environment;
         return environment;
+    }
+
+    private static readonly HashSet<string> TruthyValues = new(StringComparer.OrdinalIgnoreCase)
+        { "true", "t", "y", "yes", "on", "1" };
+
+    private static readonly HashSet<string> FalsyValues = new(StringComparer.OrdinalIgnoreCase)
+        { "false", "f", "n", "no", "off", "0" };
+
+    /// <summary>
+    /// Resolves Spotlight configuration from environment variables and applies precedence rules per spec.
+    /// Must be called before <see cref="GetDsn()"/> so that <see cref="SentryOptions.EnableSpotlight"/> is set.
+    /// </summary>
+    public void ResolveSpotlight()
+    {
+        // Per spec: config options override environment variables.
+        // If EnableSpotlight was explicitly set to false in config, nothing can override it.
+        if (_options.EnableSpotlightExplicitlySet && !_options.EnableSpotlight)
+        {
+            return;
+        }
+
+        var envVar = GetEnvironmentVariable(Constants.SpotlightEnvironmentVariable)?.Trim();
+        if (string.IsNullOrEmpty(envVar))
+        {
+            return;
+        }
+
+        if (FalsyValues.Contains(envVar))
+        {
+            // Env var disables — but only if config didn't explicitly enable
+            if (!_options.EnableSpotlightExplicitlySet)
+            {
+                _options.LogDebug("Spotlight disabled via {0} environment variable.", Constants.SpotlightEnvironmentVariable);
+            }
+            else
+            {
+                _options.LogDebug("Spotlight {0} environment variable is '{1}' but EnableSpotlight was explicitly set in configuration. Config value takes precedence.",
+                    Constants.SpotlightEnvironmentVariable, envVar);
+            }
+            return;
+        }
+
+        if (TruthyValues.Contains(envVar))
+        {
+            // Env var enables with default URL
+            if (!_options.EnableSpotlight)
+            {
+                _options.EnableSpotlight = true;
+                _options.LogDebug("Spotlight enabled via {0} environment variable.", Constants.SpotlightEnvironmentVariable);
+            }
+            // Per spec: config spotlight=true + env var URL → use env var URL.
+            // But here the env var is just truthy (not a URL), so nothing more to do.
+            return;
+        }
+
+        // Any other non-empty string is treated as a custom URL.
+        // Per spec: if config specifies a string URL → override env var (with warning).
+        if (_options.SpotlightUrlExplicitlySet)
+        {
+            _options.LogWarning(
+                "Spotlight URL from {0} environment variable ('{1}') is being ignored " +
+                "because a custom SpotlightUrl was set in configuration ('{2}').",
+                Constants.SpotlightEnvironmentVariable, envVar, _options.SpotlightUrl);
+            // Still enable if not already enabled
+            if (!_options.EnableSpotlight)
+            {
+                _options.EnableSpotlight = true;
+            }
+            return;
+        }
+
+        // Env var provides a URL: enable Spotlight and use it.
+        // Per spec: config spotlight=true + env var URL → use env var URL.
+        _options.EnableSpotlight = true;
+        _options.SpotlightUrl = envVar;
+        _options.LogDebug("Spotlight enabled via {0} environment variable with URL: {1}",
+            Constants.SpotlightEnvironmentVariable, envVar);
     }
 
     public string? GetRelease()

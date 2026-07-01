@@ -1,75 +1,63 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Internal.Http;
-using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Http;
 
-internal class SpotlightHttpTransport : HttpTransport
+/// <summary>
+/// A standalone transport that sends pre-serialized envelopes to a Spotlight sidecar.
+/// This transport is independent of the main Sentry transport — it does not wrap or delegate to it.
+/// Serialization happens upstream (in <see cref="SentryClient.SendToSpotlight"/>) on the calling
+/// thread, so this transport only handles the HTTP POST and backoff logic.
+/// </summary>
+internal class SpotlightHttpTransport : ISpotlightTransport
 {
-    private readonly ITransport _inner;
     private readonly SentryOptions _options;
     private readonly HttpClient _httpClient;
     private readonly Uri _spotlightUrl;
-    private readonly ISystemClock _clock;
-    private readonly ExponentialBackoff _backoff;
+    internal readonly ExponentialBackoff _backoff; // internal for testing
 
-    public SpotlightHttpTransport(ITransport inner, SentryOptions options, HttpClient httpClient, Uri spotlightUrl, ISystemClock clock)
-        : base(options, httpClient)
+    public SpotlightHttpTransport(SentryOptions options, HttpClient httpClient, Uri spotlightUrl, ISystemClock clock)
     {
         _options = options;
         _httpClient = httpClient;
         _spotlightUrl = spotlightUrl;
-        _inner = inner;
-        _clock = clock;
         _backoff = new ExponentialBackoff(clock);
     }
 
-    protected internal override HttpRequestMessage CreateRequest(Envelope envelope)
+    public async Task SendAsync(byte[] serializedEnvelope, CancellationToken cancellationToken = default)
     {
-        return new HttpRequestMessage
+        if (!_backoff.ShouldAttempt())
         {
-            RequestUri = _spotlightUrl,
-            Method = HttpMethod.Post,
-            Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger, _clock)
-            { Headers = { ContentType = MediaTypeHeaderValue.Parse("application/x-sentry-envelope") } }
-        };
-    }
-
-    public override async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
-    {
-        var sentryTask = _inner.SendEnvelopeAsync(envelope, cancellationToken);
-
-        if (_backoff.ShouldAttempt())
-        {
-            try
-            {
-                // Send to spotlight
-                using var processedEnvelope = ProcessEnvelope(envelope);
-                if (processedEnvelope.Items.Count > 0)
-                {
-                    using var request = CreateRequest(processedEnvelope);
-                    using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-                    await HandleResponseAsync(response, processedEnvelope, cancellationToken).ConfigureAwait(false);
-
-                    _backoff.RecordSuccess();
-                }
-            }
-            catch (Exception e)
-            {
-                int failureCount = _backoff.RecordFailure();
-                if (failureCount == 1)
-                {
-                    _options.LogError(e, "Failed sending envelope to Spotlight.");
-                }
-            }
+            return;
         }
 
-        // await the Sentry request before returning
-        await sentryTask.ConfigureAwait(false);
+        try
+        {
+            using var content = new ByteArrayContent(serializedEnvelope);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-sentry-envelope");
+
+            using var request = new HttpRequestMessage
+            {
+                RequestUri = _spotlightUrl,
+                Method = HttpMethod.Post,
+                Content = content
+            };
+
+            using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+            _backoff.RecordSuccess();
+        }
+        catch (Exception e)
+        {
+            var failureCount = _backoff.RecordFailure();
+            if (failureCount == 1)
+            {
+                _options.LogError(e, "Failed sending envelope to Spotlight at {0}.", _spotlightUrl);
+            }
+        }
     }
 
-    private class ExponentialBackoff
+    internal class ExponentialBackoff
     {
         private static readonly TimeSpan InitialRetryDelay = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(60);

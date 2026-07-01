@@ -52,9 +52,9 @@ internal class Hub : IHub, IDisposable
         ISampleRandHelper? sampleRandHelper = null,
         BackpressureMonitor? backpressureMonitor = null)
     {
-        if (string.IsNullOrWhiteSpace(options.Dsn))
+        if (string.IsNullOrWhiteSpace(options.Dsn) && !options.EnableSpotlight)
         {
-            const string msg = "Attempt to instantiate a Hub without a DSN.";
+            const string msg = "Attempt to instantiate a Hub without a DSN or Spotlight enabled.";
             options.LogFatal(msg);
             throw new InvalidOperationException(msg);
         }
@@ -248,6 +248,23 @@ internal class Hub : IHub, IDisposable
 
         if (isSampled is false)
         {
+            if (_options.EnableSpotlight)
+            {
+                // When Spotlight is enabled, use a full TransactionTracer even for sampled-out transactions
+                // so that span data is recorded and can be sent to Spotlight. The IsSampled=false flag
+                // ensures trace headers propagate the correct sampling decision, and the main Sentry
+                // pipeline will still drop this transaction.
+                var spotlightTx = new TransactionTracer(this, context)
+                {
+                    IsSampled = false,
+                    SampleRate = sampleRate,
+                    SampleRand = sampleRand,
+                    DynamicSamplingContext = dynamicSamplingContext
+                };
+                spotlightTx.DynamicSamplingContext ??= spotlightTx.CreateDynamicSamplingContext(_options, _replaySession);
+                return spotlightTx;
+            }
+
             var unsampledTransaction = new UnsampledTransaction(this, context)
             {
                 SampleRate = sampleRate,
@@ -330,7 +347,10 @@ internal class Hub : IHub, IDisposable
         }
 
         var propagationContext = CurrentScope.PropagationContext;
-        return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession).ToBaggageHeader();
+        // GetOrCreateDynamicSamplingContext returns null when there is no DSN (e.g. Spotlight-only mode);
+        // fall back to an empty baggage header in that case.
+        return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession)?.ToBaggageHeader()
+            ?? BaggageHeader.Create([]);
     }
 
     public W3CTraceparentHeader? GetTraceparentHeader()
