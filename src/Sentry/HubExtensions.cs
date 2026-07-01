@@ -9,7 +9,7 @@ namespace Sentry;
 /// Extension methods for <see cref="IHub"/>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class HubExtensions
+public static partial class HubExtensions
 {
     /// <summary>
     /// Starts a transaction.
