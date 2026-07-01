@@ -51,12 +51,13 @@ internal class BackpressureMonitor : IDisposable
         if (enablePeriodicHealthCheck)
         {
             _logger?.LogDebug("Starting BackpressureMonitor.");
-            // Default to the thread pool. The scheduler is only injected by tests, to model single-threaded
-            // runtimes (e.g. Unity WebGL) where the worker and its continuations run on the same thread.
-            _workerTask = scheduler is null
-                ? Task.Run(() => DoWorkAsync(_cts.Token))
-                : Task.Factory.StartNew(() => DoWorkAsync(_cts.Token), _cts.Token, TaskCreationOptions.None, scheduler)
-                    .Unwrap();
+            // Equivalent to Task.Run(() => DoWorkAsync(_cts.Token)): same creation options (DenyChildAttach) and,
+            // by default, the same scheduler (the thread pool). Tests inject a scheduler to model single-threaded
+            // runtimes (e.g. Unity WebGL) where the worker and its continuations must run on the same thread.
+            scheduler ??= TaskScheduler.Default;
+            _workerTask = Task.Factory
+                .StartNew(() => DoWorkAsync(_cts.Token), CancellationToken.None, TaskCreationOptions.DenyChildAttach, scheduler)
+                .Unwrap();
         }
         else
         {
