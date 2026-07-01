@@ -15,27 +15,27 @@ public interface ISpanRecorder
     /// <summary>
     /// The span's id. When not overridden at creation, one is generated.
     /// </summary>
-    SpanId SpanId { get; }
+    public SpanId SpanId { get; }
 
     /// <summary>
     /// Span description.
     /// </summary>
-    string? Description { get; set; }
+    public string? Description { get; set; }
 
     /// <summary>
     /// Span status. Defaults to <see cref="SpanStatus.Ok"/> when not set.
     /// </summary>
-    SpanStatus? Status { get; set; }
+    public SpanStatus? Status { get; set; }
 
     /// <summary>
     /// Sets a tag on the span.
     /// </summary>
-    void SetTag(string key, string value);
+    public void SetTag(string key, string value);
 
     /// <summary>
     /// Sets arbitrary data on the span.
     /// </summary>
-    void SetData(string key, object? value);
+    public void SetData(string key, object? value);
 
     /// <summary>
     /// Records a child span nested under this one. The parent is structural (this span), so no parent id
@@ -47,7 +47,7 @@ public interface ISpanRecorder
     /// <param name="spanId">Optional span id to preserve; generated when omitted.</param>
     /// <param name="configure">Optional callback to set metadata and record further nested spans.</param>
     /// <returns>The recorder for the child span.</returns>
-    ISpanRecorder RecordSpan(
+    public ISpanRecorder RecordSpan(
         string operation,
         DateTimeOffset startTimestamp,
         TimeSpan duration,
@@ -66,15 +66,15 @@ public interface ITransactionRecorder : ISpanRecorder
     /// The trace this transaction belongs to. Set at creation (via <see cref="HubExtensions.RecordTransaction"/>)
     /// and inherited by every recorded span.
     /// </summary>
-    SentryId TraceId { get; }
+    public SentryId TraceId { get; }
 
     /// <summary>
     /// The release that produced this transaction. Useful when the origin system differs from this process.
     /// </summary>
-    string? Release { get; set; }
+    public string? Release { get; set; }
 
     /// <summary>
     /// The environment the transaction ran in. Useful when the origin system differs from this process.
     /// </summary>
-    string? Environment { get; set; }
+    public string? Environment { get; set; }
 }
