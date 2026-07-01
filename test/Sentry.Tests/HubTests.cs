@@ -546,6 +546,36 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_TerminalUnhandledException_DoesNotAbortOpenTelemetryTransaction()
+    {
+        // OpenTelemetry-instrumented transactions are owned and finished by the SentrySpanProcessor
+        // when the underlying Activity ends (which is also where the transaction name, operation and
+        // otel/response contexts get populated). Finishing them early here would capture them with the
+        // raw activity name and no otel context. See https://github.com/getsentry/sentry-dotnet/issues/5091
+
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var hub = _fixture.GetSut();
+
+        var transactionContext = new TransactionContext("test", "operation")
+        {
+            Instrumenter = Instrumenter.OpenTelemetry
+        };
+        var transaction = hub.StartTransaction(transactionContext);
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: false, terminal: true);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
+
+    [Fact]
     public void CaptureEvent_NonTerminalUnhandledException_DoesNotAbortActiveTransaction()
     {
         // Arrange
