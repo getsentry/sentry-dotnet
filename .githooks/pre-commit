@@ -1,0 +1,45 @@
+#!/bin/bash
+set -e
+
+echo "🔍 Checking code formatting..."
+
+if ! git diff --quiet; then
+  echo "⚠️  Skipping format check: unstaged changes present."
+  echo "   Stage or stash all changes before committing to enable the format check."
+  exit 0
+fi
+
+INCLUDE_ARGS=()
+while IFS= read -r f; do
+  INCLUDE_ARGS+=(--include "$f")
+done < <(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' || true)
+
+if [ ${#INCLUDE_ARGS[@]} -eq 0 ]; then
+  echo "✅ No C# files staged."
+  exit 0
+fi
+
+FORMAT_OUTPUT=$(dotnet format Sentry.slnx --no-restore \
+  "${INCLUDE_ARGS[@]}" \
+  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs 2>&1) || {
+  echo ""
+  echo "❌ dotnet format failed:"
+  echo "$FORMAT_OUTPUT"
+  echo ""
+  exit 1
+}
+
+if ! git diff --quiet; then
+  echo ""
+  echo "❌ Code formatting issues found!"
+  echo ""
+  echo "Please stage the formatting fixes and commit again:"
+  echo ""
+  echo "  git add -u"
+  echo "  git commit"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Code formatting looks good!"
+exit 0

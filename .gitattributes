@@ -3,6 +3,7 @@
 *.sln text=auto eol=crlf
 *.slnx text=auto eol=lf
 *.sh eol=lf
+.githooks/* eol=lf
 *.ps1 eol=lf
 CHANGELOG.md merge=union
 
