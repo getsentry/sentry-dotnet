@@ -111,6 +111,31 @@ public class HubExtensionsRecordTests
     }
 
     [Fact]
+    public void RecordTransaction_ConfigureScope_AppliesToCaptureScope()
+    {
+        // With options available, RecordTransaction captures against a fresh scope (via the 3-arg overload)
+        // that ConfigureScope can mutate — rather than the current live scope.
+        var previous = SentryClientExtensions.SentryOptionsForTestingOnly;
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions();
+        try
+        {
+            Scope? capturedScope = null;
+            _hub.When(h => h.CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>()))
+                .Do(ci => capturedScope = ci.Arg<Scope>());
+
+            _hub.RecordTransaction("t", "op", DateTimeOffset.UtcNow, TimeSpan.FromSeconds(1), configure: tx =>
+                tx.ConfigureScope(s => s.SetTag("origin", "proxy")));
+
+            Assert.NotNull(capturedScope);
+            Assert.Equal("proxy", capturedScope!.Tags["origin"]);
+        }
+        finally
+        {
+            SentryClientExtensions.SentryOptionsForTestingOnly = previous;
+        }
+    }
+
+    [Fact]
     public void RecordTransaction_NegativeDuration_Throws()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>

@@ -318,6 +318,7 @@ namespace Sentry
         string? Environment { get; set; }
         string? Release { get; set; }
         Sentry.SentryId TraceId { get; }
+        void ConfigureScope(System.Action<Sentry.Scope> configureScope);
     }
     public interface ITransactionTracer : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext, System.IDisposable
     {
@@ -1002,6 +1003,7 @@ namespace Sentry
         public static void PauseSession() { }
         public static System.IDisposable PushScope() { }
         public static System.IDisposable PushScope<TState>(TState state) { }
+        public static Sentry.SentryId RecordTransaction(string name, string operation, System.DateTimeOffset startTimestamp, System.TimeSpan duration, Sentry.SentryId? traceId = default, Sentry.SpanId? spanId = default, Sentry.SpanId? parentSpanId = default, System.Action<Sentry.ITransactionRecorder>? configure = null) { }
         public static void ResumeSession() { }
         public static void SetTag(string key, string value) { }
         public static void StartSession() { }

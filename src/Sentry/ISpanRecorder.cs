@@ -77,4 +77,11 @@ public interface ITransactionRecorder : ISpanRecorder
     /// The environment the transaction ran in. Useful when the origin system differs from this process.
     /// </summary>
     string? Environment { get; set; }
+
+    /// <summary>
+    /// Configures the (clean) scope the recorded transaction is captured against. Use this to set data that
+    /// was captured alongside the original trace — user, tags, contexts, breadcrumbs — without inheriting the
+    /// current process's live scope.
+    /// </summary>
+    void ConfigureScope(Action<Scope> configureScope);
 }

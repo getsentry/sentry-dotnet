@@ -82,13 +82,24 @@ internal sealed class SpanRecorder : ISpanRecorder
 internal sealed class TransactionRecorder : ITransactionRecorder
 {
     private readonly TransactionTracer _tracer;
+    private readonly Scope? _scope;
 
-    public TransactionRecorder(TransactionTracer tracer)
+    public TransactionRecorder(TransactionTracer tracer, Scope? scope)
     {
         _tracer = tracer;
+        _scope = scope;
     }
 
     internal TransactionTracer Tracer => _tracer;
+
+    public void ConfigureScope(Action<Scope> configureScope)
+    {
+        // No scope when options are unavailable (e.g. a disabled hub); configuration is a no-op.
+        if (_scope is not null)
+        {
+            configureScope(_scope);
+        }
+    }
 
     public SpanId SpanId => _tracer.SpanId;
 

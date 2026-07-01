@@ -9,7 +9,7 @@ namespace Sentry;
 /// Extension methods for <see cref="IHub"/>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static partial class HubExtensions
+public static class HubExtensions
 {
     /// <summary>
     /// Starts a transaction.
@@ -59,6 +59,81 @@ public static partial class HubExtensions
         return hub.GetTransaction() is { } transaction
             ? transaction.StartChild(operation, description)
             : hub.StartTransaction(operation, description); // this is actually in the wrong order but changing it may break other things
+    }
+
+    /// <summary>
+    /// Records a transaction that has already completed elsewhere — for example, spans measured on another
+    /// machine or process and replayed through a proxy. Timing is supplied explicitly rather than measured
+    /// live, so unlike <see cref="StartTransaction(IHub, string, string)"/> there is no stopwatch, idle timer,
+    /// or sampling decision involved; the transaction is materialized and captured once when
+    /// <paramref name="configure"/> returns.
+    /// </summary>
+    /// <param name="hub">The hub.</param>
+    /// <param name="name">The transaction name.</param>
+    /// <param name="operation">The transaction operation.</param>
+    /// <param name="startTimestamp">When the transaction started.</param>
+    /// <param name="duration">How long the transaction ran. Must not be negative.</param>
+    /// <param name="traceId">Optional trace id to preserve from the originating system; generated when omitted.</param>
+    /// <param name="spanId">Optional root span id to preserve; generated when omitted.</param>
+    /// <param name="parentSpanId">Optional parent span id, when continuing a trace from another service.</param>
+    /// <param name="configure">
+    /// Optional callback to set metadata, configure the capture scope, and record the span tree via
+    /// <see cref="ISpanRecorder.RecordSpan(string, DateTimeOffset, TimeSpan, SpanId?, Action{ISpanRecorder}?)"/>.
+    /// </param>
+    /// <returns>The event id of the captured transaction.</returns>
+    public static SentryId RecordTransaction(
+        this IHub hub,
+        string name,
+        string operation,
+        DateTimeOffset startTimestamp,
+        TimeSpan duration,
+        SentryId? traceId = null,
+        SpanId? spanId = null,
+        SpanId? parentSpanId = null,
+        Action<ITransactionRecorder>? configure = null)
+    {
+        if (duration < TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(duration), duration, "Transaction duration cannot be negative.");
+        }
+
+        var context = new TransactionContext(
+            name,
+            operation,
+            spanId: spanId,
+            parentSpanId: parentSpanId,
+            traceId: traceId,
+            isSampled: true);
+
+        var tracer = new TransactionTracer(hub, context)
+        {
+            StartTimestamp = startTimestamp,
+            EndTimestamp = startTimestamp + duration,
+        };
+        tracer.Status ??= SpanStatus.Ok;
+
+        // A recorded transaction represents work that happened elsewhere, so we capture it against a clean
+        // scope rather than the current (live) one — this stops the current process's breadcrumbs/user/tags/
+        // contexts from leaking onto it. The scope is exposed via ITransactionRecorder.ConfigureScope so the
+        // caller can still set data that was captured alongside the original trace.
+        var options = hub.GetSentryOptions();
+        var scope = options is not null ? new Scope(options) : null;
+
+        var recorder = new TransactionRecorder(tracer, scope);
+        configure?.Invoke(recorder);
+
+        var transaction = new SentryTransaction(tracer);
+        if (scope is not null)
+        {
+            hub.CaptureTransaction(transaction, scope, null);
+        }
+        else
+        {
+            // No options available (e.g. a disabled hub); this is effectively a no-op capture.
+            hub.CaptureTransaction(transaction);
+        }
+
+        return transaction.EventId;
     }
 
     /// <summary>
