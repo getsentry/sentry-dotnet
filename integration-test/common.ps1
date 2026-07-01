@@ -196,6 +196,7 @@ BeforeAll {
             Pop-Location
         }
     }
+
     function DotnetNew([string] $type, [string] $name, [string] $framework)
     {
         Remove-Item -Path $name -Recurse -Force -ErrorAction SilentlyContinue
@@ -229,6 +230,24 @@ BeforeAll {
   </PropertyGroup>
 </Project>
 "@ | Out-File $name/Directory.Build.props
+        }
+    }
+
+    function DotnetRun([string] $projectPath, [string] $tfm, [string[]] $applicationArguments)
+    {
+        $executable = "dotnet run --project $projectPath --configuration Release --framework $tfm -- $($applicationArguments -join ' ')"
+
+        Write-Host "::group::Executing $executable"
+        try
+        {
+            Invoke-Expression "$executable 2>&1" | ForEach-Object {
+                Write-Host "  $_"
+                $_
+            }
+        }
+        finally
+        {
+            Write-Host '::endgroup::'
         }
     }
 }
