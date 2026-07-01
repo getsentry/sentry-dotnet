@@ -1,6 +1,6 @@
 namespace Sentry.Log4Net.Tests;
 
-public class SentryAppenderTests
+public partial class SentryAppenderTests : IDisposable
 {
     private class Fixture
     {
@@ -12,6 +12,7 @@ public class SentryAppenderTests
         public Func<IHub> HubAccessor { get; set; }
         public Scope Scope { get; } = new(new SentryOptions());
         public string Dsn { get; set; } = "dsn";
+        public SentryOptions Options { get; } = new();
 
         public Fixture()
         {
@@ -27,6 +28,8 @@ public class SentryAppenderTests
 
         public SentryAppender GetSut()
         {
+            SentryClientExtensions.SentryOptionsForTestingOnly = Options;
+
             var sut = new SentryAppender(InitAction, Hub)
             {
                 Dsn = Dsn
@@ -37,6 +40,11 @@ public class SentryAppenderTests
     }
 
     private readonly Fixture _fixture = new();
+
+    public void Dispose()
+    {
+        SentryClientExtensions.SentryOptionsForTestingOnly = null;
+    }
 
     [Fact]
     public void Append_WithException_CreatesEventWithException()
