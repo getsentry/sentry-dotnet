@@ -1,0 +1,9 @@
+# Settings that apply only to library code under /src
+# (so tests, samples, benchmarks, and integration-tests are not affected).
+
+[*.cs]
+
+# CA2007: Consider calling ConfigureAwait on the awaited task.
+# Library code must always ConfigureAwait(false) to avoid deadlocks in
+# callers that have a SynchronizationContext.
+dotnet_diagnostic.CA2007.severity = error

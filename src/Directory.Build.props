@@ -32,7 +32,6 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
     <Nullable>annotations</Nullable>
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <!-- Centralise logic for enabling `IsAotCompatible`. We use this to disable Aot for the device tests, for example -->
