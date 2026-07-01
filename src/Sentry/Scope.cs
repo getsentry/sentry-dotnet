@@ -221,26 +221,54 @@ public class Scope : IEventLike
             _transactionLock.EnterWriteLock();
             try
             {
-                _transaction.Value = value;
-
-                if (Options.EnableScopeSync)
-                {
-                    if (_transaction.Value != null)
-                    {
-                        // If there is a transaction set we propagate the trace to the native layer
-                        Options.ScopeObserver?.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
-                    }
-                    else
-                    {
-                        // If the transaction is being removed from the scope, reset and sync the trace as well
-                        Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
-                    }
-                }
+                SetTransactionValue(value);
             }
             finally
             {
                 _transactionLock.ExitWriteLock();
             }
+        }
+    }
+
+    // Must be called while holding the write lock on _transactionLock.
+    private void SetTransactionValue(ITransactionTracer? value)
+    {
+        _transaction.Value = value;
+
+        if (Options.EnableScopeSync)
+        {
+            if (_transaction.Value != null)
+            {
+                // If there is a transaction set we propagate the trace to the native layer
+                Options.ScopeObserver?.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
+            }
+            else
+            {
+                // If the transaction is being removed from the scope, reset and sync the trace as well
+                Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Atomically sets <paramref name="transaction"/> on the scope only if there isn't already an (unfinished)
+    /// transaction set. Used to implement <see cref="SentryOptions.AutoSetScopeTransactions"/> without overwriting a
+    /// transaction that was set manually or by another integration.
+    /// </summary>
+    internal void SetTransactionIfNull(ITransactionTracer transaction)
+    {
+        _transactionLock.EnterWriteLock();
+        try
+        {
+            // Treat a finished transaction as "not set" - this mirrors the getter, which returns null in that case.
+            if (_transaction.Value is null or { IsFinished: true })
+            {
+                SetTransactionValue(transaction);
+            }
+        }
+        finally
+        {
+            _transactionLock.ExitWriteLock();
         }
     }
 

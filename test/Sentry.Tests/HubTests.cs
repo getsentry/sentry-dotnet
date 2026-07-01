@@ -655,6 +655,149 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void StartTransaction_AutoSetScopeTransactionsDisabled_DoesNotSetOnScope()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AutoSetScopeTransactions = false; // the default
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        var scope = hub.ScopeManager.GetCurrent().Key;
+        scope.Transaction.Should().BeNull();
+        hub.GetSpan().Should().BeNull();
+    }
+
+    [Fact]
+    public void StartTransaction_AutoSetScopeTransactionsEnabled_SetsOnScopeWhenEmpty()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AutoSetScopeTransactions = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        var scope = hub.ScopeManager.GetCurrent().Key;
+        scope.Transaction.Should().BeSameAs(transaction);
+        hub.GetSpan().Should().BeSameAs(transaction);
+    }
+
+    [Fact]
+    public void StartTransaction_AutoSetScopeTransactionsEnabled_DoesNotOverwriteExistingTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AutoSetScopeTransactions = true;
+        var hub = _fixture.GetSut();
+        var existing = hub.StartTransaction("existing", "operation");
+        var scope = hub.ScopeManager.GetCurrent().Key;
+        scope.Transaction = existing;
+
+        // Act
+        var newTransaction = hub.StartTransaction("new", "operation");
+
+        // Assert - the manually set transaction must not be overwritten
+        scope.Transaction.Should().BeSameAs(existing);
+        newTransaction.Should().NotBeSameAs(existing);
+    }
+
+    [Fact]
+    public void StartTransaction_AutoSetScopeTransactionsEnabled_ClearedFromScopeOnFinish()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AutoSetScopeTransactions = true;
+        var hub = _fixture.GetSut();
+        var transaction = hub.StartTransaction("name", "operation");
+        var scope = hub.ScopeManager.GetCurrent().Key;
+        scope.Transaction.Should().BeSameAs(transaction);
+
+        // Act
+        transaction.Finish();
+
+        // Assert
+        scope.Transaction.Should().BeNull();
+    }
+
+    [Fact]
+    public void StartTransaction_AutoSetScopeTransactionsEnabled_FinishDoesNotClearOverriddenTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AutoSetScopeTransactions = true;
+        var hub = _fixture.GetSut();
+        var autoSet = hub.StartTransaction("auto", "operation");
+        var scope = hub.ScopeManager.GetCurrent().Key;
+        scope.Transaction.Should().BeSameAs(autoSet);
+
+        // The user (or another integration) replaces the scope transaction after ours was auto-set.
+        var replacement = hub.StartTransaction("replacement", "operation");
+        scope.Transaction = replacement;
+
+        // Act - finishing the originally auto-set transaction must not clear the replacement
+        autoSet.Finish();
+
+        // Assert
+        scope.Transaction.Should().BeSameAs(replacement);
+    }
+
+    [Fact]
+    public void StartTransaction_AutoSetScopeTransactionsEnabled_SetsUnsampledTransactionOnScope()
+    {
+        // Arrange - sampled out so StartTransaction returns an UnsampledTransaction
+        _fixture.Options.TracesSampleRate = 0.0;
+        _fixture.Options.AutoSetScopeTransactions = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+        var scope = hub.ScopeManager.GetCurrent().Key;
+        scope.Transaction.Should().BeSameAs(transaction);
+    }
+
+    [Fact]
+    public void StartSpan_AutoSetScopeTransactionOverrideFalse_DoesNotSetOnScope_EvenWhenOptionEnabled()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AutoSetScopeTransactions = true;
+        var hub = _fixture.GetSut();
+
+        // Act - the override wins over the global option (this is what the MAUI binder relies on)
+        var span = hub.StartSpan("operation", "description", autoSetScopeTransaction: false);
+
+        // Assert
+        span.Should().BeAssignableTo<ITransactionTracer>();
+        var scope = hub.ScopeManager.GetCurrent().Key;
+        scope.Transaction.Should().BeNull();
+    }
+
+    [Fact]
+    public void StartSpan_AutoSetScopeTransactionOverrideTrue_SetsOnScope_EvenWhenOptionDisabled()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AutoSetScopeTransactions = false;
+        var hub = _fixture.GetSut();
+
+        // Act - the override wins over the (disabled) global option
+        var span = hub.StartSpan("operation", "description", autoSetScopeTransaction: true);
+
+        // Assert
+        var scope = hub.ScopeManager.GetCurrent().Key;
+        scope.Transaction.Should().BeSameAs(span);
+    }
+
+    [Fact]
     public void StartTransaction_FromTraceHeader_CopiesContext()
     {
         // Arrange
