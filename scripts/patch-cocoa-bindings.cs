@@ -32,6 +32,12 @@ var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
     .WithNamespace("Sentry.CocoaSdk")
     .RemoveClass("CFunctions")
+    // Fold Swift-extension categories back into their base interface. Objective Sharpie emits
+    // members declared in a Swift `extension` (e.g. the entire `SentrySDK` API since sentry-cocoa
+    // 9.19.1 moved its class body into an extension) as a separate `[Category]` interface with an
+    // auto-generated name like `SentrySDK_Sentry_Swift_8248`. Left alone, KeepInterfaces would drop
+    // it because that generated name isn't in the keep-list, silently emptying the SentrySDK binding.
+    .MergeInterface("SentrySDK_*", "SentrySDK")
     // Make enums, interfaces, and delegates internal
     .AsInternal("Sentry*", "internal")
     .WithAttribute("*Sentry*", "Internal")
@@ -190,6 +196,32 @@ internal static class FilterExtensions
             .OfType<InterfaceDeclarationSyntax>()
             .Where(node => !names.Any(name => node.Identifier.Matches(name)));
         return root.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia)!;
+    }
+
+    public static CompilationUnitSyntax MergeInterface(
+        this CompilationUnitSyntax root,
+        string from,
+        string into)
+    {
+        bool IsSource(InterfaceDeclarationSyntax node) =>
+            node.Identifier.Matches(from) && !node.Identifier.Matches(into);
+
+        // Move the members of every category interface matching `from` into the base interface `into`.
+        var members = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(IsSource)
+            .SelectMany(node => node.Members)
+            .ToArray();
+
+        if (members.Length > 0)
+        {
+            root = root.ReplaceNodes(
+                root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().Where(node => node.Identifier.Matches(into)),
+                (node, _) => node.AddMembers(members));
+        }
+
+        // Drop the now-empty category interfaces.
+        return root.RemoveByPredicate<InterfaceDeclarationSyntax>(IsSource);
     }
 
     public static CompilationUnitSyntax WithNamespace(
