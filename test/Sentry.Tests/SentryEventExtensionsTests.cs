@@ -184,6 +184,30 @@ public class SentryEventExtensionsTests
     }
 
     [Fact]
+    public void IsFromTerminalException_HandledExceptionInSentryExceptions_ReturnsFalse()
+    {
+        // Arrange
+        var sentryEvent = new SentryEvent
+        {
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Type = "Exception",
+                    Value = "test",
+                    Mechanism = new Mechanism { Handled = true }
+                }
+            }
+        };
+
+        // Act
+        var result = sentryEvent.IsFromTerminalException();
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
     public void IsFromTerminalException_UnhandledTerminalExceptionInSentryExceptions_ReturnsTrue()
     {
         // Arrange
