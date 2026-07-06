@@ -91,6 +91,18 @@ static partial class SentrySdk
         }
         options.PostInitCallbacks.Clear();
 
+        // Default tags are applied per-event by the Enricher to events going through the .NET pipeline,
+        // but native crashes are captured and uploaded by the native SDK without going through that pipeline.
+        // Forward them to the scope observer so the native layer attaches them to crash reports.
+        // Bypassing the .NET scope keeps scope.Tags identical between native and non-native apps.
+        if (options is { EnableScopeSync: true, ScopeObserver: { } observer } && options.DefaultTags.Count > 0)
+        {
+            foreach (var tag in options.DefaultTags)
+            {
+                observer.SetTag(tag.Key, tag.Value);
+            }
+        }
+
         // Platform specific check for profiler misconfiguration.
 #if __IOS__
         // No user-facing warning necessary - the integration is part of InitSentryCocoaSdk().

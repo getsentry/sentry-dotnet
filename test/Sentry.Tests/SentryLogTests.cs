@@ -44,9 +44,11 @@ public class SentryLogTests
             Environment = "my-environment",
             Release = "my-release",
         };
-        var scope = new Scope(options);
-        scope.Sdk.Name = "Sentry.Test.SDK";
-        scope.Sdk.Version = "1.2.3-test+Sentry";
+        var sdk = new SdkVersion
+        {
+            Name = "Sentry.Test.SDK",
+            Version = "1.2.3-test+Sentry",
+        };
 
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
         {
@@ -55,7 +57,7 @@ public class SentryLogTests
             SpanId = SpanId,
         };
         log.SetAttribute("attribute", "value");
-        log.SetDefaultAttributes(options, scope);
+        log.SetDefaultAttributes(options, sdk);
 
         log.Timestamp.Should().Be(Timestamp);
         log.TraceId.Should().Be(TraceId);
@@ -66,88 +68,14 @@ public class SentryLogTests
         log.SpanId.Should().Be(SpanId);
 
         // should only show up in sdk integrations
-        log.TryGetAttribute("sentry.origin", out object origin).Should().BeFalse();
+        log.Attributes.ShouldNotContain<string>("sentry.origin");
 
-        log.TryGetAttribute("attribute", out object attribute).Should().BeTrue();
-        attribute.Should().Be("value");
-        log.TryGetAttribute("sentry.environment", out string environment).Should().BeTrue();
-        environment.Should().Be(options.Environment);
-        log.TryGetAttribute("sentry.release", out string release).Should().BeTrue();
-        release.Should().Be(options.Release);
-        log.TryGetAttribute("sentry.sdk.name", out string name).Should().BeTrue();
-        name.Should().Be(scope.Sdk.Name);
-        log.TryGetAttribute("sentry.sdk.version", out string version).Should().BeTrue();
-        version.Should().Be(scope.Sdk.Version);
-        log.TryGetAttribute("not-found", out object notFound).Should().BeFalse();
-        notFound.Should().BeNull();
-    }
-
-    [Fact]
-    public void SetDefaultAttributes_OptionsServerName_SetsServerAddress()
-    {
-        var options = new SentryOptions { ServerName = "my-server" };
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
-
-        log.SetDefaultAttributes(options, new Scope(options));
-
-        log.TryGetAttribute("server.address", out string address).Should().BeTrue();
-        address.Should().Be("my-server");
-    }
-
-    [Fact]
-    public void SetDefaultAttributes_SendDefaultPii_SetsServerAddressToMachineName()
-    {
-        var options = new SentryOptions { SendDefaultPii = true };
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
-
-        log.SetDefaultAttributes(options, new Scope(options));
-
-        log.TryGetAttribute("server.address", out string address).Should().BeTrue();
-        address.Should().Be(Environment.MachineName);
-    }
-
-    [Fact]
-    public void SetDefaultAttributes_NoServerNameNoPii_OmitsServerAddress()
-    {
-        var options = new SentryOptions();
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
-
-        log.SetDefaultAttributes(options, new Scope(options));
-
-        log.TryGetAttribute("server.address", out object _).Should().BeFalse();
-    }
-
-    [Fact]
-    public void SetDefaultAttributes_ScopeUser_SetsUserAttributes()
-    {
-        var options = new SentryOptions();
-        var scope = new Scope(options)
-        {
-            User = new SentryUser { Id = "user-id", Username = "user-name", Email = "user@example.com" },
-        };
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
-
-        log.SetDefaultAttributes(options, scope);
-
-        log.TryGetAttribute("user.id", out string id).Should().BeTrue();
-        id.Should().Be("user-id");
-        log.TryGetAttribute("user.name", out string username).Should().BeTrue();
-        username.Should().Be("user-name");
-        log.TryGetAttribute("user.email", out string email).Should().BeTrue();
-        email.Should().Be("user@example.com");
-    }
-
-    [Fact]
-    public void SetDefaultAttributes_NoScopeUser_OmitsUserAttributes()
-    {
-        var options = new SentryOptions();
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
-
-        log.SetDefaultAttributes(options, new Scope(options));
-
-        log.TryGetAttribute("user.id", out object _).Should().BeFalse();
-        log.TryGetAttribute("user.name", out object _).Should().BeFalse();
-        log.TryGetAttribute("user.email", out object _).Should().BeFalse();
+        log.Attributes.ShouldContain<string>("attribute", "value");
+        log.Attributes.ShouldContain<string>("sentry.environment", options.Environment);
+        log.Attributes.ShouldContain<string>("sentry.release", options.Release);
+        log.Attributes.ShouldContain<string>("sentry.sdk.name", sdk.Name);
+        log.Attributes.ShouldContain<string>("sentry.sdk.version", sdk.Version);
+        log.Attributes.ShouldNotContain<object>("not-found");
     }
 
     [Theory]
@@ -184,7 +112,7 @@ public class SentryLogTests
         };
 
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
-        log.SetDefaultAttributes(options, new Scope(options));
+        log.SetDefaultAttributes(options, new SdkVersion());
 
         var envelope = Envelope.FromLog(new StructuredLog([log]));
 
@@ -262,10 +190,7 @@ public class SentryLogTests
         log.SetAttribute("boolean-attribute", true);
         log.SetAttribute("integer-attribute", 3);
         log.SetAttribute("double-attribute", 4.4);
-        var scope = new Scope(options);
-        scope.Sdk.Name = "Sentry.Test.SDK";
-        scope.Sdk.Version = "1.2.3-test+Sentry";
-        log.SetDefaultAttributes(options, scope);
+        log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
 
         var envelope = EnvelopeItem.FromLog(new StructuredLog([log]));
 

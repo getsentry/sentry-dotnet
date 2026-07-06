@@ -42,6 +42,11 @@ public static class SentryTracerProviderBuilderExtensions
     public static TracerProviderBuilder AddSentryOtlpExporter(this TracerProviderBuilder tracerProviderBuilder,
         string dsnString, Uri? collectorUrl = null, TextMapPropagator? defaultTextMapPropagator = null)
     {
+        if (Dsn.IsDisabled(dsnString))
+        {
+            return tracerProviderBuilder;
+        }
+
         if (Dsn.TryParse(dsnString) is not { } dsn)
         {
             throw new ArgumentException(MissingDsnWarning, nameof(dsnString));

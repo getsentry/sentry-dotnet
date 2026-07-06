@@ -43,17 +43,17 @@ runs:
     - name: Install zstd on Windows ARM64
       uses: ./.github/actions/install-zstd
 
-    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
+    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md#xcode
     # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_26.3.app
+      run: sudo xcode-select --switch /Applications/Xcode_26.5.app
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21
       if: ${{ !matrix.container }}
-      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
       with:
         distribution: temurin
         java-version: '21'
@@ -84,7 +84,7 @@ runs:
         sudo chmod -R a+rw /usr/share/dotnet
 
     - name: Install .NET SDK
-      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+      uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
       with:
         global-json-file: global.json
         dotnet-version: |
@@ -94,7 +94,7 @@ runs:
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
       if: ${{ runner.os != 'macOS' || runner.arch != 'ARM64' }}
-      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+      uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
       with:
         dotnet-version: 5.0.x
 

@@ -88,11 +88,8 @@ public partial class MauiEventsBinderTests
         Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
         Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
-#if !NET10_0
-        // TODO: Work out why these are missing in .NET 10
         crumb.Data.Should().Contain("PreviousPage", nameof(Page));
         crumb.Data.Should().Contain("PreviousPage.Name", "otherPage");
-#endif
     }
 
     [Fact]
