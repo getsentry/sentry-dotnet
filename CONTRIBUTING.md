@@ -13,6 +13,14 @@ For a big feature it's advised to raise an issue to discuss it first.
   * CI should be green.
   * The ideal state is where a reviewer approves and merges it immediately. But on more complex changes, some back and forth during reviews is expected.
 
+## Code comments
+
+We prefer code that explains itself, so comments should be kept to a minimum:
+
+* When code needs explaining, prefer refactoring it (better variable and method names, clearer structure) over adding a comment.
+* Where a comment is genuinely needed, keep it short and to the point.
+* Detailed context belongs in the pull request description rather than inline. When a comment does need lengthy background, reference the relevant PR instead of inlining the explanation.
+
 ## TLDR
 
 * Install the .NET SDKs
