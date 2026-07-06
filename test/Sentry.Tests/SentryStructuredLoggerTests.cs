@@ -265,12 +265,9 @@ public partial class SentryStructuredLoggerTests : IDisposable
         logger.Flush();
 
         capturedLog.Should().NotBeNull();
-        capturedLog.TryGetAttribute("user.id", out string? userId).Should().BeTrue();
-        userId.Should().Be("user-id");
-        capturedLog.TryGetAttribute("user.name", out string? userName).Should().BeTrue();
-        userName.Should().Be("user-name");
-        capturedLog.TryGetAttribute("user.email", out string? userEmail).Should().BeTrue();
-        userEmail.Should().Be("user@example.com");
+        capturedLog.Attributes.ShouldContain("user.id", "user-id");
+        capturedLog.Attributes.ShouldContain("user.name", "user-name");
+        capturedLog.Attributes.ShouldContain("user.email", "user@example.com");
     }
 
     [Fact]
