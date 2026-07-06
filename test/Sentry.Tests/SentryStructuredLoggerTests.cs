@@ -289,9 +289,9 @@ public partial class SentryStructuredLoggerTests : IDisposable
         logger.Flush();
 
         capturedLog.Should().NotBeNull();
-        capturedLog.TryGetAttribute("user.id", out object? _).Should().BeFalse();
-        capturedLog.TryGetAttribute("user.name", out object? _).Should().BeFalse();
-        capturedLog.TryGetAttribute("user.email", out object? _).Should().BeFalse();
+        capturedLog.Attributes.ShouldNotContain<object>("user.id");
+        capturedLog.Attributes.ShouldNotContain<object>("user.name");
+        capturedLog.Attributes.ShouldNotContain<object>("user.email");
     }
 
     private static void ConfigureLog(SentryLog log)
