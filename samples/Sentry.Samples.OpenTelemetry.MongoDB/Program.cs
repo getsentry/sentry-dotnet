@@ -43,6 +43,7 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
 // MongoDB.Driver 3.7.0+ creates OpenTelemetry activities for every command out of the box.
 // TracingOptions is only needed to tweak that behaviour - here we opt in to capturing the query
 // text on each span (off by default), which shows up in Sentry as the `db.query.text` span data.
+// Sentry automatically scrubs query parameter values to protect PII.
 var mongoUri = Environment.GetEnvironmentVariable("MONGODB_URI") ?? "mongodb://localhost:27017";
 var clientSettings = MongoClientSettings.FromConnectionString(mongoUri);
 clientSettings.ServerSelectionTimeout = TimeSpan.FromSeconds(3); // <-- Fail fast if MongoDB isn't running

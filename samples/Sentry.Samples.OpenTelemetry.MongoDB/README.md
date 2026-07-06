@@ -26,6 +26,7 @@ clientSettings.TracingOptions = new TracingOptions
 };
 ```
 
+Note that Sentry automatically scrubs query parameter values to protect PII.
 ## Prerequisites
 
 ### MongoDB
