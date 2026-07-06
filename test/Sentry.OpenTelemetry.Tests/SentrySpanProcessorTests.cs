@@ -1016,25 +1016,21 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     [Fact]
     public void OnStart_WithExistingTransactionOnScope_DoesNotOverwriteExistingTransaction()
     {
-        // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.Options.TracesSampleRate = 1.0;
-        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
-        var scope = new Scope();
-        var clientScope = new KeyValuePair<Scope, ISentryClient>(scope, _fixture.Client);
-        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
         var sut = _fixture.GetSut();
 
         using var firstActivity = Tracer.StartActivity("Existing");
         sut.OnStart(firstActivity!);
-        var existingTransaction = scope.Transaction;
+        Assert.True(sut._map.TryGetValue(firstActivity.SpanId, out var firstTransaction));
 
-        // Act: second root activity starts while Existing is still on the scope
         using var secondActivity = Tracer.StartActivity("NewRootActivity");
         sut.OnStart(secondActivity!);
 
-        // Assert
-        scope.Transaction.Should().BeSameAs(existingTransaction,
+        object scopeTransaction = null;
+        _fixture.Hub.ConfigureScope(scope => scopeTransaction = scope.Transaction);
+
+        scopeTransaction.Should().BeSameAs(firstTransaction,
             "CreateRootSpan should not overwrite an already-set Scope.Transaction");
     }
 }
