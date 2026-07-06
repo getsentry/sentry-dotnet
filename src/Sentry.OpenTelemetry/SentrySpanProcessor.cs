@@ -172,7 +172,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
             tracer.StartTimestamp = data.StartTimeUtc;
         }
-        _hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
+        // Only set Scope.Transaction when null to avoid clobbering an existing transaction
+        // when two root OTel activities overlap. See #5314.
+        _hub.ConfigureScope(static (scope, transaction) =>
+        {
+            if (scope.Transaction is null)
+            {
+                scope.Transaction = transaction;
+            }
+        }, transaction);
         transaction.SetFused(data);
         _map[data.SpanId] = transaction;
     }
