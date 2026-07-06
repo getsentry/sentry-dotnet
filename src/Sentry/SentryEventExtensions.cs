@@ -1,5 +1,3 @@
-using Sentry.Protocol;
-
 namespace Sentry;
 
 /// <summary>
@@ -45,16 +43,7 @@ public static class SentryEventExtensions
     /// </code>
     /// </example>
     public static bool IsFromUnhandledException(this SentryEvent @event)
-    {
-        // Check if the original exception was marked as unhandled
-        if (@event.Exception?.Data[Mechanism.HandledKey] is false)
-        {
-            return true;
-        }
-
-        // Check if any of the Sentry exceptions have an unhandled mechanism
-        return @event.SentryExceptions?.Any(e => e.Mechanism is { Handled: false }) ?? false;
-    }
+        => @event.HasUnhandledException();
 
     /// <summary>
     /// Determines whether this event was created from a terminal exception.
@@ -87,24 +76,5 @@ public static class SentryEventExtensions
     /// </code>
     /// </example>
     public static bool IsFromTerminalException(this SentryEvent @event)
-    {
-        // Check if the original exception was unhandled and not explicitly marked as non-terminal
-        if (@event.Exception?.Data[Mechanism.HandledKey] is false)
-        {
-            // If it's unhandled but explicitly marked as non-terminal, return false
-            if (@event.Exception.Data[Mechanism.TerminalKey] is false)
-            {
-                return false;
-            }
-            // Otherwise, unhandled exceptions are terminal by default
-            return true;
-        }
-
-        // Check if any Sentry exceptions are unhandled and terminal
-        // (handled: false and terminal: not explicitly false)
-        return @event.SentryExceptions?.Any(e =>
-            e.Mechanism is { Handled: false } &&
-            e.Mechanism.Terminal != false
-        ) ?? false;
-    }
+        => @event.HasUnhandledTerminalException();
 }
