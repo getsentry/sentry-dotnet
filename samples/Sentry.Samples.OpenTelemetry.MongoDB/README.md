@@ -26,7 +26,27 @@ clientSettings.TracingOptions = new TracingOptions
 };
 ```
 
-Note that Sentry automatically scrubs query parameter values to protect PII.
+## A note on PII
+
+When you capture query text, the MongoDB driver records the **actual field values** sent in each
+command (for example `{ "name": "Apple", "contributor": "Alice Johnson" }`) in the `db.query.text`
+span attribute. If those values can contain PII, you need to scrub them.
+
+Importantly, the Sentry OTLP exporter used by this sample sends spans **straight to Sentry**, without
+running them through the SDK's `BeforeSend`/`BeforeSendTransaction` hooks — so you can't rely on those
+to redact data here.
+
+Your options are:
+- **Don't capture query text at all** — leave `QueryTextMaxLength` at its default of `0`. The Queries
+  module still works using the operation and collection name.
+- **Redact client-side with an OpenTelemetry span processor** — registered *before*
+  `AddSentryOtlpExporter` so it runs before spans are exported. This sample includes an example
+  `RedactSensitiveMongoData`, which strips the `contributor` field out of `db.query.text`
+  before it leaves the process. Adapt the field names to your own data.
+- **Configure [server-side data scrubbing](https://docs.sentry.io/security-legal-pii/scrubbing/server-side-scrubbing/)**
+  — note the default rules only catch known-sensitive patterns (passwords, tokens, card numbers), so
+  for arbitrary field values you'll need to add explicit scrubbing rules.
+
 ## Prerequisites
 
 ### MongoDB

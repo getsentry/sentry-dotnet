@@ -37,13 +37,15 @@ SentrySdk.Init(options =>
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource(activitySource.Name)
     .AddSource(MongoTelemetry.ActivitySourceName) // <-- Subscribe to the MongoDB driver's built-in instrumentation
+    .AddProcessor(new Sentry.Samples.OpenTelemetry.MongoDB.RedactSensitiveMongoData()) // <-- Redact PII from query text BEFORE it's exported (see below)
     .AddSentryOtlpExporter(dsn) // <-- Configure OpenTelemetry to send traces to Sentry over OTLP
     .Build();
 
 // MongoDB.Driver 3.7.0+ creates OpenTelemetry activities for every command out of the box.
 // TracingOptions is only needed to tweak that behaviour - here we opt in to capturing the query
 // text on each span (off by default), which shows up in Sentry as the `db.query.text` span data.
-// Sentry automatically scrubs query parameter values to protect PII.
+// NOTE: The captured query text includes the actual field values sent to MongoDB, which may contain
+// PII. See the RedactSensitiveMongoData span processor at the bottom of this file for how to scrub it.
 var mongoUri = Environment.GetEnvironmentVariable("MONGODB_URI") ?? "mongodb://localhost:27017";
 var clientSettings = MongoClientSettings.FromConnectionString(mongoUri);
 clientSettings.ServerSelectionTimeout = TimeSpan.FromSeconds(3); // <-- Fail fast if MongoDB isn't running
@@ -62,11 +64,14 @@ try
     // span for each MongoDB command.
     using (activitySource.StartActivity("Fruit Salad"))
     {
+        // Each recipe records the name of the person who contributed it. That's PII, and because we
+        // capture query text (above) it would otherwise be sent to Sentry verbatim in the insert
+        // command - the RedactSensitiveMongoData processor strips it out before export.
         await fruit.InsertManyAsync([
-            new BsonDocument { { "name", "Apple" }, { "color", "Red" } },
-            new BsonDocument { { "name", "Banana" }, { "color", "Yellow" } },
-            new BsonDocument { { "name", "Cherry" }, { "color", "Red" } },
-            new BsonDocument { { "name", "Kiwi" }, { "color", "Green" } }
+            new BsonDocument { { "name", "Apple" }, { "color", "Red" }, { "contributor", "Alice Johnson" } },
+            new BsonDocument { { "name", "Banana" }, { "color", "Yellow" }, { "contributor", "Bob Nguyen" } },
+            new BsonDocument { { "name", "Cherry" }, { "color", "Red" }, { "contributor", "Carla Méndez" } },
+            new BsonDocument { { "name", "Kiwi" }, { "color", "Green" }, { "contributor", "David O'Brien" } }
         ]);
 
         var redFruit = await fruit.Find(Builders<BsonDocument>.Filter.Eq("color", "Red")).ToListAsync();
