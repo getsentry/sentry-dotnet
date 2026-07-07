@@ -36,11 +36,11 @@
     <File Path=".github/workflows/validate-pr.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
     <File Path=".github/workflows/watch-upstream.yml" />
-    <File Path=".github\workflows\pr-risk.yml" />
-    <File Path=".github\workflows\verify-api.yml" />
+    <File Path=".github/workflows/pr-risk.yml" />
+    <File Path=".github/workflows/verify-api.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
-    <File Path="benchmarks\Directory.Build.props" />
+    <File Path="benchmarks/Directory.Build.props" />
     <Project Path="benchmarks/Sentry.Benchmarks/Sentry.Benchmarks.csproj" />
     <Project Path="benchmarks/Sentry.Extensions.Logging.Benchmarks/Sentry.Extensions.Logging.Benchmarks.csproj" />
   </Folder>
@@ -81,10 +81,10 @@
     <File Path="warden.toml" />
   </Folder>
   <Folder Name="/samples/">
-    <File Path="samples\Directory.Build.props" />
-    <File Path="samples\Directory.Build.targets" />
-    <File Path="samples\README.md" />
-    <File Path="samples\SamplesShared.cs" />
+    <File Path="samples/Directory.Build.props" />
+    <File Path="samples/Directory.Build.targets" />
+    <File Path="samples/README.md" />
+    <File Path="samples/SamplesShared.cs" />
     <Project Path="samples/Sentry.Samples.Android/Sentry.Samples.Android.csproj" />
     <Project Path="samples/Sentry.Samples.AspNetCore.Basic/Sentry.Samples.AspNetCore.Basic.csproj" />
     <Project Path="samples/Sentry.Samples.AspNetCore.Blazor.Server/Sentry.Samples.AspNetCore.Blazor.Server.csproj" />
@@ -145,7 +145,7 @@
   <Folder Name="/src/">
     <File Path="src/Directory.Build.props" />
     <File Path="src/Directory.Build.targets" />
-    <File Path="src\.editorconfig" />
+    <File Path="src/.editorconfig" />
     <Project Path="src/Sentry.Analyzers/Sentry.Analyzers.csproj" />
     <Project Path="src/Sentry.Android.AssemblyReader/Sentry.Android.AssemblyReader.csproj" />
     <Project Path="src/Sentry.AspNet/Sentry.AspNet.csproj" />
@@ -174,9 +174,9 @@
   <Folder Name="/test/">
     <File Path="test/Directory.Build.props" />
     <File Path="test/Directory.Build.targets" />
-    <File Path="test\CommonModuleInit.cs" />
-    <File Path="test\xunit.runner.json" />
-    <File Path="test\xunit.runner.windows.json" />
+    <File Path="test/CommonModuleInit.cs" />
+    <File Path="test/xunit.runner.json" />
+    <File Path="test/xunit.runner.windows.json" />
     <Project Path="test/AndroidTestApp/AndroidTestApp.csproj" />
     <Project Path="test/Sentry.Analyzers.Tests/Sentry.Analyzers.Tests.csproj" />
     <Project Path="test/Sentry.Android.AssemblyReader.Tests/Sentry.Android.AssemblyReader.Tests.csproj" />
