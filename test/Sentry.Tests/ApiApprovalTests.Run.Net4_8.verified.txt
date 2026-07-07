@@ -540,6 +540,11 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryEvent FromJson(System.Text.Json.JsonElement json) { }
     }
+    public static class SentryEventExtensions
+    {
+        public static bool IsFromTerminalException(this Sentry.SentryEvent @event) { }
+        public static bool IsFromUnhandledException(this Sentry.SentryEvent @event) { }
+    }
     public sealed class SentryFeedback : Sentry.ISentryJsonSerializable
     {
         public SentryFeedback(string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, Sentry.SentryId? associatedEventId = default) { }
