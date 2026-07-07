@@ -1,7 +1,7 @@
 namespace Sentry.Internal;
 
 /// <summary>
-/// A minimal replacement for <see cref="Lazy{T}"/>.
+/// A <see cref="ValueType"/>-based variant of <see cref="Lazy{T}"/> that is not thread safe.
 ///
 /// We're using this for local variables, where no <see cref="LazyThreadSafetyMode"/> is required,
 /// but a value is still cached, without any allocations via the <see langword="class"/>-based <see cref="Lazy{T}"/>.
