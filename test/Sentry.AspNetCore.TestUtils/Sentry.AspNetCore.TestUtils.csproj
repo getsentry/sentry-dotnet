@@ -11,7 +11,7 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' Or '$(TargetFrameworkVersion)' != 'v4.8'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
   </ItemGroup>
 
@@ -29,7 +29,7 @@
   an updated version of the ASP.NET Core runtime on their hosting server.
   See https://github.com/dotnet/aspnetcore/issues/15423
 -->
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(TargetFrameworkVersion)' == 'v4.8'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
     <!-- https://github.com/advisories/GHSA-hxrm-9w7p-39cc -->
