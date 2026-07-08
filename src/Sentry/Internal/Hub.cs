@@ -667,8 +667,17 @@ internal class Hub : IHub, IDisposable
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
-                _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                transaction.Finish(SpanStatus.Aborted);
+                // Skip for OpenTelemetry transactions - these get handled by the SpanProcessor instead. See https://github.com/getsentry/sentry-dotnet/pull/5310
+                if (transaction is IBaseTracer { IsOtelInstrumenter: true })
+                {
+                    _options.LogDebug(
+                        "Not ending OpenTelemetry transaction as Aborted; it is finished by the SentrySpanProcessor.");
+                }
+                else
+                {
+                    _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
+                    transaction.Finish(SpanStatus.Aborted);
+                }
             }
 
             return id;
