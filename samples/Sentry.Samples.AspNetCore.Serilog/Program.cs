@@ -17,7 +17,7 @@ public class Program
                 // Add Sentry integration with Serilog
                 .WriteTo.Sentry(s =>
                 {
-                    // Sets the minimum log level required to keep a log message as breadcrumbs
+                    // Sets the minimum log level required to add a log message as breadcrumb
                     s.MinimumBreadcrumbLevel = LogEventLevel.Debug;
                     // Set the minimum level for messages to be sent out as events to Sentry
                     s.MinimumEventLevel = LogEventLevel.Error;
