@@ -26,6 +26,7 @@ We prefer code that explains itself, so comments should be kept to a minimum:
 * Install the .NET SDKs
 * Install PowerShell
 * Install Xcode
+* Check out the submodules: `git submodule update --init --recursive`
 * Restore workloads with `dotnet workload restore` (needs `sudo` on a Mac)
 * To quickly get up and running, you can just run `dotnet build SentryNoMobile.slnf` (you're skipping the mobile targets)
 * To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
