@@ -1016,21 +1016,31 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     [Fact]
     public void OnStart_WithExistingTransactionOnScope_DoesNotOverwriteExistingTransaction()
     {
+        // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        _fixture.Options.TracesSampleRate = 1.0;
         var sut = _fixture.GetSut();
 
-        using var firstActivity = Tracer.StartActivity("Existing");
-        sut.OnStart(firstActivity!);
-        Assert.True(sut._map.TryGetValue(firstActivity.SpanId, out var firstTransaction));
+        var parentContext = new TransactionContext("Program", "Main")
+        {
+            Instrumenter = Instrumenter.OpenTelemetry,
+        };
+        var parent = _fixture.Hub.StartTransaction(parentContext);
+        _fixture.Hub.ConfigureScope(scope => scope.Transaction = parent);
 
-        using var secondActivity = Tracer.StartActivity("NewRootActivity");
-        sut.OnStart(secondActivity!);
+        using var data = Tracer.StartActivity("TestActivity");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        data.ParentSpanId.Should().Be(default(ActivitySpanId), $"{nameof(data)} should be a new root Activity, not a child Activity");
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        span.Should().BeOfType<TransactionTracer>($"{nameof(data)} should be a new root Transaction, not a child Span");
 
         object scopeTransaction = null;
         _fixture.Hub.ConfigureScope(scope => scopeTransaction = scope.Transaction);
 
-        scopeTransaction.Should().BeSameAs(firstTransaction,
+        scopeTransaction.Should().BeSameAs(parent,
             "CreateRootSpan should not overwrite an already-set Scope.Transaction");
     }
 }
