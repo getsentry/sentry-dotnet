@@ -1036,6 +1036,116 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_BeforeSendFeedbackSet_CallbackInvokedAndMutationApplied()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        SentryEvent received = null;
+        _fixture.SentryOptions.SetBeforeSendFeedback((@event, _) =>
+        {
+            received = @event;
+            @event.SetTag("scrubbed", "true");
+            return @event;
+        });
+        var sut = _fixture.GetSut();
+
+        Envelope envelope = null;
+        sut.Worker.When(w => w.EnqueueEnvelope(Arg.Any<Envelope>()))
+            .Do(callback => envelope = callback.Arg<Envelope>());
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.Success);
+        id.Should().NotBe(SentryId.Empty);
+        received.Should().NotBeNull();
+        received.Contexts.Feedback.Should().NotBeNull();
+        received.Contexts.Feedback!.Message.Should().Be("Everything is great!");
+        var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
+        @event.Tags.Should().Contain(new KeyValuePair<string, string>("scrubbed", "true"));
+    }
+
+    [Fact]
+    public void CaptureFeedback_BeforeSendFeedbackSet_ReceivesHintFromCaller()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        var hint = new SentryHint();
+        var attachment = AttachmentHelper.FakeAttachment("scrub-me.txt");
+        hint.Attachments.Add(attachment);
+        SentryHint receivedHint = null;
+        _fixture.SentryOptions.SetBeforeSendFeedback((@event, h) =>
+        {
+            receivedHint = h;
+            return @event;
+        });
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result, null, hint);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.Success);
+        id.Should().NotBe(SentryId.Empty);
+        receivedHint.Should().BeSameAs(hint);
+        receivedHint.Attachments.Should().Contain(attachment);
+    }
+
+    [Fact]
+    public void CaptureFeedback_BeforeSendFeedbackReturnsNull_FeedbackDropped()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        _fixture.SentryOptions.SetBeforeSendFeedback((SentryEvent _) => null);
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.DroppedByBeforeSendFeedback);
+        id.Should().Be(SentryId.Empty);
+        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+    }
+
+    [Fact]
+    public void CaptureFeedback_BeforeSendFeedbackThrows_FeedbackDropped()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        _fixture.SentryOptions.SetBeforeSendFeedback((SentryEvent _) => throw new InvalidOperationException("boom"));
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.DroppedByBeforeSendFeedback);
+        id.Should().Be(SentryId.Empty);
+        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+    }
+
+    [Fact]
+    public void CaptureFeedback_EnqueueFails_ReturnsUnknownError()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(false);
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.UnknownError);
+        id.Should().Be(SentryId.Empty);
+    }
+
+    [Fact]
     public void CaptureFeedback_WithHint_HasHintAttachment()
     {
         //Arrange
