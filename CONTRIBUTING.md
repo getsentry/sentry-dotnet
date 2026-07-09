@@ -128,7 +128,9 @@ Below that, you'll add heading 3 mentioned above. For example, if you're adding 
 - Attach screenshots when capturing errors on WPF (#PR number)
 ```
 
-There's a GitHub action check to verify if an entry was added. If the entry isn't a user-facing change, you can skip the verification with `#skip-changelog` written to the PR description. The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
+There's a GitHub action check to verify if an entry was added.
+If the entry isn't a user-facing change, you can skip the verification with either `#skip-changelog` written to the PR description or the `skip-changelog` label added to the PR.
+The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
 
 ## Naming tests
 

@@ -126,9 +126,9 @@ Public API diffs are stored as Verify snapshot files. After any public API chang
 
 ## Changelog
 
-- If the change is not user-facing, add `#skip-changelog` to the PR description
-- Otherwise generated automatically from [Commit message conventions](https://develop.sentry.dev/engineering-practices/commit-messages/).
-  - Do **NOT** add changelogs manually.
+- If the change is not user-facing, either write `#skip-changelog` to the PR description or add the `skip-changelog` label to the PR
+- Otherwise generated automatically from [Commit message conventions](https://develop.sentry.dev/engineering-practices/commit-messages/)
+  - Do **NOT** add changelogs manually
 
 ```sh
 # Get PR number for current branch
