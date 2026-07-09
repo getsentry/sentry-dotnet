@@ -548,8 +548,15 @@ public class SentryOptions
     internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeSendFeedbackInternal => _beforeSendFeedback;
 
     /// <summary>
-    /// Configures a callback to invoke before sending user feedback to Sentry
+    /// Configures a callback function to be invoked before sending user feedback to Sentry
     /// </summary>
+    /// <remarks>
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the user feedback before it's sent.
+    /// If the feedback should not be sent at all, return null from the callback. Unlike
+    /// <see cref="SetBeforeSend(Func{SentryEvent, SentryHint, SentryEvent?})"/>, an exception
+    /// thrown from this callback also drops the feedback (fail closed) rather than sending it.
+    /// </remarks>
     /// <param name="beforeSendFeedback">The callback</param>
     public void SetBeforeSendFeedback(Func<SentryEvent, SentryHint, SentryEvent?> beforeSendFeedback)
     {
@@ -557,8 +564,15 @@ public class SentryOptions
     }
 
     /// <summary>
-    /// Configures a callback to invoke before sending user feedback to Sentry
+    /// Configures a callback function to be invoked before sending user feedback to Sentry
     /// </summary>
+    /// <remarks>
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the user feedback before it's sent.
+    /// If the feedback should not be sent at all, return null from the callback. Unlike
+    /// <see cref="SetBeforeSend(Func{SentryEvent, SentryEvent?})"/>, an exception thrown
+    /// from this callback also drops the feedback (fail closed) rather than sending it.
+    /// </remarks>
     /// <param name="beforeSendFeedback">The callback</param>
     public void SetBeforeSendFeedback(Func<SentryEvent, SentryEvent?> beforeSendFeedback)
     {
