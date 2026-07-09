@@ -696,6 +696,69 @@ public class ScopeTests
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SetEnvironment_ObserverExist_ObserverSetsEnvironmentIfEnabled(bool observerEnable)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = observerEnable
+        });
+        var expectedEnvironment = "staging";
+        var expectedCount = observerEnable ? 1 : 0;
+
+        // Act
+        scope.Environment = expectedEnvironment;
+
+        // Assert
+        observer.Received(expectedCount).SetEnvironment(Arg.Is(expectedEnvironment));
+    }
+
+    [Fact]
+    public void SetEnvironment_Null_ObserverClearsEnvironment()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        })
+        {
+            Environment = "staging"
+        };
+        observer.ClearReceivedCalls();
+
+        // Act
+        scope.Environment = null;
+
+        // Assert
+        observer.Received(1).SetEnvironment(Arg.Is((string?)null));
+    }
+
+    [Fact]
+    public void SetEnvironment_SameValue_ObserverNotifiedOnce()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+
+        // Act
+        scope.Environment = "staging";
+        scope.Environment = "staging";
+
+        // Assert
+        observer.Received(1).SetEnvironment(Arg.Is("staging"));
+    }
+
     [Fact]
     public void Filtered_tags_are_not_set()
     {

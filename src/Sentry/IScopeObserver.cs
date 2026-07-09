@@ -36,6 +36,11 @@ public interface IScopeObserver
     public void SetTrace(SentryId traceId, SpanId parentSpanId);
 
     /// <summary>
+    /// Sets the environment.
+    /// </summary>
+    public void SetEnvironment(string? environment);
+
+    /// <summary>
     /// Adds an attachment.
     /// </summary>
     public void AddAttachment(SentryAttachment attachment);

@@ -120,6 +120,18 @@ internal sealed class CocoaScopeObserver : IScopeObserver
         }
     }
 
+    public void SetEnvironment(string? environment)
+    {
+        try
+        {
+            SentryCocoaSdk.ConfigureScope(scope => scope.SetEnvironment(environment));
+        }
+        finally
+        {
+            _innerObserver?.SetEnvironment(environment);
+        }
+    }
+
     public void AddAttachment(SentryAttachment attachment)
     {
         try

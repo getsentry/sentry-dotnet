@@ -144,8 +144,25 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public string? Distribution { get; set; }
 
+    private string? _environment;
+
     /// <inheritdoc />
-    public string? Environment { get; set; }
+    public string? Environment
+    {
+        get => _environment;
+        set
+        {
+            if (_environment != value)
+            {
+                _environment = value;
+                if (Options.EnableScopeSync &&
+                    Options.ScopeObserver is { } observer)
+                {
+                    observer.SetEnvironment(value);
+                }
+            }
+        }
+    }
 
     // TransactionName is kept for legacy purposes because
     // SentryEvent still makes use of it.
