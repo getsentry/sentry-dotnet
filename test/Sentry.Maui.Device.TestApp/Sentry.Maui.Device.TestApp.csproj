@@ -60,7 +60,7 @@
   -->
   <PropertyGroup>
     <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
-    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <!-- TargetPlatformIdentifier is already set by the root Directory.Build.props -->
 
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
