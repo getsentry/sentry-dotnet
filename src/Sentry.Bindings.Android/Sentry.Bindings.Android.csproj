@@ -75,7 +75,7 @@
   <!-- Dependencies for AndroidMavenLibrary references
        Matching what was shipped in the 10.0.100 workloads to avoid NU1608 warnings
        -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net10'))">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v10.0'">
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.9.2.1" />
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.9.2.1" />
     <!-- MAUI 10 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout   -->
@@ -90,7 +90,7 @@
   <!-- Dependencies for AndroidMavenLibrary references
        Matching what was shipped in the 9.0.300 workloads to avoid NU1608 warnings
        -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net9'))">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v9.0'">
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.7.2" />
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.7.2" />
     <!-- MAUI 9 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout   -->

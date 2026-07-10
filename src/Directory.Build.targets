@@ -3,7 +3,7 @@
   <Import Project="..\Directory.Build.targets" />
 
   <!-- Use nullability analysis only on frameworks that have annotated BCL -->
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4')) and '$(TargetFramework)' != 'netstandard2.0'">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' And !('$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(TargetFrameworkVersion)' == 'v2.0')">
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
