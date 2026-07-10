@@ -63,6 +63,9 @@ static partial class SentrySdk
 #pragma warning restore 0162
 #pragma warning restore CS0162 // Unreachable code detected
 
+        // This happens before the native SDKs get initialized
+        options.Environment = options.SettingLocator.GetEnvironment();
+
         // Initialize native platform SDKs here
         if (options.InitNativeSdks)
         {

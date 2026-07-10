@@ -708,7 +708,7 @@ public class ScopeTests
             ScopeObserver = observer,
             EnableScopeSync = observerEnable
         });
-        var expectedEnvironment = "staging";
+        const string expectedEnvironment = "staging";
         var expectedCount = observerEnable ? 1 : 0;
 
         // Act
@@ -719,25 +719,38 @@ public class ScopeTests
     }
 
     [Fact]
-    public void SetEnvironment_Null_ObserverClearsEnvironment()
+    public void SetEnvironment_Null_EnvironmentSetToOptionEnvironment()
     {
         // Arrange
+        const string expectedEnvironment = "staging";
+        var scope = new Scope(new SentryOptions { Environment = expectedEnvironment });
+
+        // Act
+        scope.Environment = null;
+
+        // Assert
+        scope.Environment.Should().Be(expectedEnvironment);
+    }
+
+    [Fact]
+    public void SetEnvironment_Null_ObserverReceivesOptionEnvironment()
+    {
+        // Arrange
+        const string expectedEnvironment = "staging";
         var observer = Substitute.For<IScopeObserver>();
         var scope = new Scope(new SentryOptions
         {
             ScopeObserver = observer,
-            EnableScopeSync = true
-        })
-        {
-            Environment = "staging"
-        };
+            EnableScopeSync = true,
+            Environment = expectedEnvironment
+        });
         observer.ClearReceivedCalls();
 
         // Act
         scope.Environment = null;
 
         // Assert
-        observer.Received(1).SetEnvironment(Arg.Is((string?)null));
+        observer.Received(1).SetEnvironment(Arg.Is(expectedEnvironment));
     }
 
     [Fact]

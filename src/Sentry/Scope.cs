@@ -152,14 +152,24 @@ public class Scope : IEventLike
         get => _environment;
         set
         {
-            if (_environment != value)
+            if (_environment == value)
+            {
+                return;
+            }
+
+            if (value is null)
+            {
+                Options.LogWarning("Environment cannot be null. Reverting to default value from the options.");
+                _environment = Options.Environment;
+            }
+            else
             {
                 _environment = value;
-                if (Options.EnableScopeSync &&
-                    Options.ScopeObserver is { } observer)
-                {
-                    observer.SetEnvironment(value);
-                }
+            }
+
+            if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
+            {
+                observer.SetEnvironment(_environment);
             }
         }
     }
@@ -305,6 +315,8 @@ public class Scope : IEventLike
     {
         Options = options ?? new SentryOptions();
         PropagationContext = new SentryPropagationContext(propagationContext);
+
+        _environment = Options.Environment;
     }
 
     // For testing. Should explicitly require SentryOptions.
@@ -423,7 +435,7 @@ public class Scope : IEventLike
         User = new();
         Release = default;
         Distribution = default;
-        Environment = default;
+        Environment = Options.Environment; // Restore to keep in sync with native
         TransactionName = default;
         Transaction = default;
         Fingerprint = Array.Empty<string>();
