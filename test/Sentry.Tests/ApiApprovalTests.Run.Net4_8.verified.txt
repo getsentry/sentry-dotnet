@@ -208,6 +208,7 @@ namespace Sentry
         void AddAttachment(Sentry.SentryAttachment attachment);
         void AddBreadcrumb(Sentry.Breadcrumb breadcrumb);
         void ClearAttachments();
+        void SetEnvironment(string? environment);
         void SetExtra(string key, object? value);
         void SetTag(string key, string value);
         void SetTrace(Sentry.SentryId traceId, Sentry.SpanId parentSpanId);
