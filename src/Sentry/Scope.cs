@@ -434,7 +434,7 @@ public class Scope : IEventLike
         Request = new();
         Contexts.Clear();
         User = new();
-        Release = default;
+        Release = Options.Release;
         Distribution = default;
         Environment = Options.Environment; // Restore to keep in sync with native
         TransactionName = default;

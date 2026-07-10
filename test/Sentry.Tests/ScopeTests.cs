@@ -427,6 +427,29 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clear_OptionsHaveEnvironmentAndRelease_RestoresToOptionsValues()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            Environment = "options-environment",
+            Release = "options-release",
+        };
+        var sut = new Scope(options);
+        sut.ApplyFakeValues();
+
+        // Act
+        sut.Clear();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            sut.Environment.Should().Be("options-environment");
+            sut.Release.Should().Be("options-release");
+        }
+    }
+
+    [Fact]
     public void Clear_ResetsPropagationContext()
     {
         var options = new SentryOptions();
