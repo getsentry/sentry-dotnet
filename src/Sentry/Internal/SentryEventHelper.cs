@@ -74,4 +74,31 @@ internal static class SentryEventHelper
 
         return @event;
     }
+
+    public static SentryEvent? DoBeforeSendFeedback(SentryEvent? @event, SentryHint hint, SentryOptions options)
+    {
+        if (@event is null || options.BeforeSendFeedbackInternal is null)
+        {
+            return @event;
+        }
+
+        options.LogDebug("Calling the BeforeSendFeedback callback.");
+        try
+        {
+            @event = options.BeforeSendFeedbackInternal.Invoke(@event, hint);
+            if (@event == null)
+            {
+                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+                options.LogInfo("Feedback dropped by BeforeSendFeedback callback.");
+            }
+        }
+        catch (Exception e)
+        {
+            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+            options.LogError(e, "The BeforeSendFeedback callback threw an exception. The feedback will be dropped.");
+            return null;
+        }
+
+        return @event;
+    }
 }

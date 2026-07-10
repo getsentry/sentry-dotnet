@@ -543,6 +543,30 @@ public class SentryOptions
         _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
     }
 
+    private Func<SentryEvent, SentryHint, SentryEvent?>? _beforeSendFeedback;
+
+    internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeSendFeedbackInternal => _beforeSendFeedback;
+
+    /// <summary>
+    /// Configures a callback to invoke before sending user feedback to Sentry.
+    /// Return null or throw to drop the feedback.
+    /// </summary>
+    /// <param name="beforeSendFeedback">The callback</param>
+    public void SetBeforeSendFeedback(Func<SentryEvent, SentryHint, SentryEvent?> beforeSendFeedback)
+    {
+        _beforeSendFeedback = beforeSendFeedback;
+    }
+
+    /// <summary>
+    /// Configures a callback to invoke before sending user feedback to Sentry.
+    /// Return null or throw to drop the feedback.
+    /// </summary>
+    /// <param name="beforeSendFeedback">The callback</param>
+    public void SetBeforeSendFeedback(Func<SentryEvent, SentryEvent?> beforeSendFeedback)
+    {
+        _beforeSendFeedback = (@event, _) => beforeSendFeedback(@event);
+    }
+
     private Func<Breadcrumb, SentryHint, Breadcrumb?>? _beforeBreadcrumb;
 
     internal Func<Breadcrumb, SentryHint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
