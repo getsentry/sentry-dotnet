@@ -244,6 +244,15 @@ public class SentryOptions
     public IList<StringOrRegex> TagFilters { get; set; } = new List<StringOrRegex>();
 
     /// <summary>
+    /// A list of transaction names to be ignored. A transaction whose name matches any of the
+    /// given substrings or regular expression patterns will not be sent to Sentry.
+    /// </summary>
+    /// <remarks>
+    /// This is applied before the BeforeSendTransaction callback.
+    /// </remarks>
+    public IList<StringOrRegex> IgnoreTransactions { get; set; } = new List<StringOrRegex>();
+
+    /// <summary>
     /// The worker used by the client to pass envelopes.
     /// </summary>
     public IBackgroundWorker? BackgroundWorker { get; set; }

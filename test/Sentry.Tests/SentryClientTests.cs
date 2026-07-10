@@ -1297,6 +1297,68 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactions_Dropped()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var client = _fixture.GetSut();
+
+        var sentryTransaction = new SentryTransaction("GET /health", "http.server")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        // Act
+        client.CaptureTransaction(sentryTransaction);
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+
+        var expectedSpanCount = sentryTransaction.Spans.Count + 1; // 1 for each span + one for the root transaction
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, expectedSpanCount);
+    }
+
+    [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactionsRegex_Dropped()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { new(new Regex(@"^GET /health/\d+$")) };
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /health/123", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_DoesNotMatchIgnoreTransactions_Sent()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /api/users", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
     public void CaptureTransaction_NotFinished_Sent()
     {
         // Arrange

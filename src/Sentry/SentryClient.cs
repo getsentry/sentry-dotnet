@@ -163,6 +163,15 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
+        if (_options.IgnoreTransactions.MatchesSubstringOrRegex(transaction.Name))
+        {
+            var ignoredSpanCount = transaction.Spans.Count + 1; // 1 for each span + 1 for the transaction itself
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, ignoredSpanCount);
+            _options.LogInfo("Transaction dropped by IgnoreTransactions option.");
+            return;
+        }
+
         // Unfinished transaction can only happen if the user calls this method instead of
         // transaction.Finish().
         // We still send these transactions over, but warn the user not to do it.
