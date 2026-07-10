@@ -21,7 +21,7 @@ fi
 
 FORMAT_OUTPUT=$(dotnet format Sentry.slnx --no-restore \
   "${INCLUDE_ARGS[@]}" \
-  --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs 2>&1) || {
+  --exclude ./modules "./**/*OptionsSetup.cs" ./test/Sentry.Tests/AttributeReaderTests.cs 2>&1) || {
   echo ""
   echo "❌ dotnet format failed:"
   echo "$FORMAT_OUTPUT"
