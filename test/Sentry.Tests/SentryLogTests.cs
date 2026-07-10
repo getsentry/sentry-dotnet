@@ -77,6 +77,42 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void SetDefaultAttributes_ScopeOverridesOptions_UsesScopeValues()
+    {
+        var options = new SentryOptions
+        {
+            Environment = "options-environment",
+            Release = "options-release",
+        };
+        var scope = new Scope(options)
+        {
+            Environment = "scope-environment",
+            Release = "scope-release",
+        };
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, scope);
+
+        log.Attributes.ShouldContain<string>("sentry.environment", "scope-environment");
+        log.Attributes.ShouldContain<string>("sentry.release", "scope-release");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_NullScope_FallsBackToOptionsSettings()
+    {
+        var options = new SentryOptions
+        {
+            Release = "options-release",
+        };
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, scope: null);
+
+        log.Attributes.ShouldContain<string>("sentry.environment", options.SettingLocator.GetEnvironment());
+        log.Attributes.ShouldContain<string>("sentry.release", options.SettingLocator.GetRelease());
+    }
+
+    [Fact]
     public void SetDefaultAttributes_OptionsServerName_SetsServerAddress()
     {
         var options = new SentryOptions { ServerName = "my-server" };

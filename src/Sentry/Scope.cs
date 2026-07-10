@@ -317,6 +317,7 @@ public class Scope : IEventLike
         PropagationContext = new SentryPropagationContext(propagationContext);
 
         _environment = Options.Environment;
+        Release = Options.Release;
     }
 
     // For testing. Should explicitly require SentryOptions.
