@@ -4,7 +4,6 @@
 
 ### Features ✨
 
-- Add `IgnoreTransactions` option to filter out transactions by name, matching substrings or regular expressions against the transaction name ([#5377](https://github.com/getsentry/sentry-dotnet/pull/5377))
 - feat: Add exponential backoff and log deduplication to Spotlight transport by @mattico in [#5025](https://github.com/getsentry/sentry-dotnet/pull/5025)
 
 ## 6.6.0
