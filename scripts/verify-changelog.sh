@@ -49,8 +49,10 @@ if printf '%s\n' "$unreleased_body" | grep -Eq '[^[:space:]]'; then
   printf '%s\n' "$unreleased_body" | grep -En '[^[:space:]]' || true
   echo ""
   echo "Please remove them. Your change is added to the changelog automatically,"
-  echo "based on the PR title / commit message. If it is not user-facing, add the"
-  echo "'skip-changelog' label or write '#skip-changelog' in the PR description."
+  echo "based on the PR title / commit message -- or a '### Changelog Entry' section"
+  echo "in the PR description if you want a more detailed entry. If it is not"
+  echo "user-facing, add the 'skip-changelog' label or write '#skip-changelog' in the"
+  echo "PR description."
   exit 1
 fi
 

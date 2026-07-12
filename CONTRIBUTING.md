@@ -113,6 +113,8 @@ To help users see value in updating the SDK, we maintain a changelog file with e
 
 **Do not edit `CHANGELOG.md` manually.** The changelog is generated automatically at release time by [craft](https://github.com/getsentry/craft) (`changelogPolicy: auto` in `.craft.yml`) from the pull requests merged since the previous release. Entries are categorized from your [commit message / PR title](https://develop.sentry.dev/engineering-practices/commit-messages/) (e.g. a `feat:` PR becomes a Feature, a `fix:` PR becomes a Fix), so there's nothing to add by hand.
 
+If the PR title doesn't capture the change well — you want more detail, or a single PR should produce several entries — add a `### Changelog Entry` section to the PR description. craft uses the text under that heading verbatim instead of the PR title. See [Custom changelog entries from PR descriptions](https://craft.sentry.dev/configuration/#custom-changelog-entries-from-pr-descriptions).
+
 If the change isn't user-facing and you'd rather it not appear in the changelog at all, add the `skip-changelog` label to the PR or write `#skip-changelog` in the PR description.
 
 ## Naming tests
