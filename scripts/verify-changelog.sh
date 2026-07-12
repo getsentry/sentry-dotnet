@@ -4,10 +4,9 @@
 #
 # This repository generates its changelog automatically at release time via
 # craft (`changelogPolicy: auto` in .craft.yml), from the pull requests merged
-# since the previous release. craft only regenerates the section when it is
+# since the previous release. Craft only regenerates the section when it is
 # empty, so a single leftover manual entry under "## Unreleased" suppresses the
 # auto-generation and silently drops every other change from the release notes.
-# (This is what broke the 6.7.0 release, which shipped with a single entry.)
 #
 # Usage: scripts/verify-changelog.sh [path-to-changelog]
 set -euo pipefail
