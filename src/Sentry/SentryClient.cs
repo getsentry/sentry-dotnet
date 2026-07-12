@@ -163,18 +163,6 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        if (_options.IgnoreTransactions.MatchesSubstringOrRegex(transaction.Name))
-        {
-            // IgnoreTransactions is a built-in filter, so discards are recorded under
-            // EventProcessor (matching the exception filter path and the JS inbound filters),
-            // not BeforeSend, which is reserved for the user's BeforeSendTransaction callback.
-            var ignoredSpanCount = transaction.Spans.Count + 1; // 1 for each span + 1 for the transaction itself
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, ignoredSpanCount);
-            _options.LogInfo("Transaction dropped by IgnoreTransactions option.");
-            return;
-        }
-
         // Unfinished transaction can only happen if the user calls this method instead of
         // transaction.Finish().
         // We still send these transactions over, but warn the user not to do it.
@@ -194,6 +182,19 @@ public class SentryClient : ISentryClient, IDisposable
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, spanCount);
             _options.LogDebug("Transaction dropped by sampling.");
+            return;
+        }
+
+        // Applied after the sampling check so that a transaction which is sampled out is
+        // still attributed to sampling, not to this filter. IgnoreTransactions is a built-in
+        // filter, so its discards are recorded under EventProcessor (matching the exception
+        // filter path and the JS inbound filters), not BeforeSend, which is reserved for the
+        // user's BeforeSendTransaction callback.
+        if (_options.IgnoreTransactions.MatchesSubstringOrRegex(transaction.Name))
+        {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, spanCount);
+            _options.LogInfo("Transaction dropped by IgnoreTransactions option.");
             return;
         }
 
