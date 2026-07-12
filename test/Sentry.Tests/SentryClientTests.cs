@@ -1359,6 +1359,33 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactions_BeforeSendTransactionNotInvoked()
+    {
+        // Arrange: IgnoreTransactions is applied before the BeforeSendTransaction
+        // callback, so the callback must not observe an ignored transaction.
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var beforeSendTransactionInvoked = false;
+        _fixture.SentryOptions.SetBeforeSendTransaction((tx, _) =>
+        {
+            beforeSendTransactionInvoked = true;
+            return tx;
+        });
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /health", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        beforeSendTransactionInvoked.Should().BeFalse();
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
     public void CaptureTransaction_NotFinished_Sent()
     {
         // Arrange
