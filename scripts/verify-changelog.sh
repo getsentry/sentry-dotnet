@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
-# Verifies that CHANGELOG.md contains no manually-added entries under an
-# "## Unreleased" heading.
+# Verifies that CHANGELOG.md has no content under an "## Unreleased" heading.
 #
 # This repository generates its changelog automatically at release time via
 # craft (`changelogPolicy: auto` in .craft.yml), from the pull requests merged
@@ -31,21 +30,23 @@ unreleased_body="$(awk '
   in_section { print }
 ' "$CHANGELOG")"
 
-# A manual changelog entry is a bullet line ("- ..." or "* ..."). This
-# deliberately ignores an empty "## Unreleased" heading and blank/sub-heading
-# lines, so only real entries fail the check.
-entry_re='^[[:space:]]*[-*][[:space:]]+[^[:space:]]'
-
-if printf '%s\n' "$unreleased_body" | grep -Eq "$entry_re"; then
-  echo "::error file=$CHANGELOG::Manual changelog entries found under '## Unreleased'."
+# craft trims the section body and skips auto-generation whenever it is
+# non-empty (`if (!changeset.body)` after `.trim()`), so ANY non-whitespace
+# content under "## Unreleased" -- a bullet, a stray "### Features" sub-heading,
+# or loose text -- suppresses generation. Match that exactly: fail on any
+# non-blank line. A bare/empty "## Unreleased" heading is fine (craft
+# regenerates it).
+if printf '%s\n' "$unreleased_body" | grep -Eq '[^[:space:]]'; then
+  echo "::error file=$CHANGELOG::The '## Unreleased' section is not empty."
   echo ""
   echo "This repository generates its changelog automatically at release time"
-  echo "(changelogPolicy: auto in .craft.yml). A manual entry under '## Unreleased'"
-  echo "suppresses that generation and causes other changes to be dropped from the"
-  echo "release notes."
+  echo "(changelogPolicy: auto in .craft.yml). craft only regenerates the"
+  echo "'## Unreleased' section when it is empty, so ANY leftover content there"
+  echo "(entries or even a bare sub-heading) suppresses generation and causes the"
+  echo "rest of the release notes to be dropped."
   echo ""
   echo "Offending line(s):"
-  printf '%s\n' "$unreleased_body" | grep -En "$entry_re" || true
+  printf '%s\n' "$unreleased_body" | grep -En '[^[:space:]]' || true
   echo ""
   echo "Please remove them. Your change is added to the changelog automatically,"
   echo "based on the PR title / commit message. If it is not user-facing, add the"
@@ -53,4 +54,4 @@ if printf '%s\n' "$unreleased_body" | grep -Eq "$entry_re"; then
   exit 1
 fi
 
-echo "OK: no manual '## Unreleased' changelog entries."
+echo "OK: '## Unreleased' section is empty."
