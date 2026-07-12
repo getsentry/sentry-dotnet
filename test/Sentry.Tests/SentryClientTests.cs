@@ -1316,8 +1316,8 @@ public partial class SentryClientTests : IDisposable
         _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
 
         var expectedSpanCount = sentryTransaction.Spans.Count + 1; // 1 for each span + one for the root transaction
-        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
-        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, expectedSpanCount);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, expectedSpanCount);
     }
 
     [Fact]

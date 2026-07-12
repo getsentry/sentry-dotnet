@@ -165,9 +165,12 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (_options.IgnoreTransactions.MatchesSubstringOrRegex(transaction.Name))
         {
+            // IgnoreTransactions is a built-in filter, so discards are recorded under
+            // EventProcessor (matching the exception filter path and the JS inbound filters),
+            // not BeforeSend, which is reserved for the user's BeforeSendTransaction callback.
             var ignoredSpanCount = transaction.Spans.Count + 1; // 1 for each span + 1 for the transaction itself
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, ignoredSpanCount);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, ignoredSpanCount);
             _options.LogInfo("Transaction dropped by IgnoreTransactions option.");
             return;
         }
