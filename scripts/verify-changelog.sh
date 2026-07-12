@@ -18,24 +18,26 @@ if [[ ! -f "$CHANGELOG" ]]; then
   exit 2
 fi
 
-# Extract the body of the "## Unreleased" section: everything between the
-# "## Unreleased" heading and the next "## " (h2) heading. "### " sub-headings
-# are not treated as section boundaries.
-unreleased_body="$(awk '
-  /^## / {
-    if (in_section) exit
-    if (tolower($0) ~ /^## +unreleased/) { in_section = 1; next }
-  }
-  in_section { print }
-' "$CHANGELOG")"
-
+# Find non-blank lines in the "## Unreleased" section -- everything between the
+# "## Unreleased" heading and the next "## " (h2) heading; "### " sub-headings
+# are not treated as section boundaries. Each match is emitted as
+# "<file-line-number>:<content>" so reported locations point at CHANGELOG.md.
+#
 # craft trims the section body and skips auto-generation whenever it is
 # non-empty (`if (!changeset.body)` after `.trim()`), so ANY non-whitespace
 # content under "## Unreleased" -- a bullet, a stray "### Features" sub-heading,
 # or loose text -- suppresses generation. Match that exactly: fail on any
 # non-blank line. A bare/empty "## Unreleased" heading is fine (craft
 # regenerates it).
-if printf '%s\n' "$unreleased_body" | grep -Eq '[^[:space:]]'; then
+offending="$(awk '
+  /^## / {
+    if (in_section) { in_section = 0 }
+    if (tolower($0) ~ /^## +unreleased/) { in_section = 1; next }
+  }
+  in_section && /[^[:space:]]/ { printf "%d:%s\n", NR, $0 }
+' "$CHANGELOG")"
+
+if [[ -n "$offending" ]]; then
   echo "::error file=$CHANGELOG::The '## Unreleased' section is not empty."
   echo ""
   echo "This repository generates its changelog automatically at release time"
@@ -44,8 +46,8 @@ if printf '%s\n' "$unreleased_body" | grep -Eq '[^[:space:]]'; then
   echo "(entries or even a bare sub-heading) suppresses generation and causes the"
   echo "rest of the release notes to be dropped."
   echo ""
-  echo "Offending line(s):"
-  printf '%s\n' "$unreleased_body" | grep -En '[^[:space:]]' || true
+  echo "Offending line(s) in $CHANGELOG:"
+  printf '%s\n' "$offending"
   echo ""
   echo "Please remove them. Your change is added to the changelog automatically,"
   echo "based on the PR title / commit message -- or a '### Changelog Entry' section"
