@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="MauiEventsBinderTests.Application.cs;MauiEventsBinderTests.Element.cs;MauiEventsBinderTests.Page.cs;MauiEventsBinderTests.Shell.cs;MauiEventsBinderTests.VisualElement.cs;MauiEventsBinderTests.Window.cs">
+    <Compile Update="MauiEventsBinderTests.Application.cs;MauiEventsBinderTests.Button.cs;MauiEventsBinderTests.Element.cs;MauiEventsBinderTests.ImageButton.cs;MauiEventsBinderTests.Page.cs;MauiEventsBinderTests.Shell.cs;MauiEventsBinderTests.VisualElement.cs;MauiEventsBinderTests.Window.cs">
       <DependentUpon>MauiEventsBinderTests.cs</DependentUpon>
     </Compile>
     <Compile Update="SentryMauiAppBuilderExtensionsTests.Android.cs;SentryMauiAppBuilderExtensionsTests.Cocoa.cs">
