@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
-    <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -42,7 +41,7 @@
   </ItemGroup>
 
   <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' Or '$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
 
@@ -51,10 +50,10 @@
   </ItemGroup>
 
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' And '$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' And '$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <Compile Include="..\Sentry.DiagnosticSource\Internal\**\*.cs">
       <Link>Internal\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
@@ -72,17 +71,17 @@
     On .NET Framework, we need a package reference to System.Runtime.InteropServices.RuntimeInformation.
     This is used in Sentry.PlatformAbstractions.RuntimeInfo.  It's already built-in for all other targets.
   -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
 
   <!-- On .NET Framework, we need an assembly reference to System.Net.Http. -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' Or '$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 

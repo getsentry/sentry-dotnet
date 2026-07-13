@@ -23,6 +23,7 @@
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/alpine.yml" />
     <File Path=".github/workflows/build.yml" />
+    <File Path=".github/workflows/changelog-guard.yml" />
     <File Path=".github/workflows/changelog-preview.yml" />
     <File Path=".github/workflows/codeql-analysis.yml" />
     <File Path=".github/workflows/danger.yml" />
@@ -136,6 +137,7 @@
     <File Path="scripts/update-cli.ps1" />
     <File Path="scripts/update-java.ps1" />
     <File Path="scripts/update-project-xml.ps1" />
+    <File Path="scripts/verify-changelog.sh" />
     <File Path="scripts/watch-upstream.sh" />
   </Folder>
   <Folder Name="/src/">

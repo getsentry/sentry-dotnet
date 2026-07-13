@@ -32,8 +32,8 @@
   <Target Name="BuildTestAPKs" BeforeTargets="BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <!-- Restore exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="EnsureAndroidTestAppRestored" RemoveProperties="TargetFramework" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net10.0-android" Condition="$(TargetFramework) == 'net10.0'" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" Condition="$(TargetFramework) == 'net9.0'" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net10.0-android" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v10.0'" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v9.0'" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
     <!-- https://learn.microsoft.com/visualstudio/msbuild/msbuild-batching -->
