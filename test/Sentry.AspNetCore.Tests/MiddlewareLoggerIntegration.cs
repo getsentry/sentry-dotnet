@@ -61,7 +61,8 @@ public class MiddlewareLoggerIntegration : IDisposable
                 MiddlewareLogger,
                 EventExceptionProcessors,
                 EventProcessors,
-                TransactionProcessors);
+                TransactionProcessors,
+                Substitute.For<IServiceProvider>());
 
         public void Dispose() => _disposable.Dispose();
     }

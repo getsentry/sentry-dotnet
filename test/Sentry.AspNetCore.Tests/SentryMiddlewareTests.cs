@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sentry.Ben.BlockingDetector;
 
 #if NETCOREAPP3_1_OR_GREATER
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
@@ -27,6 +30,7 @@ public class SentryMiddlewareTests
         public IEnumerable<ISentryTransactionProcessor> TransactionProcessors { get; set; } = Substitute.For<IEnumerable<ISentryTransactionProcessor>>();
         public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
         public Scope Scope { get; set; }
+        public IServiceProvider ServiceProvider { get; }
 
         public Fixture()
         {
@@ -40,6 +44,17 @@ public class SentryMiddlewareTests
             _ = Hub.IsEnabled.Returns(true);
             _ = Hub.StartTransaction("", "").ReturnsForAnyArgs(new TransactionTracer(Hub, "test", "test"));
             _ = HttpContext.Features.Returns(FeatureCollection);
+
+            // Mirrors the singleton registrations in SentryWebHostBuilderExtensions so the
+            // (transient) middleware can resolve the shared blocking monitor/listener.
+            ServiceProvider = new ServiceCollection()
+                .AddSingleton(HubAccessor)
+                .AddSingleton(Microsoft.Extensions.Options.Options.Create(Options))
+                .AddSingleton(p => new BlockingMonitor(
+                    p.GetRequiredService<Func<IHub>>(),
+                    p.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value))
+                .AddSingleton(p => new TaskBlockingListener(p.GetRequiredService<BlockingMonitor>()))
+                .BuildServiceProvider();
         }
 
         public SentryMiddleware GetSut()
@@ -50,10 +65,33 @@ public class SentryMiddlewareTests
                 Logger,
                 EventExceptionProcessors,
                 EventProcessors,
-                TransactionProcessors);
+                TransactionProcessors,
+                ServiceProvider);
     }
 
     private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void Constructor_CaptureBlockingCalls_SharesSingleListenerAcrossInstances()
+    {
+        _fixture.Options.CaptureBlockingCalls = true;
+
+        // The middleware is registered as transient, so DI creates a new instance per request.
+        // Simulate two requests: distinct instances must share the one process-wide monitor and
+        // listener rather than each allocating (and leaking) their own EventListener. See #5378.
+        var first = _fixture.GetSut();
+        var second = _fixture.GetSut();
+
+        Assert.NotSame(first, second);
+        Assert.NotNull(first.Listener);
+        Assert.NotNull(first.Monitor);
+        Assert.Same(first.Listener, second.Listener);
+        Assert.Same(first.Monitor, second.Monitor);
+
+        // Dispose the shared listener so it doesn't remain registered as a global EventListener
+        // (and keep TplEventSource enabled) for the rest of the test run.
+        (_fixture.ServiceProvider as IDisposable)?.Dispose();
+    }
 
     [Fact]
     public async Task InvokeAsync_DisabledSdk_InvokesNextHandlers()
