@@ -17,8 +17,9 @@ internal class ScreenshotAttachment : SentryAttachment
         AttachmentType type,
         IAttachmentContent content,
         string fileName,
-        string? contentType)
-        : base(type, content, fileName, contentType)
+        string? contentType,
+        bool addToTransactions = false)
+        : base(type, content, fileName, contentType, addToTransactions)
     {
     }
 }

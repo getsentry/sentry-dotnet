@@ -1407,6 +1407,7 @@ namespace Sentry
     public class ViewHierarchyAttachment : Sentry.SentryAttachment
     {
         public ViewHierarchyAttachment(Sentry.IAttachmentContent content) { }
+        public ViewHierarchyAttachment(Sentry.IAttachmentContent content, bool addToTransactions) { }
     }
     public abstract class ViewHierarchyNode : Sentry.ISentryJsonSerializable
     {
