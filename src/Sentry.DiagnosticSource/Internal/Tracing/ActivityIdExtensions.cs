@@ -1,4 +1,3 @@
-#if HAS_ACTIVITY_LISTENER
 namespace Sentry.Internal.Tracing;
 
 // Note: a copy of these conversions ships in Sentry.OpenTelemetry(.Exporter) as Sentry.Internal.ActivityExtensions.
@@ -42,4 +41,3 @@ internal static class ActivityIdExtensions
 #endif
     }
 }
-#endif

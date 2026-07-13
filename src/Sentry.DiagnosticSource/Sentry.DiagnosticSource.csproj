@@ -7,11 +7,6 @@
       Official Diagnostic.Listener integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time. Note: This package is not needed when using Sentry with .NET Core 3 or higher.
     </Description>
     <RootNamespace>Sentry</RootNamespace>
-    <!-- The System.Diagnostics.DiagnosticSource package provides ActivityListener/ActivitySource (5.0+) and
-         ActivityStatusCode (6.0+) on the legacy TFMs this package targets, so the Activity-based tracing code
-         in Internal/Tracing compiles here too. On modern TFMs those APIs are part of the shared framework and
-         the same sources are compiled directly into the core Sentry package instead. -->
-    <DefineConstants>$(DefineConstants);HAS_ACTIVITY_LISTENER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

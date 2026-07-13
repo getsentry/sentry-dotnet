@@ -1,4 +1,3 @@
-#if HAS_ACTIVITY_LISTENER
 namespace Sentry.Internal.Tracing;
 
 /// <summary>
@@ -49,4 +48,3 @@ internal sealed class SentryActivityListener : IDisposable
 
     public void Dispose() => _listener.Dispose();
 }
-#endif

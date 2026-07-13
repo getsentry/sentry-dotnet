@@ -1,4 +1,3 @@
-#if HAS_ACTIVITY_LISTENER
 using Sentry.Internal.Extensions;
 using Sentry.Internal.OpenTelemetry;
 
@@ -56,4 +55,3 @@ internal static class ActivityAttributeExtensions
             : null;
     }
 }
-#endif

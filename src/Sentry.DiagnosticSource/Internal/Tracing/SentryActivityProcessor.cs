@@ -1,4 +1,3 @@
-#if HAS_ACTIVITY_LISTENER
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.OpenTelemetry;
@@ -524,4 +523,3 @@ internal class SentryActivityProcessor
         return exception;
     }
 }
-#endif

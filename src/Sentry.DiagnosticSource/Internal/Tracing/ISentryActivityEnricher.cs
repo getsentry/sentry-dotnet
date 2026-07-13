@@ -1,4 +1,3 @@
-#if HAS_ACTIVITY_LISTENER
 namespace Sentry.Internal.Tracing;
 
 /// <summary>
@@ -9,4 +8,3 @@ internal interface ISentryActivityEnricher
 {
     public void Enrich(ISpan span, Activity activity, IHub hub, SentryOptions? options);
 }
-#endif
