@@ -754,6 +754,34 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public void FromTransaction_WithNullAttachment_SkipsItAndLogsWarning()
+    {
+        // Arrange
+        var tracer = new TransactionTracer(DisabledHub.Instance, "name", "op");
+        var transaction = new SentryTransaction(tracer);
+
+        using var attachmentStream = new MemoryStream(new byte[] { 1, 2, 3 });
+        var validAttachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(attachmentStream),
+            "file.txt",
+            null);
+
+        var attachments = new List<SentryAttachment> { null!, validAttachment };
+        var logger = new InMemoryDiagnosticLogger();
+
+        // Act
+        using var envelope = Envelope.FromTransaction(transaction, logger, attachments);
+
+        // Assert
+        // Only the transaction item and the single valid attachment - the null is skipped.
+        envelope.Items.Count(item => item.TryGetType() == "attachment").Should().Be(1);
+        logger.Entries.Should().ContainSingle(e =>
+            e.Level == SentryLevel.Warning &&
+            e.Message == "Encountered a null attachment.  Skipping.");
+    }
+
+    [Fact]
     public async Task Roundtrip_WithEvent_WithSession_Success()
     {
         // Arrange
