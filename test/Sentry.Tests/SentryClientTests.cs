@@ -1303,12 +1303,7 @@ public partial class SentryClientTests : IDisposable
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now
         };
-        var attachment = new SentryAttachment(
-            AttachmentType.Default,
-            new StreamAttachmentContent(new MemoryStream(new byte[] { 1 })),
-            "include.txt",
-            null,
-            addToTransactions: true);
+        var attachment = AttachmentHelper.FakeAttachment("include.txt", addToTransactions: true);
         var scope = new Scope(_fixture.SentryOptions);
         scope.AddAttachment(attachment);
         var sut = _fixture.GetSut();
