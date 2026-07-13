@@ -10,7 +10,7 @@ namespace Sentry.Internal.Tracing;
 /// <c>Hub.StartTransaction</c> invokes (via <c>SentryOptions.ActivityShimFactory</c>) for Sentry-API
 /// transactions when Activity-based tracing is enabled.
 /// </summary>
-internal sealed class ActivityTransactionShim : ActivitySpanShim, ITransactionTracer
+internal sealed class ActivityTransactionShim : ActivitySpanShim, ITransactionTracer, IAutoTimeoutTracer
 {
     private readonly ITransactionTracer _inner;
 
@@ -33,7 +33,8 @@ internal sealed class ActivityTransactionShim : ActivitySpanShim, ITransactionTr
         IHub hub,
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
-        DynamicSamplingContext? dynamicSamplingContext)
+        DynamicSamplingContext? dynamicSamplingContext,
+        TimeSpan? idleTimeout)
     {
         // Continue an inbound (remote) trace, propagating the upstream sampling decision.
         ActivityContext parentContext = default;
@@ -44,16 +45,27 @@ internal sealed class ActivityTransactionShim : ActivitySpanShim, ITransactionTr
                 context.TraceId.AsActivityTraceId(), parentSpanId.AsActivitySpanId(), flags, isRemote: true);
         }
 
+        // Sentry semantics: StartTransaction begins a new trace (unless explicitly continuing a remote one).
+        // Detach from any ambient Activity so the new activity does not become an implicit child of it -
+        // e.g. a second UI click must be an independent transaction, not a child of the (still idling) first.
+        var ambientActivity = Activity.Current;
+        Activity.Current = null;
+
         var activity = SentryActivitySources.Shim.CreateActivity(
             context.Operation, ActivityKind.Internal, parentContext);
         if (activity is null)
         {
             // No listener is subscribed to the Sentry ActivitySource.
+            Activity.Current = ambientActivity;
             return null;
         }
 
         activity.DisplayName = context.Name;
         activity.SetFused(ShimKeys.CustomSamplingContext, customSamplingContext);
+        if (idleTimeout is not null)
+        {
+            activity.SetFused(ShimKeys.IdleTimeout, idleTimeout);
+        }
         if (dynamicSamplingContext is not null)
         {
             activity.SetFused(dynamicSamplingContext);
@@ -65,10 +77,26 @@ internal sealed class ActivityTransactionShim : ActivitySpanShim, ITransactionTr
         {
             // The listener saw the activity but did not map it (e.g. the hub was disabled mid-flight).
             activity.Dispose();
+            Activity.Current = ambientActivity;
             return null;
         }
 
         var shim = new ActivityTransactionShim(activity, inner, hub);
+
+        // Idle transactions can finish out-of-band (the idle timer fires tracer-side, capturing or
+        // discarding without going through the shim). The Activity must be stopped when that happens,
+        // otherwise it leaks and - worse - stays Activity.Current, silently re-parenting later spans.
+        if (inner is TransactionTracer tracer)
+        {
+            tracer.OnFinished = () =>
+            {
+                if (!activity.IsStopped)
+                {
+                    activity.Stop();
+                }
+            };
+        }
+
         // The processor put the shadow tracer on the scope; replace it with the shim so that
         // integrations calling hub.GetSpan()/scope.Transaction route child spans through Activities.
         hub.ConfigureScope(static (scope, s) => scope.Transaction = s, shim);
@@ -166,6 +194,8 @@ internal sealed class ActivityTransactionShim : ActivitySpanShim, ITransactionTr
     }
 
     public SdkVersion Sdk => _inner.Sdk;
+
+    void IAutoTimeoutTracer.ResetIdleTimeout() => (_inner as IAutoTimeoutTracer)?.ResetIdleTimeout();
 
     public string? Platform
     {

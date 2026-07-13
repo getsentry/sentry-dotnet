@@ -15,6 +15,13 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly ISentryTimer? _idleTimer;
+
+    /// <summary>
+    /// Spike: invoked once the transaction transitions to finished (captured or discarded), including
+    /// out-of-band finishes from the idle timer. Used by the Activity tracing shim to stop the backing
+    /// Activity when the tracer finishes without the Activity lifecycle being involved.
+    /// </summary>
+    internal Action? OnFinished { get; set; }
     private readonly TimeSpan? _idleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
@@ -291,11 +298,13 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
         {
             _options?.LogDebug("Idle transaction '{0}' has no child spans. Discarding.", SpanId);
             _hub.ConfigureScope(static (scope, tracer) => scope.ResetTransaction(tracer), this);
+            OnFinished?.Invoke();
             return;
         }
 
         Status ??= SpanStatus.Ok;
         CompleteCapture();
+        OnFinished?.Invoke();
     }
 
     /// <inheritdoc />
@@ -519,6 +528,7 @@ public sealed class TransactionTracer : IBaseTracer, IAutoTimeoutTracer, ITransa
 
         Status ??= SpanStatus.Ok;
         CompleteCapture();
+        OnFinished?.Invoke();
     }
 
     /// <summary>

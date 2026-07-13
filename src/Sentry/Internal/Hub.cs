@@ -202,7 +202,7 @@ internal class Hub : IHub, IHubInternal, IDisposable
         // shim avoids infinite recursion). A null return means no listener is running - fall through too.
         if (_options.ActivityShimFactory is { } shimFactory
             && context is not TransactionContext { Instrumenter: Instrumenter.OpenTelemetry }
-            && shimFactory(this, context, customSamplingContext, dynamicSamplingContext) is { } shimmedTransaction)
+            && shimFactory(this, context, customSamplingContext, dynamicSamplingContext, idleTimeout) is { } shimmedTransaction)
         {
             return shimmedTransaction;
         }
@@ -277,7 +277,7 @@ internal class Hub : IHub, IHubInternal, IDisposable
             return unsampledTransaction;
         }
 
-        var transaction = new TransactionTracer(this, context, idleTimeout)
+        var transaction = new TransactionTracer(this, context, idleTimeout, _options.IdleTimerFactory)
         {
             SampleRate = sampleRate,
             SampleRand = sampleRand,

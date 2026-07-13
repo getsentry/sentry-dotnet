@@ -1248,7 +1248,13 @@ public class SentryOptions
     /// declared here in core - which compiles for TFMs without ActivityListener support - while the shim
     /// implementation ships in Sentry.DiagnosticSource for those TFMs.
     /// </remarks>
-    internal Func<IHub, ITransactionContext, IReadOnlyDictionary<string, object?>, DynamicSamplingContext?, ITransactionTracer?>? ActivityShimFactory { get; set; }
+    internal Func<IHub, ITransactionContext, IReadOnlyDictionary<string, object?>, DynamicSamplingContext?, TimeSpan?, ITransactionTracer?>? ActivityShimFactory { get; set; }
+
+    /// <summary>
+    /// Spike: allows tests to substitute a deterministic timer for idle-timeout transactions created through
+    /// the real Hub (TransactionTracer's timerFactory parameter is otherwise only reachable via its ctor).
+    /// </summary>
+    internal Func<Action, Infrastructure.ISentryTimer>? IdleTimerFactory { get; set; }
 
     /// <summary>
     /// During the transition period to OTLP we give SDK users the option to keep using Sentry's tracing in conjunction

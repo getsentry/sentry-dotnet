@@ -24,4 +24,5 @@ internal static class ShimKeys
 {
     public const string SpanStatus = "sentry.shim.status";
     public const string CustomSamplingContext = "sentry.shim.custom_sampling_context";
+    public const string IdleTimeout = "sentry.shim.idle_timeout";
 }

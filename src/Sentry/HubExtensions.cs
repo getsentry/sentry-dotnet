@@ -251,9 +251,10 @@ public static class HubExtensions
         this IHub hub,
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
-        DynamicSamplingContext? dynamicSamplingContext) => hub switch
+        DynamicSamplingContext? dynamicSamplingContext,
+        TimeSpan? idleTimeout = null) => hub switch
         {
-            Hub fullHub => fullHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext),
+            Hub fullHub => fullHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext, idleTimeout),
             HubAdapter adapter => adapter.StartTransaction(context, customSamplingContext, dynamicSamplingContext),
             _ => hub.StartTransaction(context, customSamplingContext)
         };

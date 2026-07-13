@@ -171,8 +171,9 @@ internal class SentryActivityProcessor
         var baggageHeader = data.Baggage.AsBaggageHeader();
         var dynamicSamplingContext = data.GetFused<DynamicSamplingContext>()
                                      ?? baggageHeader.CreateDynamicSamplingContext(_replaySession);
+        var idleTimeout = data.GetFused<TimeSpan?>(ShimKeys.IdleTimeout);
         var transaction = _hub.StartTransaction(
-            transactionContext, customSamplingContext, dynamicSamplingContext
+            transactionContext, customSamplingContext, dynamicSamplingContext, idleTimeout
         );
         if (transaction is TransactionTracer tracer)
         {
