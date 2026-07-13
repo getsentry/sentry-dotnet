@@ -136,6 +136,8 @@ internal class SentryActivityProcessor
         var span = parentSpan.StartChild(context);
         // Used to filter out spans that are not recorded when finishing a transaction
         span.SetFused(data);
+        // The reverse association lets the tracing shim resolve the span backing an Activity it started.
+        data.SetFused<ISpan>(span);
         if (span is SpanTracer spanTracer)
         {
             spanTracer.Origin = OpenTelemetryOrigin;
@@ -162,10 +164,15 @@ internal class SentryActivityProcessor
             Instrumenter = Instrumenter.OpenTelemetry
         };
 
+        // The tracing shim can supply Sentry concepts that have no Activity representation as side-channel
+        // values fused onto the Activity (set before Start, so they are available here at sampling time).
+        var customSamplingContext = data.GetFused<IReadOnlyDictionary<string, object?>>(ShimKeys.CustomSamplingContext)
+                                    ?? new Dictionary<string, object?>();
         var baggageHeader = data.Baggage.AsBaggageHeader();
-        var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext(_replaySession);
+        var dynamicSamplingContext = data.GetFused<DynamicSamplingContext>()
+                                     ?? baggageHeader.CreateDynamicSamplingContext(_replaySession);
         var transaction = _hub.StartTransaction(
-            transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
+            transactionContext, customSamplingContext, dynamicSamplingContext
         );
         if (transaction is TransactionTracer tracer)
         {
@@ -174,6 +181,8 @@ internal class SentryActivityProcessor
         }
         _hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
         transaction.SetFused(data);
+        // The reverse association lets the tracing shim resolve the transaction backing an Activity it started.
+        data.SetFused<ISpan>(transaction);
         _map[data.SpanId] = transaction;
     }
 
@@ -225,16 +234,26 @@ internal class SentryActivityProcessor
             return;
         }
 
-        var (operation, description, source) = ParseOtelSpanDescription(data, attributes);
-        span.Operation = operation;
-        span.Description = description;
+        // Activities created by the Sentry tracing shim are already Sentry-native: operation, description
+        // and name are maintained directly on the shadow tracer through the shim, so the OTel
+        // semantic-convention parsing below would only clobber them.
+        var isShimActivity = data.Source.Name == SentryActivitySources.ShimSourceName;
+        if (!isShimActivity)
+        {
+            var (operation, description, source) = ParseOtelSpanDescription(data, attributes);
+            span.Operation = operation;
+            span.Description = description;
+            if (span is TransactionTracer transactionToName)
+            {
+                transactionToName.Name = description;
+                transactionToName.NameSource = source;
+            }
+        }
 
         // Handle HTTP response status code specially
         var statusCode = attributes.HttpResponseStatusCodeAttribute();
         if (span is TransactionTracer transaction)
         {
-            transaction.Name = description;
-            transaction.NameSource = source;
             if (statusCode is { } responseStatusCode)
             {
                 transaction.Contexts.Response.StatusCode = responseStatusCode;
@@ -273,7 +292,10 @@ internal class SentryActivityProcessor
         }
         GenerateSentryErrorsFromOtelSpan(data, attributes);
 
-        var status = GetSpanStatus(data.Status, attributes);
+        // A rich SpanStatus set explicitly through the tracing shim wins over the (lossy) status derived
+        // from the Activity, which only distinguishes Unset/Ok/Error.
+        var status = data.GetFused<SpanStatus?>(ShimKeys.SpanStatus)
+                     ?? GetSpanStatus(data.Status, attributes);
         foreach (var enricher in _enrichers)
         {
             enricher.Enrich(span, data, _hub, _options);
