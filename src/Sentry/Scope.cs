@@ -318,6 +318,7 @@ public class Scope : IEventLike
 
         // Skip scope sync with backing field. The native SDKs already received the environment set on the options.
         _environment = Options.Environment;
+        Release = Options.Release;
     }
 
     // For testing. Should explicitly require SentryOptions.
@@ -434,7 +435,7 @@ public class Scope : IEventLike
         Request = new();
         Contexts.Clear();
         User = new();
-        Release = default;
+        Release = Options.Release;
         Distribution = default;
         Environment = Options.Environment; // Restore to keep in sync with native
         TransactionName = default;

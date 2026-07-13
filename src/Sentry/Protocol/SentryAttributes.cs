@@ -97,17 +97,18 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
         this[key] = new SentryAttribute(value, "integer");
     }
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
+    internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion? sdk = null)
     {
-        var environment = options.SettingLocator.GetEnvironment();
+        var environment = scope?.Environment ?? options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
 
-        var release = options.SettingLocator.GetRelease();
+        var release = scope?.Release ?? options.SettingLocator.GetRelease();
         if (release is not null)
         {
             SetAttribute("sentry.release", release);
         }
 
+        sdk ??= scope?.Sdk ?? SdkVersion.Instance;
         if (sdk.Name is { } name)
         {
             SetAttribute("sentry.sdk.name", name);

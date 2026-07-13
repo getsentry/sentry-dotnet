@@ -44,10 +44,13 @@ public class SentryMetricTests
             Environment = "my-environment",
             Release = "my-release",
         };
-        var sdk = new SdkVersion
+        var scope = new Scope(options)
         {
-            Name = "Sentry.Test.SDK",
-            Version = "1.2.3-test+Sentry",
+            Sdk =
+            {
+                Name = "Sentry.Test.SDK",
+                Version = "1.2.3-test+Sentry"
+            }
         };
 
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1)
@@ -56,7 +59,7 @@ public class SentryMetricTests
             Unit = "test_unit",
         };
         metric.SetAttribute("attribute", "value");
-        metric.Attributes.SetDefaultAttributes(options, sdk);
+        metric.Attributes.SetDefaultAttributes(options, scope);
 
         metric.Timestamp.Should().Be(Timestamp);
         metric.TraceId.Should().Be(TraceId);
@@ -69,9 +72,46 @@ public class SentryMetricTests
         metric.Attributes.ShouldContain("attribute", "value");
         metric.Attributes.ShouldContain("sentry.environment", options.Environment);
         metric.Attributes.ShouldContain("sentry.release", options.Release);
-        metric.Attributes.ShouldContain("sentry.sdk.name", sdk.Name);
-        metric.Attributes.ShouldContain("sentry.sdk.version", sdk.Version);
+        metric.Attributes.ShouldContain("sentry.sdk.name", scope.Sdk.Name);
+        metric.Attributes.ShouldContain("sentry.sdk.version", scope.Sdk.Version);
         metric.Attributes.ShouldNotContain<object>("not-found");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_ScopeOverridesOptions_UsesScopeValues()
+    {
+        var options = new SentryOptions
+        {
+            Environment = "options-environment",
+            Release = "options-release",
+        };
+        var scope = new Scope(options)
+        {
+            Environment = "scope-environment",
+            Release = "scope-release",
+        };
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        metric.Attributes.SetDefaultAttributes(options, scope);
+
+        metric.Attributes.ShouldContain("sentry.environment", "scope-environment");
+        metric.Attributes.ShouldContain("sentry.release", "scope-release");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_NullScope_FallsBackToOptionsSettings()
+    {
+        var options = new SentryOptions
+        {
+            Environment = "options-environment",
+            Release = "options-release",
+        };
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        metric.Attributes.SetDefaultAttributes(options, scope: null);
+
+        metric.Attributes.ShouldContain("sentry.environment", options.SettingLocator.GetEnvironment());
+        metric.Attributes.ShouldContain("sentry.release", options.SettingLocator.GetRelease());
     }
 
     [Fact]
@@ -84,7 +124,7 @@ public class SentryMetricTests
         };
 
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
-        metric.Attributes.SetDefaultAttributes(options, new SdkVersion());
+        metric.Attributes.SetDefaultAttributes(options, new Scope(options));
 
         var envelope = Envelope.FromMetric(new TraceMetric([metric]));
 
@@ -162,7 +202,7 @@ public class SentryMetricTests
         metric.SetAttribute("boolean-attribute", true);
         metric.SetAttribute("integer-attribute", 3);
         metric.SetAttribute("double-attribute", 4.4);
-        metric.Attributes.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
+        metric.Attributes.SetDefaultAttributes(options, new Scope(options) { Sdk = { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" } });
 
         var envelope = EnvelopeItem.FromMetric(new TraceMetric([metric]));
 

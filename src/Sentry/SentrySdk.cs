@@ -65,6 +65,7 @@ static partial class SentrySdk
 
         // This happens before the native SDKs get initialized
         options.Environment = options.SettingLocator.GetEnvironment();
+        options.Release = options.SettingLocator.GetRelease();
 
         // Initialize native platform SDKs here
         if (options.InitNativeSdks)
