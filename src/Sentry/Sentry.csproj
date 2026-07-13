@@ -53,6 +53,9 @@
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
+    <!-- System.Diagnostics.ActivityListener/ActivitySource are part of the shared framework on these TFMs.
+         On netstandard2.x/net462 they would require a System.Diagnostics.DiagnosticSource >= 5.0 package reference. -->
+    <DefineConstants>$(DefineConstants);HAS_ACTIVITY_LISTENER</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
     <Compile Include="..\Sentry.DiagnosticSource\Internal\**\*.cs">

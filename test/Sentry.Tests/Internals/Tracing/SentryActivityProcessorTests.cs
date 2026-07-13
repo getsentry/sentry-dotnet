@@ -1,0 +1,1023 @@
+#if NET8_0_OR_GREATER
+using Sentry.Internal.OpenTelemetry;
+using Sentry.Internal.Tracing;
+
+namespace Sentry.Tests.Internals.Tracing;
+
+/// <summary>
+/// Port of Sentry.OpenTelemetry.Tests.SentrySpanProcessorTests, running the same scenarios against the core
+/// <see cref="SentryActivityProcessor"/> (driven by ActivityListener callbacks rather than the OTel SDK's
+/// BaseProcessor). Test bodies are kept as close to the originals as possible so the two suites can be diffed.
+/// </summary>
+public class SentryActivityProcessorTests : ActivitySourceTests
+{
+    private class Fixture
+    {
+        public SentryOptions Options { get; }
+
+        public ISentryClient Client { get; }
+
+        public ISessionManager SessionManager { get; set; }
+
+        public IInternalScopeManager ScopeManager { get; set; }
+
+        public ISystemClock Clock { get; set; }
+
+        public List<ISentryActivityEnricher> Enrichers { get; set; } = new();
+
+        private IReplaySession ReplaySession { get; } = Substitute.For<IReplaySession>();
+
+        public Fixture()
+        {
+            Options = new SentryOptions
+            {
+                Dsn = ValidDsn,
+                TracesSampleRate = 1.0,
+                AutoSessionTracking = false
+            };
+
+            Client = Substitute.For<ISentryClient>();
+        }
+
+        public Hub Hub { get; private set; }
+
+        private Hub GetHub() => Hub ??= new Hub(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession);
+
+        public SentryActivityProcessor GetSut(IHub hub = null)
+        {
+            return new SentryActivityProcessor(hub ?? GetHub(), Enrichers, ReplaySession);
+        }
+    }
+
+    private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void Ctor_Instrumenter_OpenTelemetry_DoesNotThrowException()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+
+        // Act
+        var sut = _fixture.GetSut();
+
+        // Assert
+        Assert.NotNull(sut);
+    }
+
+    [Fact]
+    public void Ctor_Instrumenter_Not_OpenTelemetry_Throws()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.Sentry;
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => _fixture.GetSut());
+    }
+
+    [Fact]
+    public void GetSpanStatus()
+    {
+        using (new AssertionScope())
+        {
+            var noAttributes = new Dictionary<string, object>();
+
+            // Unset and OK -> OK
+            SentryActivityProcessor.GetSpanStatus(ActivityStatusCode.Unset, noAttributes).Should().Be(SpanStatus.Ok);
+            SentryActivityProcessor.GetSpanStatus(ActivityStatusCode.Ok, noAttributes).Should().Be(SpanStatus.Ok);
+
+            // Error (no attributes) -> UnknownError
+            SentryActivityProcessor.GetSpanStatus(ActivityStatusCode.Error, noAttributes)
+                .Should().Be(SpanStatus.UnknownError);
+
+            // Unknown status code -> UnknownError
+            SentryActivityProcessor.GetSpanStatus((ActivityStatusCode)42, noAttributes)
+                .Should().Be(SpanStatus.UnknownError);
+
+            // We only test one http scenario, just to make sure the SpanStatusConverter is called for these headers.
+            // Tests for SpanStatusConverter ensure other http status codes would also work though
+            var notFoundAttributes = new Dictionary<string, object> { ["http.status_code"] = 404 };
+            SentryActivityProcessor.GetSpanStatus(ActivityStatusCode.Error, notFoundAttributes)
+                .Should().Be(SpanStatus.NotFound);
+
+            // We only test one grpc scenario, just to make sure the SpanStatusConverter is called for these headers.
+            // Tests for SpanStatusConverter ensure other grpc status codes would also work though
+            var grpcAttributes = new Dictionary<string, object> { ["rpc.grpc.status_code"] = 7 };
+            SentryActivityProcessor.GetSpanStatus(ActivityStatusCode.Error, grpcAttributes)
+                .Should().Be(SpanStatus.PermissionDenied);
+
+            var errorAttributes = new Dictionary<string, object> { [OtelSpanAttributeConstants.StatusCodeKey] = OtelStatusTags.ErrorStatusCodeTagValue };
+            SentryActivityProcessor.GetSpanStatus(ActivityStatusCode.Ok, errorAttributes).Should().Be(SpanStatus.UnknownError);
+            SentryActivityProcessor.GetSpanStatus(ActivityStatusCode.Unset, errorAttributes).Should().Be(SpanStatus.UnknownError);
+        }
+    }
+
+    [Fact]
+    public void OnStart_Transaction_With_DynamicSamplingContext()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var expected = new Dictionary<string, string>()
+        {
+            { "trace_id", SentryId.Create().ToString() },
+            { "public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
+            { "sample_rate", "0.5" },
+        };
+        var data = Tracer.StartActivity("test op")!;
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}trace_id", expected["trace_id"]);
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}public_key", expected["public_key"]);
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}sample_rate", expected["sample_rate"]);
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+        if (transaction.DynamicSamplingContext is not { } actual)
+        {
+            Assert.Fail("Transaction does not have a dynamic sampling context");
+            return;
+        }
+        using (new AssertionScope())
+        {
+            actual.Items["trace_id"].Should().Be(expected["trace_id"]);
+            actual.Items["public_key"].Should().Be(expected["public_key"]);
+            actual.Items["sample_rate"].Should().NotBe(expected["sample_rate"]);
+            actual.Items["sample_rate"].Should().Be(_fixture.Options.TracesSampleRate.ToString());
+        }
+    }
+
+    [Fact]
+    public void OnStart_SampledWithParentSpanId_StartsChildSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 1.0;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity("Parent");
+        sut.OnStart(parent);
+
+        using var data = Tracer.StartActivity("TestActivity");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        using (new AssertionScope())
+        {
+            span.IsSampled.Should().Be(true);
+            span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+
+            if (span is not SpanTracer spanTracer)
+            {
+                Assert.Fail("Span is not a span tracer");
+                return;
+            }
+
+            span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+            using (new AssertionScope())
+            {
+                spanTracer.ParentSpanId.Should().Be(data.ParentSpanId.AsSentrySpanId());
+                spanTracer.TraceId.Should().Be(data.TraceId.AsSentryId());
+                spanTracer.Operation.Should().Be(data.OperationName);
+                spanTracer.Description.Should().Be(data.DisplayName);
+                spanTracer.Status.Should().BeNull();
+                spanTracer.StartTimestamp.Should().Be(data.StartTimeUtc);
+            }
+        }
+    }
+
+    [Fact]
+    public void OnStart_NotSampledWithParentSpanId_StartsChildSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 0.0;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity("Parent");
+        sut.OnStart(parent);
+
+        using var data = Tracer.StartActivity("TestActivity");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        using (new AssertionScope())
+        {
+            span.IsSampled.Should().Be(false);
+            span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+            span.Should().BeOfType<UnsampledSpan>();
+        }
+    }
+
+    [Fact]
+    public void OnStart_WithSentryParentSpanId_StartsChildSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = _fixture.Hub.StartTransaction("Program", "Main");
+        _fixture.Hub.ConfigureScope(scope => scope.Transaction = parent);
+
+        using var data = Tracer.StartActivity("TestActivity");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        ((IBaseTracer)parent).IsOtelInstrumenter.Should().BeFalse();
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        using (new AssertionScope())
+        {
+            span.Should().BeOfType<SpanTracer>();
+            span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+            if (span is not SpanTracer spanTracer)
+            {
+                Assert.Fail("Span is not a span tracer");
+                return;
+            }
+            using (new AssertionScope())
+            {
+                ((IBaseTracer)spanTracer).IsOtelInstrumenter.Should().BeTrue();
+                spanTracer.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+                spanTracer.ParentSpanId.Should().Be(parent.SpanId);
+                spanTracer.TraceId.Should().Be(parent.TraceId);
+                spanTracer.Operation.Should().Be(data.OperationName);
+                spanTracer.Description.Should().Be(data.DisplayName);
+                spanTracer.Status.Should().BeNull();
+                spanTracer.StartTimestamp.Should().Be(data.StartTimeUtc);
+            }
+        }
+    }
+
+
+    [Fact]
+    public void StartSpan_UsingSentryTracing_StartsChildSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity("Parent");
+        sut.OnStart(parent);
+
+        // Act
+        var span = _fixture.Hub.StartSpan("foo", "bar");
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(parent.SpanId, out var transaction));
+        using (new AssertionScope())
+        {
+            if (span is not SpanTracer spanTracer)
+            {
+                Assert.Fail("Span is not a span tracer");
+                return;
+            }
+            spanTracer.ParentSpanId.Should().Be(transaction.SpanId);
+            spanTracer.TraceId.Should().Be(transaction.TraceId);
+            spanTracer.Operation.Should().Be("foo");
+            spanTracer.Description.Should().Be("bar");
+            spanTracer.Status.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public void OnStart_SampledWithoutParentSpanId_StartsNewTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var scope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(scope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
+        var sut = _fixture.GetSut();
+
+        var data = Tracer.StartActivity("test op");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transaction.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+            transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
+            transaction.TraceId.Should().Be(data.TraceId.AsSentryId());
+            transaction.Name.Should().Be(data.DisplayName);
+            transaction.Operation.Should().Be(data.OperationName);
+            transaction.Description.Should().Be(data.DisplayName);
+            transaction.Status.Should().BeNull();
+            transaction.StartTimestamp.Should().Be(data.StartTimeUtc);
+        }
+    }
+
+    [Fact]
+    public void OnStart_NotSampledWithoutParentSpanId_StartsNewTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 0.0;
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var scope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(scope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
+        var sut = _fixture.GetSut();
+
+        var data = Tracer.StartActivity("test op");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        if (span is not UnsampledTransaction transaction)
+        {
+            Assert.Fail("Span is not an unsampled transaction");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transaction.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+            transaction.TraceId.Should().Be(data.TraceId.AsSentryId());
+        }
+    }
+
+    [Fact]
+    public void OnEnd_Sampled_Span_FinishesSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity(name: "transaction")!;
+        sut.OnStart(parent);
+
+        var tags = new Dictionary<string, object> {
+            { "foo", "bar" }
+        };
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not SpanTracer spanTracer)
+        {
+            Assert.Fail("Span is not a span tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            spanTracer.ParentSpanId.Should().Be(parent.SpanId.AsSentrySpanId());
+            spanTracer.Operation.Should().Be(data.OperationName);
+            spanTracer.Description.Should().Be(data.DisplayName);
+            spanTracer.EndTimestamp.Should().NotBeNull();
+            spanTracer.Extra["otel.kind"].Should().Be(data.Kind);
+            foreach (var keyValuePair in tags)
+            {
+                span.Extra[keyValuePair.Key].Should().Be(keyValuePair.Value);
+            }
+
+            spanTracer.Status.Should().Be(SpanStatus.Ok);
+            spanTracer.Origin.Should().Be(SentryActivityProcessor.OpenTelemetryOrigin);
+        }
+    }
+
+    [Fact]
+    public void OnEnd_Unsampled_Span_DoesNotThrow()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 0.0;
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity(name: "transaction")!;
+        sut.OnStart(parent);
+
+        Dictionary<string, object> tags = [];
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        span.Should().BeOfType<UnsampledSpan>();
+
+        // There's nothing else to assert here, as long as calling OnEnd does not throw an exception,
+        // UnsampledSpan.Finish() is basically a no-op.
+    }
+
+    [Fact]
+    public void OnEnd_Transaction_SetsResponseStatusCode()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var tags = new Dictionary<string, object> {
+            { OtelSemanticConventions.AttributeHttpResponseStatusCode, 404 }
+        };
+        var data = Tracer.StartActivity(
+            name: "test operation",
+            kind: ActivityKind.Server,
+            parentContext: default,
+            tags
+        );
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transaction.Contexts.Response.StatusCode.Should().Be(404);
+            transaction.Data.Should().Contain(OtelSemanticConventions.AttributeHttpResponseStatusCode, 404);
+        }
+    }
+
+    [Fact]
+    public void OnEnd_Transaction_DoesNotClearResponseStatusCode()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var data = Tracer.StartActivity(
+            name: "test operation",
+            kind: ActivityKind.Server,
+            parentContext: default,
+            new Dictionary<string, object>()
+        );
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+        (span as TransactionTracer)!.Contexts.Response.StatusCode = 200;
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transaction.Contexts.Response.StatusCode.Should().Be(200);
+        }
+    }
+
+    [Fact]
+    public void OnEnd_Span_SetsResponseStatusCode()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity(name: "transaction")!;
+        sut.OnStart(parent);
+
+        var tags = new Dictionary<string, object> {
+            { OtelSemanticConventions.AttributeHttpResponseStatusCode, 404 }
+        };
+        var data = Tracer.StartActivity(
+            name: "test operation",
+            kind: ActivityKind.Server,
+            parentContext: default,
+            tags
+        );
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not SpanTracer spanTracer)
+        {
+            Assert.Fail("Span is not a span tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            spanTracer.Tags.TryGetValue(OtelSemanticConventions.AttributeHttpResponseStatusCode,
+                    out var responseStatusCode).Should().BeTrue();
+            responseStatusCode.Should().Be("404");
+        }
+    }
+
+    [Fact]
+    public void OnEnd_Transaction_RestoresSavedScope()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var dummyScope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(dummyScope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
+        var sut = _fixture.GetSut();
+
+        var scope = new Scope();
+        var data = Tracer.StartActivity("transaction")!;
+        data.SetFused(scope);
+        sut.OnStart(data);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        _fixture.ScopeManager.Received(1).RestoreScope(scope);
+    }
+
+    [Fact]
+    public void OnEnd_Span_RestoresSavedScope()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var dummyScope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(dummyScope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
+        var sut = _fixture.GetSut();
+
+        var scope = new Scope();
+        var parent = Tracer.StartActivity("transaction")!;
+        parent.SetFused(scope);
+        sut.OnStart(parent);
+
+        var data = Tracer.StartActivity("test operation")!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        _fixture.ScopeManager.Received(1).RestoreScope(scope);
+    }
+
+    [Fact]
+    public void OnEnd_SpansEnriched()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var mockEnricher = Substitute.For<ISentryActivityEnricher>();
+        mockEnricher.Enrich(Arg.Do<ISpan>(s => s.SetTag("foo", "bar")), Arg.Any<Activity>(), Arg.Any<IHub>(), Arg.Any<SentryOptions>());
+        _fixture.Enrichers.Add(mockEnricher);
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity(name: "transaction")!;
+        sut.OnStart(parent);
+
+        sut._map.TryGetValue(parent.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(parent);
+
+        // Assert
+        if (span is not TransactionTracer transactionTracer)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        transactionTracer.Tags.TryGetValue("foo", out var foo).Should().BeTrue();
+        foo.Should().Be("bar");
+    }
+
+    [Fact]
+    public void OnEnd_Sampled_FinishesTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var tags = new Dictionary<string, object> {
+            { "foo", "bar" }
+        };
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
+            transaction.Operation.Should().Be(data.OperationName);
+            transaction.Description.Should().Be(data.DisplayName);
+            transaction.Name.Should().Be(data.DisplayName);
+            transaction.NameSource.Should().Be(TransactionNameSource.Custom);
+            transaction.EndTimestamp.Should().NotBeNull();
+            transaction.Contexts["otel"].Should().BeEquivalentTo(new Dictionary<string, object>
+            {
+                { "attributes", tags }
+            });
+            transaction.Contexts.Trace.Origin.Should().Be(SentryActivityProcessor.OpenTelemetryOrigin);
+            transaction.Status.Should().Be(SpanStatus.Ok);
+        }
+    }
+
+    [Fact]
+    public void OnEnd_NotSampled_FinishesTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 0.0;
+        var sut = _fixture.GetSut();
+
+        Dictionary<string, object> tags = [];
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not UnsampledTransaction transaction)
+        {
+            Assert.Fail("Span is not an unsampled transaction");
+            return;
+        }
+        transaction.IsFinished.Should().BeTrue();
+    }
+
+    [Fact]
+    public void OnEnd_FilteredTransaction_DoesNotFinishTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity("transaction")!;
+        sut.OnStart(parent);
+
+        var data = Tracer.StartActivity("test operation", kind: ActivityKind.Internal)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        FilterActivity(parent);
+
+        sut._map.TryGetValue(parent.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+        sut.OnEnd(parent);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transaction.EndTimestamp.Should().BeNull();
+            transaction.Status.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public void OnEnd_FilteredSpan_RemovesSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity("transaction")!;
+        sut.OnStart(parent);
+
+        var data = Tracer.StartActivity("test operation", kind: ActivityKind.Internal)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        FilterActivity(data);
+
+        sut._map.TryGetValue(parent.SpanId, out var parentSpan);
+        sut._map.TryGetValue(data.SpanId, out var childSpan);
+
+        // Act
+        sut.OnEnd(data);
+        sut.OnEnd(parent);
+
+        // Assert
+        if (parentSpan is not TransactionTracer transaction)
+        {
+            Assert.Fail("parentSpan is not a transaction tracer");
+            return;
+        }
+        if (childSpan is not SpanTracer span)
+        {
+            Assert.Fail("span is not a span tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            span.EndTimestamp.Should().BeNull();
+            span.Status.Should().BeNull();
+
+            transaction.EndTimestamp.Should().NotBeNull();
+            transaction.Status.Should().Be(SpanStatus.Ok);
+            transaction.Spans.Should().BeEmpty();
+        }
+    }
+
+    [Theory]
+    [InlineData(OtelSemanticConventions.AttributeUrlFull)]
+    [InlineData(OtelSemanticConventions.AttributeHttpUrl)]
+    public void OnEnd_IsSentryRequest_DoesNotFinishTransaction(string urlKey)
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var tags = new Dictionary<string, object> { { "foo", "bar" }, { urlKey, _fixture.Options.Dsn } };
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        transaction.IsSentryRequest.Should().BeTrue();
+    }
+
+    [Fact]
+    public void OnStart_DisabledHub_DoesNothing()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        SentryClientExtensions.SentryOptionsForTestingOnly = _fixture.Options;
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(false);
+        var sut = _fixture.GetSut(hub);
+
+        var data = Tracer.StartActivity()!;
+
+        // Act
+        sut.OnStart(data);
+
+        // Assert
+        sut._map.Should().BeEmpty();
+        hub.Received(0).GetSpan();
+        hub.Received(0).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object>>()
+            );
+    }
+
+    [Fact]
+    public void OnEnd_DisabledHub_DoesNothing()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        SentryClientExtensions.SentryOptionsForTestingOnly = _fixture.Options;
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true, false);
+        var sut = _fixture.GetSut(hub);
+
+        var data = Tracer.StartActivity()!;
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        sut._map.Should().BeEmpty();
+        hub.Received(0).GetSpan();
+        hub.Received(0).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object>>()
+        );
+    }
+
+    private static void FilterActivity(Activity activity)
+    {
+        // Simulates filtering an activity - see https://github.com/getsentry/sentry-dotnet/pull/3198
+        activity.IsAllDataRequested = false;
+        activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_FilteredTransactions_Pruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        FilterActivity(parent);
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.False(sut._map.TryGetValue(parent.SpanId, out var _));
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_UnFilteredTransactions_NotPruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(parent.SpanId, out var _));
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_FilteredSpans_Pruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        using var activity1 = Tracer.StartActivity();
+        sut.OnStart(activity1!);
+
+        using var activity2 = Tracer.StartActivity();
+        sut.OnStart(activity2!);
+
+        FilterActivity(activity2);
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(activity1.SpanId, out var _));
+        Assert.False(sut._map.TryGetValue(activity2.SpanId, out var _));
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_UnsampledSpanWithRecordedActivity_NotPruned()
+    {
+        // Arrange — Sentry drops the transaction (TracesSampleRate = 0), but the listener still records the Activity.
+        // CreateChildSpan produces an UnsampledSpan. PruneFilteredSpans must not remove it prematurely,
+        // otherwise OnEnd (which fires because Recorded = true) logs a "Span not found" error.
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 0.0;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity("Parent");
+        sut.OnStart(parent!);
+
+        using var child = Tracer.StartActivity("Child");
+        sut.OnStart(child!);
+
+        sut._map.TryGetValue(child!.SpanId, out var span).Should().BeTrue();
+        span.Should().BeOfType<UnsampledSpan>();
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert — the UnsampledSpan is still live (Recorded = true), so it must not be pruned.
+        sut._map.TryGetValue(child.SpanId, out _).Should().BeTrue();
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_GarbageCollectedActivity_Pruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        // Simulate a span whose fused activity has been GC'd (GetFused<Activity>() returns null).
+        // This can happen when a filtered activity is short-lived and collected before PruneFilteredSpans runs.
+        var spanId = ActivitySpanId.CreateRandom();
+        var orphanedSpan = Substitute.For<ISpan>();
+        sut._map[spanId] = orphanedSpan;
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.False(sut._map.TryGetValue(spanId, out _));
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_RecentlyPruned_DoesNothing()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        sut._lastPruned = DateTimeOffset.MaxValue.Ticks; // fake a recent prune
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        using var activity1 = Tracer.StartActivity();
+        sut.OnStart(activity1!);
+
+        using var activity2 = Tracer.StartActivity();
+        sut.OnStart(activity2!);
+
+        FilterActivity(activity2);
+
+        // Act
+        sut.PruneFilteredSpans();
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(activity1.SpanId, out var _));
+        Assert.True(sut._map.TryGetValue(activity2.SpanId, out var _));
+    }
+
+    [Fact]
+    public void ParseOtelSpanDescription_HttpClient()
+    {
+        // Arrange
+        var data = Tracer.StartActivity("test op", ActivityKind.Client)!;
+        var attributes = new Dictionary<string, object>()
+        {
+            [OtelSemanticConventions.AttributeHttpRequestMethod] = "POST",
+            [OtelSemanticConventions.AttributeUrlFull] = "https://example.com/foo",
+        };
+
+        // Act
+        var (operation, description, source) = SentryActivityProcessor.ParseOtelSpanDescription(data, attributes);
+
+        // Assert
+        operation.Should().Be("http.client");
+        description.Should().Be("POST https://example.com/foo");
+        source.Should().Be(TransactionNameSource.Custom);
+    }
+}
+#endif
