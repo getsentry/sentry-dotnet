@@ -1297,6 +1297,119 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactions_Dropped()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var client = _fixture.GetSut();
+
+        var sentryTransaction = new SentryTransaction("GET /health", "http.server")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        // Act
+        client.CaptureTransaction(sentryTransaction);
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+
+        var expectedSpanCount = sentryTransaction.Spans.Count + 1; // 1 for each span + one for the root transaction
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, expectedSpanCount);
+    }
+
+    [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactionsRegex_Dropped()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { new(new Regex(@"^GET /health/\d+$")) };
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /health/123", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_DoesNotMatchIgnoreTransactions_Sent()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /api/users", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactions_BeforeSendTransactionNotInvoked()
+    {
+        // Arrange: IgnoreTransactions is applied before the BeforeSendTransaction
+        // callback, so the callback must not observe an ignored transaction.
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var beforeSendTransactionInvoked = false;
+        _fixture.SentryOptions.SetBeforeSendTransaction((tx, _) =>
+        {
+            beforeSendTransactionInvoked = true;
+            return tx;
+        });
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /health", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        beforeSendTransactionInvoked.Should().BeFalse();
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_SampledOutAndMatchesIgnoreTransactions_RecordedAsSampleRate()
+    {
+        // Arrange: a sampled-out transaction whose name also matches an ignore pattern must be
+        // attributed to sampling (the earlier, primary drop reason), not to IgnoreTransactions.
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var client = _fixture.GetSut();
+
+        var hub = Substitute.For<IHub>();
+        var transaction = new UnsampledTransaction(hub, new TransactionContext("GET /health", "http.server"));
+        transaction.StartChild("span1");
+
+        // Act
+        client.CaptureTransaction(new SentryTransaction(transaction));
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+
+        var expectedSpanCount = transaction.Spans.Count + 1; // 1 for each span + one for the root transaction
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, expectedSpanCount);
+        _fixture.ClientReportRecorder.DidNotReceive().RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+    }
+
+    [Fact]
     public void CaptureTransaction_NotFinished_Sent()
     {
         // Arrange

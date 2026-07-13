@@ -185,6 +185,19 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
+        // Applied after the sampling check so that a transaction which is sampled out is
+        // still attributed to sampling, not to this filter. IgnoreTransactions is a built-in
+        // filter, so its discards are recorded under EventProcessor (matching the exception
+        // filter path and the JS inbound filters), not BeforeSend, which is reserved for the
+        // user's BeforeSendTransaction callback.
+        if (_options.IgnoreTransactions.MatchesSubstringOrRegex(transaction.Name))
+        {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, spanCount);
+            _options.LogInfo("Transaction dropped by IgnoreTransactions option.");
+            return;
+        }
+
         scope ??= new Scope(_options);
         hint ??= new SentryHint();
         hint.AddAttachmentsFromScope(scope);

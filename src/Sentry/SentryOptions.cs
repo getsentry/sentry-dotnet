@@ -244,6 +244,18 @@ public class SentryOptions
     public IList<StringOrRegex> TagFilters { get; set; } = new List<StringOrRegex>();
 
     /// <summary>
+    /// A list of transaction names to be ignored. A transaction whose name matches any of the
+    /// given substrings or regular expression patterns will not be sent to Sentry.
+    /// </summary>
+    /// <remarks>
+    /// Matching transactions are dropped before the BeforeSendTransaction callback runs, so that
+    /// callback is not invoked for them. This mirrors the behavior of the <c>ignoreTransactions</c>
+    /// option in the Sentry JavaScript and Python SDKs, where the built-in filter runs ahead of the
+    /// user's <c>before_send_transaction</c> hook.
+    /// </remarks>
+    public IList<StringOrRegex> IgnoreTransactions { get; set; } = new List<StringOrRegex>();
+
+    /// <summary>
     /// The worker used by the client to pass envelopes.
     /// </summary>
     public IBackgroundWorker? BackgroundWorker { get; set; }
