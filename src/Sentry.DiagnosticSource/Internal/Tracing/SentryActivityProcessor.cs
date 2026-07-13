@@ -170,13 +170,25 @@ internal class SentryActivityProcessor
         var baggageHeader = data.Baggage.AsBaggageHeader();
         var dynamicSamplingContext = data.GetFused<DynamicSamplingContext>()
                                      ?? baggageHeader.CreateDynamicSamplingContext(_replaySession);
+        var idleTimeout = data.GetFused<TimeSpan?>(ShimKeys.IdleTimeout);
         var transaction = _hub.StartTransaction(
-            transactionContext, customSamplingContext, dynamicSamplingContext
+            transactionContext, customSamplingContext, dynamicSamplingContext, idleTimeout
         );
         if (transaction is TransactionTracer tracer)
         {
             tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
             tracer.StartTimestamp = data.StartTimeUtc;
+
+            // If the tracer finishes out-of-band (e.g. its idle timer fires, capturing or discarding
+            // without the Activity lifecycle being involved), the backing Activity must be stopped too -
+            // otherwise it leaks and stays Activity.Current, silently re-parenting later spans.
+            tracer.OnFinished = () =>
+            {
+                if (!data.IsStopped)
+                {
+                    data.Stop();
+                }
+            };
         }
         _hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
         transaction.SetFused(data);
