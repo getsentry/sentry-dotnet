@@ -1,10 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### Features ✨
-
-- feat: Add exponential backoff and log deduplication to Spotlight transport by @mattico in [#5025](https://github.com/getsentry/sentry-dotnet/pull/5025)
 
 ## 6.6.0
 
