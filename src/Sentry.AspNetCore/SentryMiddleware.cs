@@ -38,8 +38,7 @@ internal class SentryMiddleware : IMiddleware
     private readonly BlockingMonitor? _monitor;
     private readonly TaskBlockingListener? _listener;
 
-    // Exposed for tests, to verify that a single monitor/listener is shared across
-    // (transient) middleware instances rather than being allocated per request.
+    // Internal for testing
     internal BlockingMonitor? Monitor => _monitor;
     internal TaskBlockingListener? Listener => _listener;
 
@@ -53,7 +52,7 @@ internal class SentryMiddleware : IMiddleware
     /// <param name="eventExceptionProcessors">Custom Event Exception Processors</param>
     /// <param name="eventProcessors">Custom Event Processors</param>
     /// <param name="transactionProcessors">Custom Transaction Processors</param>
-    /// <param name="serviceProvider">The service provider, used to resolve shared blocking-call detection services.</param>
+    /// <param name="serviceProvider">The service provider, used to resolve dependencies.</param>
     /// <exception cref="ArgumentNullException">
     /// next
     /// or
@@ -81,13 +80,7 @@ internal class SentryMiddleware : IMiddleware
 
         if (_options.CaptureBlockingCalls)
         {
-            // The monitor and listener are registered as process-wide singletons (see
-            // SentryWebHostBuilderExtensions). This middleware is transient (one instance per
-            // request), so constructing them here would create - and never dispose - a new
-            // TaskBlockingListener (an EventListener) on every request. Each leaked listener stays
-            // rooted in the runtime's global listener chain, keeps TplEventSource enabled, and makes
-            // EventSource.DispatchToAllListeners walk an ever-growing chain on every await in the
-            // process. Resolving the shared singletons instead keeps the overhead constant. See #5378.
+            // Resolve shared singletons to keep overhead constant - See #5378.
             _monitor = serviceProvider.GetRequiredService<BlockingMonitor>();
             _listener = serviceProvider.GetRequiredService<TaskBlockingListener>();
         }

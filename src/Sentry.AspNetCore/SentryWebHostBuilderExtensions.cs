@@ -114,10 +114,6 @@ public static class SentryWebHostBuilderExtensions
         _ = builder.ConfigureServices(c => _ =
             c.AddTransient<IStartupFilter, SentryStartupFilter>()
              .AddTransient<IStartupFilter, SentryTracingStartupFilter>()
-             // Blocking-call detection uses an EventListener that registers itself in the runtime's
-             // process-global listener chain, so exactly one must exist per process. Register the
-             // monitor and listener as singletons; the transient SentryMiddleware resolves (rather
-             // than constructs) them, avoiding a per-request listener leak. See issue #5378.
              .AddSingleton<BlockingMonitor>(p => new BlockingMonitor(
                  p.GetRequiredService<Func<IHub>>(),
                  p.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value))
