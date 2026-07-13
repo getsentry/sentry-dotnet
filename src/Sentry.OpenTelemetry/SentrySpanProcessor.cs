@@ -172,7 +172,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
             tracer.StartTimestamp = data.StartTimeUtc;
         }
-        _hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
+        _hub.ConfigureScope(static (scope, transaction) =>
+        {
+            scope.Transaction ??= transaction;
+        }, transaction);
         transaction.SetFused(data);
         _map[data.SpanId] = transaction;
     }

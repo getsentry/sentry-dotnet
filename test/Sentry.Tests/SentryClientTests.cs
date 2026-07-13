@@ -1036,6 +1036,116 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_BeforeSendFeedbackSet_CallbackInvokedAndMutationApplied()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        SentryEvent received = null;
+        _fixture.SentryOptions.SetBeforeSendFeedback((@event, _) =>
+        {
+            received = @event;
+            @event.SetTag("scrubbed", "true");
+            return @event;
+        });
+        var sut = _fixture.GetSut();
+
+        Envelope envelope = null;
+        sut.Worker.When(w => w.EnqueueEnvelope(Arg.Any<Envelope>()))
+            .Do(callback => envelope = callback.Arg<Envelope>());
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.Success);
+        id.Should().NotBe(SentryId.Empty);
+        received.Should().NotBeNull();
+        received.Contexts.Feedback.Should().NotBeNull();
+        received.Contexts.Feedback!.Message.Should().Be("Everything is great!");
+        var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
+        @event.Tags.Should().Contain(new KeyValuePair<string, string>("scrubbed", "true"));
+    }
+
+    [Fact]
+    public void CaptureFeedback_BeforeSendFeedbackSet_ReceivesHintFromCaller()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        var hint = new SentryHint();
+        var attachment = AttachmentHelper.FakeAttachment("scrub-me.txt");
+        hint.Attachments.Add(attachment);
+        SentryHint receivedHint = null;
+        _fixture.SentryOptions.SetBeforeSendFeedback((@event, h) =>
+        {
+            receivedHint = h;
+            return @event;
+        });
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result, null, hint);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.Success);
+        id.Should().NotBe(SentryId.Empty);
+        receivedHint.Should().BeSameAs(hint);
+        receivedHint.Attachments.Should().Contain(attachment);
+    }
+
+    [Fact]
+    public void CaptureFeedback_BeforeSendFeedbackReturnsNull_FeedbackDropped()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        _fixture.SentryOptions.SetBeforeSendFeedback((SentryEvent _) => null);
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.DroppedByBeforeSendFeedback);
+        id.Should().Be(SentryId.Empty);
+        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+    }
+
+    [Fact]
+    public void CaptureFeedback_BeforeSendFeedbackThrows_FeedbackDropped()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        _fixture.SentryOptions.SetBeforeSendFeedback((SentryEvent _) => throw new InvalidOperationException("boom"));
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.DroppedByBeforeSendFeedback);
+        id.Should().Be(SentryId.Empty);
+        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+    }
+
+    [Fact]
+    public void CaptureFeedback_EnqueueFails_ReturnsUnknownError()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(false);
+        var sut = _fixture.GetSut();
+
+        //Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        //Assert
+        result.Should().Be(CaptureFeedbackResult.UnknownError);
+        id.Should().Be(SentryId.Empty);
+    }
+
+    [Fact]
     public void CaptureFeedback_WithHint_HasHintAttachment()
     {
         //Arrange
@@ -1184,6 +1294,119 @@ public partial class SentryClientTests : IDisposable
 
         // Assert
         _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactions_Dropped()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var client = _fixture.GetSut();
+
+        var sentryTransaction = new SentryTransaction("GET /health", "http.server")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        // Act
+        client.CaptureTransaction(sentryTransaction);
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+
+        var expectedSpanCount = sentryTransaction.Spans.Count + 1; // 1 for each span + one for the root transaction
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, expectedSpanCount);
+    }
+
+    [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactionsRegex_Dropped()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { new(new Regex(@"^GET /health/\d+$")) };
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /health/123", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_DoesNotMatchIgnoreTransactions_Sent()
+    {
+        // Arrange
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /api/users", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_MatchesIgnoreTransactions_BeforeSendTransactionNotInvoked()
+    {
+        // Arrange: IgnoreTransactions is applied before the BeforeSendTransaction
+        // callback, so the callback must not observe an ignored transaction.
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var beforeSendTransactionInvoked = false;
+        _fixture.SentryOptions.SetBeforeSendTransaction((tx, _) =>
+        {
+            beforeSendTransactionInvoked = true;
+            return tx;
+        });
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new SentryTransaction("GET /health", "http.server")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        beforeSendTransactionInvoked.Should().BeFalse();
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_SampledOutAndMatchesIgnoreTransactions_RecordedAsSampleRate()
+    {
+        // Arrange: a sampled-out transaction whose name also matches an ignore pattern must be
+        // attributed to sampling (the earlier, primary drop reason), not to IgnoreTransactions.
+        _fixture.SentryOptions.IgnoreTransactions = new List<StringOrRegex> { "GET /health" };
+        var client = _fixture.GetSut();
+
+        var hub = Substitute.For<IHub>();
+        var transaction = new UnsampledTransaction(hub, new TransactionContext("GET /health", "http.server"));
+        transaction.StartChild("span1");
+
+        // Act
+        client.CaptureTransaction(new SentryTransaction(transaction));
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+
+        var expectedSpanCount = transaction.Spans.Count + 1; // 1 for each span + one for the root transaction
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, expectedSpanCount);
+        _fixture.ClientReportRecorder.DidNotReceive().RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
     }
 
     [Fact]

@@ -63,6 +63,15 @@
   -->
   <PropertyGroup Condition="'$(TargetFramework)' != ''">
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <!--
+      Pre-compute the framework identifier/version. The .NET SDK only sets $(TargetFrameworkIdentifier)
+      and $(TargetFrameworkVersion) late (in its own targets), so they're empty during early
+      <PropertyGroup> evaluation. Computing them here (exactly as the SDK does - including the 'v'
+      prefix on the version) makes them usable in both <PropertyGroup> and <ItemGroup> conditions, so
+      our build files can use them consistently instead of $(TargetFramework) string comparisons.
+    -->
+    <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)'))</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)'))</TargetFrameworkVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
@@ -107,7 +116,7 @@
 
   <!-- dotnet-gcdump needs net6+ and won't work on mobile. -->
   <PropertyGroup>
-    <PlatformIsLegacy Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">true</PlatformIsLegacy>
+    <PlatformIsLegacy Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' Or '$(TargetFrameworkIdentifier)' == '.NETStandard'">true</PlatformIsLegacy>
     <PlatformIsMobile Condition="'$(TargetPlatformIdentifier)' == 'android' or '$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'maccatalyst'">true</PlatformIsMobile>
     <MemoryDumpSupported Condition="!($(PlatformIsLegacy) == 'true' or $(PlatformIsMobile) == 'true')">true</MemoryDumpSupported>
 
