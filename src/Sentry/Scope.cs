@@ -157,7 +157,7 @@ public class Scope : IEventLike
 
             if (value is null)
             {
-                Options.LogWarning("Environment cannot be null. Reverting to default value from the options.");
+                Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
                 field = Options.Environment;
             }
             else
@@ -431,7 +431,7 @@ public class Scope : IEventLike
         User = new();
         Release = default;
         Distribution = default;
-        Environment = Options.Environment; // Restore to keep in sync with native
+        Environment = default;
         TransactionName = default;
         Transaction = default;
         Fingerprint = Array.Empty<string>();
