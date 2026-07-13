@@ -134,12 +134,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         };
 
         var span = parentSpan.StartChild(context);
+        // Used to filter out spans that are not recorded when finishing a transaction
+        span.SetFused(data);
         if (span is SpanTracer spanTracer)
         {
             spanTracer.Origin = OpenTelemetryOrigin;
             spanTracer.StartTimestamp = data.StartTimeUtc;
-            // Used to filter out spans that are not recorded when finishing a transaction.
-            spanTracer.SetFused(data);
             spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
         }
         _map[data.SpanId] = span;
@@ -172,7 +172,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
             tracer.StartTimestamp = data.StartTimeUtc;
         }
-        _hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
+        _hub.ConfigureScope(static (scope, transaction) =>
+        {
+            scope.Transaction ??= transaction;
+        }, transaction);
         transaction.SetFused(data);
         _map[data.SpanId] = transaction;
     }
@@ -302,7 +305,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             var (spanId, span) = mappedItem;
             var activity = span.GetFused<Activity>();
-            if (activity is { Recorded: false, IsAllDataRequested: false })
+            // Also prune when the activity has been GC'd (weak ref returns null): the activity is gone, so it
+            // can never call OnEnd, and the span will never be removed otherwise — causing a memory leak.
+            if (activity is null or { Recorded: false, IsAllDataRequested: false })
             {
                 _map.TryRemove(spanId, out _);
             }

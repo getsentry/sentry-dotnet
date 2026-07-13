@@ -87,20 +87,21 @@ internal sealed class SentryStructuredLogger : ILogger
             SpanId = spanId,
         };
 
-        log.SetDefaultAttributes(_options, _sdk);
+        var scope = _hub.GetScope();
+        log.SetDefaultAttributes(_options, scope, _sdk);
         log.SetOrigin("auto.log.extensions_logging");
 
         if (_categoryName is not null)
         {
-            log.SetAttribute("category.name", _categoryName);
+            log.Attributes.SetAttribute("category.name", _categoryName);
         }
         if (eventId.Name is not null || eventId.Id != 0)
         {
-            log.SetAttribute("event.id", eventId.Id);
+            log.Attributes.SetAttribute("event.id", eventId.Id);
         }
         if (eventId.Name is not null)
         {
-            log.SetAttribute("event.name", eventId.Name);
+            log.Attributes.SetAttribute("event.name", eventId.Name);
         }
 
         _hub.Logger.CaptureLog(log);

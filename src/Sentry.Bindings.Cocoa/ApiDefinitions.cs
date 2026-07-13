@@ -264,9 +264,17 @@ interface SentryDebugMeta : SentrySerializable
     [NullAllowed, Export("imageAddress")]
     string ImageAddress { get; set; }
 
+    // @property (assign, nonatomic) uint64_t imageAddressRaw;
+    [Export("imageAddressRaw")]
+    ulong ImageAddressRaw { get; set; }
+
     // @property (copy, nonatomic) NSString * _Nullable imageVmAddress;
     [NullAllowed, Export("imageVmAddress")]
     string ImageVmAddress { get; set; }
+
+    // @property (assign, nonatomic) uint64_t imageVmAddressRaw;
+    [Export("imageVmAddressRaw")]
+    ulong ImageVmAddressRaw { get; set; }
 
     // @property (copy, nonatomic) NSString * _Nullable codeFile;
     [NullAllowed, Export("codeFile")]
@@ -2029,6 +2037,10 @@ interface SentryOptions
     [Static]
     [Export("defaultEnvironment")]
     string DefaultEnvironment { get; }
+
+    // @property (nonatomic) BOOL enableMetrics;
+    [Export("enableMetrics")]
+    bool EnableMetrics { get; set; }
 }
 
 // @interface SentryClient : NSObject
@@ -2126,6 +2138,7 @@ interface SentryDebugImageProvider
 [Internal]
 interface SentryDependencyContainer
 {
+
     // +(SentryDependencyContainer * _Nonnull)sharedInstance __attribute__((warn_unused_result("")));
     [Static]
     [Export("sharedInstance")]
@@ -2173,17 +2186,17 @@ interface SentryExperimentalOptions
     [Export("enableUnhandledCPPExceptionsV2")]
     bool EnableUnhandledCPPExceptionsV2 { get; set; }
 
-    // @property (nonatomic) BOOL enableSessionReplayInUnreliableEnvironment;
-    [Export("enableSessionReplayInUnreliableEnvironment")]
-    bool EnableSessionReplayInUnreliableEnvironment { get; set; }
-
-    // @property (nonatomic) BOOL enableMetrics;
-    [Export("enableMetrics")]
-    bool EnableMetrics { get; set; }
-
     // @property (nonatomic) BOOL enableWatchdogTerminationsV2;
     [Export("enableWatchdogTerminationsV2")]
     bool EnableWatchdogTerminationsV2 { get; set; }
+
+    // @property (nonatomic) BOOL enableReplayNetworkDetailsCapturing;
+    [Export("enableReplayNetworkDetailsCapturing")]
+    bool EnableReplayNetworkDetailsCapturing { get; set; }
+
+    // @property (nonatomic) BOOL enableStandaloneAppStartTracing;
+    [Export("enableStandaloneAppStartTracing")]
+    bool EnableStandaloneAppStartTracing { get; set; }
 
     // -(void)validateOptions:(NSDictionary<NSString *,id> * _Nullable)options;
     [Export("validateOptions:")]
@@ -2600,6 +2613,18 @@ interface SentryReplayOptions : SentryRedactOptions
     [Export("enableFastViewRendering")]
     bool EnableFastViewRendering { get; set; }
 
+    // @property (nonatomic) BOOL networkCaptureBodies;
+    [Export("networkCaptureBodies")]
+    bool NetworkCaptureBodies { get; set; }
+
+    // @property (copy, nonatomic) NSArray<NSString *> * _Nonnull networkRequestHeaders;
+    [Export("networkRequestHeaders", ArgumentSemantic.Copy)]
+    string[] NetworkRequestHeaders { get; set; }
+
+    // @property (copy, nonatomic) NSArray<NSString *> * _Nonnull networkResponseHeaders;
+    [Export("networkResponseHeaders", ArgumentSemantic.Copy)]
+    string[] NetworkResponseHeaders { get; set; }
+
     // @property (readonly, nonatomic) NSInteger replayBitRate;
     [Export("replayBitRate")]
     nint ReplayBitRate { get; }
@@ -2623,6 +2648,10 @@ interface SentryReplayOptions : SentryRedactOptions
     // @property (nonatomic) NSTimeInterval maximumDuration;
     [Export("maximumDuration")]
     double MaximumDuration { get; set; }
+
+    // -(BOOL)isNetworkDetailCaptureEnabledFor:(NSString * _Nonnull)urlString __attribute__((warn_unused_result("")));
+    [Export("isNetworkDetailCaptureEnabledFor:")]
+    bool IsNetworkDetailCaptureEnabledFor(string urlString);
 
     // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
     [Export("initWithDictionary:")]
@@ -2782,8 +2811,6 @@ interface SentrySDK
     [Static]
     [Export("captureFeedback:")]
     void CaptureFeedback(SentryFeedback feedback);
-
-    // @property (readonly, nonatomic, strong, class) SentryFeedbackAPI * _Nonnull feedback;
     [Static]
     [Export("feedback", ArgumentSemantic.Strong)]
     SentryFeedbackAPI Feedback { get; }
@@ -2837,6 +2864,21 @@ interface SentrySDK
     [Static]
     [Export("reportFullyDisplayed")]
     void ReportFullyDisplayed();
+
+    // +(void)extendAppStart;
+    [Static]
+    [Export("extendAppStart")]
+    void ExtendAppStart();
+
+    // +(id<SentrySpan> _Nullable)getExtendedAppStartSpan __attribute__((warn_unused_result("")));
+    [Static]
+    [NullAllowed, Export("getExtendedAppStartSpan")]
+    SentrySpan ExtendedAppStartSpan { get; }
+
+    // +(void)finishExtendedAppStart;
+    [Static]
+    [Export("finishExtendedAppStart")]
+    void FinishExtendedAppStart();
 
     // +(void)pauseAppHangTracking;
     [Static]

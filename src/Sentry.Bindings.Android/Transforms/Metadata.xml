@@ -147,7 +147,13 @@
   <remove-node path="/api/package[@name='io.sentry.android.core.cache']/class[@name='AndroidEnvelopeCache']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.gestures']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.performance']" />
-  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='SentryUserFeedbackDialog.Builder']" />
+  <!-- Remove the deprecated SentryUserFeedbackDialog (and its nested types). Replaced by SentryUserFeedbackForm in Java SDK 8.41+.
+       The nested IOptionsConfiguration / IOptionsConfigurationInvoker collide with the same-named types on SentryUserFeedbackForm (CS0108). -->
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[starts-with(@name,'SentryUserFeedbackDialog')]" />
+
+  <!-- SentryUserFeedbackForm extends AlertDialog and declares a nested Builder that extends AlertDialog.Builder.
+       Rename the nested type so its C# name no longer collides with the inherited AlertDialog.Builder (CS0108). -->
+  <attr path="/api/package[@name='io.sentry.android.core']/class[@name='SentryUserFeedbackForm.Builder']" name="managedName">SentryUserFeedbackFormBuilder</attr>
 
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/*/method[@name='clone' and count(parameter)=0]" />
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/class/implements[@name='io.sentry.JsonDeserializer']" />

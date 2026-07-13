@@ -1,5 +1,4 @@
 using Sentry.Internal;
-using Sentry.Internal.Extensions;
 
 namespace Sentry;
 
@@ -30,7 +29,8 @@ internal class DynamicSamplingContext
         string? release = null,
         string? environment = null,
         string? transactionName = null,
-        IReplaySession? replaySession = null)
+        IReplaySession? replaySession = null,
+        string? orgId = null)
     {
         // Validate and set required values
         if (traceId == SentryId.Empty)
@@ -93,6 +93,11 @@ internal class DynamicSamplingContext
         if (replaySession?.ActiveReplayId is { } replayId && replayId != SentryId.Empty)
         {
             items.Add("replay_id", replayId.ToString());
+        }
+
+        if (!string.IsNullOrWhiteSpace(orgId))
+        {
+            items.Add("org_id", orgId);
         }
 
         _items = items;
@@ -200,7 +205,8 @@ internal class DynamicSamplingContext
             release,
             environment,
             transactionName,
-            replaySession);
+            replaySession,
+            orgId: options.GetEffectiveOrgId());
     }
 
     public static DynamicSamplingContext CreateFromUnsampledTransaction(UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
@@ -225,7 +231,8 @@ internal class DynamicSamplingContext
             release,
             environment,
             transactionName,
-            replaySession);
+            replaySession,
+            orgId: options.GetEffectiveOrgId());
     }
 
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
@@ -241,7 +248,32 @@ internal class DynamicSamplingContext
             null,
             release: release,
             environment: environment,
-            replaySession: replaySession
+            replaySession: replaySession,
+            orgId: options.GetEffectiveOrgId()
+            );
+    }
+
+    public static DynamicSamplingContext? CreateFromExternalPropagationContext(
+        IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    {
+        if (propagationContext.TraceId is not { } traceId || traceId == SentryId.Empty)
+        {
+            return null;
+        }
+        var publicKey = options.ParsedDsn.PublicKey;
+        var release = options.SettingLocator.GetRelease();
+        var environment = options.SettingLocator.GetEnvironment();
+
+        return new DynamicSamplingContext(
+            traceId,
+            publicKey,
+            propagationContext.IsSampled,
+            propagationContext.SampleRate,
+            propagationContext.SampleRand,
+            release: release,
+            environment: environment,
+            replaySession: replaySession,
+            orgId: options.GetEffectiveOrgId()
             );
     }
 }
@@ -259,4 +291,7 @@ internal static class DynamicSamplingContextExtensions
 
     public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
+
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+        => DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, replaySession);
 }

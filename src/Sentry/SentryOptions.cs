@@ -206,7 +206,7 @@ public class SentryOptions
 #endif
 
 #if HAS_DIAGNOSTIC_INTEGRATION
-            if ((_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
+            if (!DisableSentryTracing && (_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
             {
                 yield return new SentryDiagnosticListenerIntegration();
             }
@@ -220,8 +220,17 @@ public class SentryOptions
             }
 #endif
 
+            if ((_defaultIntegrations & DefaultIntegrations.GlobalRootScopeIntegration) != 0)
+            {
+                yield return new GlobalRootScopeIntegration();
+            }
+
             foreach (var integration in _integrations)
             {
+                if (DisableSentryTracing && integration is ISentryTracingIntegration)
+                {
+                    continue;
+                }
                 yield return integration;
             }
         }
@@ -448,6 +457,24 @@ public class SentryOptions
     internal Dsn? _parsedDsn;
     internal Dsn ParsedDsn => _parsedDsn ??= Sentry.Dsn.Parse(Dsn!);
 
+    /// <summary>
+    /// Returns the effective org ID, preferring <see cref="OrgId"/> if set, otherwise falling back to the DSN-parsed value.
+    /// </summary>
+    internal string? GetEffectiveOrgId()
+    {
+        if (!string.IsNullOrWhiteSpace(OrgId))
+        {
+            return OrgId;
+        }
+
+        if (!string.IsNullOrWhiteSpace(Dsn))
+        {
+            return ParsedDsn.OrgId;
+        }
+
+        return null;
+    }
+
     private readonly Lazy<string> _sentryBaseUrl;
 
     internal bool IsSentryRequest(string? requestUri) =>
@@ -514,6 +541,30 @@ public class SentryOptions
     public void SetBeforeSendTransaction(Func<SentryTransaction, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
+    }
+
+    private Func<SentryEvent, SentryHint, SentryEvent?>? _beforeSendFeedback;
+
+    internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeSendFeedbackInternal => _beforeSendFeedback;
+
+    /// <summary>
+    /// Configures a callback to invoke before sending user feedback to Sentry.
+    /// Return null or throw to drop the feedback.
+    /// </summary>
+    /// <param name="beforeSendFeedback">The callback</param>
+    public void SetBeforeSendFeedback(Func<SentryEvent, SentryHint, SentryEvent?> beforeSendFeedback)
+    {
+        _beforeSendFeedback = beforeSendFeedback;
+    }
+
+    /// <summary>
+    /// Configures a callback to invoke before sending user feedback to Sentry.
+    /// Return null or throw to drop the feedback.
+    /// </summary>
+    /// <param name="beforeSendFeedback">The callback</param>
+    public void SetBeforeSendFeedback(Func<SentryEvent, SentryEvent?> beforeSendFeedback)
+    {
+        _beforeSendFeedback = (@event, _) => beforeSendFeedback(@event);
     }
 
     private Func<Breadcrumb, SentryHint, Breadcrumb?>? _beforeBreadcrumb;
@@ -1064,6 +1115,28 @@ public class SentryOptions
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
     public bool PropagateTraceparent { get; set; }
 
+    /// <summary>
+    /// Controls trace continuation from third-party services that happen to be instrumented by Sentry.
+    /// </summary>
+    /// <remarks>
+    /// When enabled, the SDK will require org IDs from baggage to match for continuing the trace.
+    /// If the incoming trace does not contain an org ID and this option is <c>true</c>, a new trace will be started.
+    /// When disabled (default), incoming traces without org IDs will be continued as normal,
+    /// but mismatched org IDs will always cause a new trace to be started regardless of this setting.
+    /// </remarks>
+    public bool StrictTraceContinuation { get; set; }
+
+    /// <summary>
+    /// Configures the org ID used for trace propagation and features like <see cref="StrictTraceContinuation"/>.
+    /// </summary>
+    /// <remarks>
+    /// In most cases the org ID is already parsed from the DSN (e.g., <c>o1</c> in
+    /// <c>https://key@o1.ingest.us.sentry.io/123</c> yields org ID <c>"1"</c>).
+    /// Use this option when non-standard Sentry DSNs are used, such as self-hosted or when using a local Relay.
+    /// When set, this value overrides the org ID parsed from the DSN.
+    /// </remarks>
+    public string? OrgId { get; set; }
+
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
     private StackTraceMode? _stackTraceMode;
@@ -1187,6 +1260,19 @@ public class SentryOptions
     /// </para>
     /// </summary>
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
+
+    /// <summary>
+    /// During the transition period to OTLP we give SDK users the option to keep using Sentry's tracing in conjunction
+    /// with OTEL instrumentation. Setting this to true will disable Sentry's tracing entirely, which is the recommended
+    /// setting but would be a major change in behaviour, so we've made it opt-in for now.
+    /// TODO: Remove this option in a future major release and make it true / non-optional when using OTEL (i.e. implied by the Instrumenter)
+    /// </summary>
+    internal bool DisableSentryTracing { get; set; } = false;
+
+    /// <summary>
+    /// An optional external propagation context - used when using Sentry with OLTP
+    /// </summary>
+    internal IExternalPropagationContext? ExternalPropagationContext { get; set; }
 
     /// <summary>
     /// <para>
@@ -1366,6 +1452,7 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
                                | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
 #endif
+                               | DefaultIntegrations.GlobalRootScopeIntegration
                                ;
 
 #if ANDROID
@@ -1833,6 +1920,7 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
         SystemDiagnosticsMetricsIntegration = 1 << 7,
 #endif
+        GlobalRootScopeIntegration = 1 << 8,
     }
 
     internal void SetupLogging()

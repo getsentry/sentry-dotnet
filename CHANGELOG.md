@@ -1,5 +1,69 @@
 # Changelog
 
+## Unreleased
+
+### Features ✨
+
+- feat: Add exponential backoff and log deduplication to Spotlight transport by @mattico in [#5025](https://github.com/getsentry/sentry-dotnet/pull/5025)
+
+## 6.6.0
+
+### Features ✨
+
+- feat: propagate trace to `sentry-android` and `sentry-cocoa` by @bitsandfoxes in [#5244](https://github.com/getsentry/sentry-dotnet/pull/5244)
+- feat: User.Id can now be overriden (set to null) in Global mode by @jamescrosswell in [#5039](https://github.com/getsentry/sentry-dotnet/pull/5039)
+- feat: Implement strict trace continuation by @giortzisg in [#4981](https://github.com/getsentry/sentry-dotnet/pull/4981)
+
+### Fixes 🐛
+
+- fix: return early from AddSentryOtlpExporter when DSN is the disable-SDK sentinel by @jamescrosswell in [#5247](https://github.com/getsentry/sentry-dotnet/pull/5247)
+- fix: sync default tags to native layer by @bitsandfoxes in [#5214](https://github.com/getsentry/sentry-dotnet/pull/5214)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.14.0 by @github-actions[bot] in [#5252](https://github.com/getsentry/sentry-dotnet/pull/5252)
+- chore(deps): update Java SDK to v8.42.0 by @github-actions[bot] in [#5208](https://github.com/getsentry/sentry-dotnet/pull/5208)
+
+### Other
+
+- release: 6.6.0 by @jamescrosswell in [0140be0a](https://github.com/getsentry/sentry-dotnet/commit/0140be0a3b98ee01ff53097a5289bc6e7b703957)
+- chore: update scripts/update-cli.ps1 to 3.4.3 by @github-actions[bot] in [#5251](https://github.com/getsentry/sentry-dotnet/pull/5251)
+- ci: update the Update Dependencies workflow by @Flash0ver in [#5175](https://github.com/getsentry/sentry-dotnet/pull/5175)
+- chore: update modules/sentry-native to 0.14.2 by @github-actions[bot] in [#5229](https://github.com/getsentry/sentry-dotnet/pull/5229)
+- chore: update modules/sentry-cocoa to 9.13.0 by @github-actions[bot] in [#5221](https://github.com/getsentry/sentry-dotnet/pull/5221)
+- chore: update scripts/update-cli.ps1 to 3.4.2 by @github-actions[bot] in [#5220](https://github.com/getsentry/sentry-dotnet/pull/5220)
+- chore: update modules/sentry-cocoa to 9.12.1 by @github-actions[bot] in [#5207](https://github.com/getsentry/sentry-dotnet/pull/5207)
+
+## 6.5.0
+
+### Features ✨
+
+- feat: Add support to send OTEL traces via OTLP by @jamescrosswell in [#4899](https://github.com/getsentry/sentry-dotnet/pull/4899)
+
+### Fixes 🐛
+
+- fix(unity): update `SentryEvent` to have `IsCaptured` to allow dropping screenshots of filtered events by @JoshuaMoelans in [#5162](https://github.com/getsentry/sentry-dotnet/pull/5162)
+- fix: Memory leak when filtered Activities get garbage collected before `PruneFilteredSpans` runs by @jamescrosswell in [#5186](https://github.com/getsentry/sentry-dotnet/pull/5186)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.12.0 by @github-actions in [#5179](https://github.com/getsentry/sentry-dotnet/pull/5179)
+- chore(deps): update CLI to v3.4.1 by @github-actions in [#5171](https://github.com/getsentry/sentry-dotnet/pull/5171)
+- chore(deps): update Native SDK to v0.13.8 by @github-actions in [#5165](https://github.com/getsentry/sentry-dotnet/pull/5165)
+- chore(deps): update Java SDK to v8.40.0 by @github-actions in [#5161](https://github.com/getsentry/sentry-dotnet/pull/5161)
+- chore(deps): update Cocoa SDK to v9.11.0 by @github-actions in [#5160](https://github.com/getsentry/sentry-dotnet/pull/5160)
+- chore(deps): update CLI to v3.4.0 by @github-actions in [#5145](https://github.com/getsentry/sentry-dotnet/pull/5145)
+- chore(deps): update Java SDK to v8.39.1 by @github-actions in [#5144](https://github.com/getsentry/sentry-dotnet/pull/5144)
+
+### Other
+
+- perf(logs): avoid string allocation when no parameters are passed by @Flash0ver in [#4697](https://github.com/getsentry/sentry-dotnet/pull/4697)
+- chore: fix missing skill by @jamescrosswell in [#5134](https://github.com/getsentry/sentry-dotnet/pull/5134)
+
 ## 6.4.1
 
 ### Fixes 🐛

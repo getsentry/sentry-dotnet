@@ -125,6 +125,14 @@ public class SentryClient : ISentryClient, IDisposable
             return SentryId.Empty;  // Dropped by an event processor
         }
 
+        if (SentryEventHelper.DoBeforeSendFeedback(processedEvent, hint, _options) is not { } feedbackEvent)
+        {
+            result = CaptureFeedbackResult.DroppedByBeforeSendFeedback;
+            return SentryId.Empty;
+        }
+
+        processedEvent = feedbackEvent;
+
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromFeedback(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
         if (CaptureEnvelope(envelope))

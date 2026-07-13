@@ -44,4 +44,9 @@ public enum CaptureFeedbackResult
     /// The <see cref="SentryFeedback"/> was discarded by an event processor.
     /// </summary>
     DroppedByEventProcessor,
+    /// <summary>
+    /// The <see cref="SentryFeedback"/> was discarded by the <c>BeforeSendFeedback</c> callback
+    /// either by returning null or by throwing an exception.
+    /// </summary>
+    DroppedByBeforeSendFeedback,
 }

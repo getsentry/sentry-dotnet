@@ -245,6 +245,55 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Args.Should().BeEquivalentTo([nameof(SentryLog)]);
     }
 
+    [Fact]
+    public void Log_WithScopeUser_SetsUserAttributes()
+    {
+        var scope = new Scope();
+        scope.User = new SentryUser { Id = "user-id", Username = "user-name", Email = "user@example.com" };
+        _fixture.Hub.SubstituteConfigureScope(scope);
+
+        SentryLog capturedLog = null!;
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog((SentryLog log) =>
+        {
+            capturedLog = log;
+            return log;
+        });
+        var logger = _fixture.GetSut();
+
+        logger.LogInfo("A message");
+        logger.Flush();
+
+        capturedLog.Should().NotBeNull();
+        capturedLog.Attributes.ShouldContain("user.id", "user-id");
+        capturedLog.Attributes.ShouldContain("user.name", "user-name");
+        capturedLog.Attributes.ShouldContain("user.email", "user@example.com");
+    }
+
+    [Fact]
+    public void Log_WithoutScopeUser_DoesNotSetUserAttributes()
+    {
+        var scope = new Scope();
+        _fixture.Hub.SubstituteConfigureScope(scope);
+
+        SentryLog capturedLog = null!;
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog((SentryLog log) =>
+        {
+            capturedLog = log;
+            return log;
+        });
+        var logger = _fixture.GetSut();
+
+        logger.LogInfo("A message");
+        logger.Flush();
+
+        capturedLog.Should().NotBeNull();
+        capturedLog.Attributes.ShouldNotContain<object>("user.id");
+        capturedLog.Attributes.ShouldNotContain<object>("user.name");
+        capturedLog.Attributes.ShouldNotContain<object>("user.email");
+    }
+
     private static void ConfigureLog(SentryLog log)
     {
         log.SetAttribute("attribute-key", "attribute-value");
@@ -292,8 +341,7 @@ internal static class LoggerAssertionExtensions
 
         foreach (var expectedAttribute in fixture.ExpectedAttributes)
         {
-            log.TryGetAttribute(expectedAttribute.Key, out string? value).Should().BeTrue();
-            value.Should().Be(expectedAttribute.Value);
+            log.Attributes.ShouldContain<string>(expectedAttribute.Key, expectedAttribute.Value);
         }
     }
 

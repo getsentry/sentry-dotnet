@@ -4,8 +4,13 @@ on:
   # Run every day.
   schedule:
     - cron: "0 3 * * *"
-  # Allow a manual trigger to be able to run the update when there are new dependencies or after a PR merge to resolve CHANGELOG conflicts.
+  # Allow a manual trigger to be able to run the update when there are new dependencies.
   workflow_dispatch:
+
+permissions:
+  contents: write      # To modify files and create commits
+  pull-requests: write # To create and update pull requests
+  actions: write       # To cancel previous workflow runs
 
 jobs:
   deps:
@@ -24,7 +29,7 @@ jobs:
           - name: CLI
             path: scripts/update-cli.ps1
     steps:
-      - uses: getsentry/github-workflows/updater@26f565c05d0dd49f703d238706b775883037d76b # 3.3.0
+      - uses: getsentry/github-workflows/updater@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}

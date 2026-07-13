@@ -36,6 +36,7 @@
     <File Path=".github/workflows/validate-pr.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
     <File Path=".github/workflows/watch-upstream.yml" />
+    <File Path=".github\workflows\verify-api.yml" />
   </Folder>
   <Folder Name="/benchmarks/">
     <File Path="benchmarks\Directory.Build.props" />
@@ -113,6 +114,7 @@
     <Project Path="samples/Sentry.Samples.OpenTelemetry.AspNetCore/Sentry.Samples.OpenTelemetry.AspNetCore.csproj" />
     <Project Path="samples/Sentry.Samples.OpenTelemetry.AzureFunctions/Sentry.Samples.OpenTelemetry.AzureFunctions.csproj" />
     <Project Path="samples/Sentry.Samples.OpenTelemetry.Console/Sentry.Samples.OpenTelemetry.Console.csproj" />
+    <Project Path="samples/Sentry.Samples.OpenTelemetry.MongoDB/Sentry.Samples.OpenTelemetry.MongoDB.csproj" />
     <Project Path="samples/Sentry.Samples.Serilog/Sentry.Samples.Serilog.csproj" />
   </Folder>
   <Folder Name="/scripts/">
@@ -158,6 +160,7 @@
     <Project Path="src/Sentry.Maui.CommunityToolkit.Mvvm/Sentry.Maui.CommunityToolkit.Mvvm.csproj" />
     <Project Path="src/Sentry.Maui/Sentry.Maui.csproj" />
     <Project Path="src/Sentry.NLog/Sentry.NLog.csproj" />
+    <Project Path="src/Sentry.OpenTelemetry.Exporter/Sentry.OpenTelemetry.Exporter.csproj" />
     <Project Path="src/Sentry.OpenTelemetry/Sentry.OpenTelemetry.csproj" />
     <Project Path="src/Sentry.Profiling/Sentry.Profiling.csproj" />
     <Project Path="src/Sentry.Serilog/Sentry.Serilog.csproj" />
@@ -187,6 +190,7 @@
     <Project Path="test/Sentry.Maui.Tests/Sentry.Maui.Tests.csproj" />
     <Project Path="test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj" />
     <Project Path="test/Sentry.NLog.Tests/Sentry.NLog.Tests.csproj" />
+    <Project Path="test/Sentry.OpenTelemetry.Exporter.Tests/Sentry.OpenTelemetry.Exporter.Tests.csproj" />
     <Project Path="test/Sentry.OpenTelemetry.Tests/Sentry.OpenTelemetry.Tests.csproj" />
     <Project Path="test/Sentry.Profiling.Tests/Sentry.Profiling.Tests.csproj" />
     <Project Path="test/Sentry.Serilog.Tests/Sentry.Serilog.Tests.csproj" />
