@@ -5,6 +5,7 @@
 ### Features ✨
 
 - feat: Add exponential backoff and log deduplication to Spotlight transport by @mattico in [#5025](https://github.com/getsentry/sentry-dotnet/pull/5025)
+- feat: The `Environment` set on the `Scope` now gets synchronized to the native layers (`sentry-cocoa` and `sentry-native`) by @bitsandfoxes [#5365](https://github.com/getsentry/sentry-dotnet/pull/5365)
 
 ## 6.6.0
 

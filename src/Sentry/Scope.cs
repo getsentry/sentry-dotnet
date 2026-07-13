@@ -316,6 +316,7 @@ public class Scope : IEventLike
         Options = options ?? new SentryOptions();
         PropagationContext = new SentryPropagationContext(propagationContext);
 
+        // Skip scope sync with backing field. The native SDKs already received the environment set on the options.
         _environment = Options.Environment;
     }
 
