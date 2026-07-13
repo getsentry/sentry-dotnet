@@ -102,6 +102,7 @@ public class SentryLogTests
     {
         var options = new SentryOptions
         {
+            Environment = "options-environment",
             Release = "options-release",
         };
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");

@@ -103,6 +103,7 @@ public class SentryMetricTests
     {
         var options = new SentryOptions
         {
+            Environment = "options-environment",
             Release = "options-release",
         };
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
@@ -123,7 +124,7 @@ public class SentryMetricTests
         };
 
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
-        metric.Attributes.SetDefaultAttributes(options, new Scope());
+        metric.Attributes.SetDefaultAttributes(options, new Scope(options));
 
         var envelope = Envelope.FromMetric(new TraceMetric([metric]));
 
@@ -201,7 +202,7 @@ public class SentryMetricTests
         metric.SetAttribute("boolean-attribute", true);
         metric.SetAttribute("integer-attribute", 3);
         metric.SetAttribute("double-attribute", 4.4);
-        metric.Attributes.SetDefaultAttributes(options, new Scope { Sdk = { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" } });
+        metric.Attributes.SetDefaultAttributes(options, new Scope(options) { Sdk = { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" } });
 
         var envelope = EnvelopeItem.FromMetric(new TraceMetric([metric]));
 
