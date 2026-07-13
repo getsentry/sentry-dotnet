@@ -144,15 +144,13 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public string? Distribution { get; set; }
 
-    private string? _environment;
-
     /// <inheritdoc />
     public string? Environment
     {
-        get => _environment;
+        get;
         set
         {
-            if (_environment == value)
+            if (field == value)
             {
                 return;
             }
@@ -160,16 +158,16 @@ public class Scope : IEventLike
             if (value is null)
             {
                 Options.LogWarning("Environment cannot be null. Reverting to default value from the options.");
-                _environment = Options.Environment;
+                field = Options.Environment;
             }
             else
             {
-                _environment = value;
+                field = value;
             }
 
             if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
             {
-                observer.SetEnvironment(_environment);
+                observer.SetEnvironment(field);
             }
         }
     }
@@ -315,9 +313,6 @@ public class Scope : IEventLike
     {
         Options = options ?? new SentryOptions();
         PropagationContext = new SentryPropagationContext(propagationContext);
-
-        // Skip scope sync with backing field. The native SDKs already received the environment set on the options.
-        _environment = Options.Environment;
     }
 
     // For testing. Should explicitly require SentryOptions.

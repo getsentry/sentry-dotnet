@@ -114,6 +114,21 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clone_EnvironmentOverridesOptions_OverridePreserved()
+    {
+        // Arrange
+        var options = new SentryOptions { Environment = "production" };
+        var scope = new Scope(options);
+        scope.Environment = "staging";
+
+        // Act
+        var clone = scope.Clone();
+
+        // Assert
+        clone.Environment.Should().Be("staging");
+    }
+
+    [Fact]
     public void TransactionName_TransactionNotStarted_NameIsSet()
     {
         // Arrange
@@ -722,35 +737,37 @@ public class ScopeTests
     public void SetEnvironment_Null_EnvironmentSetToOptionEnvironment()
     {
         // Arrange
-        const string expectedEnvironment = "staging";
-        var scope = new Scope(new SentryOptions { Environment = expectedEnvironment });
+        const string optionsEnvironment = "production";
+        var scope = new Scope(new SentryOptions { Environment = optionsEnvironment });
+        scope.Environment = "staging"; // Override before resetting
 
         // Act
         scope.Environment = null;
 
         // Assert
-        scope.Environment.Should().Be(expectedEnvironment);
+        scope.Environment.Should().Be(optionsEnvironment);
     }
 
     [Fact]
     public void SetEnvironment_Null_ObserverReceivesOptionEnvironment()
     {
         // Arrange
-        const string expectedEnvironment = "staging";
+        const string optionsEnvironment = "production";
         var observer = Substitute.For<IScopeObserver>();
         var scope = new Scope(new SentryOptions
         {
             ScopeObserver = observer,
             EnableScopeSync = true,
-            Environment = expectedEnvironment
+            Environment = optionsEnvironment
         });
+        scope.Environment = "staging"; // Override before resetting
         observer.ClearReceivedCalls();
 
         // Act
         scope.Environment = null;
 
         // Assert
-        observer.Received(1).SetEnvironment(Arg.Is(expectedEnvironment));
+        observer.Received(1).SetEnvironment(Arg.Is(optionsEnvironment));
     }
 
     [Fact]
