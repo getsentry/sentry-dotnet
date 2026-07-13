@@ -1,3 +1,7 @@
+// Alias required because Android TFMs of the core Sentry package otherwise see an ambiguous reference
+// between System.Diagnostics.Activity (global using) and Android.App.Activity (Android implicit usings).
+using Activity = System.Diagnostics.Activity;
+
 namespace Sentry.Internal.Tracing;
 
 /// <summary>
