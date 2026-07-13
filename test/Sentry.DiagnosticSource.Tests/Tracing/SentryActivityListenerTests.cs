@@ -1,7 +1,6 @@
-#if NET8_0_OR_GREATER
 using Sentry.Internal.Tracing;
 
-namespace Sentry.Tests.Internals.Tracing;
+namespace Sentry.DiagnosticSource.Tests.Tracing;
 
 /// <summary>
 /// End-to-end tests for <see cref="SentryActivityListener"/>: Activities created via ActivitySource are
@@ -120,4 +119,3 @@ public class SentryActivityListenerTests
             Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 }
-#endif

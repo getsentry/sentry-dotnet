@@ -53,8 +53,10 @@
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
-    <!-- System.Diagnostics.ActivityListener/ActivitySource are part of the shared framework on these TFMs.
-         On netstandard2.x/net462 they would require a System.Diagnostics.DiagnosticSource >= 5.0 package reference. -->
+    <!-- System.Diagnostics.ActivityListener/ActivitySource are part of the shared framework on these TFMs, so the
+         Activity-based tracing code in Sentry.DiagnosticSource/Internal/Tracing is compiled directly into core here
+         (via the Compile Include below). On netstandard2.x/net462 the same sources ship in the Sentry.DiagnosticSource
+         package instead, which carries the System.Diagnostics.DiagnosticSource package reference they need. -->
     <DefineConstants>$(DefineConstants);HAS_ACTIVITY_LISTENER</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">

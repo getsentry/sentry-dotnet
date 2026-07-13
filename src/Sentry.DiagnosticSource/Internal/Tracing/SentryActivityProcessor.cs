@@ -296,7 +296,9 @@ internal class SentryActivityProcessor
 
         foreach (var mappedItem in _map)
         {
-            var (spanId, span) = mappedItem;
+            // Note: no KeyValuePair deconstruction here — it isn't available on netstandard2.0/net462.
+            var spanId = mappedItem.Key;
+            var span = mappedItem.Value;
             var activity = span.GetFused<Activity>();
             // Also prune when the activity has been GC'd (weak ref returns null): the activity is gone, so it
             // can never call OnEnd, and the span will never be removed otherwise — causing a memory leak.

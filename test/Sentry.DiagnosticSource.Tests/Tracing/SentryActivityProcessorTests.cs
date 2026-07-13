@@ -1,8 +1,7 @@
-#if NET8_0_OR_GREATER
 using Sentry.Internal.OpenTelemetry;
 using Sentry.Internal.Tracing;
 
-namespace Sentry.Tests.Internals.Tracing;
+namespace Sentry.DiagnosticSource.Tests.Tracing;
 
 /// <summary>
 /// Port of Sentry.OpenTelemetry.Tests.SentrySpanProcessorTests, running the same scenarios against the core
@@ -1020,4 +1019,3 @@ public class SentryActivityProcessorTests : ActivitySourceTests
         source.Should().Be(TransactionNameSource.Custom);
     }
 }
-#endif

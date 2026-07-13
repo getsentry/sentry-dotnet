@@ -1,5 +1,4 @@
-#if NET8_0_OR_GREATER
-namespace Sentry.Tests.Internals.Tracing;
+namespace Sentry.DiagnosticSource.Tests.Tracing;
 
 /// <summary>
 /// Base class for tests that need a recording ActivitySource. This is the core equivalent of
@@ -34,4 +33,3 @@ public abstract class ActivitySourceTests : IDisposable
         GC.SuppressFinalize(this);
     }
 }
-#endif
