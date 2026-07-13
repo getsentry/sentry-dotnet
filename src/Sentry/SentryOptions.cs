@@ -1238,6 +1238,19 @@ public class SentryOptions
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
 
     /// <summary>
+    /// Spike: when Activity-based tracing is enabled, this factory routes Sentry-API transactions
+    /// (SentrySdk.StartTransaction et al.) through a System.Diagnostics.Activity so that the Activity is the
+    /// single source of truth for spans. Set by SentryActivityListener. The factory returns null when no
+    /// activity listener is running, in which case Hub.StartTransaction falls back to the classic path.
+    /// </summary>
+    /// <remarks>
+    /// This is a plain delegate (no System.Diagnostics.Activity types in the signature) so that it can be
+    /// declared here in core - which compiles for TFMs without ActivityListener support - while the shim
+    /// implementation ships in Sentry.DiagnosticSource for those TFMs.
+    /// </remarks>
+    internal Func<IHub, ITransactionContext, IReadOnlyDictionary<string, object?>, DynamicSamplingContext?, ITransactionTracer?>? ActivityShimFactory { get; set; }
+
+    /// <summary>
     /// During the transition period to OTLP we give SDK users the option to keep using Sentry's tracing in conjunction
     /// with OTEL instrumentation. Setting this to true will disable Sentry's tracing entirely, which is the recommended
     /// setting but would be a major change in behaviour, so we've made it opt-in for now.

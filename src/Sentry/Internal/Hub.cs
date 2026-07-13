@@ -191,6 +191,18 @@ internal class Hub : IHub, IDisposable
             return NoOpTransaction.Instance;
         }
 
+        // Spike: when Activity-based tracing is enabled, Sentry-API transactions are routed through the
+        // Activity shim - the Activity becomes the source of truth and the SentryActivityListener converts
+        // it back into the transaction that gets captured. Transactions created by that conversion arrive
+        // here with Instrumenter.OpenTelemetry and fall through to the classic path below (which is how the
+        // shim avoids infinite recursion). A null return means no listener is running - fall through too.
+        if (_options.ActivityShimFactory is { } shimFactory
+            && context is not TransactionContext { Instrumenter: Instrumenter.OpenTelemetry }
+            && shimFactory(this, context, customSamplingContext, dynamicSamplingContext) is { } shimmedTransaction)
+        {
+            return shimmedTransaction;
+        }
+
         bool? isSampled = null;
         double? sampleRate = null;
         DiscardReason? discardReason = null;

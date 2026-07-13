@@ -26,6 +26,7 @@ namespace Sentry.Internal.Tracing;
 internal sealed class SentryActivityListener : IDisposable
 {
     private readonly ActivityListener _listener;
+    private readonly SentryOptions? _options;
 
     internal SentryActivityProcessor Processor { get; }
 
@@ -48,7 +49,23 @@ internal sealed class SentryActivityListener : IDisposable
             ActivityStopped = Processor.OnEnd
         };
         ActivitySource.AddActivityListener(_listener);
+
+        // Install the tracing shim: Sentry-API transactions (SentrySdk.StartTransaction et al.) get routed
+        // through Activities on the Sentry ActivitySource, making the Activity the single source of truth
+        // for spans regardless of which API created them.
+        _options = hub.GetSentryOptions();
+        if (_options is not null)
+        {
+            _options.ActivityShimFactory = ActivityTransactionShim.Create;
+        }
     }
 
-    public void Dispose() => _listener.Dispose();
+    public void Dispose()
+    {
+        if (_options is { ActivityShimFactory: { } factory } && factory == ActivityTransactionShim.Create)
+        {
+            _options.ActivityShimFactory = null;
+        }
+        _listener.Dispose();
+    }
 }
