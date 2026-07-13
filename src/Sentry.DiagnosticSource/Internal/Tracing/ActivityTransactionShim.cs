@@ -83,19 +83,8 @@ internal sealed class ActivityTransactionShim : ActivitySpanShim, ITransactionTr
 
         var shim = new ActivityTransactionShim(activity, inner, hub);
 
-        // Idle transactions can finish out-of-band (the idle timer fires tracer-side, capturing or
-        // discarding without going through the shim). The Activity must be stopped when that happens,
-        // otherwise it leaks and - worse - stays Activity.Current, silently re-parenting later spans.
-        if (inner is TransactionTracer tracer)
-        {
-            tracer.OnFinished = () =>
-            {
-                if (!activity.IsStopped)
-                {
-                    activity.Stop();
-                }
-            };
-        }
+        // Note: out-of-band tracer finishes (idle timer) stop the backing Activity via the OnFinished
+        // hook the processor installs on every activity-derived transaction.
 
         // The processor put the shadow tracer on the scope; replace it with the shim so that
         // integrations calling hub.GetSpan()/scope.Transaction route child spans through Activities.
