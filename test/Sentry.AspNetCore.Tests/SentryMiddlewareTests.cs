@@ -49,8 +49,7 @@ public class SentryMiddlewareTests
             ServiceProvider = new ServiceCollection()
                 .AddSingleton(HubAccessor)
                 .AddSingleton<SentryOptions>(Options)
-                .AddSingleton<BlockingMonitor>()
-                .AddSingleton<IBlockingMonitor>(p => p.GetRequiredService<BlockingMonitor>())
+                .AddSingleton<IBlockingMonitor, BlockingMonitor>()
                 .AddSingleton<TaskBlockingListener>()
                 .BuildServiceProvider();
         }

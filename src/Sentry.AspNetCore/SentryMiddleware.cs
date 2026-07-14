@@ -35,11 +35,11 @@ internal class SentryMiddleware : IMiddleware
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     // Ben.BlockingDetector
-    private readonly BlockingMonitor? _monitor;
+    private readonly IBlockingMonitor? _monitor;
     private readonly TaskBlockingListener? _listener;
 
     // Internal for testing
-    internal BlockingMonitor? Monitor => _monitor;
+    internal IBlockingMonitor? Monitor => _monitor;
     internal TaskBlockingListener? Listener => _listener;
 
     /// <summary>
@@ -81,7 +81,7 @@ internal class SentryMiddleware : IMiddleware
         if (_options.CaptureBlockingCalls)
         {
             // Resolve shared singletons to keep overhead constant - See #5378.
-            _monitor = serviceProvider.GetRequiredService<BlockingMonitor>();
+            _monitor = serviceProvider.GetRequiredService<IBlockingMonitor>();
             _listener = serviceProvider.GetRequiredService<TaskBlockingListener>();
         }
     }

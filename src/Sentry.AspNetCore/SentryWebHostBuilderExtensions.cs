@@ -114,9 +114,7 @@ public static class SentryWebHostBuilderExtensions
             c.AddTransient<IStartupFilter, SentryStartupFilter>()
              .AddTransient<IStartupFilter, SentryTracingStartupFilter>()
              // Single listener/monitor per process (the listener is a global EventListener) - See #5378.
-             // The IBlockingMonitor forward keeps the listener on the same monitor instance.
-             .AddSingleton<BlockingMonitor>()
-             .AddSingleton<IBlockingMonitor>(p => p.GetRequiredService<BlockingMonitor>())
+             .AddSingleton<IBlockingMonitor, BlockingMonitor>()
              .AddSingleton<TaskBlockingListener>()
              .AddTransient<SentryMiddleware>()
         );
