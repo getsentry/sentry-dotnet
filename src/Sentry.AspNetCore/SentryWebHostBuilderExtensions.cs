@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
-using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Ben.BlockingDetector;
 
@@ -118,11 +117,12 @@ public static class SentryWebHostBuilderExtensions
              // process-global listener chain, so exactly one must exist per process. Register the
              // monitor and listener as singletons; the transient SentryMiddleware resolves (rather
              // than constructs) them, avoiding a per-request listener leak. See issue #5378.
-             .AddSingleton<BlockingMonitor>(p => new BlockingMonitor(
-                 p.GetRequiredService<Func<IHub>>(),
-                 p.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value))
-             .AddSingleton<TaskBlockingListener>(p => new TaskBlockingListener(
-                 p.GetRequiredService<BlockingMonitor>()))
+             // BlockingMonitor(Func<IHub>, SentryOptions) and TaskBlockingListener(IBlockingMonitor)
+             // are both constructed by DI - Func<IHub> and SentryOptions are already registered, and
+             // the IBlockingMonitor forward ensures the listener shares the same monitor instance.
+             .AddSingleton<BlockingMonitor>()
+             .AddSingleton<IBlockingMonitor>(p => p.GetRequiredService<BlockingMonitor>())
+             .AddSingleton<TaskBlockingListener>()
              .AddTransient<SentryMiddleware>()
         );
 

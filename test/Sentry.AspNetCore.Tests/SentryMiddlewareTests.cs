@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Sentry.Ben.BlockingDetector;
 
 #if NETCOREAPP3_1_OR_GREATER
@@ -49,11 +48,10 @@ public class SentryMiddlewareTests
             // (transient) middleware can resolve the shared blocking monitor/listener.
             ServiceProvider = new ServiceCollection()
                 .AddSingleton(HubAccessor)
-                .AddSingleton(Microsoft.Extensions.Options.Options.Create(Options))
-                .AddSingleton(p => new BlockingMonitor(
-                    p.GetRequiredService<Func<IHub>>(),
-                    p.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value))
-                .AddSingleton(p => new TaskBlockingListener(p.GetRequiredService<BlockingMonitor>()))
+                .AddSingleton<SentryOptions>(Options)
+                .AddSingleton<BlockingMonitor>()
+                .AddSingleton<IBlockingMonitor>(p => p.GetRequiredService<BlockingMonitor>())
+                .AddSingleton<TaskBlockingListener>()
                 .BuildServiceProvider();
         }
 
