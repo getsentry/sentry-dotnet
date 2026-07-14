@@ -87,7 +87,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     }
 
     /// <inheritdoc />
-    public bool? IsSampled => true; // Implicitly if we instantiate this class then the transaction is sampled in
+    public bool? IsSampled { get; internal set; } = true;
 
     /// <summary>
     /// The sample rate used for this transaction.

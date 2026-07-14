@@ -35,22 +35,32 @@ static partial class SentrySdk
 
         ProcessInfo.Instance ??= new ProcessInfo(options);
 
-        // Locate the DSN
-        var dsnString = options.SettingLocator.GetDsn();
+        // Resolve Spotlight settings from environment variables before DSN resolution,
+        // so EnableSpotlight is set when we decide whether DSN is required.
+        options.SettingLocator.ResolveSpotlight();
 
-        // If it's either explicitly disabled or we couldn't resolve the DSN
-        // from anywhere else, return a disabled hub.
-        if (Dsn.IsDisabled(dsnString))
+        // Locate the DSN. When Spotlight is enabled, DSN is not required.
+        var dsnString = options.SettingLocator.GetDsn(required: !options.EnableSpotlight);
+        var hasDsn = !Dsn.IsDisabled(dsnString);
+
+        if (!hasDsn && !options.EnableSpotlight)
         {
             options.LogWarning("Init called with an empty string as the DSN. Sentry SDK will be disabled.");
             return DisabledHub.Instance;
         }
 
-        // Validate DSN for an early exception in case it's malformed
-        var dsn = Dsn.Parse(dsnString);
-        if (dsn.SecretKey != null)
+        if (hasDsn)
         {
-            options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
+            // Validate DSN for an early exception in case it's malformed
+            var dsn = Dsn.Parse(dsnString);
+            if (dsn.SecretKey != null)
+            {
+                options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
+            }
+        }
+        else
+        {
+            options.LogInfo("No DSN provided. Sentry SDK will run in Spotlight-only mode.");
         }
 
 #pragma warning disable CS0162 // Unreachable code detected
@@ -63,8 +73,8 @@ static partial class SentrySdk
 #pragma warning restore 0162
 #pragma warning restore CS0162 // Unreachable code detected
 
-        // Initialize native platform SDKs here
-        if (options.InitNativeSdks)
+        // Initialize native platform SDKs here (only when we have a DSN)
+        if (hasDsn && options.InitNativeSdks)
         {
 #if __IOS__
             InitSentryCocoaSdk(options);

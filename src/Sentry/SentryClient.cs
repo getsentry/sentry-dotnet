@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Http;
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
 
@@ -135,6 +136,13 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromFeedback(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+
+        // Send feedback to Spotlight (shared envelope — don't dispose)
+        if (_options.SpotlightTransport is not null)
+        {
+            SendToSpotlight(envelope, ownsEnvelope: false);
+        }
+
         if (CaptureEnvelope(envelope))
         {
             result = CaptureFeedbackResult.Success;
@@ -176,8 +184,11 @@ public class SentryClient : ISentryClient, IDisposable
         // Sampling decision MUST have been made at this point
         Debug.Assert(transaction.IsSampled is not null, "Attempt to capture transaction without sampling decision.");
 
+        var hasSpotlight = _options.SpotlightTransport is not null;
         var spanCount = transaction.Spans.Count + 1; // 1 for each span + 1 for the transaction itself
-        if (transaction.IsSampled is false)
+
+        // Fast path: no Spotlight and sampled out → skip enrichment entirely
+        if (!hasSpotlight && transaction.IsSampled is false)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, spanCount);
@@ -208,6 +219,22 @@ public class SentryClient : ISentryClient, IDisposable
         scope.Apply(transaction);
 
         _enricher.Apply(transaction);
+
+        // Send enriched transaction to Spotlight before any filtering/sampling/PII-redaction.
+        // Spotlight bypasses transaction processors, BeforeSendTransaction, sampling, and PII redaction per spec.
+        if (_options.SpotlightTransport is not null)
+        {
+            SendToSpotlight(Envelope.FromTransaction(transaction));
+        }
+
+        // Sentry sampling check (after Spotlight interception)
+        if (transaction.IsSampled is false)
+        {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, spanCount);
+            _options.LogDebug("Transaction dropped by sampling.");
+            return;
+        }
 
         var processedTransaction = transaction;
         foreach (var processor in scope.GetAllTransactionProcessors())
@@ -374,6 +401,16 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
+        // Send enriched event to Spotlight before any filtering/sampling/PII-redaction.
+        // Spotlight bypasses event processors, BeforeSend, sampling, and PII redaction per spec.
+        if (_options.SpotlightTransport is not null)
+        {
+            // The event is serialized twice (once for Spotlight, once for the main pipeline); buffer any
+            // single-use stream attachments first so both serializations read independent copies.
+            BufferSingleUseAttachmentsForSpotlight(hint);
+            SendToSpotlight(Envelope.FromEvent(@event, _options.DiagnosticLogger, hint.Attachments.ToList()));
+        }
+
         if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options, DataCategory.Error)
             is not { } processedEvent)
         {
@@ -470,6 +507,112 @@ public class SentryClient : ISentryClient, IDisposable
 
         // The event should not be filtered.
         return null;
+    }
+
+    /// <summary>
+    /// When Spotlight is enabled, an event's attachments are serialized twice — once for the Spotlight
+    /// envelope and once for the main pipeline envelope. <see cref="ByteAttachmentContent"/> and
+    /// <see cref="FileAttachmentContent"/> return a fresh stream per read and are safe, but any other
+    /// content (e.g. <see cref="StreamAttachmentContent"/>) may be backed by a single-use stream that the
+    /// first serialization would consume/dispose, corrupting the second. Buffer those into memory once so
+    /// both serializations read independent copies.
+    /// </summary>
+    private void BufferSingleUseAttachmentsForSpotlight(SentryHint hint)
+    {
+        if (hint.Attachments.Count == 0)
+        {
+            return;
+        }
+
+        var buffered = new List<SentryAttachment>(hint.Attachments.Count);
+        var changed = false;
+        foreach (var attachment in hint.Attachments)
+        {
+            if (attachment.Content is ByteAttachmentContent or FileAttachmentContent)
+            {
+                buffered.Add(attachment);
+                continue;
+            }
+
+            try
+            {
+                using var stream = attachment.Content.GetStream();
+                using var ms = new MemoryStream();
+                stream.CopyTo(ms);
+                buffered.Add(new SentryAttachment(
+                    attachment.Type,
+                    new ByteAttachmentContent(ms.ToArray()),
+                    attachment.FileName,
+                    attachment.ContentType));
+                changed = true;
+            }
+            catch (Exception e)
+            {
+                // Keep the original attachment so the main pipeline is unaffected.
+                _options.LogError(e, "Failed to buffer attachment '{0}' for Spotlight.", attachment.FileName);
+                buffered.Add(attachment);
+            }
+        }
+
+        if (!changed)
+        {
+            return;
+        }
+
+        hint.Attachments.Clear();
+        foreach (var attachment in buffered)
+        {
+            hint.Attachments.Add(attachment);
+        }
+    }
+
+    /// <summary>
+    /// Serializes the envelope synchronously on the calling thread to capture a snapshot of the
+    /// event/transaction data, then fire-and-forgets the HTTP POST with the immutable bytes.
+    /// This eliminates the race condition where the main pipeline mutates the event concurrently
+    /// with Spotlight serialization.
+    /// When <paramref name="ownsEnvelope"/> is true, the envelope is disposed after serialization.
+    /// </summary>
+    private void SendToSpotlight(Envelope envelope, bool ownsEnvelope = true)
+    {
+        if (_options.SpotlightTransport is not { } transport)
+        {
+            if (ownsEnvelope)
+            {
+                envelope.Dispose();
+            }
+            return;
+        }
+
+        byte[] serialized;
+        try
+        {
+            using var ms = new MemoryStream();
+            envelope.Serialize(ms, _options.DiagnosticLogger);
+            serialized = ms.ToArray();
+        }
+        finally
+        {
+            if (ownsEnvelope)
+            {
+                envelope.Dispose();
+            }
+        }
+
+        _ = SendToSpotlightAsync(transport, serialized);
+
+        static async Task SendToSpotlightAsync(ISpotlightTransport spotlightTransport, byte[] data)
+        {
+            try
+            {
+                await spotlightTransport.SendAsync(data).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Spotlight failures never affect the main pipeline.
+                // SpotlightHttpTransport handles its own error logging internally.
+            }
+        }
     }
 
     /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>

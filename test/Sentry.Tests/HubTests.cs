@@ -2957,6 +2957,90 @@ public partial class HubTests : IDisposable
         // Assert - should NOT continue because OrgId override (2) != baggage org_id (1)
         transactionContext.TraceId.Should().NotBe(incomingTraceId);
     }
+
+    [Fact]
+    public void StartTransaction_SampledOut_SpotlightEnabled_ReturnsTransactionTracer()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 0.0;
+        _fixture.Options.EnableSpotlight = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert — returns TransactionTracer so span data is recorded for Spotlight
+        transaction.Should().BeOfType<TransactionTracer>();
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_SampledOut_SpotlightDisabled_ReturnsUnsampledTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 0.0;
+        _fixture.Options.EnableSpotlight = false;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert — returns lightweight UnsampledTransaction when Spotlight is off
+        transaction.Should().BeOfType<UnsampledTransaction>();
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_SampledIn_SpotlightEnabled_ReturnsTransactionTracer()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.EnableSpotlight = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert — sampled-in always returns TransactionTracer regardless of Spotlight
+        transaction.Should().BeOfType<TransactionTracer>();
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_SpotlightEnabledNoDsn_SampledIn_DoesNotThrow()
+    {
+        // Arrange — DSN-less Spotlight mode (SettingLocator resolves the DSN to an empty string).
+        // Creating the DynamicSamplingContext must not dereference the (absent) DSN.
+        _fixture.Options.Dsn = string.Empty;
+        _fixture.Options.EnableSpotlight = true;
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.Should().BeOfType<TransactionTracer>();
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_SpotlightEnabledNoDsn_SampledOut_DoesNotThrow()
+    {
+        // Arrange — DSN-less Spotlight mode, sampled out: still a TransactionTracer for Spotlight,
+        // and the DynamicSamplingContext creation must not dereference the (absent) DSN.
+        _fixture.Options.Dsn = string.Empty;
+        _fixture.Options.EnableSpotlight = true;
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.Should().BeOfType<TransactionTracer>();
+        transaction.IsSampled.Should().BeFalse();
+    }
 }
 
 #if NET6_0_OR_GREATER

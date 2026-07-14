@@ -21,6 +21,11 @@ internal static class Constants
     public const string EnvironmentEnvironmentVariable = "SENTRY_ENVIRONMENT";
 
     /// <summary>
+    /// Sentry Spotlight environment variable.
+    /// </summary>
+    public const string SpotlightEnvironmentVariable = "SENTRY_SPOTLIGHT";
+
+    /// <summary>
     /// Default Sentry environment setting.
     /// </summary>
     /// <remarks>Best Sentry practice is to always try and have a value for this setting.</remarks>

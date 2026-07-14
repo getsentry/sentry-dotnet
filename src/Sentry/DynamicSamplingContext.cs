@@ -183,10 +183,28 @@ internal class DynamicSamplingContext
         return new DynamicSamplingContext(items);
     }
 
-    public static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession)
+    // Resolves the DSN public key required to build a DSC. Returns false when no DSN is configured
+    // (e.g. Spotlight-only mode), in which case there is no public key and therefore no DSC to create.
+    private static bool TryGetPublicKey(SentryOptions options, out string publicKey)
     {
+        if (string.IsNullOrWhiteSpace(options.Dsn) || Dsn.IsDisabled(options.Dsn))
+        {
+            publicKey = string.Empty;
+            return false;
+        }
+
+        publicKey = options.ParsedDsn.PublicKey;
+        return true;
+    }
+
+    public static DynamicSamplingContext? CreateFromTransaction(TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession)
+    {
+        if (!TryGetPublicKey(options, out var publicKey))
+        {
+            return null;
+        }
+
         // These should already be set on the transaction.
-        var publicKey = options.ParsedDsn.PublicKey;
         var traceId = transaction.TraceId;
         var sampled = transaction.IsSampled;
         var sampleRate = transaction.SampleRate!.Value;
@@ -209,10 +227,14 @@ internal class DynamicSamplingContext
             orgId: options.GetEffectiveOrgId());
     }
 
-    public static DynamicSamplingContext CreateFromUnsampledTransaction(UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext? CreateFromUnsampledTransaction(UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
     {
+        if (!TryGetPublicKey(options, out var publicKey))
+        {
+            return null;
+        }
+
         // These should already be set on the transaction.
-        var publicKey = options.ParsedDsn.PublicKey;
         var traceId = transaction.TraceId;
         var sampled = transaction.IsSampled;
         var sampleRate = transaction.SampleRate!.Value;
@@ -235,10 +257,14 @@ internal class DynamicSamplingContext
             orgId: options.GetEffectiveOrgId());
     }
 
-    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext? CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
     {
+        if (!TryGetPublicKey(options, out var publicKey))
+        {
+            return null;
+        }
+
         var traceId = propagationContext.TraceId;
-        var publicKey = options.ParsedDsn.PublicKey;
         var release = options.SettingLocator.GetRelease();
         var environment = options.SettingLocator.GetEnvironment();
 
@@ -260,7 +286,10 @@ internal class DynamicSamplingContext
         {
             return null;
         }
-        var publicKey = options.ParsedDsn.PublicKey;
+        if (!TryGetPublicKey(options, out var publicKey))
+        {
+            return null;
+        }
         var release = options.SettingLocator.GetRelease();
         var environment = options.SettingLocator.GetEnvironment();
 
@@ -283,13 +312,13 @@ internal static class DynamicSamplingContextExtensions
     public static DynamicSamplingContext? CreateDynamicSamplingContext(this BaggageHeader baggage, IReplaySession? replaySession = null)
         => DynamicSamplingContext.CreateFromBaggageHeader(baggage, replaySession);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromTransaction(transaction, options, replaySession);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromUnsampledTransaction(transaction, options, replaySession);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
 
     public static DynamicSamplingContext? CreateDynamicSamplingContext(this IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)

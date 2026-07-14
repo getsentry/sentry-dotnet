@@ -15,9 +15,9 @@ internal class SdkComposer
         ArgumentNullException.ThrowIfNull(options);
 
         _options = options;
-        if (options.Dsn is null)
+        if (options.Dsn is null && !options.EnableSpotlight)
         {
-            throw new ArgumentException("No DSN defined in the SentryOptions");
+            throw new ArgumentException("No DSN defined and Spotlight is disabled in the SentryOptions.");
         }
         _backpressureMonitor = backpressureMonitor;
     }
@@ -26,30 +26,43 @@ internal class SdkComposer
     {
         _options.LogDebug("Creating transport.");
 
-        // Start from either the transport given on options, or create a new HTTP transport.
-        var transport = _options.Transport ?? new LazyHttpTransport(_options, _backpressureMonitor);
+        ITransport transport;
+        var hasDsn = !string.IsNullOrWhiteSpace(_options.Dsn) && !Dsn.IsDisabled(_options.Dsn!);
 
-        // When a cache directory path is given, wrap the transport in a caching transport.
-        if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
+        if (hasDsn)
         {
-            _options.LogDebug("Cache directory path is specified.");
+            // Start from either the transport given on options, or create a new HTTP transport.
+            transport = _options.Transport ?? new LazyHttpTransport(_options, _backpressureMonitor);
 
-            if (_options.DisableFileWrite)
+            // When a cache directory path is given, wrap the transport in a caching transport.
+            if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
             {
-                _options.LogInfo("File write has been disabled via the options. Skipping caching transport creation.");
+                _options.LogDebug("Cache directory path is specified.");
+
+                if (_options.DisableFileWrite)
+                {
+                    _options.LogInfo("File write has been disabled via the options. Skipping caching transport creation.");
+                }
+                else
+                {
+                    _options.LogDebug("File writing is enabled, wrapping transport in caching transport.");
+                    transport = CachingTransport.Create(transport, _options);
+                }
             }
             else
             {
-                _options.LogDebug("File writing is enabled, wrapping transport in caching transport.");
-                transport = CachingTransport.Create(transport, _options);
+                _options.LogDebug("No cache directory path specified. Skipping caching transport creation.");
             }
         }
         else
         {
-            _options.LogDebug("No cache directory path specified. Skipping caching transport creation.");
+            // No DSN — use a no-op transport (e.g. Spotlight-only mode).
+            _options.LogDebug("No DSN configured. Using no-op transport for Sentry.");
+            transport = NoOpTransport.Instance;
         }
 
-        // Wrap the transport with the Spotlight one that double sends the envelope: Sentry + Spotlight
+        // Create a separate Spotlight transport when enabled.
+        // Unlike before, this is NOT a wrapper around the main transport — it sends independently.
         if (_options.EnableSpotlight)
         {
             var environment = _options.SettingLocator.GetEnvironment(true);
@@ -70,7 +83,7 @@ internal class SdkComposer
             {
                 throw new InvalidOperationException("Invalid option for SpotlightUrl: " + _options.SpotlightUrl);
             }
-            transport = new SpotlightHttpTransport(transport, _options, _options.GetHttpClient(), spotlightUrl, SystemClock.Clock);
+            _options.SpotlightTransport = new SpotlightHttpTransport(_options, _options.GetHttpClient(), spotlightUrl, SystemClock.Clock);
         }
 
         // Always persist the transport on the options, so other places can pick it up where necessary.
