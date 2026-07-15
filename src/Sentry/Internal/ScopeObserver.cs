@@ -95,6 +95,15 @@ internal abstract class ScopeObserver : Sentry.IScopeObserver
 
     public abstract void SetTraceImpl(SentryId traceId, SpanId parentSpanId);
 
+    public void SetEnvironment(string? environment)
+    {
+        _options.DiagnosticLogger?.Log(SentryLevel.Debug,
+            "{0} Scope Sync - Setting Environment e:\"{1}\"", null, _name, environment);
+        SetEnvironmentImpl(environment);
+    }
+
+    public abstract void SetEnvironmentImpl(string? environment);
+
     public void AddAttachment(SentryAttachment attachment)
     {
         _options.DiagnosticLogger?.Log(SentryLevel.Debug,

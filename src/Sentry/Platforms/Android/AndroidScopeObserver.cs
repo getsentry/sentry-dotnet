@@ -112,6 +112,18 @@ internal sealed class AndroidScopeObserver : IScopeObserver
         }
     }
 
+    public void SetEnvironment(string? environment)
+    {
+        try
+        {
+            // TODO: Missing corresponding scope-level functionality on the Android SDK
+        }
+        finally
+        {
+            _innerObserver?.SetEnvironment(environment);
+        }
+    }
+
     public void AddAttachment(SentryAttachment attachment)
     {
         try
