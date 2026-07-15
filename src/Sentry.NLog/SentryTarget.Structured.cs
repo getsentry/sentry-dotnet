@@ -36,16 +36,18 @@ public sealed partial class SentryTarget
         parameters = GetParameters(logEvent, out var parameterNames);
         attributes = new List<KeyValuePair<string, object>>();
 
-        if (logEvent.HasProperties)
+        if (!logEvent.HasProperties)
         {
-            foreach (var property in logEvent.Properties)
+            return;
+        }
+
+        foreach (var property in logEvent.Properties)
+        {
+            if (property.Key is string key && !string.IsNullOrWhiteSpace(key) &&
+                property.Value is { } value &&
+                !parameterNames.Contains(key))
             {
-                if (property.Key is string key && !string.IsNullOrWhiteSpace(key) &&
-                    property.Value is { } value &&
-                    !parameterNames.Contains(key))
-                {
-                    attributes.Add(new KeyValuePair<string, object>($"property.{key}", value));
-                }
+                attributes.Add(new KeyValuePair<string, object>($"property.{key}", value));
             }
         }
     }
