@@ -74,8 +74,9 @@ public sealed partial class SentryTarget
         var index = 0;
         foreach (var parameter in parameters)
         {
-            // Unnamed holes (e.g. `{}`) have an empty name. Fall back to the positional index so that
-            // multiple unnamed holes don't collide on the same `sentry.message.parameter.` attribute key.
+            // NLog allows passing unnamed holes (e.g. `{}`) - parameters with no names.
+            // To prevent a collision on the attribute key when multiple unnamed holes are present, we fall back to the
+            // positional index of the parameter in these cases (matching the behaviour of MEL).
             var name = string.IsNullOrEmpty(parameter.Name)
                 ? index.ToString(CultureInfo.InvariantCulture)
                 : parameter.Name;
