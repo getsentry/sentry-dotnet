@@ -98,33 +98,25 @@ public partial class SentryTargetTests
         log.Parameters[5].Should().BeEquivalentTo(new KeyValuePair<string, object>("Object", (Number: 42, Text: "42")));
         log.SpanId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.SpanId : null);
 
-        log.TryGetAttribute("sentry.environment", out object? environment).Should().BeTrue();
-        environment.Should().Be("test-environment");
-        log.TryGetAttribute("sentry.release", out object? release).Should().BeTrue();
-        release.Should().Be("test-release");
-        log.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
-        origin.Should().Be("auto.log.nlog");
-        log.TryGetAttribute("sentry.sdk.name", out object? sdkName).Should().BeTrue();
-        sdkName.Should().Be(Constants.SdkName);
-        log.TryGetAttribute("sentry.sdk.version", out object? sdkVersion).Should().BeTrue();
-        sdkVersion.Should().Be(SentryTarget.NameAndVersion.Version);
+        log.Attributes.ShouldContain("sentry.environment", "test-environment");
+        log.Attributes.ShouldContain("sentry.release", "test-release");
+        log.Attributes.ShouldContain("sentry.origin", "auto.log.nlog");
+        log.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
+        log.Attributes.ShouldContain("sentry.sdk.version", SentryTarget.NameAndVersion.Version);
 
-        log.TryGetAttribute("property.Text-Property-Key", out object? text).Should().BeTrue();
-        text.Should().Be("Text-Property-Value");
-        log.TryGetAttribute("property.Number-Property", out object? number).Should().BeTrue();
-        number.Should().Be(42);
-        log.TryGetAttribute("property.Collection-Property", out object? collection).Should().BeTrue();
+        log.Attributes.ShouldContain("property.Text-Property-Key", "Text-Property-Value");
+        log.Attributes.ShouldContain("property.Number-Property", 42);
+        log.Attributes.TryGetAttribute("property.Collection-Property", out int[]? collection).Should().BeTrue();
         collection.Should().BeEquivalentTo(new[] { 41, 42, 43 });
-        log.TryGetAttribute("property.Map-Property", out object? map).Should().BeTrue();
+        log.Attributes.TryGetAttribute("property.Map-Property", out Dictionary<string, string>? map).Should().BeTrue();
         map.Should().BeEquivalentTo(new Dictionary<string, string> { { "key", "value" } });
-        log.TryGetAttribute("property.Object-Property", out object? obj).Should().BeTrue();
-        obj.Should().Be((Number: 42, Text: "42"));
+        log.Attributes.ShouldContain("property.Object-Property", (Number: 42, Text: "42"));
 
-        log.TryGetAttribute("property.Text", out object? _).Should().BeFalse();
-        log.TryGetAttribute("property.Number", out object? _).Should().BeFalse();
-        log.TryGetAttribute("property.Collection", out object? _).Should().BeFalse();
-        log.TryGetAttribute("property.Map", out object? _).Should().BeFalse();
-        log.TryGetAttribute("property.Object", out object? _).Should().BeFalse();
+        log.Attributes.ShouldNotContain<object>("property.Text");
+        log.Attributes.ShouldNotContain<object>("property.Number");
+        log.Attributes.ShouldNotContain<object>("property.Collection");
+        log.Attributes.ShouldNotContain<object>("property.Map");
+        log.Attributes.ShouldNotContain<object>("property.Object");
     }
 
     [Fact]
