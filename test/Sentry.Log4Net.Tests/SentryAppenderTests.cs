@@ -44,6 +44,8 @@ public partial class SentryAppenderTests : IDisposable
     public void Dispose()
     {
         SentryClientExtensions.SentryOptionsForTestingOnly = null;
+        // ThreadContext.Properties is thread-static and can leak into subsequent tests running on the same thread.
+        ThreadContext.Properties.Clear();
     }
 
     [Fact]

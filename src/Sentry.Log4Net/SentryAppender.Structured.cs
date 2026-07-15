@@ -11,9 +11,11 @@ public partial class SentryAppender
             const string? template = null; // cannot get format-string from `log4net.Util.SystemStringFormat` via `LoggingEvent.MessageObject`
             var parameters = ImmutableArray<KeyValuePair<string, object>>.Empty; // cannot get arguments from `log4net.Util.SystemStringFormat` via `LoggingEvent.MessageObject`
 
-            var log = SentryLog.Create(hub, timestamp, level.Value, loggingEvent.RenderedMessage, template, parameters);
+            var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
+            var log = SentryLog.Create(hub, timestamp, level.Value, message, template, parameters);
 
-            log.SetDefaultAttributes(options, Sdk);
+            var scope = hub.GetScope();
+            log.SetDefaultAttributes(options, scope, Sdk);
             log.SetOrigin("auto.log.log4net");
 
             foreach (var property in loggingEvent.GetProperties())
