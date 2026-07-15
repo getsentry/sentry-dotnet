@@ -38,11 +38,6 @@ runs:
         sudo apt-get update
         sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
 
-    # zstd is needed for cross OS actions/cache but missing from windows-11-arm
-    # https://github.com/actions/partner-runner-images/issues/99
-    - name: Install zstd on Windows ARM64
-      uses: ./.github/actions/install-zstd
-
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md#xcode
     # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
