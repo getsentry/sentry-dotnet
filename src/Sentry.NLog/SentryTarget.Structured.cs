@@ -58,10 +58,11 @@ public sealed partial class SentryTarget
             return ImmutableArray<KeyValuePair<string, object>>.Empty;
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NET472_OR_GREATER || NETCOREAPP2_0_OR_GREATER
-        parameterNames = new HashSet<string>(parameters.Count);
-#else
+        // The HashSet<T> capacity constructor is unavailable on netstandard2.0 and net462 (added in net472).
+#if NETSTANDARD2_0 || NET462
         parameterNames = new HashSet<string>();
+#else
+        parameterNames = new HashSet<string>(parameters.Count);
 #endif
 
         var @params = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>(parameters.Count);
