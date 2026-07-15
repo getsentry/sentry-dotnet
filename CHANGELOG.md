@@ -1,5 +1,50 @@
 # Changelog
 
+## 6.7.0
+
+### Features ✨
+
+- feat(android): expose tombstone options via SentryOptions.Native by @jamescrosswell in [#5226](https://github.com/getsentry/sentry-dotnet/pull/5226)
+- Add `IgnoreTransactions` option to filter out transactions by name, matching substrings or regular expressions against the transaction name ([#5377](https://github.com/getsentry/sentry-dotnet/pull/5377)) by @Adham-Kiwan in [#5377](https://github.com/getsentry/sentry-dotnet/pull/5377)
+- feat: Add BeforeSendFeedback callback to inspect, modify, or drop user feedback before it's sent by @vladbrincoveanu in [#5361](https://github.com/getsentry/sentry-dotnet/pull/5361)
+- Add public API for checking unhandled exceptions (`SentryEventExtensions.IsFromUnhandledException`) and terminal exceptions (`SentryEventExtensions.IsFromTerminalException`) by @jamescrosswell in [#5177](https://github.com/getsentry/sentry-dotnet/pull/5177)
+- feat: Add PreferTransactionNameProvider option by @jamescrosswell in [#5159](https://github.com/getsentry/sentry-dotnet/pull/5159)
+- feat: Add exponential backoff and log deduplication to Spotlight by @mattico in [#5025](https://github.com/getsentry/sentry-dotnet/pull/5025)
+
+### Fixes 🐛
+
+- fix(otel): only set Scope.Transaction in SentrySpanProcessor when null by @tsushanth in [#5337](https://github.com/getsentry/sentry-dotnet/pull/5337)
+- fix: LNK4291 on Native AOT WinExe with Control Flow Guard by @jamescrosswell in [#5298](https://github.com/getsentry/sentry-dotnet/pull/5298)
+- fix: OpenTelemetry transactions for failed requests keep their route name and otel context by @jamescrosswell in [#5310](https://github.com/getsentry/sentry-dotnet/pull/5310)
+- fix: populate Default attributes on structured logs from current scope by @jamescrosswell in [#5216](https://github.com/getsentry/sentry-dotnet/pull/5216)
+- fix: [.NET 10] PageNavigationExtensions updated for public Page properties by @nor0x in [#5278](https://github.com/getsentry/sentry-dotnet/pull/5278)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Java SDK to v8.48.0 by @github-actions in [#5360](https://github.com/getsentry/sentry-dotnet/pull/5360)
+- chore(deps): update Cocoa SDK to v9.21.0 by @github-actions in [#5359](https://github.com/getsentry/sentry-dotnet/pull/5359)
+- chore(deps): update Native SDK to v0.15.3 by @github-actions in [#5353](https://github.com/getsentry/sentry-dotnet/pull/5353)
+- chore(deps): update Cocoa SDK to v9.20.0 by @github-actions in [#5354](https://github.com/getsentry/sentry-dotnet/pull/5354)
+- chore(deps): update Java SDK to v8.47.0 by @github-actions in [#5338](https://github.com/getsentry/sentry-dotnet/pull/5338)
+- chore(deps): update Cocoa SDK to v9.19.1 by @github-actions in [#5336](https://github.com/getsentry/sentry-dotnet/pull/5336)
+- chore(deps): update CLI to v3.6.0 by @github-actions in [#5329](https://github.com/getsentry/sentry-dotnet/pull/5329)
+- chore(deps): update Cocoa SDK to v9.19.0 by @github-actions in [#5316](https://github.com/getsentry/sentry-dotnet/pull/5316)
+- chore(deps): update Java SDK to v8.46.0 by @github-actions in [#5321](https://github.com/getsentry/sentry-dotnet/pull/5321)
+- chore(deps): update Java SDK to v8.45.0 by @github-actions in [#5315](https://github.com/getsentry/sentry-dotnet/pull/5315)
+- chore(deps): update Native SDK to v0.15.2 by @github-actions in [#5309](https://github.com/getsentry/sentry-dotnet/pull/5309)
+- chore(deps): update Cocoa SDK to v9.18.0 by @github-actions in [#5264](https://github.com/getsentry/sentry-dotnet/pull/5264)
+- chore(deps): update Java SDK to v8.44.1 by @github-actions in [#5263](https://github.com/getsentry/sentry-dotnet/pull/5263)
+- chore(deps): update CLI to v3.5.1 by @github-actions in [#5279](https://github.com/getsentry/sentry-dotnet/pull/5279)
+- chore(deps): update Native SDK to v0.15.1 by @github-actions in [#5282](https://github.com/getsentry/sentry-dotnet/pull/5282)
+
+### Other
+
+- Added Sentry.Samples.OpenTelemetry.MongoDB by @jamescrosswell in [#5335](https://github.com/getsentry/sentry-dotnet/pull/5335)
+- docs: add XML comments for boolean return of `Sentry.Extensions.Logging` Filters by @Flash0ver in [#5297](https://github.com/getsentry/sentry-dotnet/pull/5297)
+- LatestWindowsTfm added to Directory.Build.props by @nor0x in [#5277](https://github.com/getsentry/sentry-dotnet/pull/5277)
+
 ## 6.6.0
 
 ### Features ✨
