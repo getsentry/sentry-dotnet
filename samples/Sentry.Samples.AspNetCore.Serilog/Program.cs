@@ -15,13 +15,16 @@ public class Program
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 // Add Sentry integration with Serilog
-                // Two levels are used to configure it.
-                // One sets which log level is minimally required to keep a log message as breadcrumbs
-                // The other sets the minimum level for messages to be sent out as events to Sentry
                 .WriteTo.Sentry(s =>
                 {
+                    // Sets the minimum log level required to add a log message as breadcrumb
                     s.MinimumBreadcrumbLevel = LogEventLevel.Debug;
+                    // Set the minimum level for messages to be sent out as events to Sentry
                     s.MinimumEventLevel = LogEventLevel.Error;
+                    // When configuring Sentry's Serilog integration in combination with other integrations that
+                    // initialize the Sentry SDK (like ASP.NET Core or MAUI) we need to tell it not to reinitialize
+                    // Sentry... we just want it to set up the Serilog sink
+                    s.InitializeSdk = false;
                 }));
 
         // Add Sentry integration

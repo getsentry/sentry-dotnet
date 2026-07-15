@@ -1,5 +1,17 @@
 # Agent Instructions
 
+## Getting Started
+
+**Check out the submodules first.** The native SDKs and several build/tooling projects live in git submodules under `modules/` (e.g. `sentry-native`, `sentry-cocoa`, `perfview`). Without them, builds, solution-filter generation, and other tooling break in confusing ways — e.g. `scripts/generate-solution-filters.ps1` silently drops the missing projects from the `*.slnf` files.
+
+The bootstrap step handles this for you (it runs `git submodule update --init --recursive` plus a full restore):
+
+```sh
+./dev.cs cleanslate
+```
+
+If you only need to sync submodules (e.g. in a fresh worktree), run `./dev.cs subup` or `git submodule update --init --recursive` directly.
+
 ## Build System
 
 Uses the .NET SDK (`dotnet` CLI). Key files:
@@ -126,8 +138,9 @@ Public API diffs are stored as Verify snapshot files. After any public API chang
 
 ## Changelog
 
-- If the change is not user-facing, add `#skip-changelog` to the PR description
+- If the change is not user-facing, either write `#skip-changelog` to the PR description or add the `skip-changelog` label to the PR
 - Otherwise generated automatically from [Commit message conventions](https://develop.sentry.dev/engineering-practices/commit-messages/)
+  - Do **NOT** add changelogs manually
 
 ```sh
 # Get PR number for current branch

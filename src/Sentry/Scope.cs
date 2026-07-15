@@ -145,7 +145,32 @@ public class Scope : IEventLike
     public string? Distribution { get; set; }
 
     /// <inheritdoc />
-    public string? Environment { get; set; }
+    public string? Environment
+    {
+        get;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            if (value is null)
+            {
+                Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
+                field = Options.Environment;
+            }
+            else
+            {
+                field = value;
+            }
+
+            if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
+            {
+                observer.SetEnvironment(field);
+            }
+        }
+    }
 
     // TransactionName is kept for legacy purposes because
     // SentryEvent still makes use of it.

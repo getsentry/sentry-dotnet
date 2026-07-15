@@ -7,15 +7,21 @@ on:
       - 'samples/**'
       - '.github/workflows/format-code.yml'
 
+# Serialize with verify-api.yml so the two auto-commit workflows can't race
+# each other's git push on the same PR branch.
+concurrency:
+  group: pr-auto-commit-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   format-code:
     name: Format Code
     # Run on 'macos' because Linux is missing the `ios` workload: https://github.com/dotnet/runtime/issues/85505
     # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
 

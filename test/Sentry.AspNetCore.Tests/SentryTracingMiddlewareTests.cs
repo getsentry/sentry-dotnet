@@ -752,4 +752,134 @@ public class SentryTracingMiddlewareTests
         transaction.Name.Should().Be("GET /person/13.bmp");
         transaction.NameSource.Should().Be(TransactionNameSource.Url);
     }
+
+    [Fact]
+    public async Task Transaction_TransactionNameProviderSetForRoutedRequest_ProviderOverridesRouteName()
+    {
+        // Arrange
+        SentryTransaction transaction = null;
+
+        const string expectedName = "My custom name";
+
+        var sentryClient = Substitute.For<ISentryClient>();
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>()))
+            .Do(callback => transaction = callback.Arg<SentryTransaction>());
+
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry(aspNetOptions =>
+            {
+                aspNetOptions.TransactionNameProvider = _ => expectedName;
+                aspNetOptions.PreferTransactionNameProvider = true;
+            })
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        await client.GetStringAsync("/person/13");
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction.Name.Should().Be($"GET {expectedName}");
+        transaction.NameSource.Should().Be(TransactionNameSource.Custom);
+    }
+
+    [Fact]
+    public async Task Transaction_TransactionNameProviderSetForRoutedRequest_DefaultsToRouteBehaviour()
+    {
+        // Arrange
+        SentryTransaction transaction = null;
+
+        var sentryClient = Substitute.For<ISentryClient>();
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>()))
+            .Do(callback => transaction = callback.Arg<SentryTransaction>());
+
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry(aspNetOptions => aspNetOptions.TransactionNameProvider = _ => "My custom name")
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        await client.GetStringAsync("/person/13");
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction.Name.Should().Be("GET /person/{id}");
+        transaction.NameSource.Should().Be(TransactionNameSource.Route);
+    }
+
+    [Fact]
+    public async Task Transaction_PreferTransactionNameProviderWithNullReturn_PreservesRouteName()
+    {
+        // Arrange
+        SentryTransaction transaction = null;
+
+        var sentryClient = Substitute.For<ISentryClient>();
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>()))
+            .Do(callback => transaction = callback.Arg<SentryTransaction>());
+
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry(aspNetOptions =>
+            {
+                aspNetOptions.TransactionNameProvider = _ => null;
+                aspNetOptions.PreferTransactionNameProvider = true;
+            })
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        await client.GetStringAsync("/person/13");
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction.Name.Should().Be("GET /person/{id}");
+        transaction.NameSource.Should().Be(TransactionNameSource.Route);
+    }
 }

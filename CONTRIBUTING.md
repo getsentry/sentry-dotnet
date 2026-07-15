@@ -13,11 +13,20 @@ For a big feature it's advised to raise an issue to discuss it first.
   * CI should be green.
   * The ideal state is where a reviewer approves and merges it immediately. But on more complex changes, some back and forth during reviews is expected.
 
+## Code comments
+
+We prefer code that explains itself, so comments should be kept to a minimum:
+
+* When code needs explaining, prefer refactoring it (better variable and method names, clearer structure) over adding a comment.
+* Where a comment is genuinely needed, keep it short and to the point.
+* Detailed context belongs in the pull request description rather than inline. When a comment does need lengthy background, reference the relevant PR instead of inlining the explanation.
+
 ## TLDR
 
 * Install the .NET SDKs
 * Install PowerShell
 * Install Xcode
+* Check out the submodules: `git submodule update --init --recursive`
 * Restore workloads with `dotnet workload restore` (needs `sudo` on a Mac)
 * To quickly get up and running, you can just run `dotnet build SentryNoMobile.slnf` (you're skipping the mobile targets)
 * To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
@@ -100,26 +109,13 @@ To do that, run the build locally (i.e: `./build.sh` or `build.cmd`) and commit 
 ## Changelog
 
 We'd love for users to update the SDK everytime and as soon as we make a new release. But in reality most users rarely update the SDK.
-To help users see value in updating the SDK, we maintain a changelog file with entries split between two headings:
+To help users see value in updating the SDK, we maintain a changelog file with entries split between headings such as `### Features` and `### Fixes`.
 
-1. `### Features`
-2. `### Fixes`
+**Do not edit `CHANGELOG.md` manually.** The changelog is generated automatically at release time by [craft](https://github.com/getsentry/craft) (`changelogPolicy: auto` in `.craft.yml`) from the pull requests merged since the previous release. Entries are categorized from your [commit message / PR title](https://develop.sentry.dev/engineering-practices/commit-messages/) (e.g. a `feat:` PR becomes a Feature, a `fix:` PR becomes a Fix), so there's nothing to add by hand.
 
-We add the heading in the first PR that's adding either a feature or fixes in the current release.
-After a release, the [changelog file will contain only the last release entries](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md).
+If the PR title doesn't capture the change well — you want more detail, or a single PR should produce several entries — add a `### Changelog Entry` section to the PR description. craft uses the text under that heading verbatim instead of the PR title. See [Custom changelog entries from PR descriptions](https://craft.sentry.dev/configuration/#custom-changelog-entries-from-pr-descriptions).
 
-When you open a PR in such cases, you need to add a heading 2 named `## Unreleased`, which is replaced during release with the version number chosen.
-Below that, you'll add heading 3 mentioned above. For example, if you're adding a feature "Attach screenshots when capturing errors on WPF", right after a release, you'd add to the changelog:
-
-```
-## Unreleased
-
-### Features
-
-- Attach screenshots when capturing errors on WPF (#PR number)
-```
-
-There's a GitHub action check to verify if an entry was added. If the entry isn't a user-facing change, you can skip the verification with `#skip-changelog` written to the PR description. The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
+If the change isn't user-facing and you'd rather it not appear in the changelog at all, add the `skip-changelog` label to the PR or write `#skip-changelog` in the PR description.
 
 ## Naming tests
 

@@ -102,7 +102,26 @@ internal sealed class AndroidScopeObserver : IScopeObserver
 
     public void SetTrace(SentryId traceId, SpanId parentSpanId)
     {
-        // TODO: This requires sentry-java 8.4.0
+        try
+        {
+            JavaSdk.Android.Core.InternalSentrySdk.SetTrace(traceId.ToString(), parentSpanId.ToString(), null, null);
+        }
+        finally
+        {
+            _innerObserver?.SetTrace(traceId, parentSpanId);
+        }
+    }
+
+    public void SetEnvironment(string? environment)
+    {
+        try
+        {
+            // TODO: Missing corresponding scope-level functionality on the Android SDK
+        }
+        finally
+        {
+            _innerObserver?.SetEnvironment(environment);
+        }
     }
 
     public void AddAttachment(SentryAttachment attachment)

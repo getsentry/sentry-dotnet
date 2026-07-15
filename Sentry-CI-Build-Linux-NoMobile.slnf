@@ -31,6 +31,7 @@
       "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNetCore.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.AzureFunctions\\Sentry.Samples.OpenTelemetry.AzureFunctions.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.Console\\Sentry.Samples.OpenTelemetry.Console.csproj",
+      "samples\\Sentry.Samples.OpenTelemetry.MongoDB\\Sentry.Samples.OpenTelemetry.MongoDB.csproj",
       "samples\\Sentry.Samples.Serilog\\Sentry.Samples.Serilog.csproj",
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
       "src\\Sentry.AspNetCore.Blazor.WebAssembly\\Sentry.AspNetCore.Blazor.WebAssembly.csproj",

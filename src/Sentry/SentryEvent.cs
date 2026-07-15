@@ -208,14 +208,39 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
 
     private bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
 
-    private bool HasUnhandledException()
+    internal bool HasUnhandledException()
     {
+        // Check if the original exception was marked as unhandled
         if (Exception?.Data[Mechanism.HandledKey] is false)
         {
             return true;
         }
 
+        // Check if any of the Sentry exceptions have an unhandled mechanism
         return SentryExceptions?.Any(e => e.Mechanism is { Handled: false }) ?? false;
+    }
+
+    internal bool HasUnhandledTerminalException()
+    {
+        // Check if the original exception was unhandled and not explicitly marked as non-terminal
+        if (Exception?.Data[Mechanism.HandledKey] is false)
+        {
+            // If it's unhandled but explicitly marked as non-terminal, return false
+            if (Exception.Data[Mechanism.TerminalKey] is false)
+            {
+                return false;
+            }
+
+            // Otherwise, unhandled exceptions are terminal by default
+            return true;
+        }
+
+        // Check if any Sentry exceptions are unhandled and terminal
+        // (handled: false and terminal: not explicitly false)
+        return SentryExceptions?.Any(e =>
+            e.Mechanism is { Handled: false } &&
+            e.Mechanism.Terminal != false
+        ) ?? false;
     }
 
     private bool HasUnhandledNonTerminalException()

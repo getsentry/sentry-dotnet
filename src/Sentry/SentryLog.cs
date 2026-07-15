@@ -147,8 +147,39 @@ public sealed partial class SentryLog
     /// </summary>
     public void SetAttribute(string key, object value) => Attributes.SetAttribute(key, value);
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk) =>
+    internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion? sdk = null)
+    {
+        // Core Attributes
+        sdk ??= scope?.Sdk ?? SdkVersion.Instance;
         Attributes.SetDefaultAttributes(options, sdk);
+
+        // Server Attributes
+        if (!string.IsNullOrEmpty(options.ServerName))
+        {
+            SetAttribute("server.address", options.ServerName!);
+        }
+        else if (options.SendDefaultPii)
+        {
+            SetAttribute("server.address", Environment.MachineName);
+        }
+
+        // User Attributes
+        if (scope?.User is { } user)
+        {
+            if (user.Id is { } userId)
+            {
+                SetAttribute("user.id", userId);
+            }
+            if (user.Username is { } username)
+            {
+                SetAttribute("user.name", username);
+            }
+            if (user.Email is { } email)
+            {
+                SetAttribute("user.email", email);
+            }
+        }
+    }
 
     internal void SetOrigin(string origin) => Attributes.SetAttribute("sentry.origin", origin);
 

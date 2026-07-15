@@ -114,6 +114,21 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clone_EnvironmentOverridesOptions_OverridePreserved()
+    {
+        // Arrange
+        var options = new SentryOptions { Environment = "production" };
+        var scope = new Scope(options);
+        scope.Environment = "staging";
+
+        // Act
+        var clone = scope.Clone();
+
+        // Assert
+        clone.Environment.Should().Be("staging");
+    }
+
+    [Fact]
     public void TransactionName_TransactionNotStarted_NameIsSet()
     {
         // Arrange
@@ -694,6 +709,84 @@ public class ScopeTests
 
         // Assert
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SetEnvironment_ObserverExist_ObserverSetsEnvironmentIfEnabled(bool observerEnable)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = observerEnable
+        });
+        const string expectedEnvironment = "staging";
+        var expectedCount = observerEnable ? 1 : 0;
+
+        // Act
+        scope.Environment = expectedEnvironment;
+
+        // Assert
+        observer.Received(expectedCount).SetEnvironment(Arg.Is(expectedEnvironment));
+    }
+
+    [Fact]
+    public void SetEnvironment_Null_EnvironmentSetToOptionEnvironment()
+    {
+        // Arrange
+        const string optionsEnvironment = "production";
+        var scope = new Scope(new SentryOptions { Environment = optionsEnvironment });
+        scope.Environment = "staging"; // Override before resetting
+
+        // Act
+        scope.Environment = null;
+
+        // Assert
+        scope.Environment.Should().Be(optionsEnvironment);
+    }
+
+    [Fact]
+    public void SetEnvironment_Null_ObserverReceivesOptionEnvironment()
+    {
+        // Arrange
+        const string optionsEnvironment = "production";
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true,
+            Environment = optionsEnvironment
+        });
+        scope.Environment = "staging"; // Override before resetting
+        observer.ClearReceivedCalls();
+
+        // Act
+        scope.Environment = null;
+
+        // Assert
+        observer.Received(1).SetEnvironment(Arg.Is(optionsEnvironment));
+    }
+
+    [Fact]
+    public void SetEnvironment_SameValue_ObserverNotifiedOnce()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+
+        // Act
+        scope.Environment = "staging";
+        scope.Environment = "staging";
+
+        // Assert
+        observer.Received(1).SetEnvironment(Arg.Is("staging"));
     }
 
     [Fact]

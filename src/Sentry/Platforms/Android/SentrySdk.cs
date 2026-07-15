@@ -95,8 +95,9 @@ public static partial class SentrySdk
                 o.CacheDirPath = Path.Combine(cacheDirectoryPath, "android");
             }
 
-            // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
-            //       one when sending events, which is relayed through the scope observer.
+            // NOTE: options.DefaultTags are forwarded to the scope observer in SentrySdk.InitHub so the
+            //       Android SDK attaches them to native crashes. The Enricher continues to apply them to
+            //       managed events at send time.
 
             if (options.HttpProxy is System.Net.WebProxy proxy)
             {
@@ -146,6 +147,8 @@ public static partial class SentrySdk
             o.EnableNetworkEventBreadcrumbs = options.Native.EnableNetworkEventBreadcrumbs;
             o.EnableUserInteractionBreadcrumbs = options.Native.EnableUserInteractionBreadcrumbs;
             o.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
+            o.TombstoneEnabled = options.Native.TombstoneEnabled;
+            o.ReportHistoricalTombstones = options.Native.ReportHistoricalTombstones;
 
             // These options are in Java.SentryOptions but not ours
             o.AttachThreads = options.Native.AttachThreads;
