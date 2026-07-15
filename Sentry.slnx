@@ -17,9 +17,6 @@
   <Folder Name="/.github/actions/freediskspace/">
     <File Path=".github/actions/freediskspace/action.yml" />
   </Folder>
-  <Folder Name="/.github/actions/install-zstd/">
-    <File Path=".github/actions/install-zstd/action.yml" />
-  </Folder>
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/alpine.yml" />
     <File Path=".github/workflows/build.yml" />
