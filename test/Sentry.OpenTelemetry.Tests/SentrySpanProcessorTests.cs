@@ -966,6 +966,25 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void OnStart_FusesActivityWeakly()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var activity = Tracer.StartActivity("test")!;
+
+        // Act
+        sut.OnStart(activity);
+
+        // The Activity must be fused via a WeakReference, not strongly. A strong reference is pinned by
+        // _map, which prevents GC and defeats PruneFilteredSpans, leaking never-ended spans.
+        sut._map.TryGetValue(activity.SpanId, out var span).Should().BeTrue();
+        span.GetFused<WeakReference<Activity>>("Activity").Should().NotBeNull();
+        span.GetFused<Activity>("Activity").Should().BeNull("the Activity must not be fused with a strong reference");
+    }
+
+    [Fact]
     public void PruneFilteredSpans_RecentlyPruned_DoesNothing()
     {
         // Arrange
