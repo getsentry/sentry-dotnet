@@ -34,7 +34,7 @@ public sealed partial class SentryTarget
     private static void GetStructuredLoggingParametersAndAttributes(LogEventInfo logEvent, out ImmutableArray<KeyValuePair<string, object>> parameters, out List<KeyValuePair<string, object>> attributes)
     {
         parameters = GetParameters(logEvent, out var parameterNames);
-        attributes = new List<KeyValuePair<string, object>>();
+        attributes = [];
 
         if (!logEvent.HasProperties)
         {
