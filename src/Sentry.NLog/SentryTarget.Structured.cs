@@ -15,6 +15,11 @@ public sealed partial class SentryTarget
             log.SetDefaultAttributes(options, Sdk);
             log.SetOrigin("auto.log.nlog");
 
+            if (logEvent.LoggerName is not null)
+            {
+                log.Attributes.SetAttribute("category.name", logEvent.LoggerName);
+            }
+
             foreach (var attribute in attributes)
             {
                 log.SetAttribute(attribute.Key, attribute.Value);

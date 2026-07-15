@@ -103,6 +103,7 @@ public partial class SentryTargetTests
         log.Attributes.ShouldContain("sentry.origin", "auto.log.nlog");
         log.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
         log.Attributes.ShouldContain("sentry.sdk.version", SentryTarget.NameAndVersion.Version);
+        log.Attributes.ShouldContain("category.name", "sentry");
 
         log.Attributes.ShouldContain("property.Text-Property-Key", "Text-Property-Value");
         log.Attributes.ShouldContain("property.Number-Property", 42);
