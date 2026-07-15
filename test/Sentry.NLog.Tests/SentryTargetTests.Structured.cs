@@ -90,7 +90,7 @@ public partial class SentryTargetTests
         log.Message.Should().Be("""NULL, "Text", 42, 41, 42, 43, "key"="value", (42, 42).""");
         log.Template.Should().Be("{}, {Text}, {Number}, {Collection}, {Map}, {Object}.");
         log.Parameters.Should().HaveCount(6);
-        log.Parameters[0].Should().BeEquivalentTo(new KeyValuePair<string, object?>("", null));
+        log.Parameters[0].Should().BeEquivalentTo(new KeyValuePair<string, object?>("0", null));
         log.Parameters[1].Should().BeEquivalentTo(new KeyValuePair<string, object>("Text", "Text"));
         log.Parameters[2].Should().BeEquivalentTo(new KeyValuePair<string, object>("Number", 42));
         log.Parameters[3].Should().BeEquivalentTo(new KeyValuePair<string, object>("Collection", new[] { 41, 42, 43 }));
@@ -137,6 +137,25 @@ public partial class SentryTargetTests
             new KeyValuePair<string, object>("2", 2),
             new KeyValuePair<string, object>("3", 3),
         ]);
+    }
+
+    [Fact]
+    public void Write_StructuredLogging_UnnamedHolesDoNotCollide()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var logger = _fixture.GetLogger();
+
+        logger.Info("{}, {}, {}.", "first", "second", "third");
+
+        // Unnamed holes must each keep their value: no empty parameter names (which would serialize to the
+        // same `sentry.message.parameter.` attribute key) and no collisions.
+        var parameters = capturer.Logs.Should().ContainSingle().Which.Parameters;
+        parameters.Select(parameter => parameter.Value).Should().Equal("first", "second", "third");
+        parameters.Should().OnlyContain(parameter => !string.IsNullOrEmpty(parameter.Key));
+        parameters.Select(parameter => parameter.Key).Should().OnlyHaveUniqueItems();
     }
 
     [Fact]

@@ -66,10 +66,18 @@ public sealed partial class SentryTarget
 
         var @params = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>(parameters.Count);
 
+        var index = 0;
         foreach (var parameter in parameters)
         {
-            parameterNames.Add(parameter.Name);
-            @params.Add(new KeyValuePair<string, object>(parameter.Name, parameter.Value));
+            // Unnamed holes (e.g. `{}`) have an empty name. Fall back to the positional index so that
+            // multiple unnamed holes don't collide on the same `sentry.message.parameter.` attribute key.
+            var name = string.IsNullOrEmpty(parameter.Name)
+                ? index.ToString(CultureInfo.InvariantCulture)
+                : parameter.Name;
+
+            parameterNames.Add(name);
+            @params.Add(new KeyValuePair<string, object>(name, parameter.Value));
+            index++;
         }
 
         return @params.DrainToImmutable();
