@@ -4,30 +4,31 @@ public sealed partial class SentryTarget
 {
     private static void CaptureStructuredLog(IHub hub, SentryOptions options, LogEventInfo logEvent)
     {
-        var level = logEvent.Level.ToSentryLogLevel();
-        if (level.HasValue)
+        if (logEvent.Level.ToSentryLogLevel() is not { } level)
         {
-            DateTimeOffset timestamp = new(logEvent.TimeStamp);
-            GetStructuredLoggingParametersAndAttributes(logEvent, out var parameters, out var attributes);
-
-            var log = SentryLog.Create(hub, timestamp, level.Value, logEvent.FormattedMessage, logEvent.Message, parameters);
-
-            var scope = hub.GetScope();
-            log.SetDefaultAttributes(options, scope, Sdk);
-            log.SetOrigin("auto.log.nlog");
-
-            if (logEvent.LoggerName is not null)
-            {
-                log.Attributes.SetAttribute("category.name", logEvent.LoggerName);
-            }
-
-            foreach (var attribute in attributes)
-            {
-                log.SetAttribute(attribute.Key, attribute.Value);
-            }
-
-            hub.Logger.CaptureLog(log);
+            return;
         }
+
+        DateTimeOffset timestamp = new(logEvent.TimeStamp);
+        GetStructuredLoggingParametersAndAttributes(logEvent, out var parameters, out var attributes);
+
+        var log = SentryLog.Create(hub, timestamp, level, logEvent.FormattedMessage, logEvent.Message, parameters);
+
+        var scope = hub.GetScope();
+        log.SetDefaultAttributes(options, scope, Sdk);
+        log.SetOrigin("auto.log.nlog");
+
+        if (logEvent.LoggerName is not null)
+        {
+            log.Attributes.SetAttribute("category.name", logEvent.LoggerName);
+        }
+
+        foreach (var attribute in attributes)
+        {
+            log.SetAttribute(attribute.Key, attribute.Value);
+        }
+
+        hub.Logger.CaptureLog(log);
     }
 
     private static void GetStructuredLoggingParametersAndAttributes(LogEventInfo logEvent, out ImmutableArray<KeyValuePair<string, object>> parameters, out List<KeyValuePair<string, object>> attributes)
