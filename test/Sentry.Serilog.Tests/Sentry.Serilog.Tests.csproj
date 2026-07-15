@@ -20,7 +20,7 @@
     <Using Include="Serilog.Parsing" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
     <Using Include="Microsoft.AspNetCore.Builder" />
     <Using Include="Microsoft.AspNetCore.Hosting" />

@@ -63,6 +63,9 @@ static partial class SentrySdk
 #pragma warning restore 0162
 #pragma warning restore CS0162 // Unreachable code detected
 
+        // This happens before the native SDKs get initialized
+        options.Environment = options.SettingLocator.GetEnvironment();
+
         // Initialize native platform SDKs here
         if (options.InitNativeSdks)
         {
@@ -90,6 +93,18 @@ static partial class SentrySdk
             callback.Invoke(hub);
         }
         options.PostInitCallbacks.Clear();
+
+        // Default tags are applied per-event by the Enricher to events going through the .NET pipeline,
+        // but native crashes are captured and uploaded by the native SDK without going through that pipeline.
+        // Forward them to the scope observer so the native layer attaches them to crash reports.
+        // Bypassing the .NET scope keeps scope.Tags identical between native and non-native apps.
+        if (options is { EnableScopeSync: true, ScopeObserver: { } observer } && options.DefaultTags.Count > 0)
+        {
+            foreach (var tag in options.DefaultTags)
+            {
+                observer.SetTag(tag.Key, tag.Value);
+            }
+        }
 
         // Platform specific check for profiler misconfiguration.
 #if __IOS__

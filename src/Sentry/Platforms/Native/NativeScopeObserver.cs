@@ -43,6 +43,9 @@ internal class NativeScopeObserver : ScopeObserver
     public override void SetTraceImpl(SentryId traceId, SpanId parentSpanId) =>
         C.sentry_set_trace(traceId.ToString(), parentSpanId.ToString());
 
+    public override void SetEnvironmentImpl(string? environment) =>
+        C.sentry_set_environment(environment);
+
     public override void AddAttachmentImpl(SentryAttachment attachment)
     {
         // TODO: Missing corresponding functionality on the Native SDK
