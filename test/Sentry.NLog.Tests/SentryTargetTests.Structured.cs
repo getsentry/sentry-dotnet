@@ -7,11 +7,16 @@ public partial class SentryTargetTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Write_StructuredLogging_IsEnabled(bool isEnabled)
+    public void Write_StructuredLogging_UseHubOptionsOverTargetOptions(bool isEnabled)
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = isEnabled;
+        _fixture.Options.EnableLogs = true;
+
+        if (!isEnabled)
+        {
+            SentryClientExtensions.SentryOptionsForTestingOnly = null;
+        }
 
         var logger = _fixture.GetLogger();
 

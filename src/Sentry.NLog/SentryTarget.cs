@@ -346,9 +346,13 @@ public sealed partial class SentryTarget : TargetWithContext
         var shouldOnlyLogExceptions = exception == null && IgnoreEventsWithNoException;
         var shouldIncludeProperties = ContextProperties?.Count > 0 || ShouldIncludeProperties(logEvent);
 
-        if (Options.EnableLogs)
+        // Read the options from the Hub, rather than the Target's NLog-Options, because 'EnableLogs' is declared in the base 'SentryOptions', rather than the derived 'SentryNLogOptions'.
+        // In cases where Sentry's NLog-Target is added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through ASP.NET Core),
+        // then the 'EnableLogs' option of this Target's NLog-Options is default, but the Hub's Sentry-Options have the actual user-defined value configured.
+        var sentryOptions = hub.GetSentryOptions();
+        if (sentryOptions?.EnableLogs is true)
         {
-            CaptureStructuredLog(hub, Options, logEvent);
+            CaptureStructuredLog(hub, sentryOptions, logEvent);
         }
 
         if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)

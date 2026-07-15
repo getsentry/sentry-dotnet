@@ -24,6 +24,7 @@ public partial class SentryTargetTests
             HubAccessor = () => Hub;
             Scope = new Scope(new SentryOptions());
             Hub.SubstituteConfigureScope(Scope);
+            SentryClientExtensions.SentryOptionsForTestingOnly = Options;
         }
 
         public Target GetTarget(bool asyncTarget = false)
