@@ -1,6 +1,7 @@
 #nullable enable
 
 using log4net.Util;
+using Sentry.Testing;
 
 namespace Sentry.Log4Net.Tests;
 
@@ -100,25 +101,18 @@ public partial class SentryAppenderTests
         log.Parameters.Should().BeEmpty();
         log.SpanId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.SpanId : null);
 
-        log.TryGetAttribute("sentry.environment", out object? environment).Should().BeTrue();
-        environment.Should().Be("test-environment");
-        log.TryGetAttribute("sentry.release", out object? release).Should().BeTrue();
-        release.Should().Be("test-release");
-        log.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
-        origin.Should().Be("auto.log.log4net");
-        log.TryGetAttribute("sentry.sdk.name", out object? sdkName).Should().BeTrue();
-        sdkName.Should().Be(SentryAppender.SdkName);
-        log.TryGetAttribute("sentry.sdk.version", out object? sdkVersion).Should().BeTrue();
-        sdkVersion.Should().Be(SentryAppender.NameAndVersion.Version);
+        log.Attributes.ShouldContain("sentry.environment", "test-environment");
+        log.Attributes.ShouldContain("sentry.release", "test-release");
+        log.Attributes.ShouldContain("sentry.origin", "auto.log.log4net");
+        log.Attributes.ShouldContain("sentry.sdk.name", SentryAppender.SdkName);
+        log.Attributes.ShouldContain("sentry.sdk.version", SentryAppender.NameAndVersion.Version);
 
-        log.TryGetAttribute("property.Text-Property", out object? text).Should().BeTrue();
-        text.Should().Be("4");
-        log.TryGetAttribute("property.Number-Property", out object? number).Should().BeTrue();
-        number.Should().Be(4);
+        log.Attributes.ShouldContain("property.Text-Property", "4");
+        log.Attributes.ShouldContain("property.Number-Property", 4);
+        // Collections are compared by value, so this one keeps BeEquivalentTo rather than the ShouldContain (Be) extension.
         log.TryGetAttribute("property.Collection-Property", out object? collection).Should().BeTrue();
         collection.Should().BeEquivalentTo(new[] { 3, 4, 5 });
-        log.TryGetAttribute("property.Object-Property", out object? obj).Should().BeTrue();
-        obj.Should().Be((Number: 4, Text: "4"));
+        log.Attributes.ShouldContain("property.Object-Property", (Number: 4, Text: "4"));
     }
 
     [Fact]
@@ -154,7 +148,7 @@ public partial class SentryAppenderTests
         log.Message.Should().Be("Test Message");
         log.Attributes.Should().NotContain(attribute => attribute.Key.Contains("log4net:"));
         log.Attributes.Should().ContainSingle(attribute => attribute.Key.StartsWith("property."));
-        log.Attributes.Should().Contain(attribute => attribute.Key.Equals("property.test.property.key")).Which.Value.Value.Should().Be("test-property-value");
+        log.Attributes.ShouldContain("property.test.property.key", "test-property-value");
     }
 
     [Fact]
