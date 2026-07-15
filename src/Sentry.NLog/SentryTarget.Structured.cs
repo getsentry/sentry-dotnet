@@ -12,7 +12,8 @@ public sealed partial class SentryTarget
 
             var log = SentryLog.Create(hub, timestamp, level.Value, logEvent.FormattedMessage, logEvent.Message, parameters);
 
-            log.SetDefaultAttributes(options, Sdk);
+            var scope = hub.GetScope();
+            log.SetDefaultAttributes(options, scope, Sdk);
             log.SetOrigin("auto.log.nlog");
 
             if (logEvent.LoggerName is not null)
