@@ -103,6 +103,25 @@ public class DevCommands
         return RunStepAsync("npx @sentry/dotagents install", "npx", "@sentry/dotagents install", options.DryRun);
     }
 
+    [Command("setup-hooks", Description = "Configure git to use the repo's pre-commit hooks from .githooks/.")]
+    public Task<int> SetupHooksAsync(GlobalOptions options = default!)
+    {
+        Console.WriteLine("[dev] Configuring git hooks path to .githooks/");
+        return RunStepAsync("git config core.hooksPath", "git", "config core.hooksPath .githooks", options.DryRun);
+    }
+
+    [Command("remove-hooks", Description = "Restore default git hooks behaviour (stops using .githooks/).")]
+    public async Task<int> RemoveHooksAsync(GlobalOptions options = default!)
+    {
+        Console.WriteLine("[dev] Restoring default git hooks path");
+        var exitCode = await RunStepAsync("git config --unset core.hooksPath", "git", "config --unset core.hooksPath", options.DryRun);
+
+        // git exits with code 5 when the key doesn't exist. That's already the
+        // desired end state, so treat it as success to keep remove-hooks idempotent
+        // (e.g. running it twice, or before setup-hooks).
+        return exitCode == 5 ? 0 : exitCode;
+    }
+
     [Command("nrest", Description = "Restore the default CI solution.")]
     public Task<int> SolutionRestoreAsync(
         [Argument("solution", Description = "Solution file to restore. Defaults to platform-specific CI solution if omitted.")] string? solution = null,

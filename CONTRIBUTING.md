@@ -100,6 +100,31 @@ These solution filters get generated automatically by `/scripts/generate-solutio
 
 Also note that script generates a `.generated.NoMobile.slnx` solution, which is an identical copy of `Sentry.slnx`. Again, we don't recommend opening this directly. It exists as a round about way to conditionally set build properties based on the solution name in certain solution filters. You should instead use those solution filters (e.g. `SentryNoMobile.slnf`) when working in the Sentry codebase.
 
+## Git Hooks (Optional but Recommended)
+
+To automatically check and fix code formatting before committing, you can set up a pre-commit hook:
+
+```bash
+./dev.cs setup-hooks
+```
+
+Before each commit, the hook runs `dotnet format` against your staged `.cs` files and auto-fixes any formatting issues. If fixes were applied, the commit is blocked — just stage the fixes and try again:
+
+```bash
+git add -u
+git commit
+```
+
+Note: the hook skips automatically if you have unstaged changes, to avoid touching work in progress.
+
+To opt out at any time:
+
+```bash
+./dev.cs remove-hooks
+```
+
+**Note:** You can also bypass the hook for a specific commit using `git commit --no-verify` if needed.
+
 ## API changes approval process
 
 This repository uses [Verify](https://github.com/VerifyTests/Verify) to store the public API diffs in snapshot files. When a change involves modifying the public API area (by for example adding a public method), that change will need to be approved, otherwise the CI process will fail.
