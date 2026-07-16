@@ -707,6 +707,23 @@ static partial class SentrySdk
         => CurrentHub.StartTransaction(name, operation, traceHeader);
 
     /// <summary>
+    /// Records a transaction that has already completed elsewhere — for example, spans measured on another
+    /// machine or process and replayed through a proxy. See
+    /// <see cref="HubExtensions.RecordTransaction(IHub, string, string, DateTimeOffset, TimeSpan, SentryId?, SpanId?, SpanId?, Action{ITransactionRecorder}?)"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static SentryId RecordTransaction(
+        string name,
+        string operation,
+        DateTimeOffset startTimestamp,
+        TimeSpan duration,
+        SentryId? traceId = null,
+        SpanId? spanId = null,
+        SpanId? parentSpanId = null,
+        Action<ITransactionRecorder>? configure = null)
+        => CurrentHub.RecordTransaction(name, operation, startTimestamp, duration, traceId, spanId, parentSpanId, configure);
+
+    /// <summary>
     /// Binds specified exception the specified span.
     /// </summary>
     /// <remarks>
