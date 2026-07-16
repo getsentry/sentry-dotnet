@@ -189,4 +189,22 @@ public partial class SentryTargetTests
         _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be("Message");
         _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
+
+    [Fact]
+    public void Write_StructuredLoggingThrows_DoesNotBlockEventOrPropagate()
+    {
+        // Force the structured-log capture to fail.
+        _fixture.Hub.Logger.Returns(_ => throw new InvalidOperationException("structured logging failed"));
+        _fixture.Options.EnableLogs = true;
+
+        var logger = _fixture.GetLogger();
+        // Surface any exception that escapes the target, so an unguarded failure would fail this test.
+        logger.Factory.ThrowExceptions = true;
+
+        // Must not throw, even though the structured-log capture fails.
+        logger.Error(new Exception("expected message"), "Message");
+
+        // The higher-priority event must still be captured.
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+    }
 }

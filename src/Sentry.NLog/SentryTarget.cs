@@ -345,15 +345,7 @@ public sealed partial class SentryTarget : TargetWithContext
         var exception = logEvent.Exception;
         var shouldOnlyLogExceptions = exception == null && IgnoreEventsWithNoException;
         var shouldIncludeProperties = ContextProperties?.Count > 0 || ShouldIncludeProperties(logEvent);
-
-        // Read the options from the Hub, rather than the Target's NLog-Options, because 'EnableLogs' is declared in the base 'SentryOptions', rather than the derived 'SentryNLogOptions'.
-        // In cases where Sentry's NLog-Target is added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through ASP.NET Core),
-        // then the 'EnableLogs' option of this Target's NLog-Options is default, but the Hub's Sentry-Options have the actual user-defined value configured.
-        var sentryOptions = hub.GetSentryOptions();
-        if (sentryOptions?.EnableLogs is true)
-        {
-            CaptureStructuredLog(hub, sentryOptions, logEvent);
-        }
+        var addedBreadcrumbForException = false;
 
         if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
         {
@@ -415,12 +407,12 @@ public sealed partial class SentryTarget : TargetWithContext
             // Capturing exception events adds a breadcrumb automatically... we don't want to add another one
             if (exception != null)
             {
-                return;
+                addedBreadcrumbForException = true;
             }
         }
 
         // Whether or not it was sent as event, add breadcrumb so the next event includes it
-        if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
+        if (!addedBreadcrumbForException && logEvent.Level >= Options.MinimumBreadcrumbLevel)
         {
             var breadcrumbFormatted = RenderLogEvent(BreadcrumbLayout, logEvent);
             var breadcrumbCategory = RenderLogEvent(BreadcrumbCategory, logEvent);
@@ -467,6 +459,24 @@ public sealed partial class SentryTarget : TargetWithContext
                 breadcrumbCategory,
                 data: data,
                 level: logEvent.Level.ToBreadcrumbLevel());
+        }
+
+        // Capture structured logs after events and breadcrumbs, and guard the call, so that a failure
+        // here can never prevent the (higher-priority) event/breadcrumb from being sent.
+        // Read the options from the Hub, rather than the Target's NLog-Options, because 'EnableLogs' is declared in the base 'SentryOptions', rather than the derived 'SentryNLogOptions'.
+        // In cases where Sentry's NLog-Target is added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through ASP.NET Core),
+        // then the 'EnableLogs' option of this Target's NLog-Options is default, but the Hub's Sentry-Options have the actual user-defined value configured.
+        var sentryOptions = hub.GetSentryOptions();
+        if (sentryOptions?.EnableLogs is true)
+        {
+            try
+            {
+                CaptureStructuredLog(hub, sentryOptions, logEvent);
+            }
+            catch (Exception ex)
+            {
+                sentryOptions.DiagnosticLogger?.LogError(ex, "Failed to capture structured log. The log will be dropped.");
+            }
         }
     }
 
