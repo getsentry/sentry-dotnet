@@ -90,7 +90,6 @@ public partial class SentryAppender : AppenderSkeleton
             }
         }
 
-        // Structured logs are captured for every event, independent of the breadcrumb/event branching below.
         CaptureStructuredLogIfEnabled(loggingEvent);
 
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
