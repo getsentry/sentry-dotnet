@@ -35,4 +35,10 @@
     <InternalsVisibleTo Include="Sentry.NLog.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="SentryTarget.Structured.cs">
+      <DependentUpon>SentryTarget.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
