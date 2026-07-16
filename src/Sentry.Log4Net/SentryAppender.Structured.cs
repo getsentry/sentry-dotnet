@@ -18,6 +18,11 @@ public partial class SentryAppender
             log.SetDefaultAttributes(options, scope, Sdk);
             log.SetOrigin("auto.log.log4net");
 
+            if (loggingEvent.LoggerName is { } loggerName)
+            {
+                log.SetAttribute("category.name", loggerName);
+            }
+
             foreach (var property in loggingEvent.GetProperties())
             {
                 if (property is DictionaryEntry { Key: string key, Value: { } value })

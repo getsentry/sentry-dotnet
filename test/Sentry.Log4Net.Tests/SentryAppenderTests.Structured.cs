@@ -106,6 +106,7 @@ public partial class SentryAppenderTests
         log.Attributes.ShouldContain("sentry.origin", "auto.log.log4net");
         log.Attributes.ShouldContain("sentry.sdk.name", SentryAppender.SdkName);
         log.Attributes.ShouldContain("sentry.sdk.version", SentryAppender.NameAndVersion.Version);
+        log.Attributes.ShouldContain("category.name", "TestLogger");
 
         log.Attributes.ShouldContain("property.Text-Property", "4");
         log.Attributes.ShouldContain("property.Number-Property", 4);
