@@ -25,13 +25,18 @@ public partial class SentryAppender
             log.SetAttribute("category.name", loggerName);
         }
 
-        foreach (var property in loggingEvent.GetProperties())
+        // GetProperties() is non-null in current log4net, but the sibling GetLoggingEventProperties guards
+        // against null, so we do too rather than rely on log4net's internals.
+        if (loggingEvent.GetProperties() is { } properties)
         {
-            if (property is DictionaryEntry { Key: string key, Value: { } value })
+            foreach (var property in properties)
             {
-                if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase) && !Guid.TryParse(key, out _))
+                if (property is DictionaryEntry { Key: string key, Value: { } value })
                 {
-                    log.SetAttribute($"property.{key}", value);
+                    if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase) && !Guid.TryParse(key, out _))
+                    {
+                        log.SetAttribute($"property.{key}", value);
+                    }
                 }
             }
         }
