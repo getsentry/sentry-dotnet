@@ -4,37 +4,38 @@ public partial class SentryAppender
 {
     private static void CaptureStructuredLog(IHub hub, SentryOptions options, LoggingEvent loggingEvent)
     {
-        var level = loggingEvent.ToSentryLogLevel();
-        if (level.HasValue)
+        if (loggingEvent.ToSentryLogLevel() is not { } level)
         {
-            DateTimeOffset timestamp = new(loggingEvent.TimeStampUtc);
-            const string? template = null; // cannot get format-string from `log4net.Util.SystemStringFormat` via `LoggingEvent.MessageObject`
-            var parameters = ImmutableArray<KeyValuePair<string, object>>.Empty; // cannot get arguments from `log4net.Util.SystemStringFormat` via `LoggingEvent.MessageObject`
+            return;
+        }
 
-            var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
-            var log = SentryLog.Create(hub, timestamp, level.Value, message, template, parameters);
+        DateTimeOffset timestamp = new(loggingEvent.TimeStampUtc);
+        const string? template = null; // cannot get format-string from `log4net.Util.SystemStringFormat` via `LoggingEvent.MessageObject`
+        var parameters = ImmutableArray<KeyValuePair<string, object>>.Empty; // cannot get arguments from `log4net.Util.SystemStringFormat` via `LoggingEvent.MessageObject`
 
-            var scope = hub.GetScope();
-            log.SetDefaultAttributes(options, scope, Sdk);
-            log.SetOrigin("auto.log.log4net");
+        var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
+        var log = SentryLog.Create(hub, timestamp, level, message, template, parameters);
 
-            if (loggingEvent.LoggerName is { } loggerName)
+        var scope = hub.GetScope();
+        log.SetDefaultAttributes(options, scope, Sdk);
+        log.SetOrigin("auto.log.log4net");
+
+        if (loggingEvent.LoggerName is { } loggerName)
+        {
+            log.SetAttribute("category.name", loggerName);
+        }
+
+        foreach (var property in loggingEvent.GetProperties())
+        {
+            if (property is DictionaryEntry { Key: string key, Value: { } value })
             {
-                log.SetAttribute("category.name", loggerName);
-            }
-
-            foreach (var property in loggingEvent.GetProperties())
-            {
-                if (property is DictionaryEntry { Key: string key, Value: { } value })
+                if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase) && !Guid.TryParse(key, out _))
                 {
-                    if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase) && !Guid.TryParse(key, out _))
-                    {
-                        log.SetAttribute($"property.{key}", value);
-                    }
+                    log.SetAttribute($"property.{key}", value);
                 }
             }
-
-            hub.Logger.CaptureLog(log);
         }
+
+        hub.Logger.CaptureLog(log);
     }
 }
