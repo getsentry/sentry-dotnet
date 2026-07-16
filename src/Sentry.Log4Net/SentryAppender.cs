@@ -5,7 +5,7 @@ namespace Sentry.Log4Net;
 /// <summary>
 /// Sentry appender for log4net.
 /// </summary>
-public class SentryAppender : AppenderSkeleton
+public partial class SentryAppender : AppenderSkeleton
 {
     private readonly Func<string, IDisposable> _initAction;
     private volatile IDisposable? _sdkHandle;
@@ -14,6 +14,12 @@ public class SentryAppender : AppenderSkeleton
 
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryAppender).Assembly.GetNameAndVersion();
+
+    private static readonly SdkVersion Sdk = new()
+    {
+        Name = SdkName,
+        Version = NameAndVersion.Version,
+    };
 
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
@@ -84,21 +90,39 @@ public class SentryAppender : AppenderSkeleton
             }
         }
 
+        CaptureStructuredLogIfEnabled(loggingEvent);
+
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
 
         if (MinimumEventLevel is not null && loggingEvent.Level < MinimumEventLevel)
         {
-            var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
-            var category = loggingEvent.LoggerName;
-            var level = loggingEvent.ToBreadcrumbLevel();
-            IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent)
-                .Where(kvp => kvp.Value != null)
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString() ?? "");
-
-            _hub.AddBreadcrumb(message, category, type: null, data, level ?? default);
+            AddBreadcrumbFromLoggingEvent(loggingEvent);
             return;
         }
 
+        CreateSentryEvent(loggingEvent, exception);
+    }
+
+    private void CaptureStructuredLogIfEnabled(LoggingEvent loggingEvent)
+    {
+        var options = _hub.GetSentryOptions();
+        if (options is not { EnableLogs: true })
+        {
+            return;
+        }
+
+        try
+        {
+            CaptureStructuredLog(_hub, options, loggingEvent, Environment, SendIdentity);
+        }
+        catch (Exception ex)
+        {
+            options.DiagnosticLogger?.LogError(ex, "Failed to capture structured log. The log will be dropped.");
+        }
+    }
+
+    private void CreateSentryEvent(LoggingEvent loggingEvent, Exception? exception)
+    {
         var evt = new SentryEvent(exception)
         {
             Logger = loggingEvent.LoggerName,
@@ -137,6 +161,19 @@ public class SentryAppender : AppenderSkeleton
         }
 
         _hub.CaptureEvent(evt);
+    }
+
+    private void AddBreadcrumbFromLoggingEvent(LoggingEvent loggingEvent)
+    {
+        var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
+        var category = loggingEvent.LoggerName;
+        var level = loggingEvent.ToBreadcrumbLevel();
+        IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent)
+            .Where(kvp => kvp.Value != null)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString() ?? "");
+
+        _hub.AddBreadcrumb(message, category, type: null, data, level ?? default);
+        return;
     }
 
     private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LoggingEvent loggingEvent)

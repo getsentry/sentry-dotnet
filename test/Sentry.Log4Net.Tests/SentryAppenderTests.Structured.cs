@@ -1,0 +1,291 @@
+#nullable enable
+
+using log4net.Util;
+using Sentry.Testing;
+
+namespace Sentry.Log4Net.Tests;
+
+public partial class SentryAppenderTests
+{
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DoAppend_StructuredLogging_IsEnabled(bool isEnabled)
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = isEnabled;
+
+        var sut = _fixture.GetSut();
+
+        sut.DoAppend(CreateLoggingEvent(Level.Info, "Message"));
+
+        capturer.Logs.Should().HaveCount(isEnabled ? 1 : 0);
+    }
+
+    public static TheoryData<Level, SentryLogLevel> LogLevelData => new()
+    {
+        { Level.All, SentryLogLevel.Trace },
+        { Level.Finest, SentryLogLevel.Trace },
+        { Level.Verbose, SentryLogLevel.Trace },
+        { Level.Finer, SentryLogLevel.Trace },
+        { Level.Trace, SentryLogLevel.Trace },
+        { Level.Fine, SentryLogLevel.Debug },
+        { Level.Debug, SentryLogLevel.Debug },
+        { Level.Info, SentryLogLevel.Info },
+        { Level.Notice, SentryLogLevel.Info },
+        { Level.Warn, SentryLogLevel.Warning },
+        { Level.Error, SentryLogLevel.Error },
+        { Level.Severe, SentryLogLevel.Error },
+        { Level.Critical, SentryLogLevel.Error },
+        { Level.Alert, SentryLogLevel.Error },
+        { Level.Fatal, SentryLogLevel.Fatal },
+        { Level.Emergency, SentryLogLevel.Fatal },
+        { Level.Log4Net_Debug, SentryLogLevel.Fatal },
+        { new Level(0, "DEFAULT"), SentryLogLevel.Trace },
+        { new Level(-1, "CUSTOM"), SentryLogLevel.Trace },
+    };
+
+    [Theory]
+    [MemberData(nameof(LogLevelData))]
+    public void DoAppend_StructuredLogging_LogLevel(Level level, SentryLogLevel expected)
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+
+        sut.DoAppend(CreateLoggingEvent(level, "Message"));
+
+        capturer.Logs.Should().ContainSingle().Which.Level.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void DoAppend_StructuredLogging_LogEvent(bool withActiveSpan)
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.Environment = "test-environment";
+        _fixture.Options.Release = "test-release";
+
+        if (withActiveSpan)
+        {
+            var span = Substitute.For<ISpan>();
+            span.TraceId.Returns(SentryId.Create());
+            span.SpanId.Returns(SpanId.Create());
+            _fixture.Hub.GetSpan().Returns(span);
+        }
+        else
+        {
+            _fixture.Hub.GetSpan().Returns((ISpan?)null);
+        }
+
+        var sut = _fixture.GetSut();
+        ThreadContext.Properties["Text-Property"] = "4";
+        ThreadContext.Properties["Number-Property"] = 4;
+        ThreadContext.Properties["Collection-Property"] = new[] { 3, 4, 5 };
+        ThreadContext.Properties["Object-Property"] = (Number: 4, Text: "4");
+
+        sut.DoAppend(CreateLoggingEvent(Level.Info, "{0}, {1}, {2}", [0, 1, 2]));
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Timestamp.Should().BeOnOrBefore(DateTimeOffset.Now);
+        log.TraceId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.TraceId : _fixture.Scope.PropagationContext.TraceId);
+        log.Level.Should().Be(SentryLogLevel.Info);
+        log.Message.Should().Be("0, 1, 2");
+        log.Template.Should().BeNull();
+        log.Parameters.Should().BeEmpty();
+        log.SpanId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.SpanId : null);
+
+        log.Attributes.ShouldContain("sentry.environment", "test-environment");
+        log.Attributes.ShouldContain("sentry.release", "test-release");
+        log.Attributes.ShouldContain("sentry.origin", "auto.log.log4net");
+        log.Attributes.ShouldContain("sentry.sdk.name", SentryAppender.SdkName);
+        log.Attributes.ShouldContain("sentry.sdk.version", SentryAppender.NameAndVersion.Version);
+        log.Attributes.ShouldContain("category.name", "TestLogger");
+
+        log.Attributes.ShouldContain("property.Text-Property", "4");
+        log.Attributes.ShouldContain("property.Number-Property", 4);
+        // Collections are compared by value, so this one keeps BeEquivalentTo rather than the ShouldContain (Be) extension.
+        log.TryGetAttribute("property.Collection-Property", out object? collection).Should().BeTrue();
+        collection.Should().BeEquivalentTo(new[] { 3, 4, 5 });
+        log.Attributes.ShouldContain("property.Object-Property", (Number: 4, Text: "4"));
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLogging_Properties()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+
+        LoggingEventData data = new()
+        {
+            LoggerName = "TestLogger",
+            Level = Level.Info,
+            Message = "Test Message",
+            ThreadName = "1",
+            LocationInfo = new LocationInfo(null),
+            UserName = "TestUser",
+            Identity = "TestIdentity",
+            ExceptionString = "Exception",
+            Domain = "TestDomain",
+            Properties = new PropertiesDictionary(),
+            TimeStampUtc = DateTime.UtcNow,
+        };
+        data.Properties[""] = "empty";
+        data.Properties["test.property.key"] = "test-property-value";
+        LoggingEvent loggingEvent = new(data);
+        sut.DoAppend(loggingEvent);
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Level.Should().Be(SentryLogLevel.Info);
+        log.Message.Should().Be("Test Message");
+        log.Attributes.Should().NotContain(attribute => attribute.Key.Contains("log4net:"));
+        log.Attributes.Should().ContainSingle(attribute => attribute.Key.StartsWith("property."));
+        log.Attributes.ShouldContain("property.test.property.key", "test-property-value");
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLogging_DefaultProperties()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+
+        LoggingEventData data = new()
+        {
+            LoggerName = "TestLogger",
+            Level = Level.Info,
+            Message = "Test Message",
+            ThreadName = "1",
+            LocationInfo = new LocationInfo(null),
+            UserName = "TestUser",
+            Identity = "TestIdentity",
+            ExceptionString = "Exception",
+            Domain = "TestDomain",
+            TimeStampUtc = DateTime.UtcNow,
+        };
+        LoggingEvent loggingEvent = new(data);
+        sut.DoAppend(loggingEvent);
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Level.Should().Be(SentryLogLevel.Info);
+        log.Message.Should().Be("Test Message");
+        log.Attributes.Should().NotContain(attribute => attribute.Key.Contains("log4net:"));
+        log.Attributes.Should().NotContain(attribute => attribute.Key.StartsWith("property."));
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLoggingWithException_NoBreadcrumb()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+        sut.MinimumEventLevel = Level.Error;
+
+        sut.DoAppend(CreateLoggingEvent(Level.Error, "Message", new Exception("expected message")));
+
+        capturer.Logs.Should().ContainSingle().Which.Message.Should().Be("Message");
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLoggingWithoutException_LeavesBreadcrumb()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+        sut.MinimumEventLevel = Level.Fatal;
+
+        sut.DoAppend(CreateLoggingEvent(Level.Error, "Message"));
+
+        capturer.Logs.Should().ContainSingle().Which.Message.Should().Be("Message");
+        _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be("Message");
+        _ = _fixture.Hub.Received(0).CaptureEvent(Arg.Any<SentryEvent>());
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLogging_ConfiguredEnvironment_OverridesOptions()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.Environment = "options-environment";
+
+        var sut = _fixture.GetSut();
+        sut.Environment = "appender-environment";
+
+        sut.DoAppend(CreateLoggingEvent(Level.Info, "Message"));
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Attributes.ShouldContain("sentry.environment", "appender-environment");
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLogging_SendIdentity_SetsUser()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+        sut.SendIdentity = true;
+
+        sut.DoAppend(new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Info,
+            Message = "Message",
+            Identity = "TestIdentity",
+            TimeStampUtc = DateTime.UtcNow,
+        }));
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Attributes.ShouldContain("user.id", "TestIdentity");
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLogging_SendIdentityDisabled_DoesNotSetUser()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+
+        sut.DoAppend(new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Info,
+            Message = "Message",
+            Identity = "TestIdentity",
+            TimeStampUtc = DateTime.UtcNow,
+        }));
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Attributes.ShouldNotContain<string>("user.id");
+    }
+
+    private static LoggingEvent CreateLoggingEvent(Level level, string message, Exception? exception = null)
+    {
+        return new LoggingEvent(null, null, "TestLogger", level, message, exception);
+    }
+
+    private static LoggingEvent CreateLoggingEvent(Level level, string format, object[] args)
+    {
+        var message = new SystemStringFormat(CultureInfo.InvariantCulture, format, args);
+        return new LoggingEvent(null, null, "TestLogger", level, message, null);
+    }
+}

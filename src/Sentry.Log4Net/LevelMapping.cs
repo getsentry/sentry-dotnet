@@ -29,4 +29,20 @@ internal static class LevelMapping
             _ => null
         };
     }
+
+    public static SentryLogLevel? ToSentryLogLevel(this LoggingEvent loggingEvent)
+    {
+        return loggingEvent.Level switch
+        {
+            var level when level == Level.Off => null,
+            var level when level >= Level.Fatal => SentryLogLevel.Fatal,
+            var level when level >= Level.Error => SentryLogLevel.Error,
+            var level when level >= Level.Warn => SentryLogLevel.Warning,
+            var level when level >= Level.Info => SentryLogLevel.Info,
+            var level when level >= Level.Debug => SentryLogLevel.Debug,
+            var level when level >= Level.Trace => SentryLogLevel.Trace,
+            var level when level >= Level.All => SentryLogLevel.Trace,
+            _ => null,
+        };
+    }
 }
