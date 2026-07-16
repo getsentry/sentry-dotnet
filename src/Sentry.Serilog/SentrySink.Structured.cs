@@ -21,6 +21,11 @@ internal sealed partial class SentrySink
         log.SetDefaultAttributes(options, scope, Sdk);
         log.SetOrigin("auto.log.serilog");
 
+        if (logEvent.TryGetSourceContext(out var context))
+        {
+            log.Attributes.SetAttribute("category.name", context);
+        }
+
         foreach (var attribute in attributes)
         {
             log.SetAttribute(attribute.Key, attribute.Value);

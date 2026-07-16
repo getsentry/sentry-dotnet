@@ -136,6 +136,40 @@ public partial class SentrySinkTests
     }
 
     [Fact]
+    public void Emit_StructuredLogging_WithSourceContext_SetsCategoryName()
+    {
+        const string expectedLogger = "My.Logger";
+
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+        var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
+
+        logger.ForContext("SourceContext", expectedLogger).Write(LogEventLevel.Information, "Message");
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.TryGetAttribute("category.name", out object? categoryName).Should().BeTrue();
+        categoryName.Should().Be(expectedLogger);
+    }
+
+    [Fact]
+    public void Emit_StructuredLogging_WithoutSourceContext_DoesNotSetCategoryName()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+        var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
+
+        logger.Write(LogEventLevel.Information, "Message");
+
+        capturer.Logs.Should().ContainSingle().Which.TryGetAttribute("category.name", out object? _).Should().BeFalse();
+    }
+
+    [Fact]
     public void Emit_StructuredLoggingWithException_NoBreadcrumb()
     {
         InMemorySentryStructuredLogger capturer = new();
