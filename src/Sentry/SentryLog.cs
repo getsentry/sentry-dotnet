@@ -12,7 +12,7 @@ namespace Sentry;
 /// Sentry .NET SDK Docs: <see href="https://docs.sentry.io/platforms/dotnet/logs/"/>.
 /// </remarks>
 [DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
-public sealed partial class SentryLog
+public sealed class SentryLog
 {
     [SetsRequiredMembers]
     internal SentryLog(DateTimeOffset timestamp, SentryId traceId, SentryLogLevel level, string message)
@@ -25,6 +25,20 @@ public sealed partial class SentryLog
         Attributes = new SentryAttributes(7);
         // ensure the ImmutableArray`1 is not default, so we can omit IsDefault checks before accessing other members
         Parameters = ImmutableArray<KeyValuePair<string, object>>.Empty;
+    }
+
+    internal static SentryLog Create(IHub hub, DateTimeOffset timestamp, SentryLogLevel level, string message, string? template, ImmutableArray<KeyValuePair<string, object>> parameters)
+    {
+        hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
+
+        SentryLog log = new(timestamp, traceId, level, message)
+        {
+            Template = template,
+            Parameters = parameters,
+            SpanId = spanId,
+        };
+
+        return log;
     }
 
     /// <summary>
