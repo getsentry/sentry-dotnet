@@ -10,11 +10,9 @@ internal class Program
 
     private static void Main()
     {
-#if NETFRAMEWORK
         // Set the user running the process the current principal
         // Appender was configured to send the user with the event
         AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
-#endif
 
         // The following anonymous object gets serialized and sent with log messages
         ThreadContext.Properties["inventory"] = new
