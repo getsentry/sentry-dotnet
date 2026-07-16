@@ -90,27 +90,34 @@ public partial class SentryAppender : AppenderSkeleton
             }
         }
 
-        var options = _hub.GetSentryOptions();
-        if (options is { EnableLogs: true })
-        {
-            CaptureStructuredLog(_hub, options, loggingEvent);
-        }
-
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
 
         if (MinimumEventLevel is not null && loggingEvent.Level < MinimumEventLevel)
         {
-            var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
-            var category = loggingEvent.LoggerName;
-            var level = loggingEvent.ToBreadcrumbLevel();
-            IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent)
-                .Where(kvp => kvp.Value != null)
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString() ?? "");
-
-            _hub.AddBreadcrumb(message, category, type: null, data, level ?? default);
+            AddBreadcrumbFromLoggingEvent(loggingEvent);
             return;
         }
 
+        CreateSentryEvent(loggingEvent, exception);
+
+        var options = _hub.GetSentryOptions();
+        if (options is not { EnableLogs: true })
+        {
+            return;
+        }
+
+        try
+        {
+            CaptureStructuredLog(_hub, options, loggingEvent);
+        }
+        catch (Exception ex)
+        {
+            options.DiagnosticLogger?.LogError(ex, "Failed to capture structured log. The log will be dropped.");
+        }
+    }
+
+    private void CreateSentryEvent(LoggingEvent loggingEvent, Exception? exception)
+    {
         var evt = new SentryEvent(exception)
         {
             Logger = loggingEvent.LoggerName,
@@ -149,6 +156,19 @@ public partial class SentryAppender : AppenderSkeleton
         }
 
         _hub.CaptureEvent(evt);
+    }
+
+    private void AddBreadcrumbFromLoggingEvent(LoggingEvent loggingEvent)
+    {
+        var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
+        var category = loggingEvent.LoggerName;
+        var level = loggingEvent.ToBreadcrumbLevel();
+        IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent)
+            .Where(kvp => kvp.Value != null)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString() ?? "");
+
+        _hub.AddBreadcrumb(message, category, type: null, data, level ?? default);
+        return;
     }
 
     private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LoggingEvent loggingEvent)
