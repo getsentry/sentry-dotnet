@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
@@ -34,9 +35,12 @@ internal class SentryMiddleware : IMiddleware
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     // Ben.BlockingDetector
-    private readonly BlockingMonitor? _monitor;
-    private readonly DetectBlockingSynchronizationContext? _detectBlockingSyncCtx;
+    private readonly IBlockingMonitor? _monitor;
     private readonly TaskBlockingListener? _listener;
+
+    // Internal for testing
+    internal IBlockingMonitor? Monitor => _monitor;
+    internal TaskBlockingListener? Listener => _listener;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SentryMiddleware"/> class.
@@ -48,6 +52,7 @@ internal class SentryMiddleware : IMiddleware
     /// <param name="eventExceptionProcessors">Custom Event Exception Processors</param>
     /// <param name="eventProcessors">Custom Event Processors</param>
     /// <param name="transactionProcessors">Custom Transaction Processors</param>
+    /// <param name="serviceProvider">The service provider, used to resolve dependencies.</param>
     /// <exception cref="ArgumentNullException">
     /// next
     /// or
@@ -60,7 +65,8 @@ internal class SentryMiddleware : IMiddleware
         ILogger<SentryMiddleware> logger,
         IEnumerable<ISentryEventExceptionProcessor> eventExceptionProcessors,
         IEnumerable<ISentryEventProcessor> eventProcessors,
-        IEnumerable<ISentryTransactionProcessor> transactionProcessors)
+        IEnumerable<ISentryTransactionProcessor> transactionProcessors,
+        IServiceProvider serviceProvider)
     {
         ArgumentNullException.ThrowIfNull(getHub);
 
@@ -74,9 +80,9 @@ internal class SentryMiddleware : IMiddleware
 
         if (_options.CaptureBlockingCalls)
         {
-            _monitor = new BlockingMonitor(_getHub, _options);
-            _detectBlockingSyncCtx = new DetectBlockingSynchronizationContext(_monitor);
-            _listener = new TaskBlockingListener(_monitor);
+            // Resolve shared singletons to keep overhead constant - See #5378.
+            _monitor = serviceProvider.GetRequiredService<IBlockingMonitor>();
+            _listener = serviceProvider.GetRequiredService<TaskBlockingListener>();
         }
     }
 
@@ -150,7 +156,11 @@ internal class SentryMiddleware : IMiddleware
                 if (_options.CaptureBlockingCalls && _monitor is not null)
                 {
                     var syncCtx = SynchronizationContext.Current;
-                    SynchronizationContext.SetSynchronizationContext(syncCtx == null ? _detectBlockingSyncCtx : new DetectBlockingSynchronizationContext(_monitor, syncCtx));
+                    // Created per request as it carries per-request suppression state.
+                    var detectingSyncCtx = syncCtx is null
+                        ? new DetectBlockingSynchronizationContext(_monitor)
+                        : new DetectBlockingSynchronizationContext(_monitor, syncCtx);
+                    SynchronizationContext.SetSynchronizationContext(detectingSyncCtx);
                     try
                     {
                         // For detection to work we need ConfigureAwait=true

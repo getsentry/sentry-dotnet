@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
+using Sentry.Ben.BlockingDetector;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Hosting;
@@ -112,6 +113,9 @@ public static class SentryWebHostBuilderExtensions
         _ = builder.ConfigureServices(c => _ =
             c.AddTransient<IStartupFilter, SentryStartupFilter>()
              .AddTransient<IStartupFilter, SentryTracingStartupFilter>()
+             // Single listener/monitor per process (the listener is a global EventListener) - See #5378.
+             .AddSingleton<IBlockingMonitor, BlockingMonitor>()
+             .AddSingleton<TaskBlockingListener>()
              .AddTransient<SentryMiddleware>()
         );
 
