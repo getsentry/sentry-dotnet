@@ -218,6 +218,66 @@ public partial class SentryAppenderTests
         _ = _fixture.Hub.Received(0).CaptureEvent(Arg.Any<SentryEvent>());
     }
 
+    [Fact]
+    public void DoAppend_StructuredLogging_ConfiguredEnvironment_OverridesOptions()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.Environment = "options-environment";
+
+        var sut = _fixture.GetSut();
+        sut.Environment = "appender-environment";
+
+        sut.DoAppend(CreateLoggingEvent(Level.Info, "Message"));
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Attributes.ShouldContain("sentry.environment", "appender-environment");
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLogging_SendIdentity_SetsUser()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+        sut.SendIdentity = true;
+
+        sut.DoAppend(new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Info,
+            Message = "Message",
+            Identity = "TestIdentity",
+            TimeStampUtc = DateTime.UtcNow,
+        }));
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Attributes.ShouldContain("user.id", "TestIdentity");
+    }
+
+    [Fact]
+    public void DoAppend_StructuredLogging_SendIdentityDisabled_DoesNotSetUser()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+
+        sut.DoAppend(new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Info,
+            Message = "Message",
+            Identity = "TestIdentity",
+            TimeStampUtc = DateTime.UtcNow,
+        }));
+
+        var log = capturer.Logs.Should().ContainSingle().Which;
+        log.Attributes.ShouldNotContain<string>("user.id");
+    }
+
     private static LoggingEvent CreateLoggingEvent(Level level, string message, Exception? exception = null)
     {
         return new LoggingEvent(null, null, "TestLogger", level, message, exception);

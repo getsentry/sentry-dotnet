@@ -90,6 +90,9 @@ public partial class SentryAppender : AppenderSkeleton
             }
         }
 
+        // Structured logs are captured for every event, independent of the breadcrumb/event branching below.
+        CaptureStructuredLogIfEnabled(loggingEvent);
+
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
 
         if (MinimumEventLevel is not null && loggingEvent.Level < MinimumEventLevel)
@@ -99,7 +102,10 @@ public partial class SentryAppender : AppenderSkeleton
         }
 
         CreateSentryEvent(loggingEvent, exception);
+    }
 
+    private void CaptureStructuredLogIfEnabled(LoggingEvent loggingEvent)
+    {
         var options = _hub.GetSentryOptions();
         if (options is not { EnableLogs: true })
         {
@@ -108,7 +114,7 @@ public partial class SentryAppender : AppenderSkeleton
 
         try
         {
-            CaptureStructuredLog(_hub, options, loggingEvent);
+            CaptureStructuredLog(_hub, options, loggingEvent, Environment, SendIdentity);
         }
         catch (Exception ex)
         {
