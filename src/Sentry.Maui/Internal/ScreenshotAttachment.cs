@@ -5,21 +5,11 @@ namespace Sentry.Maui.Internal;
 internal class ScreenshotAttachment : SentryAttachment
 {
     public ScreenshotAttachment(SentryMauiOptions options)
-        : this(
+        : base(
             AttachmentType.Default,
             new ScreenshotAttachmentContent(options),
             "screenshot.jpg",
             "image/jpeg")
-    {
-    }
-
-    private ScreenshotAttachment(
-        AttachmentType type,
-        IAttachmentContent content,
-        string fileName,
-        string? contentType,
-        bool addToTransactions = false)
-        : base(type, content, fileName, contentType, addToTransactions)
     {
     }
 }
