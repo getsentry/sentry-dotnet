@@ -141,8 +141,11 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             spanTracer.Origin = OpenTelemetryOrigin;
             spanTracer.StartTimestamp = data.StartTimeUtc;
-            // Used to filter out spans that are not recorded when finishing a transaction.
-            spanTracer.IsFiltered = () => GetFusedActivity(spanTracer) is { IsAllDataRequested: false, Recorded: false };
+            // Capture the sampling decision now; it is fixed at span creation. Reading it lazily from the
+            // fused Activity would fail once the Activity has been garbage-collected (weak ref returns null),
+            // causing a filtered span to be included in the transaction instead of dropped.
+            var isFiltered = data is { IsAllDataRequested: false, Recorded: false };
+            spanTracer.IsFiltered = () => isFiltered;
         }
         _map[data.SpanId] = span;
     }
