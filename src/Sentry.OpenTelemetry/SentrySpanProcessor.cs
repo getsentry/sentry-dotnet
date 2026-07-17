@@ -136,7 +136,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         var span = parentSpan.StartChild(context);
         // Fuse the Activity via a WeakReference so _map does not pin it, letting PruneFilteredSpans evict
         // never-ended spans. #3198 intended weak refs here but SetFused stores the value strongly.
-        span.SetFused("Activity", new WeakReference<Activity>(data));
+        SetFusedActivity(span, data);
         if (span is SpanTracer spanTracer)
         {
             spanTracer.Origin = OpenTelemetryOrigin;
@@ -179,7 +179,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             scope.Transaction ??= transaction;
         }, transaction);
         // Fuse weakly so _map does not pin the Activity.
-        transaction.SetFused("Activity", new WeakReference<Activity>(data));
+        SetFusedActivity(transaction, data);
         _map[data.SpanId] = transaction;
     }
 
@@ -317,9 +317,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         }
     }
 
+    private const string ActivityPropertyName = "Activity";
+
+    // Fuses the Activity onto the span via a WeakReference so _map does not pin it.
+    private static void SetFusedActivity(ISpan span, Activity data) =>
+        span.SetFused(ActivityPropertyName, new WeakReference<Activity>(data));
+
     // Returns the fused Activity, or null once it has been garbage-collected.
     private static Activity? GetFusedActivity(ISpan span) =>
-        span.GetFused<WeakReference<Activity>>("Activity") is { } weakRef && weakRef.TryGetTarget(out var activity)
+        span.GetFused<WeakReference<Activity>>(ActivityPropertyName) is { } weakRef && weakRef.TryGetTarget(out var activity)
             ? activity
             : null;
 
