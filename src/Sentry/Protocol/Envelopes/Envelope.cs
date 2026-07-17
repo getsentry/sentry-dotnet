@@ -335,18 +335,12 @@ public sealed class Envelope : ISerializable, IDisposable
     }
 
     /// <summary>
-    /// Creates an envelope that contains a single transaction.
-    /// </summary>
-    public static Envelope FromTransaction(SentryTransaction transaction) =>
-        FromTransaction(transaction, null, null);
-
-    /// <summary>
     /// Creates an envelope that contains a single transaction and optional attachments.
     /// </summary>
     public static Envelope FromTransaction(
         SentryTransaction transaction,
-        IDiagnosticLogger? logger,
-        IReadOnlyCollection<SentryAttachment>? attachments)
+        IDiagnosticLogger? logger = null,
+        IReadOnlyCollection<SentryAttachment>? attachments = null)
     {
         var eventId = transaction.EventId;
         var header = CreateHeader(eventId, transaction.DynamicSamplingContext);
