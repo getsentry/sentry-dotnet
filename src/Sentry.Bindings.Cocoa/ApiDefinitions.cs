@@ -2190,10 +2190,6 @@ interface SentryExperimentalOptions
     [Export("enableWatchdogTerminationsV2")]
     bool EnableWatchdogTerminationsV2 { get; set; }
 
-    // @property (nonatomic) BOOL enableReplayNetworkDetailsCapturing;
-    [Export("enableReplayNetworkDetailsCapturing")]
-    bool EnableReplayNetworkDetailsCapturing { get; set; }
-
     // @property (nonatomic) BOOL enableStandaloneAppStartTracing;
     [Export("enableStandaloneAppStartTracing")]
     bool EnableStandaloneAppStartTracing { get; set; }
