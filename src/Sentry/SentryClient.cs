@@ -236,7 +236,10 @@ public class SentryClient : ISentryClient, IDisposable
             processedTransaction.Redact();
         }
 
-        CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+        // Keep null entries so the null-attachment guard in Envelope.FromTransaction handles them
+        // (consistent with the event/feedback capture paths); dereferencing them here would throw.
+        var attachments = hint.Attachments.Where(a => a is null || a.AddToTransactions).ToList();
+        CaptureEnvelope(Envelope.FromTransaction(processedTransaction, _options.DiagnosticLogger, attachments));
     }
 
 #if NET6_0_OR_GREATER

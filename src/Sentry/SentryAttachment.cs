@@ -66,6 +66,12 @@ public class SentryAttachment
     public string? ContentType { get; }
 
     /// <summary>
+    /// Whether the attachment should be added to transactions.
+    /// Defaults to <c>false</c>.
+    /// </summary>
+    public bool AddToTransactions { get; }
+
+    /// <summary>
     /// Initializes an instance of <see cref="SentryAttachment"/>.
     /// </summary>
     public SentryAttachment(
@@ -73,10 +79,24 @@ public class SentryAttachment
         IAttachmentContent content,
         string fileName,
         string? contentType)
+        : this(type, content, fileName, contentType, false)
+    {
+    }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="SentryAttachment"/>.
+    /// </summary>
+    public SentryAttachment(
+        AttachmentType type,
+        IAttachmentContent content,
+        string fileName,
+        string? contentType,
+        bool addToTransactions)
     {
         Type = type;
         Content = content;
         FileName = fileName;
         ContentType = contentType;
+        AddToTransactions = addToTransactions;
     }
 }

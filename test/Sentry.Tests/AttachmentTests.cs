@@ -24,6 +24,28 @@ public class ByteAttachmentContentTests
     }
 }
 
+public class ViewHierarchyAttachmentTests
+{
+    [Fact]
+    public void Ctor_DefaultsAddToTransactionsToFalse()
+    {
+        var attachment = new ViewHierarchyAttachment(new ByteAttachmentContent(new byte[] { 1 }));
+        Assert.False(attachment.AddToTransactions);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Ctor_ForwardsAddToTransactions(bool addToTransactions)
+    {
+        var attachment = new ViewHierarchyAttachment(
+            new ByteAttachmentContent(new byte[] { 1 }),
+            addToTransactions);
+
+        Assert.Equal(addToTransactions, attachment.AddToTransactions);
+    }
+}
+
 public class FileAttachmentContentTests
 {
     [Fact]

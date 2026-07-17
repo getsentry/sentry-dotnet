@@ -1523,6 +1523,75 @@ public partial class SentryClientTests : IDisposable
         hint.Attachments.Should().Contain(attachments);
     }
 
+    [Fact]
+    public void CaptureTransaction_AttachmentWithAddToTransactionsTrue_IncludedInEnvelope()
+    {
+        // Arrange
+        var transaction = new SentryTransaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+        var attachment = AttachmentHelper.FakeAttachment("include.txt", addToTransactions: true);
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(attachment);
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
+    }
+
+    [Fact]
+    public void CaptureTransaction_AttachmentWithAddToTransactionsFalse_ExcludedFromEnvelope()
+    {
+        // Arrange
+        var transaction = new SentryTransaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("exclude.txt")); // default: AddToTransactions = false
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 0));
+    }
+
+    [Fact]
+    public void CaptureTransaction_NullAttachmentInHint_DoesNotThrowAndSkipsNull()
+    {
+        // Arrange
+        var transaction = new SentryTransaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+        var scope = new Scope(_fixture.SentryOptions);
+        var sut = _fixture.GetSut();
+
+        // A null entry in the hint's attachments must not crash transaction capture.
+        var hint = new SentryHint();
+        hint.Attachments.Add(null!);
+        hint.Attachments.Add(AttachmentHelper.FakeAttachment("include.txt", addToTransactions: true));
+
+        // Act
+        var capture = () => sut.CaptureTransaction(transaction, scope, hint);
+
+        // Assert
+        capture.Should().NotThrow();
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
+    }
+
     [SkippableFact]
     public void CaptureTransaction_UserIsNull_SetsFallbackUserId()
     {
