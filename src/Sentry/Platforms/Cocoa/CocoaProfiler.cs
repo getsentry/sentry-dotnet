@@ -9,12 +9,12 @@ internal class CocoaProfiler : ITransactionProfiler
 {
     private readonly SentryOptions _options;
     private readonly SentryId _traceId;
-    private readonly CocoaSdk.SentryId _cocoaTraceId;
+    private readonly CocoaSdk.SentryObjCId _cocoaTraceId;
     private readonly ulong _startTimeNs;
     private ulong _endTimeNs;
     private readonly SentryStopwatch _stopwatch;
 
-    public CocoaProfiler(SentryOptions options, ulong startTimeNs, SentryId traceId, CocoaSdk.SentryId cocoaTraceId)
+    public CocoaProfiler(SentryOptions options, ulong startTimeNs, SentryId traceId, CocoaSdk.SentryObjCId cocoaTraceId)
     {
         _stopwatch = SentryStopwatch.StartNew();
         _options = options;
@@ -36,7 +36,7 @@ internal class CocoaProfiler : ITransactionProfiler
 
     public ISerializable? Collect(SentryTransaction transaction)
     {
-        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_startTimeNs, _endTimeNs, _cocoaTraceId);
+        var payload = SentryCocoaHybridSdk.Internal.Profiling.CollectBetweenStartTime(_startTimeNs, _endTimeNs, _cocoaTraceId);
         if (payload is null)
         {
             _options.LogWarning("Trace {0} collected profile payload is null", _traceId);
