@@ -289,7 +289,7 @@ public partial class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => SentryResponses.GetRateLimitResponse($"1234:event, 897:transaction, {metricNamespace}")
+                () => SentryResponses.GetRateLimitResponse($"1234:error, 897:transaction, {metricNamespace}")
             ));
 
         var httpTransport = new HttpTransport(
@@ -369,7 +369,7 @@ public partial class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+                () => SentryResponses.GetRateLimitResponse("1234:error, 897:transaction")
             ));
 
         var options = new SentryOptions
@@ -485,7 +485,7 @@ public partial class HttpTransportTests
 
             // We also expect two new items recorded, due to the forced HTTP failure.
             {DiscardReason.SendError.WithCategory(DataCategory.Error), 1},  // from the event
-            {DiscardReason.SendError.WithCategory(DataCategory.Default), 1} // from the client report
+            {DiscardReason.SendError.WithCategory(DataCategory.Internal), 1} // from the client report
         });
     }
 
@@ -858,7 +858,7 @@ public partial class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+                () => SentryResponses.GetRateLimitResponse("1234:error, 897:transaction")
             ));
 
         using var backpressureMonitor = new BackpressureMonitor(null, _fakeClock, false);
