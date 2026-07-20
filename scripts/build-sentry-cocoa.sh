@@ -67,6 +67,38 @@ xcodebuild -create-xcframework \
     -output ./Carthage/Build-ios/Sentry.xcframework
 echo "::endgroup::"
 
+# The SentryObjC scheme adds the structured hybrid API (SentryObjCSDK.internal), which the .NET
+# bindings use in place of the deprecated PrivateSentrySDKOnly. It produces two thin frameworks -
+# SentryObjC and SentryObjCCompat - that dynamically link the Sentry.framework built above (they do
+# not embed their own copy of the SDK), so we bundle them alongside Sentry.xcframework. We build
+# these from source rather than downloading the pre-built SentryObjC-Dynamic.xcframework because
+# that release artifact is self-contained (it embeds the whole SDK) and would duplicate Sentry.
+echo "::group::Building SentryObjC for iOS and iOS simulator"
+xcodebuild archive -project Sentry.xcodeproj \
+    -scheme SentryObjC \
+    -configuration Release \
+    -sdk "$ios_sdk" \
+    -archivePath ./Carthage/output-objc-ios.xcarchive \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
+./scripts/remove-architectures.sh ./Carthage/output-objc-ios.xcarchive arm64e
+xcodebuild archive -project Sentry.xcodeproj \
+    -scheme SentryObjC \
+    -configuration Release \
+    -sdk "$ios_simulator_sdk" \
+    -archivePath ./Carthage/output-objc-iossimulator.xcarchive \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
+for fw in SentryObjC SentryObjCCompat; do
+    xcodebuild -create-xcframework \
+        -framework "./Carthage/output-objc-ios.xcarchive/Products/Library/Frameworks/$fw.framework" \
+        -framework "./Carthage/output-objc-iossimulator.xcarchive/Products/Library/Frameworks/$fw.framework" \
+        -output "./Carthage/Build-ios/$fw.xcframework"
+done
+echo "::endgroup::"
+
 # Separately, build for Mac Catalyst
 echo "::group::Building sentry-cocoa for Mac Catalyst"
 xcodebuild archive -project Sentry.xcodeproj \
@@ -83,9 +115,28 @@ xcodebuild -create-xcframework \
     -output ./Carthage/Build-maccatalyst/Sentry.xcframework
 echo "::endgroup::"
 
+echo "::group::Building SentryObjC for Mac Catalyst"
+xcodebuild archive -project Sentry.xcodeproj \
+    -scheme SentryObjC \
+    -configuration Release \
+    -destination 'generic/platform=macOS,variant=Mac Catalyst' \
+    -archivePath ./Carthage/output-objc-maccatalyst.xcarchive \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
+./scripts/remove-architectures.sh ./Carthage/output-objc-maccatalyst.xcarchive arm64e
+for fw in SentryObjC SentryObjCCompat; do
+    xcodebuild -create-xcframework \
+        -framework "./Carthage/output-objc-maccatalyst.xcarchive/Products/Library/Frameworks/$fw.framework" \
+        -output "./Carthage/Build-maccatalyst/$fw.xcframework"
+done
+echo "::endgroup::"
+
 # Copy headers - used for generating bindings
 mkdir Carthage/Headers
 find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
+find Carthage/Build-ios/SentryObjC.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
+find Carthage/Build-ios/SentryObjCCompat.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
 
 # Remove anything we don't want to bundle in the nuget package.
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +

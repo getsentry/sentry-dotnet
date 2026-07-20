@@ -3024,3 +3024,135 @@ interface SentryViewScreenshotOptions : SentryRedactOptions
     [DesignatedInitializer]
     NativeHandle Constructor(bool enableViewRendererV2, bool enableFastViewRendering, bool maskAllText, bool maskAllImages, Class[] maskedViewClasses, Class[] unmaskedViewClasses, NSSet<NSString> excludedViewClasses, NSSet<NSString> includedViewClasses);
 }
+
+// @interface SentryObjCSDK : NSObject
+[BaseType(typeof(NSObject))]
+[Internal]
+interface SentryObjCSDK
+{
+
+    // @property (readonly, nonatomic, class) SentryObjCInternalApi * _Nonnull internal;
+    [Static]
+    [Export("internal")]
+    SentryObjCInternalApi Internal { get; }
+}
+
+// @interface SentryObjCInternalApi : NSObject
+[BaseType(typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryObjCInternalApi
+{
+    // @property (readonly, nonatomic) SentryObjCInternalSdkApi * _Nonnull sdk;
+    [Export("sdk")]
+    SentryObjCInternalSdkApi Sdk { get; }
+
+    // @property (readonly, nonatomic) SentryObjCInternalProfilingApi * _Nonnull profiling;
+    [Export("profiling")]
+    SentryObjCInternalProfilingApi Profiling { get; }
+
+    // -(void)setTrace:(SentryObjCId * _Nonnull)traceId spanId:(SentryObjCSpanId * _Nonnull)spanId;
+    [Export("setTrace:spanId:")]
+    void SetTrace(SentryObjCId traceId, SentryObjCSpanId spanId);
+
+    // -(void)ignoreNextSignal:(int)signum;
+    [Export("ignoreNextSignal:")]
+    void IgnoreNextSignal(int signum);
+}
+
+// @interface SentryObjCInternalSdkApi : NSObject
+[BaseType(typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryObjCInternalSdkApi
+{
+    // @property (copy, nonatomic) NSString * _Nonnull name;
+    [Export("name")]
+    string Name { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nonnull versionString;
+    [Export("versionString")]
+    string VersionString { get; set; }
+
+    // -(void)setName:(NSString * _Nonnull)name version:(NSString * _Nonnull)version;
+    [Export("setName:version:")]
+    void SetName(string name, string version);
+
+    // -(void)addPackageName:(NSString * _Nonnull)name version:(NSString * _Nonnull)version;
+    [Export("addPackageName:version:")]
+    void AddPackageName(string name, string version);
+
+    // @property (readonly, copy, nonatomic) NSDictionary<NSString *,id> * _Nonnull extraContext;
+    [Export("extraContext", ArgumentSemantic.Copy)]
+    NSDictionary<NSString, NSObject> ExtraContext { get; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull installationID;
+    [Export("installationID")]
+    string InstallationID { get; }
+}
+
+// @interface SentryObjCInternalProfilingApi : NSObject
+[BaseType(typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryObjCInternalProfilingApi
+{
+    // -(uint64_t)startFor:(SentryObjCId * _Nonnull)traceId;
+    [Export("startFor:")]
+    ulong StartFor(SentryObjCId traceId);
+
+    // -(NSDictionary<NSString *,id> * _Nullable)collectBetweenStartTime:(uint64_t)startTime andEndTime:(uint64_t)endTime forTraceId:(SentryObjCId * _Nonnull)traceId;
+    [Export("collectBetweenStartTime:andEndTime:forTraceId:")]
+    [return: NullAllowed]
+    NSDictionary<NSString, NSObject> CollectBetweenStartTime(ulong startTime, ulong endTime, SentryObjCId traceId);
+
+    // -(void)discardFor:(SentryObjCId * _Nonnull)traceId;
+    [Export("discardFor:")]
+    void DiscardFor(SentryObjCId traceId);
+}
+
+// @interface SentryObjCId : NSObject
+[BaseType(typeof(NSObject))]
+[Internal]
+interface SentryObjCId
+{
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull sentryIdString;
+    [Export("sentryIdString")]
+    string SentryIdString { get; }
+
+    // @property (readonly, nonatomic, strong, class) SentryObjCId * _Nonnull empty;
+    [Static]
+    [Export("empty", ArgumentSemantic.Strong)]
+    SentryObjCId Empty { get; }
+
+    // -(instancetype _Nonnull)initWithUuid:(NSUUID * _Nonnull)uuid;
+    [Export("initWithUuid:")]
+    NativeHandle Constructor(NSUuid uuid);
+
+    // -(instancetype _Nonnull)initWithUUIDString:(NSString * _Nonnull)uuidString;
+    [Export("initWithUUIDString:")]
+    NativeHandle Constructor(string uuidString);
+}
+
+// @interface SentryObjCSpanId : NSObject
+[BaseType(typeof(NSObject))]
+[Internal]
+interface SentryObjCSpanId
+{
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull sentrySpanIdString;
+    [Export("sentrySpanIdString")]
+    string SentrySpanIdString { get; }
+
+    // @property (readonly, nonatomic, strong, class) SentryObjCSpanId * _Nonnull empty;
+    [Static]
+    [Export("empty", ArgumentSemantic.Strong)]
+    SentryObjCSpanId Empty { get; }
+
+    // -(instancetype _Nonnull)initWithUuid:(NSUUID * _Nonnull)uuid;
+    [Export("initWithUuid:")]
+    NativeHandle Constructor(NSUuid uuid);
+
+    // -(instancetype _Nonnull)initWithValue:(NSString * _Nonnull)value;
+    [Export("initWithValue:")]
+    NativeHandle Constructor(string value);
+}

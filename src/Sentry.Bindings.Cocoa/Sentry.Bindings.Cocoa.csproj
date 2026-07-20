@@ -24,6 +24,11 @@
   <!-- Override values for local Cocoa SDK builds -->
   <PropertyGroup Condition="Exists('$(SentryCocoaCache).git')">
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
+    <!-- Structured hybrid API (SentryObjCSDK.internal). These two thin frameworks dynamically link
+         Sentry.framework above; build-sentry-cocoa.sh builds them from source. They are only produced
+         on the build-from-source path (there is no non-duplicating released artifact - see #5331). -->
+    <SentryCocoaObjCFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC.xcframework</SentryCocoaObjCFramework>
+    <SentryCocoaObjCCompatFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjCCompat.xcframework</SentryCocoaObjCCompatFramework>
     <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/**/*.h</SentryCocoaBindingInputs>
     <!-- Resolve path to modules/sentry-cocoa/.git -->
     <SentryCocoaGitFile>$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
@@ -54,6 +59,9 @@
     <ObjcBindingApiDefinition Include="PrivateApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
+    <!-- SentryObjCCompat before SentryObjC (dependency order); both link Sentry.framework above. -->
+    <NativeReference Include="$(SentryCocoaObjCCompatFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCCompatFramework)' != ''" />
+    <NativeReference Include="$(SentryCocoaObjCFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCFramework)' != ''" />
 
     <!-- Use a separate readme file in the nuget. -->
     <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />

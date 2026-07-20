@@ -124,6 +124,15 @@ var nodes = tree.GetCompilationUnitRoot()
     // SentryUserFeedbackConfiguration is not whitelisted
     .RemoveProperty("SentryOptions", "ConfigureUserFeedback")
     .RemoveProperty("SentryOptions", "UserFeedbackConfiguration")
+    // SentryObjCSDK.internal is the entry point to the new hybrid API (replacing PrivateSentrySDKOnly).
+    // We only bind the `internal` accessor; every other SentryObjCSDK member references SentryObjC*
+    // types we don't whitelist.
+    .KeepProperties("SentryObjCSDK", "Internal")
+    .RemoveMethod("SentryObjCSDK", "*")
+    // On the internal API the .NET wrappers only use the SDK-metadata and profiling sub-objects plus
+    // setTrace / ignoreNextSignal. The remaining accessors return sub-API/options types that aren't bound.
+    .KeepProperties("SentryObjCInternalApi", "Sdk", "Profiling")
+    .KeepMethods("SentryObjCInternalApi", "SetTrace", "IgnoreNextSignal")
     .KeepInterfaces(
         "ISentryRRWebEvent",
         "PrivateSentrySDKOnly",
@@ -155,6 +164,12 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryMechanismContext",
         "SentryMessage",
         "SentryNSError",
+        "SentryObjCId",
+        "SentryObjCInternalApi",
+        "SentryObjCInternalProfilingApi",
+        "SentryObjCInternalSdkApi",
+        "SentryObjCSDK",
+        "SentryObjCSpanId",
         "SentryOptions",
         "SentryProfileOptions",
         "SentryRedactOptions",

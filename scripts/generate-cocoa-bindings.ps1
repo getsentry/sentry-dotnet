@@ -164,12 +164,22 @@ else
 }
 
 # Generate bindings
+# The SentryObjC* headers expose the structured hybrid API (SentryObjCSDK.internal) that replaces
+# the deprecated PrivateSentrySDKOnly. We only bind the entry point (SentryObjCSDK), the internal
+# API surface, and the two id types the .NET wrappers pass; patch-cocoa-bindings.cs trims everything
+# else these headers pull in via forward declarations.
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
     "$HeadersPath/Sentry.h" `
     "$HeadersPath/Sentry-Swift.h" `
     "$HeadersPath/PrivateSentrySDKOnly.h" `
+    "$HeadersPath/SentryObjCSDK.h" `
+    "$HeadersPath/SentryObjCInternalApi.h" `
+    "$HeadersPath/SentryObjCInternalSdkApi.h" `
+    "$HeadersPath/SentryObjCInternalProfilingApi.h" `
+    "$HeadersPath/SentryObjCId.h" `
+    "$HeadersPath/SentryObjCSpanId.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute `
     -F"$iPhoneSdkPath/System/Library/SubFrameworks" # needed for UIUtilities.framework in Xcode 26+
