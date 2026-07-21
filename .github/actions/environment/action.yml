@@ -43,7 +43,7 @@ runs:
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_26.5.app
+      run: sudo xcode-select --switch /Applications/Xcode_26.6.app
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21
