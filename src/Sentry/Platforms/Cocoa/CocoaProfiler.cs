@@ -36,13 +36,17 @@ internal class CocoaProfiler : ITransactionProfiler
 
     public ISerializable? Collect(SentryTransaction transaction)
     {
-        var payload = SentryCocoaHybridSdk.Internal.Profiling.CollectBetweenStartTime(_startTimeNs, _endTimeNs, _cocoaTraceId);
-        if (payload is null)
+        var collected = SentryCocoaHybridSdk.Internal.Profiling.CollectBetweenStartTime(_startTimeNs, _endTimeNs, _cocoaTraceId);
+        if (collected is null)
         {
             _options.LogWarning("Trace {0} collected profile payload is null", _traceId);
             return null;
         }
         _options.LogDebug("Trace {0} profile payload collected", _traceId);
+
+        // The SentryObjCSDK.internal profiling API returns an immutable NSDictionary (the old
+        // PrivateSentrySDKOnly API returned a mutable one), so copy it before mutating below.
+        var payload = (NSMutableDictionary)collected.MutableCopy();
 
         var payloadTx = payload["transaction"]?.MutableCopy() as NSMutableDictionary;
         if (payloadTx is null)
