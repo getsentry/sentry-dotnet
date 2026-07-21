@@ -132,6 +132,13 @@ for fw in SentryObjC SentryObjCCompat; do
 done
 echo "::endgroup::"
 
+# Xcode embeds each framework's dynamic dependencies under <Framework>.framework/Frameworks/ (e.g.
+# SentryObjC.framework/Frameworks/SentryObjCCompat.framework/Frameworks/Sentry.framework). We bundle
+# Sentry, SentryObjCCompat and SentryObjC as separate NativeReferences - each embedded into the
+# consuming app - so those nested copies are redundant, and their deep paths blow past NuGet's path
+# length limit (NU5123). Strip them; the frameworks resolve each other via @rpath at the app level.
+find Carthage/Build-*/SentryObjC*.xcframework -type d -name Frameworks -prune -exec rm -rf {} +
+
 # Copy headers - used for generating bindings
 mkdir Carthage/Headers
 find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
