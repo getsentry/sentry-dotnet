@@ -60,8 +60,9 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // The "statsd" item type corresponds to the "metric_bucket" data category
         TypeValueMetric => DataCategory.MetricBucket,
 
-        // Client reports are system-level telemetry that is never rate-limited (the "internal" category),
-        // so they must not be dropped by a rate limit for the "default" category.
+        // Client reports are SDK telemetry that Relay never rate-limits, so map them to a data category
+        // ("internal") that never appears in a rate-limit header. This keeps them from being dropped by a
+        // limit for the "default" category (which is what the fallback below would otherwise assign).
         TypeValueClientReport => DataCategory.Internal,
 
         // Not all envelope item types equate to data categories
