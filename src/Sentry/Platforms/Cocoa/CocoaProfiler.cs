@@ -44,8 +44,7 @@ internal class CocoaProfiler : ITransactionProfiler
         }
         _options.LogDebug("Trace {0} profile payload collected", _traceId);
 
-        // The SentryObjCSDK.internal profiling API returns an immutable NSDictionary (the old
-        // PrivateSentrySDKOnly API returned a mutable one), so copy it before mutating below.
+        // The SentryObjCSDK.internal profiling API returns an immutable NSDictionary, so copy it before mutating below.
         var payload = (NSMutableDictionary)collected.MutableCopy();
 
         var payloadTx = payload["transaction"]?.MutableCopy() as NSMutableDictionary;

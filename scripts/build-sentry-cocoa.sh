@@ -136,7 +136,7 @@ echo "::endgroup::"
 # SentryObjC.framework/Frameworks/SentryObjCCompat.framework/Frameworks/Sentry.framework). We bundle
 # Sentry, SentryObjCCompat and SentryObjC as separate NativeReferences - each embedded into the
 # consuming app - so those nested copies are redundant, and their deep paths blow past NuGet's path
-# length limit (NU5123). Strip them; the frameworks resolve each other via @rpath at the app level.
+# length limit (NU5123). To fix that, we strip them. The frameworks resolve each other via @rpath at the app level instead/anyway.
 find Carthage/Build-*/SentryObjC*.xcframework -type d -name Frameworks -prune -exec rm -rf {} +
 
 # Copy headers - used for generating bindings
