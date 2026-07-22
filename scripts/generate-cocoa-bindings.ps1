@@ -164,12 +164,12 @@ else
 }
 
 # Generate bindings
+# The SentryObjC*.h headers expose the structured hybrid API (SentryObjCSDK.internal)
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
     "$HeadersPath/Sentry.h" `
     "$HeadersPath/Sentry-Swift.h" `
-    # SentryObjC.h* exposes the structured hybrid API (SentryObjCSDK.internal)
     "$HeadersPath/SentryObjCSDK.h" `
     "$HeadersPath/SentryObjCInternalApi.h" `
     "$HeadersPath/SentryObjCInternalSdkApi.h" `
