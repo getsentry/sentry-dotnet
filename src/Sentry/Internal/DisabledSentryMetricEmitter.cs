@@ -20,6 +20,14 @@ internal sealed class DisabledSentryMetricEmitter : SentryMetricEmitter
         // disabled
     }
 
+#if NET6_0_OR_GREATER
+    /// <inheritdoc />
+    private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, in TagList attributes, Scope? scope) where T : struct
+    {
+        // disabled
+    }
+#endif
+
     /// <inheritdoc />
     private protected override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
     {

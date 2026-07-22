@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
@@ -18,7 +19,8 @@
     },
     "Sentry.Samples.AspNetCore.Basic": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
       "launchUrl": "throw",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
