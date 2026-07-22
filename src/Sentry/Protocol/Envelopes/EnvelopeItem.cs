@@ -46,6 +46,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         TypeValueEvent => DataCategory.Error,
 
         // These ones are equivalent
+        TypeValueFeedback => DataCategory.Feedback,
         TypeValueTransaction => DataCategory.Transaction,
         TypeValueSpan => DataCategory.Span,
         TypeValueSession => DataCategory.Session,

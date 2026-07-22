@@ -11,6 +11,7 @@ public class RateLimitCategoryTests
     [InlineData("log_item", EnvelopeItem.TypeValueLog)]
     [InlineData("trace_metric", EnvelopeItem.TypeValueTraceMetric)]
     [InlineData("metric_bucket", EnvelopeItem.TypeValueMetric)]
+    [InlineData("feedback", EnvelopeItem.TypeValueFeedback)]
     [InlineData("session", EnvelopeItem.TypeValueSession)]
     [InlineData("transaction", EnvelopeItem.TypeValueTransaction)]
     [InlineData("attachment", EnvelopeItem.TypeValueAttachment)]
