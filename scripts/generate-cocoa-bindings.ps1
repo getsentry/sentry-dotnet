@@ -173,7 +173,6 @@ sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
     "$HeadersPath/Sentry.h" `
     "$HeadersPath/Sentry-Swift.h" `
-    "$HeadersPath/PrivateSentrySDKOnly.h" `
     "$HeadersPath/SentryObjCSDK.h" `
     "$HeadersPath/SentryObjCInternalApi.h" `
     "$HeadersPath/SentryObjCInternalSdkApi.h" `

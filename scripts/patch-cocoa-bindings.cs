@@ -57,7 +57,6 @@ var nodes = tree.GetCompilationUnitRoot()
     .PropertyToMethod("Sentry*", "Serialize")
     .PropertyToMethod("SentrySpan", "ToTraceHeader")
     .PropertyToMethod("SentryTraceContext", "ToBaggage")
-    .PropertyToMethod("PrivateSentrySDKOnly", "Capture*")
     // Verify the rest
     .VerifyProperty("*Sentry*", "*", "MethodToProperty") // TODO: replace broad patterns with one-by-one verification
     .VerifyProperty("SentryOptions", "*Targets", "StronglyTypedNSArray")
@@ -81,11 +80,6 @@ var nodes = tree.GetCompilationUnitRoot()
     .WithAttribute("SentryBeforeBreadcrumbCallback", "return: NullAllowed")
     .WithAttribute("SentryBeforeSendEventCallback", "return: NullAllowed")
     .WithAttribute("SentryTracesSamplerCallback", "return: NullAllowed")
-    // Fix nullable return attributes
-    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "NullAllowed")
-    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "NullAllowed")
-    .WithAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "return: NullAllowed")
-    .WithAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "return: NullAllowed")
     // Fix nullable property attributes
     .WithPropertyAttribute("SentryOptions", "OnCrashedLastRun", "NullAllowed")
     // Fix nullable generic type arguments
@@ -104,10 +98,6 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveMethod("Sentry*", "CopyWithZone")
     // error CS0111: Type 'SentryAttribute' already defines a member called 'Constructor' with the same parameter types
     .RemoveMethod("SentryLog", "SetAttribute")
-    // SentryEnvelope* is not whitelisted
-    .RemoveMethod("PrivateSentrySDKOnly", "CaptureEnvelope")
-    .RemoveMethod("PrivateSentrySDKOnly", "EnvelopeWithData")
-    .RemoveMethod("PrivateSentrySDKOnly", "StoreEnvelope")
     // SentryLoggerDelegate and SentryCurrentDateProvider are not whitelisted
     .RemoveMethod("SentryLogger", "Constructor")
     // SentryAppStartMeasurement is not whitelisted
@@ -116,8 +106,6 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveDelegate("SentryUserFeedbackConfigurationBlock")
     // error CS0114: 'SentryXxx.Description' hides inherited member 'NSObject.Description'.
     .RemoveProperty("Sentry*", "Description")
-    // SentryAppStartMeasurement is not whitelisted
-    .RemoveProperty("PrivateSentrySDKOnly", "*AppStartMeasurement*")
     // Minimize SentryDependencyContainer
     .RemoveMethod("SentryDependencyContainer", "*")
     .KeepProperties("SentryDependencyContainer", "SharedInstance", "DebugImageProvider")
@@ -135,7 +123,6 @@ var nodes = tree.GetCompilationUnitRoot()
     .KeepMethods("SentryObjCInternalApi", "SetTrace", "IgnoreNextSignal")
     .KeepInterfaces(
         "ISentryRRWebEvent",
-        "PrivateSentrySDKOnly",
         "SentryAttachment",
         "SentryBaggage",
         "SentryBreadcrumb",
