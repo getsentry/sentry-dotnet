@@ -25,8 +25,7 @@
   <PropertyGroup Condition="Exists('$(SentryCocoaCache).git')">
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
     <!-- Structured hybrid API (SentryObjCSDK.internal). These two thin frameworks dynamically link
-         Sentry.framework above; build-sentry-cocoa.sh builds them from source. They are only produced
-         on the build-from-source path (there is no non-duplicating released artifact - see #5331). -->
+         Sentry.framework above; build-sentry-cocoa.sh builds them from source. →
     <SentryCocoaObjCFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC.xcframework</SentryCocoaObjCFramework>
     <SentryCocoaObjCCompatFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjCCompat.xcframework</SentryCocoaObjCCompatFramework>
     <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/**/*.h</SentryCocoaBindingInputs>
@@ -59,9 +58,6 @@
     <ObjcBindingApiDefinition Include="PrivateApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
-    <!-- The thin hybrid-API frameworks: SentryObjC depends on SentryObjCCompat, which depends on
-         Sentry.framework above. They're dynamic frameworks that resolve each other via @rpath at
-         load time, so the order here is just readability (dependencies first), not a requirement. -->
     <NativeReference Include="$(SentryCocoaObjCCompatFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCCompatFramework)' != ''" />
     <NativeReference Include="$(SentryCocoaObjCFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCFramework)' != ''" />
 
