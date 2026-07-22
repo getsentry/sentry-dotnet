@@ -6,18 +6,80 @@ namespace Sentry;
 /// <seealso href="https://getsentry.github.io/relay/relay_metrics/enum.MetricUnit.html"/>
 public readonly partial struct MeasurementUnit : IEquatable<MeasurementUnit>
 {
-    private readonly Enum? _unit;
+    private readonly UnitKind _kind;
+    private readonly int _value;
     private readonly string? _name;
 
-    private MeasurementUnit(Enum unit)
+    private enum UnitKind : byte
     {
-        _unit = unit;
+        None = 0,
+        Duration = 1,
+        Information = 2,
+        Fraction = 3,
+        Custom = 4
+    }
+
+    private static readonly string[] DurationNames =
+    [
+        "nanosecond",
+        "microsecond",
+        "millisecond",
+        "second",
+        "minute",
+        "hour",
+        "day",
+        "week"
+    ];
+
+    private static readonly string[] InformationNames =
+    [
+        "bit",
+        "byte",
+        "kilobyte",
+        "kibibyte",
+        "megabyte",
+        "mebibyte",
+        "gigabyte",
+        "gibibyte",
+        "terabyte",
+        "tebibyte",
+        "petabyte",
+        "pebibyte",
+        "exabyte",
+        "exbibyte"
+    ];
+
+    private static readonly string[] FractionNames =
+    [
+        "ratio",
+        "percent"
+    ];
+
+    private MeasurementUnit(Duration unit)
+    {
+        _kind = UnitKind.Duration;
+        _value = (int)unit;
+        _name = null;
+    }
+
+    private MeasurementUnit(Information unit)
+    {
+        _kind = UnitKind.Information;
+        _value = (int)unit;
+        _name = null;
+    }
+
+    private MeasurementUnit(Fraction unit)
+    {
+        _kind = UnitKind.Fraction;
+        _value = (int)unit;
         _name = null;
     }
 
     private MeasurementUnit(string name)
     {
-        _unit = null;
+        _kind = UnitKind.Custom;
+        _value = default;
         _name = name;
     }
 
@@ -70,21 +132,32 @@ public readonly partial struct MeasurementUnit : IEquatable<MeasurementUnit>
         return Custom(name);
     }
 
+    private string? GetPredefinedName()
+    {
+        return _kind switch
+        {
+            UnitKind.Duration when (uint)_value < (uint)DurationNames.Length => DurationNames[_value],
+            UnitKind.Information when (uint)_value < (uint)InformationNames.Length => InformationNames[_value],
+            UnitKind.Fraction when (uint)_value < (uint)FractionNames.Length => FractionNames[_value],
+            _ => null
+        };
+    }
+
     /// <summary>
     /// Returns the string representation of the measurement unit, as it will be sent to Sentry.
     /// </summary>
-    public override string ToString() => _unit?.ToString().ToLowerInvariant() ?? _name ?? "";
+    public override string ToString() => ToNullableString() ?? "";
 
-    internal string? ToNullableString() => _unit?.ToString().ToLowerInvariant() ?? _name;
+    internal string? ToNullableString() => _name ?? GetPredefinedName();
 
     /// <inheritdoc />
-    public bool Equals(MeasurementUnit other) => Equals(_unit, other._unit) && _name == other._name;
+    public bool Equals(MeasurementUnit other) => _kind == other._kind && _value == other._value && _name == other._name;
 
     /// <inheritdoc />
     public override bool Equals(object? obj) => obj is MeasurementUnit other && Equals(other);
 
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(_unit, _name, _unit?.GetType());
+    public override int GetHashCode() => HashCode.Combine(_kind, _value, _name);
 
     /// <summary>
     /// Returns true if the operands are equal.
