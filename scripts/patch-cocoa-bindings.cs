@@ -119,6 +119,9 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveMethod("SentryObjCSDK", "*")
     .KeepProperties("SentryObjCInternalApi", "Sdk", "Profiling")
     .KeepMethods("SentryObjCInternalApi", "SetTrace", "IgnoreNextSignal")
+    // Sharpie generates enums for types the SentryObjC headers reference, but the members that used
+    // them are trimmed above - drop the dead enums
+    .RemoveEnum("SentryObjC*")
     .KeepInterfaces(
         "ISentryRRWebEvent",
         "SentryAttachment",
@@ -249,6 +252,13 @@ internal static class FilterExtensions
         string name)
     {
         return root.RemoveByPredicate<ClassDeclarationSyntax>(node => node.Identifier.Matches(name));
+    }
+
+    public static CompilationUnitSyntax RemoveEnum(
+        this CompilationUnitSyntax root,
+        string name)
+    {
+        return root.RemoveByPredicate<EnumDeclarationSyntax>(node => node.Identifier.Matches(name));
     }
 
     public static CompilationUnitSyntax RemoveDelegate(

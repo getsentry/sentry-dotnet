@@ -175,18 +175,3 @@ internal enum SentryTransactionNameSource : long
     Component = 4,
     Task = 5
 }
-
-[Native]
-internal enum SentryObjCFeedbackSource : long
-{
-    Widget = 0,
-    Custom
-}
-
-[Native]
-internal enum SentryObjCLastRunStatus : long
-{
-    Unknown = 0,
-    DidNotCrash,
-    DidCrash
-}
