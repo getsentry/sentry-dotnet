@@ -45,8 +45,8 @@
   -->
   <Target Name="_SentryRemoveSimulatorResourcesForHotRestartBuilds" AfterTargets="_CopyLocalBindingResources" Condition="'$(IsHotRestartBuild)' == 'true'">
     <ItemGroup>
-      <!-- Only the frameworks bundled with this package - enumerated explicitly because this file is
-           imported transitively into consuming apps, where ReferenceCopyLocalPaths spans all packages. -->
+      <!-- Only strip from the frameworks bundled with this package - this file is
+           imported transitively into consuming apps -->
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(Identity)').Contains('Sentry.xcframework\ios-arm64_x86_64-simulator')) Or $([System.String]::new('%(Identity)').Contains('SentryObjC.xcframework\ios-arm64_x86_64-simulator')) Or $([System.String]::new('%(Identity)').Contains('SentryObjCCompat.xcframework\ios-arm64_x86_64-simulator'))" />
     </ItemGroup>
   </Target>
