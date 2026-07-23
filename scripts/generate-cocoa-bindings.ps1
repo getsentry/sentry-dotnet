@@ -6,18 +6,9 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
 $CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
-if (Test-Path "$CocoaSdkPath/.git")
-{
-    # Cocoa SDK cloned to modules/sentry-cocoa for local development
-    $HeadersPath = "$CocoaSdkPath/Carthage/Headers"
-    $PrivateHeadersPath = "$CocoaSdkPath/Carthage/Headers"
-}
-else
-{
-    # Cocoa SDK downloaded from GitHub releases and extracted into modules/sentry-cocoa
-    $HeadersPath = "$CocoaSdkPath/Sentry.framework/Headers"
-    $PrivateHeadersPath = "$CocoaSdkPath/Sentry.framework/PrivateHeaders"
-}
+# The Cocoa SDK is built from source from the modules/sentry-cocoa submodule;
+# build-sentry-cocoa.sh copies the headers here.
+$HeadersPath = "$CocoaSdkPath/Carthage/Headers"
 $BindingsPath = "$RootPath/src/Sentry.Bindings.Cocoa"
 $BackupPath = "$BindingsPath/obj/_unpatched"
 

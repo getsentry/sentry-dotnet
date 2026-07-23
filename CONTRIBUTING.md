@@ -194,27 +194,23 @@ should be updated from the main branch and the `modules/make-internal.sh` script
 should reference the most recent commit on the `internal` branch of Ben.Demystifier then (functionally identical to the
 main branch - the only difference being the changes to member visibility).
 
-## Local Sentry Cocoa SDK checkout
+## Sentry Cocoa SDK checkout
 
-By default, `Sentry.Bindings.Cocoa` downloads a pre-built Sentry Cocoa SDK from
-GitHub Releases. The version is specified in `modules/sentry-cocoa.properties`.
+`Sentry.Bindings.Cocoa` always builds the Sentry Cocoa SDK from source, from the
+[getsentry/sentry-cocoa](https://github.com/getsentry/sentry-cocoa/) submodule at
+`modules/sentry-cocoa` (`scripts/build-sentry-cocoa.sh`, invoked automatically by
+the build). Pre-built release artifacts can't be used: the `SentryObjC` hybrid-API
+frameworks are only published as self-contained bundles that would embed a second
+copy of the SDK alongside `Sentry.framework` (see
+[#5331](https://github.com/getsentry/sentry-dotnet/issues/5331)).
 
-If you want to build an unreleased Sentry Cocoa SDK version from source instead,
-replace the pre-built SDK with [getsentry/sentry-cocoa](https://github.com/getsentry/sentry-cocoa/)
-by cloning it into the `modules/sentry-cocoa` directory:
-
-```sh
-$ rm -rf modules/sentry-cocoa
-$ gh repo clone getsentry/sentry-cocoa modules/sentry-cocoa
-$ dotnet build ... # uses modules/sentry-cocoa as is
-```
-
-To switch back to the pre-built SDK, delete the `modules/sentry-cocoa` directory
-and let the next build download the pre-built SDK again:
+To build against a different Cocoa SDK version, check out the desired ref in the
+submodule:
 
 ```sh
-$ rm -rf modules/sentry-cocoa
-$ dotnet build ... # downloads pre-built Cocoa SDK into modules/sentry-cocoa
+$ cd modules/sentry-cocoa
+$ git fetch origin && git checkout <tag-or-sha>
+$ cd ../.. && dotnet build ... # rebuilds the Cocoa SDK from the new ref
 ```
 
 ## Local Sentry Android SDK checkout
