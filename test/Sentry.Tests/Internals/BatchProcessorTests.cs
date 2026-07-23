@@ -159,7 +159,7 @@ public class BatchProcessorTests : IDisposable
         if (_fixture.ClientReportRecorder.GenerateClientReport() is { } clientReport)
         {
             var discardedEvent = Assert.Single(clientReport.DiscardedEvents);
-            Assert.Equal(new DiscardReasonWithCategory(DiscardReason.Backpressure, DataCategory.Default), discardedEvent.Key);
+            Assert.Equal(new DiscardReasonWithCategory(DiscardReason.Backpressure, DataCategory.LogItem), discardedEvent.Key);
 
             droppedLogs = discardedEvent.Value;
             _fixture.ExpectedDiagnosticLogs = discardedEvent.Value;

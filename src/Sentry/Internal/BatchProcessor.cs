@@ -67,7 +67,7 @@ internal abstract class BatchProcessor<TItem> : IDisposable where TItem : notnul
             activeBuffer = ReferenceEquals(activeBuffer, _buffer1) ? _buffer2 : _buffer1;
             if (!TryEnqueue(activeBuffer, item))
             {
-                _clientReportRecorder.RecordDiscardedEvent(DiscardReason.Backpressure, DataCategory.Default, 1);
+                _clientReportRecorder.RecordDiscardedEvent(DiscardReason.Backpressure, DiscardCategory, 1);
                 _diagnosticLogger?.LogInfo("{0}-Buffer full ... dropping {0}", item.GetType().Name);
             }
         }
@@ -131,6 +131,11 @@ internal abstract class BatchProcessor<TItem> : IDisposable where TItem : notnul
 
     protected abstract void CaptureEnvelope(IHub hub, TItem[] items);
 
+    /// <summary>
+    /// The data category used when recording dropped items as client reports.
+    /// </summary>
+    protected abstract DataCategory DiscardCategory { get; }
+
     private void OnTimeoutExceeded(BatchBuffer<TItem> buffer)
     {
         if (!buffer.IsEmpty)
@@ -158,6 +163,8 @@ internal sealed class SentryLogBatchProcessor : BatchProcessor<SentryLog>
     {
         _ = hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(items)));
     }
+
+    protected override DataCategory DiscardCategory => DataCategory.LogItem;
 }
 
 internal sealed class SentryMetricBatchProcessor : BatchProcessor<SentryMetric>
@@ -171,4 +178,6 @@ internal sealed class SentryMetricBatchProcessor : BatchProcessor<SentryMetric>
     {
         _ = hub.CaptureEnvelope(Envelope.FromMetric(new TraceMetric(items)));
     }
+
+    protected override DataCategory DiscardCategory => DataCategory.TraceMetric;
 }

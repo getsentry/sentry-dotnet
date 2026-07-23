@@ -2,15 +2,19 @@ namespace Sentry.Internal;
 
 internal readonly struct DataCategory : IEnumeration<DataCategory>
 {
-    // See https://develop.sentry.dev/sdk/rate-limiting/#definitions for list
+    // See https://develop.sentry.dev/sdk/expected-features/rate-limiting/#definitions for list
     public static DataCategory Attachment = new("attachment");
     public static DataCategory Default = new("default");
     public static DataCategory Error = new("error");
     public static DataCategory Feedback = new("feedback");
     public static DataCategory Internal = new("internal");
+    public static DataCategory LogItem = new("log_item");
+    public static DataCategory MetricBucket = new("metric_bucket");
+    public static DataCategory Monitor = new("monitor");
     public static DataCategory Security = new("security");
     public static DataCategory Session = new("session");
     public static DataCategory Span = new("span");
+    public static DataCategory TraceMetric = new("trace_metric");
     public static DataCategory Transaction = new("transaction");
     public static DataCategory Profile = new("profile");
 

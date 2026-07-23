@@ -46,14 +46,26 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         TypeValueEvent => DataCategory.Error,
 
         // These ones are equivalent
+        TypeValueFeedback => DataCategory.Feedback,
         TypeValueTransaction => DataCategory.Transaction,
         TypeValueSpan => DataCategory.Span,
         TypeValueSession => DataCategory.Session,
         TypeValueAttachment => DataCategory.Attachment,
         TypeValueProfile => DataCategory.Profile,
+        TypeValueLog => DataCategory.LogItem,
+        TypeValueTraceMetric => DataCategory.TraceMetric,
+
+        // The "check_in" item type corresponds to the "monitor" data category
+        TypeValueCheckIn => DataCategory.Monitor,
+
+        // The "statsd" item type corresponds to the "metric_bucket" data category
+        TypeValueMetric => DataCategory.MetricBucket,
+
+        // Client reports are SDK telemetry that Relay never rate-limits - mapped to internal
+        TypeValueClientReport => DataCategory.Internal,
 
         // Not all envelope item types equate to data categories
-        // Specifically, user_report and client_report just use "default"
+        // Specifically, user_report just uses "default"
         _ => DataCategory.Default
     };
 

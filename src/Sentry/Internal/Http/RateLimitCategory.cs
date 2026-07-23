@@ -10,28 +10,9 @@ internal class RateLimitCategory : IEquatable<RateLimitCategory>
 
     public RateLimitCategory(string name) => Name = name;
 
-    public bool Matches(EnvelopeItem item)
-    {
-        if (IsMatchAll)
-        {
-            return true;
-        }
-
-        var type = item.TryGetType();
-        if (string.IsNullOrWhiteSpace(type))
-        {
-            return false;
-        }
-
-        return type switch
-        {
-            EnvelopeItem.TypeValueMetric =>
-                // Metrics are a bit unique - the envelope item type is `statsd` but the category is `metric_bucket`
-                string.Equals(Name, "metric_bucket", StringComparison.OrdinalIgnoreCase),
-            // For most reporting categories, the envelope item type matches the client report category
-            _ => string.Equals(Name, type, StringComparison.OrdinalIgnoreCase)
-        };
-    }
+    public bool Matches(EnvelopeItem item) =>
+        // Rate limits are keyed by data category (e.g. "error", "monitor", "metric_bucket"), not envelope item type.
+        IsMatchAll || string.Equals(Name, item.DataCategory.ToString(), StringComparison.OrdinalIgnoreCase);
 
     public bool Equals(RateLimitCategory? other)
     {
