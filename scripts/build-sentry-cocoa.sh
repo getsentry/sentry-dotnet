@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+# Include this script's own hash in the build stamp so cached output is rebuilt whenever the
+# recipe changes (e.g. when new frameworks are added to the build), not just when the
+# sentry-cocoa submodule moves. Mirrors the cache key used for sentry-native in CI.
+script_checksum=$(shasum -a 256 "$0" | cut -d ' ' -f 1)
+
 pushd "$(dirname "$0")" >/dev/null
 cd ../modules/sentry-cocoa
 
@@ -24,8 +29,8 @@ while ! ln "$TMP_FILE" "$PID_FILE" 2>/dev/null; do
 done
 rm -f "$TMP_FILE"
 
-current_sha=$(git rev-parse HEAD)
-if [[ -f Carthage/.built-from-sha ]] && [[ "$(cat Carthage/.built-from-sha)" == "$current_sha" ]]; then
+build_stamp="$(git rev-parse HEAD) $script_checksum"
+if [[ -f Carthage/.built-from-sha ]] && [[ "$(cat Carthage/.built-from-sha)" == "$build_stamp" ]]; then
     popd >/dev/null
     exit 0
 fi
@@ -149,7 +154,7 @@ find Carthage/Build-ios/SentryObjCCompat.xcframework/ios-arm64 -name '*.h' -exec
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 rm -rf Carthage/output-*
 
-echo "$current_sha" > Carthage/.built-from-sha
+echo "$build_stamp" > Carthage/.built-from-sha
 echo ""
 
 popd >/dev/null
