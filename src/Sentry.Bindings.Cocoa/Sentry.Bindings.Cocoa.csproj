@@ -74,12 +74,14 @@
     <Exec Command="bash ../../scripts/build-sentry-cocoa.sh" IgnoreStandardErrorWarningFormat="true" />
   </Target>
 
-  <Target Name="_SetupCocoaSDK"
-          DependsOnTargets="_BuildCocoaSDK;_GenerateSentryCocoaBindings"
-          Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+  <Target Name="_EnsureCocoaSubmodule" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
     <Error Condition="!Exists('$(SentryCocoaCache).git')"
            Text="The modules/sentry-cocoa submodule is missing. Run 'git submodule update --init --recursive' - the Cocoa SDK is built from source (see #5331)." />
   </Target>
+
+  <Target Name="_SetupCocoaSDK"
+          DependsOnTargets="_EnsureCocoaSubmodule;_BuildCocoaSDK;_GenerateSentryCocoaBindings"
+          Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
   <!-- Outer build (multi-TFM): runs _SetupCocoaSDK once before MSBuild fans out to inner per-TFM builds.  -->
   <Target Name="SetupCocoaSDKBeforeOuterBuild" DependsOnTargets="_SetupCocoaSDK"
