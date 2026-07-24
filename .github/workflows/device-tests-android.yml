@@ -139,7 +139,7 @@ jobs:
         id: first-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: &android-emulator-test
           api-level: ${{ matrix.api-level }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
@@ -154,7 +154,7 @@ jobs:
       - name: Retry Tests (if previous failed to run)
         if: steps.first-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: *android-emulator-test
 
       - name: Setup Environment
@@ -177,7 +177,7 @@ jobs:
         id: first-integration-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: &android-emulator-integration-test
           api-level: ${{ matrix.api-level }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
@@ -192,7 +192,7 @@ jobs:
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: *android-emulator-integration-test
 
       - name: Upload results
