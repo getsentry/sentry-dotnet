@@ -74,7 +74,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
             // Inner/chained exceptions inherit the handled state established by the trigger
             // (integration or user) on the outermost exception, so the whole chain stays consistent.
-            var resolvedHandled = built.Mechanism?.Handled ?? parentHandled;
+            var resolvedHandled = built.Mechanism!.Handled;
 
             if (ex is AggregateException aex)
             {
