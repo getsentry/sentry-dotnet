@@ -5,6 +5,7 @@
     Mechanism: {
       Type: chained,
       Source: InnerExceptions[1],
+      Handled: false,
       Synthetic: false,
       IsExceptionGroup: false,
       ExceptionId: 2,
@@ -20,6 +21,7 @@
     Mechanism: {
       Type: chained,
       Source: InnerExceptions[0],
+      Handled: false,
       Synthetic: false,
       IsExceptionGroup: false,
       ExceptionId: 1,

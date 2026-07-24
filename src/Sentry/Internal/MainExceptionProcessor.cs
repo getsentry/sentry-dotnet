@@ -59,16 +59,22 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     }
 
     private IEnumerable<SentryException> WalkExceptions(Exception exception) =>
-        WalkExceptions(exception, new Counter(), null, null);
+        WalkExceptions(exception, new Counter(), null, null, null);
 
-    private IEnumerable<SentryException> WalkExceptions(Exception exception, Counter counter, int? parentId, string? source)
+    private IEnumerable<SentryException> WalkExceptions(Exception exception, Counter counter, int? parentId,
+        string? source, bool? parentHandled)
     {
         var ex = exception;
         while (ex is not null)
         {
             var id = counter.GetNextValue();
 
-            yield return BuildSentryException(ex, id, parentId, source);
+            var built = BuildSentryException(ex, id, parentId, source, parentHandled);
+            yield return built;
+
+            // Inner/chained exceptions inherit the handled state established by the trigger
+            // (integration or user) on the outermost exception, so the whole chain stays consistent.
+            var resolvedHandled = built.Mechanism!.Handled;
 
             if (ex is AggregateException aex)
             {
@@ -76,7 +82,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
                 {
                     ex = aex.InnerExceptions[i];
                     source = $"{nameof(AggregateException.InnerExceptions)}[{i}]";
-                    var sentryExceptions = WalkExceptions(ex, counter, id, source);
+                    var sentryExceptions = WalkExceptions(ex, counter, id, source, resolvedHandled);
                     foreach (var sentryException in sentryExceptions)
                     {
                         yield return sentryException;
@@ -89,6 +95,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             ex = ex.InnerException;
             parentId = id;
             source = nameof(AggregateException.InnerException);
+            parentHandled = resolvedHandled;
         }
     }
 
@@ -139,7 +146,8 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         }
     }
 
-    private SentryException BuildSentryException(Exception exception, int id, int? parentId, string? source)
+    private SentryException BuildSentryException(Exception exception, int id, int? parentId, string? source,
+        bool? parentHandled)
     {
         var sentryEx = new SentryException
         {
@@ -149,7 +157,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             ThreadId = Environment.CurrentManagedThreadId
         };
 
-        var mechanism = GetMechanism(exception, id, parentId, source);
+        var mechanism = GetMechanism(exception, id, parentId, source, parentHandled);
         if (!mechanism.IsDefaultOrEmpty())
         {
             sentryEx.Mechanism = mechanism;
@@ -159,7 +167,8 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         return sentryEx;
     }
 
-    private static Mechanism GetMechanism(Exception exception, int id, int? parentId, string? source)
+    private static Mechanism GetMechanism(Exception exception, int id, int? parentId, string? source,
+        bool? parentHandled)
     {
         var mechanism = new Mechanism();
 
@@ -170,21 +179,16 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
         if (exception.Data[Mechanism.HandledKey] is bool handled)
         {
-            // The mechanism handled flag was set by an integration.
+            // Explicit value set by an integration or by the user; never override it.
             mechanism.Handled = handled;
             exception.Data.Remove(Mechanism.HandledKey);
         }
-        else if (exception.StackTrace != null)
-        {
-            // The exception was thrown, but it was caught by the user, not an integration.
-            // Thus, we can mark it as handled.
-            mechanism.Handled = true;
-        }
         else
         {
-            // The exception was never thrown.  It was just constructed and then captured.
-            // Thus, it is neither handled nor unhandled.
-            mechanism.Handled = null;
+            // No explicit flag: a user-captured exception counts as handled;
+            // inner exceptions inherit the outer exception's resolved value.
+            // https://getsentry.github.io/relay/relay_event_schema/protocol/struct.Mechanism.html#structfield.handled
+            mechanism.Handled = parentHandled ?? true;
         }
 
         if (exception.Data[Mechanism.MechanismKey] is string mechanismType)
