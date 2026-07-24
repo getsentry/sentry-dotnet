@@ -191,7 +191,9 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'Microsoft.Maui.Essentials.pdb',
             'Microsoft.Maui.Graphics.pdb',
             'Microsoft.Maui.pdb',
-            'Sentry'
+            'Sentry',
+            'SentryObjC',
+            'SentryObjCCompat'
         )
         # The specific number of debug information files seems to change with different SDK - so we just check for non-zero
         $nonZeroNumberRegex = '[1-9][0-9]*';

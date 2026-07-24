@@ -57,7 +57,6 @@ var nodes = tree.GetCompilationUnitRoot()
     .PropertyToMethod("Sentry*", "Serialize")
     .PropertyToMethod("SentrySpan", "ToTraceHeader")
     .PropertyToMethod("SentryTraceContext", "ToBaggage")
-    .PropertyToMethod("PrivateSentrySDKOnly", "Capture*")
     // Verify the rest
     .VerifyProperty("*Sentry*", "*", "MethodToProperty") // TODO: replace broad patterns with one-by-one verification
     .VerifyProperty("SentryOptions", "*Targets", "StronglyTypedNSArray")
@@ -81,11 +80,6 @@ var nodes = tree.GetCompilationUnitRoot()
     .WithAttribute("SentryBeforeBreadcrumbCallback", "return: NullAllowed")
     .WithAttribute("SentryBeforeSendEventCallback", "return: NullAllowed")
     .WithAttribute("SentryTracesSamplerCallback", "return: NullAllowed")
-    // Fix nullable return attributes
-    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "NullAllowed")
-    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "NullAllowed")
-    .WithAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "return: NullAllowed")
-    .WithAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "return: NullAllowed")
     // Fix nullable property attributes
     .WithPropertyAttribute("SentryOptions", "OnCrashedLastRun", "NullAllowed")
     // Fix nullable generic type arguments
@@ -104,10 +98,6 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveMethod("Sentry*", "CopyWithZone")
     // error CS0111: Type 'SentryAttribute' already defines a member called 'Constructor' with the same parameter types
     .RemoveMethod("SentryLog", "SetAttribute")
-    // SentryEnvelope* is not whitelisted
-    .RemoveMethod("PrivateSentrySDKOnly", "CaptureEnvelope")
-    .RemoveMethod("PrivateSentrySDKOnly", "EnvelopeWithData")
-    .RemoveMethod("PrivateSentrySDKOnly", "StoreEnvelope")
     // SentryLoggerDelegate and SentryCurrentDateProvider are not whitelisted
     .RemoveMethod("SentryLogger", "Constructor")
     // SentryAppStartMeasurement is not whitelisted
@@ -116,17 +106,24 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveDelegate("SentryUserFeedbackConfigurationBlock")
     // error CS0114: 'SentryXxx.Description' hides inherited member 'NSObject.Description'.
     .RemoveProperty("Sentry*", "Description")
-    // SentryAppStartMeasurement is not whitelisted
-    .RemoveProperty("PrivateSentrySDKOnly", "*AppStartMeasurement*")
     // Minimize SentryDependencyContainer
     .RemoveMethod("SentryDependencyContainer", "*")
     .KeepProperties("SentryDependencyContainer", "SharedInstance", "DebugImageProvider")
     // SentryUserFeedbackConfiguration is not whitelisted
     .RemoveProperty("SentryOptions", "ConfigureUserFeedback")
     .RemoveProperty("SentryOptions", "UserFeedbackConfiguration")
+    // SentryObjCSDK.internal is the entry point to the API for hybrid SDKs
+    // We only bind the `internal` accessor; every other SentryObjCSDK member references SentryObjC*
+    // types we don't whitelist.
+    .KeepProperties("SentryObjCSDK", "Internal")
+    .RemoveMethod("SentryObjCSDK", "*")
+    .KeepProperties("SentryObjCInternalApi", "Sdk", "Profiling")
+    .KeepMethods("SentryObjCInternalApi", "SetTrace", "IgnoreNextSignal")
+    // Sharpie generates enums for types the SentryObjC headers reference, but the members that used
+    // them are trimmed above - drop the dead enums
+    .RemoveEnum("SentryObjC*")
     .KeepInterfaces(
         "ISentryRRWebEvent",
-        "PrivateSentrySDKOnly",
         "SentryAttachment",
         "SentryBaggage",
         "SentryBreadcrumb",
@@ -155,6 +152,12 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryMechanismContext",
         "SentryMessage",
         "SentryNSError",
+        "SentryObjCId",
+        "SentryObjCInternalApi",
+        "SentryObjCInternalProfilingApi",
+        "SentryObjCInternalSdkApi",
+        "SentryObjCSDK",
+        "SentryObjCSpanId",
         "SentryOptions",
         "SentryProfileOptions",
         "SentryRedactOptions",
@@ -249,6 +252,13 @@ internal static class FilterExtensions
         string name)
     {
         return root.RemoveByPredicate<ClassDeclarationSyntax>(node => node.Identifier.Matches(name));
+    }
+
+    public static CompilationUnitSyntax RemoveEnum(
+        this CompilationUnitSyntax root,
+        string name)
+    {
+        return root.RemoveByPredicate<EnumDeclarationSyntax>(node => node.Identifier.Matches(name));
     }
 
     public static CompilationUnitSyntax RemoveDelegate(

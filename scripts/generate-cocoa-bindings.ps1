@@ -6,18 +6,9 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
 $CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
-if (Test-Path "$CocoaSdkPath/.git")
-{
-    # Cocoa SDK cloned to modules/sentry-cocoa for local development
-    $HeadersPath = "$CocoaSdkPath/Carthage/Headers"
-    $PrivateHeadersPath = "$CocoaSdkPath/Carthage/Headers"
-}
-else
-{
-    # Cocoa SDK downloaded from GitHub releases and extracted into modules/sentry-cocoa
-    $HeadersPath = "$CocoaSdkPath/Sentry.framework/Headers"
-    $PrivateHeadersPath = "$CocoaSdkPath/Sentry.framework/PrivateHeaders"
-}
+# The Cocoa SDK is built from source from the modules/sentry-cocoa submodule;
+# build-sentry-cocoa.sh copies the headers here.
+$HeadersPath = "$CocoaSdkPath/Carthage/Headers"
 $BindingsPath = "$RootPath/src/Sentry.Bindings.Cocoa"
 $BackupPath = "$BindingsPath/obj/_unpatched"
 
@@ -164,12 +155,18 @@ else
 }
 
 # Generate bindings
+# The SentryObjC*.h headers expose the structured hybrid API (SentryObjCSDK.internal)
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
     "$HeadersPath/Sentry.h" `
     "$HeadersPath/Sentry-Swift.h" `
-    "$HeadersPath/PrivateSentrySDKOnly.h" `
+    "$HeadersPath/SentryObjCSDK.h" `
+    "$HeadersPath/SentryObjCInternalApi.h" `
+    "$HeadersPath/SentryObjCInternalSdkApi.h" `
+    "$HeadersPath/SentryObjCInternalProfilingApi.h" `
+    "$HeadersPath/SentryObjCId.h" `
+    "$HeadersPath/SentryObjCSpanId.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute `
     -F"$iPhoneSdkPath/System/Library/SubFrameworks" # needed for UIUtilities.framework in Xcode 26+
