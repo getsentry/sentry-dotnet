@@ -205,12 +205,15 @@ copy of the SDK alongside `Sentry.framework` (see
 [#5331](https://github.com/getsentry/sentry-dotnet/issues/5331)).
 
 To build against a different Cocoa SDK version, check out the desired ref in the
-submodule:
+submodule **and stage it** — the solution build automatically runs
+`git submodule update` (see `before.Sentry.sln.targets`), which reverts the
+submodule to the pinned commit unless the index already records your ref:
 
 ```sh
-$ cd modules/sentry-cocoa
-$ git fetch origin && git checkout <tag-or-sha>
-$ cd ../.. && dotnet build ... # rebuilds the Cocoa SDK from the new ref
+$ git -C modules/sentry-cocoa fetch origin
+$ git -C modules/sentry-cocoa checkout <tag-or-sha>
+$ git add modules/sentry-cocoa   # otherwise the build restores the pinned commit
+$ dotnet build ...               # rebuilds the Cocoa SDK from the new ref
 ```
 
 ## Local Sentry Android SDK checkout
