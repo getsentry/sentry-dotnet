@@ -170,7 +170,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
         if (exception.Data[Mechanism.HandledKey] is bool handled)
         {
-            // The mechanism handled flag was set by an integration.
+            // The mechanism handled flag was set by an integration or explicitly by the caller.
             mechanism.Handled = handled;
             exception.Data.Remove(Mechanism.HandledKey);
         }

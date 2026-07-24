@@ -1,4 +1,4 @@
-[assembly: System.CLSCompliant(true)]
+﻿[assembly: System.CLSCompliant(true)]
 namespace Sentry
 {
     public enum AttachmentType
