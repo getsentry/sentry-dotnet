@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -268,8 +269,12 @@ public static class HubExtensions
         public void Dispose() => _scope.Dispose();
     }
 
-    internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex) =>
-        hub.CaptureEvent(new SentryEvent(ex));
+    internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex)
+    {
+        // integrations path = default to false, no override
+        ex.Data[Mechanism.HandledKey] ??= false;
+        return hub.CaptureEvent(new SentryEvent(ex));
+    }
 
     /// <summary>
     /// Captures the exception with a configurable scope callback.
@@ -277,9 +282,18 @@ public static class HubExtensions
     /// <param name="hub">The Sentry hub.</param>
     /// <param name="ex">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <param name="handled">Whether the exception was handled by the caller. Defaults to <c>true</c>.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope) =>
-        hub.CaptureEvent(new SentryEvent(ex), configureScope);
+    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope, bool handled = true)
+    {
+        if (!hub.IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
+        ex.Data[Mechanism.HandledKey] = handled;
+        return hub.CaptureEvent(new SentryEvent(ex), configureScope);
+    }
 
     /// <summary>
     /// Captures feedback from the user.

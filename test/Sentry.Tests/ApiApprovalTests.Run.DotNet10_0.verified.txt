@@ -1,4 +1,4 @@
-﻿[assembly: System.CLSCompliant(true)]
+[assembly: System.CLSCompliant(true)]
 namespace Sentry
 {
     public enum AttachmentType
@@ -147,7 +147,7 @@ namespace Sentry
         public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
-        public static Sentry.SentryId CaptureException(this Sentry.IHub hub, System.Exception ex, System.Action<Sentry.Scope> configureScope) { }
+        public static Sentry.SentryId CaptureException(this Sentry.IHub hub, System.Exception ex, System.Action<Sentry.Scope> configureScope, bool handled = true) { }
         public static Sentry.SentryId CaptureFeedback(this Sentry.IHub hub, Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureMessage(this Sentry.IHub hub, string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
         public static void LockScope(this Sentry.IHub hub) { }
@@ -490,7 +490,7 @@ namespace Sentry
     }
     public static class SentryClientExtensions
     {
-        public static Sentry.SentryId CaptureException(this Sentry.ISentryClient client, System.Exception ex) { }
+        public static Sentry.SentryId CaptureException(this Sentry.ISentryClient client, System.Exception ex, bool handled = true) { }
         public static Sentry.SentryId CaptureFeedback(this Sentry.ISentryClient client, Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureFeedback(this Sentry.ISentryClient client, string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, Sentry.SentryId? associatedEventId = default, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureMessage(this Sentry.ISentryClient client, string message, Sentry.SentryLevel level = 1) { }
@@ -976,8 +976,8 @@ namespace Sentry
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
-        public static Sentry.SentryId CaptureException(System.Exception exception) { }
-        public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope) { }
+        public static Sentry.SentryId CaptureException(System.Exception exception, bool handled = true) { }
+        public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope, bool handled = true) { }
         public static Sentry.SentryId CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureFeedback(Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureFeedback(Sentry.SentryFeedback feedback, out Sentry.CaptureFeedbackResult result, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }

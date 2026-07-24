@@ -1,7 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
-using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
@@ -519,10 +518,11 @@ static partial class SentrySdk
     /// Captures the exception.
     /// </summary>
     /// <param name="exception">The exception.</param>
+    /// <param name="handled">Whether the exception was handled by the caller. Defaults to <c>true</c>.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureException(Exception exception)
-        => CurrentHub.CaptureException(exception);
+    public static SentryId CaptureException(Exception exception, bool handled = true)
+        => CurrentHub.CaptureException(exception, handled);
 
     /// <summary>
     /// Captures the exception with a configurable scope.
@@ -532,10 +532,11 @@ static partial class SentrySdk
     /// </remarks>
     /// <param name="exception">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <param name="handled">Whether the exception was handled by the caller. Defaults to <c>true</c>.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
-        => CurrentHub.CaptureException(exception, configureScope);
+    public static SentryId CaptureException(Exception exception, Action<Scope> configureScope, bool handled = true)
+        => CurrentHub.CaptureException(exception, configureScope, handled);
 
     /// <summary>
     /// Captures the message.

@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -14,9 +15,18 @@ public static class SentryClientExtensions
     /// </summary>
     /// <param name="client">The Sentry client.</param>
     /// <param name="ex">The exception.</param>
+    /// <param name="handled">Whether the exception was handled by the caller. Defaults to <c>true</c>.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this ISentryClient client, Exception ex) =>
-        client.IsEnabled ? client.CaptureEvent(new SentryEvent(ex)) : SentryId.Empty;
+    public static SentryId CaptureException(this ISentryClient client, Exception ex, bool handled = true)
+    {
+        if (!client.IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
+        ex.Data[Mechanism.HandledKey] = handled;
+        return client.CaptureEvent(new SentryEvent(ex));
+    }
 
     /// <summary>
     /// Captures a message.

@@ -57,6 +57,163 @@ public class HubExtensionsTests
     }
 
     [Fact]
+    public void CaptureExceptionInternal_NoExplicitFlag_DefaultsHandledFalse()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var ex = new Exception("unhandled");
+        SentryEvent captured = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => captured = e)).Returns(new SentryId());
+
+        // Act
+        hub.CaptureExceptionInternal(ex);
+
+        // Assert
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureExceptionInternal_ExplicitFlag_NotOverridden()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var ex = new Exception("handled by integration");
+        ex.Data[Mechanism.HandledKey] = true;
+
+        // Act
+        hub.CaptureExceptionInternal(ex);
+
+        // Assert
+        Assert.Equal(true, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureException_ExplicitHandledFalse_SetsFlag()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        var ex = new Exception("caught and rethrown");
+
+        // Act
+        hub.CaptureException(ex, handled: false);
+
+        // Assert
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureException_ExplicitHandledTrue_SetsFlag()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        var ex = new Exception("caught");
+
+        // Act
+        hub.CaptureException(ex, handled: true);
+
+        // Assert
+        Assert.Equal(true, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallbackExplicitHandledTrue_SetsFlag()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        var ex = new Exception("caught");
+
+        // Act
+        hub.CaptureException(ex, _ => { }, handled: true);
+
+        // Assert
+        Assert.Equal(true, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallbackExplicitHandledFalse_SetsFlag()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        var ex = new Exception("caught and rethrown");
+
+        // Act
+        hub.CaptureException(ex, _ => { }, handled: false);
+
+        // Assert
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureException_DisabledHubExplicitHandled_DoesNotMutateExceptionData()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(false);
+        var ex = new Exception("captured while disabled");
+
+        // Act
+        var id = hub.CaptureException(ex, handled: false);
+
+        // Assert
+        Assert.False(ex.Data.Contains(Mechanism.HandledKey));
+        Assert.Equal(SentryId.Empty, id);
+        hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+    }
+
+    [Fact]
+    public void CaptureException_DisabledHubScopeCallbackExplicitHandled_DoesNotMutateExceptionData()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(false);
+        var ex = new Exception("captured while disabled");
+
+        // Act
+        var id = hub.CaptureException(ex, _ => { }, handled: false);
+
+        // Assert
+        Assert.False(ex.Data.Contains(Mechanism.HandledKey));
+        Assert.Equal(SentryId.Empty, id);
+        hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+    }
+
+    [Fact]
+    public void CaptureException_NoHandledArgument_DefaultsToHandledOverridingPreset()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        var ex = new Exception("preset mechanism");
+        ex.SetSentryMechanism("MyHandler", handled: false);
+
+        // Act
+        hub.CaptureException(ex);
+
+        // Assert
+        Assert.Equal(true, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallbackNoHandledArgument_DefaultsToHandledOverridingPreset()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        var ex = new Exception("preset mechanism");
+        ex.SetSentryMechanism("MyHandler", handled: false);
+
+        // Act
+        hub.CaptureException(ex, _ => { });
+
+        // Assert
+        Assert.Equal(true, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
     public void AddBreadcrumb_MinimalArguments_CreatesBreadcrumb()
     {
         const string expectedMessage = "message";

@@ -673,6 +673,85 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    public void CaptureException_ExplicitHandledFalse_SetsFlag()
+    {
+        // Arrange
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        // Act
+        SentrySdk.CaptureException(new Exception("caught and rethrown"), handled: false);
+
+        // Assert
+        Assert.Equal(false, captured!.SentryExceptions!.Single().Mechanism!.Handled);
+    }
+
+    [Fact]
+    public void CaptureException_WithConfiguredScope_ExplicitHandledFalse_SetsFlag()
+    {
+        // Arrange
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        // Act
+        SentrySdk.CaptureException(new Exception("caught and rethrown"), _ => { }, handled: false);
+
+        // Assert
+        Assert.Equal(false, captured!.SentryExceptions!.Single().Mechanism!.Handled);
+    }
+
+    [Fact]
+    public void CaptureException_NoHandledArgument_DefaultsToHandledOverridingPreset()
+    {
+        // Arrange
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        var ex = new Exception("mechanism set before capture");
+        ex.SetSentryMechanism("MyHandler", handled: false);
+
+        // Act
+        SentrySdk.CaptureException(ex);
+
+        // Assert
+        // Omitting the handled argument defaults it to true, which overrides any preset value.
+        Assert.Equal(true, captured!.SentryExceptions!.Single().Mechanism!.Handled);
+    }
+
+    [Fact]
     public void CaptureMessage_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         using var _ = SentrySdk.Init(o =>
@@ -748,6 +827,9 @@ public class SentrySdkTests : IDisposable
 
     [Fact]
     public void CaptureException_Instance_NoOp() => SentrySdk.CaptureException(new Exception());
+
+    [Fact]
+    public void CaptureException_InstanceHandled_NoOp() => SentrySdk.CaptureException(new Exception(), handled: false);
 
     [Fact]
     public void CaptureMessage_Message_NoOp() => SentrySdk.CaptureMessage("message");
