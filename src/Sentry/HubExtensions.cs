@@ -282,7 +282,8 @@ public static class HubExtensions
     /// <param name="hub">The Sentry hub.</param>
     /// <param name="ex">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
-    /// <param name="handled">Whether the exception was handled by the caller. Defaults to <c>true</c>.</param>
+    /// <param name="handled">Whether the exception was handled by the caller. Applies only when no handled flag
+    /// is already set on the exception (e.g. by an SDK integration); an existing value wins. Defaults to <c>true</c>.</param>
     /// <returns>The Id of the event</returns>
     public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope, bool handled = true)
     {
@@ -291,7 +292,7 @@ public static class HubExtensions
             return SentryId.Empty;
         }
 
-        ex.Data[Mechanism.HandledKey] = handled;
+        ex.Data[Mechanism.HandledKey] ??= handled;
         return hub.CaptureEvent(new SentryEvent(ex), configureScope);
     }
 

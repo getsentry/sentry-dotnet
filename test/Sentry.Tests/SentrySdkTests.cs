@@ -723,7 +723,7 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void CaptureException_NoHandledArgument_DefaultsToHandledOverridingPreset()
+    public void CaptureException_NoHandledArgument_PreservesPresetFlag()
     {
         // Arrange
         SentryEvent captured = null;
@@ -747,8 +747,8 @@ public class SentrySdkTests : IDisposable
         SentrySdk.CaptureException(ex);
 
         // Assert
-        // Omitting the handled argument defaults it to true, which overrides any preset value.
-        Assert.Equal(true, captured!.SentryExceptions!.Single().Mechanism!.Handled);
+        // A handled flag already set on the exception wins; the omitted argument's default does not override it.
+        Assert.Equal(false, captured!.SentryExceptions!.Single().Mechanism!.Handled);
     }
 
     [Fact]

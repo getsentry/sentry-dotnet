@@ -182,7 +182,7 @@ public class HubExtensionsTests
     }
 
     [Fact]
-    public void CaptureException_NoHandledArgument_DefaultsToHandledOverridingPreset()
+    public void CaptureException_NoHandledArgument_PreservesPresetFlag()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -194,11 +194,11 @@ public class HubExtensionsTests
         hub.CaptureException(ex);
 
         // Assert
-        Assert.Equal(true, ex.Data[Mechanism.HandledKey]);
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
     }
 
     [Fact]
-    public void CaptureException_ScopeCallbackNoHandledArgument_DefaultsToHandledOverridingPreset()
+    public void CaptureException_ScopeCallbackNoHandledArgument_PreservesPresetFlag()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -210,7 +210,7 @@ public class HubExtensionsTests
         hub.CaptureException(ex, _ => { });
 
         // Assert
-        Assert.Equal(true, ex.Data[Mechanism.HandledKey]);
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
     }
 
     [Fact]

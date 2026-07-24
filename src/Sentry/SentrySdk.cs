@@ -518,7 +518,8 @@ static partial class SentrySdk
     /// Captures the exception.
     /// </summary>
     /// <param name="exception">The exception.</param>
-    /// <param name="handled">Whether the exception was handled by the caller. Defaults to <c>true</c>.</param>
+    /// <param name="handled">Whether the exception was handled by the caller. Applies only when no handled flag
+    /// is already set on the exception (e.g. by an SDK integration); an existing value wins. Defaults to <c>true</c>.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception, bool handled = true)
@@ -532,7 +533,8 @@ static partial class SentrySdk
     /// </remarks>
     /// <param name="exception">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
-    /// <param name="handled">Whether the exception was handled by the caller. Defaults to <c>true</c>.</param>
+    /// <param name="handled">Whether the exception was handled by the caller. Applies only when no handled flag
+    /// is already set on the exception (e.g. by an SDK integration); an existing value wins. Defaults to <c>true</c>.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception, Action<Scope> configureScope, bool handled = true)
