@@ -96,6 +96,43 @@ internal enum SentryANRType : long
 }
 
 [Native]
+internal enum SentryDataCategory : ulong
+{
+    All = 0,
+    Default = 1,
+    Error = 2,
+    Session = 3,
+    Transaction = 4,
+    Attachment = 5,
+    UserFeedback = 6,
+    Profile = 7,
+    MetricBucket = 8,
+    Replay = 9,
+    ProfileChunkUI = 10,
+    Span = 11,
+    Feedback = 12,
+    LogItem = 13,
+    TraceMetric = 14,
+    LogByte = 15,
+    TraceMetricByte = 16,
+    Unknown = 17
+}
+
+[Native]
+internal enum SentryDiscardReason : ulong
+{
+    BeforeSend = 0,
+    EventProcessor = 1,
+    SampleRate = 2,
+    NetworkError = 3,
+    QueueOverflow = 4,
+    CacheOverflow = 5,
+    RateLimitBackoff = 6,
+    InsufficientData = 7,
+    SendError = 8
+}
+
+[Native]
 internal enum SentryExtensionType : long
 {
     Widget = 0,
@@ -110,6 +147,14 @@ internal enum SentryFeedbackSource : long
 {
     Widget = 0,
     Custom = 1
+}
+
+[Native]
+internal enum SentryFlushResult : long
+{
+    Success = 0,
+    TimedOut = 1,
+    AlreadyFlushing = 2
 }
 
 [Native]
