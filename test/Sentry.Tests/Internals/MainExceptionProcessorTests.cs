@@ -48,7 +48,7 @@ public partial class MainExceptionProcessorTests
     }
 
     [Fact]
-    public void Process_ExceptionWithout_Handled()
+    public void Process_ExceptionWithout_ExplicitHandled_DefaultsToTrue()
     {
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();
@@ -57,7 +57,7 @@ public partial class MainExceptionProcessorTests
         sut.Process(exp, evt);
 
         Assert.NotNull(evt.SentryExceptions);
-        Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == null);
+        Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == true);
     }
 
     [Fact]
