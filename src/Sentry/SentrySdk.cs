@@ -518,6 +518,10 @@ static partial class SentrySdk
     /// <summary>
     /// Captures the exception.
     /// </summary>
+    /// <remarks>
+    /// The exception is reported as handled, unless a flag was already set on it,
+    /// e.g. via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.
+    /// </remarks>
     /// <param name="exception">The exception.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
@@ -525,10 +529,23 @@ static partial class SentrySdk
         => CurrentHub.CaptureException(exception);
 
     /// <summary>
+    /// Captures the exception, explicitly marking it as handled or unhandled.
+    /// </summary>
+    /// <param name="exception">The exception.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    public static SentryId CaptureException(Exception exception, bool handled)
+        => CurrentHub.CaptureException(exception, handled);
+
+    /// <summary>
     /// Captures the exception with a configurable scope.
     /// </summary>
     /// <remarks>
     /// This allows modifying a scope without affecting other events.
+    /// The exception is reported as handled, unless a flag was already set on it,
+    /// e.g. via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.
     /// </remarks>
     /// <param name="exception">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
@@ -536,6 +553,21 @@ static partial class SentrySdk
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
         => CurrentHub.CaptureException(exception, configureScope);
+
+    /// <summary>
+    /// Captures the exception with a configurable scope, explicitly marking it as handled or unhandled.
+    /// </summary>
+    /// <remarks>
+    /// This allows modifying a scope without affecting other events.
+    /// </remarks>
+    /// <param name="exception">The exception.</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    public static SentryId CaptureException(Exception exception, Action<Scope> configureScope, bool handled)
+        => CurrentHub.CaptureException(exception, configureScope, handled);
 
     /// <summary>
     /// Captures the message.

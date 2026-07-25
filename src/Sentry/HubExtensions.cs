@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -268,18 +269,61 @@ public static class HubExtensions
         public void Dispose() => _scope.Dispose();
     }
 
-    internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex) =>
-        hub.CaptureEvent(new SentryEvent(ex));
+    internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex)
+    {
+        // Integrations capture exceptions that were not handled by user code, so default the
+        // mechanism to handled: false, unless the integration has already set the flag explicitly.
+        if (ex.Data[Mechanism.HandledKey] is not bool)
+        {
+            ex.Data[Mechanism.HandledKey] = false;
+        }
+        return hub.CaptureEvent(new SentryEvent(ex));
+    }
 
     /// <summary>
     /// Captures the exception with a configurable scope callback.
     /// </summary>
+    /// <remarks>
+    /// The exception is reported as handled, unless a flag was already set on it,
+    /// e.g. via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.
+    /// </remarks>
     /// <param name="hub">The Sentry hub.</param>
     /// <param name="ex">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope) =>
-        hub.CaptureEvent(new SentryEvent(ex), configureScope);
+    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope)
+    {
+        if (!hub.IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
+        if (ex.Data[Mechanism.HandledKey] is not bool)
+        {
+            ex.Data[Mechanism.HandledKey] = true;
+        }
+        return hub.CaptureEvent(new SentryEvent(ex), configureScope);
+    }
+
+    /// <summary>
+    /// Captures the exception with a configurable scope callback, explicitly marking it as handled or unhandled.
+    /// </summary>
+    /// <param name="hub">The Sentry hub.</param>
+    /// <param name="ex">The exception.</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <returns>The Id of the event</returns>
+    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope, bool handled)
+    {
+        if (!hub.IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
+        ex.Data[Mechanism.HandledKey] = handled;
+        return hub.CaptureEvent(new SentryEvent(ex), configureScope);
+    }
 
     /// <summary>
     /// Captures feedback from the user.
