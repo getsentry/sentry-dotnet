@@ -13,26 +13,11 @@ public static class SentryClientExtensions
     /// <summary>
     /// Captures the exception.
     /// </summary>
-    /// <remarks>
-    /// The exception is reported as handled, unless a flag was already set on it,
-    /// e.g. via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.
-    /// </remarks>
     /// <param name="client">The Sentry client.</param>
     /// <param name="ex">The exception.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this ISentryClient client, Exception ex)
-    {
-        if (!client.IsEnabled)
-        {
-            return SentryId.Empty;
-        }
-
-        if (ex.Data[Mechanism.HandledKey] is not bool)
-        {
-            ex.Data[Mechanism.HandledKey] = true;
-        }
-        return client.CaptureEvent(new SentryEvent(ex));
-    }
+    public static SentryId CaptureException(this ISentryClient client, Exception ex) =>
+        client.IsEnabled ? client.CaptureEvent(new SentryEvent(ex)) : SentryId.Empty;
 
     /// <summary>
     /// Captures the exception, explicitly marking it as handled or unhandled.

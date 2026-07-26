@@ -23,7 +23,7 @@ public class SentryClientExtensionsTests
     }
 
     [Fact]
-    public void CaptureException_NoHandledArgument_DefaultsToHandledTrue()
+    public void CaptureException_NoHandledArgument_DoesNotSetHandledFlag()
     {
         // Arrange
         _ = _sut.IsEnabled.Returns(true);
@@ -33,7 +33,7 @@ public class SentryClientExtensionsTests
         _ = _sut.CaptureException(ex);
 
         // Assert
-        Assert.Equal(true, ex.Data[Mechanism.HandledKey]);
+        Assert.False(ex.Data.Contains(Mechanism.HandledKey));
     }
 
     [Fact]

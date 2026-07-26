@@ -518,10 +518,6 @@ static partial class SentrySdk
     /// <summary>
     /// Captures the exception.
     /// </summary>
-    /// <remarks>
-    /// The exception is reported as handled, unless a flag was already set on it,
-    /// e.g. via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.
-    /// </remarks>
     /// <param name="exception">The exception.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
@@ -544,8 +540,6 @@ static partial class SentrySdk
     /// </summary>
     /// <remarks>
     /// This allows modifying a scope without affecting other events.
-    /// The exception is reported as handled, unless a flag was already set on it,
-    /// e.g. via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.
     /// </remarks>
     /// <param name="exception">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>

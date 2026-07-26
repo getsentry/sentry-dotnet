@@ -672,6 +672,29 @@ public class SentrySdkTests : IDisposable
         Assert.True(scopeCallbackWasInvoked);
     }
 
+    [Fact]
+    public void CaptureException_NoHandledArgument_LeavesMechanismHandledUnset()
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"));
+
+        Assert.NotNull(captured);
+        Assert.Null(Assert.Single(captured.SentryExceptions!).Mechanism?.Handled);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
