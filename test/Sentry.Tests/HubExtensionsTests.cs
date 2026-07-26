@@ -132,18 +132,22 @@ public class HubExtensionsTests
         _ = Sut.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
 
-    [Fact]
-    public void CaptureExceptionInternal_PresetFlag_IsOverriddenToUnhandled()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureExceptionInternal_PresetFlag_IsNotOverwritten(bool handled)
     {
         // Arrange
+        // E.g. WinUIUnhandledExceptionIntegration forwards the platform's Handled value
+        // via SetSentryMechanism before capturing.
         var ex = new Exception();
-        ex.SetSentryMechanism("SomeMechanism", handled: true);
+        ex.SetSentryMechanism("SomeMechanism", handled: handled);
 
         // Act
         _ = Sut.CaptureExceptionInternal(ex);
 
         // Assert
-        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+        Assert.Equal(handled, ex.Data[Mechanism.HandledKey]);
     }
 
     [Fact]

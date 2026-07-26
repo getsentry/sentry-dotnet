@@ -271,7 +271,12 @@ public static class HubExtensions
 
     internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex)
     {
-        ex.Data[Mechanism.HandledKey] = false;
+        // Integrations stamp the flag via SetSentryMechanism before calling this (e.g. WinUI forwards the
+        // platform's Handled value); only default to unhandled when nothing was declared.
+        if (!ex.Data.Contains(Mechanism.HandledKey))
+        {
+            ex.Data[Mechanism.HandledKey] = false;
+        }
         return hub.CaptureEvent(new SentryEvent(ex));
     }
 
