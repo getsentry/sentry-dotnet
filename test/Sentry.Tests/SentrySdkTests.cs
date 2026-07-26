@@ -673,7 +673,7 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void CaptureException_NoHandledArgument_LeavesMechanismHandledUnset()
+    public void CaptureException_NoHandledArgument_NeverThrown_DefaultsToHandled()
     {
         SentryEvent captured = null;
         using var _ = SentrySdk.Init(o =>
@@ -691,8 +691,9 @@ public class SentrySdkTests : IDisposable
 
         SentrySdk.CaptureException(new Exception("test"));
 
+        // The plain overload writes no flag; MainExceptionProcessor infers handled for a never-thrown exception.
         Assert.NotNull(captured);
-        Assert.Null(Assert.Single(captured.SentryExceptions!).Mechanism?.Handled);
+        Assert.True(Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
     }
 
     [Theory]
