@@ -672,6 +672,83 @@ public class SentrySdkTests : IDisposable
         Assert.True(scopeCallbackWasInvoked);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_ExplicitHandled_SetsMechanismHandledOnEvent(bool handled)
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled);
+
+        Assert.NotNull(captured);
+        Assert.Equal(handled, Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_WithConfiguredScope_ExplicitHandled_SetsMechanismHandledOnEvent(bool handled)
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), s => s.SetTag("scope-callback", "ran"), handled);
+
+        Assert.NotNull(captured);
+        Assert.Equal(handled, Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
+        Assert.Equal("ran", captured.Tags["scope-callback"]);
+    }
+
+    [Fact]
+    public void CaptureException_ExplicitHandled_OverridesFlagSetBySetSentryMechanism()
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        var ex = new Exception("test");
+        ex.SetSentryMechanism("SomeMechanism", handled: false);
+
+        SentrySdk.CaptureException(ex, handled: true);
+
+        Assert.NotNull(captured);
+        Assert.True(Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
+    }
+
     [Fact]
     public void CaptureMessage_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
