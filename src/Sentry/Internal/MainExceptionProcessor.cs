@@ -176,9 +176,6 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         }
         else
         {
-            // No integration claimed this exception, so it reached us because user code captured it explicitly -
-            // whether it was thrown and caught, or merely constructed and passed to CaptureException. Either way
-            // that counts as handled:
             // https://getsentry.github.io/relay/relay_event_schema/protocol/struct.Mechanism.html#structfield.handled
             // "Exceptions captured using capture_exception (called from user code) are handled=true as the user
             // explicitly captured the exception (and therefore kind of handled it)."
