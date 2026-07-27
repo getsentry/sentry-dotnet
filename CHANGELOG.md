@@ -1,5 +1,43 @@
 # Changelog
 
+## 6.8.0
+
+### Features ✨
+
+#### Logs
+
+- feat(logs): add `log4net` integration by @Flash0ver in [#5172](https://github.com/getsentry/sentry-dotnet/pull/5172)
+- feat(logs): add `NLog` integration by @Flash0ver in [#5176](https://github.com/getsentry/sentry-dotnet/pull/5176)
+
+#### Other
+
+- feat(serilog): support restrictedToMinimumLevel when configuring Serilog in code by @jamescrosswell in [#5181](https://github.com/getsentry/sentry-dotnet/pull/5181)
+- Attachments can now be sent with transactions by setting `AddToTransactions` on `SentryAttachment` [#5182](<https://github.com/getsentry/sentry-dotnet/pull/5182>) by @jamescrosswell in [#5182](https://github.com/getsentry/sentry-dotnet/pull/5182)
+- Added `SentrySdk.RecordTransaction` to record already-completed transactions and spans (e.g. replayed through a proxy) [#5333](https://github.com/getsentry/sentry-dotnet/pull/5333) by @jamescrosswell in [#5333](https://github.com/getsentry/sentry-dotnet/pull/5333)
+- The `Environment` set on the `Scope` now gets synchronized to the native layers (`sentry-cocoa` and `sentry-native`) by @bitsandfoxes in [#5365](https://github.com/getsentry/sentry-dotnet/pull/5365)
+
+### Fixes 🐛
+
+- fix: `SentrySpanProcessor` no longer leaks spans whose Activity never ends (e.g. aborted requests); the Activity is now held via a `WeakReference` so orphaned spans are pruned once it is garbage-collected. by @Ermabo in [#5393](https://github.com/getsentry/sentry-dotnet/pull/5393)
+- The SDK was incorrectly ignoring server rate limits for errors, check-ins, and logs by @jamescrosswell in [#5412](https://github.com/getsentry/sentry-dotnet/pull/5412)
+- fix: BackpressureMonitor.Dispose() no longer deadlocks on single-threaded targets by @jamescrosswell in [#5330](https://github.com/getsentry/sentry-dotnet/pull/5330)
+- fix: Create a single TaskBlockingListener per process for CaptureBlockingCalls by @jamescrosswell in [#5381](https://github.com/getsentry/sentry-dotnet/pull/5381)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update CLI to v3.6.1 by @github-actions in [#5417](https://github.com/getsentry/sentry-dotnet/pull/5417)
+- chore(deps): update Native SDK to v0.15.4 by @github-actions in [#5416](https://github.com/getsentry/sentry-dotnet/pull/5416)
+- chore(deps): update Cocoa SDK to v9.22.0 by @github-actions in [#5395](https://github.com/getsentry/sentry-dotnet/pull/5395)
+- chore(deps): update Java SDK to v8.49.0 by @github-actions in [#5398](https://github.com/getsentry/sentry-dotnet/pull/5398)
+
+### Other
+
+- ci: drop install-zstd workaround by @jpnurmi in [#5391](https://github.com/getsentry/sentry-dotnet/pull/5391)
+- docs: add Sentry.OpenTelemetry.Exporter to README.md by @Flash0ver in [#5194](https://github.com/getsentry/sentry-dotnet/pull/5194)
+- meta: Update CODEOWNERS by @Flash0ver in [#5386](https://github.com/getsentry/sentry-dotnet/pull/5386)
+
 ## 6.7.0
 
 ### Features ✨
