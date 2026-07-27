@@ -114,6 +114,7 @@ foreach ($file in $filesToPatch)
     if (Test-Path $file)
     {
         $content = Get-Content -Path $file -Raw
+        $content = $content -replace '<SentryObjC/([^>]+)>', '"$1"'
         $content = $content -replace '<Sentry/([^>]+)>', '"$1"'
         $content = $content -replace '#\s*import SENTRY_HEADER\(([^)]+)\)', '#import "$1.h"'
         Set-Content -Path $file -Value $content
@@ -155,18 +156,16 @@ else
 }
 
 # Generate bindings
-# The SentryObjC*.h headers expose the structured hybrid API (SentryObjCSDK.internal)
+# We bind the SentryObjC umbrella header only. It exposes the full public surface
+# (options, SDK entry point, event model, scope, enums) plus the structured hybrid API
+# (SentryObjCSDK.internal, incl. debug images) via SentryObjC* classes. The classic
+# Sentry.framework ObjC surface is no longer bound here; the few remaining classic
+# holdouts (scope.applyToEvent enrichment + the SentrySerializable protocol) are declared
+# by hand in PrivateApiDefinitions.cs. See getsentry/sentry-dotnet#5444.
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
-    "$HeadersPath/Sentry.h" `
-    "$HeadersPath/Sentry-Swift.h" `
-    "$HeadersPath/SentryObjCSDK.h" `
-    "$HeadersPath/SentryObjCInternalApi.h" `
-    "$HeadersPath/SentryObjCInternalSdkApi.h" `
-    "$HeadersPath/SentryObjCInternalProfilingApi.h" `
-    "$HeadersPath/SentryObjCId.h" `
-    "$HeadersPath/SentryObjCSpanId.h" `
+    "$HeadersPath/SentryObjC.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute `
     -F"$iPhoneSdkPath/System/Library/SubFrameworks" # needed for UIUtilities.framework in Xcode 26+

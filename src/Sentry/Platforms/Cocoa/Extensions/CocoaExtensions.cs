@@ -276,7 +276,7 @@ internal static class CocoaExtensions
         };
     }
 
-    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryEvent native)
+    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryObjCEvent native)
     {
         // we only support a subset of mutated data to be passed back to the native SDK at this time
         native.ServerName = managed.ServerName;
@@ -302,7 +302,7 @@ internal static class CocoaExtensions
         }
     }
 
-    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent)
+    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryObjCEvent sentryEvent)
     {
         using var stream = sentryEvent.ToJsonStream();
         if (stream == null)
@@ -314,9 +314,9 @@ internal static class CocoaExtensions
         return ev;
     }
 
-    public static CocoaSdk.SentryMessage ToCocoaSentryMessage(this SentryMessage msg)
+    public static CocoaSdk.SentryObjCMessage ToCocoaSentryMessage(this SentryMessage msg)
     {
-        var native = new CocoaSdk.SentryMessage(msg.Formatted ?? string.Empty);
+        var native = new CocoaSdk.SentryObjCMessage(msg.Formatted ?? string.Empty);
         native.Params = msg.Params?.Select(x => x.ToString()!).ToArray() ?? new string[0];
 
         return native;
