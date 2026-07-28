@@ -44,8 +44,21 @@ jobs:
     steps:
       - name: Initialize Alpine Linux
         if: ${{ contains(matrix.container.image, 'alpine') }}
+        # A workaround for "JavaScript Actions in Alpine containers are only supported on x64 Linux runners."
+        # https://github.com/actions/runner/blob/8a9b96806d12343f7d123c669e29c629138023dd/src/Runner.Worker/Handlers/StepHost.cs#L283-L290
+        # Inlined rather than fetched over the network: this step runs before checkout (checkout is itself a
+        # JavaScript action that needs node symlinked first), so it can't be read from the working tree, and
+        # piping a curl download straight into a shell made CI flaky when the fetch was rate-limited or
+        # truncated. See https://github.com/getsentry/sentry-dotnet/issues/5408.
         run: |
-          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
+          if [ "$(uname -m)" != "x86_64" ]; then
+            for node in /__e/node*; do
+              sudo mkdir -p "$node/bin"
+              sudo ln -s /usr/bin/node "$node/bin/node"
+              sudo ln -s /usr/bin/npm "$node/bin/npm"
+            done
+            sudo sed -i 's/ID=alpine/ID=unknown/' /usr/lib/os-release
+          fi
 
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -108,8 +121,21 @@ jobs:
     steps:
       - name: Initialize Alpine Linux
         if: ${{ contains(matrix.container.image, 'alpine') }}
+        # A workaround for "JavaScript Actions in Alpine containers are only supported on x64 Linux runners."
+        # https://github.com/actions/runner/blob/8a9b96806d12343f7d123c669e29c629138023dd/src/Runner.Worker/Handlers/StepHost.cs#L283-L290
+        # Inlined rather than fetched over the network: this step runs before checkout (checkout is itself a
+        # JavaScript action that needs node symlinked first), so it can't be read from the working tree, and
+        # piping a curl download straight into a shell made CI flaky when the fetch was rate-limited or
+        # truncated. See https://github.com/getsentry/sentry-dotnet/issues/5408.
         run: |
-          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
+          if [ "$(uname -m)" != "x86_64" ]; then
+            for node in /__e/node*; do
+              sudo mkdir -p "$node/bin"
+              sudo ln -s /usr/bin/node "$node/bin/node"
+              sudo ln -s /usr/bin/npm "$node/bin/npm"
+            done
+            sudo sed -i 's/ID=alpine/ID=unknown/' /usr/lib/os-release
+          fi
 
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
