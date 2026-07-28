@@ -5,6 +5,19 @@ internal static class EnumExtensions
     // These align, so we can just cast
     public static SentryLevel ToSentryLevel(this CocoaSdk.SentryObjCLevel level) => (SentryLevel)level;
 
+    // SentryObjCLevel has a leading `None = 0` member that managed SentryLevel does not, so map by name
+    // (a direct cast would be off by one). `None` has no managed equivalent and maps to null.
+    public static SentryLevel? ToSentryLevelOrNull(this CocoaSdk.SentryObjCLevel level) =>
+        level switch
+        {
+            CocoaSdk.SentryObjCLevel.Debug => SentryLevel.Debug,
+            CocoaSdk.SentryObjCLevel.Info => SentryLevel.Info,
+            CocoaSdk.SentryObjCLevel.Warning => SentryLevel.Warning,
+            CocoaSdk.SentryObjCLevel.Error => SentryLevel.Error,
+            CocoaSdk.SentryObjCLevel.Fatal => SentryLevel.Fatal,
+            _ => null
+        };
+
     public static CocoaSdk.SentryObjCLevel ToCocoaSentryLevel(this SentryLevel level) => level switch
     {
         SentryLevel.Debug => CocoaSdk.SentryObjCLevel.Debug,
