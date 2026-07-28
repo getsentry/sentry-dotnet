@@ -20,8 +20,7 @@ jobs:
         include:
           - name: dotnet/android - AssemblyStore reader
             repo: dotnet/android
-            # Upstream moved this out of tools/assembly-store-reader-mk2/ in dotnet/android#12108
-            # (commit f1aecf9). The parser we vendor now lives under the read-assembly-store skill.
+            # Upstream moved from tools/assembly-store-reader-mk2/ to the read-assembly-store skill in dotnet/android#12108 (f1aecf9). 
             path: .github/skills/read-assembly-store/src/AssemblyStore
             local_path: src/Sentry.Android.AssemblyReader/
     steps:
