@@ -71,5 +71,49 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
         Assert.NotEmpty(Logs);
         Assert.Contains(Logs, log => log.Level == SentryLogLevel.Info && log.Message == "Hello, World!");
     }
+
+    // Logging through ILogger from a namespace that merely starts with "Sentry" used to be discarded
+    // by the sink, so nothing was captured and event processors never ran.
+    // https://github.com/getsentry/sentry-dotnet/issues/5265
+    [Fact]
+    public async Task ILoggerFromApplicationNamespaceStartingWithSentry_CapturesEventAndRunsEventProcessors()
+    {
+        // The namespace our own ASP.NET Core Serilog sample uses, which is where the report came from.
+        const string category = "Sentry.Samples.AspNetCore.Serilog.Program";
+
+        var processor = new RecordingEventProcessor();
+        ConfigureServices = services => services.AddSingleton<ISentryEventProcessor>(processor);
+
+        var handler = new RequestHandler
+        {
+            Path = "/log",
+            Handler = context =>
+            {
+                context.RequestServices.GetRequiredService<ILoggerFactory>()
+                    .CreateLogger(category)
+                    .LogError(new InvalidOperationException("hello?"), "This is a problem");
+                return Task.CompletedTask;
+            }
+        };
+
+        Handlers = new[] { handler };
+        Build();
+        await HttpClient.GetAsync(handler.Path);
+        await ServiceProvider.GetRequiredService<IHub>().FlushAsync();
+
+        Assert.Contains(Events, e => e.Logger == category);
+        Assert.True(processor.Invoked);
+    }
+
+    private class RecordingEventProcessor : ISentryEventProcessor
+    {
+        public bool Invoked { get; private set; }
+
+        public SentryEvent Process(SentryEvent @event)
+        {
+            Invoked = true;
+            return @event;
+        }
+    }
 }
 #endif

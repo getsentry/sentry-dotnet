@@ -281,60 +281,61 @@ public partial class SentrySinkTests
             && p.Message.Message == expectedMessage));
     }
 
-    [Fact]
-    public void Emit_SourceContextMatchesSentry_NoEventSent()
+    [Theory]
+    [InlineData("Sentry")]
+    [InlineData("Sentry.ISentryClient")]
+    [InlineData("Sentry.Serilog")]
+    [InlineData("Sentry.Serilog.SentrySink")]
+    [InlineData("Sentry.AspNetCore.SentryMiddleware")]
+    [InlineData("Sentry.Extensions.Logging.MelDiagnosticLogger")]
+    public void Emit_SourceContextFromSentrySdk_NoEventSent(string sourceContext)
     {
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
             new MessageTemplateParser().Parse("message"),
-            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry.Serilog")) });
+            new[] { new LogEventProperty("SourceContext", new ScalarValue(sourceContext)) });
 
         sut.Emit(evt);
 
         _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
-    [Fact]
-    public void Emit_SourceContextContainsSentry_NoEventSent()
+    [Theory]
+    [InlineData("Sentry")]
+    [InlineData("Sentry.ISentryClient")]
+    [InlineData("Sentry.Serilog")]
+    [InlineData("Sentry.AspNetCore.SentryMiddleware")]
+    public void Emit_SourceContextFromSentrySdk_NoScopeConfigured(string sourceContext)
     {
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
             new MessageTemplateParser().Parse("message"),
-            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry")) });
-
-        sut.Emit(evt);
-
-        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
-    [Fact]
-    public void Emit_SourceContextMatchesSentry_NoScopeConfigured()
-    {
-        var sut = _fixture.GetSut();
-
-        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
-            new MessageTemplateParser().Parse("message"),
-            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry.Serilog")) });
+            new[] { new LogEventProperty("SourceContext", new ScalarValue(sourceContext)) });
 
         sut.Emit(evt);
 
         _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
     }
 
-    [Fact]
-    public void Emit_SourceContextContainsSentry_NoScopeConfigured()
+    // Application code is free to live under a namespace beginning with "Sentry", and used to be
+    // discarded for it. https://github.com/getsentry/sentry-dotnet/issues/5265
+    [Theory]
+    [InlineData("Sentry.Samples.AspNetCore.Serilog.Program")]
+    [InlineData("Sentry.Some.Class")]
+    [InlineData("SentrySomething")]
+    public void Emit_SourceContextFromUserCode_EventSent(string sourceContext)
     {
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
             new MessageTemplateParser().Parse("message"),
-            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry")) });
+            new[] { new LogEventProperty("SourceContext", new ScalarValue(sourceContext)) });
 
         sut.Emit(evt);
 
-        _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == sourceContext));
     }
 
     [Fact]

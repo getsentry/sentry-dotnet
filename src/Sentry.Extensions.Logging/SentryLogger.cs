@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry.Extensions.Logging;
 
@@ -182,22 +183,7 @@ internal sealed class SentryLogger : ILogger
                    exception));
 
 
-    private bool IsFromSentry()
-    {
-        if (string.Equals(CategoryName, "Sentry", StringComparison.Ordinal))
-        {
-            return true;
-        }
-
-#if DEBUG
-        if (CategoryName.StartsWith("Sentry.Samples.", StringComparison.Ordinal))
-        {
-            return false;
-        }
-#endif
-
-        return CategoryName.StartsWith("Sentry.", StringComparison.Ordinal);
-    }
+    private bool IsFromSentry() => SentrySdkNamespaces.IsSentrySdk(CategoryName);
 
     internal static bool IsEfExceptionMessage(EventId eventId)
     {

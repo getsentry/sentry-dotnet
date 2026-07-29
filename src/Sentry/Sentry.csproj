@@ -225,4 +225,72 @@
     </ItemGroup>
   </Target>
 
+  <!--
+    The logging integrations need to recognise log messages that the SDK itself emitted, so they can
+    skip them instead of feeding them back into Sentry. That means knowing which namespace roots
+    belong to the SDK. Rather than hand-maintaining that list (and letting it go stale as packages
+    are added), it's generated from the package list in .craft.yml, which is already kept current for
+    releases. Consumed by Internal\SentrySdkNamespaces.cs.
+  -->
+  <PropertyGroup>
+    <_SentryCraftManifest>$(MSBuildThisFileDirectory)..\..\.craft.yml</_SentryCraftManifest>
+  </PropertyGroup>
+
+  <Target Name="GenerateSentrySdkNamespaces"
+          Inputs="$(_SentryCraftManifest);$(MSBuildThisFileFullPath)"
+          Outputs="$(IntermediateOutputPath)SentrySdkNamespaces.g.cs">
+
+    <ReadLinesFromFile File="$(_SentryCraftManifest)">
+      <Output TaskParameter="Lines" ItemName="_SentryCraftLine" />
+    </ReadLinesFromFile>
+
+    <ItemGroup>
+      <!-- Entries look like "      nuget:Sentry.AspNetCore:" -->
+      <_SentrySdkPackage Include="$([System.Text.RegularExpressions.Regex]::Replace('%(_SentryCraftLine.Identity)', '^\s*nuget:([A-Za-z0-9\.]+):\s*$', '$1'))"
+                         Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(_SentryCraftLine.Identity)', '^\s*nuget:[A-Za-z0-9\.]+:\s*$'))" />
+      <!--
+        'Sentry' is deliberately excluded. Every SDK type lives under the 'Sentry.' namespace, so
+        using it as a prefix would also match user code that happens to sit under 'Sentry.' - which
+        is the bug this list exists to avoid. The core package is matched explicitly instead, see
+        Internal\SentrySdkNamespaces.cs.
+      -->
+      <_SentrySdkPackage Remove="Sentry" />
+    </ItemGroup>
+
+    <Error Condition="'@(_SentrySdkPackage)' == ''"
+           Text="No 'nuget:&lt;package&gt;:' entries could be read from $(_SentryCraftManifest). Without them the logging integrations cannot identify the SDK's own log messages, which risks feedback loops - so this is a hard failure rather than an empty list." />
+
+    <ItemGroup>
+      <_SentrySdkNamespacesLine Include="// &lt;auto-generated/&gt;" />
+      <_SentrySdkNamespacesLine Include="// Generated from .craft.yml by the GenerateSentrySdkNamespaces target in Sentry.csproj." />
+      <_SentrySdkNamespacesLine Include="namespace Sentry.Internal%3B" />
+      <_SentrySdkNamespacesLine Include="internal static partial class SentrySdkNamespaces" />
+      <_SentrySdkNamespacesLine Include="{" />
+      <_SentrySdkNamespacesLine Include="    // Namespace roots owned by SDK packages other than the core 'Sentry' package." />
+      <_SentrySdkNamespacesLine Include="    internal static readonly string[] PackageRoots =" />
+      <_SentrySdkNamespacesLine Include="    {" />
+      <_SentrySdkNamespacesLine Include="        &quot;%(_SentrySdkPackage.Identity)&quot;," />
+      <_SentrySdkNamespacesLine Include="    }%3B" />
+      <_SentrySdkNamespacesLine Include="}" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(IntermediateOutputPath)SentrySdkNamespaces.g.cs"
+                      Lines="@(_SentrySdkNamespacesLine)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+  </Target>
+
+  <!--
+    Kept separate from the target above so the Compile item is still added on incremental builds,
+    where that target is skipped as up to date.
+  -->
+  <Target Name="IncludeSentrySdkNamespaces"
+          BeforeTargets="BeforeCompile;CoreCompile"
+          DependsOnTargets="GenerateSentrySdkNamespaces">
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)SentrySdkNamespaces.g.cs" />
+      <FileWrites Include="$(IntermediateOutputPath)SentrySdkNamespaces.g.cs" />
+    </ItemGroup>
+  </Target>
+
 </Project>
