@@ -19,13 +19,12 @@ public class SentrySdkNamespacesTests
     [InlineData("")]
     [InlineData("MyApp.Program")]
     [InlineData("Microsoft.AspNetCore.Hosting.Diagnostics")]
-    // Application namespaces that merely start with "Sentry" - the regression this guards against.
-    // https://github.com/getsentry/sentry-dotnet/issues/5265
+    // Logs from our samples shouldn't be filtered
     [InlineData("Sentry.Samples.AspNetCore.Serilog.Program")]
     [InlineData("Sentry.Samples.Console.Basic")]
     [InlineData("Sentry.Some.Class")]
     [InlineData("Sentry.MyApp.Worker")]
-    // https://github.com/getsentry/sentry-dotnet/issues/132
+    // Starts with Sentry but not one of our SDK namespaces
     [InlineData("SentrySomething")]
     // A package root must match on a namespace boundary, not just as a string prefix.
     [InlineData("Sentry.MauiSomething.Thing")]

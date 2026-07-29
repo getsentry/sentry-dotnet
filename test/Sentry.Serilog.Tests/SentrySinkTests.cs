@@ -319,8 +319,7 @@ public partial class SentrySinkTests
         _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
     }
 
-    // Application code is free to live under a namespace beginning with "Sentry", and used to be
-    // discarded for it. https://github.com/getsentry/sentry-dotnet/issues/5265
+    // See https://github.com/getsentry/sentry-dotnet/issues/5265
     [Theory]
     [InlineData("Sentry.Samples.AspNetCore.Serilog.Program")]
     [InlineData("Sentry.Some.Class")]

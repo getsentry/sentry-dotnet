@@ -72,13 +72,10 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
         Assert.Contains(Logs, log => log.Level == SentryLogLevel.Info && log.Message == "Hello, World!");
     }
 
-    // Logging through ILogger from a namespace that merely starts with "Sentry" used to be discarded
-    // by the sink, so nothing was captured and event processors never ran.
-    // https://github.com/getsentry/sentry-dotnet/issues/5265
     [Fact]
     public async Task ILoggerFromApplicationNamespaceStartingWithSentry_CapturesEventAndRunsEventProcessors()
     {
-        // The namespace our own ASP.NET Core Serilog sample uses, which is where the report came from.
+        // Logs from our samples shouldn't be filtered - only logs from our SDK should be
         const string category = "Sentry.Samples.AspNetCore.Serilog.Program";
 
         var processor = new RecordingEventProcessor();
