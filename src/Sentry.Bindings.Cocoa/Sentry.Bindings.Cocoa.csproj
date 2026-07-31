@@ -116,8 +116,12 @@
     <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 -PathToCheck $(MSBuildThisFileDirectory)" />
   </Target>
 
-  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
-  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299.
+       Only runs when bgen actually emits SupportDelegates.g.cs (i.e. when the binding declares
+       named delegate types). The SentryObjC surface uses only inline Func/Action callbacks, whose
+       trampolines bgen emits as internal delegates in Trampolines.g.cs, so no patching is needed. -->
+  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile"
+    Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(GeneratedSourcesDir)SupportDelegates.g.cs')"
     Inputs="$(GeneratedSourcesDir)SupportDelegates.g.cs" Outputs="$(GeneratedSourcesDir)SupportDelegates.g.cs.stamp">
     <PropertyGroup>
       <GeneratedSupportDelegatesFile>$(GeneratedSourcesDir)SupportDelegates.g.cs</GeneratedSupportDelegatesFile>

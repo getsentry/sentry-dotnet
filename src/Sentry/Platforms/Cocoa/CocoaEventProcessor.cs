@@ -26,10 +26,11 @@ internal class CocoaEventProcessor : ISentryEventProcessor, IDisposable
     private static CocoaSdk.SentryEvent GetTempEvent()
     {
         // This will populate an event with all of the information we need, without actually capturing that event.
+        // SentryObjCScope exposes no applyToEvent, so this enrichment still uses the classic Sentry.framework
+        // SDK + scope + event. TODO: Find a non-private way to do this (getsentry/sentry-dotnet#5444).
         var @event = new CocoaSdk.SentryEvent();
-        SentryCocoaSdk.ConfigureScope(scope =>
+        SentryCocoaLegacySdk.ConfigureScope(scope =>
         {
-            // TODO: As of Sentry Cocoa 8.0.0, this is a private API.  Find a better way!
             scope.ApplyToEvent(@event, 0);
         });
 

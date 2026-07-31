@@ -276,7 +276,7 @@ internal static class CocoaExtensions
         };
     }
 
-    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryEvent native)
+    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryObjCEvent native)
     {
         // we only support a subset of mutated data to be passed back to the native SDK at this time
         native.ServerName = managed.ServerName;
@@ -302,21 +302,66 @@ internal static class CocoaExtensions
         }
     }
 
-    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent)
+    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryObjCEvent sentryEvent, IDiagnosticLogger? logger = null)
     {
-        using var stream = sentryEvent.ToJsonStream();
-        if (stream == null)
-            return null;
+        // Unlike the classic SentryEvent, SentryObjCEvent exposes no serialize() to round-trip through
+        // JSON, so we reconstruct the managed event from its properties. We map the same subset that
+        // CopyToCocoaSentryEvent writes back, plus the exception derived from the native NSError.
+        // TODO: revisit once the SentryObjC surface exposes event serialization (getsentry/sentry-dotnet#5444).
+        var exception = sentryEvent.Error is { } error ? new NSErrorException(error) : null;
+        var ev = new SentryEvent(exception)
+        {
+            Level = sentryEvent.Level.ToSentryLevelOrNull(),
+            ServerName = sentryEvent.ServerName,
+            Distribution = sentryEvent.Dist,
+            Logger = sentryEvent.Logger,
+            Release = sentryEvent.ReleaseName,
+            Environment = sentryEvent.Environment,
+            TransactionName = sentryEvent.Transaction,
+        };
 
-        using var json = JsonDocument.Parse(stream);
-        var exception = sentryEvent.Error == null ? null : new NSErrorException(sentryEvent.Error);
-        var ev = SentryEvent.FromJson(json.RootElement, exception);
+        if (sentryEvent.Message is { } message)
+        {
+            ev.Message = message.ToSentryMessage();
+        }
+
+        foreach (var (key, value) in sentryEvent.Tags.ToStringDictionary(logger))
+        {
+            ev.SetTag(key, value);
+        }
+
+        foreach (var (key, value) in sentryEvent.Extra.ToObjectDictionary(logger))
+        {
+            ev.SetExtra(key, value);
+        }
+
+        if (sentryEvent.Breadcrumbs is { } breadcrumbs)
+        {
+            foreach (var breadcrumb in breadcrumbs)
+            {
+                ev.AddBreadcrumb(breadcrumb.ToBreadcrumb(logger));
+            }
+        }
+
+        if (sentryEvent.User is { } user)
+        {
+            ev.User = user.ToUser(logger);
+        }
+
         return ev;
     }
 
-    public static CocoaSdk.SentryMessage ToCocoaSentryMessage(this SentryMessage msg)
+    public static SentryMessage ToSentryMessage(this CocoaSdk.SentryObjCMessage message) =>
+        new()
+        {
+            Formatted = message.Formatted,
+            Message = message.Message,
+            Params = message.Params,
+        };
+
+    public static CocoaSdk.SentryObjCMessage ToCocoaSentryMessage(this SentryMessage msg)
     {
-        var native = new CocoaSdk.SentryMessage(msg.Formatted ?? string.Empty);
+        var native = new CocoaSdk.SentryObjCMessage(msg.Formatted ?? string.Empty);
         native.Params = msg.Params?.Select(x => x.ToString()!).ToArray() ?? new string[0];
 
         return native;
