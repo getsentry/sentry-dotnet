@@ -555,13 +555,13 @@ static partial class SentrySdk
     /// This allows modifying a scope without affecting other events.
     /// </remarks>
     /// <param name="exception">The exception.</param>
-    /// <param name="configureScope">The callback to configure the scope.</param>
     /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
     /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureException(Exception exception, Action<Scope> configureScope, bool handled)
-        => CurrentHub.CaptureException(exception, configureScope, handled);
+    public static SentryId CaptureException(Exception exception, bool handled, Action<Scope> configureScope)
+        => CurrentHub.CaptureException(exception, handled, configureScope);
 
     /// <summary>
     /// Captures the message.

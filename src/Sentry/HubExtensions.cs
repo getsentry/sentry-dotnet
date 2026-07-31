@@ -271,8 +271,8 @@ public static class HubExtensions
 
     internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex)
     {
-        // Integrations stamp the flag via SetSentryMechanism before calling this (e.g. WinUI forwards the
-        // platform's Handled value); only default to unhandled when nothing was declared.
+        // Integrations always call `SetSentryMechanism` before calling this method (e.g. WinUI forwards the
+        // platform's Handled value), so this fallback is defensive only. In practice, it never executes.
         if (!ex.Data.Contains(Mechanism.HandledKey))
         {
             ex.Data[Mechanism.HandledKey] = false;
@@ -295,12 +295,17 @@ public static class HubExtensions
     /// </summary>
     /// <param name="hub">The Sentry hub.</param>
     /// <param name="ex">The exception.</param>
-    /// <param name="configureScope">The callback to configure the scope.</param>
     /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
     /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope, bool handled)
+    public static SentryId CaptureException(this IHub hub, Exception ex, bool handled, Action<Scope> configureScope)
     {
+        if (!hub.IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
         ex.Data[Mechanism.HandledKey] = handled;
         return hub.CaptureEvent(new SentryEvent(ex), configureScope);
     }

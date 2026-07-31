@@ -96,7 +96,7 @@ public class HubExtensionsTests
         var ex = new Exception();
 
         // Act
-        _ = Sut.CaptureException(ex, _ => { }, handled);
+        _ = Sut.CaptureException(ex, handled, _ => { });
 
         // Assert
         Assert.Equal(handled, ex.Data[Mechanism.HandledKey]);
@@ -112,10 +112,26 @@ public class HubExtensionsTests
         ex.SetSentryMechanism("SomeMechanism", handled: true);
 
         // Act
-        _ = Sut.CaptureException(ex, _ => { }, handled: false);
+        _ = Sut.CaptureException(ex, handled: false, _ => { });
 
         // Assert
         Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallback_ExplicitHandled_DisabledHub_DoesNotRecordFlagOnException()
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(false);
+        var ex = new Exception();
+
+        // Act
+        var id = Sut.CaptureException(ex, handled: false, _ => { });
+
+        // Assert
+        Assert.Equal(SentryId.Empty, id);
+        Assert.False(ex.Data.Contains(Mechanism.HandledKey));
+        _ = Sut.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Action<Scope>>());
     }
 
     [Fact]

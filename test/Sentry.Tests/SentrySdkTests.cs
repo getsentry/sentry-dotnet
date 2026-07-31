@@ -740,7 +740,7 @@ public class SentrySdkTests : IDisposable
             });
         });
 
-        SentrySdk.CaptureException(new Exception("test"), s => s.SetTag("scope-callback", "ran"), handled);
+        SentrySdk.CaptureException(new Exception("test"), handled, s => s.SetTag("scope-callback", "ran"));
 
         Assert.NotNull(captured);
         Assert.Equal(handled, Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
