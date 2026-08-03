@@ -55,7 +55,7 @@ updates:
     interval: weekly
   # Dependabot treats each subpath of an action repo as a separate dependency, so
   # without these groups it bumps e.g. codeql-action/init without codeql-action/analyze
-  # and the mismatched versions break CI. Group each repo so subpaths move in lockstep.
+  # Grouping ensures dependencies from the same subpath are upgraded together
   groups:
     codeql-action:
       patterns:
