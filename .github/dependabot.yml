@@ -53,3 +53,19 @@ updates:
     - "/.github/actions/*"
   schedule:
     interval: weekly
+  # Dependabot treats each subpath of an action repo as a separate dependency, so
+  # without these groups it bumps e.g. codeql-action/init without codeql-action/analyze
+  # and the mismatched versions break CI. Group each repo so subpaths move in lockstep.
+  groups:
+    codeql-action:
+      patterns:
+        - "github/codeql-action*"
+    github-workflows:
+      patterns:
+        - "getsentry/github-workflows*"
+    craft:
+      patterns:
+        - "getsentry/craft*"
+    actions-cache:
+      patterns:
+        - "actions/cache*"
