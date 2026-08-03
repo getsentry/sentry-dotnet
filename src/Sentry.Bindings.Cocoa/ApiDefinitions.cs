@@ -226,6 +226,10 @@ interface SentryBreadcrumb : SentrySerializable
     [NullAllowed, Export("data", ArgumentSemantic.Copy)]
     NSDictionary<NSString, NSObject> Data { get; set; }
 
+    // -(void)setDataValue:(id _Nullable)value forKey:(NSString * _Nonnull)key __attribute__((swift_name("setData(value:key:)")));
+    [Export("setDataValue:forKey:")]
+    void SetDataValue([NullAllowed] NSObject value, string key);
+
     // -(instancetype _Nonnull)initWithLevel:(SentryLevel)level category:(NSString * _Nonnull)category;
     [Export("initWithLevel:category:")]
     NativeHandle Constructor(SentryLevel level, string category);
@@ -1565,6 +1569,10 @@ interface SentryOptions
     // @property (nonatomic) BOOL enableSigtermReporting;
     [Export("enableSigtermReporting")]
     bool EnableSigtermReporting { get; set; }
+
+    // @property (nonatomic) BOOL enableMemoryIntrospection;
+    [Export("enableMemoryIntrospection")]
+    bool EnableMemoryIntrospection { get; set; }
 
     // @property (nonatomic) NSUInteger maxBreadcrumbs;
     [Export("maxBreadcrumbs")]

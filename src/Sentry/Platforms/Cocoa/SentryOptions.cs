@@ -130,6 +130,19 @@ public partial class SentryOptions
         public bool EnableFileIOTracing { get; set; } = true;
 
         /// <summary>
+        /// When enabled, the SDK inspects memory near the crash site and includes any string contents it
+        /// finds in the crash event. These contents appear as the message subtitle beneath the issue title
+        /// in Sentry.
+        /// The default value is <c>false</c> (disabled).
+        /// </summary>
+        /// <remarks>
+        /// Disabled by default because the inspected memory can contain PII or security-relevant data.
+        /// Enabling this option opts back in to the pre-9.24.0 Cocoa SDK behaviour.
+        /// See https://github.com/getsentry/sentry-cocoa/issues/8571
+        /// </remarks>
+        public bool EnableMemoryIntrospection { get; set; } = false;
+
+        /// <summary>
         /// When enabled, the SDK adds breadcrumbs for each network request
         /// if auto performance tracking and <see cref="EnableSwizzling"/> are enabled.
         /// The default value is <c>true</c> (enabled).
