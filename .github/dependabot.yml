@@ -54,9 +54,8 @@ updates:
   schedule:
     interval: weekly
   # Dependabot treats each subpath of an action repo as a separate dependency, so
-  # ungrouped it bumps e.g. codeql-action/init without codeql-action/analyze and the
-  # mismatched versions break CI. One group keeps every action in a single PR, which
-  # also cuts down on version-bump noise. Matches getsentry/sentry-java.
+  # ungrouped it bumps e.g. codeql-action/init without codeql-action/analyze.
+  # Grouping ensures all actions are upgraded together, in a single PR.
   groups:
     github-actions:
       patterns:
