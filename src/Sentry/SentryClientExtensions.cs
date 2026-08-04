@@ -26,15 +26,19 @@ public static class SentryClientExtensions
     /// <param name="ex">The exception.</param>
     /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
     /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed, aborting the active transaction on
+    /// <see cref="IHub"/> clients.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this ISentryClient client, Exception ex, bool handled)
+    public static SentryId CaptureException(this ISentryClient client, Exception ex, bool handled,
+        bool terminal = false)
     {
         if (!client.IsEnabled)
         {
             return SentryId.Empty;
         }
 
-        ex.Data[Mechanism.HandledKey] = handled;
+        ex.RecordMechanismFlags(handled, terminal);
         return client.CaptureEvent(new SentryEvent(ex));
     }
 

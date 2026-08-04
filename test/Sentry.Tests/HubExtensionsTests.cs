@@ -96,7 +96,7 @@ public class HubExtensionsTests
         var ex = new Exception();
 
         // Act
-        _ = Sut.CaptureException(ex, handled, _ => { });
+        _ = Sut.CaptureException(ex, handled, terminal: false, _ => { });
 
         // Assert
         Assert.Equal(handled, ex.Data[Mechanism.HandledKey]);
@@ -112,7 +112,7 @@ public class HubExtensionsTests
         ex.SetSentryMechanism("SomeMechanism", handled: true);
 
         // Act
-        _ = Sut.CaptureException(ex, handled: false, _ => { });
+        _ = Sut.CaptureException(ex, handled: false, terminal: false, _ => { });
 
         // Assert
         Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
@@ -126,7 +126,7 @@ public class HubExtensionsTests
         var ex = new Exception();
 
         // Act
-        var id = Sut.CaptureException(ex, handled: false, _ => { });
+        var id = Sut.CaptureException(ex, handled: false, terminal: false, _ => { });
 
         // Assert
         Assert.Equal(SentryId.Empty, id);
@@ -269,5 +269,39 @@ public class HubExtensionsTests
         // Assert
         traceId.Should().Be(SentryId.Empty);
         spanId.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_ScopeCallback_ExplicitTerminal_RecordsTerminalFlagOnException(bool terminal)
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(true);
+        var ex = new Exception();
+
+        // Act
+        _ = Sut.CaptureException(ex, handled: false, terminal, _ => { });
+
+        // Assert
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+        Assert.Equal(terminal, ex.Data[Mechanism.TerminalKey]);
+        _ = Sut.Received(1).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Action<Scope>>());
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallback_ExplicitTerminal_DisabledHub_DoesNotRecordFlagsOnException()
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(false);
+        var ex = new Exception();
+
+        // Act
+        var id = Sut.CaptureException(ex, handled: false, terminal: true, _ => { });
+
+        // Assert
+        Assert.Equal(SentryId.Empty, id);
+        Assert.False(ex.Data.Contains(Mechanism.HandledKey));
+        Assert.False(ex.Data.Contains(Mechanism.TerminalKey));
     }
 }

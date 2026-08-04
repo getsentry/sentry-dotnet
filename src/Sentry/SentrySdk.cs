@@ -530,10 +530,12 @@ static partial class SentrySdk
     /// <param name="exception">The exception.</param>
     /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
     /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed and the active transaction is aborted.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureException(Exception exception, bool handled)
-        => CurrentHub.CaptureException(exception, handled);
+    public static SentryId CaptureException(Exception exception, bool handled, bool terminal = false)
+        => CurrentHub.CaptureException(exception, handled, terminal);
 
     /// <summary>
     /// Captures the exception with a configurable scope.
@@ -549,7 +551,8 @@ static partial class SentrySdk
         => CurrentHub.CaptureException(exception, configureScope);
 
     /// <summary>
-    /// Captures the exception with a configurable scope, explicitly marking it as handled or unhandled.
+    /// Captures the exception with a configurable scope, explicitly marking it as handled or unhandled and
+    /// whether it terminated the application.
     /// </summary>
     /// <remarks>
     /// This allows modifying a scope without affecting other events.
@@ -557,11 +560,14 @@ static partial class SentrySdk
     /// <param name="exception">The exception.</param>
     /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
     /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed and the active transaction is aborted.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureException(Exception exception, bool handled, Action<Scope> configureScope)
-        => CurrentHub.CaptureException(exception, handled, configureScope);
+    public static SentryId CaptureException(Exception exception, bool handled, bool terminal,
+        Action<Scope> configureScope)
+        => CurrentHub.CaptureException(exception, handled, terminal, configureScope);
 
     /// <summary>
     /// Captures the message.

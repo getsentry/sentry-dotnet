@@ -273,6 +273,7 @@ public static class HubExtensions
     {
         // Integrations always call `SetSentryMechanism` before calling this method (e.g. WinUI forwards the
         // platform's Handled value), so this fallback is defensive only. In practice, it never executes.
+        // Terminal is left unset (not false) so a missing SetSentryMechanism call still reads as a crash.
         if (!ex.Data.Contains(Mechanism.HandledKey))
         {
             ex.Data[Mechanism.HandledKey] = false;
@@ -291,22 +292,26 @@ public static class HubExtensions
         hub.CaptureEvent(new SentryEvent(ex), configureScope);
 
     /// <summary>
-    /// Captures the exception with a configurable scope callback, explicitly marking it as handled or unhandled.
+    /// Captures the exception with a configurable scope callback, explicitly marking it as handled or unhandled
+    /// and whether it terminated the application.
     /// </summary>
     /// <param name="hub">The Sentry hub.</param>
     /// <param name="ex">The exception.</param>
     /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
     /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed and the active transaction is aborted.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this IHub hub, Exception ex, bool handled, Action<Scope> configureScope)
+    public static SentryId CaptureException(this IHub hub, Exception ex, bool handled, bool terminal,
+        Action<Scope> configureScope)
     {
         if (!hub.IsEnabled)
         {
             return SentryId.Empty;
         }
 
-        ex.Data[Mechanism.HandledKey] = handled;
+        ex.RecordMechanismFlags(handled, terminal);
         return hub.CaptureEvent(new SentryEvent(ex), configureScope);
     }
 

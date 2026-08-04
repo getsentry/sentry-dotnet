@@ -740,7 +740,7 @@ public class SentrySdkTests : IDisposable
             });
         });
 
-        SentrySdk.CaptureException(new Exception("test"), handled, s => s.SetTag("scope-callback", "ran"));
+        SentrySdk.CaptureException(new Exception("test"), handled, terminal: false, s => s.SetTag("scope-callback", "ran"));
 
         Assert.NotNull(captured);
         Assert.Equal(handled, Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
@@ -771,6 +771,109 @@ public class SentrySdkTests : IDisposable
 
         Assert.NotNull(captured);
         Assert.True(Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_ExplicitTerminal_SetsMechanismTerminalOnEvent(bool terminal)
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled: false, terminal: terminal);
+
+        Assert.NotNull(captured);
+        var mechanism = Assert.Single(captured.SentryExceptions!).Mechanism!;
+        Assert.False(mechanism.Handled);
+        Assert.Equal(terminal, mechanism.Terminal);
+    }
+
+    [Fact]
+    public void CaptureException_NoTerminalArgument_SetsMechanismTerminalToFalse()
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled: false);
+
+        Assert.NotNull(captured);
+        Assert.False(Assert.Single(captured.SentryExceptions!).Mechanism!.Terminal);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_WithConfiguredScope_ExplicitTerminal_SetsMechanismTerminalOnEvent(bool terminal)
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled: false, terminal, _ => { });
+
+        Assert.NotNull(captured);
+        Assert.Equal(terminal, Assert.Single(captured.SentryExceptions!).Mechanism!.Terminal);
+    }
+
+    [Fact]
+    public void CaptureException_HandledTrue_LeavesMechanismTerminalUnset()
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        var ex = new Exception("test");
+        ex.SetSentryMechanism("SomeMechanism", handled: false, terminal: true);
+
+        SentrySdk.CaptureException(ex, handled: true);
+
+        Assert.NotNull(captured);
+        var mechanism = Assert.Single(captured.SentryExceptions!).Mechanism!;
+        Assert.True(mechanism.Handled);
+        Assert.Null(mechanism.Terminal);
     }
 
     [Fact]
