@@ -14,9 +14,25 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
+    // How long Dispose() waits for an in-flight session startup to complete before giving up on it.
+    private const int SHUTDOWN_TIMEOUT_MS = 2_000;
+
     private readonly SentryOptions _options;
 
     internal Task<SampleProfilerSession> _sessionTask;
+
+    // Cancels the wait for the first event so that Dispose() doesn't have to wait for a session that
+    // may never receive one.
+    private readonly CancellationTokenSource _shutdownCts = new();
+
+    // Assigned as soon as the session exists, which is earlier than _sessionTask completing. Dispose()
+    // uses this so it can also stop a session that never saw its first event.
+    private SampleProfilerSession? _session;
+
+    private int _disposed;
+
+    // Exposed for tests.
+    internal bool IsDisposed => Volatile.Read(ref _disposed) != 0;
 
     private bool _errorLogged = false;
 
@@ -28,9 +44,10 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         {
             // This can block up to 30 seconds. The timeout is out of our hands.
             var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+            _session = session;
 
-            // This can block indefinitely.
-            await session.WaitForFirstEventAsync().ConfigureAwait(false);
+            // This can block indefinitely, so it's cancelled when the factory is disposed.
+            await session.WaitForFirstEventAsync(_shutdownCts.Token).ConfigureAwait(false);
 
             return session;
         });
@@ -83,6 +100,34 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     public void Dispose()
     {
-        _sessionTask.ContinueWith(session => session.Dispose());
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        // Unblocks the startup task if it's still waiting for the first event to arrive.
+        _shutdownCts.Cancel();
+
+        try
+        {
+            // Gives an in-flight startup a chance to finish, and observes the exception if it failed
+            // or was cancelled above.
+            _sessionTask.Wait(SHUTDOWN_TIMEOUT_MS);
+        }
+        catch (Exception e)
+        {
+            _options.LogDebug("Profiler session didn't start up cleanly before shutdown: {0}", e.Message);
+        }
+
+        try
+        {
+            _session?.Dispose();
+        }
+        catch (Exception e)
+        {
+            _options.LogWarning(e, "Failed to stop the profiler session.");
+        }
+
+        _shutdownCts.Dispose();
     }
 }
