@@ -228,6 +228,27 @@ public class SamplingTransactionProfilerTests
         return -n;
     }
 
+    [SkippableFact]
+    public async Task Session_Stop_ShutsDownWithoutError()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
+
+        SampleProfilerSession? session = null;
+        SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
+        await session!.WaitForFirstEventAsync(CancellationToken.None);
+
+        session.Stop();
+
+        // The event processing task used to be an OnlyOnFaulted continuation, which transitions to
+        // Canceled when processing completes normally. Waiting on it therefore threw on every clean
+        // shutdown, and the EventPipeSession and TraceLogEventSource were left undisposed.
+        _testOutputLogger.Entries.Select(e => e.Message).Should().NotContain(
+            m => m.StartsWith("Error during sampler profiler session shutdown"));
+
+        // Stopping again must stay a no-op.
+        session.Stop();
+    }
+
     [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]

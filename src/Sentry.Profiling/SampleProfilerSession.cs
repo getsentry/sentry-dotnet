@@ -47,6 +47,10 @@ internal class SampleProfilerSession : IDisposable
     // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
     internal static int CircularBufferMB = 16;
 
+    // How long Stop() waits for the event processing task to drain after the session has been stopped.
+    // Draining should be near-instant; this only bounds the worst case so shutdown can't hang.
+    internal const int ProcessingDrainTimeoutMs = 2_000;
+
     // Exposed for tests
     internal TraceLogEventSource EventSource { get; }
 
@@ -83,6 +87,9 @@ internal class SampleProfilerSession : IDisposable
             var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
+            // Note: the continuation is deliberately unconditional. A continuation whose criteria aren't
+            // met (e.g. OnlyOnFaulted when Process() returns normally) transitions to Canceled, which
+            // would make the Wait() in Stop() throw on every clean shutdown.
             var processing = Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
                 .ContinueWith(_ =>
                 {
@@ -90,7 +97,7 @@ internal class SampleProfilerSession : IDisposable
                     {
                         logger?.LogWarning(e, "Error during sampler profiler EventPipeSession processing.");
                     }
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                });
 
             return new SampleProfilerSession(stopWatch, session, eventSource, processing, logger);
         }
@@ -119,19 +126,39 @@ internal class SampleProfilerSession : IDisposable
 
     public void Stop()
     {
-        if (!_stopped)
+        if (_stopped)
         {
+            return;
+        }
+
+        _stopped = true;
+        try
+        {
+            _session.Stop();
+
+            // Let the processing task drain the events that are still in flight, but don't hold up
+            // shutdown indefinitely if it doesn't get there.
+            if (!_processing.Wait(ProcessingDrainTimeoutMs))
+            {
+                _logger?.LogWarning("Sampler profiler event processing didn't finish within {0} ms of stopping the session.", ProcessingDrainTimeoutMs);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Error during sampler profiler session shutdown.");
+        }
+        finally
+        {
+            // These need to happen even if stopping the session or draining the events failed, otherwise
+            // the EventPipe connection to the runtime is left open.
             try
             {
-                _stopped = true;
-                _session.Stop();
-                _processing.Wait();
                 _session.Dispose();
                 EventSource.Dispose();
             }
             catch (Exception ex)
             {
-                _logger?.LogWarning(ex, "Error during sampler profiler session shutdown.");
+                _logger?.LogWarning(ex, "Error disposing the sampler profiler session.");
             }
         }
     }
