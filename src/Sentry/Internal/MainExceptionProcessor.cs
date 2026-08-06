@@ -174,17 +174,12 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             mechanism.Handled = handled;
             exception.Data.Remove(Mechanism.HandledKey);
         }
-        else if (exception.StackTrace != null)
-        {
-            // The exception was thrown, but it was caught by the user, not an integration.
-            // Thus, we can mark it as handled.
-            mechanism.Handled = true;
-        }
         else
         {
-            // The exception was never thrown.  It was just constructed and then captured.
-            // Thus, it is neither handled nor unhandled.
-            mechanism.Handled = null;
+            // https://getsentry.github.io/relay/relay_event_schema/protocol/struct.Mechanism.html#structfield.handled
+            // "Exceptions captured using capture_exception (called from user code) are handled=true as the user
+            // explicitly captured the exception (and therefore kind of handled it)."
+            mechanism.Handled = true;
         }
 
         if (exception.Data[Mechanism.MechanismKey] is string mechanismType)
