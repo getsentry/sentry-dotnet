@@ -75,6 +75,13 @@ public partial class App : Application
     {
         testArg = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ARG");
 
+#if IOS
+        if (HasTestArg("UnmanagedThreadCrash"))
+        {
+            Native.TriggerUnmanagedThreadCrash();
+        }
+#endif
+
 #pragma warning disable CS0618
         if (Enum.TryParse<CrashType>(testArg, ignoreCase: true, out var crashType))
         {

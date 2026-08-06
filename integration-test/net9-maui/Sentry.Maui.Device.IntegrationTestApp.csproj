@@ -64,6 +64,20 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <NativeSource Include="Platforms\iOS\Native.c" />
+  </ItemGroup>
+
+  <Target Name="AddIosNativeSources"
+          AfterTargets="_ComputeNativeExecutableInputs"
+          Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <ItemGroup>
+      <_CompileNativeExecutableFile Include="@(NativeSource)">
+        <OutputFile>$(_IntermediateNativeLibraryDir)Native.o</OutputFile>
+      </_CompileNativeExecutableFile>
+    </ItemGroup>
+  </Target>
+
   <!-- Needed for SetAndroidNdkPreload (buildTransitive doesn't apply via ProjectReference) -->
   <ImportGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
     <Import Project="..\..\src\Sentry\buildTransitive\Sentry.props" Condition="Exists('..\..\src\Sentry\buildTransitive\Sentry.props')" />

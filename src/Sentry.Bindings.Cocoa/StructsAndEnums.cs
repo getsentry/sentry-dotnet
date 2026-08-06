@@ -55,6 +55,13 @@ internal enum SentryObjCLogLevel : long
 }
 
 [Native]
+internal enum SentryObjCProfileLifecycle : long
+{
+    Manual = 0,
+    Trace
+}
+
+[Native]
 internal enum SentryObjCReplayQuality : long
 {
     Low = 0,

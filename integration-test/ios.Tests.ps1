@@ -123,6 +123,19 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
         $result.Envelopes() | Should -HaveCount 1
     }
 
+    It 'captures native crash from unmanaged thread (<configuration>, <runtime>)' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunIosApp -Dsn $url -TestArg "UnmanagedThreadCrash"
+            RunIosApp -Dsn $url
+        }
+
+        $result.HasErrors() | Should -BeFalse
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"SIGSEGV`""
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
+        $result.Envelopes() | Should -HaveCount 1
+    }
+
     It 'captures native crash (<configuration>, <runtime>)' {
         $result = Invoke-SentryServer {
             param([string]$url)

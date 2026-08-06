@@ -25,8 +25,7 @@ const string Header = @"// -----------------------------------------------------
 var code = Header + File.ReadAllText(args[0]);
 
 // Fix broken multi-line comments
-code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\()\n\s*", "$1");
-code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""", "$1 ");
+code = Regex.Replace(code, @"(?ms)^\s*// @property[^\r\n]*DEPRECATED_MSG_ATTRIBUTE.*?(?=^\s*\[Export)", "");
 
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
@@ -69,8 +68,11 @@ var nodes = tree.GetCompilationUnitRoot()
     // error CS0114: 'SentryXxx.Description' hides inherited member 'NSObject.Description'.
     .RemoveProperty("Sentry*", "Description")
     // Option properties that reference SentryObjC* types the .NET SDK doesn't whitelist.
+    .RemoveProperty("SentryObjCOptions", "BeforeSendWithHint")
+    .RemoveProperty("SentryObjCOptions", "BeforeBreadcrumbWithHint")
     .RemoveProperty("SentryObjCOptions", "BeforeSendLog")
     .RemoveProperty("SentryObjCOptions", "BeforeSendMetric")
+    .RemoveProperty("SentryObjCOptions", "ConfigureProfiling")
     .RemoveProperty("SentryObjCOptions", "ConfigureUserFeedback")
     // SentryObjCSDK is both the public entry point and the hybrid-SDK gateway (via `internal`).
     // Keep the public members the .NET SDK calls plus the `internal` accessor; drop the rest, whose
