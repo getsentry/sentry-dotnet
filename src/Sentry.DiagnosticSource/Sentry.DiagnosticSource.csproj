@@ -14,7 +14,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.0" />
+    <!-- Version notes for the Activity-based tracing code:
+         - ActivityListener/ActivitySource need 5.0.0; ActivityStatusCode needs 6.0.0.
+         - However the netstandard2.0/net462 assets of the 6.0.0 package lag the modern API surface
+           (e.g. Activity.HasRemoteParent is missing there), so 8.0.1 is the effective minimum. -->
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>
