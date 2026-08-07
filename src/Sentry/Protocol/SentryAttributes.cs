@@ -155,6 +155,27 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
         }
     }
 
+#if NET6_0_OR_GREATER
+    [SuppressMessage("Roslynator", "RCS1242:Do not pass non-read-only struct by read-only reference", Justification = $"Ensure that only readonly instance members of {nameof(TagList)} are invoked, to avoid a defensive copy created by the compiler.")]
+    internal void SetAttributes(in TagList attributes)
+    {
+        if (attributes.Count == 0)
+        {
+            return;
+        }
+
+#if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+        _ = EnsureCapacity(Count + attributes.Count);
+#endif
+
+        for (var index = 0; index < attributes.Count; index++)
+        {
+            var attribute = attributes[index];
+            this[attribute.Key] = new SentryAttribute(attribute.Value!);
+        }
+    }
+#endif
+
     /// <inheritdoc cref="ISentryJsonSerializable.WriteTo(Utf8JsonWriter, IDiagnosticLogger)" />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {

@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseSentry(options =>
@@ -73,7 +75,33 @@ app.Use(async (context, next) =>
         span.Finish(e);
         throw;
     }
-    await next();
+
+    var timestamp = Stopwatch.GetTimestamp();
+    TagList attributes = new()
+    {
+        { "request.scheme", context.Request.Scheme },
+        { "request.method", context.Request.Method },
+    };
+    if (context.Request.Path.HasValue)
+    {
+        attributes.Add("request.route", context.Request.Path.Value);
+    }
+
+    try
+    {
+        await next();
+    }
+    catch (Exception exception)
+    {
+        attributes.Add("exception.message", exception.Message);
+        attributes.Add("exception.type", exception.GetType().FullName);
+        throw;
+    }
+    finally
+    {
+        var elapsed = Stopwatch.GetElapsedTime(timestamp);
+        SentrySdk.Metrics.EmitDistribution("http.server.request.duration", elapsed.TotalSeconds, MeasurementUnit.Duration.Second, attributes);
+    }
 });
 
 app.Run();
