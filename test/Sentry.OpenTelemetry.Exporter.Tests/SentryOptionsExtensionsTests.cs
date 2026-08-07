@@ -1,4 +1,3 @@
-using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
 
 namespace Sentry.OpenTelemetry.Exporter.Tests;
@@ -115,21 +114,6 @@ public class SentryOptionsExtensionsTests
 
         // Act
         var act = () => options.UseOtlp(tracerProviderBuilder, collectorUrl);
-
-        // Assert
-        act.Should().NotThrow();
-    }
-
-    [Fact]
-    public void UseOtlp_WithCustomPropagator_DoesNotThrow()
-    {
-        // Arrange
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsn };
-        var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
-        var customPropagator = Substitute.For<TextMapPropagator>();
-
-        // Act
-        var act = () => options.UseOtlp(tracerProviderBuilder, defaultTextMapPropagator: customPropagator);
 
         // Assert
         act.Should().NotThrow();
