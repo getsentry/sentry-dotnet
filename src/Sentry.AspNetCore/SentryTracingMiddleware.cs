@@ -179,7 +179,7 @@ internal class SentryTracingMiddleware
 
                 // If no Name was found for Transaction, then we don't have the route.
                 // Also, run this block if the caller has opted into always calling the TransactionNameProvider.
-                var customName = new Lazy<string?>(context.TryGetCustomTransactionName, LazyThreadSafetyMode.None);
+                var customName = new LazyLite<string?>(context.TryGetCustomTransactionName);
                 var forceCustomName = _options.PreferTransactionNameProvider && customName.Value is not null;
                 if (transaction.Name == string.Empty || forceCustomName)
                 {
