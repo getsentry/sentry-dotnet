@@ -80,6 +80,24 @@ public class HttpContextExtensionsTests
     }
 
     [Fact]
+    public void TryGetSentryTraceHeader_WithTraceId_ReturnsNotNull()
+    {
+        // Arrange
+        var httpContext = Fixture.GetSut();
+        var options = new SentryOptions();
+        httpContext.Request.Headers.Append(SentryTraceHeader.HttpHeaderName, "5bd5f6d346b442dd9177dce9302fd737-b0d83d6cfec87606-1");
+
+        // Act
+        var header = httpContext.TryGetSentryTraceHeader(options);
+
+        // Assert
+        Assert.NotNull(header);
+        header.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
+        header.SpanId.Should().Be(SpanId.Parse("b0d83d6cfec87606"));
+        header.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
     public void TryGetSentryTraceHeader_WithEmptyTraceId_ReturnsNull()
     {
         // Arrange
