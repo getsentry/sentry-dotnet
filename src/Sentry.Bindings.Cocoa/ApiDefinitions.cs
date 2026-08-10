@@ -2062,6 +2062,10 @@ interface SentryFeedbackAPI
     void ShowWidget();
     [Export("hideWidget")]
     void HideWidget();
+    [Export("enableOnShake")]
+    void EnableOnShake();
+    [Export("disableOnShake")]
+    void DisableOnShake();
 }
 
 // @interface SentryHub : NSObject
