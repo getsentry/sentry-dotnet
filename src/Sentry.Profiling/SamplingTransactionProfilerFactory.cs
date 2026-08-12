@@ -83,6 +83,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     public void Dispose()
     {
-        _sessionTask.ContinueWith(session => session.Dispose());
+        _sessionTask.ContinueWith(task => task.Result.Dispose(), TaskContinuationOptions.OnlyOnRanToCompletion);
     }
 }
