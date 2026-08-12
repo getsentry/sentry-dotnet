@@ -622,6 +622,99 @@ public partial class HttpTransportTests
     }
 
     [Fact]
+    public async Task SendEnvelopeAsync_HeapDumpAttachmentTooLarge_DeleteFilesAndLogsDebug()
+    {
+        var tempFilePath = Path.GetTempFileName();
+        File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                MaxAttachmentSize = 1,
+                DiagnosticLogger = logger,
+                Debug = true
+            },
+            new HttpClient(new RecordingHttpMessageHandler(new FakeHttpMessageHandler())));
+
+        var HeapDumpAttachment = new SentryAttachment(
+            AttachmentType.HeapDump,
+            new FileAttachmentContent(tempFilePath),
+            Path.GetFileName(tempFilePath),
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            null,
+            new[] { HeapDumpAttachment });
+
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            File.Exists(tempFilePath).Should().BeFalse();
+
+            logger.Entries.Should().Contain(e =>
+                e.Level == SentryLevel.Debug &&
+                string.Format(e.Message, e.Args).Contains("exceeded the attachment size limit and was deleted"));
+        }
+        finally
+        {
+            File.Delete(tempFilePath);
+        }
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_NonHeapDumpAttachmentTooLarge_DoesNotDeleteFile()
+    {
+        var tempFilePath = Path.GetTempFileName();
+        File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                MaxAttachmentSize = 1,
+                DiagnosticLogger = logger,
+                Debug = true
+            },
+            new HttpClient(new RecordingHttpMessageHandler(new FakeHttpMessageHandler())));
+
+        var NonHeapDumpAttachment = new SentryAttachment(
+            AttachmentType.Default,
+            new FileAttachmentContent(tempFilePath),
+            Path.GetFileName(tempFilePath),
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            null,
+            new[] { NonHeapDumpAttachment });
+
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            File.Exists(tempFilePath).Should().BeTrue();
+
+            logger.Entries.Should().NotContain(e =>
+                string.Format(e.Message, e.Args).Contains("exceeded the attachment size limit and was deleted"));
+        }
+        finally
+        {
+            File.Delete(tempFilePath);
+        }
+    }
+
+    [Fact]
     public async Task SendEnvelopeAsync_ItemRateLimit_PromotesNextSessionWithSameId()
     {
         // Arrange

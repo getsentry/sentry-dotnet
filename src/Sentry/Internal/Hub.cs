@@ -759,7 +759,7 @@ internal class Hub : IHub, IDisposable
                 Level = _options.HeapDumpOptions?.Level ?? SentryLevel.Warning,
             };
             var hint = new SentryHint(_options);
-            hint.AddAttachment(dumpFile);
+            hint.AddAttachment(dumpFile, AttachmentType.HeapDump);
             CaptureEvent(evt, CurrentScope, hint);
         }
         catch (Exception e)
