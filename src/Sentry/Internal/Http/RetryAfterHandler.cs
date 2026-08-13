@@ -63,7 +63,10 @@ internal class RetryAfterHandler : DelegatingHandler
 
         var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (response.StatusCode == TooManyRequests && !HasCategoryRateLimits(response))
+        // A 429 carrying per-category limits is applied by the transport, per envelope item, so backing off
+        // globally here would stop us sending categories that aren't limited at all.
+        // See https://github.com/getsentry/sentry-dotnet/pull/5482
+        if (response.StatusCode == TooManyRequests && !response.Headers.Contains("X-Sentry-Rate-Limits"))
         {
             var retryAfterTimestamp = GetRetryAfterTimestamp(response);
             _ = Interlocked.Exchange(ref _retryAfterUtcTicks, retryAfterTimestamp.UtcTicks);
@@ -71,18 +74,6 @@ internal class RetryAfterHandler : DelegatingHandler
 
         return response;
     }
-
-    /// <summary>
-    /// Whether the response carries per-category rate limits, which are applied by the transport
-    /// (see <see cref="Sentry.Http.HttpTransportBase"/>) on a per-envelope-item basis.
-    /// </summary>
-    /// <remarks>
-    /// When present, this header takes precedence over the blanket back off implemented here: a limit on one
-    /// category (say, transactions) must not stop us sending another (say, errors).
-    /// See https://develop.sentry.dev/sdk/expected-features/rate-limiting/#parsing-the-response
-    /// </remarks>
-    private static bool HasCategoryRateLimits(HttpResponseMessage response) =>
-        response.Headers.Contains("X-Sentry-Rate-Limits");
 
     private DateTimeOffset GetRetryAfterTimestamp(HttpResponseMessage response)
     {
