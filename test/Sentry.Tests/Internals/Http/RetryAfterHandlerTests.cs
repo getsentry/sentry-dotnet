@@ -52,6 +52,48 @@ public class RetryAfterHandlerTests
     }
 
     [Fact]
+    public async Task SendAsync_TooManyRequestsWithCategoryRateLimits_RetryAfterNotSet()
+    {
+        // Per-category limits are applied by the transport, per envelope item. Backing off globally here would
+        // stop us sending categories that aren't rate limited at all. See https://github.com/getsentry/sentry-dotnet/issues/3947
+        var expected = new HttpResponseMessage(TooManyRequests);
+        expected.Headers.Add("X-Sentry-Rate-Limits", "60:transaction;profile;span:organization:transaction_usage_exceeded");
+        expected.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(60));
+        _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
+
+        var invoker = _fixture.GetInvoker();
+        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+
+        Assert.Equal(expected, actual);
+        Assert.Equal(0, _fixture.Sut.RetryAfterUtcTicks);
+        Assert.True(_fixture.StubHandler.SendAsyncCalled);
+    }
+
+    [Fact]
+    public async Task SendAsync_TooManyRequestsWithCategoryRateLimits_SecondRequestIsNotThrottled()
+    {
+        var rateLimited = new HttpResponseMessage(TooManyRequests);
+        rateLimited.Headers.Add("X-Sentry-Rate-Limits", "60:transaction;profile;span:organization:transaction_usage_exceeded");
+        _fixture.StubHandler.SendAsyncFunc = (_, _) => rateLimited;
+
+        var invoker = _fixture.GetInvoker();
+
+        // First call: rate limited for transactions only
+        _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        Assert.True(_fixture.StubHandler.SendAsyncCalled);
+
+        // Change the response: OK
+        var expected = new HttpResponseMessage(HttpStatusCode.OK);
+        _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
+        _fixture.StubHandler.SendAsyncCalled = false;
+
+        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+
+        Assert.Equal(expected, actual);
+        Assert.True(_fixture.StubHandler.SendAsyncCalled);
+    }
+
+    [Fact]
     public async Task SendAsync_TooManyRequestsWithRetryAfterHeaderDate_RetryAfterSet()
     {
         var expected = new HttpResponseMessage(TooManyRequests);
