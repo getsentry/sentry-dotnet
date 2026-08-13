@@ -108,11 +108,13 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
             SetAttribute("sentry.release", release);
         }
 
-        if (sdk.Name is { } name)
+        // Fall back to the populated SDK instance when the scope's Sdk was not filled in by a framework integration,
+        // e.g. in console apps, so logs and metrics still carry the SDK name and version (see #5352).
+        if ((sdk.Name ?? SdkVersion.Instance.Name) is { } name)
         {
             SetAttribute("sentry.sdk.name", name);
         }
-        if (sdk.Version is { } version)
+        if ((sdk.Version ?? SdkVersion.Instance.Version) is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
         }

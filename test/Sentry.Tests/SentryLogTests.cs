@@ -77,6 +77,21 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void SetDefaultAttributes_EmptyScopeSdk_UsesSdkInstance()
+    {
+        var options = new SentryOptions();
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        // A console app does not populate scope.Sdk, so its Name and Version stay null.
+        // The log must still carry the SDK name and version (see #5352).
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        SdkVersion.Instance.Version.Should().NotBeNullOrWhiteSpace();
+        log.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet");
+        log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version);
+    }
+
+    [Fact]
     public void SetDefaultAttributes_OptionsServerName_SetsServerAddress()
     {
         var options = new SentryOptions { ServerName = "my-server" };
@@ -221,6 +236,14 @@ public class SentryLogTests
                 },
                 "sentry.release": {
                   "value": "my-release",
+                  "type": "string"
+                },
+                "sentry.sdk.name": {
+                  "value": "{{SdkVersion.Instance.Name}}",
+                  "type": "string"
+                },
+                "sentry.sdk.version": {
+                  "value": "{{SdkVersion.Instance.Version}}",
                   "type": "string"
                 }
               }

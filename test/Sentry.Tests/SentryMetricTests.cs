@@ -75,6 +75,21 @@ public class SentryMetricTests
     }
 
     [Fact]
+    public void SetDefaultAttributes_EmptySdk_UsesSdkInstance()
+    {
+        var options = new SentryOptions();
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        // A console app does not populate the scope's Sdk, so the metric path receives an empty SdkVersion (Name and Version null).
+        // The metric must still carry the SDK name and version (see #5352).
+        metric.Attributes.SetDefaultAttributes(options, new SdkVersion());
+
+        SdkVersion.Instance.Version.Should().NotBeNullOrWhiteSpace();
+        metric.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet");
+        metric.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version);
+    }
+
+    [Fact]
     public void WriteTo_Envelope_MinimalSerializedSentryMetric()
     {
         var options = new SentryOptions
@@ -133,6 +148,14 @@ public class SentryMetricTests
                 },
                 "sentry.release": {
                   "value": "my-release",
+                  "type": "string"
+                },
+                "sentry.sdk.name": {
+                  "value": "{{SdkVersion.Instance.Name}}",
+                  "type": "string"
+                },
+                "sentry.sdk.version": {
+                  "value": "{{SdkVersion.Instance.Version}}",
                   "type": "string"
                 }
               }
