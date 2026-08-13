@@ -1072,4 +1072,47 @@ public partial class HttpTransportTests
             e.Level == SentryLevel.Error &&
             e.Message.Contains("Sentry rejected the envelope"));
     }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_TransactionRateLimited_ErrorEnvelopeStillSent()
+    {
+        // Arrange
+        // Note this goes through DefaultSentryHttpClientFactory, so that the RetryAfterHandler is part of the
+        // pipeline, as it is in production. See https://github.com/getsentry/sentry-dotnet/issues/3947
+        var requestCount = 0;
+        using var httpHandler = new FakeHttpMessageHandler(() =>
+        {
+            requestCount++;
+            return requestCount == 1
+                ? SentryResponses.GetRateLimitResponse(
+                    "60:transaction;profile;span:organization:transaction_usage_exceeded, " +
+                    "60:transaction:project:project_quota_transaction_usage_exceeded")
+                : SentryResponses.GetOkResponse();
+        });
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            Debug = true,
+            CreateHttpMessageHandler = () => httpHandler
+        };
+
+        var httpTransport = new HttpTransport(
+            options,
+            new DefaultSentryHttpClientFactory().Create(options),
+            null,
+            clock: _fakeClock);
+
+        // Act
+        // Transactions are over quota...
+        var transaction = new SentryTransaction("test", "test.op") { IsSampled = true };
+        await httpTransport.SendEnvelopeAsync(Envelope.FromTransaction(transaction));
+
+        // ...but errors are not, so this one should still go out
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        requestCount.Should().Be(2);
+    }
 }
