@@ -63,8 +63,7 @@ internal class RetryAfterHandler : DelegatingHandler
 
         var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        // A 429 carrying per-category limits is applied by the transport, per envelope item, so backing off
-        // globally here would stop us sending categories that aren't limited at all.
+        // 429 responses carrying a `X-Sentry-Rate-Limits` header are handled separately.
         // See https://github.com/getsentry/sentry-dotnet/pull/5482
         if (response.StatusCode == TooManyRequests && !response.Headers.Contains("X-Sentry-Rate-Limits"))
         {
