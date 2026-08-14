@@ -1702,6 +1702,10 @@ interface SentryOptions
     [Export("enablePreWarmedAppStartTracing")]
     bool EnablePreWarmedAppStartTracing { get; set; }
 
+    // @property (nonatomic) BOOL enableStandaloneAppStartTracing;
+    [Export("enableStandaloneAppStartTracing")]
+    bool EnableStandaloneAppStartTracing { get; set; }
+
     // @property (nonatomic) BOOL enableReportNonFullyBlockingAppHangs;
     [Export("enableReportNonFullyBlockingAppHangs")]
     bool EnableReportNonFullyBlockingAppHangs { get; set; }
@@ -2032,9 +2036,9 @@ interface SentryExperimentalOptions
     [Export("enableWatchdogTerminationsV2")]
     bool EnableWatchdogTerminationsV2 { get; set; }
 
-    // @property (nonatomic) BOOL enableStandaloneAppStartTracing;
-    [Export("enableStandaloneAppStartTracing")]
-    bool EnableStandaloneAppStartTracing { get; set; }
+    // @property (nonatomic) BOOL enableUIViewControllerInitSwizzling;
+    [Export("enableUIViewControllerInitSwizzling")]
+    bool EnableUIViewControllerInitSwizzling { get; set; }
 }
 
 // @interface SentryFeedback : NSObject
@@ -2804,18 +2808,6 @@ interface SentryScreenFrames
     nuint Hash { get; }
 }
 
-// @protocol SentryViewScreenshotProvider <NSObject>
-[Protocol(Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
-[BaseType(typeof(NSObject), Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
-[Internal]
-interface SentryViewScreenshotProvider
-{
-    // @required -(void)imageWithView:(UIView * _Nonnull)view onComplete:(void (^ _Nonnull)(UIImage * _Nonnull))onComplete;
-    [Abstract]
-    [Export("imageWithView:onComplete:")]
-    void OnComplete(UIView view, Action<UIImage> onComplete);
-}
-
 // @interface SentryViewScreenshotOptions : NSObject <SentryRedactOptions>
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry27SentryViewScreenshotOptions")]
 [Internal]
@@ -2865,6 +2857,18 @@ interface SentryViewScreenshotOptions : SentryRedactOptions
     [Export("initWithEnableViewRendererV2:enableFastViewRendering:maskAllText:maskAllImages:maskedViewClasses:unmaskedViewClasses:excludedViewClasses:includedViewClasses:")]
     [DesignatedInitializer]
     NativeHandle Constructor(bool enableViewRendererV2, bool enableFastViewRendering, bool maskAllText, bool maskAllImages, Class[] maskedViewClasses, Class[] unmaskedViewClasses, NSSet<NSString> excludedViewClasses, NSSet<NSString> includedViewClasses);
+}
+
+// @protocol SentryViewScreenshotProvider <NSObject>
+[Protocol(Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
+[BaseType(typeof(NSObject), Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
+[Internal]
+interface SentryViewScreenshotProvider
+{
+    // @required -(void)imageWithView:(UIView * _Nonnull)view onComplete:(void (^ _Nonnull)(UIImage * _Nonnull))onComplete;
+    [Abstract]
+    [Export("imageWithView:onComplete:")]
+    void OnComplete(UIView view, Action<UIImage> onComplete);
 }
 
 // @interface SentryObjCSDK : NSObject
