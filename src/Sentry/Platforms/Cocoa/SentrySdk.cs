@@ -123,6 +123,7 @@ public static partial class SentrySdk
         nativeOptions.EnableAutoPerformanceTracing = options.Native.EnableAutoPerformanceTracing;
         nativeOptions.EnableCoreDataTracing = options.Native.EnableCoreDataTracing;
         nativeOptions.EnableFileIOTracing = options.Native.EnableFileIOTracing;
+        nativeOptions.EnableMemoryIntrospection = options.Native.EnableMemoryIntrospection;
         nativeOptions.EnableNetworkBreadcrumbs = options.Native.EnableNetworkBreadcrumbs;
         nativeOptions.EnableNetworkTracking = options.Native.EnableNetworkTracking;
 #pragma warning disable CS0618 // Type or member is obsolete

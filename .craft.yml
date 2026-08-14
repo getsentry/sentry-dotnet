@@ -19,6 +19,7 @@ targets:
       nuget:Sentry.Hangfire:
       nuget:Sentry.Log4Net:
       nuget:Sentry.Maui:
+      nuget:Sentry.Maui.CommunityToolkit.Mvvm:
       nuget:Sentry.NLog:
       nuget:Sentry.OpenTelemetry:
       nuget:Sentry.OpenTelemetry.Exporter:

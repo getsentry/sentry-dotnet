@@ -9,9 +9,6 @@
     <Using Include="Sentry.CocoaSdk.SentryObjCOptions" Alias="SentryCocoaSdkOptions" />
     <Using Include="Sentry.CocoaSdk.SentryObjCSDK" Alias="SentryCocoaSdk" />
     <Using Include="Sentry.CocoaSdk.SentryObjCSDK" Alias="SentryCocoaHybridSdk" />
-    <!-- Classic Sentry.framework SDK, kept for the CocoaEventProcessor scope-enrichment holdout
-         (see PrivateApiDefinitions.cs and getsentry/sentry-dotnet#5444). -->
-    <Using Include="Sentry.CocoaSdk.SentrySDK" Alias="SentryCocoaLegacySdk" />
   </ItemGroup>
 
 </Project>

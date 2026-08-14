@@ -91,7 +91,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
     {
         if (logEvent.TryGetSourceContext(out var context))
         {
-            if (IsSentryContext(context))
+            if (SentrySdkNamespaces.IsSentrySdk(context))
             {
                 return;
             }
@@ -174,10 +174,6 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
             CaptureStructuredLog(hub, options, logEvent, formatted, template);
         }
     }
-
-    private static bool IsSentryContext(string context) =>
-        context.StartsWith("Sentry.") ||
-        string.Equals(context, "Sentry", StringComparison.Ordinal);
 
     private string FormatLogEvent(LogEvent logEvent)
     {

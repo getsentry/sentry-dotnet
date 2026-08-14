@@ -218,11 +218,15 @@ public class SentryLoggerTests
             .CaptureEvent(Arg.Any<SentryEvent>());
     }
 
-    [Fact]
-    public void Log_SentryCategory_DoesNotSendEvent()
+    [Theory]
+    [InlineData("Sentry")]
+    [InlineData("Sentry.ISentryClient")]
+    [InlineData("Sentry.Extensions.Logging.SentryLogger")]
+    [InlineData("Sentry.AspNetCore.SentryMiddleware")]
+    public void Log_SentryCategory_DoesNotSendEvent(string categoryName)
     {
         var expectedException = new Exception("expected message");
-        _fixture.CategoryName = "Sentry.Some.Class";
+        _fixture.CategoryName = categoryName;
         var sut = _fixture.GetSut();
 
         sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
@@ -231,25 +235,17 @@ public class SentryLoggerTests
             .CaptureEvent(Arg.Any<SentryEvent>());
     }
 
-    [Fact]
-    public void Log_SentryRootCategory_DoesNotSendEvent()
-    {
-        var expectedException = new Exception("expected message");
-        _fixture.CategoryName = "Sentry";
-        var sut = _fixture.GetSut();
-
-        sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
-
-        _ = _fixture.Hub.DidNotReceive()
-            .CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
+    // A category under a "Sentry" namespace that isn't one of ours belongs to the application.
     // https://github.com/getsentry/sentry-dotnet/issues/132
-    [Fact]
-    public void Log_SentrySomethingCategory_SendEvent()
+    // https://github.com/getsentry/sentry-dotnet/issues/5265
+    [Theory]
+    [InlineData("SentrySomething")]
+    [InlineData("Sentry.Some.Class")]
+    [InlineData("Sentry.Samples.AspNetCore.Serilog.Program")]
+    public void Log_UserCategory_SendsEvent(string categoryName)
     {
         var expectedException = new Exception("expected message");
-        _fixture.CategoryName = "SentrySomething";
+        _fixture.CategoryName = categoryName;
         var sut = _fixture.GetSut();
 
         sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);

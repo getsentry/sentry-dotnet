@@ -565,6 +565,10 @@ interface SentryObjCBreadcrumb
     [NullAllowed, Export("data", ArgumentSemantic.Copy)]
     NSDictionary<NSString, NSObject> Data { get; set; }
 
+    // -(void)setDataValue:(id _Nullable)value forKey:(NSString * _Nonnull)key;
+    [Export("setDataValue:forKey:")]
+    void SetDataValue([NullAllowed] NSObject value, string key);
+
     // -(instancetype _Nonnull)initWithLevel:(SentryObjCLevel)level category:(NSString * _Nonnull)category;
     [Export("initWithLevel:category:")]
     NativeHandle Constructor(SentryObjCLevel level, string category);
@@ -1278,6 +1282,10 @@ interface SentryObjCExperimentalOptions
     // @property (nonatomic) BOOL enableWatchdogTerminationsV2;
     [Export("enableWatchdogTerminationsV2")]
     bool EnableWatchdogTerminationsV2 { get; set; }
+
+    // @property (nonatomic) BOOL enableUIViewControllerInitSwizzling;
+    [Export("enableUIViewControllerInitSwizzling")]
+    bool EnableUIViewControllerInitSwizzling { get; set; }
 }
 
 // @interface SentryObjCOptions : NSObject
@@ -1320,6 +1328,10 @@ interface SentryObjCOptions
     // @property (nonatomic) BOOL enableCrashHandler;
     [Export("enableCrashHandler")]
     bool EnableCrashHandler { get; set; }
+
+    // @property (nonatomic) BOOL enableMemoryIntrospection;
+    [Export("enableMemoryIntrospection")]
+    bool EnableMemoryIntrospection { get; set; }
 
     // @property (nonatomic) NSUInteger maxBreadcrumbs;
     [Export("maxBreadcrumbs")]
@@ -1569,6 +1581,10 @@ interface SentryObjCOptions
     [Export("enablePreWarmedAppStartTracing")]
     bool EnablePreWarmedAppStartTracing { get; set; }
 
+    // @property (nonatomic) BOOL enableStandaloneAppStartTracing;
+    [Export("enableStandaloneAppStartTracing")]
+    bool EnableStandaloneAppStartTracing { get; set; }
+
     // @property (nonatomic) BOOL enableReportNonFullyBlockingAppHangs;
     [Export("enableReportNonFullyBlockingAppHangs")]
     bool EnableReportNonFullyBlockingAppHangs { get; set; }
@@ -1670,6 +1686,14 @@ interface SentryObjCInternalApi
     [Export("debug")]
     SentryObjCInternalDebugApi Debug { get; }
 
+    // @property (readonly, nonatomic) SentryObjCInternalScopeApi * _Nonnull scope;
+    [Export("scope")]
+    SentryObjCInternalScopeApi Scope { get; }
+
+    // @property (readonly, nonatomic) SentryObjCInternalSerializerApi * _Nonnull serializer;
+    [Export("serializer")]
+    SentryObjCInternalSerializerApi Serializer { get; }
+
     // @property (readonly, nonatomic) SentryObjCInternalProfilingApi * _Nonnull profiling;
     [Export("profiling")]
     SentryObjCInternalProfilingApi Profiling { get; }
@@ -1717,6 +1741,17 @@ interface SentryObjCInternalProfilingApi
     void DiscardFor(SentryObjCId traceId);
 }
 
+// @interface SentryObjCInternalScopeApi : NSObject
+[BaseType(typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryObjCInternalScopeApi
+{
+    // -(NSDictionary<NSString *,NSDictionary<NSString *,id> *> * _Nonnull)serializedContexts;
+    [Export("serializedContexts")]
+    NSDictionary<NSString, NSDictionary<NSString, NSObject>> SerializedContexts { get; }
+}
+
 // @interface SentryObjCInternalSdkApi : NSObject
 [BaseType(typeof(NSObject))]
 [DisableDefaultCtor]
@@ -1746,6 +1781,17 @@ interface SentryObjCInternalSdkApi
     // @property (readonly, copy, nonatomic) NSString * _Nonnull installationID;
     [Export("installationID")]
     string InstallationID { get; }
+}
+
+// @interface SentryObjCInternalSerializerApi : NSObject
+[BaseType(typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryObjCInternalSerializerApi
+{
+    // -(NSDictionary<NSString *,id> * _Nonnull)serializeEvent:(SentryObjCEvent * _Nonnull)event;
+    [Export("serializeEvent:")]
+    NSDictionary<NSString, NSObject> SerializeEvent(SentryObjCEvent @event);
 }
 
 // @interface SentryObjCSDK : NSObject

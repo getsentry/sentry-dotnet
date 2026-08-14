@@ -19,6 +19,7 @@ internal partial class BindableSentryOptions
         public bool? EnableAutoPerformanceTracing { get; set; }
         public bool? EnableCoreDataTracing { get; set; }
         public bool? EnableFileIOTracing { get; set; }
+        public bool? EnableMemoryIntrospection { get; set; }
         public bool? EnableNetworkBreadcrumbs { get; set; }
         public bool? EnableNetworkTracking { get; set; }
         public bool? EnableWatchdogTerminationTracking { get; set; }
@@ -42,6 +43,7 @@ internal partial class BindableSentryOptions
             options.EnableAutoPerformanceTracing = EnableAutoPerformanceTracing ?? options.EnableAutoPerformanceTracing;
             options.EnableCoreDataTracing = EnableCoreDataTracing ?? options.EnableCoreDataTracing;
             options.EnableFileIOTracing = EnableFileIOTracing ?? options.EnableFileIOTracing;
+            options.EnableMemoryIntrospection = EnableMemoryIntrospection ?? options.EnableMemoryIntrospection;
             options.EnableNetworkBreadcrumbs = EnableNetworkBreadcrumbs ?? options.EnableNetworkBreadcrumbs;
             options.EnableNetworkTracking = EnableNetworkTracking ?? options.EnableNetworkTracking;
 #pragma warning disable CS0618 // Type or member is obsolete

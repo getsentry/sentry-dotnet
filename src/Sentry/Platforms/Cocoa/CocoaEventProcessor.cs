@@ -7,32 +7,24 @@ internal class CocoaEventProcessor : ISentryEventProcessor, IDisposable
 {
     public SentryEvent Process(SentryEvent @event)
     {
-        // Get a temp event from the Cocoa SDK
-        using var tempEvent = GetTempEvent();
-
-        // Now we'll copy the context info into our own, leveraging the fact that the JSON
-        // serialization is compatible, since both are designed to send the same data to Sentry.
-        var json = tempEvent.Context?.ToJsonString();
+        // Enrich the event with the native SDK's contexts (device, OS, app, ...). The Cocoa SDK
+        // exposes the current scope's contexts in Sentry wire format via the structured hybrid API,
+        // so we no longer need a throwaway native event or the private applyToEvent.
+        // We leverage the fact that the JSON serialization is compatible, since both SDKs are
+        // designed to send the same data to Sentry.
+        var json = SentryCocoaHybridSdk.Internal.Scope.SerializedContexts.ToJsonString();
         if (json != null)
         {
             var jsonDoc = JsonDocument.Parse(json);
             var contexts = SentryContexts.FromJson(jsonDoc.RootElement);
+
+            // The native contexts include a "trace" whose ids belong to the Cocoa SDK. This event was
+            // captured by the .NET SDK and already carries its own trace context linking it to the
+            // managed transaction, so drop the native one rather than let it overwrite ours.
+            contexts.Remove("trace");
+
             contexts.CopyTo(@event.Contexts);
         }
-
-        return @event;
-    }
-
-    private static CocoaSdk.SentryEvent GetTempEvent()
-    {
-        // This will populate an event with all of the information we need, without actually capturing that event.
-        // SentryObjCScope exposes no applyToEvent, so this enrichment still uses the classic Sentry.framework
-        // SDK + scope + event. TODO: Find a non-private way to do this (getsentry/sentry-dotnet#5444).
-        var @event = new CocoaSdk.SentryEvent();
-        SentryCocoaLegacySdk.ConfigureScope(scope =>
-        {
-            scope.ApplyToEvent(@event, 0);
-        });
 
         return @event;
     }

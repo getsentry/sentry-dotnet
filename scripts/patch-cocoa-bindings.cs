@@ -77,7 +77,7 @@ var nodes = tree.GetCompilationUnitRoot()
     .KeepMethods("SentryObjCSDK", "StartWithOptions", "ConfigureScope", "Crash")
     .KeepProperties("SentryObjCSDK", "Internal", "CrashedLastRun")
     // SentryObjCInternalApi: keep only the sub-APIs the .NET SDK uses (sdk, profiling, debug).
-    .KeepProperties("SentryObjCInternalApi", "Sdk", "Profiling", "Debug")
+    .KeepProperties("SentryObjCInternalApi", "Sdk", "Profiling", "Debug", "Scope", "Serializer")
     .KeepMethods("SentryObjCInternalApi", "SetTrace", "IgnoreNextSignal")
     .KeepInterfaces(
         "SentryObjCAttachment",
@@ -93,7 +93,9 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryObjCInternalApi",
         "SentryObjCInternalDebugApi",
         "SentryObjCInternalProfilingApi",
+        "SentryObjCInternalScopeApi",
         "SentryObjCInternalSdkApi",
+        "SentryObjCInternalSerializerApi",
         "SentryObjCMeasurementUnit",
         "SentryObjCMechanism",
         "SentryObjCMechanismContext",

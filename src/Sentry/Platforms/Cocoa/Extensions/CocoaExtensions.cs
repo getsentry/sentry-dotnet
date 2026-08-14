@@ -26,13 +26,6 @@ internal static class CocoaExtensions
             return null;
         }
 
-        if (obj is CocoaSdk.ISentrySerializable serializable)
-        {
-            // For types that implement Sentry Cocoa's SentrySerializable protocol (interface),
-            // We should call that first, and then serialize the result to JSON later.
-            obj = serializable.Serialize();
-        }
-
         // Now we will use Apple's JSON Serialization functions.
         // See https://developer.apple.com/documentation/foundation/nsjsonserialization
 
@@ -302,62 +295,20 @@ internal static class CocoaExtensions
         }
     }
 
-    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryObjCEvent sentryEvent, IDiagnosticLogger? logger = null)
+    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryObjCEvent sentryEvent)
     {
-        // Unlike the classic SentryEvent, SentryObjCEvent exposes no serialize() to round-trip through
-        // JSON, so we reconstruct the managed event from its properties. We map the same subset that
-        // CopyToCocoaSentryEvent writes back, plus the exception derived from the native NSError.
-        // TODO: revisit once the SentryObjC surface exposes event serialization (getsentry/sentry-dotnet#5444).
-        var exception = sentryEvent.Error is { } error ? new NSErrorException(error) : null;
-        var ev = new SentryEvent(exception)
-        {
-            Level = sentryEvent.Level.ToSentryLevelOrNull(),
-            ServerName = sentryEvent.ServerName,
-            Distribution = sentryEvent.Dist,
-            Logger = sentryEvent.Logger,
-            Release = sentryEvent.ReleaseName,
-            Environment = sentryEvent.Environment,
-            TransactionName = sentryEvent.Transaction,
-        };
+        // The Cocoa SDK serializes the native event to its Sentry wire format via the structured hybrid
+        // API; we deserialize that JSON into a managed event so managed processors / before-send can run.
+        var dict = SentryCocoaHybridSdk.Internal.Serializer.SerializeEvent(sentryEvent);
+        using var stream = dict.ToJsonStream();
+        if (stream == null)
+            return null;
 
-        if (sentryEvent.Message is { } message)
-        {
-            ev.Message = message.ToSentryMessage();
-        }
-
-        foreach (var (key, value) in sentryEvent.Tags.ToStringDictionary(logger))
-        {
-            ev.SetTag(key, value);
-        }
-
-        foreach (var (key, value) in sentryEvent.Extra.ToObjectDictionary(logger))
-        {
-            ev.SetExtra(key, value);
-        }
-
-        if (sentryEvent.Breadcrumbs is { } breadcrumbs)
-        {
-            foreach (var breadcrumb in breadcrumbs)
-            {
-                ev.AddBreadcrumb(breadcrumb.ToBreadcrumb(logger));
-            }
-        }
-
-        if (sentryEvent.User is { } user)
-        {
-            ev.User = user.ToUser(logger);
-        }
-
+        using var json = JsonDocument.Parse(stream);
+        var exception = sentryEvent.Error == null ? null : new NSErrorException(sentryEvent.Error);
+        var ev = SentryEvent.FromJson(json.RootElement, exception);
         return ev;
     }
-
-    public static SentryMessage ToSentryMessage(this CocoaSdk.SentryObjCMessage message) =>
-        new()
-        {
-            Formatted = message.Formatted,
-            Message = message.Message,
-            Params = message.Params,
-        };
 
     public static CocoaSdk.SentryObjCMessage ToCocoaSentryMessage(this SentryMessage msg)
     {
