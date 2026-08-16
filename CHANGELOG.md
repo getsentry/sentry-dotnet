@@ -1,5 +1,37 @@
 # Changelog
 
+## 6.9.0
+
+### Features ✨
+
+- feat: Allow users to control Mechanism.Handled for captured exceptions by @vladbrincoveanu in [#5449](https://github.com/getsentry/sentry-dotnet/pull/5449)
+
+### Fixes 🐛
+
+- fix(serilog): logs from application namespaces beginning with "Sentry" are discarded by @jamescrosswell in [#5456](https://github.com/getsentry/sentry-dotnet/pull/5456)
+- fix: rate limit on one data category no longer blocks all others by @jamescrosswell in [#5482](https://github.com/getsentry/sentry-dotnet/pull/5482)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Native SDK to v0.16.3 by @github-actions in [#5486](https://github.com/getsentry/sentry-dotnet/pull/5486)
+- chore(deps): update Cocoa SDK to v9.26.0 by @github-actions in [#5485](https://github.com/getsentry/sentry-dotnet/pull/5485)
+- chore(deps): update Cocoa SDK to v9.25.0 by @github-actions in [#5472](https://github.com/getsentry/sentry-dotnet/pull/5472)
+- chore(deps): update Native SDK to v0.16.2 by @github-actions in [#5477](https://github.com/getsentry/sentry-dotnet/pull/5477)
+- chore(deps): update Java SDK to v8.52.0 by @github-actions in [#5471](https://github.com/getsentry/sentry-dotnet/pull/5471)
+- chore(deps): update Cocoa SDK to v9.24.0 by @github-actions in [#5460](https://github.com/getsentry/sentry-dotnet/pull/5460)
+- chore(deps): update Java SDK to v8.51.0 by @github-actions in [#5457](https://github.com/getsentry/sentry-dotnet/pull/5457)
+- chore(deps): update Native SDK to v0.16.1 by @github-actions in [#5459](https://github.com/getsentry/sentry-dotnet/pull/5459)
+- chore(deps): update Native SDK to v0.16.0 by @github-actions in [#5452](https://github.com/getsentry/sentry-dotnet/pull/5452)
+- chore(deps): update Java SDK to v8.50.1 by @github-actions in [#5441](https://github.com/getsentry/sentry-dotnet/pull/5441)
+- chore(deps): update CLI to v3.6.2 by @github-actions in [#5443](https://github.com/getsentry/sentry-dotnet/pull/5443)
+- chore(deps): update Cocoa SDK to v9.23.0 by @github-actions in [#5442](https://github.com/getsentry/sentry-dotnet/pull/5442)
+
+### Other
+
+- ref: migrate Cocoa bindings from PrivateSentrySDKOnly to SentryObjCSDK.internal by @jamescrosswell in [#5409](https://github.com/getsentry/sentry-dotnet/pull/5409)
+
 ## 6.8.0
 
 ### Features ✨
