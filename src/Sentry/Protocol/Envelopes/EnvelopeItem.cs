@@ -31,11 +31,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string FileNameKey = "filename";
 
     /// <summary>
-    /// The local file path associated with this envelope item.
-    /// </summary>
-    internal string? LocalFilePath { get; }
-
-    /// <summary>
     /// Header associated with this envelope item.
     /// </summary>
     public IReadOnlyDictionary<string, object?> Header { get; }
@@ -77,11 +72,10 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// <summary>
     /// Initializes an instance of <see cref="EnvelopeItem"/>.
     /// </summary>
-    public EnvelopeItem(IReadOnlyDictionary<string, object?> header, ISerializable payload, string? localFilePath = null)
+    public EnvelopeItem(IReadOnlyDictionary<string, object?> header, ISerializable payload)
     {
         Header = header;
         Payload = payload;
-        LocalFilePath = localFilePath;
     }
 
     /// <summary>
@@ -361,9 +355,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             ["content_type"] = attachment.ContentType
         };
 
-        var localFilePath = attachment.Content is FileAttachmentContent fileContent ? fileContent.FilePath : null;
-
-        return new EnvelopeItem(header, new StreamSerializable(stream), localFilePath);
+        return new EnvelopeItem(header, new StreamSerializable(stream));
     }
 
     /// <summary>

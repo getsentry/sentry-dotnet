@@ -100,6 +100,7 @@ namespace Sentry
     {
         public FileAttachmentContent(string filePath) { }
         public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
+        public FileAttachmentContent(string filePath, bool readFileAsynchronously, bool deleteOnClose) { }
         public System.IO.Stream GetStream() { }
     }
     public static class HasExtraExtensions
@@ -2025,7 +2026,7 @@ namespace Sentry.Protocol.Envelopes
     }
     public sealed class EnvelopeItem : Sentry.Protocol.Envelopes.ISerializable, System.IDisposable
     {
-        public EnvelopeItem(System.Collections.Generic.IReadOnlyDictionary<string, object?> header, Sentry.Protocol.Envelopes.ISerializable payload, string? localFilePath = null) { }
+        public EnvelopeItem(System.Collections.Generic.IReadOnlyDictionary<string, object?> header, Sentry.Protocol.Envelopes.ISerializable payload) { }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Header { get; }
         public Sentry.Protocol.Envelopes.ISerializable Payload { get; }
         public void Dispose() { }

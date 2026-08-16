@@ -162,37 +162,8 @@ public abstract class HttpTransportBase
                 item.TryGetFileName(),
                 item.TryGetLength());
 
-            if (item.LocalFilePath is { } localFilePath &&
-                item.Header.TryGetValue("attachment_type", out var attachmentType) &&
-                string.Equals(attachmentType as string, "event.heapdump", StringComparison.Ordinal))
-            {
-                item.Dispose();
+            item.Dispose();
 
-                try
-                {
-                    if (_options.FileSystem.DeleteFile(localFilePath))
-                    {
-                        _options.LogDebug(
-                            "{0}: Local heap dump file '{1}' exceeded the attachment size limit and was deleted.",
-                            _typeName,
-                            localFilePath);
-                    }
-                    else
-                    {
-                        _options.LogError(
-                            "{0}: Failed to delete local heap dump file '{1}' after exceeding the attachment size limit.",
-                            _typeName,
-                            localFilePath);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _options.LogError(ex,
-                        "{0}: Failed to delete local heap dump file '{1}'.",
-                        _typeName,
-                        localFilePath);
-                }
-            }
             return;
         }
 
