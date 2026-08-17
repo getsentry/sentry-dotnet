@@ -19,10 +19,8 @@ targets:
       nuget:Sentry.Hangfire:
       nuget:Sentry.Log4Net:
       nuget:Sentry.Maui:
-      # The other packages already exist in the release registry, so craft just carries their
-      # manifests forward and a bare key is enough. This one doesn't, so craft has to create its
-      # manifest - which needs `name` (required) plus `packageUrl`/`mainDocsUrl` (otherwise the
-      # manifest is written without them and main_docs_url falls back to the repo URL).
+      # Extra detail for the Mvvm package so that craft can create it in the registry. 
+      # The other packages already exist so craft just carries their manifests forward
       nuget:Sentry.Maui.CommunityToolkit.Mvvm:
         name: Sentry.Maui.CommunityToolkit.Mvvm
         packageUrl: https://www.nuget.org/packages/Sentry.Maui.CommunityToolkit.Mvvm
