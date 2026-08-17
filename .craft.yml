@@ -5,30 +5,93 @@ targets:
   - name: nuget
   - name: github
   - name: registry
+    # Every package carries name/packageUrl/mainDocsUrl, even though craft only reads them for a
+    # package it hasn't published before. For packages already in the release registry craft just
+    # carries the existing manifest forward, so a bare `nuget:<package>:` key works - right up
+    # until the release that first ships a *new* package, where craft has to build the initial
+    # manifest, finds no `name`, and fails the entire registry target (not just that package).
+    # That has caught us on nearly every new package: Sentry.Extensions.AI, Sentry.Hangfire and
+    # most recently Sentry.Maui.CommunityToolkit.Mvvm in 6.9.0 (#5495). Filling these in for
+    # everything means a new package is added by copying the block above it, and craft creates
+    # the registry entry by itself.
+    #
+    # These values are authoritative, not decorative: craft writes them over the manifest fields
+    # on every release, so a typo here rewrites what's published in the registry. They currently
+    # match https://github.com/getsentry/sentry-release-registry/tree/master/packages/nuget
     sdks:
       nuget:Sentry:
+        name: Sentry
+        packageUrl: https://www.nuget.org/packages/Sentry
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet
       nuget:Sentry.AspNetCore:
+        name: Sentry.AspNetCore
+        packageUrl: https://www.nuget.org/packages/Sentry.AspNetCore
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/aspnetcore
       nuget:Sentry.AspNetCore.Grpc:
+        name: Sentry.AspNetCore.Grpc
+        packageUrl: https://www.nuget.org/packages/Sentry.AspNetCore.Grpc
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet
       nuget:Sentry.AspNetCore.Blazor.WebAssembly:
+        name: Sentry.AspNetCore.Blazor.WebAssembly
+        packageUrl: https://www.nuget.org/packages/Sentry.AspNetCore.Blazor.WebAssembly
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/aspnetcore
       nuget:Sentry.AspNet:
+        name: Sentry.AspNet
+        packageUrl: https://www.nuget.org/packages/Sentry.AspNet
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/aspnet
       nuget:Sentry.DiagnosticSource:
+        name: Sentry.DiagnosticSource
+        packageUrl: https://www.nuget.org/packages/Sentry.DiagnosticSource
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet
       nuget:Sentry.EntityFramework:
+        name: Sentry.EntityFramework
+        packageUrl: https://www.nuget.org/packages/Sentry.EntityFramework
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/entityframework
       nuget:Sentry.Extensions.AI:
+        name: Sentry.Extensions.AI
+        packageUrl: https://www.nuget.org/packages/Sentry.Extensions.AI
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/ai-agents-module/
       nuget:Sentry.Extensions.Logging:
+        name: Sentry.Extensions.Logging
+        packageUrl: https://www.nuget.org/packages/Sentry.Extensions.Logging
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/microsoft-extensions-logging
       nuget:Sentry.Google.Cloud.Functions:
+        name: Sentry.Google.Cloud.Functions
+        packageUrl: https://www.nuget.org/packages/Sentry.Google.Cloud.Functions
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/gcp-functions
       nuget:Sentry.Hangfire:
+        name: Sentry.Hangfire
+        packageUrl: https://www.nuget.org/packages/Sentry.Hangfire
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/crons/hangfire/
       nuget:Sentry.Log4Net:
+        name: Sentry.Log4Net
+        packageUrl: https://www.nuget.org/packages/Sentry.Log4Net
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet
       nuget:Sentry.Maui:
-      # The other packages already exist in the release registry, so craft just carries their
-      # manifests forward and a bare key is enough. This one doesn't, so craft has to create its
-      # manifest - which needs `name` (required) plus `packageUrl`/`mainDocsUrl` (otherwise the
-      # manifest is written without them and main_docs_url falls back to the repo URL).
+        name: Sentry.Maui
+        packageUrl: https://www.nuget.org/packages/Sentry.Maui
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/maui/
       nuget:Sentry.Maui.CommunityToolkit.Mvvm:
         name: Sentry.Maui.CommunityToolkit.Mvvm
         packageUrl: https://www.nuget.org/packages/Sentry.Maui.CommunityToolkit.Mvvm
         mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/maui/
       nuget:Sentry.NLog:
+        name: Sentry.NLog
+        packageUrl: https://www.nuget.org/packages/Sentry.NLog
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet
       nuget:Sentry.OpenTelemetry:
+        name: Sentry.OpenTelemetry
+        packageUrl: https://www.nuget.org/packages/Sentry.OpenTelemetry
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/performance/instrumentation/opentelemetry/
       nuget:Sentry.OpenTelemetry.Exporter:
+        name: Sentry.OpenTelemetry.Exporter
+        packageUrl: https://www.nuget.org/packages/Sentry.OpenTelemetry.Exporter
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/opentelemetry/
       nuget:Sentry.Serilog:
+        name: Sentry.Serilog
+        packageUrl: https://www.nuget.org/packages/Sentry.Serilog
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet
       nuget:Sentry.Profiling:
+        name: Sentry.Profiling
+        packageUrl: https://www.nuget.org/packages/Sentry.Profiling
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/profiling/
