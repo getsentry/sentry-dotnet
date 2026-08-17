@@ -5,19 +5,11 @@ targets:
   - name: nuget
   - name: github
   - name: registry
-    # Every package carries name/packageUrl/mainDocsUrl, even though craft only reads them for a
-    # package it hasn't published before. For packages already in the release registry craft just
-    # carries the existing manifest forward, so a bare `nuget:<package>:` key works - right up
-    # until the release that first ships a *new* package, where craft has to build the initial
-    # manifest, finds no `name`, and fails the entire registry target (not just that package).
-    # That has caught us on nearly every new package: Sentry.Extensions.AI, Sentry.Hangfire and
-    # most recently Sentry.Maui.CommunityToolkit.Mvvm in 6.9.0 (#5495). Filling these in for
-    # everything means a new package is added by copying the block above it, and craft creates
-    # the registry entry by itself.
-    #
-    # These values are authoritative, not decorative: craft writes them over the manifest fields
-    # on every release, so a typo here rewrites what's published in the registry. They currently
-    # match https://github.com/getsentry/sentry-release-registry/tree/master/packages/nuget
+    # Every package carries name/packageUrl/mainDocsUrl so craft can create the registry entry
+    # itself when we add a new package. Craft only reads them for a package it hasn't published
+    # before, but a missing `name` fails the whole registry target rather than just that package -
+    # which has caught us on nearly every new package, most recently #5495.
+    # Keep these in sync with the registry: craft writes them over the manifest on every release.
     sdks:
       nuget:Sentry:
         name: Sentry
