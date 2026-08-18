@@ -26,13 +26,6 @@ internal static class CocoaExtensions
             return null;
         }
 
-        if (obj is CocoaSdk.ISentrySerializable serializable)
-        {
-            // For types that implement Sentry Cocoa's SentrySerializable protocol (interface),
-            // We should call that first, and then serialize the result to JSON later.
-            obj = serializable.Serialize();
-        }
-
         // Now we will use Apple's JSON Serialization functions.
         // See https://developer.apple.com/documentation/foundation/nsjsonserialization
 
@@ -276,7 +269,7 @@ internal static class CocoaExtensions
         };
     }
 
-    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryEvent native)
+    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryObjCEvent native)
     {
         // we only support a subset of mutated data to be passed back to the native SDK at this time
         native.ServerName = managed.ServerName;
@@ -302,9 +295,12 @@ internal static class CocoaExtensions
         }
     }
 
-    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent)
+    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryObjCEvent sentryEvent)
     {
-        using var stream = sentryEvent.ToJsonStream();
+        // The Cocoa SDK serializes the native event to its Sentry wire format via the structured hybrid
+        // API; we deserialize that JSON into a managed event so managed processors / before-send can run.
+        var dict = SentryCocoaHybridSdk.Internal.Serializer.SerializeEvent(sentryEvent);
+        using var stream = dict.ToJsonStream();
         if (stream == null)
             return null;
 
@@ -314,9 +310,9 @@ internal static class CocoaExtensions
         return ev;
     }
 
-    public static CocoaSdk.SentryMessage ToCocoaSentryMessage(this SentryMessage msg)
+    public static CocoaSdk.SentryObjCMessage ToCocoaSentryMessage(this SentryMessage msg)
     {
-        var native = new CocoaSdk.SentryMessage(msg.Formatted ?? string.Empty);
+        var native = new CocoaSdk.SentryObjCMessage(msg.Formatted ?? string.Empty);
         native.Params = msg.Params?.Select(x => x.ToString()!).ToArray() ?? new string[0];
 
         return native;

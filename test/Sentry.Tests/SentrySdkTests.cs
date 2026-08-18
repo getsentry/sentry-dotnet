@@ -1272,8 +1272,8 @@ public class SentrySdkTests : IDisposable
         hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
             .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
 
-        var evt = new Sentry.CocoaSdk.SentryEvent();
-        var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
+        var evt = new Sentry.CocoaSdk.SentryObjCEvent();
+        var ex = new Sentry.CocoaSdk.SentryObjCException("Not checked", "EXC_BAD_ACCESS");
         evt.Exceptions = [ex];
 
         // Act
@@ -1315,8 +1315,8 @@ public class SentrySdkTests : IDisposable
         // the Cocoa SDK init before the Hub instance has been created
         var hub = DisabledHub.Instance;
 
-        var evt = new Sentry.CocoaSdk.SentryEvent();
-        var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
+        var evt = new Sentry.CocoaSdk.SentryObjCEvent();
+        var ex = new Sentry.CocoaSdk.SentryObjCException("Not checked", "EXC_BAD_ACCESS");
         evt.Exceptions = [ex];
 
         // Act
@@ -1348,7 +1348,7 @@ public class SentrySdkTests : IDisposable
             InitNativeSdks = false
         };
 
-        var native = new Sentry.CocoaSdk.SentryEvent();
+        var native = new Sentry.CocoaSdk.SentryObjCEvent();
         native.ServerName = "server name";
         native.Dist = "dist";
         native.Logger = "logger";
@@ -1396,7 +1396,7 @@ public class SentrySdkTests : IDisposable
         hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
             .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
 
-        var native = new Sentry.CocoaSdk.SentryEvent();
+        var native = new Sentry.CocoaSdk.SentryObjCEvent();
 
         // Act
         SentrySdk.ProcessOnBeforeSend(options, native, hub);
