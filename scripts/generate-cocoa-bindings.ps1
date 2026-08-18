@@ -101,67 +101,15 @@ Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 $iPhoneSdkPath = xcrun --show-sdk-path --sdk $iPhoneSdkVersion
 Write-Output "iPhoneSdkPath: $iPhoneSdkPath"
 
-## Imports in the various header files are provided in the "new" style of:
-#     `#import <Sentry/SomeHeader.h>`
-# ...or:
-#     `#import SENTRY_HEADER(SentryHeader)`
-# ...instead of:
-#     `#import "SomeHeader.h"`
-# This causes sharpie to fail resolve those headers
-$filesToPatch = Get-ChildItem -Path "$HeadersPath" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
-foreach ($file in $filesToPatch)
-{
-    if (Test-Path $file)
-    {
-        $content = Get-Content -Path $file -Raw
-        $content = $content -replace '<SentryObjC/([^>]+)>', '"$1"'
-        $content = $content -replace '<Sentry/([^>]+)>', '"$1"'
-        $content = $content -replace '#\s*import SENTRY_HEADER\(([^)]+)\)', '#import "$1.h"'
-        Set-Content -Path $file -Value $content
-    }
-    else
-    {
-        Write-Host "File not found: $file"
-    }
-}
-$privateHeaderFile = "$HeadersPath/PrivatesHeader.h"
-if (Test-Path $privateHeaderFile)
-{
-    $content = Get-Content -Path $privateHeaderFile -Raw
-    $content = $content -replace '"SentryDefines.h"', '"../Headers/SentryDefines.h"'
-    $content = $content -replace '"SentryProfilingConditionals.h"', '"../Headers/SentryProfilingConditionals.h"'
-    Set-Content -Path $privateHeaderFile -Value $content
-    Write-Host "Patched includes: $privateHeaderFile"
-}
-else
-{
-    Write-Host "File not found: $privateHeaderFile"
-}
-$swiftHeaderFile = "$HeadersPath/Sentry-Swift.h"
-if (Test-Path $swiftHeaderFile)
-{
-    $content = Get-Content -Path $swiftHeaderFile -Raw
-    # Replace module @imports with traditional #includes
-    $content = $content -replace '(?m)^#if\s+(__has_feature\(objc_modules\))', '#if 1 // $1'
-    $content = $content -replace '(?m)^@import\s+ObjectiveC;\s*\n', ''
-    $content = $content -replace '(?m)^@import\s+(\w+);', '#include <$1/$1.h>'
-    $content = $content -replace '(?m)^#import\s+"Sentry.h"\s*\n', ''
-
-    Set-Content -Path $swiftHeaderFile -Value $content
-    Write-Host "Patched includes: $swiftHeaderFile"
-}
-else
-{
-    Write-Host "File not found: $swiftHeaderFile"
-}
-
-# Generate bindings
-# We bind the SentryObjC umbrella header only. It exposes the full public surface
-# (options, SDK entry point, event model, scope, enums) plus the structured hybrid API
-# (SentryObjCSDK.internal, incl. debug images) via SentryObjC* classes. The classic
-# Sentry.framework ObjC surface is no longer bound here; the few remaining classic
-# holdouts (scope.applyToEvent enrichment + the SentrySerializable protocol) are declared
-# by hand in PrivateApiDefinitions.cs. See getsentry/sentry-dotnet#5444.
+# Generate bindings.
+# We bind the SentryObjC umbrella header only. It exposes the full public surface (options, SDK
+# entry point, event model, scope, enums) plus the structured hybrid API (SentryObjCSDK.internal -
+# incl. debug images, scope contexts, and event serialization) via SentryObjC* classes. The classic
+# Sentry.framework ObjC surface is no longer bound. See getsentry/sentry-dotnet#5444.
+#
+# The SentryObjC headers resolve their own imports via `__has_include` guards and don't use the
+# `SENTRY_HEADER` macro, so - unlike the classic Sentry.h/Sentry-Swift.h headers we used to bind -
+# no header patching is needed before invoking sharpie.
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
