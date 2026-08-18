@@ -109,18 +109,25 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
             SetAttribute("sentry.release", release);
         }
 
+        var sdkName = sdk.Name;
+        var sdkVersion = sdk.Version;
+
         // The scope's Sdk is only populated by framework integrations (e.g. ASP.NET Core), so console
-        // apps leave both Name and Version null. Fall back to the SDK instance there so logs and metrics
-        // still carry the SDK name and version (see #5352). Set name and version together so the two are
-        // never sourced separately, the same way Enricher and Scope treat them.
-        if (sdk.Name is { } sdkName && sdk.Version is { } sdkVersion)
+        // apps leave both Name and Version null. Fall back to the SDK instance only when the SDK is
+        // entirely unset, so an integration that sets just the name (its Version can be null) keeps its
+        // own name rather than being relabelled with the default (see #5352).
+        if (sdkName is null && sdkVersion is null)
         {
-            SetAttribute("sentry.sdk.name", sdkName);
-            SetAttribute("sentry.sdk.version", sdkVersion);
+            sdkName = Constants.SdkName;
+            sdkVersion = SdkVersion.Instance.Version;
         }
-        else if (SdkVersion.Instance.Version is { } version)
+
+        if (sdkName is { } name)
         {
-            SetAttribute("sentry.sdk.name", Constants.SdkName);
+            SetAttribute("sentry.sdk.name", name);
+        }
+        if (sdkVersion is { } version)
+        {
             SetAttribute("sentry.sdk.version", version);
         }
     }

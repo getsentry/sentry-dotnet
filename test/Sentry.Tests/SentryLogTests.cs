@@ -92,6 +92,23 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void SetDefaultAttributes_ScopeSdkNameOnly_KeepsIntegrationName()
+    {
+        var options = new SentryOptions();
+        var scope = new Scope(options);
+        scope.Sdk.Name = "sentry.dotnet.serilog";
+
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        // An integration sets the name but its version can be null. The fallback must not relabel it
+        // with the default SDK name; only a fully unset SDK gets the default (see #5483).
+        log.SetDefaultAttributes(options, scope);
+
+        log.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet.serilog");
+        log.Attributes.ShouldNotContain<string>("sentry.sdk.version");
+    }
+
+    [Fact]
     public void SetDefaultAttributes_OptionsServerName_SetsServerAddress()
     {
         var options = new SentryOptions { ServerName = "my-server" };

@@ -90,6 +90,20 @@ public class SentryMetricTests
     }
 
     [Fact]
+    public void SetDefaultAttributes_SdkNameOnly_KeepsIntegrationName()
+    {
+        var options = new SentryOptions();
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        // An integration sets the name but its version can be null. The fallback must not relabel it
+        // with the default SDK name; only a fully unset SDK gets the default (see #5483).
+        metric.Attributes.SetDefaultAttributes(options, new SdkVersion { Name = "sentry.dotnet.serilog" });
+
+        metric.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet.serilog");
+        metric.Attributes.ShouldNotContain<string>("sentry.sdk.version");
+    }
+
+    [Fact]
     public void WriteTo_Envelope_MinimalSerializedSentryMetric()
     {
         var options = new SentryOptions
