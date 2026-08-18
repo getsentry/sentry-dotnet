@@ -85,7 +85,7 @@ public class SentryMetricTests
         metric.Attributes.SetDefaultAttributes(options, new SdkVersion());
 
         SdkVersion.Instance.Version.Should().NotBeNullOrWhiteSpace();
-        metric.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet");
+        metric.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
         metric.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version);
     }
 

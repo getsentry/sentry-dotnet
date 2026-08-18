@@ -87,7 +87,7 @@ public class SentryLogTests
         log.SetDefaultAttributes(options, new Scope(options));
 
         SdkVersion.Instance.Version.Should().NotBeNullOrWhiteSpace();
-        log.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet");
+        log.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
         log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version);
     }
 
