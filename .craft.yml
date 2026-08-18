@@ -34,7 +34,7 @@ targets:
       nuget:Sentry.DiagnosticSource:
         name: Sentry.DiagnosticSource
         packageUrl: https://www.nuget.org/packages/Sentry.DiagnosticSource
-        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/automatic-instrumentation/
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/automatic-instrumentation/#diagnosticsource-integration
       nuget:Sentry.EntityFramework:
         name: Sentry.EntityFramework
         packageUrl: https://www.nuget.org/packages/Sentry.EntityFramework
@@ -78,7 +78,7 @@ targets:
       nuget:Sentry.OpenTelemetry.Exporter:
         name: Sentry.OpenTelemetry.Exporter
         packageUrl: https://www.nuget.org/packages/Sentry.OpenTelemetry.Exporter
-        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/opentelemetry/
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/opentelemetry-otlp/
       nuget:Sentry.Serilog:
         name: Sentry.Serilog
         packageUrl: https://www.nuget.org/packages/Sentry.Serilog
