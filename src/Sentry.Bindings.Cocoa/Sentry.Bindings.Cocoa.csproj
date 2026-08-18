@@ -12,17 +12,20 @@
     <NoWarn>$(NoWarn);CS0108</NoWarn>
   </PropertyGroup>
 
-  <!-- The Cocoa SDK is always built from source from the modules/sentry-cocoa submodule. The
-       pre-built Sentry-Dynamic.xcframework can't be used because the SentryObjC hybrid-API
-       frameworks have no non-duplicating released artifact (see #5331). -->
-  <PropertyGroup Condition="Exists('$(SentryCocoaCache).git')">
-    <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
-    <!-- Structured hybrid API (SentryObjCSDK.internal). These two thin frameworks dynamically link
-         Sentry.framework above; build-sentry-cocoa.sh builds them from source. -->
-    <SentryCocoaObjCFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC.xcframework</SentryCocoaObjCFramework>
-    <SentryCocoaObjCCompatFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjCCompat.xcframework</SentryCocoaObjCCompatFramework>
-    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/**/*.h</SentryCocoaBindingInputs>
-    <!-- Resolve path to modules/sentry-cocoa/.git -->
+  <!-- The .NET SDK consumes a single self-contained SentryObjC-Dynamic xcframework (the SentryObjC*
+       API surface with the engine baked in). By default we download the pre-built release artifact
+       named in modules/sentry-cocoa.properties; set -p:BuildCocoaSdkFromSource=true to build it from
+       the modules/sentry-cocoa submodule instead (e.g. to add native debug logging while diagnosing
+       an issue). Both paths produce the same Carthage/Build-<platform>/SentryObjC-Dynamic.xcframework
+       + Carthage/Headers layout. See getsentry/sentry-dotnet#5492. -->
+  <PropertyGroup>
+    <BuildCocoaSdkFromSource Condition="'$(BuildCocoaSdkFromSource)' == ''">false</BuildCocoaSdkFromSource>
+    <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC-Dynamic.xcframework</SentryCocoaFramework>
+    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/Headers/**/*.h</SentryCocoaBindingInputs>
+  </PropertyGroup>
+
+  <!-- From-source only: resolve modules/sentry-cocoa/.git so the build can be keyed on its HEAD. -->
+  <PropertyGroup Condition="'$(BuildCocoaSdkFromSource)' == 'true' And Exists('$(SentryCocoaCache).git')">
     <SentryCocoaGitFile>$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
     <!-- Standalone clone: .git is a directory -->
     <SentryCocoaGitDir Condition="Exists('$(SentryCocoaCache).git\HEAD')">.git</SentryCocoaGitDir>
@@ -50,8 +53,6 @@
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
-    <NativeReference Include="$(SentryCocoaObjCCompatFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCCompatFramework)' != ''" />
-    <NativeReference Include="$(SentryCocoaObjCFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCFramework)' != ''" />
 
     <!-- Use a separate readme file in the nuget. -->
     <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
@@ -64,22 +65,28 @@
     <None Include="buildTransitive\Sentry.Bindings.Cocoa.targets" Pack="true" PackagePath="buildTransitive\Sentry.Bindings.Cocoa.targets" />
   </ItemGroup>
 
-  <!-- Build the Sentry Cocoa SDK from source -->
+  <!-- Default: download the pre-built self-contained SentryObjC-Dynamic xcframework (no submodule needed). -->
+  <Target Name="_DownloadCocoaSDK"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(BuildCocoaSdkFromSource)' != 'true'"
+          Inputs="..\..\modules\sentry-cocoa.properties;..\..\scripts\download-sentry-cocoa.sh" Outputs="..\..\modules\sentry-cocoa\Carthage\.downloaded-version">
+
+    <Message Importance="High" Text="Downloading the pre-built Cocoa SDK (SentryObjC-Dynamic)." />
+    <Exec Command="bash ../../scripts/download-sentry-cocoa.sh" IgnoreStandardErrorWarningFormat="true" />
+  </Target>
+
+  <!-- Toggle (-p:BuildCocoaSdkFromSource=true): build SentryObjC-Dynamic from the submodule source. -->
   <Target Name="_BuildCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(SentryCocoaCache).git')"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(BuildCocoaSdkFromSource)' == 'true'"
           Inputs="$(SentryCocoaCache)$(SentryCocoaGitDir)\HEAD;..\..\scripts\build-sentry-cocoa.sh" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
 
-    <Message Importance="High" Text="Building the Cocoa SDK from source." />
+    <Error Condition="!Exists('$(SentryCocoaCache).git')"
+           Text="BuildCocoaSdkFromSource=true requires the modules/sentry-cocoa submodule. Run 'git submodule update --init modules/sentry-cocoa'." />
+    <Message Importance="High" Text="Building the Cocoa SDK from source (SentryObjC-Dynamic)." />
     <Exec Command="bash ../../scripts/build-sentry-cocoa.sh" IgnoreStandardErrorWarningFormat="true" />
   </Target>
 
-  <Target Name="_EnsureCocoaSubmodule" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-    <Error Condition="!Exists('$(SentryCocoaCache).git')"
-           Text="The modules/sentry-cocoa submodule is missing. Run 'git submodule update --init --recursive' - the Cocoa SDK is built from source (see #5331)." />
-  </Target>
-
   <Target Name="_SetupCocoaSDK"
-          DependsOnTargets="_EnsureCocoaSubmodule;_BuildCocoaSDK;_GenerateSentryCocoaBindings"
+          DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK;_GenerateSentryCocoaBindings"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
   <!-- Outer build (multi-TFM): runs _SetupCocoaSDK once before MSBuild fans out to inner per-TFM builds.  -->

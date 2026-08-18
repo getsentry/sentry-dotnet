@@ -1,9 +1,21 @@
 #!/bin/bash
 set -euo pipefail
 
-# Include this script's own hash in the build stamp so cached output is rebuilt whenever the
-# recipe changes (e.g. when new frameworks are added to the build), not just when the
-# sentry-cocoa submodule moves. Mirrors the cache key used for sentry-native in CI.
+# From-source toggle for the Cocoa SDK (-p:BuildCocoaSdkFromSource=true). Builds the self-contained
+# SentryObjC-Dynamic.xcframework from the modules/sentry-cocoa submodule using sentry-cocoa's own
+# packaging pipeline, then lays it out exactly like the default download path
+# (download-sentry-cocoa.sh): per-platform xcframeworks under Carthage/Build-{ios,maccatalyst} plus
+# the headers under Carthage/Headers used to generate the bindings.
+#
+# This exists so we can add native debug logging / patch the SDK while diagnosing an issue. It
+# produces the same artifact the default path downloads, so runtime behaviour is identical either
+# way. See getsentry/sentry-dotnet#5492.
+
+FRAMEWORK="SentryObjC-Dynamic"
+SDKS="iphoneos,iphonesimulator,maccatalyst"
+
+# Include this script's own hash in the build stamp so cached output is rebuilt whenever the recipe
+# changes, not just when the sentry-cocoa submodule moves.
 script_checksum=$(shasum -a 256 "$0" | cut -d ' ' -f 1)
 
 pushd "$(dirname "$0")" >/dev/null
@@ -13,7 +25,7 @@ mkdir -p Carthage
 PID_FILE="$PWD/Carthage/.build.pid"
 trap 'if [[ "$(cat "$PID_FILE" 2>/dev/null)" == "$$" ]]; then rm -f "$PID_FILE"; fi' EXIT
 
-# Serialize concurrent invocations; parallel xcodebuilds race on DerivedData.
+# Serialize concurrent invocations; parallel builds race on DerivedData / SPM caches.
 TMP_FILE=$(mktemp "$PID_FILE.tmp.XXXXXX")
 echo $$ > "$TMP_FILE"
 while ! ln "$TMP_FILE" "$PID_FILE" 2>/dev/null; do
@@ -35,126 +47,35 @@ if [[ -f Carthage/.built-from-sha ]] && [[ "$(cat Carthage/.built-from-sha)" == 
     exit 0
 fi
 
-rm -rf Carthage/output-*.xcarchive Carthage/Build-* Carthage/Headers Carthage/.built-from-sha
+rm -rf Carthage/Build-* Carthage/Headers Carthage/.built-from-sha Carthage/.downloaded-version
 
-# Grabbing the first SDK versions
-sdks=$(xcodebuild -showsdks)
-ios_sdk=$(echo "$sdks" | awk '/iOS SDKs/{getline; print $NF}')
-ios_simulator_sdk=$(echo "$sdks" | awk '/iOS Simulator SDKs/{getline; print $NF}')
+# Build the self-contained SentryObjC-Dynamic.xcframework via sentry-cocoa's own packaging script
+# (compiles the SDK to a static lib per SDK, then relinks into a dynamic framework).
+echo "::group::Building SentryObjC-Dynamic from source ($SDKS)"
+./scripts/build-xcframework-sentryobjc.sh --variant dynamic --sdks "$SDKS"
+echo "::endgroup::"
 
-# Note - We keep the build output in separate directories so that .NET
-# bundles iOS with net6.0-ios and Mac Catalyst with net6.0-maccatalyst.
-# The lack of symlinks in the ios builds, means we should also be able
-# to use the package on Windows with "Pair to Mac".
+# build-xcframework-sentryobjc.sh writes the assembled xcframework to the submodule root.
+xcf="$FRAMEWORK.xcframework"
+[ -d "$xcf" ] || { echo "Expected $PWD/$xcf was not produced" >&2; exit 1; }
 
-# Build for iOS and iOS simulator.
-echo "::group::Building sentry-cocoa for iOS and iOS simulator"
-xcodebuild archive -project Sentry.xcodeproj \
-    -scheme Sentry \
-    -configuration Release \
-    -sdk "$ios_sdk" \
-    -archivePath ./Carthage/output-ios.xcarchive \
-    SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
-./scripts/remove-architectures.sh ./Carthage/output-ios.xcarchive arm64e
-xcodebuild archive -project Sentry.xcodeproj \
-    -scheme Sentry \
-    -configuration Release \
-    -sdk "$ios_simulator_sdk" \
-    -archivePath ./Carthage/output-iossimulator.xcarchive \
-    SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
+# Re-slice into just the platforms the .NET SDK ships, matching the download layout:
+#   Build-ios (device + simulator), Build-maccatalyst.
 xcodebuild -create-xcframework \
-    -framework ./Carthage/output-ios.xcarchive/Products/Library/Frameworks/Sentry.framework \
-    -framework ./Carthage/output-iossimulator.xcarchive/Products/Library/Frameworks/Sentry.framework \
-    -output ./Carthage/Build-ios/Sentry.xcframework
-echo "::endgroup::"
-
-# The SentryObjC scheme adds the structured hybrid API (SentryObjCSDK.internal), which the .NET
-# bindings use in place of the deprecated PrivateSentrySDKOnly. It produces two thin frameworks -
-# SentryObjC and SentryObjCCompat - that dynamically link the Sentry.framework built above (they do
-# not embed their own copy of the SDK), so we bundle them alongside Sentry.xcframework. We build
-# these from source rather than downloading the pre-built SentryObjC-Dynamic.xcframework because
-# that release artifact is self-contained (it embeds the whole SDK) and would duplicate Sentry.
-echo "::group::Building SentryObjC for iOS and iOS simulator"
-xcodebuild archive -project Sentry.xcodeproj \
-    -scheme SentryObjC \
-    -configuration Release \
-    -sdk "$ios_sdk" \
-    -archivePath ./Carthage/output-objc-ios.xcarchive \
-    SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
-./scripts/remove-architectures.sh ./Carthage/output-objc-ios.xcarchive arm64e
-xcodebuild archive -project Sentry.xcodeproj \
-    -scheme SentryObjC \
-    -configuration Release \
-    -sdk "$ios_simulator_sdk" \
-    -archivePath ./Carthage/output-objc-iossimulator.xcarchive \
-    SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
-for fw in SentryObjC SentryObjCCompat; do
-    xcodebuild -create-xcframework \
-        -framework "./Carthage/output-objc-ios.xcarchive/Products/Library/Frameworks/$fw.framework" \
-        -framework "./Carthage/output-objc-iossimulator.xcarchive/Products/Library/Frameworks/$fw.framework" \
-        -output "./Carthage/Build-ios/$fw.xcframework"
-done
-echo "::endgroup::"
-
-# Separately, build for Mac Catalyst
-echo "::group::Building sentry-cocoa for Mac Catalyst"
-xcodebuild archive -project Sentry.xcodeproj \
-    -scheme Sentry \
-    -configuration Release \
-    -destination 'generic/platform=macOS,variant=Mac Catalyst' \
-    -archivePath ./Carthage/output-maccatalyst.xcarchive \
-    SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
-./scripts/remove-architectures.sh ./Carthage/output-maccatalyst.xcarchive arm64e
+    -framework "$xcf/ios-arm64/SentryObjC.framework" \
+    -framework "$xcf/ios-arm64_x86_64-simulator/SentryObjC.framework" \
+    -output "Carthage/Build-ios/$FRAMEWORK.xcframework"
 xcodebuild -create-xcframework \
-    -framework ./Carthage/output-maccatalyst.xcarchive/Products/Library/Frameworks/Sentry.framework \
-    -output ./Carthage/Build-maccatalyst/Sentry.xcframework
-echo "::endgroup::"
+    -framework "$xcf/ios-arm64_x86_64-maccatalyst/SentryObjC.framework" \
+    -output "Carthage/Build-maccatalyst/$FRAMEWORK.xcframework"
 
-echo "::group::Building SentryObjC for Mac Catalyst"
-xcodebuild archive -project Sentry.xcodeproj \
-    -scheme SentryObjC \
-    -configuration Release \
-    -destination 'generic/platform=macOS,variant=Mac Catalyst' \
-    -archivePath ./Carthage/output-objc-maccatalyst.xcarchive \
-    SKIP_INSTALL=NO \
-    BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-    GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1'
-./scripts/remove-architectures.sh ./Carthage/output-objc-maccatalyst.xcarchive arm64e
-for fw in SentryObjC SentryObjCCompat; do
-    xcodebuild -create-xcframework \
-        -framework "./Carthage/output-objc-maccatalyst.xcarchive/Products/Library/Frameworks/$fw.framework" \
-        -output "./Carthage/Build-maccatalyst/$fw.xcframework"
-done
-echo "::endgroup::"
+# Copy headers (used to generate bindings) before we strip them from the bundled frameworks.
+mkdir -p Carthage/Headers
+find "Carthage/Build-ios/$FRAMEWORK.xcframework/ios-arm64" -name '*.h' -exec cp {} Carthage/Headers \;
 
-# Xcode embeds each framework's dynamic dependencies under <Framework>.framework/Frameworks/ (e.g.
-# SentryObjC.framework/Frameworks/SentryObjCCompat.framework/Frameworks/Sentry.framework). We bundle
-# Sentry, SentryObjCCompat and SentryObjC as separate NativeReferences - each embedded into the
-# consuming app - so those nested copies are redundant, and their deep paths blow past NuGet's path
-# length limit (NU5123). To fix that, we strip them. The frameworks resolve each other via @rpath at the app level instead/anyway.
-find Carthage/Build-*/SentryObjC*.xcframework -type d -name Frameworks -prune -exec rm -rf {} +
-
-# Copy headers - used for generating bindings
-mkdir Carthage/Headers
-find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
-find Carthage/Build-ios/SentryObjC.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
-find Carthage/Build-ios/SentryObjCCompat.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
-
-# Remove anything we don't want to bundle in the nuget package.
+# Don't bundle headers/modules in the nuget package.
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
-rm -rf Carthage/output-*
+rm -rf XCFrameworkBuildPath "$FRAMEWORK.xcframework"
 
 echo "$build_stamp" > Carthage/.built-from-sha
-echo ""
-
 popd >/dev/null
