@@ -77,6 +77,38 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void SetDefaultAttributes_EmptyScopeSdk_UsesSdkInstance()
+    {
+        var options = new SentryOptions();
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        // A console app does not populate scope.Sdk, so its Name and Version stay null.
+        // The log must still carry the SDK name and version (see #5352).
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        SdkVersion.Instance.Version.Should().NotBeNullOrWhiteSpace();
+        log.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
+        log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version);
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_ScopeSdkNameOnly_KeepsIntegrationName()
+    {
+        var options = new SentryOptions();
+        var scope = new Scope(options);
+        scope.Sdk.Name = "sentry.dotnet.serilog";
+
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        // An integration sets the name but its version can be null. The fallback must not relabel it
+        // with the default SDK name; only a fully unset SDK gets the default (see #5483).
+        log.SetDefaultAttributes(options, scope);
+
+        log.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet.serilog");
+        log.Attributes.ShouldNotContain<string>("sentry.sdk.version");
+    }
+
+    [Fact]
     public void SetDefaultAttributes_OptionsServerName_SetsServerAddress()
     {
         var options = new SentryOptions { ServerName = "my-server" };
@@ -221,6 +253,14 @@ public class SentryLogTests
                 },
                 "sentry.release": {
                   "value": "my-release",
+                  "type": "string"
+                },
+                "sentry.sdk.name": {
+                  "value": "{{SdkVersion.Instance.Name}}",
+                  "type": "string"
+                },
+                "sentry.sdk.version": {
+                  "value": "{{SdkVersion.Instance.Version}}",
                   "type": "string"
                 }
               }
