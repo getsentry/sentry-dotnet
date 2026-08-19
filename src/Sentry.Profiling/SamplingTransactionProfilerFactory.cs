@@ -39,7 +39,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
-        // Reading _shutdownCts.Token once Dispose() has disposed it throws.
+        // Store local reference to avoid ObjectDisposed exception
         var shutdownToken = _shutdownCts.Token;
 
         _sessionTask = Task.Run(async () =>
