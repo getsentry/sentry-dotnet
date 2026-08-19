@@ -59,13 +59,10 @@ internal class SampleProfilerSession : IDisposable
 
     public TraceLog TraceLog => EventSource.TraceLog;
 
-    // Exposed for tests.
     internal bool IsStopped => _stopped;
 
-    // Exposed for tests: stands in for the uncancellable StartEventPipeSession() window.
     internal static Action? BeforeStartupForTests;
 
-    // Exposed for tests. A callback rather than a static field, so no session is held in production.
     internal static Action<SampleProfilerSession>? OnSessionCreatedForTests;
 
     private static InterlockedBoolean _throwOnNextStartupForTests = false;

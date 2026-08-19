@@ -29,7 +29,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     private SampleProfilerSession? _session;
     private bool _disposed;
 
-    // Exposed for tests.
     internal bool IsDisposed
     {
         get { lock (_sessionLock) { return _disposed; } }
@@ -41,7 +40,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
-        // Reading _shutdownCts.Token once Dispose() has disposed it throws.
+        // Store local reference to avoid ObjectDisposed exception
         var shutdownToken = _shutdownCts.Token;
 
         _sessionTask = Task.Run(async () =>
