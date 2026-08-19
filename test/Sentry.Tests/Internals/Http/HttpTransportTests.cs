@@ -651,11 +651,28 @@ public partial class HttpTransportTests
             null,
             [heapDumpAttachment]);
 
-        // Act
-        await httpTransport.SendEnvelopeAsync(envelope);
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
 
-        // Assert
-        File.Exists(tempFilePath).Should().BeFalse();
+            // The oversized item is dropped before sending, so it never reaches the processed
+            // envelope. The original envelope still owns it, so the file survives until that
+            // envelope is disposed - which is what BackgroundWorker does after each send.
+            File.Exists(tempFilePath).Should().BeTrue();
+
+            envelope.Dispose();
+
+            // Assert
+            File.Exists(tempFilePath).Should().BeFalse();
+        }
+        finally
+        {
+            if (File.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+        }
     }
 
     [Fact]

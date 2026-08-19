@@ -80,6 +80,44 @@ public class CachingTransportTests : IDisposable
     }
 
     [Fact]
+    public async Task WithHeapDumpAttachment_DeletesLocalFileButStillSendsIt()
+    {
+        // Arrange
+        string httpContent = null;
+        var innerTransport = new HttpTransport(_options, new HttpClient(new CallbackHttpClientHandler(async message =>
+        {
+            httpContent = await message.Content!.ReadAsStringAsync();
+        })));
+
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        const string dumpContent = "fake heap dump";
+        var dumpFile = Path.Combine(_cacheDirectory.Path, "dump.gcdump");
+        File.WriteAllText(dumpFile, dumpContent);
+
+        var attachment = new SentryAttachment(
+            AttachmentType.HeapDump,
+            new FileAttachmentContent(dumpFile, readFileAsynchronously: true, deleteOnClose: true),
+            "dump.gcdump",
+            null);
+
+        var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new[] { attachment });
+
+        // Act
+        // The caching transport writes the envelope (including the dump) to the cache directory
+        // before the envelope is disposed, which is what BackgroundWorker does after each send.
+        await transport.SendEnvelopeAsync(envelope);
+        File.Exists(dumpFile).Should().BeTrue("the dump must survive until it has been cached");
+
+        envelope.Dispose();
+        await transport.FlushAsync();
+
+        // Assert
+        File.Exists(dumpFile).Should().BeFalse("the dump should be deleted once the envelope is disposed");
+        httpContent.Should().Contain(dumpContent, "the cached copy should still be sent to Sentry");
+    }
+
+    [Fact]
     public async Task WorksInBackground()
     {
         // Arrange

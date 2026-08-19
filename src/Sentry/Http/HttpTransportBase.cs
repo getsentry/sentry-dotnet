@@ -162,8 +162,6 @@ public abstract class HttpTransportBase
                 item.TryGetFileName(),
                 item.TryGetLength());
 
-            item.Dispose();
-
             return;
         }
 
