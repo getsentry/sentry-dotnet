@@ -47,7 +47,6 @@ internal class SampleProfilerSession : IDisposable
     // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
     internal static int CircularBufferMB = 16;
 
-    // How long Stop() waits for the event processing task to drain after the session has been stopped.
     // Draining should be near-instant; this only bounds the worst case so shutdown can't hang.
     internal const int ProcessingDrainTimeoutMs = 2_000;
 
@@ -60,16 +59,13 @@ internal class SampleProfilerSession : IDisposable
 
     public TraceLog TraceLog => EventSource.TraceLog;
 
-    // Exposed for tests: whether Stop() has run, so a test can assert a session was cleaned up even
-    // when it was never handed back to the factory.
+    // Exposed for tests.
     internal bool IsStopped => _stopped;
 
-    // Exposed for tests: invoked at the top of StartNew(), standing in for the window that the
-    // uncancellable StartEventPipeSession() call can sit in for up to 30 seconds.
+    // Exposed for tests: stands in for the uncancellable StartEventPipeSession() window.
     internal static Action? BeforeStartupForTests;
 
-    // Exposed for tests: hands the created session to the test. Deliberately a callback rather than a
-    // static field so that no session is kept alive in production.
+    // Exposed for tests. A callback rather than a static field, so no session is held in production.
     internal static Action<SampleProfilerSession>? OnSessionCreatedForTests;
 
     private static InterlockedBoolean _throwOnNextStartupForTests = false;
@@ -101,9 +97,8 @@ internal class SampleProfilerSession : IDisposable
             var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
-            // Note: the continuation is deliberately unconditional. A continuation whose criteria aren't
-            // met (e.g. OnlyOnFaulted when Process() returns normally) transitions to Canceled, which
-            // would make the Wait() in Stop() throw on every clean shutdown.
+            // The continuation must stay unconditional: one whose criteria aren't met (e.g. OnlyOnFaulted
+            // when Process() returns normally) is Canceled, making the Wait() in Stop() throw.
             var processing = Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
                 .ContinueWith(_ =>
                 {
@@ -152,8 +147,6 @@ internal class SampleProfilerSession : IDisposable
         {
             _session.Stop();
 
-            // Let the processing task drain the events that are still in flight, but don't hold up
-            // shutdown indefinitely if it doesn't get there.
             if (!_processing.Wait(ProcessingDrainTimeoutMs))
             {
                 _logger?.LogWarning("Sampler profiler event processing didn't finish within {0} ms of stopping the session.", ProcessingDrainTimeoutMs);
@@ -165,8 +158,8 @@ internal class SampleProfilerSession : IDisposable
         }
         finally
         {
-            // These need to happen even if stopping the session or draining the events failed, otherwise
-            // the EventPipe connection to the runtime is left open.
+            // These always need to happen, otherwise the EventPipe connection to the 
+            // runtime is left open.
             try
             {
                 _session.Dispose();

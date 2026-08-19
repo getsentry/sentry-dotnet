@@ -14,20 +14,17 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
-    // How long Dispose() waits for an in-flight session startup to complete before giving up on it.
+    // How long Dispose() waits for an in-flight session to complete before giving up on it.
     private const int SHUTDOWN_TIMEOUT_MS = 2_000;
 
     private readonly SentryOptions _options;
 
     internal Task<SampleProfilerSession> _sessionTask;
 
-    // Cancels the wait for the first event so that Dispose() doesn't have to wait for a session that
-    // may never receive one.
     private readonly CancellationTokenSource _shutdownCts = new();
 
-    // Guards the handoff of the session between the startup task and Dispose(). StartEventPipeSession()
-    // can block for up to 30 seconds and can't be cancelled, so Dispose() may well run before there is
-    // anything to stop - whichever side loses that race is the one that stops the session.
+    // StartNew() can block for up to 30s uncancellably, so Dispose() may run before there is a session
+    // to stop. This hands it between the two sides so exactly one of them stops it.
     private readonly object _sessionLock = new();
     private SampleProfilerSession? _session;
     private bool _disposed;
@@ -44,7 +41,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
-        // Captured up front - reading _shutdownCts.Token once Dispose() has disposed it throws.
+        // Reading _shutdownCts.Token once Dispose() has disposed it throws.
         var shutdownToken = _shutdownCts.Token;
 
         _sessionTask = Task.Run(async () =>
@@ -64,7 +61,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
             if (disposedDuringStartup)
             {
-                // Dispose() has already been and gone, and found no session to stop - so it's ours.
+                // Dispose() found no session to stop, so this one is ours.
                 session.Dispose();
                 throw new OperationCanceledException(shutdownToken);
             }
@@ -133,8 +130,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
             _disposed = true;
 
-            // If the startup task hasn't published a session yet it will see _disposed and stop the
-            // one it eventually creates itself, so exactly one side does the cleanup.
+            // Null here means startup will see _disposed and stop its own session.
             session = _session;
         }
 
@@ -143,8 +139,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
         try
         {
-            // Gives an in-flight startup a chance to finish, and observes the exception if it failed
-            // or was cancelled above.
             _sessionTask.Wait(SHUTDOWN_TIMEOUT_MS);
         }
         catch (Exception e)
