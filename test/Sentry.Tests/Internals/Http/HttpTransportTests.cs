@@ -622,6 +622,154 @@ public partial class HttpTransportTests
     }
 
     [Fact]
+    public async Task SendEnvelopeAsync_HeapDumpAttachmentTooLarge_FileIsDeleted()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler());
+
+        var tempFilePath = Path.GetTempFileName();
+        File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                MaxAttachmentSize = 1,
+                Debug = true
+            },
+            new HttpClient(httpHandler));
+
+        var heapDumpAttachment = new SentryAttachment(
+            AttachmentType.HeapDump,
+            new FileAttachmentContent(tempFilePath, readFileAsynchronously: true, deleteOnClose: true),
+            Path.GetFileName(tempFilePath),
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            null,
+            [heapDumpAttachment]);
+
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // The oversized item is dropped before sending, so it never reaches the processed
+            // envelope. The original envelope still owns it, so the file survives until that
+            // envelope is disposed - which is what BackgroundWorker does after each send.
+            File.Exists(tempFilePath).Should().BeTrue();
+
+            envelope.Dispose();
+
+            // Assert
+            File.Exists(tempFilePath).Should().BeFalse();
+        }
+        finally
+        {
+            if (File.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_HeapDumpAttachmentSentSuccessfully_FileIsDeleted()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler());
+
+        var tempFilePath = Path.GetTempFileName();
+        File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                // Large enough that this attachment is NOT dropped for being too big
+                MaxAttachmentSize = 1_000_000,
+                Debug = true
+            },
+            new HttpClient(httpHandler));
+
+        var heapDumpAttachment = new SentryAttachment(
+            AttachmentType.HeapDump,
+            new FileAttachmentContent(tempFilePath, readFileAsynchronously: true, deleteOnClose: true),
+            Path.GetFileName(tempFilePath),
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            null,
+            [heapDumpAttachment]);
+
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            // The file is streamed as part of the successful send, and should be
+            // deleted once the stream backing the envelope item is closed/disposed.
+            File.Exists(tempFilePath).Should().BeFalse();
+        }
+        finally
+        {
+            if (File.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_NonHeapDumpAttachment_FileIsNotDeleted()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler());
+
+        var tempFilePath = Path.GetTempFileName();
+        File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                MaxAttachmentSize = 1_000_000,
+                Debug = true
+            },
+            new HttpClient(httpHandler));
+
+        var normalAttachment = new SentryAttachment(
+            AttachmentType.Default,
+            new FileAttachmentContent(tempFilePath),
+            Path.GetFileName(tempFilePath),
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            null,
+            [normalAttachment]);
+
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            File.Exists(tempFilePath).Should().BeTrue();
+        }
+        finally
+        {
+            File.Delete(tempFilePath);
+        }
+    }
+
+    [Fact]
     public async Task SendEnvelopeAsync_ItemRateLimit_PromotesNextSessionWithSameId()
     {
         // Arrange

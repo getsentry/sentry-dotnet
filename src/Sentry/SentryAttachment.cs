@@ -36,7 +36,14 @@ public enum AttachmentType
     /// <summary>
     /// A JSON attachment containing the View Hierarchy
     /// </summary>
-    ViewHierarchy
+    ViewHierarchy,
+
+    /// <summary>
+    /// A .gcdump file captured when a configured memory threshold is exceeded.
+    /// Used internally to allow the SDK to clean up the file from disk if it can't be sent to Sentry
+    /// (e.g. because it exceeds the attachment size limit).
+    /// </summary>
+    HeapDump
 }
 
 /// <summary>

@@ -9,6 +9,7 @@ namespace Sentry
         UnrealContext = 3,
         UnrealLogs = 4,
         ViewHierarchy = 5,
+        HeapDump = 6,
     }
     public class BaggageHeader
     {
@@ -109,6 +110,7 @@ namespace Sentry
     {
         public FileAttachmentContent(string filePath) { }
         public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
+        public FileAttachmentContent(string filePath, bool readFileAsynchronously, bool deleteOnClose) { }
         public System.IO.Stream GetStream() { }
     }
     public static class HasExtraExtensions
