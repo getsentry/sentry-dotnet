@@ -52,10 +52,14 @@ public class FileAttachmentContent : IAttachmentContent
         var options = FileOptions.None;
 
         if (_readFileAsynchronously)
+        {
             options |= FileOptions.Asynchronous;
+        }
 
         if (_deleteOnClose)
+        {
             options |= FileOptions.DeleteOnClose;
+        }
 
         return new FileStream(
             FilePath,
