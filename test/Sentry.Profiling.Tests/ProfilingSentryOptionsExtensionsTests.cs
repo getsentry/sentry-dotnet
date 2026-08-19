@@ -62,6 +62,38 @@ public class ProfilingSentryOptionsExtensionsTests
     }
 
     [Fact]
+    public void HubDispose_DisposesTheProfilerFactoryItCreated()
+    {
+        _options.TracesSampleRate = 1.0;
+        _options.ProfilesSampleRate = 1.0;
+
+        var hub = GetSut();
+        var factory = (SamplingTransactionProfilerFactory)_options.TransactionProfilerFactory!;
+        Assert.False(factory.IsDisposed);
+
+        hub.Dispose();
+
+        Assert.True(factory.IsDisposed);
+    }
+
+    [Fact]
+    public void HubDispose_DoesNotDisposeAProfilerFactoryItDidNotCreate()
+    {
+        _options.TracesSampleRate = 1.0;
+        _options.ProfilesSampleRate = 1.0;
+
+        var externalFactory = Substitute.For<ITransactionProfilerFactory, IDisposable>();
+        _options.TransactionProfilerFactory = externalFactory;
+
+        using (var hub = GetSut())
+        {
+            Assert.Same(externalFactory, _options.TransactionProfilerFactory);
+        }
+
+        ((IDisposable)externalFactory).DidNotReceive().Dispose();
+    }
+
+    [Fact]
     public void AddProfilingIntegration_DoesntDuplicate()
     {
         var options = new SentryOptions();

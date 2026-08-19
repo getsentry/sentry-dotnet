@@ -14,9 +14,24 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
+    // How long Dispose() waits for an in-flight session to complete before giving up on it.
+    private const int SHUTDOWN_TIMEOUT_MS = 2_000;
+
     private readonly SentryOptions _options;
 
     internal Task<SampleProfilerSession> _sessionTask;
+
+    private readonly CancellationTokenSource _shutdownCts = new();
+
+    // StartNew() blocks uncancellably, so Dispose() may run before there is a session to stop.
+    private readonly object _sessionLock = new();
+    private SampleProfilerSession? _session;
+    private bool _disposed;
+
+    internal bool IsDisposed
+    {
+        get { lock (_sessionLock) { return _disposed; } }
+    }
 
     private bool _errorLogged = false;
 
@@ -24,13 +39,32 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
+        // Store local reference to avoid ObjectDisposed exception
+        var shutdownToken = _shutdownCts.Token;
+
         _sessionTask = Task.Run(async () =>
         {
             // This can block up to 30 seconds. The timeout is out of our hands.
             var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
 
+            bool disposedDuringStartup;
+            lock (_sessionLock)
+            {
+                disposedDuringStartup = _disposed;
+                if (!disposedDuringStartup)
+                {
+                    _session = session;
+                }
+            }
+
+            if (disposedDuringStartup)
+            {
+                session.Dispose();
+                throw new OperationCanceledException(shutdownToken);
+            }
+
             // This can block indefinitely.
-            await session.WaitForFirstEventAsync().ConfigureAwait(false);
+            await session.WaitForFirstEventAsync(shutdownToken).ConfigureAwait(false);
 
             return session;
         });
@@ -83,6 +117,40 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     public void Dispose()
     {
-        _sessionTask.ContinueWith(session => session.Dispose());
+        SampleProfilerSession? session;
+        lock (_sessionLock)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+
+            // Null here means startup will see _disposed and stop its own session.
+            session = _session;
+        }
+
+        _shutdownCts.Cancel();
+
+        try
+        {
+            _sessionTask.Wait(SHUTDOWN_TIMEOUT_MS);
+        }
+        catch (Exception e)
+        {
+            _options.LogDebug("Profiler session didn't start up cleanly before shutdown: {0}", e.Message);
+        }
+
+        try
+        {
+            session?.Dispose();
+        }
+        catch (Exception e)
+        {
+            _options.LogWarning(e, "Failed to stop the profiler session.");
+        }
+
+        _shutdownCts.Dispose();
     }
 }

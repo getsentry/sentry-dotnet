@@ -6,9 +6,11 @@ namespace Sentry.Profiling;
 /// <summary>
 /// Enables transaction performance profiling.
 /// </summary>
-public class ProfilingIntegration : ISdkIntegration
+public class ProfilingIntegration : ISdkIntegration, IDisposable
 {
     private TimeSpan _startupTimeout;
+
+    private IDisposable? _ownedFactory;
 
     /// <summary>
     /// Initializes the profiling integration.
@@ -35,7 +37,12 @@ public class ProfilingIntegration : ISdkIntegration
         {
             try
             {
-                options.TransactionProfilerFactory ??= new SamplingTransactionProfilerFactory(options, _startupTimeout);
+                if (options.TransactionProfilerFactory is null)
+                {
+                    var factory = new SamplingTransactionProfilerFactory(options, _startupTimeout);
+                    options.TransactionProfilerFactory = factory;
+                    _ownedFactory = factory;
+                }
             }
             catch (Exception e)
             {
@@ -46,5 +53,12 @@ public class ProfilingIntegration : ISdkIntegration
         {
             options.LogInfo("Profiling Integration is disabled because profiling is disabled by configuration.");
         }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _ownedFactory?.Dispose();
+        _ownedFactory = null;
     }
 }
