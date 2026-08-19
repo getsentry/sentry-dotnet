@@ -10,8 +10,6 @@ public class ProfilingIntegration : ISdkIntegration, IDisposable
 {
     private TimeSpan _startupTimeout;
 
-    // Only set when this integration created the factory, so that Dispose() never tears down a
-    // factory that was supplied by someone else.
     private IDisposable? _ownedFactory;
 
     /// <summary>
@@ -57,10 +55,7 @@ public class ProfilingIntegration : ISdkIntegration, IDisposable
         }
     }
 
-    /// <summary>
-    /// Stops the profiler session started by this integration, releasing the underlying EventPipe
-    /// session. Called by the SDK on shutdown.
-    /// </summary>
+    /// <inheritdoc/>
     public void Dispose()
     {
         _ownedFactory?.Dispose();

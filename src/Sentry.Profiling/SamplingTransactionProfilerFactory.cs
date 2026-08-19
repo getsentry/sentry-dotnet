@@ -23,13 +23,11 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     private readonly CancellationTokenSource _shutdownCts = new();
 
-    // StartNew() can block for up to 30s uncancellably, so Dispose() may run before there is a session
-    // to stop. This hands it between the two sides so exactly one of them stops it.
+    // StartNew() blocks uncancellably, so Dispose() may run before there is a session to stop.
     private readonly object _sessionLock = new();
     private SampleProfilerSession? _session;
     private bool _disposed;
 
-    // Exposed for tests.
     internal bool IsDisposed
     {
         get { lock (_sessionLock) { return _disposed; } }
@@ -61,12 +59,11 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
             if (disposedDuringStartup)
             {
-                // Dispose() found no session to stop, so this one is ours.
                 session.Dispose();
                 throw new OperationCanceledException(shutdownToken);
             }
 
-            // This can block indefinitely, so it's cancelled when the factory is disposed.
+            // This can block indefinitely.
             await session.WaitForFirstEventAsync(shutdownToken).ConfigureAwait(false);
 
             return session;
@@ -134,7 +131,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             session = _session;
         }
 
-        // Unblocks the startup task if it's still waiting for the first event to arrive.
         _shutdownCts.Cancel();
 
         try

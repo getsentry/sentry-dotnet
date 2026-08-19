@@ -47,10 +47,8 @@ internal class SampleProfilerSession : IDisposable
     // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
     internal static int CircularBufferMB = 16;
 
-    // Draining should be near-instant; this only bounds the worst case so shutdown can't hang.
     internal const int ProcessingDrainTimeoutMs = 2_000;
 
-    // Exposed for tests
     internal TraceLogEventSource EventSource { get; }
 
     public SampleProfilerTraceEventParser SampleEventParser => _sampleEventParser;
@@ -59,13 +57,10 @@ internal class SampleProfilerSession : IDisposable
 
     public TraceLog TraceLog => EventSource.TraceLog;
 
-    // Exposed for tests.
     internal bool IsStopped => _stopped;
 
-    // Exposed for tests: stands in for the uncancellable StartEventPipeSession() window.
     internal static Action? BeforeStartupForTests;
 
-    // Exposed for tests. A callback rather than a static field, so no session is held in production.
     internal static Action<SampleProfilerSession>? OnSessionCreatedForTests;
 
     private static InterlockedBoolean _throwOnNextStartupForTests = false;
@@ -97,8 +92,8 @@ internal class SampleProfilerSession : IDisposable
             var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
-            // The continuation must stay unconditional: one whose criteria aren't met (e.g. OnlyOnFaulted
-            // when Process() returns normally) is Canceled, making the Wait() in Stop() throw.
+            // The continuation must stay unconditional - one whose criteria aren't met is Canceled,
+            // which would make the Wait() in Stop() throw.
             var processing = Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
                 .ContinueWith(_ =>
                 {

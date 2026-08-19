@@ -73,8 +73,6 @@ public class ProfilingSentryOptionsExtensionsTests
 
         hub.Dispose();
 
-        // ProfilingIntegration must be IDisposable for the Hub to register it for cleanup - otherwise
-        // the factory (and the EventPipe session it owns) is never disposed on SDK shutdown.
         Assert.True(factory.IsDisposed);
     }
 

@@ -243,12 +243,11 @@ public class SamplingTransactionProfilerTests
         {
             factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
 
-            // Dispose while startup is still gated, i.e. before there is any session to stop. That is
-            // the window StartEventPipeSession() can sit in for up to 30 seconds, uncancellably.
+            // The gate holds startup inside the window StartEventPipeSession() blocks in, so Dispose()
+            // runs before there is any session to stop.
             factory.Dispose();
             Assert.True(factory.IsDisposed);
 
-            // Now let startup run to completion.
             startupGate.Set();
             try
             {
@@ -256,7 +255,7 @@ public class SamplingTransactionProfilerTests
             }
             catch (AggregateException)
             {
-                // Expected - the startup task ends cancelled once it sees the factory was disposed.
+                // Expected: startup ends cancelled once it sees the factory was disposed.
             }
         }
         finally
@@ -265,14 +264,13 @@ public class SamplingTransactionProfilerTests
             SampleProfilerSession.OnSessionCreatedForTests = null;
         }
 
-        // Passing _shutdownCts.Token here used to throw ObjectDisposedException, because Dispose() had
-        // already disposed the CTS by the time startup got this far.
         factory._sessionTask.Exception?.InnerExceptions.Should()
-            .NotContain(e => e is ObjectDisposedException);
+            .NotContain(e => e is ObjectDisposedException,
+                "startup must not read the CancellationTokenSource that Dispose() has already disposed");
 
-        // Dispose() found no session to stop, so the startup task has to stop the one it created.
         createdSession.Should().NotBeNull();
-        createdSession!.IsStopped.Should().BeTrue();
+        createdSession!.IsStopped.Should().BeTrue(
+            "Dispose() found no session to stop, so startup has to stop the one it created");
     }
 
     [SkippableFact]
@@ -286,14 +284,12 @@ public class SamplingTransactionProfilerTests
 
         session.Stop();
 
-        // The event processing task used to be an OnlyOnFaulted continuation, which transitions to
-        // Canceled when processing completes normally. Waiting on it therefore threw on every clean
-        // shutdown, and the EventPipeSession and TraceLogEventSource were left undisposed.
         _testOutputLogger.Entries.Select(e => e.Message).Should().NotContain(
-            m => m.StartsWith("Error during sampler profiler session shutdown"));
+            m => m.StartsWith("Error during sampler profiler session shutdown"),
+            "a throw here leaves the EventPipeSession and TraceLogEventSource undisposed");
 
-        // Stopping again must stay a no-op.
         session.Stop();
+        session.IsStopped.Should().BeTrue();
     }
 
     [SkippableTheory]
