@@ -10,6 +10,9 @@ internal class BindableSentryMauiOptions : BindableSentryLoggingOptions
     public bool? IncludeBackgroundingStateInBreadcrumbs { get; set; }
     public bool? CreateElementEventsBreadcrumbs { get; set; } = false;
     public bool? AttachScreenshot { get; set; }
+    public bool? EnableAutoTransactions { get; set; }
+    public TimeSpan? AutoTransactionIdleTimeout { get; set; }
+    public bool? EnableUserInteractionTracing { get; set; }
 
     public void ApplyTo(SentryMauiOptions options)
     {
@@ -19,5 +22,8 @@ internal class BindableSentryMauiOptions : BindableSentryLoggingOptions
         options.IncludeBackgroundingStateInBreadcrumbs = IncludeBackgroundingStateInBreadcrumbs ?? options.IncludeBackgroundingStateInBreadcrumbs;
         options.CreateElementEventsBreadcrumbs = CreateElementEventsBreadcrumbs ?? options.CreateElementEventsBreadcrumbs;
         options.AttachScreenshot = AttachScreenshot ?? options.AttachScreenshot;
+        options.EnableAutoTransactions = EnableAutoTransactions ?? options.EnableAutoTransactions;
+        options.AutoTransactionIdleTimeout = AutoTransactionIdleTimeout ?? options.AutoTransactionIdleTimeout;
+        options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
     }
 }

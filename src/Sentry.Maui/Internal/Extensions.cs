@@ -82,4 +82,20 @@ internal static class Extensions
         var s = o.ToString();
         return s == null || s == t.FullName ? t.Name : s;
     }
+
+    internal static Page? FindContainingPage(this Element? element)
+    {
+        const int hopLimit = 32;
+        var hops = 0;
+        var current = element;
+        while (current is not null && hops++ < hopLimit)
+        {
+            if (current is Page page)
+            {
+                return page;
+            }
+            current = current.Parent;
+        }
+        return null;
+    }
 }
