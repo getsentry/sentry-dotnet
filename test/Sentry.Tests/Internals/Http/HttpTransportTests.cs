@@ -628,8 +628,6 @@ public partial class HttpTransportTests
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler());
 
-        var logger = new InMemoryDiagnosticLogger();
-
         var tempFilePath = Path.GetTempFileName();
         File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
 
@@ -638,7 +636,6 @@ public partial class HttpTransportTests
             {
                 Dsn = ValidDsn,
                 MaxAttachmentSize = 1,
-                DiagnosticLogger = logger,
                 Debug = true
             },
             new HttpClient(httpHandler));
@@ -652,7 +649,7 @@ public partial class HttpTransportTests
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
             null,
-            new[] { heapDumpAttachment });
+            [heapDumpAttachment]);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -668,8 +665,6 @@ public partial class HttpTransportTests
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler());
 
-        var logger = new InMemoryDiagnosticLogger();
-
         var tempFilePath = Path.GetTempFileName();
         File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
 
@@ -679,7 +674,6 @@ public partial class HttpTransportTests
                 Dsn = ValidDsn,
                 // Large enough that this attachment is NOT dropped for being too big
                 MaxAttachmentSize = 1_000_000,
-                DiagnosticLogger = logger,
                 Debug = true
             },
             new HttpClient(httpHandler));
@@ -693,7 +687,7 @@ public partial class HttpTransportTests
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
             null,
-            new[] { heapDumpAttachment });
+            [heapDumpAttachment]);
 
         try
         {
@@ -721,8 +715,6 @@ public partial class HttpTransportTests
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler());
 
-        var logger = new InMemoryDiagnosticLogger();
-
         var tempFilePath = Path.GetTempFileName();
         File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
 
@@ -731,7 +723,6 @@ public partial class HttpTransportTests
             {
                 Dsn = ValidDsn,
                 MaxAttachmentSize = 1_000_000,
-                DiagnosticLogger = logger,
                 Debug = true
             },
             new HttpClient(httpHandler));
@@ -745,7 +736,7 @@ public partial class HttpTransportTests
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
             null,
-            new[] { normalAttachment });
+            [normalAttachment]);
 
         try
         {
