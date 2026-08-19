@@ -39,6 +39,16 @@ public abstract partial class SentryMetric
         return metric;
     }
 
+#if NET6_0_OR_GREATER
+    [SuppressMessage("Roslynator", "RCS1242:Do not pass non-read-only struct by read-only reference", Justification = $"Ensure that only readonly instance members of {nameof(TagList)} are invoked, to avoid a defensive copy created by the compiler.")]
+    internal static SentryMetric<T> Create<T>(IHub hub, SentryOptions options, ISystemClock clock, SentryMetricType type, string name, T value, string? unit, in TagList attributes, Scope? scope) where T : struct
+    {
+        var metric = CreateCore<T>(hub, options, clock, type, name, value, unit, scope);
+        metric.Attributes.SetAttributes(in attributes);
+        return metric;
+    }
+#endif
+
     private static bool IsSupported<T>() where T : struct
     {
         var valueType = typeof(T);

@@ -61,6 +61,27 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
         CaptureMetric(metric);
     }
 
+#if NET6_0_OR_GREATER
+    /// <inheritdoc />
+    private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, in TagList attributes, Scope? scope) where T : struct
+    {
+        if (!SentryMetric.IsSupported(typeof(T)))
+        {
+            _options.DiagnosticLogger?.LogWarning("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.", typeof(T));
+            return;
+        }
+
+        if (string.IsNullOrEmpty(name))
+        {
+            _options.DiagnosticLogger?.LogWarning("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}", type.ToString(), typeof(T));
+            return;
+        }
+
+        var metric = SentryMetric.Create(_hub, _options, _clock, type, name, value, unit, in attributes, scope);
+        CaptureMetric(metric);
+    }
+#endif
+
     /// <inheritdoc />
     private protected override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
     {
