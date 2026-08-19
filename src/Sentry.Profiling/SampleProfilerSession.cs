@@ -60,6 +60,18 @@ internal class SampleProfilerSession : IDisposable
 
     public TraceLog TraceLog => EventSource.TraceLog;
 
+    // Exposed for tests: whether Stop() has run, so a test can assert a session was cleaned up even
+    // when it was never handed back to the factory.
+    internal bool IsStopped => _stopped;
+
+    // Exposed for tests: invoked at the top of StartNew(), standing in for the window that the
+    // uncancellable StartEventPipeSession() call can sit in for up to 30 seconds.
+    internal static Action? BeforeStartupForTests;
+
+    // Exposed for tests: hands the created session to the test. Deliberately a callback rather than a
+    // static field so that no session is kept alive in production.
+    internal static Action<SampleProfilerSession>? OnSessionCreatedForTests;
+
     private static InterlockedBoolean _throwOnNextStartupForTests = false;
 
     internal static bool ThrowOnNextStartupForTests
@@ -72,6 +84,8 @@ internal class SampleProfilerSession : IDisposable
     {
         try
         {
+            BeforeStartupForTests?.Invoke();
+
             var client = new DiagnosticsClient(Environment.ProcessId);
 
             if (_throwOnNextStartupForTests.CompareExchange(false, true) == true)
@@ -99,7 +113,9 @@ internal class SampleProfilerSession : IDisposable
                     }
                 });
 
-            return new SampleProfilerSession(stopWatch, session, eventSource, processing, logger);
+            var result = new SampleProfilerSession(stopWatch, session, eventSource, processing, logger);
+            OnSessionCreatedForTests?.Invoke(result);
+            return result;
         }
         catch (Exception ex)
         {

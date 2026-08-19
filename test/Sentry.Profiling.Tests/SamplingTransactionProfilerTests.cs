@@ -229,6 +229,53 @@ public class SamplingTransactionProfilerTests
     }
 
     [SkippableFact]
+    public void Factory_DisposedDuringSessionStartup_StopsTheSession()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Starts a real EventPipe session.");
+
+        using var startupGate = new ManualResetEventSlim(false);
+        SampleProfilerSession? createdSession = null;
+        SampleProfilerSession.BeforeStartupForTests = () => startupGate.Wait(30_000);
+        SampleProfilerSession.OnSessionCreatedForTests = session => createdSession = session;
+
+        SamplingTransactionProfilerFactory factory;
+        try
+        {
+            factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
+
+            // Dispose while startup is still gated, i.e. before there is any session to stop. That is
+            // the window StartEventPipeSession() can sit in for up to 30 seconds, uncancellably.
+            factory.Dispose();
+            Assert.True(factory.IsDisposed);
+
+            // Now let startup run to completion.
+            startupGate.Set();
+            try
+            {
+                factory._sessionTask.Wait(60_000);
+            }
+            catch (AggregateException)
+            {
+                // Expected - the startup task ends cancelled once it sees the factory was disposed.
+            }
+        }
+        finally
+        {
+            SampleProfilerSession.BeforeStartupForTests = null;
+            SampleProfilerSession.OnSessionCreatedForTests = null;
+        }
+
+        // Passing _shutdownCts.Token here used to throw ObjectDisposedException, because Dispose() had
+        // already disposed the CTS by the time startup got this far.
+        factory._sessionTask.Exception?.InnerExceptions.Should()
+            .NotContain(e => e is ObjectDisposedException);
+
+        // Dispose() found no session to stop, so the startup task has to stop the one it created.
+        createdSession.Should().NotBeNull();
+        createdSession!.IsStopped.Should().BeTrue();
+    }
+
+    [SkippableFact]
     public async Task Session_Stop_ShutsDownWithoutError()
     {
         Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");

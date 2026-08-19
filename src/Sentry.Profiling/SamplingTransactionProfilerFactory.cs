@@ -25,14 +25,18 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // may never receive one.
     private readonly CancellationTokenSource _shutdownCts = new();
 
-    // Assigned as soon as the session exists, which is earlier than _sessionTask completing. Dispose()
-    // uses this so it can also stop a session that never saw its first event.
+    // Guards the handoff of the session between the startup task and Dispose(). StartEventPipeSession()
+    // can block for up to 30 seconds and can't be cancelled, so Dispose() may well run before there is
+    // anything to stop - whichever side loses that race is the one that stops the session.
+    private readonly object _sessionLock = new();
     private SampleProfilerSession? _session;
-
-    private int _disposed;
+    private bool _disposed;
 
     // Exposed for tests.
-    internal bool IsDisposed => Volatile.Read(ref _disposed) != 0;
+    internal bool IsDisposed
+    {
+        get { lock (_sessionLock) { return _disposed; } }
+    }
 
     private bool _errorLogged = false;
 
@@ -40,14 +44,33 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
+        // Captured up front - reading _shutdownCts.Token once Dispose() has disposed it throws.
+        var shutdownToken = _shutdownCts.Token;
+
         _sessionTask = Task.Run(async () =>
         {
             // This can block up to 30 seconds. The timeout is out of our hands.
             var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
-            _session = session;
+
+            bool disposedDuringStartup;
+            lock (_sessionLock)
+            {
+                disposedDuringStartup = _disposed;
+                if (!disposedDuringStartup)
+                {
+                    _session = session;
+                }
+            }
+
+            if (disposedDuringStartup)
+            {
+                // Dispose() has already been and gone, and found no session to stop - so it's ours.
+                session.Dispose();
+                throw new OperationCanceledException(shutdownToken);
+            }
 
             // This can block indefinitely, so it's cancelled when the factory is disposed.
-            await session.WaitForFirstEventAsync(_shutdownCts.Token).ConfigureAwait(false);
+            await session.WaitForFirstEventAsync(shutdownToken).ConfigureAwait(false);
 
             return session;
         });
@@ -100,9 +123,19 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        SampleProfilerSession? session;
+        lock (_sessionLock)
         {
-            return;
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+
+            // If the startup task hasn't published a session yet it will see _disposed and stop the
+            // one it eventually creates itself, so exactly one side does the cleanup.
+            session = _session;
         }
 
         // Unblocks the startup task if it's still waiting for the first event to arrive.
@@ -121,7 +154,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
         try
         {
-            _session?.Dispose();
+            session?.Dispose();
         }
         catch (Exception e)
         {
