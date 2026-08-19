@@ -37,7 +37,6 @@ on:
       - 'lib/sentry-android-supplemental/**'
       - 'modules/sentry-native/**'
       - 'modules/sentry-cocoa/**'
-      - 'modules/sentry-cocoa.properties'
       # Build configuration (affects all builds)
       - 'global.json'
       - 'Directory.Build.props'

@@ -14,11 +14,19 @@ set -euo pipefail
 FRAMEWORK="SentryObjC-Dynamic"
 SDKS="iphoneos,iphonesimulator,maccatalyst"
 
-# Include this script's own hash in the build stamp so cached output is rebuilt whenever the recipe
-# changes, not just when the sentry-cocoa submodule moves.
-script_checksum=$(shasum -a 256 "$0" | cut -d ' ' -f 1)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-pushd "$(dirname "$0")" >/dev/null
+# The .NET SDK runs under the managed (.NET/mono) runtime, so SentryCrash must be compiled with
+# SENTRY_CRASH_MANAGED_RUNTIME=1 (native capture of managed crashes breaks otherwise). sentry-cocoa's
+# packaging scripts don't expose extra build settings, so we inject the define via XCODE_XCCONFIG_FILE,
+# which xcodebuild applies to every target. See getsentry/sentry-dotnet#5492.
+export XCODE_XCCONFIG_FILE="$SCRIPT_DIR/sentry-cocoa.xcconfig"
+
+# Include this script's own hash + the xcconfig's in the build stamp so cached output is rebuilt
+# whenever the recipe changes, not just when the sentry-cocoa submodule moves.
+script_checksum=$(cat "$0" "$XCODE_XCCONFIG_FILE" | shasum -a 256 | cut -d ' ' -f 1)
+
+pushd "$SCRIPT_DIR" >/dev/null
 cd ../modules/sentry-cocoa
 
 mkdir -p Carthage

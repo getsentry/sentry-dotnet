@@ -6,8 +6,8 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
 $CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
-# The Cocoa SDK's SentryObjC headers are staged here by whichever setup path ran:
-# download-sentry-cocoa.sh (default) or build-sentry-cocoa.sh (from-source toggle).
+# The Cocoa SDK's SentryObjC headers are staged here by build-sentry-cocoa.sh, which builds the
+# self-contained SentryObjC-Dynamic.xcframework from the modules/sentry-cocoa submodule.
 $HeadersPath = "$CocoaSdkPath/Carthage/Headers"
 $BindingsPath = "$RootPath/src/Sentry.Bindings.Cocoa"
 $BackupPath = "$BindingsPath/obj/_unpatched"
