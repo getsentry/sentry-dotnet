@@ -57,7 +57,7 @@ fi
 
 rm -rf Carthage/Build-* Carthage/Headers Carthage/.built-from-sha Carthage/.downloaded-version
 
-# Build the self-contained SentryObjC-Dynamic.xcframework via sentry-cocoa's own packaging script
+# Build SentryObjC-Dynamic.xcframework via sentry-cocoa's own packaging script
 # (compiles the SDK to a static lib per SDK, then relinks into a dynamic framework).
 echo "::group::Building SentryObjC-Dynamic from source ($SDKS)"
 ./scripts/build-xcframework-sentryobjc.sh --variant dynamic --sdks "$SDKS"
@@ -77,7 +77,7 @@ xcodebuild -create-xcframework \
     -framework "$xcf/ios-arm64_x86_64-maccatalyst/SentryObjC.framework" \
     -output "Carthage/Build-maccatalyst/$FRAMEWORK.xcframework"
 
-# Copy headers (used to generate bindings) before we strip them from the bundled frameworks.
+# Copy headers (used to generate bindings) before we strip them from bundle
 mkdir -p Carthage/Headers
 find "Carthage/Build-ios/$FRAMEWORK.xcframework/ios-arm64" -name '*.h' -exec cp {} Carthage/Headers \;
 

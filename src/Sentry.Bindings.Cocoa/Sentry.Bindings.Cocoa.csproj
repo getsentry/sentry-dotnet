@@ -12,12 +12,9 @@
     <NoWarn>$(NoWarn);CS0108</NoWarn>
   </PropertyGroup>
 
-  <!-- The .NET SDK consumes a single self-contained SentryObjC-Dynamic xcframework (the SentryObjC*
-       API surface with the engine baked in), built from the modules/sentry-cocoa submodule by
-       build-sentry-cocoa.sh. We build from source rather than consuming the pre-built release
-       artifact because the .NET SDK needs SentryCrash compiled with SENTRY_CRASH_MANAGED_RUNTIME=1
-       (for native capture of managed crashes), which the generic release artifact is not. See
-       getsentry/sentry-dotnet#5492. -->
+  <!-- SentryObjC-Dynamic xcframework is built from the modules/sentry-cocoa submodule by
+       build-sentry-cocoa.sh, so we can compile with SENTRY_CRASH_MANAGED_RUNTIME=1
+       See getsentry/sentry-dotnet#5492. -->
   <PropertyGroup>
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC-Dynamic.xcframework</SentryCocoaFramework>
     <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/Headers/**/*.h</SentryCocoaBindingInputs>
@@ -61,12 +58,12 @@
     <None Include="buildTransitive\Sentry.Bindings.Cocoa.targets" Pack="true" PackagePath="buildTransitive\Sentry.Bindings.Cocoa.targets" />
   </ItemGroup>
 
-  <!-- Build the single self-contained SentryObjC-Dynamic xcframework from the submodule source. -->
+  <!-- Build the SentryObjC-Dynamic xcframework from source. -->
   <Target Name="_BuildCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(SentryCocoaCache).git')"
           Inputs="$(SentryCocoaCache)$(SentryCocoaGitDir)\HEAD;..\..\scripts\build-sentry-cocoa.sh;..\..\scripts\sentry-cocoa.xcconfig" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
 
-    <Message Importance="High" Text="Building the Cocoa SDK from source (SentryObjC-Dynamic)." />
+    <Message Importance="High" Text="Building the Cocoa SDK from source." />
     <Exec Command="bash ../../scripts/build-sentry-cocoa.sh" IgnoreStandardErrorWarningFormat="true" />
   </Target>
 
