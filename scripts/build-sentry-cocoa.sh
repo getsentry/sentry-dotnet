@@ -1,15 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-# From-source toggle for the Cocoa SDK (-p:BuildCocoaSdkFromSource=true). Builds the self-contained
-# SentryObjC-Dynamic.xcframework from the modules/sentry-cocoa submodule using sentry-cocoa's own
-# packaging pipeline, then lays it out exactly like the default download path
-# (download-sentry-cocoa.sh): per-platform xcframeworks under Carthage/Build-{ios,maccatalyst} plus
-# the headers under Carthage/Headers used to generate the bindings.
-#
-# This exists so we can add native debug logging / patch the SDK while diagnosing an issue. It
-# produces the same artifact the default path downloads, so runtime behaviour is identical either
-# way. See getsentry/sentry-dotnet#5492.
+# Builds the self-contained SentryObjC-Dynamic.xcframework from the modules/sentry-cocoa submodule
+# using sentry-cocoa's own packaging pipeline, re-slices it to the platforms the .NET SDK ships
+# (per-platform xcframeworks under Carthage/Build-{ios,maccatalyst}), and stages the SentryObjC
+# headers under Carthage/Headers for binding generation. Built from source so we can compile with
+# SENTRY_CRASH_MANAGED_RUNTIME=1
 
 FRAMEWORK="SentryObjC-Dynamic"
 SDKS="iphoneos,iphonesimulator,maccatalyst"
