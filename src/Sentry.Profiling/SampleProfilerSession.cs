@@ -47,7 +47,6 @@ internal class SampleProfilerSession : IDisposable
     // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
     internal static int CircularBufferMB = 16;
 
-    // How long Stop() waits for the event processing task to drain after the session has been stopped.
     // Draining should be near-instant; this only bounds the worst case so shutdown can't hang.
     internal const int ProcessingDrainTimeoutMs = 2_000;
 
@@ -136,8 +135,6 @@ internal class SampleProfilerSession : IDisposable
         {
             _session.Stop();
 
-            // Let the processing task drain the events that are still in flight, but don't hold up
-            // shutdown indefinitely if it doesn't get there.
             if (!_processing.Wait(ProcessingDrainTimeoutMs))
             {
                 _logger?.LogWarning("Sampler profiler event processing didn't finish within {0} ms of stopping the session.", ProcessingDrainTimeoutMs);
@@ -149,8 +146,8 @@ internal class SampleProfilerSession : IDisposable
         }
         finally
         {
-            // These need to happen even if stopping the session or draining the events failed, otherwise
-            // the EventPipe connection to the runtime is left open.
+            // These always need to happen, otherwise the EventPipe connection to the 
+            // runtime is left open.
             try
             {
                 _session.Dispose();

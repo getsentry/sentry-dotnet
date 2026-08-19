@@ -14,19 +14,15 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
-    // How long Dispose() waits for an in-flight session startup to complete before giving up on it.
+    // How long Dispose() waits for an in-flight session to complete before giving up on it.
     private const int SHUTDOWN_TIMEOUT_MS = 2_000;
 
     private readonly SentryOptions _options;
 
     internal Task<SampleProfilerSession> _sessionTask;
 
-    // Cancels the wait for the first event so that Dispose() doesn't have to wait for a session that
-    // may never receive one.
     private readonly CancellationTokenSource _shutdownCts = new();
 
-    // Assigned as soon as the session exists, which is earlier than _sessionTask completing. Dispose()
-    // uses this so it can also stop a session that never saw its first event.
     private SampleProfilerSession? _session;
 
     private int _disposed;
@@ -110,8 +106,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
         try
         {
-            // Gives an in-flight startup a chance to finish, and observes the exception if it failed
-            // or was cancelled above.
             _sessionTask.Wait(SHUTDOWN_TIMEOUT_MS);
         }
         catch (Exception e)
