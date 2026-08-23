@@ -2095,4 +2095,64 @@ public partial class SentryClientTests : IDisposable
         // Assert
         _fixture.SessionManager.Received().MarkSessionAsUnhandled();
     }
+
+    [Fact]
+    public void CaptureException_Handled_ReportsError()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureException(new Exception(), handled: true);
+
+        // Assert
+        _fixture.SessionManager.Received(1).ReportError();
+        _fixture.SessionManager.DidNotReceive().EndSession(SessionEndStatus.Crashed);
+        _fixture.SessionManager.DidNotReceive().MarkSessionAsUnhandled();
+    }
+
+    [Fact]
+    public void CaptureException_UnhandledNonTerminal_MarksSessionUnhandledWithoutEndingIt()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureException(new Exception(), handled: false, terminal: false);
+
+        // Assert
+        _fixture.SessionManager.Received(1).MarkSessionAsUnhandled();
+        _fixture.SessionManager.DidNotReceive().EndSession(SessionEndStatus.Crashed);
+    }
+
+    [Fact]
+    public void CaptureException_UnhandledTerminal_EndsSessionAsCrashed()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureException(new Exception(), handled: false, terminal: true);
+
+        // Assert
+        _fixture.SessionManager.Received(1).EndSession(SessionEndStatus.Crashed);
+        _fixture.SessionManager.DidNotReceive().MarkSessionAsUnhandled();
+    }
+
+    [Fact]
+    public void CaptureException_UnhandledWithoutTerminalArgument_DoesNotEndSessionAsCrashed()
+    {
+        // This is the behaviour change the terminal parameter exists for: a manual unhandled capture
+        // must not dent the crash-free-sessions rate when nothing actually crashed.
+
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureException(new Exception(), handled: false);
+
+        // Assert
+        _fixture.SessionManager.Received(1).MarkSessionAsUnhandled();
+        _fixture.SessionManager.DidNotReceive().EndSession(SessionEndStatus.Crashed);
+    }
 }

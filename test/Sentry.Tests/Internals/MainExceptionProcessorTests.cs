@@ -56,8 +56,9 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
+        // No integration set the flag, so this was captured by user code, which counts as handled.
         Assert.NotNull(evt.SentryExceptions);
-        Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == null);
+        Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == true);
     }
 
     [Fact]

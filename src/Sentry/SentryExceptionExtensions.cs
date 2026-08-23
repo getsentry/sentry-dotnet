@@ -65,4 +65,26 @@ public static class SentryExceptionExtensions
             ex.Data[Mechanism.TerminalKey] = terminal;
         }
     }
+
+    /// <summary>
+    /// Records the mechanism flags for an explicit user capture, fully overriding any previously set values.
+    /// </summary>
+    /// <remarks>
+    /// <c>Terminal</c> is only meaningful when the exception is unhandled, so it is removed when
+    /// <paramref name="handled"/> is <c>true</c> rather than left over from an earlier
+    /// <see cref="SetSentryMechanism"/> call. Mirrors that method's null-removes semantics.
+    /// </remarks>
+    internal static void RecordMechanismFlags(this Exception ex, bool handled, bool terminal)
+    {
+        ex.Data[Mechanism.HandledKey] = handled;
+
+        if (handled)
+        {
+            ex.Data.Remove(Mechanism.TerminalKey);
+        }
+        else
+        {
+            ex.Data[Mechanism.TerminalKey] = terminal;
+        }
+    }
 }

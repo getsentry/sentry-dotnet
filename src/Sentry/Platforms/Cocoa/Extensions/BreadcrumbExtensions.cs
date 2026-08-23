@@ -4,7 +4,7 @@ namespace Sentry.Cocoa.Extensions;
 
 internal static class BreadcrumbExtensions
 {
-    public static Breadcrumb ToBreadcrumb(this CocoaSdk.SentryBreadcrumb breadcrumb, IDiagnosticLogger? logger) =>
+    public static Breadcrumb ToBreadcrumb(this CocoaSdk.SentryObjCBreadcrumb breadcrumb, IDiagnosticLogger? logger) =>
         new(
             breadcrumb.Timestamp?.ToDateTimeOffset(),
             breadcrumb.Message,
@@ -13,7 +13,7 @@ internal static class BreadcrumbExtensions
             breadcrumb.Category,
             breadcrumb.Level.ToBreadcrumbLevel());
 
-    public static CocoaSdk.SentryBreadcrumb ToCocoaBreadcrumb(this Breadcrumb breadcrumb) =>
+    public static CocoaSdk.SentryObjCBreadcrumb ToCocoaBreadcrumb(this Breadcrumb breadcrumb) =>
         new()
         {
             Timestamp = breadcrumb.Timestamp.ToNSDate(),

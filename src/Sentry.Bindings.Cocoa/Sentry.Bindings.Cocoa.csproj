@@ -48,7 +48,6 @@
 
     <!-- Set up the binding project. -->
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
-    <ObjcBindingApiDefinition Include="PrivateApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
     <NativeReference Include="$(SentryCocoaObjCCompatFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCCompatFramework)' != ''" />
@@ -116,8 +115,9 @@
     <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 -PathToCheck $(MSBuildThisFileDirectory)" />
   </Target>
 
-  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
-  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299. -->
+  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile"
+    Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(GeneratedSourcesDir)SupportDelegates.g.cs')"
     Inputs="$(GeneratedSourcesDir)SupportDelegates.g.cs" Outputs="$(GeneratedSourcesDir)SupportDelegates.g.cs.stamp">
     <PropertyGroup>
       <GeneratedSupportDelegatesFile>$(GeneratedSourcesDir)SupportDelegates.g.cs</GeneratedSupportDelegatesFile>

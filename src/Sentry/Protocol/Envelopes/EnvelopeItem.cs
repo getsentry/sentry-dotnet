@@ -342,6 +342,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             AttachmentType.UnrealContext => "unreal.context",
             AttachmentType.UnrealLogs => "unreal.logs",
             AttachmentType.ViewHierarchy => "event.view_hierarchy",
+            AttachmentType.HeapDump => "event.heapdump",
             _ => "event.attachment"
         };
 

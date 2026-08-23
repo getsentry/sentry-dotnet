@@ -93,6 +93,17 @@
     </method>
   </add-node>
 
+  <!--
+    ISpan.startChild(String, String, SentryDate) became a Java default method in 8.53.0 (it used to be an
+    abstract method on ITransaction). The generator surfaces inherited default methods on derived interfaces
+    as explicit interface implementations, and emits the qualifier without a `global::` prefix:
+      global::Sentry.JavaSdk.ISpan? Sentry.JavaSdk.ISpan.StartChild (...)
+    Inside the Sentry.JavaSdk namespace, `Sentry` binds to the io.sentry.Sentry class rather than the
+    namespace, so ITransaction fails to compile with CS0426/CS0538. We don't bind to any startChild
+    overload, so drop the default method.
+  -->
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='ISpan']/method[@name='startChild' and count(parameter)=3 and parameter[3][@type='io.sentry.SentryDate']]" />
+
   <!-- Remove problematic deprecated methods in the IScopes interface -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='IScopes']/method[@deprecated]" />
 

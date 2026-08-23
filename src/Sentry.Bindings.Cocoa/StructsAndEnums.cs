@@ -6,58 +6,74 @@
 
 #nullable enable
 
-using System.Runtime.InteropServices;
-using Foundation;
 using ObjCRuntime;
 
 namespace Sentry.CocoaSdk;
 
 [Native]
-internal enum SentryAttachmentType : long
+internal enum SentryObjCAttachmentType : long
 {
-    EventAttachment,
+    EventAttachment = 0,
     ViewHierarchy
 }
 
 [Native]
-internal enum SentryLevel : ulong
+internal enum SentryObjCFeedbackSource : long
+{
+    Widget = 0,
+    Custom
+}
+
+[Native]
+internal enum SentryObjCLastRunStatus : long
+{
+    Unknown = 0,
+    DidNotCrash,
+    DidCrash
+}
+
+[Native]
+internal enum SentryObjCLevel : ulong
 {
     None = 0,
-    Debug = 1,
-    Info = 2,
-    Warning = 3,
-    Error = 4,
-    Fatal = 5
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal
 }
 
 [Native]
-internal enum SentryError : long
+internal enum SentryObjCLogLevel : long
 {
-    UnknownError = -1,
-    InvalidDsnError = 100,
-    SentryCrashNotInstalledError = 101,
-    InvalidCrashReportError = 102,
-    CompressionError = 103,
-    JsonConversionError = 104,
-    CouldNotFindDirectory = 105,
-    RequestError = 106,
-    EventNotSent = 107,
-    FileIO = 108,
-    Kernel = 109
+    Trace = 0,
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Fatal
 }
 
 [Native]
-internal enum SentrySampleDecision : ulong
+internal enum SentryObjCReplayQuality : long
 {
-    Undecided,
+    Low = 0,
+    Medium,
+    High
+}
+
+[Native]
+internal enum SentryObjCSampleDecision : ulong
+{
+    Undecided = 0,
     Yes,
     No
 }
 
 [Native]
-internal enum SentrySpanStatus : ulong
+internal enum SentryObjCSpanStatus : ulong
 {
-    Undefined,
+    Undefined = 0,
     Ok,
     DeadlineExceeded,
     Unauthenticated,
@@ -78,145 +94,30 @@ internal enum SentrySpanStatus : ulong
 }
 
 [Native]
-internal enum SentryAppStartType : ulong
-{
-    Warm,
-    Cold,
-    Unknown
-}
-
-[Native]
-internal enum SentryANRType : long
-{
-    FatalFullyBlocking = 0,
-    FatalNonFullyBlocking = 1,
-    FullyBlocking = 2,
-    NonFullyBlocking = 3,
-    Unknown = 4
-}
-
-[Native]
-internal enum SentryDataCategory : ulong
-{
-    All = 0,
-    Default = 1,
-    Error = 2,
-    Session = 3,
-    Transaction = 4,
-    Attachment = 5,
-    UserFeedback = 6,
-    Profile = 7,
-    MetricBucket = 8,
-    Replay = 9,
-    ProfileChunkUI = 10,
-    Span = 11,
-    Feedback = 12,
-    LogItem = 13,
-    TraceMetric = 14,
-    LogByte = 15,
-    TraceMetricByte = 16,
-    Unknown = 17
-}
-
-[Native]
-internal enum SentryDiscardReason : ulong
-{
-    BeforeSend = 0,
-    EventProcessor = 1,
-    SampleRate = 2,
-    NetworkError = 3,
-    QueueOverflow = 4,
-    CacheOverflow = 5,
-    RateLimitBackoff = 6,
-    InsufficientData = 7,
-    SendError = 8
-}
-
-[Native]
-internal enum SentryExtensionType : long
-{
-    Widget = 0,
-    Intent = 1,
-    Action = 2,
-    Share = 3,
-    NotificationService = 4
-}
-
-[Native]
-internal enum SentryFeedbackSource : long
-{
-    Widget = 0,
-    Custom = 1
-}
-
-[Native]
-internal enum SentryFlushResult : long
-{
-    Success = 0,
-    TimedOut = 1,
-    AlreadyFlushing = 2
-}
-
-[Native]
-internal enum SentryHttpStatusCode : long
-{
-    Ok = 200,
-    Created = 201,
-    BadRequest = 400,
-    PreconditionFailed = 412,
-    ContentTooLarge = 413,
-    TooManyRequests = 429,
-    InternalServerError = 500
-}
-
-[Native]
-internal enum SentryLastRunStatus : long
-{
-    Unknown = 0,
-    DidNotCrash = 1,
-    DidCrash = 2
-}
-
-[Native]
-internal enum SentryLogLevel : long
-{
-    Trace = 0,
-    Debug = 1,
-    Info = 2,
-    Warn = 3,
-    Error = 4,
-    Fatal = 5
-}
-
-[Native]
-internal enum SentryProfileLifecycle : long
-{
-    Manual = 0,
-    Trace = 1
-}
-
-[Native]
-internal enum SentryReplayQuality : long
-{
-    Low = 0,
-    Medium = 1,
-    High = 2
-}
-
-[Native]
-internal enum SentryReplayType : long
-{
-    Session = 0,
-    Buffer = 1
-}
-
-[Native]
-internal enum SentryTransactionNameSource : long
+internal enum SentryObjCTransactionNameSource : long
 {
     Custom = 0,
-    Url = 1,
-    Route = 2,
-    View = 3,
-    Component = 4,
-    Task = 5
+    Url,
+    Route,
+    View,
+    Component,
+    Task
+}
+
+[Native]
+internal enum SentryObjCRedactRegionType : long
+{
+    Redact = 0,
+    ClipOut,
+    ClipBegin,
+    ClipEnd,
+    RedactSwiftUI
+}
+
+[Native]
+internal enum SentryObjCSwizzleMode : long
+{
+    Always = 0,
+    OncePerClass = 1,
+    OncePerClassAndSuperclasses = 2
 }

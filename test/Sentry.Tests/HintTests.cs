@@ -175,5 +175,48 @@ public class HintTests : IDisposable
         hint.Attachments.Should().Contain(attachment2);
     }
 
+    [Fact]
+    public void AddAttachment_HeapDump_DeletesFileWhenStreamIsClosed()
+    {
+        // Arrange
+        var attachmentPath = Path.Combine(_testDirectory, "dump.gcdump");
+        File.WriteAllText(attachmentPath, "fake heap dump");
+
+        var hint = new SentryHint(new SentryOptions());
+
+        // Act
+        hint.AddAttachment(attachmentPath, AttachmentType.HeapDump);
+
+        // Assert
+        var attachment = Assert.Single(hint.Attachments);
+        using (attachment.Content.GetStream())
+        {
+            File.Exists(attachmentPath).Should().BeTrue("the dump must survive while it is being read");
+        }
+
+        File.Exists(attachmentPath).Should().BeFalse("heap dumps are deleted once the stream is closed");
+    }
+
+    [Fact]
+    public void AddAttachment_NonHeapDump_LeavesFileInPlaceWhenStreamIsClosed()
+    {
+        // Arrange
+        var attachmentPath = Path.Combine(_testDirectory, "attachment.txt");
+        File.WriteAllText(attachmentPath, "some user attachment");
+
+        var hint = new SentryHint(new SentryOptions());
+
+        // Act
+        hint.AddAttachment(attachmentPath, AttachmentType.Default);
+
+        // Assert
+        var attachment = Assert.Single(hint.Attachments);
+        using (attachment.Content.GetStream())
+        {
+        }
+
+        File.Exists(attachmentPath).Should().BeTrue("we must never delete attachments supplied by the user");
+    }
+
     public void Dispose() => Directory.Delete(_testDirectory, true);
 }

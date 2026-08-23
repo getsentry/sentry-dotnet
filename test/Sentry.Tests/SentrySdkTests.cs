@@ -673,6 +673,210 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    public void CaptureException_NoHandledArgument_NeverThrown_DefaultsToHandled()
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"));
+
+        // The plain overload writes no flag; MainExceptionProcessor infers handled for a never-thrown exception.
+        Assert.NotNull(captured);
+        Assert.True(Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_ExplicitHandled_SetsMechanismHandledOnEvent(bool handled)
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled);
+
+        Assert.NotNull(captured);
+        Assert.Equal(handled, Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_WithConfiguredScope_ExplicitHandled_SetsMechanismHandledOnEvent(bool handled)
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled, terminal: false, s => s.SetTag("scope-callback", "ran"));
+
+        Assert.NotNull(captured);
+        Assert.Equal(handled, Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
+        Assert.Equal("ran", captured.Tags["scope-callback"]);
+    }
+
+    [Fact]
+    public void CaptureException_ExplicitHandled_OverridesFlagSetBySetSentryMechanism()
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        var ex = new Exception("test");
+        ex.SetSentryMechanism("SomeMechanism", handled: false);
+
+        SentrySdk.CaptureException(ex, handled: true);
+
+        Assert.NotNull(captured);
+        Assert.True(Assert.Single(captured.SentryExceptions!).Mechanism!.Handled);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_ExplicitTerminal_SetsMechanismTerminalOnEvent(bool terminal)
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled: false, terminal: terminal);
+
+        Assert.NotNull(captured);
+        var mechanism = Assert.Single(captured.SentryExceptions!).Mechanism!;
+        Assert.False(mechanism.Handled);
+        Assert.Equal(terminal, mechanism.Terminal);
+    }
+
+    [Fact]
+    public void CaptureException_NoTerminalArgument_SetsMechanismTerminalToFalse()
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled: false);
+
+        Assert.NotNull(captured);
+        Assert.False(Assert.Single(captured.SentryExceptions!).Mechanism!.Terminal);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_WithConfiguredScope_ExplicitTerminal_SetsMechanismTerminalOnEvent(bool terminal)
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        SentrySdk.CaptureException(new Exception("test"), handled: false, terminal, _ => { });
+
+        Assert.NotNull(captured);
+        Assert.Equal(terminal, Assert.Single(captured.SentryExceptions!).Mechanism!.Terminal);
+    }
+
+    [Fact]
+    public void CaptureException_HandledTrue_LeavesMechanismTerminalUnset()
+    {
+        SentryEvent captured = null;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+            o.SetBeforeSend(e =>
+            {
+                captured = e;
+                return e;
+            });
+        });
+
+        var ex = new Exception("test");
+        ex.SetSentryMechanism("SomeMechanism", handled: false, terminal: true);
+
+        SentrySdk.CaptureException(ex, handled: true);
+
+        Assert.NotNull(captured);
+        var mechanism = Assert.Single(captured.SentryExceptions!).Mechanism!;
+        Assert.True(mechanism.Handled);
+        Assert.Null(mechanism.Terminal);
+    }
+
+    [Fact]
     public void CaptureMessage_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         using var _ = SentrySdk.Init(o =>
@@ -1068,8 +1272,8 @@ public class SentrySdkTests : IDisposable
         hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
             .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
 
-        var evt = new Sentry.CocoaSdk.SentryEvent();
-        var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
+        var evt = new Sentry.CocoaSdk.SentryObjCEvent();
+        var ex = new Sentry.CocoaSdk.SentryObjCException("Not checked", "EXC_BAD_ACCESS");
         evt.Exceptions = [ex];
 
         // Act
@@ -1111,8 +1315,8 @@ public class SentrySdkTests : IDisposable
         // the Cocoa SDK init before the Hub instance has been created
         var hub = DisabledHub.Instance;
 
-        var evt = new Sentry.CocoaSdk.SentryEvent();
-        var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
+        var evt = new Sentry.CocoaSdk.SentryObjCEvent();
+        var ex = new Sentry.CocoaSdk.SentryObjCException("Not checked", "EXC_BAD_ACCESS");
         evt.Exceptions = [ex];
 
         // Act
@@ -1144,7 +1348,7 @@ public class SentrySdkTests : IDisposable
             InitNativeSdks = false
         };
 
-        var native = new Sentry.CocoaSdk.SentryEvent();
+        var native = new Sentry.CocoaSdk.SentryObjCEvent();
         native.ServerName = "server name";
         native.Dist = "dist";
         native.Logger = "logger";
@@ -1192,7 +1396,7 @@ public class SentrySdkTests : IDisposable
         hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
             .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
 
-        var native = new Sentry.CocoaSdk.SentryEvent();
+        var native = new Sentry.CocoaSdk.SentryObjCEvent();
 
         // Act
         SentrySdk.ProcessOnBeforeSend(options, native, hub);

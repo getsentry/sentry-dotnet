@@ -13,6 +13,7 @@
           Value: my exception,
           Mechanism: {
             Type: generic,
+            Handled: true,
             Synthetic: false,
             IsExceptionGroup: false,
             Data: {
