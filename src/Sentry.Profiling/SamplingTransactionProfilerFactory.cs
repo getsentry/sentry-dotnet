@@ -47,17 +47,17 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             // This can block up to 30 seconds. The timeout is out of our hands.
             var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
 
-            bool disposedDuringStartup;
+            bool disposedWhileSessionStarting;
             lock (_sessionLock)
             {
-                disposedDuringStartup = _disposed;
-                if (!disposedDuringStartup)
+                disposedWhileSessionStarting = _disposed;
+                if (!disposedWhileSessionStarting)
                 {
                     _session = session;
                 }
             }
 
-            if (disposedDuringStartup)
+            if (disposedWhileSessionStarting)
             {
                 session.Dispose();
                 throw new OperationCanceledException(shutdownToken);
