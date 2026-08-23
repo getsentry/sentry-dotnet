@@ -458,6 +458,68 @@ public class SamplingTransactionProfilerTests
     }
 
     [SkippableFact]
+    public void Profiler_WhenNoProfileRunning_TrimsInternedCallStacks()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI.");
+
+        // The interning tables grow whether or not a profile is running, so this deliberately never
+        // starts one - the trim has to happen off the back of ordinary samples. See #5469.
+        var originalMax = SamplingTransactionProfilerFactory.MaxCallStackCount;
+        SamplingTransactionProfilerFactory.MaxCallStackCount = 100;
+        try
+        {
+            using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+            SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+            var traceLog = factory._sessionTask.Result.TraceLog;
+
+            // Produce a variety of stack shapes so the sampler has something to intern.
+            var stopwatch = Stopwatch.StartNew();
+            var random = new Random(4242);
+            var highWaterMark = 0;
+            while (stopwatch.ElapsedMilliseconds < 3_000 && factory.TrimCount == 0)
+            {
+                RecursiveWork(random.Next(8, 24), random);
+                highWaterMark = Math.Max(highWaterMark, traceLog.CallStacks.Count);
+            }
+
+            SkipIfFailsInCI(() =>
+            {
+                if (factory.TrimCount == 0)
+                {
+                    throw new Exception($"No trim occurred; call stacks peaked at {highWaterMark}.");
+                }
+            });
+
+            // Having trimmed at least once, the table must have been reset rather than left to grow.
+            Assert.True(factory.TrimCount > 0, $"Expected at least one trim, call stacks peaked at {highWaterMark}.");
+            Assert.True(traceLog.CallStacks.Count < highWaterMark,
+                $"Expected the interning table to shrink after trimming, but it is {traceLog.CallStacks.Count} against a peak of {highWaterMark}.");
+        }
+        finally
+        {
+            SamplingTransactionProfilerFactory.MaxCallStackCount = originalMax;
+        }
+    }
+
+    private static long RecursiveWork(int depth, Random random)
+    {
+        if (depth <= 0)
+        {
+            double sink = 0;
+            for (var i = 1; i < 5_000; i++)
+            {
+                sink += Math.Sqrt(i);
+            }
+            return (long)sink;
+        }
+
+        // Branch so that different calls produce different stack shapes.
+        return (random.Next(2) == 0)
+            ? RecursiveWork(depth - 1, random) + depth
+            : RecursiveWork(depth - 1, random) - depth;
+    }
+
+    [SkippableFact]
     public void Downsampler_ShouldSample_Works()
     {
         var sut = new Downsampler();

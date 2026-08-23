@@ -1,3 +1,4 @@
+using Microsoft.Diagnostics.Tracing;
 using Sentry.Extensibility;
 using Sentry.Internal;
 
@@ -14,9 +15,24 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
+    // TraceLog interns every distinct call stack it observes for the lifetime of the session and
+    // never releases them, so a long-running process grows without bound. Once the interning tables
+    // exceed this many entries we discard them at the next point where doing so is safe.
+    // Exposed for tests.
+    internal static int MaxCallStackCount = 100_000;
+
     private readonly SentryOptions _options;
 
     internal Task<SampleProfilerSession> _sessionTask;
+
+    private volatile SampleProfilerSession? _session;
+
+    // The end timestamp of the most recently finished profile. That profiler stays subscribed and
+    // keeps consuming samples up to this timestamp, so we cannot trim until a later sample arrives.
+    private double _lastProfileEndTimeMs = double.MinValue;
+
+    // How many times we have trimmed. Exposed for tests.
+    internal int TrimCount;
 
     private bool _errorLogged = false;
 
@@ -31,6 +47,9 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
             // This can block indefinitely.
             await session.WaitForFirstEventAsync().ConfigureAwait(false);
+
+            _session = session;
+            session.SampleEventParser.ThreadSample += TrimSessionStateIfNeeded;
 
             return session;
         });
@@ -69,7 +88,13 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             {
                 return new SamplingTransactionProfiler(_options, _sessionTask.Result, TIME_LIMIT_MS, cancellationToken)
                 {
-                    OnFinish = () => _inProgress = false
+                    OnFinish = endTimeMs =>
+                    {
+                        // Set the end time before clearing _inProgress, so the trim check can never
+                        // observe "no profile running" together with a stale end time.
+                        _lastProfileEndTimeMs = endTimeMs;
+                        _inProgress = false;
+                    }
                 };
             }
             catch (Exception e)
@@ -79,6 +104,49 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             }
         }
         return null;
+    }
+
+    /// <summary>
+    /// Discards TraceLog's call stack interning tables once they grow past <see cref="MaxCallStackCount"/>.
+    /// <para>
+    /// Runs for every sample, on the session's event processing thread - which is also the only thread
+    /// allowed to call <c>TrimLiveSessionState</c>, so this is where the trim has to happen. It cannot be
+    /// driven off profile completion alone, because the tables grow whether or not a profile is running.
+    /// </para>
+    /// </summary>
+    private void TrimSessionStateIfNeeded(TraceEvent data)
+    {
+        // A profile is collecting. Its SampleProfileBuilder caches by CallStackIndex, and a trim
+        // reissues those indexes from zero, so cached entries would resolve to unrelated stacks.
+        if (_inProgress)
+        {
+            return;
+        }
+
+        // The previous profiler stays subscribed after finishing and keeps consuming samples up to its
+        // end time. Only once we see a later sample do we know it has stopped resolving indexes.
+        if (data.TimeStampRelativeMSec <= _lastProfileEndTimeMs)
+        {
+            return;
+        }
+
+        var traceLog = _session?.TraceLog;
+        if (traceLog is null || traceLog.CallStacks.Count <= MaxCallStackCount)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Trimming profiler session state, {0} interned call stacks.", traceLog.CallStacks.Count);
+            traceLog.TrimLiveSessionState();
+            TrimCount++;
+        }
+        catch (Exception e)
+        {
+            // Never let this take down event processing for the whole session.
+            _options.LogWarning(e, "Failed to trim profiler session state.");
+        }
     }
 
     public void Dispose()
