@@ -18,22 +18,24 @@ public static class Program
         {
             quartz.UseSentry(builder.Services, options =>
             {
-                var jobKey = new JobKey(nameof(FirstJob));
-                quartz.AddJob<FirstJob>(opts => opts.WithIdentity(jobKey));
-                quartz.AddTrigger<FirstJob>(opts => opts.ForJob(jobKey).WithIdentity($"{nameof(FirstJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
+                var jobKey1 = new JobKey(nameof(FirstJob));
+                quartz.AddJob<FirstJob>(opts => opts.WithIdentity(jobKey1));
+                quartz.AddTrigger<FirstJob>(opts => opts.ForJob(jobKey1).WithIdentity($"{nameof(FirstJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
 
-                quartz.AddJob<SecondJob>(opts => opts.WithIdentity(jobKey));
-                quartz.AddTrigger<SecondJob>(opts => opts.ForJob(jobKey).WithIdentity($"{nameof(SecondJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
+                var jobKey2 = new JobKey(nameof(SecondJob));
+                quartz.AddJob<SecondJob>(opts => opts.WithIdentity(jobKey2));
+                quartz.AddTrigger<SecondJob>(opts => opts.ForJob(jobKey2).WithIdentity($"{nameof(SecondJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
 
-                quartz.AddJob<ThirdJob>(opts => opts.WithIdentity(jobKey));
-                quartz.AddTrigger<ThirdJob>(opts => opts.ForJob(jobKey).WithIdentity($"{nameof(ThirdJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
+                var jobKey3 = new JobKey(nameof(ThirdJob));
+                quartz.AddJob<ThirdJob>(opts => opts.WithIdentity(jobKey3));
+                quartz.AddTrigger<ThirdJob>(opts => opts.ForJob(jobKey3).WithIdentity($"{nameof(ThirdJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
 
                 if (!builder.Environment.IsProduction())
                 {
                     options.EnableUpsertCronMonitor = false;
                 }
             });
-        });
+        }).AddQuartzHostedService();
 
         var app = builder.Build();
 
