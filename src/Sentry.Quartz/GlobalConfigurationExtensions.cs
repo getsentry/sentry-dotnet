@@ -26,13 +26,7 @@ public static class GlobalConfigurationExtensions
             serviceCollection.Configure(configure);
         }
 
-        configuration.AddJobListener<SentryCronJobListener>(sp =>
-        {
-            var serviceScope = sp.CreateScope();
-            var serviceProvider = serviceScope.ServiceProvider;
-
-            return serviceProvider.GetRequiredService<SentryCronJobListener>();
-        });
+        configuration.AddJobListener<SentryCronJobListener>(sp => sp.GetRequiredService<SentryCronJobListener>());
 
         return configuration;
     }
