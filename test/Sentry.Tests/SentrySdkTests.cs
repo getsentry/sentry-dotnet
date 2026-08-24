@@ -347,6 +347,64 @@ public class SentrySdkTests : IDisposable
 #endif
 
     [Fact]
+    public async Task Init_WithOversizedCorruptCacheFile_DiscardsItAndStarts()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+
+        var cachePath = new SentryOptions { Dsn = ValidDsn, CacheDirectoryPath = cacheDirectory.Path }
+            .TryGetProcessSpecificCacheDirectoryPath();
+        Directory.CreateDirectory(cachePath!);
+
+        // A crash mid-write leaves a file with no header and no newline anywhere in it
+        var file = Path.Combine(cachePath!, "poison.envelope");
+        File.WriteAllBytes(file, new byte[2 * Internal.Extensions.StreamExtensions.MaxLineLength]);
+
+        // Act
+        await RunSdk();
+
+        // Assert
+        File.Exists(file).Should().BeFalse();
+
+        var entries = ((TestOutputDiagnosticLogger)_logger).Entries;
+        entries.Should().Contain(x =>
+            x.Message.Contains("discarding cached envelope") && x.Message.Contains("(truncated)"));
+
+        // The next launch is where the file used to come back out of __processing
+        await RunSdk();
+
+        Directory.GetFiles(cacheDirectory.Path, "*.envelope", SearchOption.AllDirectories)
+            .Should().BeEmpty();
+
+        async Task RunSdk()
+        {
+            SentryOptions options = null;
+            try
+            {
+                using var _ = SentrySdk.Init(o =>
+                {
+                    o.DisableAppDomainProcessExitFlush();
+
+                    o.Dsn = ValidDsn;
+                    o.Debug = true;
+                    o.DiagnosticLogger = _logger;
+                    o.CacheDirectoryPath = cacheDirectory.Path;
+                    o.InitCacheFlushTimeout = TimeSpan.FromSeconds(30);
+                    o.Transport = Substitute.For<ITransport>();
+                    o.AutoSessionTracking = false;
+                    o.InitNativeSdks = false;
+                    options = o;
+                });
+            }
+            finally
+            {
+                var cachingTransport = (CachingTransport)options!.Transport;
+                await cachingTransport!.StopWorkerAsync();
+            }
+        }
+    }
+
+    [Fact]
     public void Disposable_MultipleCalls_NoOp()
     {
         var disposable = SentrySdk.Init(o =>
