@@ -7,8 +7,7 @@ namespace Sentry.Profiling;
 
 internal class SamplingTransactionProfiler : ITransactionProfiler
 {
-    // Invoked with the profile's end timestamp. Samples at or before it may still be consumed by
-    // this profiler after it finishes, so the factory needs the value to know when we are done.
+    // Invoked with the profile's end timestamp
     public Action<double>? OnFinish;
     private readonly CancellationToken _cancellationToken;
     private bool _stopped = false;
