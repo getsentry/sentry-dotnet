@@ -385,9 +385,9 @@ internal class CachingTransport : ITransport, IDisposable
                 }
             }
         }
-        catch (JsonException ex)
+        catch (Exception ex) when (ex is JsonException or InvalidDataException)
         {
-            // Log deserialization errors
+            // A file that won't deserialize now won't later either, so drop it instead of retrying
             LogFailureWithDiscard(file, ex);
         }
 
@@ -399,18 +399,7 @@ internal class CachingTransport : ITransport, IDisposable
 
     private void LogFailureWithDiscard(string file, Exception ex)
     {
-        string? envelopeContents = null;
-        try
-        {
-            if (_fileSystem.FileExists(file))
-            {
-                envelopeContents = _fileSystem.ReadAllTextFromFile(file);
-            }
-        }
-        // ReSharper disable once EmptyGeneralCatchClause
-        catch
-        {
-        }
+        var envelopeContents = TryReadContentsForLogging(file);
 
         if (envelopeContents == null)
         {
@@ -419,6 +408,44 @@ internal class CachingTransport : ITransport, IDisposable
         else
         {
             _options.LogError(ex, "Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", file, envelopeContents);
+        }
+    }
+
+    // Only corrupt files get here and they can be huge, so don't read the whole thing
+    private string? TryReadContentsForLogging(string file)
+    {
+        const int maxLength = 8 * 1024;
+
+        try
+        {
+            if (!_fileSystem.FileExists(file))
+            {
+                return null;
+            }
+
+            using var stream = _fileSystem.OpenFileForReading(file);
+
+            // One byte past the limit, so a full buffer means there was more to read
+            var buffer = new byte[maxLength + 1];
+            var read = 0;
+            while (read < buffer.Length)
+            {
+                var bytesRead = stream.Read(buffer, read, buffer.Length - read);
+                if (bytesRead <= 0)
+                {
+                    break;
+                }
+
+                read += bytesRead;
+            }
+
+            return read > maxLength
+                ? Encoding.UTF8.GetString(buffer, 0, maxLength) + "... (truncated)"
+                : Encoding.UTF8.GetString(buffer, 0, read);
+        }
+        catch
+        {
+            return null;
         }
     }
 

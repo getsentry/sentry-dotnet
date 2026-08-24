@@ -2,6 +2,10 @@ namespace Sentry.Internal.Extensions;
 
 internal static class StreamExtensions
 {
+    // Only headers are read a line at a time and those are one short json object,
+    // so no newline in 64KB means the file is corrupt and we stop rather than load it all
+    internal const int MaxLineLength = 64 * 1024;
+
     public static async Task<byte[]> ReadLineAsync(
         this Stream stream,
         CancellationToken cancellationToken = default)
@@ -37,6 +41,12 @@ internal static class StreamExtensions
             }
 
             result.Write(buffer.Array, 0, bytesRead);
+
+            if (result.Length > MaxLineLength)
+            {
+                throw new InvalidDataException(
+                    $"Expected a line of at most {MaxLineLength} bytes but found no newline within that many.");
+            }
         }
 
         stream.Position -= overreach;
