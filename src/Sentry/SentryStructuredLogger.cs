@@ -13,10 +13,7 @@ public abstract partial class SentryStructuredLogger
 
     internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
-        // A disabled Hub has nothing to send logs to, and DefaultSentryStructuredLogger requires an enabled one.
-        return hub.IsEnabled
-            ? new DefaultSentryStructuredLogger(hub, options, clock, batchCount, batchInterval)
-            : DisabledSentryStructuredLogger.Instance;
+        return new DefaultSentryStructuredLogger(hub, options, clock, batchCount, batchInterval);
     }
 
     private protected SentryStructuredLogger()
