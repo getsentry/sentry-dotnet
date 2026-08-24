@@ -51,12 +51,18 @@ public class TraceLogProcessorTests
         {
             var etlFilePath = Path.ChangeExtension(etlxFilePath, "nettrace");
             var source = new EventPipeEventSource(etlFilePath);
-            typeof(TraceLog)
-            .GetMethod(
+            // This is a non-public API in the perfview submodule, so a bump can move it out from
+            // under us. Fail loudly here rather than letting a null-conditional call silently no-op
+            // and surface as a confusing "file not found" on the TraceLog constructor below.
+            var createFromEventPipeEventSources = typeof(TraceLog).GetMethod(
                 "CreateFromEventPipeEventSources",
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
-                new Type[] { typeof(TraceEventDispatcher), typeof(string), typeof(TraceLogOptions) })?
-            .Invoke(null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
+                new Type[] { typeof(TraceEventDispatcher), typeof(string), typeof(TraceLogOptions) })
+                ?? throw new InvalidOperationException(
+                    "TraceLog.CreateFromEventPipeEventSources was not found. Has the perfview submodule changed its signature?");
+
+            createFromEventPipeEventSources.Invoke(
+                null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
         }
 
         using var traceLog = new TraceLog(etlxFilePath);
