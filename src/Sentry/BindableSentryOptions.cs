@@ -78,7 +78,10 @@ internal partial class BindableSentryOptions
         options.Distribution = Distribution ?? options.Distribution;
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
+#pragma warning disable CS0618 // Type or member is obsolete
+        // Bound for backwards compatibility with existing configuration; the option is ignored.
         options.EnableLogs = EnableLogs ?? options.EnableLogs;
+#pragma warning restore CS0618
         options.EnableMetrics = EnableMetrics ?? options.EnableMetrics;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;

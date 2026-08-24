@@ -25,7 +25,6 @@ public class SentrySerilogSinkExtensionsTests
         public SentryLevel DiagnosticLevel { get; } = SentryLevel.Warning;
         public ReportAssembliesMode ReportAssembliesMode { get; } = ReportAssembliesMode.None;
         public DeduplicateMode DeduplicateMode { get; } = DeduplicateMode.SameExceptionInstance;
-        public bool EnableLogs { get; } = false;
         public bool InitializeSdk { get; } = false;
         public LogEventLevel MinimumEventLevel { get; } = LogEventLevel.Verbose;
         public LogEventLevel MinimumBreadcrumbLevel { get; } = LogEventLevel.Fatal;
@@ -100,7 +99,7 @@ public class SentrySerilogSinkExtensionsTests
             _fixture.SampleRate, _fixture.Release, _fixture.Environment, _fixture.MaxQueueItems,
             _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
             _fixture.RequestBodyCompressionBuffered, _fixture.Debug, _fixture.DiagnosticLevel,
-            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode, null, _fixture.EnableLogs,
+            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode, null, null,
             _fixture.RestrictedToMinimumLevel, _fixture.LevelSwitch);
 
         // Compare individual properties
@@ -122,7 +121,6 @@ public class SentrySerilogSinkExtensionsTests
         Assert.Equal(_fixture.DiagnosticLevel, sut.DiagnosticLevel);
         Assert.Equal(_fixture.ReportAssembliesMode, sut.ReportAssembliesMode);
         Assert.Equal(_fixture.DeduplicateMode, sut.DeduplicateMode);
-        Assert.Equal(_fixture.EnableLogs, sut.EnableLogs);
         Assert.True(sut.InitializeSdk);
         Assert.Equal(_fixture.MinimumEventLevel, sut.MinimumEventLevel);
         Assert.Equal(_fixture.MinimumBreadcrumbLevel, sut.MinimumBreadcrumbLevel);

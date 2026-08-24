@@ -22,7 +22,6 @@ builder.WebHost.UseSentry(options =>
 
     // This option enables Logs sent to Sentry
     // Configure the minimum Log Level of Structured-Logs via e.g. "appsettings.json" and "appsettings.{HostEnvironment}.json"
-    options.EnableLogs = true;
 });
 
 var app = builder.Build();

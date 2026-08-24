@@ -88,7 +88,6 @@ public class SentryWebHostBuilderExtensionsTests
 #endif
         WebHostBuilder.UseSentry((SentryAspNetCoreOptions options) =>
         {
-            options.EnableLogs = true;
             options.InitializeSdk = false;
         });
         using var serviceProvider = Services.BuildServiceProvider();
@@ -105,7 +104,6 @@ public class SentryWebHostBuilderExtensionsTests
     {
         WebHostBuilder.UseSentry((SentryAspNetCoreOptions options) =>
         {
-            options.EnableLogs = true;
             options.InitializeSdk = false;
         });
         using var serviceProvider = Services.BuildServiceProvider();

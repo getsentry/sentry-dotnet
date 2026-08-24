@@ -19,7 +19,6 @@ public class SentryStructuredLoggerBenchmarks
         SentryLoggingOptions options = new()
         {
             Dsn = DsnSamples.ValidDsn,
-            EnableLogs = true,
         };
         options.SetBeforeSendLog((SentryLog log) =>
         {

@@ -136,7 +136,11 @@ public class WebIntegrationTests
 
         // No transaction should be recorded for pre-flight/options requests
         // See: https://github.com/getsentry/sentry-dotnet/issues/1835#issuecomment-1239546099
-        transport.Payloads.Any().Should().BeFalse();
+        // Structured logs are always captured, so only assert on non-log envelope items.
+        transport.Envelopes
+            .SelectMany(envelope => envelope.Items)
+            .Where(item => !item.Header.TryGetValue("type", out var type) || !"log".Equals(type))
+            .Should().BeEmpty();
     }
 
     [ApiController]

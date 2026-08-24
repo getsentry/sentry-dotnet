@@ -59,6 +59,8 @@ namespace Sentry.NLog
         public NLog.Layouts.Layout? BreadcrumbCategory { get; set; }
         public NLog.Layouts.Layout? BreadcrumbLayout { get; set; }
         public NLog.Layouts.Layout? Dsn { get; set; }
+        [System.Obsolete("Logs are always enabled. This option is ignored and will be removed in a future m" +
+            "ajor version. To drop logs, use SetBeforeSendLog and return null.")]
         public bool EnableLogs { get; set; }
         public NLog.Layouts.Layout? Environment { get; set; }
         public int FlushTimeoutSeconds { get; set; }

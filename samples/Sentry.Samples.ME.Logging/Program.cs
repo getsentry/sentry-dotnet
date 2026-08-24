@@ -25,7 +25,6 @@ using var loggerFactory = LoggerFactory.Create(builder =>
         options.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
 
         // This option enables Logs sent to Sentry.
-        options.EnableLogs = true;
         options.SetBeforeSendLog(static log =>
         {
             log.SetAttribute("attribute-key", "attribute-value");
