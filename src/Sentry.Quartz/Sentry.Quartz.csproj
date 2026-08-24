@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Quartz" Version="4.0.0-alpha.1" />
+    <ProjectReference Include="..\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
 
