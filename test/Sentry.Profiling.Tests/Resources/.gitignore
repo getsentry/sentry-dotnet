@@ -1,4 +1,0 @@
-# Regenerated from sample.nettrace by TraceLogProcessorTests when absent.
-# Not committed: the ETLX format version is tied to the TraceEvent build, so a
-# checked-in copy goes stale whenever the perfview submodule is bumped.
-sample.etlx
