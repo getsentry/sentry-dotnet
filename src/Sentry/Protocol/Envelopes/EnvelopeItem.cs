@@ -25,6 +25,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     internal const string TypeValueMetric = "statsd";
     internal const string TypeValueCodeLocations = "metric_meta";
     internal const string TypeValueLog = "log";
+    internal const string TypeValueTraceMetric = "trace_metric";
 
     private const string LengthKey = "length";
     private const string FileNameKey = "filename";
@@ -45,14 +46,26 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         TypeValueEvent => DataCategory.Error,
 
         // These ones are equivalent
+        TypeValueFeedback => DataCategory.Feedback,
         TypeValueTransaction => DataCategory.Transaction,
         TypeValueSpan => DataCategory.Span,
         TypeValueSession => DataCategory.Session,
         TypeValueAttachment => DataCategory.Attachment,
         TypeValueProfile => DataCategory.Profile,
+        TypeValueLog => DataCategory.LogItem,
+        TypeValueTraceMetric => DataCategory.TraceMetric,
+
+        // The "check_in" item type corresponds to the "monitor" data category
+        TypeValueCheckIn => DataCategory.Monitor,
+
+        // The "statsd" item type corresponds to the "metric_bucket" data category
+        TypeValueMetric => DataCategory.MetricBucket,
+
+        // Client reports are SDK telemetry that Relay never rate-limits - mapped to internal
+        TypeValueClientReport => DataCategory.Internal,
 
         // Not all envelope item types equate to data categories
-        // Specifically, user_report and client_report just use "default"
+        // Specifically, user_report just uses "default"
         _ => DataCategory.Default
     };
 
@@ -232,20 +245,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <summary>
-    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sentryUserFeedback"/>.
-    /// </summary>
-    [Obsolete("Use FromFeedback instead.")]
-    public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
-    {
-        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-        {
-            [TypeKey] = TypeValueUserReport
-        };
-
-        return new EnvelopeItem(header, new JsonSerializable(sentryUserFeedback));
-    }
-
-    /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="transaction"/>.
     /// </summary>
     public static EnvelopeItem FromTransaction(SentryTransaction transaction)
@@ -343,6 +342,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             AttachmentType.UnrealContext => "unreal.context",
             AttachmentType.UnrealLogs => "unreal.logs",
             AttachmentType.ViewHierarchy => "event.view_hierarchy",
+            AttachmentType.HeapDump => "event.heapdump",
             _ => "event.attachment"
         };
 
@@ -383,6 +383,18 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         return new EnvelopeItem(header, new JsonSerializable(log));
     }
 
+    internal static EnvelopeItem FromMetric(TraceMetric metric)
+    {
+        var header = new Dictionary<string, object?>(3, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueTraceMetric,
+            ["item_count"] = metric.Length,
+            ["content_type"] = "application/vnd.sentry.items.trace-metric+json",
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(metric));
+    }
+
     private static async Task<Dictionary<string, object?>> DeserializeHeaderAsync(
         Stream stream,
         CancellationToken cancellationToken = default)
@@ -415,18 +427,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             var sentryEvent = Json.Parse(buffer, SentryEvent.FromJson);
 
             return new JsonSerializable(sentryEvent);
-        }
-
-        // User report
-        if (string.Equals(payloadType, TypeValueUserReport, StringComparison.OrdinalIgnoreCase))
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            var bufferLength = (int)(payloadLength ?? stream.Length);
-            var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-            var userFeedback = Json.Parse(buffer, UserFeedback.FromJson);
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            return new JsonSerializable(userFeedback);
         }
 
         // Transaction

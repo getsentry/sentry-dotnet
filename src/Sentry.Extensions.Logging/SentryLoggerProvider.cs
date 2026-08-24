@@ -6,10 +6,10 @@ using Sentry.Reflection;
 namespace Sentry.Extensions.Logging;
 
 /// <summary>
-/// Sentry Logger Provider.
+/// Sentry Logger Provider for <see cref="Breadcrumb"/> and <see cref="SentryEvent"/>.
 /// </summary>
 [ProviderAlias("Sentry")]
-public class SentryLoggerProvider : ILoggerProvider
+internal class SentryLoggerProvider : ILoggerProvider
 {
     private readonly ISystemClock _clock;
     private readonly SentryLoggingOptions _options;

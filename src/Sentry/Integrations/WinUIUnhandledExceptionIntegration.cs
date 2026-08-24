@@ -23,11 +23,7 @@ namespace Sentry.Integrations;
 // to avoid reflection (which would also allow us to support trimming with this
 // integration).
 //
-// This integration is for WinUI 3.  It does NOT work for UWP (WinUI 2).
-// For UWP, the calling application will need to hook the event handler.
-// See https://docs.sentry.io/platforms/dotnet/guides/uwp/
-// (We can't do it automatically without a separate UWP class library,
-// due to a security exception when attempting to attach the event dynamically.)
+// This integration is for WinUI 3.  It does NOT work with UWP or WinUI 2
 
 internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
 {

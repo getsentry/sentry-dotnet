@@ -11,7 +11,7 @@ public class SentryLogTests
 {
     private static readonly DateTimeOffset Timestamp = new(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2));
     private static readonly SentryId TraceId = SentryId.Create();
-    private static readonly SpanId? ParentSpanId = SpanId.Create();
+    private static readonly SpanId? SpanId = Sentry.SpanId.Create();
 
     private static readonly ISystemClock Clock = new MockClock(Timestamp);
 
@@ -23,6 +23,20 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void Create_Default_HasMinimalSpecification()
+    {
+        var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message");
+
+        log.Timestamp.Should().Be(Timestamp);
+        log.TraceId.Should().Be(TraceId);
+        log.Level.Should().Be((SentryLogLevel)24);
+        log.Message.Should().Be("message");
+        log.Template.Should().BeNull();
+        log.Parameters.Should().BeEmpty();
+        log.SpanId.Should().BeNull();
+    }
+
+    [Fact]
     public void Protocol_Default_VerifyAttributes()
     {
         var options = new SentryOptions
@@ -30,20 +44,18 @@ public class SentryLogTests
             Environment = "my-environment",
             Release = "my-release",
         };
-        var sdk = new SdkVersion
-        {
-            Name = "Sentry.Test.SDK",
-            Version = "1.2.3-test+Sentry"
-        };
+        var scope = new Scope(options);
+        scope.Sdk.Name = "Sentry.Test.SDK";
+        scope.Sdk.Version = "1.2.3-test+Sentry";
 
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
         {
             Template = "template",
             Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("param", "params")),
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
         log.SetAttribute("attribute", "value");
-        log.SetDefaultAttributes(options, sdk);
+        log.SetDefaultAttributes(options, scope);
 
         log.Timestamp.Should().Be(Timestamp);
         log.TraceId.Should().Be(TraceId);
@@ -51,20 +63,136 @@ public class SentryLogTests
         log.Message.Should().Be("message");
         log.Template.Should().Be("template");
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("param", "params"), });
-        log.ParentSpanId.Should().Be(ParentSpanId);
+        log.SpanId.Should().Be(SpanId);
 
-        log.TryGetAttribute("attribute", out object attribute).Should().BeTrue();
-        attribute.Should().Be("value");
-        log.TryGetAttribute("sentry.environment", out string environment).Should().BeTrue();
-        environment.Should().Be(options.Environment);
-        log.TryGetAttribute("sentry.release", out string release).Should().BeTrue();
-        release.Should().Be(options.Release);
-        log.TryGetAttribute("sentry.sdk.name", out string name).Should().BeTrue();
-        name.Should().Be(sdk.Name);
-        log.TryGetAttribute("sentry.sdk.version", out string version).Should().BeTrue();
-        version.Should().Be(sdk.Version);
-        log.TryGetAttribute("not-found", out object notFound).Should().BeFalse();
-        notFound.Should().BeNull();
+        // should only show up in sdk integrations
+        log.Attributes.ShouldNotContain<string>("sentry.origin");
+
+        log.Attributes.ShouldContain<string>("attribute", "value");
+        log.Attributes.ShouldContain<string>("sentry.environment", options.Environment);
+        log.Attributes.ShouldContain<string>("sentry.release", options.Release);
+        log.Attributes.ShouldContain<string>("sentry.sdk.name", scope.Sdk.Name);
+        log.Attributes.ShouldContain<string>("sentry.sdk.version", scope.Sdk.Version);
+        log.Attributes.ShouldNotContain<object>("not-found");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_EmptyScopeSdk_UsesSdkInstance()
+    {
+        var options = new SentryOptions();
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        // A console app does not populate scope.Sdk, so its Name and Version stay null.
+        // The log must still carry the SDK name and version (see #5352).
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        SdkVersion.Instance.Version.Should().NotBeNullOrWhiteSpace();
+        log.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
+        log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version);
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_ScopeSdkNameOnly_KeepsIntegrationName()
+    {
+        var options = new SentryOptions();
+        var scope = new Scope(options);
+        scope.Sdk.Name = "sentry.dotnet.serilog";
+
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        // An integration sets the name but its version can be null. The fallback must not relabel it
+        // with the default SDK name; only a fully unset SDK gets the default (see #5483).
+        log.SetDefaultAttributes(options, scope);
+
+        log.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet.serilog");
+        log.Attributes.ShouldNotContain<string>("sentry.sdk.version");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_OptionsServerName_SetsServerAddress()
+    {
+        var options = new SentryOptions { ServerName = "my-server" };
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        log.Attributes.ShouldContain("server.address", "my-server");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_SendDefaultPii_SetsServerAddressToMachineName()
+    {
+        var options = new SentryOptions { SendDefaultPii = true };
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        log.Attributes.ShouldContain("server.address", Environment.MachineName);
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_NoServerNameNoPii_OmitsServerAddress()
+    {
+        var options = new SentryOptions();
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        log.Attributes.ShouldNotContain<string>("server.address");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_ScopeUser_SetsUserAttributes()
+    {
+        var options = new SentryOptions();
+        var scope = new Scope(options)
+        {
+            User = new SentryUser { Id = "user-id", Username = "user-name", Email = "user@example.com" },
+        };
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, scope);
+
+        log.Attributes.ShouldContain("user.id", "user-id");
+        log.Attributes.ShouldContain("user.name", "user-name");
+        log.Attributes.ShouldContain("user.email", "user@example.com");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_NoScopeUser_OmitsUserAttributes()
+    {
+        var options = new SentryOptions();
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        log.Attributes.ShouldNotContain<string>("user.id");
+        log.Attributes.ShouldNotContain<string>("user.name");
+        log.Attributes.ShouldNotContain<string>("user.email");
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WriteTo_NoParameters_NoTemplate(bool hasParameters)
+    {
+        // Arrange
+        ImmutableArray<KeyValuePair<string, object>> parameters = hasParameters
+            ? [new KeyValuePair<string, object>("param", "params")]
+            : [];
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Debug, "message")
+        {
+            Template = "template",
+            Parameters = parameters,
+            SpanId = SpanId,
+        };
+
+        // Act
+        var document = log.ToJsonDocument(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var attributes = document.RootElement.GetProperty("attributes");
+
+        // Assert
+        attributes.TryGetProperty("sentry.message.template", out _).Should().Be(hasParameters);
     }
 
     [Fact]
@@ -77,7 +205,7 @@ public class SentryLogTests
         };
 
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
-        log.SetDefaultAttributes(options, new SdkVersion());
+        log.SetDefaultAttributes(options, new Scope(options));
 
         var envelope = Envelope.FromLog(new StructuredLog([log]));
 
@@ -126,6 +254,14 @@ public class SentryLogTests
                 "sentry.release": {
                   "value": "my-release",
                   "type": "string"
+                },
+                "sentry.sdk.name": {
+                  "value": "{{SdkVersion.Instance.Name}}",
+                  "type": "string"
+                },
+                "sentry.sdk.version": {
+                  "value": "{{SdkVersion.Instance.Version}}",
+                  "type": "string"
                 }
               }
             }
@@ -149,13 +285,16 @@ public class SentryLogTests
         {
             Template = "template",
             Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("0", "string"), new KeyValuePair<string, object>("1", false), new KeyValuePair<string, object>("2", 1), new KeyValuePair<string, object>("3", 2.2)),
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
         log.SetAttribute("string-attribute", "string-value");
         log.SetAttribute("boolean-attribute", true);
         log.SetAttribute("integer-attribute", 3);
         log.SetAttribute("double-attribute", 4.4);
-        log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
+        var scope = new Scope(options);
+        scope.Sdk.Name = "Sentry.Test.SDK";
+        scope.Sdk.Version = "1.2.3-test+Sentry";
+        log.SetDefaultAttributes(options, scope);
 
         var envelope = EnvelopeItem.FromLog(new StructuredLog([log]));
 
@@ -185,6 +324,7 @@ public class SentryLogTests
               "level": "fatal",
               "body": "message",
               "trace_id": "{{TraceId.ToString()}}",
+              "span_id": "{{SpanId.ToString()}}",
               "severity_number": 24,
               "attributes": {
                 "sentry.message.template": {
@@ -237,10 +377,6 @@ public class SentryLogTests
                 },
                 "sentry.sdk.version": {
                   "value": "1.2.3-test+Sentry",
-                  "type": "string"
-                },
-                "sentry.trace.parent_span_id": {
-                  "value": "{{ParentSpanId.ToString()}}",
                   "type": "string"
                 }
               }

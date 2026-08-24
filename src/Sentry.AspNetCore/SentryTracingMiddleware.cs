@@ -140,6 +140,9 @@ internal class SentryTracingMiddleware
         catch (Exception e)
         {
             exception = e;
+            // Rethrow immediately so as not to disrupt the .net 10 pipeline behaviour
+            // See: https://github.com/getsentry/sentry-dotnet/issues/4735
+            throw;
         }
         finally
         {
@@ -175,13 +178,15 @@ internal class SentryTracingMiddleware
                 var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
 
                 // If no Name was found for Transaction, then we don't have the route.
-                if (transaction.Name == string.Empty)
+                // Also, run this block if the caller has opted into always calling the TransactionNameProvider.
+                var customName = new Lazy<string?>(context.TryGetCustomTransactionName, LazyThreadSafetyMode.None);
+                var forceCustomName = _options.PreferTransactionNameProvider && customName.Value is not null;
+                if (transaction.Name == string.Empty || forceCustomName)
                 {
                     var method = context.Request.Method.ToUpperInvariant();
 
                     // If we've set a TransactionNameProvider, use that here
-                    var customTransactionName = context.TryGetCustomTransactionName();
-                    if (!string.IsNullOrEmpty(customTransactionName))
+                    if (customName.Value is { } customTransactionName)
                     {
                         transaction.Name = $"{method} {customTransactionName}";
                         tracer.NameSource = TransactionNameSource.Custom;
@@ -211,11 +216,6 @@ internal class SentryTracingMiddleware
                 {
                     transaction.Finish(exception, status);
                 }
-            }
-
-            if (exception is not null)
-            {
-                ExceptionDispatchInfo.Capture(exception).Throw();
             }
         }
     }

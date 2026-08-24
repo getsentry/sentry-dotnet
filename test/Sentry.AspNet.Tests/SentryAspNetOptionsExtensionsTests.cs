@@ -1,4 +1,5 @@
 using Sentry.AspNet.Internal;
+using Sentry.Internal;
 
 namespace Sentry.AspNet.Tests;
 
@@ -23,6 +24,14 @@ public class SentryAspNetOptionsExtensionsTests :
         var extractor = Assert.IsType<RequestBodyExtractionDispatcher>(processor.PayloadExtractor);
         Assert.Contains(extractor.Extractors, p => p.GetType() == typeof(FormRequestPayloadExtractor));
         Assert.Contains(extractor.Extractors, p => p.GetType() == typeof(DefaultRequestPayloadExtractor));
+    }
+
+    [Fact]
+    public void AddAspNet_RegistersTraceIgnoreStatusCodeTransactionProcessor()
+    {
+        var options = new SentryOptions();
+        options.AddAspNet();
+        Assert.Contains(options.GetAllTransactionProcessors(), p => p is TraceIgnoreStatusCodeTransactionProcessor);
     }
 
     [Fact]

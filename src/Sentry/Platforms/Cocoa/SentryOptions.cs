@@ -69,9 +69,10 @@ public partial class SentryOptions
         public bool EnableAppHangTracking { get; set; } = false;
 
         /// <summary>
-        /// IMPORTANT: This feature is experimental and may have bugs.
+        /// IMPORTANT: App Hangs V2 is now the default.
         /// <br/>
         /// As of version 8.39.0-beta.1 of the sentry-cocoa SDK, you can enable AppHangsV2, which is available on iOS and tvOS.
+        /// Starting with version 9.0.0, App Hangs V2 is enabled by default.
         /// The main difference is that AppHangsV2 differentiates between fully-blocking and non-fully-blocking
         /// app hangs, which you might choose to ignore. A fully-blocking app hang is when the main thread is stuck
         /// completely, and the app can't render a single frame.
@@ -83,6 +84,7 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/#app-hangs-v2
         /// </remarks>
+        [Obsolete("App Hangs V2 is now the default. Use EnableAppHangTracking instead.")]
         public bool EnableAppHangTrackingV2 { get; set; } = false;
 
         /// <summary>
@@ -126,6 +128,19 @@ public partial class SentryOptions
         /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#file-io-instrumentation
         /// </remarks>
         public bool EnableFileIOTracing { get; set; } = true;
+
+        /// <summary>
+        /// When enabled, the SDK inspects memory near the crash site and includes any string contents it
+        /// finds in the crash event. These contents appear as the message subtitle beneath the issue title
+        /// in Sentry.
+        /// The default value is <c>false</c> (disabled).
+        /// </summary>
+        /// <remarks>
+        /// Disabled by default because the inspected memory can contain PII or security-relevant data.
+        /// Enabling this option opts back in to the pre-9.24.0 Cocoa SDK behaviour.
+        /// See https://github.com/getsentry/sentry-cocoa/issues/8571
+        /// </remarks>
+        public bool EnableMemoryIntrospection { get; set; } = false;
 
         /// <summary>
         /// When enabled, the SDK adds breadcrumbs for each network request
@@ -237,7 +252,6 @@ public partial class SentryOptions
         /// </summary>
         public bool EnableTracing { get; set; } = false;
 
-        internal List<string>? InAppExcludes { get; private set; }
         internal List<string>? InAppIncludes { get; private set; }
 
         /// <summary>
@@ -248,10 +262,9 @@ public partial class SentryOptions
         /// <remarks>
         /// https://docs.sentry.io/platforms/apple/configuration/options/#in-app-exclude
         /// </remarks>
+        [Obsolete("This option had no effect and was removed.")]
         public void AddInAppExclude(string prefix)
         {
-            InAppExcludes ??= new List<string>();
-            InAppExcludes.Add(prefix);
         }
 
         /// <summary>
@@ -267,6 +280,72 @@ public partial class SentryOptions
             InAppIncludes ??= new List<string>();
             InAppIncludes.Add(prefix);
         }
+
+        /// <summary>
+        /// Options for experimental features in the native Sentry Cocoa SDK.
+        /// </summary>
+        public class NativeExperimentalOptions
+        {
+            /// <summary>
+            /// Session Replay options.
+            /// </summary>
+            public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+        }
+
+        /// <summary>
+        /// Session Replay options for the native Sentry Cocoa SDK.
+        /// </summary>
+        public class NativeSentryReplayOptions
+        {
+            /// <summary>
+            /// The sample rate for sessions that had an error or crash.
+            /// Value must be between 0.0 and 1.0.
+            /// A value of 0.0 disables session replay for errored sessions.
+            /// A value of 1.0 captures session replay for all errored sessions.
+            /// </summary>
+            public double? OnErrorSampleRate { get; set; }
+            /// <summary>
+            /// The sample rate for all sessions.
+            /// Value must be between 0.0 and 1.0.
+            /// A value of 0.0 disables session replay for all sessions.
+            /// A value of 1.0 captures session replay for all sessions.
+            /// </summary>
+            public double? SessionSampleRate { get; set; }
+            /// <summary>
+            /// Whether to mask all images in the session replay by default.
+            /// </summary>
+            public bool MaskAllImages { get; set; } = true;
+            /// <summary>
+            /// Whether to mask all text in the session replay by default.
+            /// </summary>
+            public bool MaskAllText { get; set; } = true;
+
+            /// <summary>
+            /// When enabled, reduces the impact of Session Replay on the main thread and potential frame drops. This is
+            /// the default and recommended setting, but if you are experiencing issues then you can opt out by setting
+            /// to <c>false</c>.
+            /// </summary>
+            /// <remarks>Defaults to <c>true</c></remarks>
+            public bool EnableViewRendererV2 { get; set; } = true;
+
+            /// <summary>
+            /// <para>
+            /// Enables faster rendering of views at the cost of some visual fidelity.
+            /// </para>
+            /// <para>
+            /// See: https://blog.sentry.io/boosting-session-replay-performance-on-ios-with-view-renderer-v2/
+            /// </para>
+            /// </summary>
+            /// <remarks>Defaults to <c>false</c></remarks>
+            public bool EnableFastViewRendering { get; set; } = false;
+
+            internal bool IsSessionReplayEnabled => OnErrorSampleRate > 0.0 || SessionSampleRate > 0.0;
+        }
+
+        /// <summary>
+        /// ExperimentalOptions
+        /// </summary>
+        public NativeExperimentalOptions ExperimentalOptions { get; set; } = new();
     }
 
     // We actually add the profiling integration automatically in InitSentryCocoaSdk().

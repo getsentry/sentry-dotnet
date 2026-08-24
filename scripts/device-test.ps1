@@ -12,7 +12,7 @@ param(
 
 Set-StrictMode -Version latest
 $ErrorActionPreference = 'Stop'
-. $PSScriptRoot/ios-simulator-utils.ps1
+. $PSScriptRoot/device-test-utils.ps1
 
 if (!$Build -and !$Run)
 {
@@ -26,7 +26,7 @@ try
 {
     if (!$Tfm)
     {
-        $Tfm = 'net9.0'
+        $Tfm = 'net10.0'
     }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
@@ -52,8 +52,6 @@ try
     {
         $Tfm += '-ios'
         $group = 'apple'
-        # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
-        $arch = 'x64'
         $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/iossimulator-$arch"
         $envValue = $CI ? 'true' : 'false'
         $arguments = @(
@@ -64,7 +62,7 @@ try
             '--set-env', "CI=$envValue"
         )
 
-        $udid = Get-IosSimulatorUdid -IosVersion '18.5' -Verbose
+        $udid = Get-IosSimulatorUdid -Verbose
         if ($udid) {
             $arguments += @('--device', $udid)
         } else {
@@ -84,14 +82,7 @@ try
 
     if ($Run)
     {
-        if (!(Get-Command xharness -ErrorAction SilentlyContinue))
-        {
-            Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/tmp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease.25466.1' `
-                --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
-            Pop-Location
-        }
-
+        Install-XHarness
         Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
         try
         {
@@ -102,6 +93,16 @@ try
             xharness $group test $arguments --output-directory=test_output
             if ($LASTEXITCODE -ne 0)
             {
+                $testResultsXml = './test_output/TestResults.xml'
+                if (Test-Path $testResultsXml)
+                {
+                    $failedTests = Select-String -Path $testResultsXml -Pattern 'result="Fail"'
+                    if ($failedTests)
+                    {
+                        Write-Host "`nFailed tests:"
+                        $failedTests | ForEach-Object { Write-Host $_.Line }
+                    }
+                }
                 throw 'xharness run failed with non-zero exit code'
             }
         }
@@ -109,9 +110,12 @@ try
         {
             if ($CI)
             {
-                scripts/parse-xunit2-xml.ps1 (Get-Item ./test_output/*.xml).FullName | Out-File $env:GITHUB_STEP_SUMMARY
+                $xmlFiles = Get-Item ./test_output/*.xml -ErrorAction SilentlyContinue
+                if ($xmlFiles)
+                {
+                    scripts/parse-xunit2-xml.ps1 $xmlFiles.FullName | Out-File $env:GITHUB_STEP_SUMMARY
+                }
             }
-
         }
     }
 }

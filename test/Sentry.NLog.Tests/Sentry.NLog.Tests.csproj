@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms)</TargetFrameworks>
     <!-- These tests fail on Mono -->
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
@@ -19,6 +19,12 @@
     <Using Include="NLog.Targets.Wrappers" />
     <Using Include="System.Xml" />
 
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="SentryTargetTests.Structured.cs">
+      <DependentUpon>SentryTargetTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

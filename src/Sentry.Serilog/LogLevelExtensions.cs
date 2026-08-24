@@ -38,7 +38,7 @@ internal static class SentryExtensions
             LogEventLevel.Information => BreadcrumbLevel.Info,
             LogEventLevel.Warning => BreadcrumbLevel.Warning,
             LogEventLevel.Error => BreadcrumbLevel.Error,
-            LogEventLevel.Fatal => BreadcrumbLevel.Critical,
+            LogEventLevel.Fatal => BreadcrumbLevel.Fatal,
             _ => (BreadcrumbLevel)level
         };
     }

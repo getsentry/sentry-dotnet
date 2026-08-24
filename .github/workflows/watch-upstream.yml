@@ -1,0 +1,35 @@
+name: Watch Upstream Changes
+
+on:
+  # Run weekly on Monday mornings.
+  schedule:
+    - cron: "0 6 * * 1"
+  # Allow manual triggering for testing or on-demand checks.
+  workflow_dispatch:
+
+jobs:
+  check-upstream:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: dotnet/android - AssemblyStore reader
+            repo: dotnet/android
+            # Upstream moved from tools/assembly-store-reader-mk2/ to the read-assembly-store skill in dotnet/android#12108 (f1aecf9). 
+            path: .github/skills/read-assembly-store/src/AssemblyStore
+            local_path: src/Sentry.Android.AssemblyReader/
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check for upstream changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          scripts/watch-upstream.sh "${{ matrix.repo }}" "${{ matrix.path }}" "${{ matrix.local_path }}"

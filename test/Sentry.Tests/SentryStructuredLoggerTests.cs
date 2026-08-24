@@ -22,12 +22,14 @@ public partial class SentryStructuredLoggerTests : IDisposable
             BatchSize = 2;
             BatchTimeout = Timeout.InfiniteTimeSpan;
             TraceId = SentryId.Create();
-            ParentSpanId = SpanId.Create();
+            SpanId = Sentry.SpanId.Create();
 
             Hub.IsEnabled.Returns(true);
 
-            var traceHeader = new SentryTraceHeader(TraceId, ParentSpanId.Value, null);
-            Hub.GetTraceHeader().Returns(traceHeader);
+            var span = Substitute.For<ISpan>();
+            span.TraceId.Returns(TraceId);
+            span.SpanId.Returns(SpanId.Value);
+            Hub.GetSpan().Returns(span);
 
             ExpectedAttributes = new Dictionary<string, string>(1)
             {
@@ -42,15 +44,18 @@ public partial class SentryStructuredLoggerTests : IDisposable
         public int BatchSize { get; set; }
         public TimeSpan BatchTimeout { get; set; }
         public SentryId TraceId { get; private set; }
-        public SpanId? ParentSpanId { get; private set; }
+        public SpanId? SpanId { get; private set; }
 
         public Dictionary<string, string> ExpectedAttributes { get; }
 
-        public void WithoutTraceHeader()
+        public void WithoutActiveSpan()
         {
-            Hub.GetTraceHeader().Returns((SentryTraceHeader?)null);
-            TraceId = SentryId.Empty;
-            ParentSpanId = SpanId.Empty;
+            Hub.GetSpan().Returns((ISpan?)null);
+
+            var scope = new Scope();
+            Hub.SubstituteConfigureScope(scope);
+            TraceId = scope.PropagationContext.TraceId;
+            SpanId = null;
         }
 
         public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock, BatchSize, BatchTimeout);
@@ -71,7 +76,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Create_Enabled_NewDefaultInstance()
     {
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
 
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
@@ -83,7 +88,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Create_Disabled_CachedDisabledInstance()
     {
-        _fixture.Options.Experimental.EnableLogs.Should().BeFalse();
+        _fixture.Options.EnableLogs.Should().BeFalse();
 
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
@@ -93,10 +98,10 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Log_WithoutTraceHeader_CapturesEnvelope()
+    public void Log_WithoutActiveSpan_CapturesEnvelope()
     {
-        _fixture.WithoutTraceHeader();
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.WithoutActiveSpan();
+        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -115,8 +120,8 @@ public partial class SentryStructuredLoggerTests : IDisposable
         var invocations = 0;
         SentryLog configuredLog = null!;
 
-        _fixture.Options.Experimental.EnableLogs = true;
-        _fixture.Options.Experimental.SetBeforeSendLog((SentryLog log) =>
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog((SentryLog log) =>
         {
             invocations++;
             configuredLog = log;
@@ -137,8 +142,8 @@ public partial class SentryStructuredLoggerTests : IDisposable
     {
         var invocations = 0;
 
-        _fixture.Options.Experimental.EnableLogs = true;
-        _fixture.Options.Experimental.SetBeforeSendLog((SentryLog log) =>
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog((SentryLog log) =>
         {
             invocations++;
             return null;
@@ -154,7 +159,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Log_InvalidFormat_DoesNotCaptureEnvelope()
     {
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}, {4}", "string", true, 1, 2.2);
@@ -170,7 +175,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Log_InvalidConfigureLog_DoesNotCaptureEnvelope()
     {
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         logger.LogTrace(static (SentryLog log) => throw new InvalidOperationException(), "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
@@ -186,8 +191,8 @@ public partial class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Log_InvalidBeforeSendLog_DoesNotCaptureEnvelope()
     {
-        _fixture.Options.Experimental.EnableLogs = true;
-        _fixture.Options.Experimental.SetBeforeSendLog(static (SentryLog log) => throw new InvalidOperationException());
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog(static (SentryLog log) => throw new InvalidOperationException());
         var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
@@ -203,7 +208,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Flush_AfterLog_CapturesEnvelope()
     {
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -225,7 +230,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Dispose_BeforeLog_DoesNotCaptureEnvelope()
     {
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         var defaultLogger = logger.Should().BeOfType<DefaultSentryStructuredLogger>().Which;
@@ -235,9 +240,58 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Info);
-        entry.Message.Should().Be("Log Buffer full ... dropping log");
+        entry.Message.Should().Be("{0}-Buffer full ... dropping {0}");
         entry.Exception.Should().BeNull();
-        entry.Args.Should().BeEmpty();
+        entry.Args.Should().BeEquivalentTo([nameof(SentryLog)]);
+    }
+
+    [Fact]
+    public void Log_WithScopeUser_SetsUserAttributes()
+    {
+        var scope = new Scope();
+        scope.User = new SentryUser { Id = "user-id", Username = "user-name", Email = "user@example.com" };
+        _fixture.Hub.SubstituteConfigureScope(scope);
+
+        SentryLog capturedLog = null!;
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog((SentryLog log) =>
+        {
+            capturedLog = log;
+            return log;
+        });
+        var logger = _fixture.GetSut();
+
+        logger.LogInfo("A message");
+        logger.Flush();
+
+        capturedLog.Should().NotBeNull();
+        capturedLog.Attributes.ShouldContain("user.id", "user-id");
+        capturedLog.Attributes.ShouldContain("user.name", "user-name");
+        capturedLog.Attributes.ShouldContain("user.email", "user@example.com");
+    }
+
+    [Fact]
+    public void Log_WithoutScopeUser_DoesNotSetUserAttributes()
+    {
+        var scope = new Scope();
+        _fixture.Hub.SubstituteConfigureScope(scope);
+
+        SentryLog capturedLog = null!;
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog((SentryLog log) =>
+        {
+            capturedLog = log;
+            return log;
+        });
+        var logger = _fixture.GetSut();
+
+        logger.LogInfo("A message");
+        logger.Flush();
+
+        capturedLog.Should().NotBeNull();
+        capturedLog.Attributes.ShouldNotContain<object>("user.id");
+        capturedLog.Attributes.ShouldNotContain<object>("user.name");
+        capturedLog.Attributes.ShouldNotContain<object>("user.email");
     }
 
     private static void ConfigureLog(SentryLog log)
@@ -246,7 +300,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 }
 
-internal static class AssertionExtensions
+internal static class LoggerAssertionExtensions
 {
     public static void AssertEnvelope(this SentryStructuredLoggerTests.Fixture fixture, Envelope envelope, SentryLogLevel level)
     {
@@ -283,17 +337,26 @@ internal static class AssertionExtensions
         log.Message.Should().Be("Template string with arguments: string, True, 1, 2.2");
         log.Template.Should().Be("Template string with arguments: {0}, {1}, {2}, {3}");
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("0", "string"), new("1", true), new("2", 1), new("3", 2.2), });
-        log.ParentSpanId.Should().Be(fixture.ParentSpanId);
+        log.SpanId.Should().Be(fixture.SpanId);
 
         foreach (var expectedAttribute in fixture.ExpectedAttributes)
         {
-            log.TryGetAttribute(expectedAttribute.Key, out string? value).Should().BeTrue();
-            value.Should().Be(expectedAttribute.Value);
+            log.Attributes.ShouldContain<string>(expectedAttribute.Key, expectedAttribute.Value);
         }
     }
 
     private static KeyValuePair<string, object?> CreateHeader(string name, object? value)
     {
         return new KeyValuePair<string, object?>(name, value);
+    }
+
+    public static SentryLog ShouldContainSingleLog(this Envelope envelope)
+    {
+        var envelopeItem = envelope.Items.Should().ContainSingle().Which;
+        var serializable = envelopeItem.Payload.Should().BeOfType<JsonSerializable>().Which;
+        var log = serializable.Source.Should().BeOfType<StructuredLog>().Which;
+
+        log.Items.Length.Should().Be(1);
+        return log.Items[0];
     }
 }

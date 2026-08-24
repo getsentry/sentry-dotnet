@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Integrations;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
@@ -9,7 +8,7 @@ namespace Sentry.Internal;
 
 internal class Hub : IHub, IDisposable
 {
-    private readonly object _sessionPauseLock = new();
+    private readonly Lock _sessionPauseLock = new();
 
     private readonly ISystemClock _clock;
     private readonly ISessionManager _sessionManager;
@@ -24,15 +23,18 @@ internal class Hub : IHub, IDisposable
     private readonly MemoryMonitor? _memoryMonitor;
 #endif
 
-    private int _isPersistedSessionRecovered;
+    private InterlockedBoolean _isPersistedSessionRecovered;
 
     // Internal for testability
     internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
 
-    private int _isEnabled = 1;
-    public bool IsEnabled => _isEnabled == 1;
+    private InterlockedBoolean _isEnabled = true;
+
+    public bool IsEnabled => _isEnabled;
+
+    public bool IsSessionActive => _sessionManager.IsSessionActive;
 
     internal SentryOptions Options => _options;
 
@@ -79,6 +81,7 @@ internal class Hub : IHub, IDisposable
         }
 
         Logger = SentryStructuredLogger.Create(this, options, _clock);
+        Metrics = SentryMetricEmitter.Create(this, options, _clock);
 
 #if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpOptions is not null)
@@ -179,6 +182,12 @@ internal class Hub : IHub, IDisposable
         // after disposing the hub will result in that transaction not being sent to Sentry.
         if (!IsEnabled)
         {
+            return NoOpTransaction.Instance;
+        }
+
+        if (_options.DisableSentryTracing)
+        {
+            _options.LogWarning("Sentry transaction dropped because OpenTelemetry is enabled");
             return NoOpTransaction.Instance;
         }
 
@@ -290,6 +299,12 @@ internal class Hub : IHub, IDisposable
 
     public SentryTraceHeader GetTraceHeader()
     {
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null, SpanId: not null } externalPropagationContext)
+        {
+            return new SentryTraceHeader(externalPropagationContext.TraceId.Value,
+                externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
+        }
+
         if (GetSpan()?.GetTraceHeader() is { } traceHeader)
         {
             return traceHeader;
@@ -303,6 +318,11 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null } externalPropagationContext)
+        {
+            return externalPropagationContext.GetBaggageHeader();
+        }
+
         var span = GetSpan();
         if (span?.GetTransaction().GetDynamicSamplingContext() is { IsEmpty: false } dsc)
         {
@@ -311,6 +331,24 @@ internal class Hub : IHub, IDisposable
 
         var propagationContext = CurrentScope.PropagationContext;
         return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession).ToBaggageHeader();
+    }
+
+    public W3CTraceparentHeader? GetTraceparentHeader()
+    {
+        if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null, SpanId: not null } externalPropagationContext)
+        {
+            return new W3CTraceparentHeader(externalPropagationContext.TraceId.Value,
+                externalPropagationContext.SpanId.Value, externalPropagationContext.IsSampled);
+        }
+
+        if (GetSpan()?.GetTraceHeader() is { } traceHeader)
+        {
+            return new W3CTraceparentHeader(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled);
+        }
+
+        // We fall back to the propagation context
+        var propagationContext = CurrentScope.PropagationContext;
+        return new W3CTraceparentHeader(propagationContext.TraceId, propagationContext.SpanId, null);
     }
 
     public TransactionContext ContinueTrace(
@@ -340,6 +378,13 @@ internal class Hub : IHub, IDisposable
         string? name = null,
         string? operation = null)
     {
+        if (!ShouldContinueTrace(baggageHeader))
+        {
+            _options.LogDebug("Not continuing trace due to org ID validation. Starting new trace.");
+            traceHeader = null;
+            baggageHeader = null;
+        }
+
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession);
         ConfigureScope(static (scope, propagationContext) => scope.SetPropagationContext(propagationContext), propagationContext);
 
@@ -353,10 +398,43 @@ internal class Hub : IHub, IDisposable
             isParentSampled: traceHeader?.IsSampled);
     }
 
+    internal bool ShouldContinueTrace(BaggageHeader? baggageHeader)
+    {
+        var sdkOrgId = _options.GetEffectiveOrgId();
+
+        string? baggageOrgId = null;
+        if (baggageHeader is not null)
+        {
+            var sentryMembers = baggageHeader.GetSentryMembers();
+            sentryMembers.TryGetValue("org_id", out baggageOrgId);
+        }
+
+        // Mismatched org IDs always cause a new trace, regardless of strict mode
+        if (!string.IsNullOrEmpty(sdkOrgId) && !string.IsNullOrEmpty(baggageOrgId) && sdkOrgId != baggageOrgId)
+        {
+            return false;
+        }
+
+        // In strict mode, both must be present and match
+        if (_options.StrictTraceContinuation)
+        {
+            // If both are missing, continue (nothing to compare)
+            if (string.IsNullOrEmpty(sdkOrgId) && string.IsNullOrEmpty(baggageOrgId))
+            {
+                return true;
+            }
+
+            // Both must be present and equal
+            return sdkOrgId == baggageOrgId;
+        }
+
+        return true;
+    }
+
     public void StartSession()
     {
         // Attempt to recover persisted session left over from previous run
-        if (Interlocked.Exchange(ref _isPersistedSessionRecovered, 1) != 1)
+        if (_isPersistedSessionRecovered.Exchange(true) != true)
         {
             try
             {
@@ -471,6 +549,14 @@ internal class Hub : IHub, IDisposable
         evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
     }
 
+    private void ApplyTraceContextToEvent(SentryEvent evt, IExternalPropagationContext propagationContext)
+    {
+        evt.Contexts.Trace.TraceId = propagationContext.TraceId ?? default;
+        evt.Contexts.Trace.SpanId = propagationContext.SpanId ?? default;
+        evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
+        evt.DynamicSamplingContext = propagationContext.GetDynamicSamplingContext(_options, _replaySession);
+    }
+
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
 
     private void AddBreadcrumbForException(SentryEvent evt, Scope scope)
@@ -501,11 +587,11 @@ internal class Hub : IHub, IDisposable
                     {"exception_message", exceptionMessage}
                 };
             }
-            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Critical);
+            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Fatal);
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failure to store breadcrumb for exception event: {0}", evt.EventId);
+            _options.LogError(e, "Failure to store breadcrumb for exception event: '{0}'", evt.EventId);
         }
     }
 
@@ -555,9 +641,13 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            // We get the span linked to the event or fall back to the current span
-            var span = GetLinkedSpan(evt) ?? scope.Span;
-            if (span is not null)
+            // Prefer ExternalPropagationContext then linked span, then scope span and finally fall back to the
+            // propagation context
+            if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null } externalPropagationContext)
+            {
+                ApplyTraceContextToEvent(evt, externalPropagationContext);
+            }
+            else if ((GetLinkedSpan(evt) ?? scope.Span) is { } span)
             {
                 ApplyTraceContextToEvent(evt, span);
             }
@@ -572,12 +662,22 @@ internal class Hub : IHub, IDisposable
             scope.LastEventId = id;
             scope.SessionUpdate = null;
 
-            if (evt.HasTerminalException() && scope.Transaction is { } transaction)
+            if (evt.GetExceptionType() is SentryEvent.ExceptionType.UnhandledTerminal
+                && scope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
-                _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                transaction.Finish(SpanStatus.Aborted);
+                // Skip for OpenTelemetry transactions - these get handled by the SpanProcessor instead. See https://github.com/getsentry/sentry-dotnet/pull/5310
+                if (transaction is IBaseTracer { IsOtelInstrumenter: true })
+                {
+                    _options.LogDebug(
+                        "Not ending OpenTelemetry transaction as Aborted; it is finished by the SentrySpanProcessor.");
+                }
+                else
+                {
+                    _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
+                    transaction.Finish(SpanStatus.Aborted);
+                }
             }
 
             return id;
@@ -589,11 +689,13 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -601,19 +703,23 @@ internal class Hub : IHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            CaptureFeedback(feedback, clonedScope, hint);
+            return CaptureFeedback(feedback, out result, clonedScope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result, Scope? scope = null,
+        SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -625,11 +731,13 @@ internal class Hub : IHub, IDisposable
             }
 
             scope ??= CurrentScope;
-            CurrentClient.CaptureFeedback(feedback, scope, hint);
+            return CurrentClient.CaptureFeedback(feedback, out result, scope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
@@ -651,7 +759,7 @@ internal class Hub : IHub, IDisposable
                 Level = _options.HeapDumpOptions?.Level ?? SentryLevel.Warning,
             };
             var hint = new SentryHint(_options);
-            hint.AddAttachment(dumpFile);
+            hint.AddAttachment(dumpFile, AttachmentType.HeapDump);
             CaptureEvent(evt, CurrentScope, hint);
         }
         catch (Exception e)
@@ -660,34 +768,6 @@ internal class Hub : IHub, IDisposable
         }
     }
 #endif
-
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(userFeedback.Email) && !EmailValidator.IsValidEmail(userFeedback.Email))
-            {
-                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", userFeedback.Email);
-                userFeedback = new UserFeedback(
-                    userFeedback.EventId,
-                    userFeedback.Name,
-                    null, // Scrubbed email
-                    userFeedback.Comments);
-            }
-
-            CurrentClient.CaptureUserFeedback(userFeedback);
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failure to capture user feedback: {0}", userFeedback.EventId);
-        }
-    }
 
     public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
@@ -823,6 +903,7 @@ internal class Hub : IHub, IDisposable
         try
         {
             Logger.Flush();
+            Metrics.Flush();
             await CurrentClient.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
@@ -835,7 +916,7 @@ internal class Hub : IHub, IDisposable
     {
         _options.LogInfo("Disposing the Hub.");
 
-        if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
+        if (!_isEnabled.Exchange(false))
         {
             return;
         }
@@ -857,7 +938,9 @@ internal class Hub : IHub, IDisposable
 #endif
 
         Logger.Flush();
+        Metrics.Flush();
         (Logger as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryStructuredLogger
+        (Metrics as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryMetricEmitter
 
         try
         {
@@ -869,12 +952,16 @@ internal class Hub : IHub, IDisposable
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
+        // Stop the backpressure monitor's worker so it doesn't outlive the hub...  this cancels the 
+        // worker but clients can still read the downsample factor while draining.
         _backpressureMonitor?.Dispose();
 
 #if __IOS__
             // TODO
 #elif ANDROID
-            // TODO
+        // TODO: For some reason the integration tests on Android fail if we Close on the Java SDK...
+        // https://github.com/getsentry/sentry-dotnet/blob/0adaddb7ad91d0b41a2c38aacc64727ce54b2a3b/integration-test/android.Tests.ps1#L154
+        // JavaSdk.Sentry.Close();
 #elif NET8_0_OR_GREATER
         if (SentryNative.IsAvailable)
         {
@@ -887,4 +974,6 @@ internal class Hub : IHub, IDisposable
     public SentryId LastEventId => CurrentScope.LastEventId;
 
     public SentryStructuredLogger Logger { get; }
+
+    public SentryMetricEmitter Metrics { get; }
 }

@@ -16,7 +16,7 @@ public class LogLevelExtensionsTests
         yield return new object[] { (BreadcrumbLevel.Info, LogLevel.Information) };
         yield return new object[] { (BreadcrumbLevel.Warning, LogLevel.Warning) };
         yield return new object[] { (BreadcrumbLevel.Error, LogLevel.Error) };
-        yield return new object[] { (BreadcrumbLevel.Critical, LogLevel.Critical) };
+        yield return new object[] { (BreadcrumbLevel.Fatal, LogLevel.Critical) };
         yield return new object[] { ((BreadcrumbLevel)6, LogLevel.None) };
         yield return new object[] { ((BreadcrumbLevel)int.MaxValue, (LogLevel)int.MaxValue) };
     }

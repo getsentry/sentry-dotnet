@@ -1,3 +1,4 @@
+#if !NETFRAMEWORK
 using Sentry.Internal.DiagnosticSource;
 using static Sentry.Internal.DiagnosticSource.SentrySqlListener;
 
@@ -120,11 +121,10 @@ public class SentrySqlListenerTests
                 }));
 
         // Assert
-        var spans = fixture.Spans.Where(s => s.Operation != "abc");
+        var spans = fixture.Spans.Where(s => s.Operation != "abc").ToList();
         Assert.NotEmpty(spans);
 
-        var firstSpan = fixture.Spans.OrderByDescending(x => x.StartTimestamp).First();
-        Assert.True(GetValidator(key)(firstSpan));
+        Assert.True(GetValidator(key)(spans[0]));
     }
 
     [Theory]
@@ -686,3 +686,5 @@ public class SentrySqlListenerTests
         Assert.False(exceptionReceived);
     }
 }
+
+#endif

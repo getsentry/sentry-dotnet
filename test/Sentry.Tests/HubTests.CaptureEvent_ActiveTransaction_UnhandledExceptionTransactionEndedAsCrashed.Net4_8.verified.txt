@@ -79,16 +79,6 @@
                 ImageSize: null,
                 DebugId: ________-____-____-____-____________-________,
                 DebugChecksum: ______:________________________________________________________________,
-                DebugFile: .../Sentry.Tests.pdb,
-                CodeId: ______________,
-                CodeFile: .../Sentry.Tests.dll
-              },
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
                 DebugFile: xunit.execution.desktop.pdb,
                 CodeId: ______________,
                 CodeFile: .../xunit.execution.desktop.dll

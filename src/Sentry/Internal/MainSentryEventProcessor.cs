@@ -34,7 +34,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
 
     public SentryEvent Process(SentryEvent @event)
     {
-        _options.LogDebug("Running main event processor on: Event {0}", @event.EventId);
+        _options.LogDebug("Running main event processor on: Event '{0}'", @event.EventId);
 
         if (TimeZoneInfo.Local is { } timeZoneInfo)
         {
@@ -83,8 +83,8 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         @event.Release ??= Release;
         @event.Distribution ??= Distribution;
 
-        // if there's no exception with a stack trace, then get the current stack trace
-        if (@event.Exception?.StackTrace is null)
+        // If there's no current thread on the event and there is no exception with a stack trace, get the current stack trace
+        if (@event.Exception?.StackTrace is null && @event.SentryThreads?.Any(t => t.Current == true) != true)
         {
             var stackTrace = @event.SentryExceptions?.FirstOrDefault()?.Stacktrace
                             ?? SentryStackTraceFactoryAccessor().Create();

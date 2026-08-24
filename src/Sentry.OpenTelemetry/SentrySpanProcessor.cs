@@ -134,13 +134,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         };
 
         var span = parentSpan.StartChild(context);
+        // Fuse the Activity via a WeakReference so _map does not pin it, letting PruneFilteredSpans evict
+        // never-ended spans. #3198 intended weak refs here but SetFused stores the value strongly.
+        SetFusedActivity(span, data);
         if (span is SpanTracer spanTracer)
         {
             spanTracer.Origin = OpenTelemetryOrigin;
             spanTracer.StartTimestamp = data.StartTimeUtc;
             // Used to filter out spans that are not recorded when finishing a transaction.
-            spanTracer.SetFused(data);
-            spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+            spanTracer.IsFiltered = () => GetFusedActivity(spanTracer) is { IsAllDataRequested: false, Recorded: false };
         }
         _map[data.SpanId] = span;
     }
@@ -172,8 +174,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
             tracer.StartTimestamp = data.StartTimeUtc;
         }
-        _hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
-        transaction.SetFused(data);
+        _hub.ConfigureScope(static (scope, transaction) =>
+        {
+            scope.Transaction ??= transaction;
+        }, transaction);
+        // Fuse weakly so _map does not pin the Activity.
+        SetFusedActivity(transaction, data);
         _map[data.SpanId] = transaction;
     }
 
@@ -239,6 +245,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             if (statusCode is { } responseStatusCode)
             {
                 transaction.Contexts.Response.StatusCode = responseStatusCode;
+                transaction.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, responseStatusCode);
             }
 
             // Use the end timestamp from the activity data.
@@ -300,13 +307,27 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         foreach (var mappedItem in _map)
         {
             var (spanId, span) = mappedItem;
-            var activity = span.GetFused<Activity>();
-            if (activity is { Recorded: false, IsAllDataRequested: false })
+            var activity = GetFusedActivity(span);
+            // Prune when the activity has been GC'd (weak ref returns null): it can no longer call OnEnd, so
+            // the span would otherwise stay in _map forever.
+            if (activity is null or { Recorded: false, IsAllDataRequested: false })
             {
                 _map.TryRemove(spanId, out _);
             }
         }
     }
+
+    private const string ActivityPropertyName = "Activity";
+
+    // Fuses the Activity onto the span via a WeakReference so _map does not pin it.
+    private static void SetFusedActivity(ISpan span, Activity data) =>
+        span.SetFused(ActivityPropertyName, new WeakReference<Activity>(data));
+
+    // Returns the fused Activity, or null once it has been garbage-collected.
+    private static Activity? GetFusedActivity(ISpan span) =>
+        span.GetFused<WeakReference<Activity>>(ActivityPropertyName) is { } weakRef && weakRef.TryGetTarget(out var activity)
+            ? activity
+            : null;
 
     private bool NeedsPruning()
     {

@@ -9,40 +9,41 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
     private readonly SentryOptions _options;
     private readonly ISystemClock _clock;
 
-    private readonly StructuredLogBatchProcessor _batchProcessor;
+    private readonly BatchProcessor<SentryLog> _batchProcessor;
 
     internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
         Debug.Assert(hub.IsEnabled);
-        Debug.Assert(options is { Experimental.EnableLogs: true });
+        Debug.Assert(options is { EnableLogs: true });
 
         _hub = hub;
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new StructuredLogBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
+        _batchProcessor = new SentryLogBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     /// <inheritdoc />
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         var timestamp = _clock.GetUtcNow();
-        var traceHeader = _hub.GetTraceHeader() ?? SentryTraceHeader.Empty;
+        _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
         string message;
-        try
-        {
-            message = string.Format(CultureInfo.InvariantCulture, template, parameters ?? []);
-        }
-        catch (FormatException e)
-        {
-            _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
-            return;
-        }
+        ImmutableArray<KeyValuePair<string, object>> @params;
 
-        ImmutableArray<KeyValuePair<string, object>> @params = default;
         if (parameters is { Length: > 0 })
         {
+            try
+            {
+                message = string.Format(CultureInfo.InvariantCulture, template, parameters);
+            }
+            catch (FormatException e)
+            {
+                _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
+                return;
+            }
+
             var builder = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>(parameters.Length);
             for (var index = 0; index < parameters.Length; index++)
             {
@@ -50,12 +51,18 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
             }
             @params = builder.DrainToImmutable();
         }
+        else
+        {
+            message = template;
+            template = null!; // SentryLog.Template is declared nullable (string?)
+            @params = ImmutableArray<KeyValuePair<string, object>>.Empty;
+        }
 
-        SentryLog log = new(timestamp, traceHeader.TraceId, level, message)
+        SentryLog log = new(timestamp, traceId, level, message)
         {
             Template = template,
             Parameters = @params,
-            ParentSpanId = traceHeader.SpanId,
+            SpanId = spanId,
         };
 
         try
@@ -69,7 +76,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         }
 
         var scope = _hub.GetScope();
-        log.SetDefaultAttributes(_options, scope?.Sdk ?? SdkVersion.Instance);
+        log.SetDefaultAttributes(_options, scope);
 
         CaptureLog(log);
     }
@@ -79,7 +86,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
     {
         var configuredLog = log;
 
-        if (_options.Experimental.BeforeSendLogInternal is { } beforeSendLog)
+        if (_options.BeforeSendLogInternal is { } beforeSendLog)
         {
             try
             {

@@ -1,4 +1,5 @@
 {
   "omnisharp.useModernNet": true,
-  "dotnet.defaultSolution": "Sentry.sln"
+  "dotnet.defaultSolution": "Sentry.slnx",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

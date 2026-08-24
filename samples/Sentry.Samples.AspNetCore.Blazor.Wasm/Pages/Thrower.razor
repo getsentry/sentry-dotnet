@@ -30,6 +30,6 @@
     private static class StuffThrower
     {
         public static void DoSomething() => Thrower();
-        private static void Thrower() => throw null;
+        private static void Thrower() => throw null!;
     }
 }

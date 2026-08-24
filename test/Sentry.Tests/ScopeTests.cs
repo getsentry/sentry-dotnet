@@ -114,6 +114,21 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clone_EnvironmentOverridesOptions_OverridePreserved()
+    {
+        // Arrange
+        var options = new SentryOptions { Environment = "production" };
+        var scope = new Scope(options);
+        scope.Environment = "staging";
+
+        // Act
+        var clone = scope.Clone();
+
+        // Assert
+        clone.Environment.Should().Be("staging");
+    }
+
+    [Fact]
     public void TransactionName_TransactionNotStarted_NameIsSet()
     {
         // Arrange
@@ -356,9 +371,6 @@ public class ScopeTests
         });
         var transaction = new TransactionTracer(DisabledHub.Instance, "test-transaction", "op");
         scope.Transaction = transaction;
-
-        var expectedTraceId = scope.PropagationContext.TraceId;
-        var expectedSpanId = scope.PropagationContext.SpanId;
         var expectedCount = enableScopeSync ? 1 : 0;
 
         observer.ClearReceivedCalls();
@@ -367,7 +379,8 @@ public class ScopeTests
         scope.ResetTransaction(transaction);
 
         // Assert
-        observer.Received(expectedCount).SetTrace(Arg.Is(expectedTraceId), Arg.Is(expectedSpanId));
+        observer.Received(expectedCount)
+            .SetTrace(Arg.Is(scope.PropagationContext.TraceId), Arg.Is(scope.PropagationContext.SpanId));
     }
 
     [Theory]
@@ -698,6 +711,84 @@ public class ScopeTests
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SetEnvironment_ObserverExist_ObserverSetsEnvironmentIfEnabled(bool observerEnable)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = observerEnable
+        });
+        const string expectedEnvironment = "staging";
+        var expectedCount = observerEnable ? 1 : 0;
+
+        // Act
+        scope.Environment = expectedEnvironment;
+
+        // Assert
+        observer.Received(expectedCount).SetEnvironment(Arg.Is(expectedEnvironment));
+    }
+
+    [Fact]
+    public void SetEnvironment_Null_EnvironmentSetToOptionEnvironment()
+    {
+        // Arrange
+        const string optionsEnvironment = "production";
+        var scope = new Scope(new SentryOptions { Environment = optionsEnvironment });
+        scope.Environment = "staging"; // Override before resetting
+
+        // Act
+        scope.Environment = null;
+
+        // Assert
+        scope.Environment.Should().Be(optionsEnvironment);
+    }
+
+    [Fact]
+    public void SetEnvironment_Null_ObserverReceivesOptionEnvironment()
+    {
+        // Arrange
+        const string optionsEnvironment = "production";
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true,
+            Environment = optionsEnvironment
+        });
+        scope.Environment = "staging"; // Override before resetting
+        observer.ClearReceivedCalls();
+
+        // Act
+        scope.Environment = null;
+
+        // Assert
+        observer.Received(1).SetEnvironment(Arg.Is(optionsEnvironment));
+    }
+
+    [Fact]
+    public void SetEnvironment_SameValue_ObserverNotifiedOnce()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+
+        // Act
+        scope.Environment = "staging";
+        scope.Environment = "staging";
+
+        // Assert
+        observer.Received(1).SetEnvironment(Arg.Is("staging"));
+    }
+
     [Fact]
     public void Filtered_tags_are_not_set()
     {
@@ -737,6 +828,129 @@ public class ScopeTests
         }
 
         Assert.Null(exception);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AddAttachment_ObserverExist_ObserverNotifiedIfEnabled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        var attachment = new SentryAttachment(default, default, default, "test.txt");
+        var expectedCount = enableScopeSync ? 1 : 0;
+
+        // Act
+        scope.AddAttachment(attachment);
+
+        // Assert
+        observer.Received(expectedCount).AddAttachment(Arg.Is(attachment));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ClearAttachments_ObserverExist_ObserverNotifiedIfEnabled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        scope.AddAttachment(new SentryAttachment(default, default, default, "test.txt"));
+        observer.ClearReceivedCalls();
+        var expectedCount = enableScopeSync ? 1 : 0;
+
+        // Act
+        scope.ClearAttachments();
+
+        // Assert
+        observer.Received(expectedCount).ClearAttachments();
+    }
+
+    [Fact]
+    public void Apply_Attachments_DoesNotNotifyObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var source = new Scope(new SentryOptions());
+        source.AddAttachment(new SentryAttachment(default, default, default, "test.txt"));
+
+        var target = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+        observer.ClearReceivedCalls();
+
+        // Act
+        source.Apply(target);
+
+        // Assert
+        observer.DidNotReceive().AddAttachment(Arg.Any<SentryAttachment>());
+    }
+
+    [Fact]
+    public void AddAttachment_ByteOverload_NotifiesObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+
+        // Act
+        scope.AddAttachment(new byte[] { 1, 2, 3 }, "bytes.bin");
+
+        // Assert
+        observer.Received(1).AddAttachment(Arg.Is<SentryAttachment>(a => a.FileName == "bytes.bin"));
+    }
+
+    [Fact]
+    public void AddAttachment_StreamOverload_NotifiesObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+
+        // Act
+        scope.AddAttachment(new MemoryStream(new byte[] { 1, 2, 3 }), "stream.bin");
+
+        // Assert
+        observer.Received(1).AddAttachment(Arg.Is<SentryAttachment>(a => a.FileName == "stream.bin"));
+    }
+
+    [Fact]
+    public void Clear_ObserverExist_NotifiesClearAttachments()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+        scope.AddAttachment(new SentryAttachment(default, default, default, "test.txt"));
+        observer.ClearReceivedCalls();
+
+        // Act
+        scope.Clear();
+
+        // Assert
+        observer.Received(1).ClearAttachments();
     }
 
     [Theory]

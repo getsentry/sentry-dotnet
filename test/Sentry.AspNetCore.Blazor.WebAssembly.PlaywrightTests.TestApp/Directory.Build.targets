@@ -1,0 +1,3 @@
+<Project>
+  <!-- Stop inheriting test-specific targets from test/Directory.Build.targets -->
+</Project>

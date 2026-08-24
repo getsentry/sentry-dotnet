@@ -35,7 +35,9 @@ public static class SentrySinkExtensions
     /// <param name="reportAssembliesMode">What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/></param>
     /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
     /// <param name="defaultTags">Default tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
-    /// <param name="experimentalEnableLogs">Whether to send structured logs. <seealso cref="SentryOptions.SentryExperimentalOptions.EnableLogs"/></param>
+    /// <param name="enableLogs">Whether to send structured logs. <seealso cref="SentryOptions.EnableLogs"/></param>
+    /// <param name="restrictedToMinimumLevel">The minimum level for events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified. <seealso cref="SentrySerilogOptions.RestrictedToMinimumLevel"/></param>
+    /// <param name="levelSwitch">A switch allowing the pass-through minimum level to be changed at runtime. <seealso cref="SentrySerilogOptions.LevelSwitch"/></param>
     /// <returns><see cref="LoggerConfiguration"/></returns>
     /// <example>This sample shows how each item may be set from within a configuration file:
     /// <code>
@@ -73,7 +75,7 @@ public static class SentrySinkExtensions
     ///                         "key-1", "value-1",
     ///                         "key-2", "value-2"
     ///                     },
-    ///                     "experimentalEnableLogs": true
+    ///                     "enableLogs": true
     ///                 }
     ///             }
     ///         ]
@@ -106,7 +108,9 @@ public static class SentrySinkExtensions
         ReportAssembliesMode? reportAssembliesMode = null,
         DeduplicateMode? deduplicateMode = null,
         Dictionary<string, string>? defaultTags = null,
-        bool? experimentalEnableLogs = null)
+        bool? enableLogs = null,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        LoggingLevelSwitch? levelSwitch = null)
     {
         return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
             dsn,
@@ -132,7 +136,9 @@ public static class SentrySinkExtensions
             reportAssembliesMode,
             deduplicateMode,
             defaultTags,
-            experimentalEnableLogs));
+            enableLogs,
+            restrictedToMinimumLevel,
+            levelSwitch));
     }
 
     /// <summary>
@@ -147,6 +153,8 @@ public static class SentrySinkExtensions
     /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
     /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
     /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
+    /// <param name="restrictedToMinimumLevel">The minimum level for events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified. <seealso cref="SentrySerilogOptions.RestrictedToMinimumLevel"/></param>
+    /// <param name="levelSwitch">A switch allowing the pass-through minimum level to be changed at runtime. <seealso cref="SentrySerilogOptions.LevelSwitch"/></param>
     /// <returns><see cref="LoggerConfiguration"/></returns>
     /// <example>This sample shows how each item may be set from within a configuration file:
     /// <code>
@@ -174,15 +182,18 @@ public static class SentrySinkExtensions
         LogEventLevel? minimumEventLevel = null,
         LogEventLevel? minimumBreadcrumbLevel = null,
         IFormatProvider? formatProvider = null,
-        ITextFormatter? textFormatter = null
-        )
+        ITextFormatter? textFormatter = null,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        LoggingLevelSwitch? levelSwitch = null)
     {
         return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
             null,
             minimumEventLevel,
             minimumBreadcrumbLevel,
             formatProvider,
-            textFormatter));
+            textFormatter,
+            restrictedToMinimumLevel: restrictedToMinimumLevel,
+            levelSwitch: levelSwitch));
     }
 
     internal static void ConfigureSentrySerilogOptions(
@@ -210,7 +221,9 @@ public static class SentrySinkExtensions
         ReportAssembliesMode? reportAssembliesMode = null,
         DeduplicateMode? deduplicateMode = null,
         Dictionary<string, string>? defaultTags = null,
-        bool? experimentalEnableLogs = null)
+        bool? enableLogs = null,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        LoggingLevelSwitch? levelSwitch = null)
     {
         if (dsn is not null)
         {
@@ -322,10 +335,13 @@ public static class SentrySinkExtensions
             sentrySerilogOptions.DeduplicateMode = deduplicateMode.Value;
         }
 
-        if (experimentalEnableLogs.HasValue)
+        if (enableLogs.HasValue)
         {
-            sentrySerilogOptions.Experimental.EnableLogs = experimentalEnableLogs.Value;
+            sentrySerilogOptions.EnableLogs = enableLogs.Value;
         }
+
+        sentrySerilogOptions.RestrictedToMinimumLevel = restrictedToMinimumLevel;
+        sentrySerilogOptions.LevelSwitch = levelSwitch;
 
         // Serilog-specific items
         sentrySerilogOptions.InitializeSdk = dsn is not null;  // Inferred from the Sentry overload that is used
@@ -364,6 +380,6 @@ public static class SentrySinkExtensions
             sdkDisposable = SentrySdk.Init(options);
         }
 
-        return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable));
+        return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable), options.RestrictedToMinimumLevel, options.LevelSwitch);
     }
 }

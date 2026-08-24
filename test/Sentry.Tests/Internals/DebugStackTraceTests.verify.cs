@@ -134,7 +134,7 @@ public class DebugStackTraceTests
 
         logger.Received(1).Log(
             SentryLevel.Warning,
-            "Cannot call MergeDebugImagesInto multiple times. Event: {0}",
+            "Cannot call MergeDebugImagesInto multiple times. Event: '{0}'",
             null,
             Arg.Any<SentryId>()
             );

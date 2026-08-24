@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
+using Sentry.Ben.BlockingDetector;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Hosting;
@@ -95,14 +96,15 @@ public static class SentryWebHostBuilderExtensions
             _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
             _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
 
-            _ = logging.AddFilter<SentryAspNetCoreLoggerProvider>(
-                "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
-                LogLevel.None);
-            _ = logging.AddFilter<SentryAspNetCoreStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
+            // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
+            _ = logging.AddFilter<SentryAspNetCoreLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
             {
                 return categoryName is null
-                    || (categoryName != "Sentry.ISentryClient" && categoryName != "Sentry.AspNetCore.SentryMiddleware");
+                       || categoryName != "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware";
             });
+            // Add non-delegate rules in order to respect Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
+            _ = logging.AddFilter<SentryAspNetCoreStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
+            _ = logging.AddFilter<SentryAspNetCoreStructuredLoggerProvider>("Sentry.AspNetCore.SentryMiddleware", LogLevel.None);
 
             var sentryBuilder = logging.Services.AddSentry();
             configureSentry?.Invoke(context, sentryBuilder);
@@ -111,6 +113,9 @@ public static class SentryWebHostBuilderExtensions
         _ = builder.ConfigureServices(c => _ =
             c.AddTransient<IStartupFilter, SentryStartupFilter>()
              .AddTransient<IStartupFilter, SentryTracingStartupFilter>()
+             // Single listener/monitor per process (the listener is a global EventListener) - See #5378.
+             .AddSingleton<IBlockingMonitor, BlockingMonitor>()
+             .AddSingleton<TaskBlockingListener>()
              .AddTransient<SentryMiddleware>()
         );
 

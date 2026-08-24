@@ -492,6 +492,34 @@ public class MainSentryEventProcessorTests
     }
 
     [Fact]
+    public void Process_AttachStacktraceTrueAndCurrentThreadAlreadyExists_DoesNotAddAnotherThread()
+    {
+        var existingStackTrace = new SentryStackTrace();
+        _fixture.SentryOptions.AttachStacktrace = true;
+        var sut = _fixture.GetSut();
+
+        var evt = new SentryEvent
+        {
+            SentryThreads = new[]
+            {
+                new SentryThread
+                {
+                    Name = "existing-thread",
+                    Current = true,
+                    Stacktrace = existingStackTrace
+                }
+            }
+        };
+        _ = sut.Process(evt);
+
+        Assert.Single(evt.SentryThreads);
+        Assert.Equal("existing-thread", evt.SentryThreads.First().Name);
+        Assert.True(evt.SentryThreads.First().Current);
+        Assert.Same(existingStackTrace, evt.SentryThreads.First().Stacktrace);
+        _ = _fixture.SentryStackTraceFactory.DidNotReceive().Create();
+    }
+
+    [Fact]
     public void Process_CultureInfoAndCultureInfoAreEqual_OnlyCultureInfoSet()
     {
         //Arrange

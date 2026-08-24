@@ -16,6 +16,7 @@ public class SentryThreadTests
         {
             Crashed = true,
             Current = true,
+            Main = true,
             Id = 0,
             Name = "thread11",
             Stacktrace = new SentryStackTrace
@@ -35,6 +36,7 @@ public class SentryThreadTests
               "name": "thread11",
               "crashed": true,
               "current": true,
+              "main": true,
               "stacktrace": {
                 "frames": [
                   {
@@ -62,6 +64,8 @@ public class SentryThreadTests
         yield return new object[] { (new SentryThread { Name = "some name" }, """{"name":"some name"}""") };
         yield return new object[] { (new SentryThread { Crashed = false }, """{"crashed":false}""") };
         yield return new object[] { (new SentryThread { Current = false }, """{"current":false}""") };
+        yield return new object[] { (new SentryThread { Main = false }, """{"main":false}""") };
+        yield return new object[] { (new SentryThread { Main = true }, """{"main":true}""") };
         yield return new object[] { (new SentryThread { Id = 200 }, """{"id":200}""") };
         yield return new object[] { (new SentryThread { Stacktrace = new SentryStackTrace { Frames = { new SentryStackFrame { InApp = true } } } },
             """{"stacktrace":{"frames":[{"in_app":true}]}}""") };

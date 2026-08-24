@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
+using Sentry.Internal;
 
 namespace Sentry.AspNetCore;
 
@@ -9,7 +10,7 @@ namespace Sentry.AspNetCore;
 /// Sets up ASP.NET Core option for Sentry.
 /// </summary>
 #if NETSTANDARD2_0
-public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
+internal sealed class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
 {
     /// <summary>
     /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
@@ -28,11 +29,12 @@ public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<Se
         base.Configure(options);
         options.AddDiagnosticSourceIntegration();
         options.DeduplicateUnhandledException();
+        options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));
     }
 }
 
 #else
-public class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAspNetCoreOptions>
+internal sealed class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAspNetCoreOptions>
 {
     private readonly IConfiguration _config;
 
@@ -65,6 +67,7 @@ public class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAspNetCoreOp
         bindable.ApplyTo(options);
 
         options.DeduplicateUnhandledException();
+        options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));
     }
 }
 #endif

@@ -32,8 +32,9 @@ public static class SentryExceptionExtensions
     /// <param name="type">A required short string that identifies the mechanism.</param>
     /// <param name="description">An optional human-readable description of the mechanism.</param>
     /// <param name="handled">An optional flag indicating whether the exception was handled by the mechanism.</param>
+    /// <param name="terminal">An optional flag indicating whether the exception is considered terminal.</param>
     public static void SetSentryMechanism(this Exception ex, string type, string? description = null,
-        bool? handled = null)
+        bool? handled = null, bool? terminal = null)
     {
         ex.Data[Mechanism.MechanismKey] = type;
 
@@ -53,6 +54,37 @@ public static class SentryExceptionExtensions
         else
         {
             ex.Data[Mechanism.HandledKey] = handled;
+        }
+
+        if (terminal == null)
+        {
+            ex.Data.Remove(Mechanism.TerminalKey);
+        }
+        else
+        {
+            ex.Data[Mechanism.TerminalKey] = terminal;
+        }
+    }
+
+    /// <summary>
+    /// Records the mechanism flags for an explicit user capture, fully overriding any previously set values.
+    /// </summary>
+    /// <remarks>
+    /// <c>Terminal</c> is only meaningful when the exception is unhandled, so it is removed when
+    /// <paramref name="handled"/> is <c>true</c> rather than left over from an earlier
+    /// <see cref="SetSentryMechanism"/> call. Mirrors that method's null-removes semantics.
+    /// </remarks>
+    internal static void RecordMechanismFlags(this Exception ex, bool handled, bool terminal)
+    {
+        ex.Data[Mechanism.HandledKey] = handled;
+
+        if (handled)
+        {
+            ex.Data.Remove(Mechanism.TerminalKey);
+        }
+        else
+        {
+            ex.Data[Mechanism.TerminalKey] = terminal;
         }
     }
 }

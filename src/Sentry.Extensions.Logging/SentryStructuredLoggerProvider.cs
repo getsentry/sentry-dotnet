@@ -5,9 +5,9 @@ using Sentry.Infrastructure;
 namespace Sentry.Extensions.Logging;
 
 /// <summary>
-/// Sentry Structured Logger Provider.
+/// Sentry Logger Provider for <see cref="SentryLog"/>.
 /// </summary>
-[ProviderAlias("SentryLogs")]
+[ProviderAlias("Sentry")]
 internal class SentryStructuredLoggerProvider : ILoggerProvider
 {
     private readonly SentryLoggingOptions _options;
@@ -17,6 +17,11 @@ internal class SentryStructuredLoggerProvider : ILoggerProvider
 
     public SentryStructuredLoggerProvider(IOptions<SentryLoggingOptions> options, IHub hub)
         : this(options.Value, hub, SystemClock.Clock, CreateSdkVersion())
+    {
+    }
+
+    internal SentryStructuredLoggerProvider(IHub hub, ISystemClock clock, SentryLoggingOptions options)
+        : this(options, hub, clock, CreateSdkVersion())
     {
     }
 

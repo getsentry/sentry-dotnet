@@ -7,7 +7,7 @@ namespace Sentry.Maui.Tests.Mocks;
 
 public class MockApplication : Application
 {
-    private static readonly object LockObj = new();
+    private static readonly Lock LockObj = new();
     private Page _mainPage;
 
     static MockApplication()

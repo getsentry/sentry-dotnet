@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <OutputType>Exe</OutputType>
+      <TargetFramework>net10.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MongoDB.Driver 3.7.0 and later has built-in OpenTelemetry instrumentation -->
+    <PackageReference Include="MongoDB.Driver" Version="3.9.0" />
+    <PackageReference Include="OpenTelemetry" Version="1.15.0" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadSources>true</SentryUploadSources>
+  </PropertyGroup>
+
+  <!-- In your own project, this would be PackageReferences to the latest versions of these Sentry packages. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry.Exporter\Sentry.OpenTelemetry.Exporter.csproj" />
+  </ItemGroup>
+
+</Project>

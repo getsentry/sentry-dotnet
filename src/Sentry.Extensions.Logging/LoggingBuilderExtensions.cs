@@ -60,12 +60,8 @@ public static class LoggingBuilderExtensions
         builder.AddFilter<SentryLoggerProvider>(_ => true);
 
         // Logs from the SentryLogger should not flow to the SentryStructuredLogger as this may cause recursive invocations.
-        // Filtering of logs is handled in SentryStructuredLogger, using SentryOptions.MinimumLogLevel
-        builder.AddFilter<SentryStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
-        {
-            return categoryName is null
-                || categoryName != "Sentry.ISentryClient";
-        });
+        // Filtering of structured logs is handled by Microsoft.Extensions.Configuration and Microsoft.Extensions.Options.
+        builder.AddFilter<SentryStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
 
         return builder;
     }

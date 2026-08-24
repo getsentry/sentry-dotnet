@@ -5,20 +5,11 @@ namespace Sentry.Maui.Internal;
 internal class ScreenshotAttachment : SentryAttachment
 {
     public ScreenshotAttachment(SentryMauiOptions options)
-        : this(
+        : base(
             AttachmentType.Default,
             new ScreenshotAttachmentContent(options),
             "screenshot.jpg",
             "image/jpeg")
-    {
-    }
-
-    private ScreenshotAttachment(
-        AttachmentType type,
-        IAttachmentContent content,
-        string fileName,
-        string? contentType)
-        : base(type, content, fileName, contentType)
     {
     }
 }
@@ -27,10 +18,8 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 {
     private readonly SentryMauiOptions _options;
 
-#if NET9_0_OR_GREATER && ANDROID
+#if ANDROID
     private static readonly Lock JniLock = new();
-#elif ANDROID
-    private static readonly object JniLock = new();
 #endif
 
     public ScreenshotAttachmentContent(SentryMauiOptions options)

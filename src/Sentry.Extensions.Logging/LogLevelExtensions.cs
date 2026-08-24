@@ -13,7 +13,7 @@ internal static class LogLevelExtensions
             LogLevel.Information => BreadcrumbLevel.Info,
             LogLevel.Warning => BreadcrumbLevel.Warning,
             LogLevel.Error => BreadcrumbLevel.Error,
-            LogLevel.Critical => BreadcrumbLevel.Critical,
+            LogLevel.Critical => BreadcrumbLevel.Fatal,
             _ => (BreadcrumbLevel)level
         };
     }

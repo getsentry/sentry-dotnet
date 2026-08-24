@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -17,6 +18,29 @@ public static class SentryClientExtensions
     /// <returns>The Id of the event</returns>
     public static SentryId CaptureException(this ISentryClient client, Exception ex) =>
         client.IsEnabled ? client.CaptureEvent(new SentryEvent(ex)) : SentryId.Empty;
+
+    /// <summary>
+    /// Captures the exception, explicitly marking it as handled or unhandled.
+    /// </summary>
+    /// <param name="client">The Sentry client.</param>
+    /// <param name="ex">The exception.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed, aborting the active transaction on
+    /// <see cref="IHub"/> clients.</param>
+    /// <returns>The Id of the event</returns>
+    public static SentryId CaptureException(this ISentryClient client, Exception ex, bool handled,
+        bool terminal = false)
+    {
+        if (!client.IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
+        ex.RecordMechanismFlags(handled, terminal);
+        return client.CaptureEvent(new SentryEvent(ex));
+    }
 
     /// <summary>
     /// Captures a message.
@@ -43,31 +67,25 @@ public static class SentryClientExtensions
     /// <summary>
     /// Captures feedback from the user.
     /// </summary>
-    public static void CaptureFeedback(this ISentryClient client, string message, string? contactEmail = null,
+    public static SentryId CaptureFeedback(this ISentryClient client, string message, string? contactEmail = null,
         string? name = null, string? replayId = null, string? url = null, SentryId? associatedEventId = null,
         Scope? scope = null, SentryHint? hint = null)
         => client.CaptureFeedback(new SentryFeedback(message, contactEmail, name, replayId, url, associatedEventId),
             scope, hint);
 
     /// <summary>
-    /// Captures a user feedback.
+    /// Captures feedback from the user.
     /// </summary>
-    /// <param name="client"></param>
-    /// <param name="eventId">The event Id.</param>
-    /// <param name="email">The user email.</param>
-    /// <param name="comments">The user comments.</param>
-    /// <param name="name">The optional username.</param>
-    [Obsolete("Use CaptureFeedback instead.")]
-    public static void CaptureUserFeedback(this ISentryClient client, SentryId eventId, string email, string comments,
-        string? name = null)
-    {
-        if (!client.IsEnabled)
-        {
-            return;
-        }
-
-        client.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
-    }
+    /// <param name="client">The Sentry client.</param>
+    /// <param name="feedback">The feedback to send to Sentry.</param>
+    /// <param name="scope">An optional scope to be applied to the event.</param>
+    /// <param name="hint">An optional hint providing high level context for the source of the event</param>
+    /// <returns>
+    /// A <see cref="SentryId"/> that will contain the Id of the new event (if successful) or
+    /// <see cref="SentryId.Empty"/> otherwise
+    /// </returns>
+    public static SentryId CaptureFeedback(this ISentryClient client, SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+        => client.CaptureFeedback(feedback, out _, scope, hint);
 
     /// <summary>
     /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
@@ -125,7 +143,8 @@ public static class SentryClientExtensions
     /// </summary>
     /// <param name="clientOrHub"></param>
     /// <returns></returns>
-    [Obsolete("This method is meant for external usage only")]
+    [Obsolete("WARNING: This method is meant for internal usage only")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static SentryOptions? GetInternalSentryOptions(this ISentryClient clientOrHub) =>
         clientOrHub.GetSentryOptions();
 }

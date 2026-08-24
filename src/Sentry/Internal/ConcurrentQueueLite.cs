@@ -6,7 +6,7 @@ namespace Sentry.Internal;
 /// We're using this due to a memory leak that happens when using ConcurrentQueue in the BackgroundWorker.
 /// See https://github.com/getsentry/sentry-dotnet/issues/2516
 /// </summary>
-internal class ConcurrentQueueLite<T>
+internal class ConcurrentQueueLite<T> : IReadOnlyCollection<T>
 {
     private readonly List<T> _queue = new();
 
@@ -74,4 +74,18 @@ internal class ConcurrentQueueLite<T>
             return _queue.ToArray();
         }
     }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        // Return a snapshot to avoid holding the lock during iteration
+        // and to prevent InvalidOperationException if the collection is modified.
+        T[] snapshot;
+        lock (_queue)
+        {
+            snapshot = _queue.ToArray();
+        }
+        return ((IEnumerable<T>)snapshot).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

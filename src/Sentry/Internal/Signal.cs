@@ -2,7 +2,7 @@ namespace Sentry.Internal;
 
 internal class Signal : IDisposable
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private readonly SemaphoreSlim _semaphore = new(0, 1);
 
     public Signal(bool isReleasedInitially = false)

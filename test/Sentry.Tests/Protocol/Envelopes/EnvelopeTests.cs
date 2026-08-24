@@ -754,6 +754,34 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public void FromTransaction_WithNullAttachment_SkipsItAndLogsWarning()
+    {
+        // Arrange
+        var tracer = new TransactionTracer(DisabledHub.Instance, "name", "op");
+        var transaction = new SentryTransaction(tracer);
+
+        using var attachmentStream = new MemoryStream(new byte[] { 1, 2, 3 });
+        var validAttachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(attachmentStream),
+            "file.txt",
+            null);
+
+        var attachments = new List<SentryAttachment> { null!, validAttachment };
+        var logger = new InMemoryDiagnosticLogger();
+
+        // Act
+        using var envelope = Envelope.FromTransaction(transaction, logger, attachments);
+
+        // Assert
+        // Only the transaction item and the single valid attachment - the null is skipped.
+        envelope.Items.Count(item => item.TryGetType() == "attachment").Should().Be(1);
+        logger.Entries.Should().ContainSingle(e =>
+            e.Level == SentryLevel.Warning &&
+            e.Message == "Encountered a null attachment.  Skipping.");
+    }
+
+    [Fact]
     public async Task Roundtrip_WithEvent_WithSession_Success()
     {
         // Arrange
@@ -793,32 +821,6 @@ public class EnvelopeTests
 
         envelopeRoundtrip.Items[2].Payload.Should().BeOfType<JsonSerializable>()
             .Which.Source.Should().BeEquivalentTo(sessionUpdate);
-    }
-
-    [Fact]
-    public async Task Roundtrip_WithUserFeedback_Success()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        var feedback = new UserFeedback(
-            SentryId.Create(),
-            "Someone Nice",
-            "foo@bar.com",
-            "Everything is great!");
-
-        using var envelope = Envelope.FromUserFeedback(feedback);
-
-        using var stream = new MemoryStream();
-
-        // Act
-        await envelope.SerializeAsync(stream, _testOutputLogger);
-        stream.Seek(0, SeekOrigin.Begin);
-
-        using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
-
-        // Assert
-        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]
@@ -871,7 +873,7 @@ public class EnvelopeTests
     }
 
     [Fact]
-    public void FromFeedback_MultipleAttachments_LogsWarning()
+    public void FromFeedback_MultipleAttachments_AddsAll()
     {
         // Arrange
         var feedback = new SentryFeedback(
@@ -890,23 +892,46 @@ public class EnvelopeTests
                 Feedback = feedback
             }
         };
-        var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-
         List<SentryAttachment> attachments = [
             AttachmentHelper.FakeAttachment("file1.txt"), AttachmentHelper.FakeAttachment("file2.txt")
         ];
 
         // Act
-        using var envelope = Envelope.FromFeedback(evt, logger, attachments);
+        using var envelope = Envelope.FromFeedback(evt, attachments: attachments);
 
         // Assert
-        logger.Received(1).Log(
-            SentryLevel.Warning,
-            Arg.Is<string>(m => m.Contains("Feedback can only contain one attachment")),
-            null,
-            Arg.Any<object[]>());
-        envelope.Items.Should().ContainSingle(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment);
+        envelope.Items.Count(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment).Should().Be(2);
+    }
+
+    [Fact]
+    public void FromFeedback_NullAttachment_Skipped()
+    {
+        // Arrange
+        var feedback = new SentryFeedback(
+            "Everything is great!",
+            "foo@bar.com",
+            "Someone Nice",
+            "fake-replay-id",
+            "https://www.example.com",
+            SentryId.Create()
+        );
+        var evt = new SentryEvent
+        {
+            Level = SentryLevel.Info,
+            Contexts =
+            {
+                Feedback = feedback
+            }
+        };
+        List<SentryAttachment> attachments = [
+            null!, AttachmentHelper.FakeAttachment("file1.txt")
+        ];
+
+        // Act
+        using var envelope = Envelope.FromFeedback(evt, attachments: attachments);
+
+        // Assert
+        envelope.Items.Count(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment).Should().Be(1);
     }
 
     [Fact]

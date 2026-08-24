@@ -16,8 +16,13 @@ builder.WebHost.UseSentry(options =>
     options.Debug = true;
 #endif
 
-    // This option enables Logs sent to Sentry.
-    options.Experimental.EnableLogs = true;
+    // Configure the minimum Log Level of Breadcrumbs and Events
+    options.MinimumBreadcrumbLevel = LogLevel.Information;
+    options.MinimumEventLevel = LogLevel.Error;
+
+    // This option enables Logs sent to Sentry
+    // Configure the minimum Log Level of Structured-Logs via e.g. "appsettings.json" and "appsettings.{HostEnvironment}.json"
+    options.EnableLogs = true;
 });
 
 var app = builder.Build();

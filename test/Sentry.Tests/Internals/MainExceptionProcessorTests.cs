@@ -56,8 +56,9 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
+        // No integration set the flag, so this was captured by user code, which counts as handled.
         Assert.NotNull(evt.SentryExceptions);
-        Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == null);
+        Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == true);
     }
 
     [Fact]
@@ -101,6 +102,39 @@ public partial class MainExceptionProcessorTests
 
         Assert.NotNull(evt.SentryExceptions);
         Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == true);
+    }
+
+    [Fact]
+    public void Process_ExceptionWith_TerminalTrue_StoresInMechanismData()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        var exp = new Exception();
+
+        exp.SetSentryMechanism("TestException", terminal: true);
+
+        sut.Process(exp, evt);
+
+        Assert.NotNull(evt.SentryExceptions);
+        var sentryException = evt.SentryExceptions.Single();
+        Assert.NotNull(sentryException.Mechanism?.Terminal);
+        Assert.True(sentryException.Mechanism?.Terminal);
+    }
+
+    [Fact]
+    public void Process_ExceptionWith_TerminalFalse_StoresInMechanismData()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        var exp = new Exception();
+
+        exp.SetSentryMechanism("TestException", terminal: false);
+
+        sut.Process(exp, evt);
+
+        Assert.NotNull(evt.SentryExceptions);
+        var sentryException = evt.SentryExceptions.Single();
+        Assert.False(sentryException.Mechanism?.Terminal);
     }
 
     [Fact]

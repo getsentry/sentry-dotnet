@@ -26,13 +26,6 @@ internal static class CocoaExtensions
             return null;
         }
 
-        if (obj is CocoaSdk.ISentrySerializable serializable)
-        {
-            // For types that implement Sentry Cocoa's SentrySerializable protocol (interface),
-            // We should call that first, and then serialize the result to JSON later.
-            obj = serializable.Serialize();
-        }
-
         // Now we will use Apple's JSON Serialization functions.
         // See https://developer.apple.com/documentation/foundation/nsjsonserialization
 
@@ -195,6 +188,39 @@ internal static class CocoaExtensions
         this IReadOnlyCollection<KeyValuePair<string, TValue>> dict) =>
         dict.Count == 0 ? null : dict.ToNSDictionary();
 
+    public static NSDictionary<NSString, NSObject>? ToCocoaBreadcrumbData(
+        this IReadOnlyDictionary<string, string> source)
+    {
+        // Avoid an allocation if we can
+        if (source.Count == 0)
+        {
+            return null;
+        }
+
+        var dict = new Dictionary<NSString, NSObject>();
+
+        foreach (var (key, value) in source)
+        {
+            // Cocoa Session Replay expects `request_start` to be a Date (`NSDate`).
+            // See https://github.com/getsentry/sentry-cocoa/blob/2b4e787e55558e1475eda8f98b02c19a0d511741/Sources/Swift/Integrations/SessionReplay/SentrySRDefaultBreadcrumbConverter.swift#L73
+            if (key == SentryHttpMessageHandler.RequestStartKey && TryParseUnixMs(value, out var unixMs))
+            {
+                var dto = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+                dict[(NSString)key] = dto.ToNSDate();
+                continue;
+            }
+
+            dict[(NSString)key] = NSObject.FromObject(value);
+        }
+
+        return dict.Count == 0
+            ? null
+            : NSDictionary<NSString, NSObject>.FromObjectsAndKeys(dict.Values.ToArray(), dict.Keys.ToArray());
+
+        static bool TryParseUnixMs(string value, out long unixMs) =>
+            long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out unixMs);
+    }
+
     /// <summary>
     /// Converts an <see cref="NSNumber"/> to a .NET primitive data type and returns the result box in an <see cref="object"/>.
     /// </summary>
@@ -243,7 +269,7 @@ internal static class CocoaExtensions
         };
     }
 
-    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryEvent native)
+    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryObjCEvent native)
     {
         // we only support a subset of mutated data to be passed back to the native SDK at this time
         native.ServerName = managed.ServerName;
@@ -269,9 +295,12 @@ internal static class CocoaExtensions
         }
     }
 
-    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent)
+    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryObjCEvent sentryEvent)
     {
-        using var stream = sentryEvent.ToJsonStream();
+        // The Cocoa SDK serializes the native event to its Sentry wire format via the structured hybrid
+        // API; we deserialize that JSON into a managed event so managed processors / before-send can run.
+        var dict = SentryCocoaHybridSdk.Internal.Serializer.SerializeEvent(sentryEvent);
+        using var stream = dict.ToJsonStream();
         if (stream == null)
             return null;
 
@@ -281,9 +310,9 @@ internal static class CocoaExtensions
         return ev;
     }
 
-    public static CocoaSdk.SentryMessage ToCocoaSentryMessage(this SentryMessage msg)
+    public static CocoaSdk.SentryObjCMessage ToCocoaSentryMessage(this SentryMessage msg)
     {
-        var native = new CocoaSdk.SentryMessage(msg.Formatted ?? string.Empty);
+        var native = new CocoaSdk.SentryObjCMessage(msg.Formatted ?? string.Empty);
         native.Params = msg.Params?.Select(x => x.ToString()!).ToArray() ?? new string[0];
 
         return native;

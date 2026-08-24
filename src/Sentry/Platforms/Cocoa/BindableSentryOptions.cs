@@ -19,6 +19,7 @@ internal partial class BindableSentryOptions
         public bool? EnableAutoPerformanceTracing { get; set; }
         public bool? EnableCoreDataTracing { get; set; }
         public bool? EnableFileIOTracing { get; set; }
+        public bool? EnableMemoryIntrospection { get; set; }
         public bool? EnableNetworkBreadcrumbs { get; set; }
         public bool? EnableNetworkTracking { get; set; }
         public bool? EnableWatchdogTerminationTracking { get; set; }
@@ -35,11 +36,14 @@ internal partial class BindableSentryOptions
             options.AppHangTimeoutInterval = AppHangTimeoutInterval ?? options.AppHangTimeoutInterval;
             options.IdleTimeout = IdleTimeout ?? options.IdleTimeout;
             options.EnableAppHangTracking = EnableAppHangTracking ?? options.EnableAppHangTracking;
+#pragma warning disable CS0618 // Type or member is obsolete
             options.EnableAppHangTrackingV2 = EnableAppHangTrackingV2 ?? options.EnableAppHangTrackingV2;
+#pragma warning restore CS0618 // Type or member is obsolete
             options.EnableAutoBreadcrumbTracking = EnableAutoBreadcrumbTracking ?? options.EnableAutoBreadcrumbTracking;
             options.EnableAutoPerformanceTracing = EnableAutoPerformanceTracing ?? options.EnableAutoPerformanceTracing;
             options.EnableCoreDataTracing = EnableCoreDataTracing ?? options.EnableCoreDataTracing;
             options.EnableFileIOTracing = EnableFileIOTracing ?? options.EnableFileIOTracing;
+            options.EnableMemoryIntrospection = EnableMemoryIntrospection ?? options.EnableMemoryIntrospection;
             options.EnableNetworkBreadcrumbs = EnableNetworkBreadcrumbs ?? options.EnableNetworkBreadcrumbs;
             options.EnableNetworkTracking = EnableNetworkTracking ?? options.EnableNetworkTracking;
 #pragma warning disable CS0618 // Type or member is obsolete

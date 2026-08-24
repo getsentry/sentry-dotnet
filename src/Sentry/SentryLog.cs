@@ -1,19 +1,19 @@
 using Sentry.Extensibility;
-using Sentry.Infrastructure;
 using Sentry.Protocol;
 
 namespace Sentry;
 
 /// <summary>
-/// Represents the Sentry Log protocol.
-/// <para>This API is experimental and it may change in the future.</para>
+/// Represents a Sentry Structured Log.
 /// </summary>
-[Experimental(DiagnosticId.ExperimentalFeature)]
+/// <remarks>
+/// Sentry Docs: <see href="https://docs.sentry.io/product/explore/logs/"/>.
+/// Sentry Developer Documentation: <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>.
+/// Sentry .NET SDK Docs: <see href="https://docs.sentry.io/platforms/dotnet/logs/"/>.
+/// </remarks>
 [DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
-public sealed class SentryLog
+public sealed partial class SentryLog
 {
-    private readonly Dictionary<string, SentryAttribute> _attributes;
-
     [SetsRequiredMembers]
     internal SentryLog(DateTimeOffset timestamp, SentryId traceId, SentryLogLevel level, string message)
     {
@@ -22,64 +22,75 @@ public sealed class SentryLog
         Level = level;
         Message = message;
         // 7 is the number of built-in attributes, so we start with that.
-        _attributes = new Dictionary<string, SentryAttribute>(7);
+        Attributes = new SentryAttributes(7);
+        // ensure the ImmutableArray`1 is not default, so we can omit IsDefault checks before accessing other members
+        Parameters = ImmutableArray<KeyValuePair<string, object>>.Empty;
+    }
+
+    internal static SentryLog Create(IHub hub, DateTimeOffset timestamp, SentryLogLevel level, string message, string? template, ImmutableArray<KeyValuePair<string, object>> parameters)
+    {
+        hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
+
+        SentryLog log = new(timestamp, traceId, level, message)
+        {
+            Template = template,
+            Parameters = parameters,
+            SpanId = spanId,
+        };
+
+        return log;
     }
 
     /// <summary>
     /// The timestamp of the log.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     /// <remarks>
     /// Sent as seconds since the Unix epoch.
     /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required DateTimeOffset Timestamp { get; init; }
 
     /// <summary>
     /// The trace id of the log.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required SentryId TraceId { get; init; }
 
     /// <summary>
     /// The severity level of the log.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required SentryLogLevel Level { get; init; }
 
     /// <summary>
     /// The formatted log message.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required string Message { get; init; }
 
     /// <summary>
     /// The parameterized template string.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public string? Template { get; init; }
 
     /// <summary>
     /// The parameters to the template string.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public ImmutableArray<KeyValuePair<string, object>> Parameters { get; init; }
+    public ImmutableArray<KeyValuePair<string, object>> Parameters
+    {
+        get;
+        init
+        {
+            Debug.Assert(!value.IsDefault); // DEBUG-only check, because .ctor is internal and set-accessor is init-only
+            field = value;
+        }
+    }
 
     /// <summary>
     /// The span id of the span that was active when the log was collected.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public SpanId? ParentSpanId { get; init; }
+    public SpanId? SpanId { get; init; }
+
+    internal SentryAttributes Attributes { get; }
 
     /// <summary>
     /// Gets the attribute value associated with the specified key.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     /// <remarks>
     /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key and it's value is not <see langword="null"/>.
@@ -128,79 +139,54 @@ public sealed class SentryLog
     /// </list>
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value)
-    {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Value is not null)
-        {
-            value = attribute.Value;
-            return true;
-        }
-
-        value = null;
-        return false;
-    }
-
-    internal bool TryGetAttribute(string key, [NotNullWhen(true)] out string? value)
-    {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "string" && attribute.Value is not null)
-        {
-            value = (string)attribute.Value;
-            return true;
-        }
-
-        value = null;
-        return false;
-    }
+    public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value) =>
+        Attributes.TryGetAttribute(key, out value);
 
     /// <summary>
     /// Set a key-value pair of data attached to the log.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void SetAttribute(string key, object value)
-    {
-        _attributes[key] = new SentryAttribute(value);
-    }
+    public void SetAttribute(string key, object value) => Attributes.SetAttribute(key, value);
 
-    internal void SetAttribute(string key, string value)
+    internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion? sdk = null)
     {
-        _attributes[key] = new SentryAttribute(value, "string");
-    }
+        // Core Attributes
+        sdk ??= scope?.Sdk ?? SdkVersion.Instance;
+        Attributes.SetDefaultAttributes(options, sdk);
 
-    internal void SetAttribute(string key, char value)
-    {
-        _attributes[key] = new SentryAttribute(value.ToString(), "string");
-    }
-
-    internal void SetAttribute(string key, int value)
-    {
-        _attributes[key] = new SentryAttribute(value, "integer");
-    }
-
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
-    {
-        var environment = options.SettingLocator.GetEnvironment();
-        SetAttribute("sentry.environment", environment);
-
-        var release = options.SettingLocator.GetRelease();
-        if (release is not null)
+        // Server Attributes
+        if (!string.IsNullOrEmpty(options.ServerName))
         {
-            SetAttribute("sentry.release", release);
+            SetAttribute("server.address", options.ServerName!);
+        }
+        else if (options.SendDefaultPii)
+        {
+            SetAttribute("server.address", Environment.MachineName);
         }
 
-        if (sdk.Name is { } name)
+        // User Attributes
+        if (scope?.User is { } user)
         {
-            SetAttribute("sentry.sdk.name", name);
-        }
-        if (sdk.Version is { } version)
-        {
-            SetAttribute("sentry.sdk.version", version);
+            if (user.Id is { } userId)
+            {
+                SetAttribute("user.id", userId);
+            }
+            if (user.Username is { } username)
+            {
+                SetAttribute("user.name", username);
+            }
+            if (user.Email is { } email)
+            {
+                SetAttribute("user.email", email);
+            }
         }
     }
+
+    internal void SetOrigin(string origin) => Attributes.SetAttribute("sentry.origin", origin);
 
     internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
+        Debug.Assert(!Parameters.IsDefault);
+
         writer.WriteStartObject();
 
 #if NET9_0_OR_GREATER
@@ -217,6 +203,12 @@ public sealed class SentryLog
         writer.WritePropertyName("trace_id");
         TraceId.WriteTo(writer, logger);
 
+        if (SpanId.HasValue)
+        {
+            writer.WritePropertyName("span_id");
+            SpanId.Value.WriteTo(writer, logger);
+        }
+
         if (severityNumber.HasValue)
         {
             writer.WriteNumber("severity_number", severityNumber.Value);
@@ -225,32 +217,21 @@ public sealed class SentryLog
         writer.WritePropertyName("attributes");
         writer.WriteStartObject();
 
-        if (Template is not null)
+        // the SDK MUST NOT attach a sentry.message.template attribute if there are no parameters
+        // https://develop.sentry.dev/sdk/telemetry/logs/#default-attributes
+        if (Template is not null && !Parameters.IsEmpty)
         {
             SentryAttributeSerializer.WriteStringAttribute(writer, "sentry.message.template", Template);
         }
 
-        if (!Parameters.IsDefault)
+        foreach (var parameter in Parameters)
         {
-            foreach (var parameter in Parameters)
-            {
-                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{parameter.Key}", parameter.Value, logger);
-            }
+            SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{parameter.Key}", parameter.Value, logger);
         }
 
-        foreach (var attribute in _attributes)
+        foreach (var attribute in Attributes)
         {
             SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
-        }
-
-        if (ParentSpanId.HasValue)
-        {
-            writer.WritePropertyName("sentry.trace.parent_span_id");
-            writer.WriteStartObject();
-            writer.WritePropertyName("value");
-            ParentSpanId.Value.WriteTo(writer, logger);
-            writer.WriteString("type", "string");
-            writer.WriteEndObject();
         }
 
         writer.WriteEndObject(); // attributes

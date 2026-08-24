@@ -110,6 +110,49 @@ internal sealed class CocoaScopeObserver : IScopeObserver
 
     public void SetTrace(SentryId traceId, SpanId parentSpanId)
     {
-        // TODO: Missing corresponding functionality on the Cocoa SDK
+        try
+        {
+            SentryCocoaHybridSdk.Internal.SetTrace(traceId.ToCocoaObjCId(), parentSpanId.ToCocoaObjCSpanId());
+        }
+        finally
+        {
+            _innerObserver?.SetTrace(traceId, parentSpanId);
+        }
+    }
+
+    public void SetEnvironment(string? environment)
+    {
+        try
+        {
+            SentryCocoaSdk.ConfigureScope(scope => scope.SetEnvironment(environment));
+        }
+        finally
+        {
+            _innerObserver?.SetEnvironment(environment);
+        }
+    }
+
+    public void AddAttachment(SentryAttachment attachment)
+    {
+        try
+        {
+            // TODO: Missing corresponding functionality on the Cocoa SDK
+        }
+        finally
+        {
+            _innerObserver?.AddAttachment(attachment);
+        }
+    }
+
+    public void ClearAttachments()
+    {
+        try
+        {
+            // TODO: Missing corresponding functionality on the Cocoa SDK
+        }
+        finally
+        {
+            _innerObserver?.ClearAttachments();
+        }
     }
 }

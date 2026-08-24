@@ -15,8 +15,8 @@ internal class CocoaProfilerFactory : ITransactionProfilerFactory
     /// <inheritdoc />
     public ITransactionProfiler? Start(ITransactionTracer tracer, CancellationToken cancellationToken)
     {
-        var traceId = tracer.TraceId.ToCocoaSentryId();
-        var startTime = SentryCocoaHybridSdk.StartProfilerForTrace(traceId);
+        var traceId = tracer.TraceId.ToCocoaObjCId();
+        var startTime = SentryCocoaHybridSdk.Internal.Profiling.StartFor(traceId);
         return new CocoaProfiler(_options, startTime, tracer.TraceId, traceId);
     }
 }

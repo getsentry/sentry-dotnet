@@ -134,10 +134,9 @@ public class WebIntegrationTests
         // dispose will ultimately trigger the background worker to flush
         server.Dispose();
 
-        await Verify(new { result, transport.Payloads })
-            .IgnoreStandardSentryMembers()
-            .ScrubAspMembers()
-            .UniqueForTargetFrameworkAndVersion();
+        // No transaction should be recorded for pre-flight/options requests
+        // See: https://github.com/getsentry/sentry-dotnet/issues/1835#issuecomment-1239546099
+        transport.Payloads.Any().Should().BeFalse();
     }
 
     [ApiController]

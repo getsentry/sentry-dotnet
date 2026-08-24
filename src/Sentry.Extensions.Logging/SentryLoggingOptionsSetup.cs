@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging;
 
-internal class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggingOptions>
+internal sealed class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggingOptions>
 {
     private readonly IConfiguration _config;
 
@@ -30,7 +30,7 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging;
 
-internal class SentryLoggingOptionsSetup : ConfigureFromConfigurationOptions<SentryLoggingOptions>
+internal sealed class SentryLoggingOptionsSetup : ConfigureFromConfigurationOptions<SentryLoggingOptions>
 {
     public SentryLoggingOptionsSetup(
         ILoggerProviderConfiguration<SentryLoggerProvider> providerConfiguration)

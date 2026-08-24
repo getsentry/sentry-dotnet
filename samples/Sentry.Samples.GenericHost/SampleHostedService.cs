@@ -7,6 +7,8 @@ internal class SampleHostedService(IHub hub, ILogger<SampleHostedService> logger
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        // Configure structured logging via appsettings.json (Logging:Sentry:LogLevel:)
+        logger.LogTrace("LogLevel.Trace is not configured to be sent as structured log");
         // Logging integration by default keeps informational logs as Breadcrumb
         logger.LogInformation("Starting sample hosted service. This goes as a breadcrumb");
         // You can also add breadcrumb directly through Sentry.Hub:

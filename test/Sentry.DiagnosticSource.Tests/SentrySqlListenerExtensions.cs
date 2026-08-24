@@ -1,3 +1,4 @@
+#if !NETFRAMEWORK
 using Sentry.Internal.DiagnosticSource;
 
 namespace Sentry.DiagnosticSource.Tests;
@@ -34,3 +35,5 @@ internal static class SentrySqlListenerExtensions
             SentrySqlListener.SqlDataWriteCommandError,
             new { OperationId = operationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
 }
+
+#endif

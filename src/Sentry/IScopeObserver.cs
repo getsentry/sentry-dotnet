@@ -34,4 +34,19 @@ public interface IScopeObserver
     /// Sets the current trace
     /// </summary>
     public void SetTrace(SentryId traceId, SpanId parentSpanId);
+
+    /// <summary>
+    /// Sets the environment.
+    /// </summary>
+    public void SetEnvironment(string? environment);
+
+    /// <summary>
+    /// Adds an attachment.
+    /// </summary>
+    public void AddAttachment(SentryAttachment attachment);
+
+    /// <summary>
+    /// Clears all attachments.
+    /// </summary>
+    public void ClearAttachments();
 }

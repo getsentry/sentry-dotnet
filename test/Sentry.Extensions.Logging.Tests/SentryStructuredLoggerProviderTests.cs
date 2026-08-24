@@ -18,10 +18,11 @@ public class SentryStructuredLoggerProviderTests
         public Fixture()
         {
             var loggingOptions = new SentryLoggingOptions();
-            loggingOptions.Experimental.EnableLogs = true;
+            loggingOptions.EnableLogs = true;
 
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
+            Hub.SubstituteConfigureScope(new Scope(loggingOptions));
             Clock = new MockClock();
             Sdk = new SdkVersion
             {
@@ -39,6 +40,16 @@ public class SentryStructuredLoggerProviderTests
     }
 
     private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void Type_CustomAttributes_HasProviderAliasAttribute()
+    {
+        var type = typeof(SentryStructuredLoggerProvider);
+
+        type.GetCustomAttributes<ProviderAliasAttribute>().Should()
+            .ContainSingle().Which
+            .Alias.Should().Be("Sentry");
+    }
 
     [Fact]
     public void Ctor_DependencyInjection_CanCreate()
@@ -91,6 +102,9 @@ public class SentryStructuredLoggerProviderTests
 
         capturedLog.TryGetAttribute("sentry.sdk.version", out object? version).Should().BeTrue();
         version.Should().Be(SentryLoggerProvider.NameAndVersion.Version);
+
+        capturedLog.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
+        origin.Should().Be("auto.log.extensions_logging");
     }
 
     [Fact]

@@ -36,11 +36,14 @@ internal class BackpressureMonitor : IDisposable
     private readonly CancellationTokenSource _cts = new();
 
     private readonly Task _workerTask;
+    private int _disposed;
+    internal Task WorkerTask => _workerTask;
     internal int DownsampleLevel => _downsampleLevel;
     internal long LastQueueOverflowTicks => Interlocked.Read(ref _lastQueueOverflow);
     internal long LastRateLimitEventTicks => Interlocked.Read(ref _lastRateLimitEvent);
 
-    public BackpressureMonitor(IDiagnosticLogger? logger, ISystemClock? clock = null, bool enablePeriodicHealthCheck = true)
+    public BackpressureMonitor(IDiagnosticLogger? logger, ISystemClock? clock = null, bool enablePeriodicHealthCheck = true,
+        TaskScheduler? scheduler = null)
     {
         _logger = logger;
         _clock = clock ?? SystemClock.Clock;
@@ -48,7 +51,13 @@ internal class BackpressureMonitor : IDisposable
         if (enablePeriodicHealthCheck)
         {
             _logger?.LogDebug("Starting BackpressureMonitor.");
-            _workerTask = Task.Run(() => DoWorkAsync(_cts.Token));
+            // Equivalent to Task.Run(() => DoWorkAsync(_cts.Token)): same creation options (DenyChildAttach) and,
+            // by default, the same scheduler (the thread pool). Tests inject a scheduler to model single-threaded
+            // runtimes (e.g. Unity WebGL) where the worker and its continuations must run on the same thread.
+            scheduler ??= TaskScheduler.Default;
+            _workerTask = Task.Factory
+                .StartNew(() => DoWorkAsync(_cts.Token), CancellationToken.None, TaskCreationOptions.DenyChildAttach, scheduler)
+                .Unwrap();
         }
         else
         {
@@ -144,14 +153,20 @@ internal class BackpressureMonitor : IDisposable
 
     public void Dispose()
     {
+        // Idempotent and thread-safe: only the first caller runs the disposal logic. Without this guard a
+        // second call would hit an already-disposed _cts and log a spurious ObjectDisposedException.
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
         try
         {
+            // Request cancellation but do NOT block on _workerTask here. On single-threaded runtimes
+            // (e.g. Unity WebGL / browser-wasm) _workerTask.Wait() would cause a deadlock.
+            // The worker observes the token and unwinds on its own.
+            // See https://github.com/getsentry/sentry-dotnet/issues/5237
             _cts.Cancel();
-            _workerTask.Wait();
-        }
-        catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
-        {
-            // Ignore cancellation
         }
         catch (Exception ex)
         {
@@ -160,7 +175,15 @@ internal class BackpressureMonitor : IDisposable
         }
         finally
         {
-            _cts.Dispose();
+            // Dispose the CTS once the worker has stopped using the token, but
+            // without blocking the calling thread. Disposing it inline would race the worker 
+            //  and could lead to an ObjectDisposedException
+            _workerTask.ContinueWith(
+                static (_, state) => ((CancellationTokenSource)state!).Dispose(),
+                _cts,
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
     }
 }

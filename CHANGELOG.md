@@ -1,6 +1,429 @@
 # Changelog
 
-## Unreleased
+## 6.9.0
+
+### Features ✨
+
+- feat: Allow users to control Mechanism.Handled for captured exceptions by @vladbrincoveanu in [#5449](https://github.com/getsentry/sentry-dotnet/pull/5449)
+
+### Fixes 🐛
+
+- fix(serilog): logs from application namespaces beginning with "Sentry" are discarded by @jamescrosswell in [#5456](https://github.com/getsentry/sentry-dotnet/pull/5456)
+- fix: rate limit on one data category no longer blocks all others by @jamescrosswell in [#5482](https://github.com/getsentry/sentry-dotnet/pull/5482)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Native SDK to v0.16.3 by @github-actions in [#5486](https://github.com/getsentry/sentry-dotnet/pull/5486)
+- chore(deps): update Cocoa SDK to v9.26.0 by @github-actions in [#5485](https://github.com/getsentry/sentry-dotnet/pull/5485)
+- chore(deps): update Cocoa SDK to v9.25.0 by @github-actions in [#5472](https://github.com/getsentry/sentry-dotnet/pull/5472)
+- chore(deps): update Native SDK to v0.16.2 by @github-actions in [#5477](https://github.com/getsentry/sentry-dotnet/pull/5477)
+- chore(deps): update Java SDK to v8.52.0 by @github-actions in [#5471](https://github.com/getsentry/sentry-dotnet/pull/5471)
+- chore(deps): update Cocoa SDK to v9.24.0 by @github-actions in [#5460](https://github.com/getsentry/sentry-dotnet/pull/5460)
+- chore(deps): update Java SDK to v8.51.0 by @github-actions in [#5457](https://github.com/getsentry/sentry-dotnet/pull/5457)
+- chore(deps): update Native SDK to v0.16.1 by @github-actions in [#5459](https://github.com/getsentry/sentry-dotnet/pull/5459)
+- chore(deps): update Native SDK to v0.16.0 by @github-actions in [#5452](https://github.com/getsentry/sentry-dotnet/pull/5452)
+- chore(deps): update Java SDK to v8.50.1 by @github-actions in [#5441](https://github.com/getsentry/sentry-dotnet/pull/5441)
+- chore(deps): update CLI to v3.6.2 by @github-actions in [#5443](https://github.com/getsentry/sentry-dotnet/pull/5443)
+- chore(deps): update Cocoa SDK to v9.23.0 by @github-actions in [#5442](https://github.com/getsentry/sentry-dotnet/pull/5442)
+
+### Other
+
+- ref: migrate Cocoa bindings from PrivateSentrySDKOnly to SentryObjCSDK.internal by @jamescrosswell in [#5409](https://github.com/getsentry/sentry-dotnet/pull/5409)
+
+## 6.8.0
+
+### Features ✨
+
+#### Logs
+
+- feat(logs): add `log4net` integration by @Flash0ver in [#5172](https://github.com/getsentry/sentry-dotnet/pull/5172)
+- feat(logs): add `NLog` integration by @Flash0ver in [#5176](https://github.com/getsentry/sentry-dotnet/pull/5176)
+
+#### Other
+
+- feat(serilog): support restrictedToMinimumLevel when configuring Serilog in code by @jamescrosswell in [#5181](https://github.com/getsentry/sentry-dotnet/pull/5181)
+- Attachments can now be sent with transactions by setting `AddToTransactions` on `SentryAttachment` [#5182](<https://github.com/getsentry/sentry-dotnet/pull/5182>) by @jamescrosswell in [#5182](https://github.com/getsentry/sentry-dotnet/pull/5182)
+- Added `SentrySdk.RecordTransaction` to record already-completed transactions and spans (e.g. replayed through a proxy) [#5333](https://github.com/getsentry/sentry-dotnet/pull/5333) by @jamescrosswell in [#5333](https://github.com/getsentry/sentry-dotnet/pull/5333)
+- The `Environment` set on the `Scope` now gets synchronized to the native layers (`sentry-cocoa` and `sentry-native`) by @bitsandfoxes in [#5365](https://github.com/getsentry/sentry-dotnet/pull/5365)
+
+### Fixes 🐛
+
+- fix: `SentrySpanProcessor` no longer leaks spans whose Activity never ends (e.g. aborted requests); the Activity is now held via a `WeakReference` so orphaned spans are pruned once it is garbage-collected. by @Ermabo in [#5393](https://github.com/getsentry/sentry-dotnet/pull/5393)
+- The SDK was incorrectly ignoring server rate limits for errors, check-ins, and logs by @jamescrosswell in [#5412](https://github.com/getsentry/sentry-dotnet/pull/5412)
+- fix: BackpressureMonitor.Dispose() no longer deadlocks on single-threaded targets by @jamescrosswell in [#5330](https://github.com/getsentry/sentry-dotnet/pull/5330)
+- fix: Create a single TaskBlockingListener per process for CaptureBlockingCalls by @jamescrosswell in [#5381](https://github.com/getsentry/sentry-dotnet/pull/5381)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update CLI to v3.6.1 by @github-actions in [#5417](https://github.com/getsentry/sentry-dotnet/pull/5417)
+- chore(deps): update Native SDK to v0.15.4 by @github-actions in [#5416](https://github.com/getsentry/sentry-dotnet/pull/5416)
+- chore(deps): update Cocoa SDK to v9.22.0 by @github-actions in [#5395](https://github.com/getsentry/sentry-dotnet/pull/5395)
+- chore(deps): update Java SDK to v8.49.0 by @github-actions in [#5398](https://github.com/getsentry/sentry-dotnet/pull/5398)
+
+### Other
+
+- ci: drop install-zstd workaround by @jpnurmi in [#5391](https://github.com/getsentry/sentry-dotnet/pull/5391)
+- docs: add Sentry.OpenTelemetry.Exporter to README.md by @Flash0ver in [#5194](https://github.com/getsentry/sentry-dotnet/pull/5194)
+- meta: Update CODEOWNERS by @Flash0ver in [#5386](https://github.com/getsentry/sentry-dotnet/pull/5386)
+
+## 6.7.0
+
+### Features ✨
+
+- feat(android): expose tombstone options via SentryOptions.Native by @jamescrosswell in [#5226](https://github.com/getsentry/sentry-dotnet/pull/5226)
+- Add `IgnoreTransactions` option to filter out transactions by name, matching substrings or regular expressions against the transaction name ([#5377](https://github.com/getsentry/sentry-dotnet/pull/5377)) by @Adham-Kiwan in [#5377](https://github.com/getsentry/sentry-dotnet/pull/5377)
+- feat: Add BeforeSendFeedback callback to inspect, modify, or drop user feedback before it's sent by @vladbrincoveanu in [#5361](https://github.com/getsentry/sentry-dotnet/pull/5361)
+- Add public API for checking unhandled exceptions (`SentryEventExtensions.IsFromUnhandledException`) and terminal exceptions (`SentryEventExtensions.IsFromTerminalException`) by @jamescrosswell in [#5177](https://github.com/getsentry/sentry-dotnet/pull/5177)
+- feat: Add PreferTransactionNameProvider option by @jamescrosswell in [#5159](https://github.com/getsentry/sentry-dotnet/pull/5159)
+- feat: Add exponential backoff and log deduplication to Spotlight by @mattico in [#5025](https://github.com/getsentry/sentry-dotnet/pull/5025)
+
+### Fixes 🐛
+
+- fix(otel): only set Scope.Transaction in SentrySpanProcessor when null by @tsushanth in [#5337](https://github.com/getsentry/sentry-dotnet/pull/5337)
+- fix: LNK4291 on Native AOT WinExe with Control Flow Guard by @jamescrosswell in [#5298](https://github.com/getsentry/sentry-dotnet/pull/5298)
+- fix: OpenTelemetry transactions for failed requests keep their route name and otel context by @jamescrosswell in [#5310](https://github.com/getsentry/sentry-dotnet/pull/5310)
+- fix: populate Default attributes on structured logs from current scope by @jamescrosswell in [#5216](https://github.com/getsentry/sentry-dotnet/pull/5216)
+- fix: [.NET 10] PageNavigationExtensions updated for public Page properties by @nor0x in [#5278](https://github.com/getsentry/sentry-dotnet/pull/5278)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Java SDK to v8.48.0 by @github-actions in [#5360](https://github.com/getsentry/sentry-dotnet/pull/5360)
+- chore(deps): update Cocoa SDK to v9.21.0 by @github-actions in [#5359](https://github.com/getsentry/sentry-dotnet/pull/5359)
+- chore(deps): update Native SDK to v0.15.3 by @github-actions in [#5353](https://github.com/getsentry/sentry-dotnet/pull/5353)
+- chore(deps): update Cocoa SDK to v9.20.0 by @github-actions in [#5354](https://github.com/getsentry/sentry-dotnet/pull/5354)
+- chore(deps): update Java SDK to v8.47.0 by @github-actions in [#5338](https://github.com/getsentry/sentry-dotnet/pull/5338)
+- chore(deps): update Cocoa SDK to v9.19.1 by @github-actions in [#5336](https://github.com/getsentry/sentry-dotnet/pull/5336)
+- chore(deps): update CLI to v3.6.0 by @github-actions in [#5329](https://github.com/getsentry/sentry-dotnet/pull/5329)
+- chore(deps): update Cocoa SDK to v9.19.0 by @github-actions in [#5316](https://github.com/getsentry/sentry-dotnet/pull/5316)
+- chore(deps): update Java SDK to v8.46.0 by @github-actions in [#5321](https://github.com/getsentry/sentry-dotnet/pull/5321)
+- chore(deps): update Java SDK to v8.45.0 by @github-actions in [#5315](https://github.com/getsentry/sentry-dotnet/pull/5315)
+- chore(deps): update Native SDK to v0.15.2 by @github-actions in [#5309](https://github.com/getsentry/sentry-dotnet/pull/5309)
+- chore(deps): update Cocoa SDK to v9.18.0 by @github-actions in [#5264](https://github.com/getsentry/sentry-dotnet/pull/5264)
+- chore(deps): update Java SDK to v8.44.1 by @github-actions in [#5263](https://github.com/getsentry/sentry-dotnet/pull/5263)
+- chore(deps): update CLI to v3.5.1 by @github-actions in [#5279](https://github.com/getsentry/sentry-dotnet/pull/5279)
+- chore(deps): update Native SDK to v0.15.1 by @github-actions in [#5282](https://github.com/getsentry/sentry-dotnet/pull/5282)
+
+### Other
+
+- Added Sentry.Samples.OpenTelemetry.MongoDB by @jamescrosswell in [#5335](https://github.com/getsentry/sentry-dotnet/pull/5335)
+- docs: add XML comments for boolean return of `Sentry.Extensions.Logging` Filters by @Flash0ver in [#5297](https://github.com/getsentry/sentry-dotnet/pull/5297)
+- LatestWindowsTfm added to Directory.Build.props by @nor0x in [#5277](https://github.com/getsentry/sentry-dotnet/pull/5277)
+
+## 6.6.0
+
+### Features ✨
+
+- feat: propagate trace to `sentry-android` and `sentry-cocoa` by @bitsandfoxes in [#5244](https://github.com/getsentry/sentry-dotnet/pull/5244)
+- feat: User.Id can now be overriden (set to null) in Global mode by @jamescrosswell in [#5039](https://github.com/getsentry/sentry-dotnet/pull/5039)
+- feat: Implement strict trace continuation by @giortzisg in [#4981](https://github.com/getsentry/sentry-dotnet/pull/4981)
+
+### Fixes 🐛
+
+- fix: return early from AddSentryOtlpExporter when DSN is the disable-SDK sentinel by @jamescrosswell in [#5247](https://github.com/getsentry/sentry-dotnet/pull/5247)
+- fix: sync default tags to native layer by @bitsandfoxes in [#5214](https://github.com/getsentry/sentry-dotnet/pull/5214)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.14.0 by @github-actions[bot] in [#5252](https://github.com/getsentry/sentry-dotnet/pull/5252)
+- chore(deps): update Java SDK to v8.42.0 by @github-actions[bot] in [#5208](https://github.com/getsentry/sentry-dotnet/pull/5208)
+
+### Other
+
+- release: 6.6.0 by @jamescrosswell in [0140be0a](https://github.com/getsentry/sentry-dotnet/commit/0140be0a3b98ee01ff53097a5289bc6e7b703957)
+- chore: update scripts/update-cli.ps1 to 3.4.3 by @github-actions[bot] in [#5251](https://github.com/getsentry/sentry-dotnet/pull/5251)
+- ci: update the Update Dependencies workflow by @Flash0ver in [#5175](https://github.com/getsentry/sentry-dotnet/pull/5175)
+- chore: update modules/sentry-native to 0.14.2 by @github-actions[bot] in [#5229](https://github.com/getsentry/sentry-dotnet/pull/5229)
+- chore: update modules/sentry-cocoa to 9.13.0 by @github-actions[bot] in [#5221](https://github.com/getsentry/sentry-dotnet/pull/5221)
+- chore: update scripts/update-cli.ps1 to 3.4.2 by @github-actions[bot] in [#5220](https://github.com/getsentry/sentry-dotnet/pull/5220)
+- chore: update modules/sentry-cocoa to 9.12.1 by @github-actions[bot] in [#5207](https://github.com/getsentry/sentry-dotnet/pull/5207)
+
+## 6.5.0
+
+### Features ✨
+
+- feat: Add support to send OTEL traces via OTLP by @jamescrosswell in [#4899](https://github.com/getsentry/sentry-dotnet/pull/4899)
+
+### Fixes 🐛
+
+- fix(unity): update `SentryEvent` to have `IsCaptured` to allow dropping screenshots of filtered events by @JoshuaMoelans in [#5162](https://github.com/getsentry/sentry-dotnet/pull/5162)
+- fix: Memory leak when filtered Activities get garbage collected before `PruneFilteredSpans` runs by @jamescrosswell in [#5186](https://github.com/getsentry/sentry-dotnet/pull/5186)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.12.0 by @github-actions in [#5179](https://github.com/getsentry/sentry-dotnet/pull/5179)
+- chore(deps): update CLI to v3.4.1 by @github-actions in [#5171](https://github.com/getsentry/sentry-dotnet/pull/5171)
+- chore(deps): update Native SDK to v0.13.8 by @github-actions in [#5165](https://github.com/getsentry/sentry-dotnet/pull/5165)
+- chore(deps): update Java SDK to v8.40.0 by @github-actions in [#5161](https://github.com/getsentry/sentry-dotnet/pull/5161)
+- chore(deps): update Cocoa SDK to v9.11.0 by @github-actions in [#5160](https://github.com/getsentry/sentry-dotnet/pull/5160)
+- chore(deps): update CLI to v3.4.0 by @github-actions in [#5145](https://github.com/getsentry/sentry-dotnet/pull/5145)
+- chore(deps): update Java SDK to v8.39.1 by @github-actions in [#5144](https://github.com/getsentry/sentry-dotnet/pull/5144)
+
+### Other
+
+- perf(logs): avoid string allocation when no parameters are passed by @Flash0ver in [#4697](https://github.com/getsentry/sentry-dotnet/pull/4697)
+- chore: fix missing skill by @jamescrosswell in [#5134](https://github.com/getsentry/sentry-dotnet/pull/5134)
+
+## 6.4.1
+
+### Fixes 🐛
+
+- fix: prevent redundant native exceptions on Android/CoreCLR by @jpnurmi in [#5127](https://github.com/getsentry/sentry-dotnet/pull/5127)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Java SDK to v8.39.0 by @github-actions in [#5137](https://github.com/getsentry/sentry-dotnet/pull/5137)
+- chore(deps): update Native SDK to v0.13.7 by @github-actions in [#5136](https://github.com/getsentry/sentry-dotnet/pull/5136)
+
+## 6.4.0
+
+### Features ✨
+
+- feat: Add network details for session replay on iOS by @jamescrosswell in [#4891](https://github.com/getsentry/sentry-dotnet/pull/4891)
+- feat: Add option to exclude certain HTTP statuses from tracing by @jamescrosswell in [#5034](https://github.com/getsentry/sentry-dotnet/pull/5034)
+
+### Fixes 🐛
+
+- fix: memory leak when profiling is enabled by @jamescrosswell in [#5133](https://github.com/getsentry/sentry-dotnet/pull/5133)
+- fix: prevent redundant native exceptions on iOS by @jpnurmi in [#5126](https://github.com/getsentry/sentry-dotnet/pull/5126)
+- fix: prevent redundant native exceptions on Android/Mono by @jpnurmi in [#4676](https://github.com/getsentry/sentry-dotnet/pull/4676)
+  - Note: opt in by setting `options.Native.ExperimentalOptions.SignalHandlerStrategy` to `Sentry.Android.SignalHandlerStrategy.ChainAtStart`
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.10.0 by @github-actions in [#5132](https://github.com/getsentry/sentry-dotnet/pull/5132)
+- chore(deps): update Cocoa SDK to v9.9.0 by @github-actions in [#5115](https://github.com/getsentry/sentry-dotnet/pull/5115)
+- chore(deps): update Java SDK to v8.38.0 by @github-actions in [#5124](https://github.com/getsentry/sentry-dotnet/pull/5124)
+
+## 6.3.2
+
+### Dependencies ⬆️
+
+- chore(deps): update Native SDK to v0.13.6 by @github-actions in [#5128](https://github.com/getsentry/sentry-dotnet/pull/5128)
+
+## 6.3.1
+
+### Fixes 🐛
+
+- fix: Workaround FileNotFoundException on Android when recovering sessions by @jamescrosswell in [#5084](https://github.com/getsentry/sentry-dotnet/pull/5084)
+- fix: `CaptureFeedback` now supports multiple attachments correctly by @bitsandfoxes in [#5077](https://github.com/getsentry/sentry-dotnet/pull/5077)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Native SDK to v0.13.5 by @github-actions in [#5119](https://github.com/getsentry/sentry-dotnet/pull/5119)
+- chore(deps): update CLI to v3.3.5 by @github-actions in [#5093](https://github.com/getsentry/sentry-dotnet/pull/5093)
+- chore(deps): update Native SDK to v0.13.4 by @github-actions in [#5081](https://github.com/getsentry/sentry-dotnet/pull/5081)
+- chore(deps): update Java SDK to v8.37.1 by @github-actions in [#5071](https://github.com/getsentry/sentry-dotnet/pull/5071)
+- chore(deps): update CLI to v3.3.4 by @github-actions in [#5068](https://github.com/getsentry/sentry-dotnet/pull/5068)
+- chore(deps): update Java SDK to v8.37.0 by @github-actions in [#5069](https://github.com/getsentry/sentry-dotnet/pull/5069)
+- chore(deps): update Cocoa SDK to v9.8.0 by @github-actions in [#5044](https://github.com/getsentry/sentry-dotnet/pull/5044)
+- chore(deps): update Java SDK to v8.36.0 by @github-actions in [#5036](https://github.com/getsentry/sentry-dotnet/pull/5036)
+- chore(deps): update epitaph to 0.1.1 by @github-actions in [#5036](https://github.com/getsentry/sentry-dotnet/pull/5036)
+
+### Other
+
+- chore: Update validate-pr workflow by @stephanie-anderson in [#5108](https://github.com/getsentry/sentry-dotnet/pull/5108)
+- ci: fix workflows that always fail for fork PRs by @jamescrosswell in [#5065](https://github.com/getsentry/sentry-dotnet/pull/5065)
+
+## 6.3.0
+
+### Features
+
+- The _Metrics_ APIs are now stable: removed `Experimental` from `SentrySdk`, `SentryOptions` and `IHub` ([#5023](https://github.com/getsentry/sentry-dotnet/pull/5023))
+- Report a new _Diagnostic_ (`SENTRY1001`) when a Metrics-API is invoked with an unsupported numeric type ([#4840](https://github.com/getsentry/sentry-dotnet/pull/4840))
+
+### Fixes
+
+- Common tags such as `Environment` and `Release` and custom event processors are all now correctly applied to CaptureFeedback events ([#4942](https://github.com/getsentry/sentry-dotnet/pull/4942))
+- Include `Data` set via `ITransactionTracer` in `SentryTransaction` ([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
+
+### Dependencies
+
+- Bump Cocoa SDK from v9.5.0 to v9.7.0 ([#4958](https://github.com/getsentry/sentry-dotnet/pull/4958), [#5015](https://github.com/getsentry/sentry-dotnet/pull/5015))
+- Bump CLI from v3.3.0 to v3.3.3 ([#5002](https://github.com/getsentry/sentry-dotnet/pull/5002))
+- Bump Java SDK from v8.34.1 to v8.35.0 ([#5017](https://github.com/getsentry/sentry-dotnet/pull/5017))
+- Bump Native SDK from v0.13.2 to v0.13.3 ([#5045](https://github.com/getsentry/sentry-dotnet/pull/5045))
+
+## 6.2.0
+
+### Features
+
+- Outbound HTTP requests now show in the Network tab for Android Session Replays ([#4860](https://github.com/getsentry/sentry-dotnet/pull/4860))
+
+### Fixes
+
+- The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
+- Symbolication now works correctly with Android workloads 10.0.102 and later ([#4998](https://github.com/getsentry/sentry-dotnet/pull/4998))
+- `libmonosgen` and `libxamarin` frames no longer show as in-app ([#4960](https://github.com/getsentry/sentry-dotnet/pull/4960))
+
+### Dependencies
+
+- Bump Native SDK from v0.12.6 to v0.13.2 ([#4920](https://github.com/getsentry/sentry-dotnet/pull/4920), [#4929](https://github.com/getsentry/sentry-dotnet/pull/4929), [#4941](https://github.com/getsentry/sentry-dotnet/pull/4941), [#4964](https://github.com/getsentry/sentry-dotnet/pull/4964), [#4996](https://github.com/getsentry/sentry-dotnet/pull/4996))
+- Bump Cocoa SDK from v8.57.3 to v9.5.0 ([#4781](https://github.com/getsentry/sentry-dotnet/pull/4781), [#4928](https://github.com/getsentry/sentry-dotnet/pull/4928), [#4944](https://github.com/getsentry/sentry-dotnet/pull/4944))
+- Bump CLI from v2.58.2 to v3.3.0 ([#4805](https://github.com/getsentry/sentry-dotnet/pull/4805), [#4943](https://github.com/getsentry/sentry-dotnet/pull/4943), [#4973](https://github.com/getsentry/sentry-dotnet/pull/4973))
+  - NOTE: Sentry CLI v3 removed support for the legacy API key authentication method. Sentry CLI now only supports authenticating with Auth Tokens. If you are using API key authentication via `SentryApiKey`, you need to generate an [Auth Token](https://docs.sentry.io/account/auth-tokens/) and use `SentryAuthToken`, instead.
+- Bump Java SDK from v8.32.0 to v8.34.1 ([#4933](https://github.com/getsentry/sentry-dotnet/pull/4933), [#4986](https://github.com/getsentry/sentry-dotnet/pull/4986))
+
+## 6.2.0-alpha.0
+
+### Features
+
+- Add navigation breadcrumbs for Blazor WebAssembly ([#4907](https://github.com/getsentry/sentry-dotnet/pull/4907))
+
+### Dependencies
+
+- Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
+- Bumped CommunityToolkit.Mvvm to 8.4.0 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
+- Bump Java SDK from v8.29.0 to v8.32.0 ([#4843](https://github.com/getsentry/sentry-dotnet/pull/4843))
+
+## 6.1.0
+
+### Features
+
+- Add _experimental_ support for [Sentry trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
+- Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
+
+### Fixes
+
+- User Feedback now contains additional Context and Tags, like `Environment` and `Release` ([#4883](https://github.com/getsentry/sentry-dotnet/pull/4883))
+- Allow Sentry failures from the Sentry CLI when SENTRY_ALLOW_FAILURE is set ([#4852](https://github.com/getsentry/sentry-dotnet/pull/4852))
+- The SDK now logs a specific error message when envelopes are rejected due to size limits (HTTP 413) ([#4863](https://github.com/getsentry/sentry-dotnet/pull/4863))
+- Fixed thread-safety issue on Android when multiple events are captured concurrently ([#4814](https://github.com/getsentry/sentry-dotnet/pull/4814))
+
+### Dependencies
+
+- Bump Native SDK from v0.12.2 to v0.12.6 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832), [#4875](https://github.com/getsentry/sentry-dotnet/pull/4875), [#4892](https://github.com/getsentry/sentry-dotnet/pull/4892), [#4897](https://github.com/getsentry/sentry-dotnet/pull/4897))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0126)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.6)
+- Bump Java SDK from v8.28.0 to v8.29.0 ([#4817](https://github.com/getsentry/sentry-dotnet/pull/4817))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8290)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.28.0...8.29.0)
+
+## 6.0.0
+
+### BREAKING CHANGES
+
+- This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
+- Backpressure handling is now enabled by default, meaning that the SDK will monitor system health and reduce the sampling rate of events and transactions when the system is under load. When the system is determined to be healthy again, the sampling rates are returned to their original levels. ([#4615](https://github.com/getsentry/sentry-dotnet/pull/4615))
+- Remove `SentryLoggingOptions.ExperimentalLogging.MinimumLogLevel`. _Structured Logs_ can now be configured via the `"Sentry"` logging provider (e.g. in `appsettings.json` and `appsettings.{HostEnvironment}.json`) ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+- All logging provider types are _internal_ now in order to ensure configuration as intended ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+- Rename `SentryLog.ParentSpanId` to `SentryLog.SpanId` reflecting the protocol change ([#4778](https://github.com/getsentry/sentry-dotnet/pull/4778))
+- QOL improvement: Spans and Transactions now implement `IDisposable` so that they can be used with `using` statements/declarations that will automatically finish the span with a status of OK when it passes out of scope, if it has not already been finished, to be consistent with `Activity` classes when using OpenTelemetry ([#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
+- SpanTracer and TransactionTracer are still public but these are now `sealed` (see also [#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
+- The _Structured Logs_ APIs are now stable: removed `Experimental` from `SentryOptions` ([#4699](https://github.com/getsentry/sentry-dotnet/pull/4699))
+- Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4583](https://github.com/getsentry/sentry-dotnet/pull/4583))
+- CaptureFeedback now returns a `SentryId` and a `CaptureFeedbackResult` out parameter that indicate whether feedback was captured successfully and what the reason for failure was otherwise ([#4613](https://github.com/getsentry/sentry-dotnet/pull/4613))
+- Deprecated `Sentry.Azure.Functions.Worker` as very few people were using it and the functionality can easily be replaced with OpenTelemetry. We've replaced our integration with a sample showing how to do this using our OpenTelemetry package instead. ([#4693](https://github.com/getsentry/sentry-dotnet/pull/4693))
+- UWP support has been dropped. Future efforts will likely focus on WinUI 3, in line with Microsoft's recommendations for building Windows UI apps. ([#4686](https://github.com/getsentry/sentry-dotnet/pull/4686))
+- `BreadcrumbLevel.Critical` has been renamed to `BreadcrumbLevel.Fatal` for consistency with the other Sentry SDKs ([#4605](https://github.com/getsentry/sentry-dotnet/pull/4605))
+- SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
+- Removed obsolete APIs ([#4619](https://github.com/getsentry/sentry-dotnet/pull/4619))
+  - Removed the unusual constructor from `Sentry.Maui.BreadcrumbEvent` that had been marked as obsolete. That constructor expected a `IEnumerable<(string Key, string Value)>[]` argument (i.e. an array of IEnumerable of tuples). If you were using this constructor, you should instead use the alternate constructor that expects just an IEnumerable of tuples: `IEnumerable<(string Key, string Value)>`.
+  - Removed `SentrySdk.CaptureUserFeedback` and all associated members. Use the newer `SentrySdk.CaptureFeedback` instead.
+- ScopeExtensions.Populate is now internal ([#4611](https://github.com/getsentry/sentry-dotnet/pull/4611))
+
+### Features
+
+- Support for .NET 10 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
+- Added a new SDK `Sentry.Extensions.AI` which allows LLM usage instrumentation via `Microsoft.Extensions.AI` ([#4657](https://github.com/getsentry/sentry-dotnet/pull/4657))
+- Added experimental support for Session Replay on iOS ([#4664](https://github.com/getsentry/sentry-dotnet/pull/4664))
+- Add support for _Structured Logs_ in `Sentry.Google.Cloud.Functions` ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+- QOL features for Unity
+  - The SDK now provides a `IsSessionActive` to allow checking the session state ([#4662](https://github.com/getsentry/sentry-dotnet/pull/4662))
+  - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633), [#4653](https://github.com/getsentry/sentry-dotnet/pull/4653))
+- Extended the App context by `app_memory` that can hold the amount of memory used by the application in bytes. ([#4707](https://github.com/getsentry/sentry-dotnet/pull/4707))
+- Add support for W3C traceparent header for outgoing requests ([#4661](https://github.com/getsentry/sentry-dotnet/pull/4661))
+  - This feature is disabled by default. Set `PropagateTraceparent = true` when initializing the SDK if to include the W3C traceparent header on outgoing requests.
+  - See https://develop.sentry.dev/sdk/telemetry/traces/distributed-tracing/#w3c-trace-context-header for more details.
+
+### Fixes
+
+- Memory leak when finishing an unsampled Transaction that has started unsampled Spans ([#4717](https://github.com/getsentry/sentry-dotnet/pull/4717))
+- Sentry Tracing middleware crashed ASP.NET Core in .NET 10 in 6.0.0-rc.1 and earlier ([#4747](https://github.com/getsentry/sentry-dotnet/pull/4747))
+- Captured [Http Client Errors](https://docs.sentry.io/platforms/dotnet/guides/aspnet/configuration/http-client-errors/) on .NET 5+ now include a full stack trace in order to improve Issue grouping ([#4724](https://github.com/getsentry/sentry-dotnet/pull/4724))
+- Deliver system breadcrumbs in the main thread on Android ([#4671](https://github.com/getsentry/sentry-dotnet/pull/4671))
+- The `Serilog` integration captures _Structured Logs_ (when enabled) independently of captured Events and added Breadcrumbs ([#4691](https://github.com/getsentry/sentry-dotnet/pull/4691))
+- Minimum Log-Level for _Structured Logs_, _Breadcrumbs_ and _Events_ in all Logging-Integrations ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+  - for `Sentry.Extensions.Logging`, `Sentry.AspNetCore`, `Sentry.Maui` and `Sentry.Google.Cloud.Functions`
+  - the Logger-Provider for _Breadcrumbs_ and _Events_ ignores Logging-Configuration (e.g. via `appsettings.json`)
+    - use the intended `SentryLoggingOptions.MinimumBreadcrumbLevel`, `SentryLoggingOptions.MinimumEventLevel`, or add filter functions via `SentryLoggingOptionsExtensions.AddLogEntryFilter`
+  - the Logger-Provider for _Structured Logs_ respects Logging-Configuration (e.g. via `appsettings.json`)
+    - when enabled by `SentryOptions.EnableLogs`
+- Avoid appending `/NODEFAULTLIB:MSVCRT` to NativeAOT linker arguments on Windows when targetting non-Windows platforms (Android, Browser) ([#4760](https://github.com/getsentry/sentry-dotnet/pull/4760))
+- The SDK avoids redundant scope sync after transaction finish ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
+- sentry-native is now automatically disabled for WASM applications ([#4631](https://github.com/getsentry/sentry-dotnet/pull/4631))
+- Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
+
+### Dependencies
+
+- Bump Java SDK from v8.24.0 to v8.28.0 ([#4728](https://github.com/getsentry/sentry-dotnet/pull/4728), [#4761](https://github.com/getsentry/sentry-dotnet/pull/4761), [#4791](https://github.com/getsentry/sentry-dotnet/pull/4791))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8280)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.24.0...8.28.0)
+- Bump Native SDK from v0.12.0 to v0.12.2 ([#4690](https://github.com/getsentry/sentry-dotnet/pull/4690), [#4737](https://github.com/getsentry/sentry-dotnet/pull/4737), [#4780](https://github.com/getsentry/sentry-dotnet/pull/4780))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0122)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.0...0.12.2)
+- Bump Cocoa SDK from v8.57.1 to v8.57.3 ([#4704](https://github.com/getsentry/sentry-dotnet/pull/4704), [#4738](https://github.com/getsentry/sentry-dotnet/pull/4738))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8573)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.57.1...8.57.3)
+- Bump CLI from v2.57.0 to v2.58.2 ([#4705](https://github.com/getsentry/sentry-dotnet/pull/4705), [#4727](https://github.com/getsentry/sentry-dotnet/pull/4727), [#4732](https://github.com/getsentry/sentry-dotnet/pull/4732))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2582)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.57.0...2.58.2)
+
+## 5.16.2
+
+### Fixes
+
+- Do not allow multiple `sentry.proguard-uuid` metadata to be set in Android manifest ([#4647](https://github.com/getsentry/sentry-dotnet/pull/4647))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.56.2 to v8.57.1 ([#4637](https://github.com/getsentry/sentry-dotnet/pull/4637), [#4680](https://github.com/getsentry/sentry-dotnet/pull/4680))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8571)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.56.2...8.57.1)
+- Bump Native SDK from v0.11.2 to v0.12.0 ([#4636](https://github.com/getsentry/sentry-dotnet/pull/4636), [#4678](https://github.com/getsentry/sentry-dotnet/pull/4678))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0120)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.2...0.12.0)
+- Bump Java SDK from v8.23.0 to v8.24.0 ([#4667](https://github.com/getsentry/sentry-dotnet/pull/4667))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8240)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.23.0...8.24.0)
+- Bump CLI from v2.56.1 to v2.57.0 ([#4668](https://github.com/getsentry/sentry-dotnet/pull/4668))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2570)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.56.1...2.57.0)
+
+## 5.16.1
+
+### Fixes
+
+- Structured Logs now have a `sentry.origin` attribute to so it's clearer where these come from ([#4566](https://github.com/getsentry/sentry-dotnet/pull/4566))
+
+### Dependencies
+
+- Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8230)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.22.0...8.23.0)
+- Bump Native SDK from v0.11.1 to v0.11.2 ([#4590](https://github.com/getsentry/sentry-dotnet/pull/4590))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0112)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.1...0.11.2)
+- Bump CLI from v2.56.0 to v2.56.1 ([#4625](https://github.com/getsentry/sentry-dotnet/pull/4625))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2561)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.56.0...2.56.1)
+
+## 5.16.0
 
 ### Features
 
@@ -9,9 +432,15 @@
 
 ### Fixes
 
+- Templates are no longer sent with Structured Logs that have no parameters ([#4544](https://github.com/getsentry/sentry-dotnet/pull/4544))
+- Parent-Span-IDs are no longer sent with Structured Logs when recorded without an active Span ([#4565](https://github.com/getsentry/sentry-dotnet/pull/4565))
 - Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))
 - In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 - Fixed WASM0001 warning when building Blazor WebAssembly projects ([#4519](https://github.com/getsentry/sentry-dotnet/pull/4519))
+
+### API Changes
+
+- Remove `ExperimentalAttribute` from all _Structured Logs_ APIs, and remove `Experimental` property from `SentrySdk`, but keep `Experimental` property on `SentryOptions` ([#4567](https://github.com/getsentry/sentry-dotnet/pull/4567))
 
 ### Dependencies
 
@@ -27,6 +456,9 @@
 
 ### Dependencies
 
+- Bump CLI from v2.54.0 to v2.56.0 ([#4556](https://github.com/getsentry/sentry-dotnet/pull/4556), [#4577](https://github.com/getsentry/sentry-dotnet/pull/4577))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2560)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.56.0)
 - Bump Java SDK from v8.21.1 to v8.22.0 ([#4552](https://github.com/getsentry/sentry-dotnet/pull/4552))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8220)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.21.1...8.22.0)
@@ -73,8 +505,8 @@
 ### Dependencies
 
 - Bump sentry-cocoa from 8.39.0 to 8.55.1 ([#4442](https://github.com/getsentry/sentry-dotnet/pull/4442), [#4483](https://github.com/getsentry/sentry-dotnet/pull/4483), [#4485](https://github.com/getsentry/sentry-dotnet/pull/4485))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8551)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.55.1)
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8551)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.55.1)
 - Bump Native SDK from v0.9.1 to v0.10.1 ([#4436](https://github.com/getsentry/sentry-dotnet/pull/4436), [#4492](https://github.com/getsentry/sentry-dotnet/pull/4492))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0101)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.9.1...0.10.1)
@@ -184,7 +616,7 @@
 
 - The HTTP instrumentation uses the span created for the outgoing request in the sentry-trace header, fixing the parent-child relationship between client and server ([#4264](https://github.com/getsentry/sentry-dotnet/pull/4264))
 - ExtraData not captured for Breadcrumbs in MauiEventsBinder ([#4254](https://github.com/getsentry/sentry-dotnet/pull/4254))
-    - NOTE: Required breaking changes to the public API of `Sentry.Maui.BreadcrumbEvent`, while keeping an _Obsolete_ constructor for backward compatibility.
+  - NOTE: Required breaking changes to the public API of `Sentry.Maui.BreadcrumbEvent`, while keeping an _Obsolete_ constructor for backward compatibility.
 - InvalidOperationException sending attachments on Android with LLVM enabled ([#4276](https://github.com/getsentry/sentry-dotnet/pull/4276))
 - When CaptureFeedback methods are called with invalid email addresses, the email address will be removed and, if Debug mode is enabled, a warning will be logged. This is done to avoid losing the Feedback altogether (Sentry would reject Feedback that has an invalid email address) ([#4284](https://github.com/getsentry/sentry-dotnet/pull/4284))
 
@@ -192,7 +624,7 @@
 
 - Bump the version of the .NET SDK that we use from 9.0.203 to 9.0.301 ([#4272](https://github.com/getsentry/sentry-dotnet/pull/4272))
   - Note that this also required we bump various Java dependencies (since version 9.0.300 of the Android workload requires newer versions of the these)
-  - See https://docs.sentry.io/platforms/dotnet/troubleshooting/#detected-package-version-outside-of-dependency-constraint if you see NU1605, NU1608 and/or NU1107 warnings after upgrading   
+  - See https://docs.sentry.io/platforms/dotnet/troubleshooting/#detected-package-version-outside-of-dependency-constraint if you see NU1605, NU1608 and/or NU1107 warnings after upgrading
 - Bump Native SDK from v0.8.5 to v0.9.0 ([#4260](https://github.com/getsentry/sentry-dotnet/pull/4260))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#090)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.8.5...0.9.0)
@@ -246,7 +678,7 @@
 ### Fixes
 
 - Revert "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4202](https://github.com/getsentry/sentry-dotnet/pull/4202))
-    - IMPORTANT: Fixes multiple issues running versions 5.6.x and 5.7.x of the Sentry SDK for .NET on iOS (initialising the SDK and sending data to Sentry)
+  - IMPORTANT: Fixes multiple issues running versions 5.6.x and 5.7.x of the Sentry SDK for .NET on iOS (initialising the SDK and sending data to Sentry)
 
 ### Dependencies
 
@@ -285,7 +717,7 @@
 ### Fixes
 
 - Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
-- Prevent Auto Breadcrumbs Event Binder from leaking and rebinding events  ([#4159](https://github.com/getsentry/sentry-dotnet/pull/4159))
+- Prevent Auto Breadcrumbs Event Binder from leaking and rebinding events ([#4159](https://github.com/getsentry/sentry-dotnet/pull/4159))
 - Fixes build error when building .NET Framework applications using Sentry 5.6.0: `MSB4185 :The function "IsWindows" on type "System.OperatingSystem" is not available` ([#4160](https://github.com/getsentry/sentry-dotnet/pull/4160))
 - Added a `SentrySetCommitReleaseOptions` build property that can be specified separately from `SentryReleaseOptions` ([#4109](https://github.com/getsentry/sentry-dotnet/pull/4109))
 
@@ -313,8 +745,8 @@
 ### Dependencies
 
 - Bump Cocoa SDK from v8.39.0 to v8.46.0 ([#4103](https://github.com/getsentry/sentry-dotnet/pull/4103))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
 - Bump Native SDK from v0.8.3 to v0.8.4 ([#4122](https://github.com/getsentry/sentry-dotnet/pull/4122))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#084)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.8.3...0.8.4)
@@ -336,8 +768,8 @@
 ### Dependencies
 
 - Bump Native SDK from v0.8.2 to v0.8.3 [#4072](https://github.com/getsentry/sentry-dotnet/pull/4072))
-    - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#083)
-    - [diff](https://github.com/getsentry/sentry-native/compare/0.8.2...0.8.3)
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#083)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.2...0.8.3)
 
 ### Fixes
 
@@ -395,7 +827,7 @@
 - Users can now register their own MAUI controls for breadcrumb creation ([#3997](https://github.com/getsentry/sentry-dotnet/pull/3997))
 - Serilog scope properties are now sent with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
 - The sample seed used for sampling decisions is now propagated, for use in downstream custom trace samplers ([#3951](https://github.com/getsentry/sentry-dotnet/pull/3951))
-- Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
+- Add Azure Function UseSentry overloads for easier wire ups ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
 
 ### Fixes
 
@@ -418,13 +850,14 @@
 - Emit transaction.data inside contexts.trace.data ([#3936](https://github.com/getsentry/sentry-dotnet/pull/3936))
 - Native SIGSEGV errors resulting from managed NullReferenceExceptions are now suppressed on Android ([#3903](https://github.com/getsentry/sentry-dotnet/pull/3903))
 - OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
-- Fixed envelopes with oversized attachments getting stuck in __processing ([#3938](https://github.com/getsentry/sentry-dotnet/pull/3938))
+- Fixed envelopes with oversized attachments getting stuck in \_\_processing ([#3938](https://github.com/getsentry/sentry-dotnet/pull/3938))
 - OperatingSystem will now return macOS as OS name instead of 'Darwin' as well as the proper version. ([#2710](https://github.com/getsentry/sentry-dotnet/pull/3956))
 - Ignore null value on CocoaScopeObserver.SetTag ([#3948](https://github.com/getsentry/sentry-dotnet/pull/3948))
 
 ## 5.1.0
 
 ### Significant change in behavior
+
 - The User.IpAddress is now only set to `{{auto}}` when `SendDefaultPii` is enabled. This change gives you control over IP address collection directly on the client ([#3893](https://github.com/getsentry/sentry-dotnet/pull/3893))
 
 ### Features
@@ -437,6 +870,7 @@
 - Bump Native SDK from v0.7.17 to v0.7.18 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0718)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.18)
+
 ### Fixes
 
 - Prevent Native EXC_BAD_ACCESS signal errors from being captured when managed NullRefrenceExceptions occur ([#3909](https://github.com/getsentry/sentry-dotnet/pull/3909))
@@ -490,12 +924,14 @@
 - `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
 
 ### Features
+
 - Added support for `.NET 9` ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
 - Heap dumps can be captured automatically when memory usage exceeds a configurable threshold. Note that this API is still experimental and may change based on user feedback. ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
 - libsentrysupplemental.so now supports 16 KB page sizes on Android ([#3723](https://github.com/getsentry/sentry-dotnet/pull/3723))
 - Added `SentryOptions` extension for profiling: `options.AddProfilingIntegration()` ([#3660](https://github.com/getsentry/sentry-dotnet/pull/3660))
 
 ### Fixes
+
 - Address Trim warnings to enable AOT support, including support for MAUI specifically. ([#3841](https://github.com/getsentry/sentry-dotnet/pull/3841))
 - Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
 - Android - fix bug that prevents logcat.log from getting attached to unhandled events (SIGSEGV Segfault) ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
@@ -514,8 +950,8 @@
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7190)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.16.0...7.19.0)
 - Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
 - Bump Native SDK from v0.7.11 to v0.7.16 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731), [#3770](https://github.com/getsentry/sentry-dotnet/pull/3770), [#3775](https://github.com/getsentry/sentry-dotnet/pull/3775), [#3779](https://github.com/getsentry/sentry-dotnet/pull/3779)) ([#3825](https://github.com/getsentry/sentry-dotnet/pull/3825))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0716)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.16)
@@ -590,7 +1026,7 @@ Note that .NET 9 will also support Xcode 16, when it is released next month (Nov
 
 - The `SentrySdk.Metrics` module is deprecated and will be removed in the next major release.
   Sentry will reject all metrics sent after October 7, 2024.
-  Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics  ([#3619](https://github.com/getsentry/sentry-dotnet/pull/3619))
+  Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics ([#3619](https://github.com/getsentry/sentry-dotnet/pull/3619))
 
 ### Fixes
 
@@ -617,10 +1053,12 @@ Note that .NET 9 will also support Xcode 16, when it is released next month (Nov
 - All exceptions are now added as breadcrumbs on future events. Previously this was only the case for exceptions captured via the `Sentry.SeriLog` or `Sentry.Extensions.Logging` integrations. ([#3584](https://github.com/getsentry/sentry-dotnet/pull/3584))
 
 ### Fixes
+
 - On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
 - Add missing org parameter to the CLI release operations ([#3600](https://github.com/getsentry/sentry-dotnet/pull/3600))
 
 ### API Changes
+
 - When the Sentry SDK is disabled, `SentrySdk.StartTransaction()` now returns a `NoOpTransaction`, which avoids unnecessary memory allocations ([#3581](https://github.com/getsentry/sentry-dotnet/pull/3581))
 
 ### Dependencies
@@ -674,7 +1112,7 @@ Note that .NET 9 will also support Xcode 16, when it is released next month (Nov
 ### Fixes
 
 - When targeting `WPF`, `WinForms` or `Avalonia` with `PublishAot` enabled, the SDK no longers throws a `DllNotFoundException` trying to initialize `sentry-native` ([#3411](https://github.com/getsentry/sentry-dotnet/pull/3411))
-Unable to load DLL sentry-native or one of its dependencies
+  Unable to load DLL sentry-native or one of its dependencies
 - On mobile devices, the SDK no longer throws a `FormatException` when trying to report native events ([#3485](https://github.com/getsentry/sentry-dotnet/pull/3485))
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
 - Decrease runtime diagnostics circular buffer when profiling, reducing memory usage ([#3491](https://github.com/getsentry/sentry-dotnet/pull/3491))
@@ -909,10 +1347,10 @@ Unable to load DLL sentry-native or one of its dependencies
 ### Features
 
 - ASP.NET Core: Blocking call detection. An event with the stack trace of the blocking call will be captured as event. ([#2709](https://github.com/getsentry/sentry-dotnet/pull/2709))
-    - IMPORTANT: Verify this in test/staging before prod! Blocking calls in hot paths could create a lot of events for your Sentry project.
-    - Opt-in via `options.CaptureBlockingCalls = true`
-    - Disabled for specific code blocks with `using (new SuppressBlockingDetection())`
-    - Doesn't detect everything. See original [Caveats described by Ben Adams](https://github.com/benaadams/Ben.BlockingDetector?tab=readme-ov-file#caveats).
+  - IMPORTANT: Verify this in test/staging before prod! Blocking calls in hot paths could create a lot of events for your Sentry project.
+  - Opt-in via `options.CaptureBlockingCalls = true`
+  - Disabled for specific code blocks with `using (new SuppressBlockingDetection())`
+  - Doesn't detect everything. See original [Caveats described by Ben Adams](https://github.com/benaadams/Ben.BlockingDetector?tab=readme-ov-file#caveats).
 - Added Crons support via `SentrySdk.CaptureCheckIn` and an integration with Hangfire ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
 - Common tags set automatically for metrics and metrics summaries are attached to Spans ([#3191](https://github.com/getsentry/sentry-dotnet/pull/3191))
 
@@ -1043,12 +1481,14 @@ This SDK version is compatible with a self-hosted version of Sentry `22.12.0` or
 - Setting `SentryOptions.Dsn` to `null` now throws `ArgumentNullException` during initialization. ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
 - Enable `CaptureFailedRequests` by default ([#2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 - Added `Sentry` namespace to global usings when `ImplicitUsings` is enabled ([#3043](https://github.com/getsentry/sentry-dotnet/pull/3043))
-If you have conflicts, you can opt out by adding the following to your `csproj`:
+  If you have conflicts, you can opt out by adding the following to your `csproj`:
+
 ```
 <PropertyGroup>
   <SentryImplicitUsings>false</SentryImplicitUsings>
 </PropertyGroup>
 ```
+
 - Transactions' spans are no longer automatically finished with the status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay).
   - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
 - The `User.IpAddress` is now set to `{{auto}}` by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
@@ -1124,7 +1564,6 @@ If you have compilation errors you can find the affected types or overloads miss
 - The `WithScope` and `WithScopeAsync` methods have been removed. We have discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
 
   Replace your usage of `WithScope` with overloads of `Capture*` methods:
-
   - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
   - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
   - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
@@ -1151,8 +1590,7 @@ If you have compilation errors you can find the affected types or overloads miss
   - `SentrySdk.Metrics.Set` now additionally accepts `string` as value ([#3092](https://github.com/getsentry/sentry-dotnet/pull/3092))
   - Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
   - Added support for capturing built-in metrics from the `System.Diagnostics.Metrics` API ([#3052](https://github.com/getsentry/sentry-dotnet/pull/3052))
-- `Sentry.Profiling` is now available as a package on [nuget](nuget.org). Be aware that profiling is in alpha and on servers the overhead could be high. Improving the experience for ASP.NET Core is tracked on [this issue](
-https://github.com/getsentry/sentry-dotnet/issues/2316) ([#2800](https://github.com/getsentry/sentry-dotnet/pull/2800))
+- `Sentry.Profiling` is now available as a package on [nuget](nuget.org). Be aware that profiling is in alpha and on servers the overhead could be high. Improving the experience for ASP.NET Core is tracked on [this issue](https://github.com/getsentry/sentry-dotnet/issues/2316) ([#2800](https://github.com/getsentry/sentry-dotnet/pull/2800))
   - iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
 - Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
 - Support for [Spotlight](https://spotlightjs.com/), a debug tool for local development. ([#2961](https://github.com/getsentry/sentry-dotnet/pull/2961))
@@ -1209,7 +1647,6 @@ There are some functional differences when publishing Native AOT:
 
 - Upgraded to NLog version 5. ([#2697](https://github.com/getsentry/sentry-dotnet/pull/2697))
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([#2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
-
 
 - Bump Cocoa SDK from v8.16.1 to v8.19.0 ([#2910](https://github.com/getsentry/sentry-dotnet/pull/2910), [#2936](https://github.com/getsentry/sentry-dotnet/pull/2936), [#2972](https://github.com/getsentry/sentry-dotnet/pull/2972), [#3005](https://github.com/getsentry/sentry-dotnet/pull/3005), [#3084](https://github.com/getsentry/sentry-dotnet/pull/3084))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8190)
@@ -1429,7 +1866,7 @@ There are some functional differences when publishing Native AOT:
 - Introduced `HttpMessageHandler` in favor of the now deprecated `HttpClientHandler` on the options. This allows the SDK to support NSUrlSessionHandler on iOS ([#2503](https://github.com/getsentry/sentry-dotnet/pull/2503))
 - Using `Activity.RecordException` now correctly updates the error status of OpenTelemetry Spans ([#2515](https://github.com/getsentry/sentry-dotnet/pull/2515))
 - Fixed Transaction name not reporting correctly when using UseExceptionHandler ([#2511](https://github.com/getsentry/sentry-dotnet/pull/2511))
-- log4net logging Level.All now maps to SentryLevel.Debug ([#2522]([url](https://github.com/getsentry/sentry-dotnet/pull/2522)))
+- log4net logging Level.All now maps to SentryLevel.Debug ([#2522](<[url](https://github.com/getsentry/sentry-dotnet/pull/2522)>))
 
 ### Dependencies
 
@@ -1479,8 +1916,8 @@ There are some functional differences when publishing Native AOT:
 - Various .NET MAUI fixes / improvements ([#2403](https://github.com/getsentry/sentry-dotnet/pull/2403))
   - The battery level was being reported incorrectly due to percentage multiplier.
   - The device architecture (x64, arm64, etc.) is now reported
-  - On Windows, the OS type is now reported as "Windows" instead of "WinUI".  Additionally, the OS display version (ex, "22H2") is now included.
-  - `UIKit`, `ABI.Microsoft` and `WinRT`  frames are now marked "system" instead of "in app".
+  - On Windows, the OS type is now reported as "Windows" instead of "WinUI". Additionally, the OS display version (ex, "22H2") is now included.
+  - `UIKit`, `ABI.Microsoft` and `WinRT` frames are now marked "system" instead of "in app".
 - Reduce debug files uploaded ([#2404](https://github.com/getsentry/sentry-dotnet/pull/2404))
 - Fix system frames being marked as "in-app" ([#2408](https://github.com/getsentry/sentry-dotnet/pull/2408))
   - NOTE: This important fix corrects a value that is used during issue grouping, so you may receive new alerts for existing issues after deploying this update.
@@ -1503,12 +1940,12 @@ There are some functional differences when publishing Native AOT:
 ### Features
 
 - .NET SDK changes for exception groups ([#2287](https://github.com/getsentry/sentry-dotnet/pull/2287))
-  - This changes how `AggregateException` is handled.  Instead of filtering them out client-side, the SDK marks them as an "exception group",
+  - This changes how `AggregateException` is handled. Instead of filtering them out client-side, the SDK marks them as an "exception group",
     and adds includes data that represents the hierarchical structure of inner exceptions. Sentry now recognizes this server-side,
     improving the accuracy of the issue detail page.
-  - Accordingly, the `KeepAggregateException` option is now obsolete and does nothing.  Please remove any usages of `KeepAggregateException`.
+  - Accordingly, the `KeepAggregateException` option is now obsolete and does nothing. Please remove any usages of `KeepAggregateException`.
   - NOTE: If running Self-Hosted Sentry, you should wait to adopt this SDK update until after updating to the 23.6.0 (est. June 2023) release of Sentry.
-    The effect of updating the SDK early will be as if `KeepAggregateException = true` was set.  That will not break anything, but may affect issue grouping and alerts.
+    The effect of updating the SDK early will be as if `KeepAggregateException = true` was set. That will not break anything, but may affect issue grouping and alerts.
 
 ### Fixes
 
@@ -1525,13 +1962,13 @@ There are some functional differences when publishing Native AOT:
 ### Features
 
 - Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
-  - Initial `beta.1` release.  Please give it a try and let us know how it goes!
-  - Documentation is TBD.  For now, see `/samples/Sentry.Samples.Azure.Functions.Worker`.
+  - Initial `beta.1` release. Please give it a try and let us know how it goes!
+  - Documentation is TBD. For now, see `/samples/Sentry.Samples.Azure.Functions.Worker`.
 
-- Add `Hint` support  ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
+- Add `Hint` support ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
   - Currently, this allows you to manipulate attachments in the various "before" event delegates.
   - Hints can also be used in event and transaction processors by implementing `ISentryEventProcessorWithHint` or `ISentryTransactionProcessorWithHint`, instead of `ISentryEventProcessor` or `ISentryTransactionProcessor`.
-  - Note: Obsoletes the `BeforeSend`, `BeforeSendTransaction`, and `BeforeBreadcrumb` properties on the `SentryOptions` class.  They have been replaced with `SetBeforeSend`, `SetBeforeSendTransaction`, and `SetBeforeBreadcrumb` respectively.  Each one provides overloads both with and without a `Hint` object.
+  - Note: Obsoletes the `BeforeSend`, `BeforeSendTransaction`, and `BeforeBreadcrumb` properties on the `SentryOptions` class. They have been replaced with `SetBeforeSend`, `SetBeforeSendTransaction`, and `SetBeforeBreadcrumb` respectively. Each one provides overloads both with and without a `Hint` object.
 
 - Allow setting the active span on the scope ([#2364](https://github.com/getsentry/sentry-dotnet/pull/2364))
   - Note: Obsoletes the `Scope.GetSpan` method in favor of a `Scope.Span` property (which now has a setter as well).
@@ -1546,8 +1983,8 @@ There are some functional differences when publishing Native AOT:
     Though extremely uncommon, if you are _retrieving_ the `TracesSampleRate` property for some reason, you will need to account for nulls.
     However, there is no change to the behavior or _typical_ usage of either of these properties.
 
-- CachedTransport gracefully handles malformed envelopes during processing  ([#2371](https://github.com/getsentry/sentry-dotnet/pull/2371))
-- Remove extraneous iOS simulator resources when building MAUI apps using Visual Studio "Hot Restart" mode, to avoid hitting Windows max path  ([#2384](https://github.com/getsentry/sentry-dotnet/pull/2384))
+- CachedTransport gracefully handles malformed envelopes during processing ([#2371](https://github.com/getsentry/sentry-dotnet/pull/2371))
+- Remove extraneous iOS simulator resources when building MAUI apps using Visual Studio "Hot Restart" mode, to avoid hitting Windows max path ([#2384](https://github.com/getsentry/sentry-dotnet/pull/2384))
 
 ### Dependencies
 
@@ -1644,7 +2081,7 @@ There are some functional differences when publishing Native AOT:
 ## 3.29.0
 
 **Notice:** The `<SentryUploadSymbols>` MSBuild property previously defaulted to `true` for projects compiled in `Release` configuration.
-It is now `false` by default.  To continue uploading symbols, you must opt-in by setting it to `true`.
+It is now `false` by default. To continue uploading symbols, you must opt-in by setting it to `true`.
 See the [MSBuild Setup](https://docs.sentry.io/platforms/dotnet/configuration/msbuild/) docs for further details.
 
 ### Features
@@ -1695,7 +2132,7 @@ See the [MSBuild Setup](https://docs.sentry.io/platforms/dotnet/configuration/ms
 ### Fixes
 
 - Workaround Visual Studio "Pair to Mac" issue (on Windows), and Update bundled Cocoa SDK to version 7.31.5 ([#2164](https://github.com/getsentry/sentry-dotnet/pull/2164))
-- Sentry SDK assemblies no longer have PDBs embedded. Debug symbols are uploaded to `nuget.org` as `snupkg` packages  ([#2166](https://github.com/getsentry/sentry-dotnet/pull/2166))
+- Sentry SDK assemblies no longer have PDBs embedded. Debug symbols are uploaded to `nuget.org` as `snupkg` packages ([#2166](https://github.com/getsentry/sentry-dotnet/pull/2166))
 
 ### Dependencies
 
@@ -1950,7 +2387,7 @@ Includes Sentry.Maui Preview 1
 ### Fixes
 
 - Remove IInternalSdkIntegration ([#1656](https://github.com/getsentry/sentry-dotnet/pull/1656))
-- On async Main, dont unregister unhandled exception before capturing crash  ([#321](https://github.com/getsentry/sentry-dotnet/issues/321))
+- On async Main, dont unregister unhandled exception before capturing crash ([#321](https://github.com/getsentry/sentry-dotnet/issues/321))
 - Handle BadHttpRequestException from Kestrel inside SentryTunnelMiddleware ([#1673](https://github.com/getsentry/sentry-dotnet/pull/1673))
 - Improve timestamp precision of transactions and spans ([#1680](https://github.com/getsentry/sentry-dotnet/pull/1680))
 - Flatten AggregateException ([#1672](https://github.com/getsentry/sentry-dotnet/pull/1672))
@@ -2001,7 +2438,7 @@ Includes Sentry.Maui Preview 1
 - Cleanup diagnostic source ([#1529](https://github.com/getsentry/sentry-dotnet/pull/1529))
 - Remove confusing message Successfully sent cached envelope ([#1542](https://github.com/getsentry/sentry-dotnet/pull/1542))
 - Fix infinite loop in SentryDatabaseLogging.UseBreadcrumbs ([#1543](https://github.com/getsentry/sentry-dotnet/pull/1543))
-- GetFromRuntimeInformation() in try-catch  ([#1554](https://github.com/getsentry/sentry-dotnet/pull/1554))
+- GetFromRuntimeInformation() in try-catch ([#1554](https://github.com/getsentry/sentry-dotnet/pull/1554))
 - Make `Contexts` properties more thread-safe ([#1571](https://github.com/getsentry/sentry-dotnet/pull/1571))
 - Fix `PlatformNotSupportedException` exception on `net6.0-maccatalyst` targets ([#1567](https://github.com/getsentry/sentry-dotnet/pull/1567))
 - In ASP.Net Core, make sure that `SentrySdk.LastEventId` is accessible from exception handler pages ([#1573](https://github.com/getsentry/sentry-dotnet/pull/1573))
@@ -2053,7 +2490,7 @@ Includes Sentry.Maui Preview 1
 ### Features
 
 - Add CaptureLastError as an extension method to the Server class on ASP.NET ([#1411](https://github.com/getsentry/sentry-dotnet/pull/1411))
-- Add IsDynamicCode* to events ([#1418](https://github.com/getsentry/sentry-dotnet/pull/1418))
+- Add IsDynamicCode\* to events ([#1418](https://github.com/getsentry/sentry-dotnet/pull/1418))
 
 ### Fixes
 
@@ -2601,7 +3038,7 @@ feat: Add integration to TaskScheduler.UnobservedTaskException (#481)
 fix: aspnet fqdn (#485) @bruno-garcia
 ref: wait on test the time needed (#484) @bruno-garcia
 feat: Add integration to TaskScheduler.UnobservedTaskException (#481) @lucas-zimerman
-build(deps): bump Serilog.AspNetCore from 3.2.0 to 3.4.0 (#477)  @dependabot-preview
+build(deps): bump Serilog.AspNetCore from 3.2.0 to 3.4.0 (#477) @dependabot-preview
 Fix README typo (#480) @AndreasLangberg
 build(deps): bump coverlet.msbuild from 2.8.1 to 2.9.0 (#462) @dependabot-preview
 build(deps): bump Microsoft.Extensions.Logging.Debug @dependabot-preview
@@ -2666,7 +3103,7 @@ Fixed ASP.NET System.Web catch HttpException to prevent the request processor fr
 
 ## 2.1.1
 
-Bug fix:  Don't overwrite server name set via configuration with machine name on ASP.NET Core #372
+Bug fix: Don't overwrite server name set via configuration with machine name on ASP.NET Core #372
 
 ## 2.1.0
 
@@ -2684,7 +3121,7 @@ Take ServerName from options (#356)
 ## 2.0.2
 
 Add logger and category from Serilog SourceContext. (#316) @krisztiankocsis
-Set DateFormatHandling.IsoDateFormat for serializer. Fixes #351 (#353)  @olsh
+Set DateFormatHandling.IsoDateFormat for serializer. Fixes #351 (#353) @olsh
 
 ## 2.0.1
 
@@ -2697,7 +3134,7 @@ Removed `-beta` from dependencies.
 - sourcelink GA (#330)
 - Adds ability to specify user values via NLog configuration (#336)
 - Add option to ASP.NET Core to flush events after response complete (#288)
-- Fixed race on `BackgroundWorker`  (#293)
+- Fixed race on `BackgroundWorker` (#293)
 - Exclude `Sentry.` frames from InApp (#272)
 - NLog SentryTarget with less overhead for breadcrumb (#273)
 - Logging on body not extracted (#246)
@@ -2725,7 +3162,7 @@ Removed `-beta` from dependencies.
 Major version bumped due to these breaking changes:
 
 1. `Sentry.Protocol` version 2.0.0
-   - Remove StackTrace from SentryEvent [#38](https://github.com/getsentry/sentry-dotnet-protocol/pull/38) - StackTrace is  either part of Thread or SentryException.
+   - Remove StackTrace from SentryEvent [#38](https://github.com/getsentry/sentry-dotnet-protocol/pull/38) - StackTrace is either part of Thread or SentryException.
 2. Removed `ContextLine` #223
 3. Use `StackTrace` from `Threads` #222
 4. `FlushAsync` added to `ISentryClient` #214
@@ -2756,7 +3193,7 @@ Features:
 ## 2.0.0-beta5
 
 - Add option to ASP.NET Core to flush events after response complete (#288)
-- Fixed race on `BackgroundWorker`  (#293)
+- Fixed race on `BackgroundWorker` (#293)
 - Exclude `Sentry.` frames from InApp (#272)
 - NLog SentryTarget with less overhead for breadcrumb (#273)
 
@@ -2827,7 +3264,7 @@ Fixes and improvements to the NLog integration: #207 by @josh-degraw
 
 ## 1.1.3-beta4
 
-Bug fix: Don't override user  #199
+Bug fix: Don't override user #199
 
 ## 1.1.3-beta3
 
@@ -2928,7 +3365,7 @@ Features:
 
 - Use log entry to improve grouping #125
 - Use .NET Core SDK 2.1.401
-- Make `AddProcessors` extension methods on Options public  #115
+- Make `AddProcessors` extension methods on Options public #115
 - Format InternalsVisibleTo to avoid iOS issue: 94e28b3
 
 Bug fixes:
@@ -3011,12 +3448,12 @@ Sample event using the log4net integration:
 
 Download it directly from GitHub or using NuGet:
 
-|      Integrations                 |        NuGet         |
-| ----------------------------- | -------------------: |
-|         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
-|     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
-| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
-| **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
+| Integrations                  |                                                                                                                                 NuGet |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------: |
+| **Sentry**                    |                                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry) |
+| **Sentry.AspNetCore**         |                 [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore) |
+| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging) |
+| **Sentry.Log4Net**            |                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net) |
 
 ## 1.0.0-rc2
 
@@ -3033,12 +3470,12 @@ Bug fixes:
 
 Download it directly below from GitHub or using NuGet:
 
-|      Integrations                 |        NuGet         |
-| ----------------------------- | -------------------: |
-|         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
-|     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
-| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
-| **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
+| Integrations                  |                                                                                                                                 NuGet |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------: |
+| **Sentry**                    |                                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry) |
+| **Sentry.AspNetCore**         |                 [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore) |
+| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging) |
+| **Sentry.Log4Net**            |                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net) |
 
 ## 1.0.0-rc
 
@@ -3065,12 +3502,12 @@ The settings for HTTP and Worker have been moved to `SentryOptions`. There's no 
 
 Download it directly below from GitHub or using NuGet:
 
-|      Integrations                 |        NuGet         |
-| ----------------------------- | -------------------: |
-|         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
-|     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
-| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
-| **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
+| Integrations                  |                                                                                                                                 NuGet |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------: |
+| **Sentry**                    |                                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry) |
+| **Sentry.AspNetCore**         |                 [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore) |
+| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging) |
+| **Sentry.Log4Net**            |                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net) |
 
 ## 0.0.1-preview5
 
@@ -3093,12 +3530,12 @@ Bug fixes:
 
 Download it directly below from GitHub or using NuGet:
 
-|      Integrations                 |        NuGet         |
-| ----------------------------- | -------------------: |
-|         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
-|     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
-| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
-| **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
+| Integrations                  |                                                                                                                                 NuGet |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------: |
+| **Sentry**                    |                                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry) |
+| **Sentry.AspNetCore**         |                 [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore) |
+| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging) |
+| **Sentry.Log4Net**            |                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net) |
 
 ## 0.0.1-preview4
 
@@ -3127,12 +3564,12 @@ Improvements to [the docs](https://getsentry.github.io/sentry-dotnet) like:
 
 Download it directly from GitHub or using NuGet:
 
-|      Integrations                 |        NuGet         |
-| ----------------------------- | -------------------: |
-|         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
-|     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
-| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
-| **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
+| Integrations                  |                                                                                                                                 NuGet |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------: |
+| **Sentry**                    |                                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry) |
+| **Sentry.AspNetCore**         |                 [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore) |
+| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging) |
+| **Sentry.Log4Net**            |                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net) |
 
 ## 0.0.1-preview3
 
@@ -3159,11 +3596,11 @@ Bug fixes:
 
 Download it directly from GitHub or using NuGet:
 
-|      Integrations                 |        NuGet         |
-| ----------------------------- | -------------------: |
-|         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
-|     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
-| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
+| Integrations                  |                                                                                                                                 NuGet |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------: |
+| **Sentry**                    |                                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry) |
+| **Sentry.AspNetCore**         |                 [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore) |
+| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging) |
 
 ## 0.0.1-preview2
 
@@ -3186,11 +3623,11 @@ Bugs fixed:
 
 Download it directly from GitHub or using NuGet:
 
-|      Integrations                 |        NuGet         |
-| ----------------------------- | -------------------: |
-|         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
-|     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
-| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
+| Integrations                  |                                                                                                                                 NuGet |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------: |
+| **Sentry**                    |                                       [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry) |
+| **Sentry.AspNetCore**         |                 [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore) |
+| **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging) |
 
 ## 0.0.1-preview1
 

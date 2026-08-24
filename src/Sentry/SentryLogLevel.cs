@@ -1,11 +1,9 @@
 using Sentry.Extensibility;
-using Sentry.Infrastructure;
 
 namespace Sentry;
 
 /// <summary>
 /// The severity of the structured log.
-/// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
 /// <remarks>
 /// The named constants use the value of the lowest severity number per severity level:
@@ -41,7 +39,6 @@ namespace Sentry;
 /// </list>
 /// </remarks>
 /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-[Experimental(DiagnosticId.ExperimentalFeature)]
 public enum SentryLogLevel
 {
     /// <summary>

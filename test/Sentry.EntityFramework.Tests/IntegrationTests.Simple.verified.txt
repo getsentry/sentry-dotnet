@@ -13,6 +13,7 @@
           Value: my exception,
           Mechanism: {
             Type: generic,
+            Handled: true,
             Synthetic: false,
             IsExceptionGroup: false,
             Data: {
@@ -61,7 +62,7 @@
         {
           Message: my exception,
           Category: Exception,
-          Level: critical
+          Level: fatal
         }
       ],
       Spans: [

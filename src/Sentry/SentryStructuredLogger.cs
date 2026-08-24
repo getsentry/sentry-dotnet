@@ -5,9 +5,7 @@ namespace Sentry;
 
 /// <summary>
 /// Creates and sends logs to Sentry.
-/// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
-[Experimental(DiagnosticId.ExperimentalFeature)]
 public abstract partial class SentryStructuredLogger
 {
     internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock)
@@ -15,7 +13,7 @@ public abstract partial class SentryStructuredLogger
 
     internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
-        return options.Experimental.EnableLogs
+        return options.EnableLogs
             ? new DefaultSentryStructuredLogger(hub, options, clock, batchCount, batchInterval)
             : DisabledSentryStructuredLogger.Instance;
     }

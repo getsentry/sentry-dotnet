@@ -25,6 +25,10 @@ internal class ReplaySession : IReplaySession
             // Check to see if a Replay ID is available
             var replayId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.ReplayId?.ToSentryId();
             return (replayId is { } id && id != SentryId.Empty) ? id : null;
+#elif __IOS__
+            string? nativeId = null;
+            SentryCocoaSdk.ConfigureScope(scope => nativeId = scope.ReplayId);
+            return (nativeId is { } id) ? SentryId.Parse(id) : null;
 #else
             return null;
 #endif

@@ -4,9 +4,10 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console app NativeAOT (<framework>)' -ForEach @(
-    @{ framework = 'net8.0' }
+    foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
+        ResetLocalPackages
         $path = './console-app'
         DotnetNew 'console' $path $framework
         @'
@@ -184,11 +185,23 @@ internal class FakeTransport : ITransport
 
 # This ensures we don't have a regression for https://github.com/getsentry/sentry-dotnet/issues/2825
 Describe 'Console app regression (missing System.Reflection.Metadata)' {
-    AfterAll {
-        dotnet remove ./net4-console/console-app.csproj package Sentry
+    BeforeAll {
+        ResetLocalPackages
     }
 
-    It 'Ensure System.Reflection.Metadata is not missing' {
+    AfterAll {
+        Push-Location ./net4-console
+        try
+        {
+            dotnet remove console-app.csproj package Sentry
+        }
+        finally
+        {
+            Pop-Location
+        }
+    }
+
+    It 'Ensure System.Reflection.Metadata is not missing' -Skip:(!$IsWindows) {
         $path = './net4-console'
         Remove-Item -Recurse -Force -Path @("$path/bin", "$path/obj") -ErrorAction SilentlyContinue
         AddPackageReference $path 'Sentry'

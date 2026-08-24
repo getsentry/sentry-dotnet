@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Maui.CommunityToolkit.Mvvm;
 
 namespace Sentry.Maui;
@@ -12,7 +13,14 @@ public static class SentryOptionsExtensions
     /// </summary>
     public static SentryMauiOptions AddCommunityToolkitIntegration(this SentryMauiOptions options)
     {
-        options.AddIntegrationEventBinder<MauiCommunityToolkitMvvmEventsBinder>();
+        if (options.DisableSentryTracing)
+        {
+            options.LogWarning("Skipping CommunityToolkit.Mvvm integration because OpenTelemetry is enabled.");
+        }
+        else
+        {
+            options.AddIntegrationEventBinder<MauiCommunityToolkitMvvmEventsBinder>();
+        }
         return options;
     }
 }

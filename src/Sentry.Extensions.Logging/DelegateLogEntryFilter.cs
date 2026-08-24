@@ -13,9 +13,13 @@ public class DelegateLogEntryFilter : ILogEntryFilter
     /// <summary>
     /// Creates a new instance of <see cref="DelegateLogEntryFilter"/>
     /// </summary>
-    /// <param name="filter"></param>
+    /// <param name="filter">The filter <see langword="delegate"/>.</param>
     public DelegateLogEntryFilter(Func<string, LogLevel, EventId, Exception?, bool> filter)
-        => _filter = filter ?? throw new ArgumentNullException(nameof(filter));
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+
+        _filter = filter;
+    }
 
     /// <inheritdoc />
     public bool Filter(

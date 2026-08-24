@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using FluentAssertions;
 using Foundation;
@@ -34,7 +35,7 @@ public class CocoaExtensionsTests
             IpAddress = "127.0.0.1"
         };
 
-        var native = new CocoaSdk.SentryEvent();
+        var native = new CocoaSdk.SentryObjCEvent();
         evt.CopyToCocoaSentryEvent(native);
 
         AssertEqual(evt, native);
@@ -49,10 +50,10 @@ public class CocoaExtensionsTests
     [Fact]
     public void ToSentryEvent_ConvertToManaged()
     {
-        var native = new CocoaSdk.SentryEvent();
+        var native = new CocoaSdk.SentryObjCEvent();
 
         native.Timestamp = DateTimeOffset.UtcNow.ToNSDate();
-        native.Level = Sentry.CocoaSdk.SentryLevel.Debug;
+        native.Level = Sentry.CocoaSdk.SentryObjCLevel.Debug;
         native.ServerName = "native server name";
         native.Dist = "native dist";
         native.Logger = "native logger";
@@ -65,9 +66,9 @@ public class CocoaExtensionsTests
         native.Error = new NSError(new NSString("Test Error"), IntPtr.Zero);
         native.Breadcrumbs =
         [
-            new CocoaSdk.SentryBreadcrumb(CocoaSdk.SentryLevel.Debug, "category")
+            new CocoaSdk.SentryObjCBreadcrumb(CocoaSdk.SentryObjCLevel.Debug, "category")
         ];
-        native.User = new CocoaSdk.SentryUser
+        native.User = new CocoaSdk.SentryObjCUser
         {
             UserId = "user id",
             Username = "test",
@@ -78,7 +79,64 @@ public class CocoaExtensionsTests
         AssertEqual(managed, native);
     }
 
-    private static void AssertEqual(SentryEvent managed, CocoaSdk.SentryEvent native)
+    [Fact]
+    public void ToCocoaBreadcrumbData_EmptyDictionary_ReturnsNull()
+    {
+        var source = new Dictionary<string, string>();
+        var result = source.ToCocoaBreadcrumbData();
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public void ToCocoaBreadcrumbData_RegularKeys_ConvertsToNSObject()
+    {
+        var source = new Dictionary<string, string>
+        {
+            { "url", "https://example.com" },
+            { "method", "GET" }
+        };
+
+        var result = source.ToCocoaBreadcrumbData();
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(2);
+        result[(NSString)"url"].Should().Be(NSObject.FromObject("https://example.com"));
+        result[(NSString)"method"].Should().Be(NSObject.FromObject("GET"));
+    }
+
+    [Fact]
+    public void ToCocoaBreadcrumbData_RequestStartKey_ConvertsToNSDate()
+    {
+        var timestamp = DateTimeOffset.UtcNow;
+        var unixMs = timestamp.ToUnixTimeMilliseconds();
+        var source = new Dictionary<string, string>
+        {
+            { SentryHttpMessageHandler.RequestStartKey, unixMs.ToString("F0", CultureInfo.InvariantCulture) }
+        };
+
+        var result = source.ToCocoaBreadcrumbData();
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1);
+        result[(NSString)SentryHttpMessageHandler.RequestStartKey].Should().BeOfType<NSDate>();
+    }
+
+    [Fact]
+    public void ToCocoaBreadcrumbData_RequestStartKey_NonNumericValue_FallsBackToNSObject()
+    {
+        var source = new Dictionary<string, string>
+        {
+            { SentryHttpMessageHandler.RequestStartKey, "not-a-number" }
+        };
+
+        var result = source.ToCocoaBreadcrumbData();
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1);
+        result[(NSString)SentryHttpMessageHandler.RequestStartKey].Should().Be(NSObject.FromObject("not-a-number"));
+    }
+
+    private static void AssertEqual(SentryEvent managed, CocoaSdk.SentryObjCEvent native)
     {
         native.ServerName.Should().Be(managed.ServerName, "Server Name");
         native.Dist.Should().Be(managed.Distribution, "Distribution");

@@ -13,11 +13,20 @@ For a big feature it's advised to raise an issue to discuss it first.
   * CI should be green.
   * The ideal state is where a reviewer approves and merges it immediately. But on more complex changes, some back and forth during reviews is expected.
 
+## Code comments
+
+We prefer code that explains itself, so comments should be kept to a minimum:
+
+* When code needs explaining, prefer refactoring it (better variable and method names, clearer structure) over adding a comment.
+* Where a comment is genuinely needed, keep it short and to the point.
+* Detailed context belongs in the pull request description rather than inline. When a comment does need lengthy background, reference the relevant PR instead of inlining the explanation.
+
 ## TLDR
 
 * Install the .NET SDKs
 * Install PowerShell
 * Install Xcode
+* Check out the submodules: `git submodule update --init --recursive`
 * Restore workloads with `dotnet workload restore` (needs `sudo` on a Mac)
 * To quickly get up and running, you can just run `dotnet build SentryNoMobile.slnf` (you're skipping the mobile targets)
 * To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
@@ -25,10 +34,11 @@ For a big feature it's advised to raise an issue to discuss it first.
 ## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
+  - [.NET 10.0](https://dotnet.microsoft.com/download/dotnet/10.0)
   - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-  *Technically, you only need the full SDK installation for the latest version (9.0). If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 8.0. However, installing the full SDKs will also give you the runtimes.*
+  *Technically, you only need the full SDK installation for the latest version. If you like, you can install the smaller ASP.NET Core Runtime packages for older versions. However, installing the full SDKs will also give you the runtimes.*
 
 * [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 
@@ -84,11 +94,36 @@ _TLDR;_ when working with the Sentry codebase, you should use the solution filte
 
 _Full explanation:_ 
 
-The `Sentry.sln` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However, the repository contains various solution filters that will be more practical for day-to-day tasks.
+The `Sentry.slnx` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However, the repository contains various solution filters that will be more practical for day-to-day tasks.
 
 These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that are committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
 
-Also note that script generates a `.generated.NoMobile.sln` solution, which is an identical copy of `Sentry.sln`. Again, we don't recommend opening this directly. It exists as a round about way to conditionally set build properties based on the solution name in certain solution filters. You should instead use those solution filters (e.g. `SentryNoMobile.slnf`) when working in the Sentry codebase.
+Also note that script generates a `.generated.NoMobile.slnx` solution, which is an identical copy of `Sentry.slnx`. Again, we don't recommend opening this directly. It exists as a round about way to conditionally set build properties based on the solution name in certain solution filters. You should instead use those solution filters (e.g. `SentryNoMobile.slnf`) when working in the Sentry codebase.
+
+## Git Hooks (Optional but Recommended)
+
+To automatically check and fix code formatting before committing, you can set up a pre-commit hook:
+
+```bash
+./dev.cs setup-hooks
+```
+
+Before each commit, the hook runs `dotnet format` against your staged `.cs` files and auto-fixes any formatting issues. If fixes were applied, the commit is blocked — just stage the fixes and try again:
+
+```bash
+git add -u
+git commit
+```
+
+Note: the hook skips automatically if you have unstaged changes, to avoid touching work in progress.
+
+To opt out at any time:
+
+```bash
+./dev.cs remove-hooks
+```
+
+**Note:** You can also bypass the hook for a specific commit using `git commit --no-verify` if needed.
 
 ## API changes approval process
 
@@ -99,26 +134,13 @@ To do that, run the build locally (i.e: `./build.sh` or `build.cmd`) and commit 
 ## Changelog
 
 We'd love for users to update the SDK everytime and as soon as we make a new release. But in reality most users rarely update the SDK.
-To help users see value in updating the SDK, we maintain a changelog file with entries split between two headings:
+To help users see value in updating the SDK, we maintain a changelog file with entries split between headings such as `### Features` and `### Fixes`.
 
-1. `### Features`
-2. `### Fixes`
+**Do not edit `CHANGELOG.md` manually.** The changelog is generated automatically at release time by [craft](https://github.com/getsentry/craft) (`changelogPolicy: auto` in `.craft.yml`) from the pull requests merged since the previous release. Entries are categorized from your [commit message / PR title](https://develop.sentry.dev/engineering-practices/commit-messages/) (e.g. a `feat:` PR becomes a Feature, a `fix:` PR becomes a Fix), so there's nothing to add by hand.
 
-We add the heading in the first PR that's adding either a feature or fixes in the current release.
-After a release, the [changelog file will contain only the last release entries](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md).
+If the PR title doesn't capture the change well — you want more detail, or a single PR should produce several entries — add a `### Changelog Entry` section to the PR description. craft uses the text under that heading verbatim instead of the PR title. See [Custom changelog entries from PR descriptions](https://craft.sentry.dev/configuration/#custom-changelog-entries-from-pr-descriptions).
 
-When you open a PR in such cases, you need to add a heading 2 named `## Unreleased`, which is replaced during release with the version number chosen.
-Below that, you'll add heading 3 mentioned above. For example, if you're adding a feature "Attach screenshots when capturing errors on WPF", right after a release, you'd add to the changelog:
-
-```
-## Unreleased
-
-### Features
-
-- Attach screenshots when capturing errors on WPF (#PR number)
-```
-
-There's a GitHub action check to verify if an entry was added. If the entry isn't a user-facing change, you can skip the verification with `#skip-changelog` written to the PR description. The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
+If the change isn't user-facing and you'd rather it not appear in the changelog at all, add the `skip-changelog` label to the PR or write `#skip-changelog` in the PR description.
 
 ## Naming tests
 
@@ -171,3 +193,61 @@ Once changes to Ben.Demystifier have been merged into the main branch then, the 
 should be updated from the main branch and the `modules/make-internal.sh` script run again (if necessary). This repo 
 should reference the most recent commit on the `internal` branch of Ben.Demystifier then (functionally identical to the
 main branch - the only difference being the changes to member visibility).
+
+## Sentry Cocoa SDK checkout
+
+`Sentry.Bindings.Cocoa` always builds the Sentry Cocoa SDK from source, from the
+[getsentry/sentry-cocoa](https://github.com/getsentry/sentry-cocoa/) submodule at
+`modules/sentry-cocoa` (`scripts/build-sentry-cocoa.sh`, invoked automatically by
+the build). Pre-built release artifacts can't be used: the `SentryObjC` hybrid-API
+frameworks are only published as self-contained bundles that would embed a second
+copy of the SDK alongside `Sentry.framework` (see
+[#5331](https://github.com/getsentry/sentry-dotnet/issues/5331)).
+
+To build against a different Cocoa SDK version, check out the desired ref in the
+submodule **and stage it** — the solution build automatically runs
+`git submodule update` (see `before.Sentry.sln.targets`), which reverts the
+submodule to the pinned commit unless the index already records your ref:
+
+```sh
+$ git -C modules/sentry-cocoa fetch origin
+$ git -C modules/sentry-cocoa checkout <tag-or-sha>
+$ git add modules/sentry-cocoa   # otherwise the build restores the pinned commit
+$ dotnet build ...               # rebuilds the Cocoa SDK from the new ref
+```
+
+## Local Sentry Android SDK checkout
+
+Similarly, by default, `Sentry.Bindings.Android` downloads a pre-built Sentry Android SDK from
+Maven. The version is specified in the `SentryAndroidSdkVersion` build property in `Sentry.Bindings.Android.csproj`.
+
+If you want to build an unreleased Sentry Android SDK version from source instead,
+you'll need to clone both the sentry-java and the sentry-native repositories and publish these locally:
+```sh
+$ cd $(LocalSentryJavaRepoDir) && ./gradlew publishToMavenLocal
+$ cd $(LocalSentryNativeRepoDir)/ndk && ./gradlew publishToMavenLocal
+```
+
+You'll also need to set `<UseLocalSentryMavenRepo>true</UseLocalSentryMavenRepo>` and `<SentryNativeNdkVersion>{whatever_version_you_checked_out}</SentryNativeNdkVersion>`
+in the `Sentry.Bindings.Android.csproj`file.
+
+To switch back again, simply revert those two build properties to their original values.
+
+## AI Workflows
+
+### AGENTS.md
+
+We guide coding agents via the [AGENTS.md](./AGENTS.md) file.
+See also https://agents.md/.
+
+And yes, Sentry has a [Skill](https://github.com/getsentry/skills) to maintain the `AGENTS.md` file.
+
+### .agents
+
+We use [dotagents](https://github.com/getsentry/dotagents) as a package manager for agent skills and more.
+See [agents.toml](./agents.toml) for our current configuration.
+
+### Warden
+
+We use [Warden](https://github.com/getsentry/warden) as a tool to run _Agent Skills_ against code changes, both locally and in CI.
+See [warden.toml](./warden.toml) for our current configuration.

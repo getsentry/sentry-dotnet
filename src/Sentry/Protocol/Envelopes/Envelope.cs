@@ -313,13 +313,17 @@ public sealed class Envelope : ISerializable, IDisposable
 
         if (attachments is { Count: > 0 })
         {
-            if (attachments.Count > 1)
+            foreach (var attachment in attachments)
             {
-                logger?.LogWarning("Feedback can only contain one attachment. Discarding {0} additional attachments.",
-                    attachments.Count - 1);
-            }
+                // Safety check, in case the user forcefully added a null attachment.
+                if (attachment.IsNull())
+                {
+                    logger?.LogWarning("Encountered a null attachment.  Skipping.");
+                    continue;
+                }
 
-            AddEnvelopeItemFromAttachment(items, attachments.First(), logger);
+                AddEnvelopeItemFromAttachment(items, attachment, logger);
+            }
         }
 
         if (sessionUpdate is not null)
@@ -331,26 +335,12 @@ public sealed class Envelope : ISerializable, IDisposable
     }
 
     /// <summary>
-    /// Creates an envelope that contains a single user feedback.
+    /// Creates an envelope that contains a single transaction and optional attachments.
     /// </summary>
-    [Obsolete("Use FromFeedback instead.")]
-    public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
-    {
-        var eventId = sentryUserFeedback.EventId;
-        var header = CreateHeader(eventId);
-
-        var items = new[]
-        {
-            EnvelopeItem.FromUserFeedback(sentryUserFeedback)
-        };
-
-        return new Envelope(eventId, header, items);
-    }
-
-    /// <summary>
-    /// Creates an envelope that contains a single transaction.
-    /// </summary>
-    public static Envelope FromTransaction(SentryTransaction transaction)
+    public static Envelope FromTransaction(
+        SentryTransaction transaction,
+        IDiagnosticLogger? logger = null,
+        IReadOnlyCollection<SentryAttachment>? attachments = null)
     {
         var eventId = transaction.EventId;
         var header = CreateHeader(eventId, transaction.DynamicSamplingContext);
@@ -368,6 +358,20 @@ public sealed class Envelope : ISerializable, IDisposable
             if (profiler.Collect(transaction) is { } profileInfo)
             {
                 items.Add(EnvelopeItem.FromProfileInfo(profileInfo));
+            }
+        }
+
+        if (attachments is not null)
+        {
+            foreach (var attachment in attachments)
+            {
+                if (attachment.IsNull())
+                {
+                    logger?.LogWarning("Encountered a null attachment.  Skipping.");
+                    continue;
+                }
+
+                AddEnvelopeItemFromAttachment(items, attachment, logger);
             }
         }
 
@@ -458,6 +462,18 @@ public sealed class Envelope : ISerializable, IDisposable
         var items = new[]
         {
             EnvelopeItem.FromLog(log),
+        };
+
+        return new Envelope(header, items);
+    }
+
+    internal static Envelope FromMetric(TraceMetric metric)
+    {
+        var header = DefaultHeader;
+
+        var items = new[]
+        {
+            EnvelopeItem.FromMetric(metric),
         };
 
         return new Envelope(header, items);

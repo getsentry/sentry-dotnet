@@ -23,9 +23,13 @@ public class ProtobufRequestExtractionDispatcher : IProtobufRequestPayloadExtrac
     public ProtobufRequestExtractionDispatcher(IEnumerable<IProtobufRequestPayloadExtractor> extractors,
         SentryOptions options, Func<RequestSize> sizeSwitch)
     {
-        Extractors = extractors ?? throw new ArgumentNullException(nameof(extractors));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _sizeSwitch = sizeSwitch ?? throw new ArgumentNullException(nameof(sizeSwitch));
+        ArgumentNullException.ThrowIfNull(extractors);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(sizeSwitch);
+
+        Extractors = extractors;
+        _options = options;
+        _sizeSwitch = sizeSwitch;
     }
 
     /// <summary>

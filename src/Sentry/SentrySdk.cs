@@ -31,6 +31,7 @@ static partial class SentrySdk
     internal static IHub InitHub(SentryOptions options)
     {
         options.SetupLogging();
+        options.LogDiagnosticWarning();
 
         ProcessInfo.Instance ??= new ProcessInfo(options);
 
@@ -62,6 +63,9 @@ static partial class SentrySdk
 #pragma warning restore 0162
 #pragma warning restore CS0162 // Unreachable code detected
 
+        // This happens before the native SDKs get initialized
+        options.Environment = options.SettingLocator.GetEnvironment();
+
         // Initialize native platform SDKs here
         if (options.InitNativeSdks)
         {
@@ -89,6 +93,18 @@ static partial class SentrySdk
             callback.Invoke(hub);
         }
         options.PostInitCallbacks.Clear();
+
+        // Default tags are applied per-event by the Enricher to events going through the .NET pipeline,
+        // but native crashes are captured and uploaded by the native SDK without going through that pipeline.
+        // Forward them to the scope observer so the native layer attaches them to crash reports.
+        // Bypassing the .NET scope keeps scope.Tags identical between native and non-native apps.
+        if (options is { EnableScopeSync: true, ScopeObserver: { } observer } && options.DefaultTags.Count > 0)
+        {
+            foreach (var tag in options.DefaultTags)
+            {
+                observer.SetTag(tag.Key, tag.Value);
+            }
+        }
 
         // Platform specific check for profiler misconfiguration.
 #if __IOS__
@@ -284,18 +300,11 @@ static partial class SentrySdk
     /// </summary>
     public static bool IsEnabled { [DebuggerStepThrough] get => CurrentHub.IsEnabled; }
 
-    /// <summary>
-    /// Experimental Sentry SDK features.
-    /// </summary>
-    /// <remarks>
-    /// This and related experimental APIs may change in the future.
-    /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public static class Experimental
-    {
-        /// <inheritdoc cref="IHub.Logger" />
-        public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
-    }
+    /// <inheritdoc cref="IHub.Logger" />
+    public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
+
+    /// <inheritdoc cref="IHub.Metrics" />
+    public static SentryMetricEmitter Metrics { [DebuggerStepThrough] get => CurrentHub.Metrics; }
 
     /// <summary>
     /// Creates a new scope that will terminate when disposed.
@@ -516,6 +525,19 @@ static partial class SentrySdk
         => CurrentHub.CaptureException(exception);
 
     /// <summary>
+    /// Captures the exception, explicitly marking it as handled or unhandled.
+    /// </summary>
+    /// <param name="exception">The exception.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed and the active transaction is aborted.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    public static SentryId CaptureException(Exception exception, bool handled, bool terminal = false)
+        => CurrentHub.CaptureException(exception, handled, terminal);
+
+    /// <summary>
     /// Captures the exception with a configurable scope.
     /// </summary>
     /// <remarks>
@@ -527,6 +549,25 @@ static partial class SentrySdk
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
         => CurrentHub.CaptureException(exception, configureScope);
+
+    /// <summary>
+    /// Captures the exception with a configurable scope, explicitly marking it as handled or unhandled and
+    /// whether it terminated the application.
+    /// </summary>
+    /// <remarks>
+    /// This allows modifying a scope without affecting other events.
+    /// </remarks>
+    /// <param name="exception">The exception.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed and the active transaction is aborted.</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    public static SentryId CaptureException(Exception exception, bool handled, bool terminal,
+        Action<Scope> configureScope)
+        => CurrentHub.CaptureException(exception, handled, terminal, configureScope);
 
     /// <summary>
     /// Captures the message.
@@ -552,50 +593,37 @@ static partial class SentrySdk
     public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
         => CurrentHub.CaptureMessage(message, configureScope, level);
 
-    /// <summary>
-    /// Captures feedback from the user.
-    /// </summary>
+    /// <inheritdoc cref="M:Sentry.IHub.CaptureFeedback(Sentry.SentryFeedback,System.Action{Sentry.Scope},Sentry.SentryHint)"/>
     [DebuggerStepThrough]
-    public static void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public static SentryId CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
         => CurrentHub.CaptureFeedback(feedback, configureScope, hint);
 
-    /// <summary>
-    /// Captures feedback from the user.
-    /// </summary>
+    /// <inheritdoc cref="M:Sentry.IHub.CaptureFeedback(Sentry.SentryFeedback, out Sentry.CaptureFeedbackResult,System.Action{Sentry.Scope},Sentry.SentryHint)"/>
     [DebuggerStepThrough]
-    public static void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public static SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, out result, configureScope, hint);
+
+    /// <inheritdoc cref="M:Sentry.ISentryClient.CaptureFeedback"/>
+    [DebuggerStepThrough]
+    public static SentryId CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
         => CurrentHub.CaptureFeedback(feedback, scope, hint);
+
+    /// <inheritdoc cref="M:Sentry.ISentryClient.CaptureFeedback"/>
+    [DebuggerStepThrough]
+    public static SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Scope? scope = null, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, out result, scope, hint);
 
     /// <summary>
     /// Captures feedback from the user.
     /// </summary>
     [DebuggerStepThrough]
-    public static void CaptureFeedback(string message, string? contactEmail = null, string? name = null,
+    public static SentryId CaptureFeedback(string message, string? contactEmail = null, string? name = null,
         string? replayId = null, string? url = null, SentryId? associatedEventId = null, Scope? scope = null,
         SentryHint? hint = null)
         => CurrentHub.CaptureFeedback(new SentryFeedback(message, contactEmail, name, replayId, url, associatedEventId),
             scope, hint);
-
-    /// <summary>
-    /// Captures a user feedback.
-    /// </summary>
-    /// <param name="userFeedback">The user feedback to send to Sentry.</param>
-    [DebuggerStepThrough]
-    [Obsolete("Use CaptureFeedback instead.")]
-    public static void CaptureUserFeedback(UserFeedback userFeedback)
-        => CurrentHub.CaptureUserFeedback(userFeedback);
-
-    /// <summary>
-    /// Captures a user feedback.
-    /// </summary>
-    /// <param name="eventId">The event Id.</param>
-    /// <param name="email">The user email.</param>
-    /// <param name="comments">The user comments.</param>
-    /// <param name="name">The optional username.</param>
-    [DebuggerStepThrough]
-    [Obsolete("Use CaptureFeedback instead.")]
-    public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
-        => CurrentHub.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
 
     /// <summary>
     /// Captures a transaction.
@@ -711,6 +739,23 @@ static partial class SentrySdk
         => CurrentHub.StartTransaction(name, operation, traceHeader);
 
     /// <summary>
+    /// Records a transaction that has already completed elsewhere — for example, spans measured on another
+    /// machine or process and replayed through a proxy. See
+    /// <see cref="HubExtensions.RecordTransaction(IHub, string, string, DateTimeOffset, TimeSpan, SentryId?, SpanId?, SpanId?, Action{ITransactionRecorder}?)"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static SentryId RecordTransaction(
+        string name,
+        string operation,
+        DateTimeOffset startTimestamp,
+        TimeSpan duration,
+        SentryId? traceId = null,
+        SpanId? spanId = null,
+        SpanId? parentSpanId = null,
+        Action<ITransactionRecorder>? configure = null)
+        => CurrentHub.RecordTransaction(name, operation, startTimestamp, duration, traceId, spanId, parentSpanId, configure);
+
+    /// <summary>
     /// Binds specified exception the specified span.
     /// </summary>
     /// <remarks>
@@ -748,6 +793,13 @@ static partial class SentrySdk
         => CurrentHub.GetBaggage();
 
     /// <summary>
+    /// Gets the W3C Trace Context traceparent header that allows tracing across services
+    /// </summary>
+    [DebuggerStepThrough]
+    public static W3CTraceparentHeader? GetTraceparentHeader()
+        => CurrentHub.GetTraceparentHeader();
+
+    /// <summary>
     /// Continues a trace based on HTTP header values provided as strings.
     /// </summary>
     /// <remarks>
@@ -774,6 +826,9 @@ static partial class SentrySdk
         string? name = null,
         string? operation = null)
         => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
+
+    /// <inheritdoc cref="IHub.IsSessionActive"/>
+    public static bool IsSessionActive { [DebuggerStepThrough] get => CurrentHub.IsSessionActive; }
 
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]

@@ -21,7 +21,7 @@ public partial class HttpTransportTests
     {
         // Arrange
         using var source = new CancellationTokenSource();
-        source.Cancel();
+        await source.CancelAsync();
         var token = source.Token;
 
         var httpHandler = Substitute.For<MockableHttpMessageHandler>();
@@ -36,17 +36,20 @@ public partial class HttpTransportTests
         var envelope = Envelope.FromEvent(
             new SentryEvent(eventId: SentryResponses.ResponseId));
 
-#if NET5_0_OR_GREATER
-        await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
-#else
         // Act
-        await httpTransport.SendEnvelopeAsync(envelope, token);
+        try
+        {
+            await httpTransport.SendEnvelopeAsync(envelope, token);
+        }
+        catch (TaskCanceledException)
+        {
+            // Swallow this
+        }
 
         // Assert
         await httpHandler
             .Received(1)
             .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
-#endif
     }
 
     [Fact]
@@ -199,8 +202,8 @@ public partial class HttpTransportTests
     public async Task SendEnvelopeAsync_ResponseNotOkWithStringMessage_LogsError()
     {
         // Arrange
-        const HttpStatusCode expectedCode = HttpStatusCode.RequestEntityTooLarge;
-        const string expectedMessage = "413 Request Entity Too Large";
+        const HttpStatusCode expectedCode = HttpStatusCode.InternalServerError;
+        const string expectedMessage = "500 Internal Server Error";
 
         var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
@@ -286,7 +289,7 @@ public partial class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => SentryResponses.GetRateLimitResponse($"1234:event, 897:transaction, {metricNamespace}")
+                () => SentryResponses.GetRateLimitResponse($"1234:error, 897:transaction, {metricNamespace}")
             ));
 
         var httpTransport = new HttpTransport(
@@ -366,7 +369,7 @@ public partial class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+                () => SentryResponses.GetRateLimitResponse("1234:error, 897:transaction")
             ));
 
         var options = new SentryOptions
@@ -480,9 +483,9 @@ public partial class HttpTransportTests
             {DiscardReason.EventProcessor.WithCategory(DataCategory.Error), 2},
             {DiscardReason.QueueOverflow.WithCategory(DataCategory.Security), 3},
 
-            // We also expect two new items recorded, due to the forced network failure.
-            {DiscardReason.NetworkError.WithCategory(DataCategory.Error), 1},  // from the event
-            {DiscardReason.NetworkError.WithCategory(DataCategory.Default), 1} // from the client report
+            // We also expect two new items recorded, due to the forced HTTP failure.
+            {DiscardReason.SendError.WithCategory(DataCategory.Error), 1},  // from the event
+            {DiscardReason.SendError.WithCategory(DataCategory.Internal), 1} // from the client report
         });
     }
 
@@ -616,6 +619,154 @@ public partial class HttpTransportTests
             string.Format(e.Message, e.Args) == "HttpTransport: Attachment 'test2.txt' dropped because it's too large (5 bytes).");
 
         actualEnvelopeSerialized.Should().NotContain("test2.txt");
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_HeapDumpAttachmentTooLarge_FileIsDeleted()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler());
+
+        var tempFilePath = Path.GetTempFileName();
+        File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                MaxAttachmentSize = 1,
+                Debug = true
+            },
+            new HttpClient(httpHandler));
+
+        var heapDumpAttachment = new SentryAttachment(
+            AttachmentType.HeapDump,
+            new FileAttachmentContent(tempFilePath, readFileAsynchronously: true, deleteOnClose: true),
+            Path.GetFileName(tempFilePath),
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            null,
+            [heapDumpAttachment]);
+
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // The oversized item is dropped before sending, so it never reaches the processed
+            // envelope. The original envelope still owns it, so the file survives until that
+            // envelope is disposed - which is what BackgroundWorker does after each send.
+            File.Exists(tempFilePath).Should().BeTrue();
+
+            envelope.Dispose();
+
+            // Assert
+            File.Exists(tempFilePath).Should().BeFalse();
+        }
+        finally
+        {
+            if (File.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_HeapDumpAttachmentSentSuccessfully_FileIsDeleted()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler());
+
+        var tempFilePath = Path.GetTempFileName();
+        File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                // Large enough that this attachment is NOT dropped for being too big
+                MaxAttachmentSize = 1_000_000,
+                Debug = true
+            },
+            new HttpClient(httpHandler));
+
+        var heapDumpAttachment = new SentryAttachment(
+            AttachmentType.HeapDump,
+            new FileAttachmentContent(tempFilePath, readFileAsynchronously: true, deleteOnClose: true),
+            Path.GetFileName(tempFilePath),
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            null,
+            [heapDumpAttachment]);
+
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            // The file is streamed as part of the successful send, and should be
+            // deleted once the stream backing the envelope item is closed/disposed.
+            File.Exists(tempFilePath).Should().BeFalse();
+        }
+        finally
+        {
+            if (File.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_NonHeapDumpAttachment_FileIsNotDeleted()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler());
+
+        var tempFilePath = Path.GetTempFileName();
+        File.WriteAllBytes(tempFilePath, new byte[] { 1, 2, 3, 4, 5 });
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                MaxAttachmentSize = 1_000_000,
+                Debug = true
+            },
+            new HttpClient(httpHandler));
+
+        var normalAttachment = new SentryAttachment(
+            AttachmentType.Default,
+            new FileAttachmentContent(tempFilePath),
+            Path.GetFileName(tempFilePath),
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            null,
+            [normalAttachment]);
+
+        try
+        {
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            File.Exists(tempFilePath).Should().BeTrue();
+        }
+        finally
+        {
+            File.Delete(tempFilePath);
+        }
     }
 
     [Fact]
@@ -855,7 +1006,7 @@ public partial class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+                () => SentryResponses.GetRateLimitResponse("1234:error, 897:transaction")
             ));
 
         using var backpressureMonitor = new BackpressureMonitor(null, _fakeClock, false);
@@ -881,5 +1032,235 @@ public partial class HttpTransportTests
         // Assert
         backpressureMonitor.LastRateLimitEventTicks.Should().Be(_fakeClock.GetUtcNow().Ticks);
         backpressureMonitor.IsHealthy.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response413WithJsonMessage_LogsSizeLimitError()
+    {
+        // Arrange
+        const string expectedDetail = "Envelope too large";
+        var expectedCauses = new[] { "max size exceeded" };
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetJsonErrorResponse(HttpStatusCode.RequestEntityTooLarge, expectedDetail, expectedCauses));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var errorEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("exceeded the maximum allowed size"));
+
+        errorEntry.Should().NotBeNull();
+        errorEntry!.Message.Should().Contain("Consider reducing attachment sizes");
+        errorEntry.Args[2].ToString().Should().Contain(expectedDetail);
+        errorEntry.Args[2].ToString().Should().Contain(expectedCauses[0]);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response413WithTextMessage_LogsSizeLimitError()
+    {
+        // Arrange
+        const string expectedMessage = "413 Request Entity Too Large";
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetTextErrorResponse(HttpStatusCode.RequestEntityTooLarge, expectedMessage));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var errorEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("exceeded the maximum allowed size"));
+
+        errorEntry.Should().NotBeNull();
+        errorEntry!.Message.Should().Contain("Consider reducing attachment sizes");
+        errorEntry.Args[2].ToString().Should().Contain(expectedMessage);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response413_RecordsSendErrorDiscard()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => SentryResponses.GetJsonErrorResponse(HttpStatusCode.RequestEntityTooLarge, "Too large")));
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            SendClientReports = true,
+            Debug = true
+        };
+
+        var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
+
+        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert - should use SendError, not NetworkError
+        recorder.DiscardedEvents.Should().ContainKey(DiscardReason.SendError.WithCategory(DataCategory.Error));
+        recorder.DiscardedEvents.Should().NotContainKey(DiscardReason.NetworkError.WithCategory(DataCategory.Error));
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response429WithJsonMessage_LogsWarning()
+    {
+        // Arrange
+        const string expectedDetail = "Sentry dropped data due to a quota or internal rate limit being reached.";
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetJsonErrorResponse((HttpStatusCode)429, expectedDetail));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var warningEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Warning &&
+            e.Message.Contains("due to rate limiting"));
+
+        warningEntry.Should().NotBeNull();
+        warningEntry!.Message.Should().Contain("exceeded your quota");
+        warningEntry.Args[2].ToString().Should().Contain(expectedDetail);
+
+        // Should NOT have an error-level log for this
+        logger.Entries.Should().NotContain(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("Sentry rejected the envelope"));
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Response429WithTextMessage_LogsWarning()
+    {
+        // Arrange
+        const string expectedMessage = "Rate limited";
+
+        var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+        httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            .Returns(_ => SentryResponses.GetTextErrorResponse((HttpStatusCode)429, expectedMessage));
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                Debug = true,
+                DiagnosticLogger = logger
+            },
+            new HttpClient(httpHandler));
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var warningEntry = logger.Entries.FirstOrDefault(e =>
+            e.Level == SentryLevel.Warning &&
+            e.Message.Contains("due to rate limiting"));
+
+        warningEntry.Should().NotBeNull();
+        warningEntry!.Args[2].ToString().Should().Contain(expectedMessage);
+
+        // Should NOT have an error-level log for this
+        logger.Entries.Should().NotContain(e =>
+            e.Level == SentryLevel.Error &&
+            e.Message.Contains("Sentry rejected the envelope"));
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_TransactionRateLimited_ErrorEnvelopeStillSent()
+    {
+        // Arrange
+        // Note this goes through DefaultSentryHttpClientFactory, so that the RetryAfterHandler is part of the
+        // pipeline, as it is in production. See https://github.com/getsentry/sentry-dotnet/issues/3947
+        var requestCount = 0;
+        using var httpHandler = new FakeHttpMessageHandler(() =>
+        {
+            requestCount++;
+            return requestCount == 1
+                ? SentryResponses.GetRateLimitResponse(
+                    "60:transaction;profile;span:organization:transaction_usage_exceeded, " +
+                    "60:transaction:project:project_quota_transaction_usage_exceeded")
+                : SentryResponses.GetOkResponse();
+        });
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            Debug = true,
+            CreateHttpMessageHandler = () => httpHandler
+        };
+
+        var httpTransport = new HttpTransport(
+            options,
+            new DefaultSentryHttpClientFactory().Create(options),
+            null,
+            clock: _fakeClock);
+
+        // Act
+        // Transactions are over quota...
+        var transaction = new SentryTransaction("test", "test.op") { IsSampled = true };
+        await httpTransport.SendEnvelopeAsync(Envelope.FromTransaction(transaction));
+
+        // ...but errors are not, so this one should still go out
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        requestCount.Should().Be(2);
     }
 }

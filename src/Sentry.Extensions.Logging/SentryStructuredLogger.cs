@@ -29,9 +29,8 @@ internal sealed class SentryStructuredLogger : ILogger
     public bool IsEnabled(LogLevel logLevel)
     {
         return _hub.IsEnabled
-            && _options.Experimental.EnableLogs
-            && logLevel != LogLevel.None
-            && logLevel >= _options.ExperimentalLogging.MinimumLogLevel;
+            && _options.EnableLogs
+            && logLevel != LogLevel.None;
     }
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
@@ -42,7 +41,7 @@ internal sealed class SentryStructuredLogger : ILogger
         }
 
         var timestamp = _clock.GetUtcNow();
-        var traceHeader = _hub.GetTraceHeader() ?? SentryTraceHeader.Empty;
+        _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
         var level = logLevel.ToSentryLogLevel();
         Debug.Assert(level != default);
@@ -81,26 +80,28 @@ internal sealed class SentryStructuredLogger : ILogger
             }
         }
 
-        SentryLog log = new(timestamp, traceHeader.TraceId, level, message)
+        SentryLog log = new(timestamp, traceId, level, message)
         {
             Template = template,
             Parameters = parameters.DrainToImmutable(),
-            ParentSpanId = traceHeader.SpanId,
+            SpanId = spanId,
         };
 
-        log.SetDefaultAttributes(_options, _sdk);
+        var scope = _hub.GetScope();
+        log.SetDefaultAttributes(_options, scope, _sdk);
+        log.SetOrigin("auto.log.extensions_logging");
 
         if (_categoryName is not null)
         {
-            log.SetAttribute("category.name", _categoryName);
+            log.Attributes.SetAttribute("category.name", _categoryName);
         }
         if (eventId.Name is not null || eventId.Id != 0)
         {
-            log.SetAttribute("event.id", eventId.Id);
+            log.Attributes.SetAttribute("event.id", eventId.Id);
         }
         if (eventId.Name is not null)
         {
-            log.SetAttribute("event.name", eventId.Name);
+            log.Attributes.SetAttribute("event.name", eventId.Name);
         }
 
         _hub.Logger.CaptureLog(log);

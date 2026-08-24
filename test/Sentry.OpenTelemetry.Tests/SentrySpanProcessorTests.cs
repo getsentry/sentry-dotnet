@@ -463,6 +463,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         using (new AssertionScope())
         {
             transaction.Contexts.Response.StatusCode.Should().Be(404);
+            transaction.Data.Should().Contain(OtelSemanticConventions.AttributeHttpResponseStatusCode, 404);
         }
     }
 
@@ -919,6 +920,71 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void PruneFilteredSpans_UnsampledSpanWithRecordedActivity_NotPruned()
+    {
+        // Arrange — Sentry drops the transaction (TracesSampleRate = 0), but OTel still records the Activity.
+        // CreateChildSpan produces an UnsampledSpan. PruneFilteredSpans must not remove it prematurely,
+        // otherwise OnEnd (which fires because Recorded = true) logs a "Span not found" error.
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = 0.0;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity("Parent");
+        sut.OnStart(parent!);
+
+        using var child = Tracer.StartActivity("Child");
+        sut.OnStart(child!);
+
+        sut._map.TryGetValue(child!.SpanId, out var span).Should().BeTrue();
+        span.Should().BeOfType<UnsampledSpan>();
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert — the UnsampledSpan is still live (Recorded = true), so it must not be pruned.
+        sut._map.TryGetValue(child.SpanId, out _).Should().BeTrue();
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_GarbageCollectedActivity_Pruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        // Simulate a span whose fused activity has been GC'd (GetFused<Activity>() returns null).
+        // This can happen when a filtered activity is short-lived and collected before PruneFilteredSpans runs.
+        var spanId = ActivitySpanId.CreateRandom();
+        var orphanedSpan = Substitute.For<ISpan>();
+        sut._map[spanId] = orphanedSpan;
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.False(sut._map.TryGetValue(spanId, out _));
+    }
+
+    [Fact]
+    public void OnStart_FusesActivityWeakly()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var activity = Tracer.StartActivity("test")!;
+
+        // Act
+        sut.OnStart(activity);
+
+        // The Activity must be fused via a WeakReference, not strongly. A strong reference is pinned by
+        // _map, which prevents GC and defeats PruneFilteredSpans, leaking never-ended spans.
+        sut._map.TryGetValue(activity.SpanId, out var span).Should().BeTrue();
+        span.GetFused<WeakReference<Activity>>("Activity").Should().NotBeNull();
+        span.GetFused<Activity>("Activity").Should().BeNull("the Activity must not be fused with a strong reference");
+    }
+
+    [Fact]
     public void PruneFilteredSpans_RecentlyPruned_DoesNothing()
     {
         // Arrange
@@ -964,5 +1030,36 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         operation.Should().Be("http.client");
         description.Should().Be("POST https://example.com/foo");
         source.Should().Be(TransactionNameSource.Custom);
+    }
+
+    [Fact]
+    public void OnStart_WithExistingTransactionOnScope_DoesNotOverwriteExistingTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parentContext = new TransactionContext("Program", "Main")
+        {
+            Instrumenter = Instrumenter.OpenTelemetry,
+        };
+        var parent = _fixture.Hub.StartTransaction(parentContext);
+        _fixture.Hub.ConfigureScope(scope => scope.Transaction = parent);
+
+        using var data = Tracer.StartActivity("TestActivity");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        data.ParentSpanId.Should().Be(default(ActivitySpanId), $"{nameof(data)} should be a new root Activity, not a child Activity");
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        span.Should().BeOfType<TransactionTracer>($"{nameof(data)} should be a new root Transaction, not a child Span");
+
+        object scopeTransaction = null;
+        _fixture.Hub.ConfigureScope(scope => scopeTransaction = scope.Transaction);
+
+        scopeTransaction.Should().BeSameAs(parent,
+            "CreateRootSpan should not overwrite an already-set Scope.Transaction");
     }
 }

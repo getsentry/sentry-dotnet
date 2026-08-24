@@ -6,10 +6,8 @@ namespace Sentry.Maui.Internal;
 
 internal static class MauiDeviceData
 {
-#if NET9_0_OR_GREATER && ANDROID
+#if ANDROID
     private static readonly Lock JniLock = new();
-#elif ANDROID
-    private static readonly object JniLock = new();
 #endif
 
     public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger,

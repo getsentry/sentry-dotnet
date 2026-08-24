@@ -36,7 +36,14 @@ public enum AttachmentType
     /// <summary>
     /// A JSON attachment containing the View Hierarchy
     /// </summary>
-    ViewHierarchy
+    ViewHierarchy,
+
+    /// <summary>
+    /// A .gcdump file captured when a configured memory threshold is exceeded.
+    /// Used internally to allow the SDK to clean up the file from disk if it can't be sent to Sentry
+    /// (e.g. because it exceeds the attachment size limit).
+    /// </summary>
+    HeapDump
 }
 
 /// <summary>
@@ -66,6 +73,12 @@ public class SentryAttachment
     public string? ContentType { get; }
 
     /// <summary>
+    /// Whether the attachment should be added to transactions.
+    /// Defaults to <c>false</c>.
+    /// </summary>
+    public bool AddToTransactions { get; }
+
+    /// <summary>
     /// Initializes an instance of <see cref="SentryAttachment"/>.
     /// </summary>
     public SentryAttachment(
@@ -73,10 +86,24 @@ public class SentryAttachment
         IAttachmentContent content,
         string fileName,
         string? contentType)
+        : this(type, content, fileName, contentType, false)
+    {
+    }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="SentryAttachment"/>.
+    /// </summary>
+    public SentryAttachment(
+        AttachmentType type,
+        IAttachmentContent content,
+        string fileName,
+        string? contentType,
+        bool addToTransactions)
     {
         Type = type;
         Content = content;
         FileName = fileName;
         ContentType = contentType;
+        AddToTransactions = addToTransactions;
     }
 }

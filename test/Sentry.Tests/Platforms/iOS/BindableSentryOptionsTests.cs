@@ -6,7 +6,8 @@ namespace Sentry.Tests.Platforms.Cocoa;
 public class BindableSentryOptionsTests : BindableTests<SentryOptions.NativeOptions>
 {
     public BindableSentryOptionsTests()
-    : base(nameof(SentryOptions.NativeOptions.UrlSessionDelegate))
+    : base(nameof(SentryOptions.NativeOptions.UrlSessionDelegate),
+        nameof(SentryOptions.NativeOptions.ExperimentalOptions))
     {
     }
 

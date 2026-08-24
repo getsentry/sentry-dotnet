@@ -82,7 +82,7 @@ internal class DebugStackTrace : SentryStackTrace
         // Frame indexes may be changed as well as _debugImageIndexByModule becoming invalid.
         if (_debugImagesMerged)
         {
-            _options.LogWarning("Cannot call MergeDebugImagesInto multiple times. Event: {0}", @event.EventId);
+            _options.LogWarning("Cannot call MergeDebugImagesInto multiple times. Event: '{0}'", @event.EventId);
             return;
         }
         _debugImagesMerged = true;
@@ -532,14 +532,18 @@ internal class DebugStackTrace : SentryStackTrace
                 return reader.Invoke(assemblyName);
             }
 
-            var assembly = options.FileSystem.OpenFileForReading(assemblyName);
-            return new PEReader(assembly);
+            if (options.FileSystem.FileExists(assemblyName))
+            {
+                var assembly = options.FileSystem.OpenFileForReading(assemblyName);
+                return new PEReader(assembly);
+            }
         }
-        catch (Exception)
+        catch
         {
-            assemblyName = null;
-            return null;
+            // Swallow and return null below
         }
+        assemblyName = null;
+        return null;
     }
 
     private int? AddManagedModuleDebugImage(Module module)

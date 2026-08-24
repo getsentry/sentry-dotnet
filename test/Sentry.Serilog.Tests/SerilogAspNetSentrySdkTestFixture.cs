@@ -8,7 +8,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
     protected List<SentryEvent> Events;
     protected List<SentryLog> Logs;
 
-    protected bool ExperimentalEnableLogs { get; set; }
+    protected bool EnableLogs { get; set; }
 
     protected override void ConfigureBuilder(WebHostBuilder builder)
     {
@@ -19,8 +19,8 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         {
             options.SetBeforeSend((@event, _) => { Events.Add(@event); return @event; });
 
-            options.Experimental.EnableLogs = ExperimentalEnableLogs;
-            options.Experimental.SetBeforeSendLog(log => { Logs.Add(log); return log; });
+            options.EnableLogs = EnableLogs;
+            options.SetBeforeSendLog(log => { Logs.Add(log); return log; });
         };
 
         ConfigureApp = app =>
@@ -35,7 +35,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         builder.ConfigureLogging(loggingBuilder =>
         {
             var logger = new LoggerConfiguration()
-                .WriteTo.Sentry(ValidDsn, experimentalEnableLogs: ExperimentalEnableLogs)
+                .WriteTo.Sentry(ValidDsn, enableLogs: EnableLogs)
                 .CreateLogger();
             loggingBuilder.AddSerilog(logger);
         });

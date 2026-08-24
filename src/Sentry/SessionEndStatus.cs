@@ -13,10 +13,15 @@ public enum SessionEndStatus
     /// <summary>
     /// Session ended with an unhandled exception.
     /// </summary>
+    Unhandled,
+
+    /// <summary>
+    /// Session ended with a terminal unhandled exception.
+    /// </summary>
     Crashed,
 
     /// <summary>
     /// Session ended abnormally (e.g. device lost power).
     /// </summary>
-    Abnormal
+    Abnormal,
 }

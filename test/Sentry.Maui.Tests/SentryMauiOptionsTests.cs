@@ -10,6 +10,13 @@ public class SentryMauiOptionsTests
     };
 
     [Fact]
+    public void IsEnvironmentUser_Default()
+    {
+        var options = GetSut();
+        Assert.False(options.IsEnvironmentUser);
+    }
+
+    [Fact]
     public void IncludeTextInBreadcrumbs_Default()
     {
         var options = GetSut();

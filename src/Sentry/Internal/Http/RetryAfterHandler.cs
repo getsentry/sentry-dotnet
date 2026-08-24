@@ -3,7 +3,8 @@ using Sentry.Infrastructure;
 namespace Sentry.Internal.Http;
 
 /// <summary>
-/// Retry After Handler which short-circuit requests following an HTTP 429.
+/// Retry After Handler which short-circuits requests following an HTTP 429 that carries no per-category
+/// rate limits. Responses that do carry them are left to the transport to apply per envelope item.
 /// </summary>
 /// <seealso href="https://tools.ietf.org/html/rfc6585#section-4" />
 /// <seealso href="https://develop.sentry.dev/sdk/overview/#writing-an-sdk"/>
@@ -28,7 +29,11 @@ internal class RetryAfterHandler : DelegatingHandler
 
     internal RetryAfterHandler(HttpMessageHandler innerHandler, ISystemClock clock)
         : base(innerHandler)
-        => _clock = clock ?? throw new ArgumentNullException(nameof(clock));
+    {
+        ArgumentNullException.ThrowIfNull(clock);
+
+        _clock = clock;
+    }
 
     /// <summary>
     /// Sends an HTTP request to the inner handler while verifying the Response status code for HTTP 429.
@@ -58,7 +63,9 @@ internal class RetryAfterHandler : DelegatingHandler
 
         var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (response.StatusCode == TooManyRequests)
+        // 429 responses carrying a `X-Sentry-Rate-Limits` header are handled separately.
+        // See https://github.com/getsentry/sentry-dotnet/pull/5482
+        if (response.StatusCode == TooManyRequests && !response.Headers.Contains("X-Sentry-Rate-Limits"))
         {
             var retryAfterTimestamp = GetRetryAfterTimestamp(response);
             _ = Interlocked.Exchange(ref _retryAfterUtcTicks, retryAfterTimestamp.UtcTicks);

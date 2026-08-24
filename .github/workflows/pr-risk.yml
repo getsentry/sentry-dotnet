@@ -1,0 +1,36 @@
+name: PR Risk Experiment
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: pr-risk-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  risk:
+    name: Score PR risk
+    runs-on: ubuntu-24.04
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Score current PR
+        uses: getsentry/pr-risk-action@v0
+        with:
+          repo: ${{ github.repository }}
+          pr-number: ${{ github.event.pull_request.number }}
+          result-path: risk-pr-result.json
+          skip-reviews: "true"
+          apply-label: "true"
+
+      - name: Upload risk result
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: risk-pr-result
+          path: risk-pr-result.json

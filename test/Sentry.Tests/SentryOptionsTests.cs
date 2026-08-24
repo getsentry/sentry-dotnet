@@ -14,6 +14,20 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
+    public void EnableBackpressureHandling_Default_True()
+    {
+        var sut = new SentryOptions();
+        sut.EnableBackpressureHandling.Should().BeTrue();
+    }
+
+    [Fact]
+    public void EnableLogs_Default_False()
+    {
+        var sut = new SentryOptions();
+        sut.EnableLogs.Should().BeFalse();
+    }
+
+    [Fact]
     public void RequestBodyCompressionLevel_ByDefault_Optimal()
     {
         var sut = new SentryOptions();
@@ -473,6 +487,13 @@ public partial class SentryOptionsTests
         sut.AddEventProcessorProvider(() => new[] { first, second });
         Assert.Contains(sut.GetAllEventProcessors(), actual => actual == first);
         Assert.Contains(sut.GetAllEventProcessors(), actual => actual == second);
+    }
+
+    [Fact]
+    public void GetAllTransactionProcessors_ByDefault_DoesNotIncludeTraceIgnoreStatusCodeTransactionProcessor()
+    {
+        var sut = new SentryOptions();
+        Assert.DoesNotContain(sut.GetAllTransactionProcessors(), p => p is TraceIgnoreStatusCodeTransactionProcessor);
     }
 
     [Fact]

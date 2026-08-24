@@ -51,19 +51,29 @@ Console.WriteLine("Hello, Sentry!");
 
     It 'Aot' {
         $rid = $env:RuntimeIdentifier
+        $baseImage = $env:ContainerBaseImage
+        # To exclude specific warnings without disabling warnings-as-errors entirely, add:
+        #   '-p:WarningsNotAsErrors=CS####;IL####'        # compiler/analyzer warnings (CS, IL2###, IL3###)
+        #   '-p:MSBuildWarningsNotAsErrors=MSB####'       # MSBuild task warnings (MSB###)
+        $publishArgs = @(
+            '-c', 'Release',
+            '-p:TreatWarningsAsErrors=true',
+            '-p:MSBuildTreatWarningsAsErrors=true'
+        )
         if ($rid)
         {
-            dotnet publish -c Release -r $rid | Write-Host
+            Write-Host "Environment RuntimeIdentifier: $rid"
+            $publishArgs += @('-r', $rid)
         }
-        else
-        {
-            dotnet publish -c Release | Write-Host
+        if ($baseImage) {
+            Write-Host "Using ContainerBaseImage: $baseImage"
+            $publishArgs += "-p:ContainerBaseImage=$baseImage"
         }
+        dotnet publish @publishArgs | Write-Host
         $LASTEXITCODE | Should -Be 0
 
         $tfm = (Get-ChildItem -Path "bin/Release" -Directory | Select-Object -First 1).Name
-        if (-not $rid)
-        {
+        if (-not $rid) {
             $rid = (Get-ChildItem -Path "bin/Release/$tfm" -Directory | Select-Object -First 1).Name
         }
         & "bin/Release/$tfm/$rid/publish/hello-sentry" | Write-Host

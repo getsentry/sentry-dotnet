@@ -1,7 +1,7 @@
 namespace Sentry;
 
 /// <summary>
-/// Contains representations of the subset of properties in SentryOptions that can be set from ConfigurationBindings.
+/// Contains representations of the subset of properties in <see cref="SentryOptions"/> that can be set from ConfigurationBindings.
 /// Note that all of these properties are nullable, so that if they are not present in configuration, the values from
 /// the type being bound to will be preserved.
 /// </summary>
@@ -11,6 +11,7 @@ internal partial class BindableSentryOptions
     public bool? EnableScopeSync { get; set; }
     public bool? EnableBackpressureHandling { get; set; }
     public List<string>? TagFilters { get; set; }
+    public List<string>? IgnoreTransactions { get; set; }
     public bool? SendDefaultPii { get; set; }
     public bool? IsEnvironmentUser { get; set; }
     public string? ServerName { get; set; }
@@ -21,6 +22,8 @@ internal partial class BindableSentryOptions
     public string? Distribution { get; set; }
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
+    public bool? EnableLogs { get; set; }
+    public bool? EnableMetrics { get; set; }
     public int? MaxQueueItems { get; set; }
     public int? MaxCacheItems { get; set; }
     public TimeSpan? ShutdownTimeout { get; set; }
@@ -36,12 +39,16 @@ internal partial class BindableSentryOptions
     public string? CacheDirectoryPath { get; set; }
     public bool? CaptureFailedRequests { get; set; }
     public List<string>? FailedRequestTargets { get; set; }
+    public List<int>? TraceIgnoreStatusCodes { get; set; }
     public bool? DisableFileWrite { get; set; }
     public TimeSpan? InitCacheFlushTimeout { get; set; }
     public Dictionary<string, string>? DefaultTags { get; set; }
     public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
+    public bool? PropagateTraceparent { get; set; }
+    public bool? StrictTraceContinuation { get; set; }
+    public string? OrgId { get; set; }
     public double? ProfilesSampleRate { get; set; }
     public StackTraceMode? StackTraceMode { get; set; }
     public long? MaxAttachmentSize { get; set; }
@@ -54,19 +61,13 @@ internal partial class BindableSentryOptions
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
 
-    public BindableSentryExperimentalOptions Experimental { get; set; } = new();
-
-    internal sealed class BindableSentryExperimentalOptions
-    {
-        public bool? EnableLogs { get; set; }
-    }
-
     public void ApplyTo(SentryOptions options)
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
         options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
         options.EnableBackpressureHandling = EnableBackpressureHandling ?? options.EnableBackpressureHandling;
         options.TagFilters = TagFilters?.Select(s => new StringOrRegex(s)).ToList() ?? options.TagFilters;
+        options.IgnoreTransactions = IgnoreTransactions?.Select(s => new StringOrRegex(s)).ToList() ?? options.IgnoreTransactions;
         options.SendDefaultPii = SendDefaultPii ?? options.SendDefaultPii;
         options.IsEnvironmentUser = IsEnvironmentUser ?? options.IsEnvironmentUser;
         options.ServerName = ServerName ?? options.ServerName;
@@ -77,6 +78,8 @@ internal partial class BindableSentryOptions
         options.Distribution = Distribution ?? options.Distribution;
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
+        options.EnableLogs = EnableLogs ?? options.EnableLogs;
+        options.EnableMetrics = EnableMetrics ?? options.EnableMetrics;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;
@@ -92,12 +95,16 @@ internal partial class BindableSentryOptions
         options.CacheDirectoryPath = CacheDirectoryPath ?? options.CacheDirectoryPath;
         options.CaptureFailedRequests = CaptureFailedRequests ?? options.CaptureFailedRequests;
         options.FailedRequestTargets = FailedRequestTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.FailedRequestTargets;
+        options.TraceIgnoreStatusCodes = TraceIgnoreStatusCodes?.Select(code => new HttpStatusCodeRange(code)).ToList<HttpStatusCodeRange>() ?? options.TraceIgnoreStatusCodes;
         options.DisableFileWrite = DisableFileWrite ?? options.DisableFileWrite;
         options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
         options.DefaultTags = DefaultTags ?? options.DefaultTags;
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
         options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
         options.TracePropagationTargets = TracePropagationTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.TracePropagationTargets;
+        options.PropagateTraceparent = PropagateTraceparent ?? options.PropagateTraceparent;
+        options.StrictTraceContinuation = StrictTraceContinuation ?? options.StrictTraceContinuation;
+        options.OrgId = OrgId ?? options.OrgId;
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
         options.DetectStartupTime = DetectStartupTime ?? options.DetectStartupTime;
@@ -108,8 +115,6 @@ internal partial class BindableSentryOptions
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
-
-        options.Experimental.EnableLogs = Experimental.EnableLogs ?? options.Experimental.EnableLogs;
 
 #if ANDROID
         Android.ApplyTo(options.Android);

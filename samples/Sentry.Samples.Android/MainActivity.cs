@@ -31,6 +31,11 @@ public class MainActivity : Activity
             // Enable Native Android SDK ANR detection
             options.Native.AnrEnabled = true;
 
+            // If your app doesn't have sensitive data, you can attach screenshots automatically when a Java/native
+            // error is captured.
+            // https://docs.sentry.io/platforms/android/configuration/options/#attachScreenshot
+            options.Native.AttachScreenshot = true;
+
             // Currently experimental support is only available on Android
             options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
             options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;

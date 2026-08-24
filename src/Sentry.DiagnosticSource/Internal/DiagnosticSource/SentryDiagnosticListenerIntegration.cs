@@ -3,7 +3,7 @@ using Sentry.Integrations;
 
 namespace Sentry.Internal.DiagnosticSource;
 
-internal class SentryDiagnosticListenerIntegration : ISdkIntegration
+internal class SentryDiagnosticListenerIntegration : ISdkIntegration, ISentryTracingIntegration
 {
     public void Register(IHub hub, SentryOptions options)
     {

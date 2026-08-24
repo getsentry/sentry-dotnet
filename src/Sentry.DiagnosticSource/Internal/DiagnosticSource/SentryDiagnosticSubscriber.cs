@@ -13,7 +13,9 @@ internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>
     // Thus, we will create the instances lazily.
 
     private readonly Lazy<SentryEFCoreListener> _efListener;
+#if !NETFRAMEWORK
     private readonly Lazy<SentrySqlListener> _sqlListener;
+#endif
 
     public SentryDiagnosticSubscriber(IHub hub, SentryOptions options)
     {
@@ -23,11 +25,13 @@ internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>
             return new SentryEFCoreListener(hub, options);
         });
 
+#if !NETFRAMEWORK
         _sqlListener = new Lazy<SentrySqlListener>(() =>
         {
             options.Log(SentryLevel.Debug, "Registering SQL Client integration.");
             return new SentrySqlListener(hub, options);
         });
+#endif
     }
 
     public void OnCompleted() { }
@@ -44,13 +48,16 @@ internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>
                     break;
                 }
 
+#if !NETFRAMEWORK
             case "SqlClientDiagnosticListener":
                 {
                     listener.Subscribe(_sqlListener.Value);
                     break;
                 }
+#endif
         }
 
+#if !NETFRAMEWORK
         // By default, the EF listener will duplicate spans already given by the SQL Client listener.
         // Thus, we should disable those parts of the EF listener when they are both registered.
         if (_efListener.IsValueCreated && _sqlListener.IsValueCreated)
@@ -59,5 +66,6 @@ internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>
             efListener.DisableConnectionSpan();
             efListener.DisableQuerySpan();
         }
+#endif
     }
 }

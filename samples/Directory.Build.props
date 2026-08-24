@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <!-- Workaround for hang on compile issue.  See https://github.com/xamarin/xamarin-macios/issues/17825#issuecomment-1478568270. -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <MtouchUseLlvm>false</MtouchUseLlvm>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- So the source generators work for our samples... SDK users wouldn't need to do this  -->
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj"
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\Sentry.Compiler.Extensions\Sentry.Compiler.Extensions.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"/>
   </ItemGroup>

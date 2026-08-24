@@ -7,6 +7,10 @@ namespace Sentry;
 /// </summary>
 public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
 {
+    private const int HexCharsPerByte = 2;
+    private static readonly int ByteCount = Unsafe.SizeOf<Guid>();
+    private static readonly int HexCharCount = ByteCount * HexCharsPerByte;
+
     private readonly Guid _guid;
 
     /// <summary>
@@ -28,6 +32,32 @@ public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
     /// </remarks>
     /// <returns>String representation of the event id.</returns>
     public override string ToString() => _guid.ToString("n");
+
+    internal bool TryFormat(Span<char> destination)
+    {
+#if NETSTANDARD2_0 || NET462
+        var value = ToString();
+        if (destination.Length < value.Length)
+        {
+            return false;
+        }
+
+        value.AsSpan().CopyTo(destination);
+        return true;
+#else
+        return _guid.TryFormat(destination, out var charsWritten, "n") && charsWritten == HexCharCount;
+#endif
+    }
+
+    internal bool TryWriteBytes(Span<byte> destination)
+    {
+        if (destination.Length < ByteCount)
+        {
+            return false;
+        }
+
+        return _guid.TryWriteBytes(destination, bigEndian: true, out var bytesWritten) && bytesWritten == ByteCount;
+    }
 
     /// <inheritdoc />
     public bool Equals(SentryId other) => _guid.Equals(other._guid);

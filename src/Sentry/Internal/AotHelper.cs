@@ -12,7 +12,12 @@ internal static class AotHelper
 
     static AotHelper()
     {
-        IsTrimmed = CheckIsTrimmed();
+        IsTrimmed =
+#if SENTRY_UNITY
+            false;
+#else
+            CheckIsTrimmed();
+#endif
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AvoidAtRuntime)]

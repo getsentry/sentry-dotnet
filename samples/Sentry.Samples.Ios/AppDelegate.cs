@@ -11,7 +11,7 @@ public class AppDelegate : UIApplicationDelegate
         set;
     }
 
-    public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
+    public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
         // Init the Sentry SDK
         SentrySdk.Init(options =>
@@ -36,6 +36,10 @@ public class AppDelegate : UIApplicationDelegate
             // Enable Native iOS SDK App Hangs detection
             options.Native.EnableAppHangTracking = true;
 
+            // If your app doesn't have sensitive data, you can get screenshots on error events automatically
+            // https://docs.sentry.io/platforms/apple/guides/ios/configuration/options/#attachScreenshot
+            options.Native.AttachScreenshot = true;
+
             options.CacheDirectoryPath = Path.GetTempPath();
 
             options.SetBeforeSend(evt =>
@@ -55,8 +59,10 @@ public class AppDelegate : UIApplicationDelegate
             };
         });
 
+#pragma warning disable CA1422 // Validate platform compatibility
         // create a new window instance based on the screen size
         Window = new UIWindow(UIScreen.MainScreen.Bounds);
+#pragma warning restore CA1422
 
         // determine control colours (SystemBackground requires iOS >= 13.0)
         var backgroundColor = UIDevice.CurrentDevice.CheckSystemVersion(13, 0)

@@ -4,7 +4,8 @@ namespace Sentry.Internal;
 
 internal static class SentryEventHelper
 {
-    public static SentryEvent? ProcessEvent(SentryEvent? evt, IEnumerable<ISentryEventProcessor> processors, SentryHint? hint, SentryOptions options)
+    public static SentryEvent? ProcessEvent(SentryEvent? evt, IEnumerable<ISentryEventProcessor> processors,
+        SentryHint? hint, SentryOptions options, DataCategory dataCategory)
     {
         if (evt == null)
         {
@@ -19,7 +20,7 @@ internal static class SentryEventHelper
             processedEvent = processor.DoProcessEvent(processedEvent, effectiveHint);
             if (processedEvent == null)
             {
-                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, dataCategory);
                 options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                 break;
             }
@@ -37,7 +38,7 @@ internal static class SentryEventHelper
             return @event;
         }
 
-        options.LogDebug("Calling the BeforeSend callback");
+        options.LogDebug("Calling the BeforeSend callback.");
         try
         {
             @event = options.BeforeSendInternal?.Invoke(@event, hint);
@@ -69,6 +70,33 @@ internal static class SentryEventHelper
                 category: "SentryClient",
                 data: data,
                 level: BreadcrumbLevel.Error);
+        }
+
+        return @event;
+    }
+
+    public static SentryEvent? DoBeforeSendFeedback(SentryEvent? @event, SentryHint hint, SentryOptions options)
+    {
+        if (@event is null || options.BeforeSendFeedbackInternal is null)
+        {
+            return @event;
+        }
+
+        options.LogDebug("Calling the BeforeSendFeedback callback.");
+        try
+        {
+            @event = options.BeforeSendFeedbackInternal.Invoke(@event, hint);
+            if (@event == null)
+            {
+                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+                options.LogInfo("Feedback dropped by BeforeSendFeedback callback.");
+            }
+        }
+        catch (Exception e)
+        {
+            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+            options.LogError(e, "The BeforeSendFeedback callback threw an exception. The feedback will be dropped.");
+            return null;
         }
 
         return @event;

@@ -4,7 +4,7 @@ namespace Sentry.NLog;
 /// Sentry NLog Target.
 /// </summary>
 [Target("Sentry")]
-public sealed class SentryTarget : TargetWithContext
+public sealed partial class SentryTarget : TargetWithContext
 {
     // For testing:
     internal Func<IHub> HubAccessor { get; }
@@ -13,6 +13,12 @@ public sealed class SentryTarget : TargetWithContext
     private IDisposable? _sdkDisposable;
 
     internal static readonly SdkVersion NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
+
+    private static readonly SdkVersion Sdk = new()
+    {
+        Name = Constants.SdkName,
+        Version = NameAndVersion.Version,
+    };
 
     internal static readonly string AdditionalGroupingKeyProperty = "AdditionalGroupingKey";
 
@@ -127,6 +133,15 @@ public sealed class SentryTarget : TargetWithContext
     {
         get => Options.MinimumBreadcrumbLevel?.ToString() ?? LogLevel.Off.ToString();
         set => Options.MinimumBreadcrumbLevel = LogLevel.FromString(value);
+    }
+
+    /// <summary>
+    /// Controls whether logs are generated and sent.
+    /// </summary>
+    public bool EnableLogs
+    {
+        get => Options.EnableLogs;
+        set => Options.EnableLogs = value;
     }
 
     /// <summary>
@@ -321,129 +336,155 @@ public sealed class SentryTarget : TargetWithContext
         }
 
         var hub = HubAccessor();
-
         if (!hub.IsEnabled)
         {
             return;
         }
 
         var exception = logEvent.Exception;
-        var shouldOnlyLogExceptions = exception == null && IgnoreEventsWithNoException;
+        var shouldIgnoreEvent = exception == null && IgnoreEventsWithNoException;
         var shouldIncludeProperties = ContextProperties?.Count > 0 || ShouldIncludeProperties(logEvent);
+        var addedBreadcrumbForException = false;
 
-        if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
+        if (logEvent.Level >= Options.MinimumEventLevel && !shouldIgnoreEvent)
         {
-            var formatted = RenderLogEvent(Layout, logEvent);
-            var template = logEvent.Message;
-
-            var evt = new SentryEvent(exception)
-            {
-                Message = new SentryMessage
-                {
-                    Formatted = formatted,
-                    Message = template
-                },
-                Logger = logEvent.LoggerName,
-                Level = logEvent.Level.ToSentryLevel(),
-                Release = Options.Release,
-                Environment = Options.Environment,
-                User = GetUser(logEvent) ?? new SentryUser(),
-            };
-
-            if (evt.Sdk is { } sdk)
-            {
-                sdk.Name = Constants.SdkName;
-                sdk.Version = NameAndVersion.Version;
-
-                if (NameAndVersion.Version is { } version)
-                {
-                    sdk.AddPackage(ProtocolPackageName, version);
-                }
-            }
-
-            if (Tags.Count > 0 || IncludeEventPropertiesAsTags && logEvent.HasProperties)
-            {
-                evt.SetTags(GetTagsFromLogEvent(logEvent));
-            }
-
-            if (shouldIncludeProperties)
-            {
-                var contextProps = GetAllProperties(logEvent);
-                evt.SetExtras(contextProps);
-
-                if (contextProps.TryGetValue(AdditionalGroupingKeyProperty, out var additionalGroupingKey)
-                    && additionalGroupingKey is string groupingKey)
-                {
-                    var overridenFingerprint = evt.Fingerprint.ToList();
-                    if (!evt.Fingerprint.Any())
-                    {
-                        overridenFingerprint.Add("{{ default }}");
-                    }
-
-                    overridenFingerprint.Add(groupingKey);
-
-                    evt.SetFingerprint(overridenFingerprint);
-                }
-            }
-
-            _ = hub.CaptureEvent(evt);
+            CreateSentryEvent(logEvent, exception, shouldIncludeProperties, hub);
 
             // Capturing exception events adds a breadcrumb automatically... we don't want to add another one
             if (exception != null)
             {
-                return;
+                addedBreadcrumbForException = true;
             }
         }
 
-        // Whether or not it was sent as event, add breadcrumb so the next event includes it
-        if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
+        // Whether or not it was sent as an event, add breadcrumb so the next event includes it
+        if (!addedBreadcrumbForException && logEvent.Level >= Options.MinimumBreadcrumbLevel)
         {
-            var breadcrumbFormatted = RenderLogEvent(BreadcrumbLayout, logEvent);
-            var breadcrumbCategory = RenderLogEvent(BreadcrumbCategory, logEvent);
-            if (string.IsNullOrEmpty(breadcrumbCategory))
+            CreateBreadcrumb(logEvent, exception, shouldIncludeProperties, hub);
+        }
+
+        // Read the options from the Hub rather than the Target's NLog-Options because 'EnableLogs' is declared in the
+        // base 'SentryOptions', rather than the derived 'SentryNLogOptions'. If the NLog-Target is added without a DSN
+        // (i.e. without initialising the SDK), then base options will only be initialised in the Hub options.
+        var sentryOptions = hub.GetSentryOptions();
+        if (sentryOptions?.EnableLogs is true)
+        {
+            try
             {
-                breadcrumbCategory = null;
+                CaptureStructuredLog(hub, sentryOptions, logEvent);
             }
-
-            var message = string.IsNullOrWhiteSpace(breadcrumbFormatted)
-                ? exception?.Message ?? logEvent.FormattedMessage
-                : breadcrumbFormatted;
-
-            IDictionary<string, string>? data = null;
-            // If this is true, an exception is being logged with no custom message
-            if (exception?.Message != null && !message.StartsWith(exception.Message))
+            catch (Exception ex)
             {
-                // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:
-                data = new Dictionary<string, string>
-                {
-                    {"exception_type", exception.GetType().ToString()},
-                    {"exception_message", exception.Message},
-                };
+                sentryOptions.DiagnosticLogger?.LogError(ex, "Failed to capture structured log. The log will be dropped.");
             }
+        }
+    }
 
-            if (IncludeEventDataOnBreadcrumbs)
+    private void CreateBreadcrumb(LogEventInfo logEvent, Exception? exception, bool shouldIncludeProperties, IHub hub)
+    {
+        var breadcrumbFormatted = RenderLogEvent(BreadcrumbLayout, logEvent);
+        var breadcrumbCategory = RenderLogEvent(BreadcrumbCategory, logEvent);
+        if (string.IsNullOrEmpty(breadcrumbCategory))
+        {
+            breadcrumbCategory = null;
+        }
+
+        var message = string.IsNullOrWhiteSpace(breadcrumbFormatted)
+            ? exception?.Message ?? logEvent.FormattedMessage
+            : breadcrumbFormatted;
+
+        IDictionary<string, string>? data = null;
+        // If this is true, an exception is being logged with no custom message
+        if (exception?.Message != null && !message.StartsWith(exception.Message))
+        {
+            // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:
+            data = new Dictionary<string, string>
             {
-                if (shouldIncludeProperties)
+                {"exception_type", exception.GetType().ToString()},
+                {"exception_message", exception.Message},
+            };
+        }
+
+        if (IncludeEventDataOnBreadcrumbs)
+        {
+            if (shouldIncludeProperties)
+            {
+                var contextProps = GetAllProperties(logEvent);
+                data ??= new Dictionary<string, string>(contextProps.Count);
+                foreach (var contextProp in contextProps)
                 {
-                    var contextProps = GetAllProperties(logEvent);
-                    data ??= new Dictionary<string, string>(contextProps.Count);
-                    foreach (var contextProp in contextProps)
+                    if (contextProp.Value?.ToString() is { } value)
                     {
-                        if (contextProp.Value?.ToString() is { } value)
-                        {
-                            data.Add(contextProp.Key, value);
-                        }
+                        data.Add(contextProp.Key, value);
                     }
                 }
             }
-
-            hub.AddBreadcrumb(
-                _clock,
-                message,
-                breadcrumbCategory,
-                data: data,
-                level: logEvent.Level.ToBreadcrumbLevel());
         }
+
+        hub.AddBreadcrumb(
+            _clock,
+            message,
+            breadcrumbCategory,
+            data: data,
+            level: logEvent.Level.ToBreadcrumbLevel());
+    }
+
+    private void CreateSentryEvent(LogEventInfo logEvent, Exception? exception, bool shouldIncludeProperties, IHub hub)
+    {
+        var formatted = RenderLogEvent(Layout, logEvent);
+        var template = logEvent.Message;
+
+        var evt = new SentryEvent(exception)
+        {
+            Message = new SentryMessage
+            {
+                Formatted = formatted,
+                Message = template
+            },
+            Logger = logEvent.LoggerName,
+            Level = logEvent.Level.ToSentryLevel(),
+            Release = Options.Release,
+            Environment = Options.Environment,
+            User = GetUser(logEvent) ?? new SentryUser(),
+        };
+
+        if (evt.Sdk is { } sdk)
+        {
+            sdk.Name = Constants.SdkName;
+            sdk.Version = NameAndVersion.Version;
+
+            if (NameAndVersion.Version is { } version)
+            {
+                sdk.AddPackage(ProtocolPackageName, version);
+            }
+        }
+
+        if (Tags.Count > 0 || IncludeEventPropertiesAsTags && logEvent.HasProperties)
+        {
+            evt.SetTags(GetTagsFromLogEvent(logEvent));
+        }
+
+        if (shouldIncludeProperties)
+        {
+            var contextProps = GetAllProperties(logEvent);
+            evt.SetExtras(contextProps);
+
+            if (contextProps.TryGetValue(AdditionalGroupingKeyProperty, out var additionalGroupingKey)
+                && additionalGroupingKey is string groupingKey)
+            {
+                var overridenFingerprint = evt.Fingerprint.ToList();
+                if (!evt.Fingerprint.Any())
+                {
+                    overridenFingerprint.Add("{{ default }}");
+                }
+
+                overridenFingerprint.Add(groupingKey);
+
+                evt.SetFingerprint(overridenFingerprint);
+            }
+        }
+
+        _ = hub.CaptureEvent(evt);
     }
 
     private SentryUser? GetUser(LogEventInfo logEvent)

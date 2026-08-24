@@ -55,6 +55,11 @@ public sealed class App : ISentryJsonSerializable, ICloneable<App>, IUpdatable<A
     public string? Build { get; set; }
 
     /// <summary>
+    /// Amount of memory used by the application in bytes.
+    /// </summary>
+    public long? Memory { get; set; }
+
+    /// <summary>
     /// A flag indicating whether the app is in foreground or not. An app is in foreground when it's visible to the user.
     /// </summary>
     public bool? InForeground { get; set; }
@@ -74,6 +79,7 @@ public sealed class App : ISentryJsonSerializable, ICloneable<App>, IUpdatable<A
             Name = Name,
             Version = Version,
             Build = Build,
+            Memory = Memory,
             InForeground = InForeground
         };
 
@@ -100,6 +106,7 @@ public sealed class App : ISentryJsonSerializable, ICloneable<App>, IUpdatable<A
         Name ??= source.Name;
         Version ??= source.Version;
         Build ??= source.Build;
+        Memory ??= source.Memory;
         InForeground ??= source.InForeground;
     }
 
@@ -116,6 +123,7 @@ public sealed class App : ISentryJsonSerializable, ICloneable<App>, IUpdatable<A
         writer.WriteStringIfNotWhiteSpace("app_name", Name);
         writer.WriteStringIfNotWhiteSpace("app_version", Version);
         writer.WriteStringIfNotWhiteSpace("app_build", Build);
+        writer.WriteNumberIfNotNull("app_memory", Memory);
         writer.WriteBooleanIfNotNull("in_foreground", InForeground);
 
         writer.WriteEndObject();
@@ -133,6 +141,7 @@ public sealed class App : ISentryJsonSerializable, ICloneable<App>, IUpdatable<A
         var name = json.GetPropertyOrNull("app_name")?.GetString();
         var version = json.GetPropertyOrNull("app_version")?.GetString();
         var build = json.GetPropertyOrNull("app_build")?.GetString();
+        var memory = json.GetPropertyOrNull("app_memory")?.GetInt64();
         var inForeground = json.GetPropertyOrNull("in_foreground")?.GetBoolean();
 
         return new App
@@ -144,6 +153,7 @@ public sealed class App : ISentryJsonSerializable, ICloneable<App>, IUpdatable<A
             Name = name,
             Version = version,
             Build = build,
+            Memory = memory,
             InForeground = inForeground
         };
     }

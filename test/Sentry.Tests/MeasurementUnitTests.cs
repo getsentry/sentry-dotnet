@@ -1,5 +1,7 @@
 namespace Sentry.Tests;
 
+using System.Globalization;
+
 public class MeasurementUnitTests
 {
     [Fact]
@@ -7,6 +9,7 @@ public class MeasurementUnitTests
     {
         MeasurementUnit m = new();
         Assert.Equal("", m.ToString());
+        Assert.Null(m.ToNullableString());
     }
 
     [Fact]
@@ -21,6 +24,7 @@ public class MeasurementUnitTests
     {
         var m = MeasurementUnit.None;
         Assert.Equal("none", m.ToString());
+        Assert.Equal("none", m.ToNullableString());
     }
 
     [Fact]
@@ -28,6 +32,7 @@ public class MeasurementUnitTests
     {
         MeasurementUnit m = MeasurementUnit.Duration.Second;
         Assert.Equal("second", m.ToString());
+        Assert.Equal("second", m.ToNullableString());
     }
 
     [Fact]
@@ -35,6 +40,7 @@ public class MeasurementUnitTests
     {
         MeasurementUnit m = MeasurementUnit.Information.Byte;
         Assert.Equal("byte", m.ToString());
+        Assert.Equal("byte", m.ToNullableString());
     }
 
     [Fact]
@@ -42,6 +48,7 @@ public class MeasurementUnitTests
     {
         MeasurementUnit m = MeasurementUnit.Fraction.Percent;
         Assert.Equal("percent", m.ToString());
+        Assert.Equal("percent", m.ToNullableString());
     }
 
     [Fact]
@@ -49,6 +56,7 @@ public class MeasurementUnitTests
     {
         var m = MeasurementUnit.Custom("foo");
         Assert.Equal("foo", m.ToString());
+        Assert.Equal("foo", m.ToNullableString());
     }
 
     [Fact]
@@ -119,5 +127,41 @@ public class MeasurementUnitTests
         var m1 = MeasurementUnit.Custom("second");
         var m2 = MeasurementUnit.Duration.Second;
         Assert.NotEqual(m1, m2);
+    }
+
+    [Fact]
+    public void DurationUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var raw in Enum.GetValues(typeof(MeasurementUnit.Duration)))
+        {
+            var value = (MeasurementUnit.Duration)raw;
+            MeasurementUnit unit = (MeasurementUnit.Duration)raw;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
+    }
+
+    [Fact]
+    public void InformationUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var raw in Enum.GetValues(typeof(MeasurementUnit.Information)))
+        {
+            var value = (MeasurementUnit.Information)raw;
+            MeasurementUnit unit = (MeasurementUnit.Information)raw;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
+    }
+
+    [Fact]
+    public void FractionUnits_ToNullableString_MatchesLowercaseEnumNames()
+    {
+        foreach (var raw in Enum.GetValues(typeof(MeasurementUnit.Fraction)))
+        {
+            var value = (MeasurementUnit.Fraction)raw;
+            MeasurementUnit unit = (MeasurementUnit.Fraction)raw;
+            var expected = value.ToString().ToLower(CultureInfo.InvariantCulture);
+            Assert.Equal(expected, unit.ToNullableString());
+        }
     }
 }

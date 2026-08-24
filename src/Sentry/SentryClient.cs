@@ -45,7 +45,9 @@ public class SentryClient : ISentryClient, IDisposable
         ISessionManager? sessionManager = null,
         BackpressureMonitor? backpressureMonitor = null)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
+
+        _options = options;
         _backpressureMonitor = backpressureMonitor;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
@@ -79,18 +81,20 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError(e, "An error occurred when capturing the event {0}.", @event.EventId);
+            _options.LogError(e, "An error occurred when capturing the event '{0}'.", @event.EventId);
             return SentryId.Empty;
         }
     }
 
     /// <inheritdoc />
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Scope? scope = null, SentryHint? hint = null)
     {
         if (string.IsNullOrEmpty(feedback.Message))
         {
             _options.LogWarning("Feedback dropped due to empty message.");
-            return;
+            result = CaptureFeedbackResult.EmptyMessage;
+            return SentryId.Empty;
         }
 
         scope ??= new Scope(_options);
@@ -114,23 +118,30 @@ public class SentryClient : ISentryClient, IDisposable
             evt.Level = scope.Level;
         }
 
-        var attachments = hint.Attachments.ToList();
-        var envelope = Envelope.FromFeedback(evt, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
-        CaptureEnvelope(envelope);
-    }
-
-    /// <inheritdoc />
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-        if (userFeedback.EventId.Equals(SentryId.Empty))
+        if (SentryEventHelper.ProcessEvent(evt, scope.GetAllEventProcessors(), hint, _options, DataCategory.Feedback)
+            is not { } processedEvent)
         {
-            // Ignore the user feedback if EventId is empty
-            _options.LogWarning("User feedback dropped due to empty id.");
-            return;
+            result = CaptureFeedbackResult.DroppedByEventProcessor;
+            return SentryId.Empty;  // Dropped by an event processor
         }
 
-        CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
+        if (SentryEventHelper.DoBeforeSendFeedback(processedEvent, hint, _options) is not { } feedbackEvent)
+        {
+            result = CaptureFeedbackResult.DroppedByBeforeSendFeedback;
+            return SentryId.Empty;
+        }
+
+        processedEvent = feedbackEvent;
+
+        var attachments = hint.Attachments.ToList();
+        var envelope = Envelope.FromFeedback(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+        if (CaptureEnvelope(envelope))
+        {
+            result = CaptureFeedbackResult.Success;
+            return processedEvent.EventId;
+        }
+        result = CaptureFeedbackResult.UnknownError;
+        return SentryId.Empty;
     }
 
     /// <inheritdoc />
@@ -174,6 +185,19 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
+        // Applied after the sampling check so that a transaction which is sampled out is
+        // still attributed to sampling, not to this filter. IgnoreTransactions is a built-in
+        // filter, so its discards are recorded under EventProcessor (matching the exception
+        // filter path and the JS inbound filters), not BeforeSend, which is reserved for the
+        // user's BeforeSendTransaction callback.
+        if (_options.IgnoreTransactions.MatchesSubstringOrRegex(transaction.Name))
+        {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, spanCount);
+            _options.LogInfo("Transaction dropped by IgnoreTransactions option.");
+            return;
+        }
+
         scope ??= new Scope(_options);
         hint ??= new SentryHint();
         hint.AddAttachmentsFromScope(scope);
@@ -212,7 +236,10 @@ public class SentryClient : ISentryClient, IDisposable
             processedTransaction.Redact();
         }
 
-        CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+        // Keep null entries so the null-attachment guard in Envelope.FromTransaction handles them
+        // (consistent with the event/feedback capture paths); dereferencing them here would throw.
+        var attachments = hint.Attachments.Where(a => a is null || a.AddToTransactions).ToList();
+        CaptureEnvelope(Envelope.FromTransaction(processedTransaction, _options.DiagnosticLogger, attachments));
     }
 
 #if NET6_0_OR_GREATER
@@ -350,7 +377,8 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options) is not { } processedEvent)
+        if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options, DataCategory.Error)
+            is not { } processedEvent)
         {
             return SentryId.Empty;  // Dropped by an event processor
         }
@@ -361,18 +389,23 @@ public class SentryClient : ISentryClient, IDisposable
             return SentryId.Empty; // Dropped by BeforeSend callback
         }
 
-        var hasTerminalException = processedEvent.HasTerminalException();
-        if (hasTerminalException)
+        var exceptionType = processedEvent.GetExceptionType();
+        switch (exceptionType)
         {
-            // Event contains a terminal exception -> end session as crashed
-            _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
-            scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
-        }
-        else if (processedEvent.HasException())
-        {
-            // Event contains a non-terminal exception -> report error
-            // (this might return null if the session has already reported errors before)
-            scope.SessionUpdate = _sessionManager.ReportError();
+            case SentryEvent.ExceptionType.UnhandledNonTerminal:
+                _options.LogDebug("Marking session as 'Unhandled', due to non-terminal unhandled exception.");
+                _sessionManager.MarkSessionAsUnhandled();
+                break;
+
+            case SentryEvent.ExceptionType.UnhandledTerminal:
+                _options.LogDebug("Ending session as 'Crashed', due to unhandled exception.");
+                scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+                break;
+
+            case SentryEvent.ExceptionType.Handled:
+                _options.LogDebug("Updating session by reporting an error.");
+                scope.SessionUpdate = _sessionManager.ReportError();
+                break;
         }
 
         if (_options.SampleRate != null)
@@ -402,7 +435,14 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
-        return CaptureEnvelope(envelope) ? processedEvent.EventId : SentryId.Empty;
+        if (CaptureEnvelope(envelope))
+        {
+#if SENTRY_UNITY
+            @event.IsCaptured = true; // See SentryEvent.Unity.cs for more details.
+#endif
+            return processedEvent.EventId;
+        }
+        return SentryId.Empty;
     }
 
     private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
@@ -445,7 +485,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         _options.LogWarning(
-            "The attempt to queue the event failed. Items in queue: {0}",
+            "The attempt to queue the event failed. Items in queue: '{0}'",
             Worker.QueuedItems);
 
         return false;
