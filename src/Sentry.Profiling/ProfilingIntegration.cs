@@ -10,7 +10,8 @@ public class ProfilingIntegration : ISdkIntegration, IDisposable
 {
     private TimeSpan _startupTimeout;
 
-    private IDisposable? _ownedFactory;
+    private SentryOptions? _options;
+    private SamplingTransactionProfilerFactory? _ownedFactory;
 
     /// <summary>
     /// Initializes the profiling integration.
@@ -41,6 +42,7 @@ public class ProfilingIntegration : ISdkIntegration, IDisposable
                 {
                     var factory = new SamplingTransactionProfilerFactory(options, _startupTimeout);
                     options.TransactionProfilerFactory = factory;
+                    _options = options;
                     _ownedFactory = factory;
                 }
             }
@@ -58,7 +60,20 @@ public class ProfilingIntegration : ISdkIntegration, IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        _ownedFactory?.Dispose();
+        var factory = _ownedFactory;
+        if (factory is null)
+        {
+            return;
+        }
+
+        var options = _options;
+        if (options is not null && ReferenceEquals(options.TransactionProfilerFactory, factory))
+        {
+            options.TransactionProfilerFactory = null;
+        }
+
+        factory.Dispose();
         _ownedFactory = null;
+        _options = null;
     }
 }

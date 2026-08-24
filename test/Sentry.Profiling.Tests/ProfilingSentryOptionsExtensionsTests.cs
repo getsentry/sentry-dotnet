@@ -77,6 +77,24 @@ public class ProfilingSentryOptionsExtensionsTests
     }
 
     [Fact]
+    public void HubDispose_OptionsReusedByANewHub_ProfilerFactoryIsRecreated()
+    {
+        _options.TracesSampleRate = 1.0;
+        _options.ProfilesSampleRate = 1.0;
+
+        using (var first = GetSut())
+        {
+            Assert.NotNull(_options.TransactionProfilerFactory);
+        }
+
+        using var second = GetSut();
+
+        var factory = (SamplingTransactionProfilerFactory)_options.TransactionProfilerFactory!;
+        factory.IsDisposed.Should().BeFalse(
+            "a disposed factory left in the options would silently stop profiling for the new hub");
+    }
+
+    [Fact]
     public void HubDispose_DoesNotDisposeAProfilerFactoryItDidNotCreate()
     {
         _options.TracesSampleRate = 1.0;
