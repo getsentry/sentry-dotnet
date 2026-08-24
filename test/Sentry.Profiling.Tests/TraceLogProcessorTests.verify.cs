@@ -50,10 +50,7 @@ public class TraceLogProcessorTests
         if (!File.Exists(etlxFilePath))
         {
             var etlFilePath = Path.ChangeExtension(etlxFilePath, "nettrace");
-            var source = new EventPipeEventSource(etlFilePath);
-            // This is a non-public API in the perfview submodule, so a bump can move it out from
-            // under us. Fail loudly here rather than letting a null-conditional call silently no-op
-            // and surface as a confusing "file not found" on the TraceLog constructor below.
+            using var source = new EventPipeEventSource(etlFilePath);
             var createFromEventPipeEventSources = typeof(TraceLog).GetMethod(
                 "CreateFromEventPipeEventSources",
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
