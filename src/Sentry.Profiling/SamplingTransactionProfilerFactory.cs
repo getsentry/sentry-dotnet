@@ -15,10 +15,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
-    // TraceLog interns every distinct call stack it observes for the lifetime of the session and
-    // never releases them, so a long-running process grows without bound. Once the interning tables
-    // exceed this many entries we discard them at the next point where doing so is safe.
-    // Exposed for tests.
+    // Once the interning tables exceed this many entries we discard them ASAP
     internal static int MaxCallStackCount = 100_000;
 
     private readonly SentryOptions _options;
@@ -31,7 +28,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // keeps consuming samples up to this timestamp, so we cannot trim until a later sample arrives.
     private double _lastProfileEndTimeMs = double.MinValue;
 
-    // How many times we have trimmed. Exposed for tests.
     internal int TrimCount;
 
     private bool _errorLogged = false;
@@ -116,17 +112,14 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     /// </summary>
     private void TrimSessionStateIfNeeded(TraceEvent data)
     {
-        // A profile is collecting. Its SampleProfileBuilder caches by CallStackIndex, and a trim
-        // reissues those indexes from zero, so cached entries would resolve to unrelated stacks.
         if (_inProgress)
         {
             return;
         }
 
-        // The previous profiler stays subscribed after finishing and keeps consuming samples up to its
-        // end time. Only once we see a later sample do we know it has stopped resolving indexes.
         if (data.TimeStampRelativeMSec <= _lastProfileEndTimeMs)
         {
+            // Still resolving indexes - can't trim yet
             return;
         }
 
