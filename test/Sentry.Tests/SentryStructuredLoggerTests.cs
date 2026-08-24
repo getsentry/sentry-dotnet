@@ -74,13 +74,25 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Create_NewDefaultInstance()
+    public void Create_EnabledHub_NewDefaultInstance()
     {
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
 
         instance.Should().BeOfType<DefaultSentryStructuredLogger>();
         instance.Should().NotBeSameAs(other);
+    }
+
+    [Fact]
+    public void Create_DisabledHub_CachedDisabledInstance()
+    {
+        _fixture.Hub.IsEnabled.Returns(false);
+
+        var instance = _fixture.GetSut();
+        var other = _fixture.GetSut();
+
+        instance.Should().BeOfType<DisabledSentryStructuredLogger>();
+        instance.Should().BeSameAs(other);
     }
 
     [Fact]
