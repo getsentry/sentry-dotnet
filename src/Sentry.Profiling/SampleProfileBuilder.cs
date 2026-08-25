@@ -52,9 +52,8 @@ internal class SampleProfileBuilder
 
     internal void AddSample(TraceEvent data, double timestampMs)
     {
-        // The interning tables have been discarded since we last looked, so indexes have been
-        // reissued from zero and every entry in _stackIndexes now refers to a different stack.
-        // Dropping the cache just means those stacks get walked again.
+        // The interning tables have been discarded since we last looked so we have to
+        // invalidate the _stackIndexes cache (means stacks get walked again)
         if (_session is { } session && _trimGeneration != session.TrimGeneration)
         {
             _trimGeneration = session.TrimGeneration;
