@@ -10,8 +10,10 @@ public class ProfilingIntegration : ISdkIntegration, IDisposable
 {
     private TimeSpan _startupTimeout;
 
+    private readonly object _lock = new();
     private SentryOptions? _options;
     private SamplingTransactionProfilerFactory? _ownedFactory;
+    private int _registrations;
 
     /// <summary>
     /// Initializes the profiling integration.
@@ -38,12 +40,20 @@ public class ProfilingIntegration : ISdkIntegration, IDisposable
         {
             try
             {
-                if (options.TransactionProfilerFactory is null)
+                lock (_lock)
                 {
-                    var factory = new SamplingTransactionProfilerFactory(options, _startupTimeout);
-                    options.TransactionProfilerFactory = factory;
-                    _options = options;
-                    _ownedFactory = factory;
+                    if (options.TransactionProfilerFactory is null)
+                    {
+                        var factory = new SamplingTransactionProfilerFactory(options, _startupTimeout);
+                        options.TransactionProfilerFactory = factory;
+                        _options = options;
+                        _ownedFactory = factory;
+                        _registrations = 1;
+                    }
+                    else if (ReferenceEquals(options.TransactionProfilerFactory, _ownedFactory))
+                    {
+                        _registrations++;
+                    }
                 }
             }
             catch (Exception e)
@@ -60,20 +70,26 @@ public class ProfilingIntegration : ISdkIntegration, IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        var factory = _ownedFactory;
-        if (factory is null)
+        SamplingTransactionProfilerFactory factory;
+        lock (_lock)
         {
-            return;
-        }
+            // Another hub may have registered this integration and still be using the factory.
+            if (_ownedFactory is null || --_registrations > 0)
+            {
+                return;
+            }
 
-        var options = _options;
-        if (options is not null && ReferenceEquals(options.TransactionProfilerFactory, factory))
-        {
-            options.TransactionProfilerFactory = null;
+            factory = _ownedFactory;
+
+            if (_options is { } options && ReferenceEquals(options.TransactionProfilerFactory, factory))
+            {
+                options.TransactionProfilerFactory = null;
+            }
+
+            _ownedFactory = null;
+            _options = null;
         }
 
         factory.Dispose();
-        _ownedFactory = null;
-        _options = null;
     }
 }

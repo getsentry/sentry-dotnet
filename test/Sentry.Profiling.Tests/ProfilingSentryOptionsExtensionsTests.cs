@@ -95,6 +95,29 @@ public class ProfilingSentryOptionsExtensionsTests
     }
 
     [Fact]
+    public void HubDispose_WhileAnotherHubIsStillRegistered_KeepsTheProfilerFactoryAlive()
+    {
+        _options.TracesSampleRate = 1.0;
+        _options.ProfilesSampleRate = 1.0;
+
+        // SentrySdk.Init is UseHub(InitHub(options)) - the replacement hub registers before the
+        // outgoing one is disposed.
+        var first = GetSut();
+        var factory = (SamplingTransactionProfilerFactory)_options.TransactionProfilerFactory!;
+        var second = GetSut();
+
+        first.Dispose();
+
+        _options.TransactionProfilerFactory.Should().BeSameAs(factory);
+        factory.IsDisposed.Should().BeFalse("the replacement hub is still using it");
+
+        second.Dispose();
+
+        factory.IsDisposed.Should().BeTrue("the last hub using it has gone");
+        _options.TransactionProfilerFactory.Should().BeNull();
+    }
+
+    [Fact]
     public void HubDispose_DoesNotDisposeAProfilerFactoryItDidNotCreate()
     {
         _options.TracesSampleRate = 1.0;
