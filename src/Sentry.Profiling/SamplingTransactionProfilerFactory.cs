@@ -115,6 +115,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         try
         {
             _options.LogDebug("Trimming profiler session state, {0} interned call stacks.", session.TraceLog.CallStacks.Count);
+            // Costs the in-flight sample: its stack mapping goes with the tables, so AddSample skips it.
             session.TrimLiveSessionState();
             TrimCount++;
         }
