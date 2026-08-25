@@ -11,7 +11,11 @@ namespace Sentry.Profiling;
 internal class SampleProfileBuilder
 {
     private readonly SentryOptions _options;
+    private readonly SampleProfilerSession? _session;
     private readonly TraceLog _traceLog;
+
+    // The trim generation this builder's _stackIndexes cache was populated against.
+    private int _trimGeneration;
 
     // Output profile being built.
     public readonly SampleProfile Profile = new();
@@ -32,14 +36,31 @@ internal class SampleProfileBuilder
     // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
     private readonly Downsampler _downsampler = new();
 
+    // For a TraceLog read from a file, where nothing trims it and no generation tracking is needed.
     public SampleProfileBuilder(SentryOptions options, TraceLog traceLog)
     {
         _options = options;
         _traceLog = traceLog;
     }
 
+    public SampleProfileBuilder(SentryOptions options, SampleProfilerSession session)
+        : this(options, session.TraceLog)
+    {
+        _session = session;
+        _trimGeneration = session.TrimGeneration;
+    }
+
     internal void AddSample(TraceEvent data, double timestampMs)
     {
+        // The interning tables have been discarded since we last looked, so indexes have been
+        // reissued from zero and every entry in _stackIndexes now refers to a different stack.
+        // Dropping the cache just means those stacks get walked again.
+        if (_session is { } session && _trimGeneration != session.TrimGeneration)
+        {
+            _trimGeneration = session.TrimGeneration;
+            _stackIndexes.Clear();
+        }
+
         var thread = data.Thread();
         if (thread is null || thread.ThreadIndex == ThreadIndex.Invalid)
         {

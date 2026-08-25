@@ -24,10 +24,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     private volatile SampleProfilerSession? _session;
 
-    // The end timestamp of the most recently finished profile. That profiler stays subscribed and
-    // keeps consuming samples up to this timestamp, so we cannot trim until a later sample arrives.
-    private double _lastProfileEndTimeMs = double.MinValue;
-
     internal int TrimCount;
 
     private bool _errorLogged = false;
@@ -84,13 +80,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             {
                 return new SamplingTransactionProfiler(_options, _sessionTask.Result, TIME_LIMIT_MS, cancellationToken)
                 {
-                    OnFinish = endTimeMs =>
-                    {
-                        // Set the end time before clearing _inProgress, so the trim check can never
-                        // observe "no profile running" together with a stale end time.
-                        _lastProfileEndTimeMs = endTimeMs;
-                        _inProgress = false;
-                    }
+                    OnFinish = () => _inProgress = false
                 };
             }
             catch (Exception e)
@@ -105,34 +95,27 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     /// <summary>
     /// Discards TraceLog's call stack interning tables once they grow past <see cref="MaxCallStackCount"/>.
     /// <para>
-    /// Runs for every sample, on the session's event processing thread - which is also the only thread
-    /// allowed to call <c>TrimLiveSessionState</c>, so this is where the trim has to happen. It cannot be
-    /// driven off profile completion alone, because the tables grow whether or not a profile is running.
+    /// Runs for every sample, on the session's event processing thread - which is the only thread
+    /// allowed to trim, so this is where it has to happen. It cannot be driven off profile completion
+    /// alone, because the tables grow whether or not a profile is running.
+    /// </para>
+    /// <para>
+    /// Safe to do mid-profile: SampleProfileBuilder keys a cache off CallStackIndex, which a trim
+    /// reissues from zero, but it notices the bumped generation and drops that cache.
     /// </para>
     /// </summary>
     private void TrimSessionStateIfNeeded(TraceEvent data)
     {
-        if (_inProgress)
-        {
-            return;
-        }
-
-        if (data.TimeStampRelativeMSec <= _lastProfileEndTimeMs)
-        {
-            // Still resolving indexes - can't trim yet
-            return;
-        }
-
-        var traceLog = _session?.TraceLog;
-        if (traceLog is null || traceLog.CallStacks.Count <= MaxCallStackCount)
+        var session = _session;
+        if (session is null || session.TraceLog.CallStacks.Count <= MaxCallStackCount)
         {
             return;
         }
 
         try
         {
-            _options.LogDebug("Trimming profiler session state, {0} interned call stacks.", traceLog.CallStacks.Count);
-            traceLog.TrimLiveSessionState();
+            _options.LogDebug("Trimming profiler session state, {0} interned call stacks.", session.TraceLog.CallStacks.Count);
+            session.TrimLiveSessionState();
             TrimCount++;
         }
         catch (Exception e)

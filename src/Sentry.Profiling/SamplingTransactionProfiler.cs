@@ -7,8 +7,7 @@ namespace Sentry.Profiling;
 
 internal class SamplingTransactionProfiler : ITransactionProfiler
 {
-    // Invoked with the profile's end timestamp
-    public Action<double>? OnFinish;
+    public Action? OnFinish;
     private readonly CancellationToken _cancellationToken;
     private bool _stopped = false;
     private readonly SentryOptions _options;
@@ -25,7 +24,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         _cancellationToken = cancellationToken;
         _startTimeMs = session.Elapsed.TotalMilliseconds;
         _endTimeMs = double.MaxValue;
-        _processor = new SampleProfileBuilder(options, session.TraceLog);
+        _processor = new SampleProfileBuilder(options, session);
         session.SampleEventParser.ThreadSample += OnThreadSample;
         cancellationToken.Register(() =>
         {
@@ -54,7 +53,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 {
                     _stopped = true;
                     _endTimeMs = endTimeMs.Value;
-                    OnFinish?.Invoke(_endTimeMs);
+                    OnFinish?.Invoke();
                     return true;
                 }
             }

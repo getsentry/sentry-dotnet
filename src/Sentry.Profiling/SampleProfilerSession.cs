@@ -56,6 +56,20 @@ internal class SampleProfilerSession : IDisposable
 
     public TraceLog TraceLog => EventSource.TraceLog;
 
+    // Bumped every time the interning tables are discarded. Anything caching a CallStackIndex can
+    // compare against this to find out its cache no longer means what it did.
+    internal int TrimGeneration;
+
+    /// <summary>
+    /// Discards TraceLog's call stack interning tables, invalidating every CallStackIndex handed out
+    /// so far. Must be called from the event processing thread - TraceLog enforces that.
+    /// </summary>
+    internal void TrimLiveSessionState()
+    {
+        TraceLog.TrimLiveSessionState();
+        TrimGeneration++;
+    }
+
     private static InterlockedBoolean _throwOnNextStartupForTests = false;
 
     internal static bool ThrowOnNextStartupForTests

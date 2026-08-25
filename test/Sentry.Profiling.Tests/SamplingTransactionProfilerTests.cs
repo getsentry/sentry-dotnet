@@ -501,6 +501,60 @@ public class SamplingTransactionProfilerTests
         }
     }
 
+    [SkippableFact]
+    public void Profiler_WhileProfileRunning_StillTrimsInternedCallStacks()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI.");
+
+        // A profile is held open for the whole test. Trimming must still happen: profiles can run
+        // back to back under load, so gating the trim on "no profile running" would starve it
+        // exactly when the tables grow fastest. The profile is then collected to show that trimming
+        // mid-profile does not corrupt its output.
+        var originalMax = SamplingTransactionProfilerFactory.MaxCallStackCount;
+        SamplingTransactionProfilerFactory.MaxCallStackCount = 100;
+        try
+        {
+            using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+            SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+
+            var clock = SentryStopwatch.StartNew();
+            var transactionTracer = new TransactionTracer(Substitute.For<IHub>(), "test", "");
+            var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
+            SkipIfFailsInCI(() => ArgumentNullException.ThrowIfNull(sut));
+            transactionTracer.TransactionProfiler = sut;
+
+            // Discard trims from before the profile started - the tiny budget means the session
+            // startup alone can trigger one. From here every trim happens while _inProgress is true.
+            factory.TrimCount = 0;
+
+            var stopwatch = Stopwatch.StartNew();
+            var random = new Random(4242);
+            while (stopwatch.ElapsedMilliseconds < 5_000 && factory.TrimCount == 0)
+            {
+                RecursiveWork(random.Next(8, 24), random);
+            }
+
+            SkipIfFailsInCI(() =>
+            {
+                if (factory.TrimCount == 0)
+                {
+                    throw new Exception("No trim occurred while a profile was running.");
+                }
+            });
+            Assert.True(factory.TrimCount > 0, "Expected trimming to happen even while a profile is running.");
+
+            sut!.Finish();
+            var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
+            var collectTask = sut.CollectAsync(new SentryTransaction(transactionTracer));
+            collectTask.Wait();
+            ValidateProfile(collectTask.Result.Profile, elapsedNanoseconds);
+        }
+        finally
+        {
+            SamplingTransactionProfilerFactory.MaxCallStackCount = originalMax;
+        }
+    }
+
     private static long RecursiveWork(int depth, Random random)
     {
         if (depth <= 0)
