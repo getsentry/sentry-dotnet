@@ -825,6 +825,8 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableBackpressureHandling { get; set; }
         public bool EnableLogs { get; set; }
+        [System.Obsolete("Metrics are always enabled. This option is ignored and will be removed in version" +
+            " 7.0.0. To drop metrics, use SetBeforeSendMetric and return null.")]
         public bool EnableMetrics { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }

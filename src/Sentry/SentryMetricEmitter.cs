@@ -13,9 +13,7 @@ public abstract partial class SentryMetricEmitter
 
     internal static SentryMetricEmitter Create(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
-        return options.EnableMetrics
-            ? new DefaultSentryMetricEmitter(hub, options, clock, batchCount, batchInterval)
-            : DisabledSentryMetricEmitter.Instance;
+        return new DefaultSentryMetricEmitter(hub, options, clock, batchCount, batchInterval);
     }
 
     private protected SentryMetricEmitter()
