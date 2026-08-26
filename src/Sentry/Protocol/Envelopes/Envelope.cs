@@ -285,13 +285,15 @@ public sealed class Envelope : ISerializable, IDisposable
             if (attachment.Content is FileAttachmentContent { DeleteOnClose: false } fileAttachment &&
                 fileAttachment.GetType() == typeof(FileAttachmentContent))
             {
-                using var lengthStream = fileAttachment.GetStream();
-                if (lengthStream.TryGetLength() != 0)
+                var item = EnvelopeItem.FromAttachment(attachment);
+                if (item.TryGetLength() != 0)
                 {
-                    items.Add(EnvelopeItem.FromAttachment(attachment));
+                    items.Add(item);
                 }
                 else
                 {
+                    item.Dispose();
+
                     logger?.LogWarning("Did not add '{0}' to envelope because the file was empty.",
                         attachment.FileName);
                 }
