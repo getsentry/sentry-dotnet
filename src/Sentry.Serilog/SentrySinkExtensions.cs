@@ -35,7 +35,7 @@ public static class SentrySinkExtensions
     /// <param name="reportAssembliesMode">What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/></param>
     /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
     /// <param name="defaultTags">Default tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
-    /// <param name="enableLogs">Whether to send structured logs. <seealso cref="SentryOptions.EnableLogs"/></param>
+    /// <param name="enableLogs">Ignored. Structured logs are always sent. To drop logs, use <see cref="SentryOptions.SetBeforeSendLog(Func{SentryLog, SentryLog})"/> and return <see langword="null"/>.</param>
     /// <param name="restrictedToMinimumLevel">The minimum level for events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified. <seealso cref="SentrySerilogOptions.RestrictedToMinimumLevel"/></param>
     /// <param name="levelSwitch">A switch allowing the pass-through minimum level to be changed at runtime. <seealso cref="SentrySerilogOptions.LevelSwitch"/></param>
     /// <returns><see cref="LoggerConfiguration"/></returns>
@@ -74,8 +74,7 @@ public static class SentrySinkExtensions
     ///                     "defaultTags": {
     ///                         "key-1", "value-1",
     ///                         "key-2", "value-2"
-    ///                     },
-    ///                     "enableLogs": true
+    ///                     }
     ///                 }
     ///             }
     ///         ]
@@ -333,11 +332,6 @@ public static class SentrySinkExtensions
         if (deduplicateMode.HasValue)
         {
             sentrySerilogOptions.DeduplicateMode = deduplicateMode.Value;
-        }
-
-        if (enableLogs.HasValue)
-        {
-            sentrySerilogOptions.EnableLogs = enableLogs.Value;
         }
 
         sentrySerilogOptions.RestrictedToMinimumLevel = restrictedToMinimumLevel;

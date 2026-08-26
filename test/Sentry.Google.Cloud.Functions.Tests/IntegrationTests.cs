@@ -63,7 +63,10 @@ public class IntegrationTests
             Assert.True(tcs.Task.IsCompleted, "Expected Verify to complete.");
             Assert.True(requests.Any(p => p.Contains(ExpectedMessage)),
                 "Expected error to be captured");
-            Assert.True(requests.All(p => p.Contains("sentry.dotnet.google-cloud-function")),
+            // Structured logs are always captured, and those envelopes carry the ASP.NET Core SDK name,
+            // so only the envelopes carrying the error are asserted on here.
+            Assert.True(requests.Where(p => p.Contains(ExpectedMessage))
+                    .All(p => p.Contains("sentry.dotnet.google-cloud-function")),
                 "Expected SDK name to be in the payload");
             return; // pass
         }

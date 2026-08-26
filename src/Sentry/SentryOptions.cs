@@ -607,12 +607,27 @@ public class SentryOptions
         _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
     }
 
+    internal const string ObsoleteEnableLogs =
+        "Logs are always enabled. This option is ignored and will be removed in a future major version. " +
+        "To drop logs, use SetBeforeSendLog and return null.";
+
     /// <summary>
-    /// When set to <see langword="true"/>, logs are sent to Sentry.
-    /// Defaults to <see langword="false"/>.
+    /// Logs are always sent to Sentry.
     /// </summary>
+    /// <remarks>
+    /// This option no longer has any effect. The getter always returns <see langword="true"/> and the setter is ignored.
+    /// To filter or drop logs, use <see cref="SetBeforeSendLog(Func{SentryLog, SentryLog})"/> and return <see langword="null"/>.
+    /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-    public bool EnableLogs { get; set; } = false;
+    [Obsolete(ObsoleteEnableLogs)]
+    public bool EnableLogs
+    {
+        get => true;
+        set
+        {
+            // Logs are always enabled. This option is deliberately ignored.
+        }
+    }
 
     private Func<SentryLog, SentryLog?>? _beforeSendLog;
 

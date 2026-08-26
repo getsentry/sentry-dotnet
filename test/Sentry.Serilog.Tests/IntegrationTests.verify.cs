@@ -113,7 +113,6 @@ public class IntegrationTests
             _ =>
             {
                 _.MinimumEventLevel = (LogEventLevel)int.MaxValue;
-                _.EnableLogs = true;
                 _.Transport = transport;
                 _.DiagnosticLogger = diagnosticLogger;
                 _.Dsn = ValidDsn;

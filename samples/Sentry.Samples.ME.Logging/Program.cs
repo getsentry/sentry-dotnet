@@ -24,8 +24,6 @@ using var loggerFactory = LoggerFactory.Create(builder =>
         options.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
         options.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
 
-        // This option enables Logs sent to Sentry.
-        options.EnableLogs = true;
         options.SetBeforeSendLog(static log =>
         {
             log.SetAttribute("attribute-key", "attribute-value");
