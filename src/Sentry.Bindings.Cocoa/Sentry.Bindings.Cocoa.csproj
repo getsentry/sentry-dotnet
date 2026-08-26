@@ -12,22 +12,18 @@
     <NoWarn>$(NoWarn);CS0108</NoWarn>
   </PropertyGroup>
 
-  <!-- The Cocoa SDK is always built from source from the modules/sentry-cocoa submodule. The
-       pre-built Sentry-Dynamic.xcframework can't be used because the SentryObjC hybrid-API
-       frameworks have no non-duplicating released artifact (see #5331). -->
-  <PropertyGroup Condition="Exists('$(SentryCocoaCache).git')">
-    <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
-    <!-- Structured hybrid API (SentryObjCSDK.internal). These two thin frameworks dynamically link
-         Sentry.framework above; build-sentry-cocoa.sh builds them from source. -->
-    <SentryCocoaObjCFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC.xcframework</SentryCocoaObjCFramework>
-    <SentryCocoaObjCCompatFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjCCompat.xcframework</SentryCocoaObjCCompatFramework>
-    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/**/*.h</SentryCocoaBindingInputs>
+  <!-- SentryObjC-Dynamic xcframework is built from the modules/sentry-cocoa submodule by
+       build-sentry-cocoa.sh, so we can compile with SENTRY_CRASH_MANAGED_RUNTIME=1
+       See getsentry/sentry-dotnet#5492. -->
+  <PropertyGroup>
+    <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC-Dynamic.xcframework</SentryCocoaFramework>
+    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/Headers/**/*.h</SentryCocoaBindingInputs>
     <!-- Resolve path to modules/sentry-cocoa/.git -->
-    <SentryCocoaGitFile>$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
+    <SentryCocoaGitFile Condition="Exists('$(SentryCocoaCache).git')">$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
     <!-- Standalone clone: .git is a directory -->
     <SentryCocoaGitDir Condition="Exists('$(SentryCocoaCache).git\HEAD')">.git</SentryCocoaGitDir>
     <!-- Submodule: .git is a file pointing at the real gitdir -->
-    <SentryCocoaGitDir Condition="'$(SentryCocoaGitDir)' == ''">$([System.IO.File]::ReadAllText('$(SentryCocoaGitFile)').Trim().Replace('gitdir: ', ''))</SentryCocoaGitDir>
+    <SentryCocoaGitDir Condition="Exists('$(SentryCocoaCache).git') And '$(SentryCocoaGitDir)' == ''">$([System.IO.File]::ReadAllText('$(SentryCocoaGitFile)').Trim().Replace('gitdir: ', ''))</SentryCocoaGitDir>
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
@@ -50,8 +46,6 @@
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
-    <NativeReference Include="$(SentryCocoaObjCCompatFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCCompatFramework)' != ''" />
-    <NativeReference Include="$(SentryCocoaObjCFramework)" Kind="Framework" Condition="'$(SentryCocoaObjCFramework)' != ''" />
 
     <!-- Use a separate readme file in the nuget. -->
     <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
@@ -64,10 +58,10 @@
     <None Include="buildTransitive\Sentry.Bindings.Cocoa.targets" Pack="true" PackagePath="buildTransitive\Sentry.Bindings.Cocoa.targets" />
   </ItemGroup>
 
-  <!-- Build the Sentry Cocoa SDK from source -->
+  <!-- Build the SentryObjC-Dynamic xcframework from source. -->
   <Target Name="_BuildCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(SentryCocoaCache).git')"
-          Inputs="$(SentryCocoaCache)$(SentryCocoaGitDir)\HEAD;..\..\scripts\build-sentry-cocoa.sh" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
+          Inputs="$(SentryCocoaCache)$(SentryCocoaGitDir)\HEAD;..\..\scripts\build-sentry-cocoa.sh;..\..\scripts\sentry-cocoa.xcconfig" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
 
     <Message Importance="High" Text="Building the Cocoa SDK from source." />
     <Exec Command="bash ../../scripts/build-sentry-cocoa.sh" IgnoreStandardErrorWarningFormat="true" />
@@ -75,7 +69,7 @@
 
   <Target Name="_EnsureCocoaSubmodule" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
     <Error Condition="!Exists('$(SentryCocoaCache).git')"
-           Text="The modules/sentry-cocoa submodule is missing. Run 'git submodule update --init --recursive' - the Cocoa SDK is built from source (see #5331)." />
+           Text="The modules/sentry-cocoa submodule is missing. Run 'git submodule update --init modules/sentry-cocoa' - the Cocoa SDK is built from source (see getsentry/sentry-dotnet#5492)." />
   </Target>
 
   <Target Name="_SetupCocoaSDK"

@@ -1,4 +1,3 @@
-using Microsoft.Diagnostics.Tracing;
 using Sentry.Extensibility;
 using Sentry.Internal;
 
@@ -15,6 +14,8 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
+    private const int SHUTDOWN_TIMEOUT_MS = 2_000;
+
     // Once the interning tables exceed this many entries we discard them ASAP
     internal static int MaxCallStackCount = 100_000;
 
@@ -22,7 +23,16 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     internal Task<SampleProfilerSession> _sessionTask;
 
-    private volatile SampleProfilerSession? _session;
+    private readonly CancellationTokenSource _shutdownCts = new();
+
+    private readonly object _sessionLock = new();
+    private SampleProfilerSession? _session;
+    private bool _disposed;
+
+    internal bool IsDisposed
+    {
+        get { lock (_sessionLock) { return _disposed; } }
+    }
 
     internal int TrimCount;
 
@@ -32,16 +42,24 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
+        // Store local reference to avoid ObjectDisposed exception
+        var shutdownToken = _shutdownCts.Token;
+
         _sessionTask = Task.Run(async () =>
         {
             // This can block up to 30 seconds. The timeout is out of our hands.
             var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
 
-            // This can block indefinitely.
-            await session.WaitForFirstEventAsync().ConfigureAwait(false);
+            if (!TryPublishSession(session))
+            {
+                session.Dispose();
+                throw new OperationCanceledException(shutdownToken);
+            }
 
-            _session = session;
-            session.SampleEventParser.ThreadSample += TrimSessionStateIfNeeded;
+            // This can block indefinitely.
+            await session.WaitForFirstEventAsync(shutdownToken).ConfigureAwait(false);
+
+            session.SampleEventParser.ThreadSample += _ => TrimSessionStateIfNeeded(session);
 
             return session;
         });
@@ -54,9 +72,43 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         }
     }
 
+    private bool TryPublishSession(SampleProfilerSession session)
+    {
+        lock (_sessionLock)
+        {
+            if (_disposed)
+            {
+                return false;
+            }
+
+            _session = session;
+            return true;
+        }
+    }
+
+    private bool TryBeginShutdown(out SampleProfilerSession? sessionToStop)
+    {
+        lock (_sessionLock)
+        {
+            sessionToStop = _session;
+            if (_disposed)
+            {
+                return false;
+            }
+
+            _disposed = true;
+            return true;
+        }
+    }
+
     /// <inheritdoc />
     public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken cancellationToken)
     {
+        if (IsDisposed)
+        {
+            return null;
+        }
+
         // Start a profiler if one wasn't running yet.
         if (!_errorLogged && !_inProgress.Exchange(true))
         {
@@ -93,21 +145,12 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     }
 
     /// <summary>
-    /// Discards TraceLog's call stack interning tables once they grow past <see cref="MaxCallStackCount"/>.
-    /// <para>
-    /// Runs for every sample, on the session's event processing thread - which is the only thread
-    /// allowed to trim, so this is where it has to happen. It cannot be driven off profile completion
-    /// alone, because the tables grow whether or not a profile is running.
-    /// </para>
-    /// <para>
-    /// Safe to do mid-profile: SampleProfileBuilder keys a cache off CallStackIndex, which a trim
-    /// reissues from zero, but it notices the bumped generation and drops that cache.
-    /// </para>
+    /// Must run on the event processing thread, which is the only thread allowed to trim - hence
+    /// hanging off ThreadSample rather than off profile completion.
     /// </summary>
-    private void TrimSessionStateIfNeeded(TraceEvent data)
+    private void TrimSessionStateIfNeeded(SampleProfilerSession session)
     {
-        var session = _session;
-        if (session is null || session.TraceLog.CallStacks.Count <= MaxCallStackCount)
+        if (session.TraceLog.CallStacks.Count <= MaxCallStackCount)
         {
             return;
         }
@@ -128,6 +171,31 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     public void Dispose()
     {
-        _sessionTask.ContinueWith(session => session.Dispose());
+        if (!TryBeginShutdown(out var session))
+        {
+            return;
+        }
+
+        _shutdownCts.Cancel();
+
+        try
+        {
+            _sessionTask.Wait(SHUTDOWN_TIMEOUT_MS);
+        }
+        catch (Exception e)
+        {
+            _options.LogDebug("Profiler session didn't start up cleanly before shutdown: {0}", e.Message);
+        }
+
+        try
+        {
+            session?.Dispose();
+        }
+        catch (Exception e)
+        {
+            _options.LogWarning(e, "Failed to stop the profiler session.");
+        }
+
+        _shutdownCts.Dispose();
     }
 }

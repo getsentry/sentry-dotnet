@@ -228,6 +228,86 @@ public class SamplingTransactionProfilerTests
         return -n;
     }
 
+    [SkippableFact]
+    public void Factory_StartAfterDispose_ReturnsNoProfiler()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Starts a real EventPipe session.");
+
+        var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
+        SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+        factory._sessionTask.IsCompletedSuccessfully.Should().BeTrue();
+
+        factory.Dispose();
+
+        var profiler = factory.Start(new TransactionTracer(Substitute.For<IHub>(), "test", ""), CancellationToken.None);
+
+        profiler.Should().BeNull("the session backing the factory has been stopped");
+    }
+
+    [SkippableFact]
+    public void Factory_DisposedDuringSessionStartup_StopsTheSession()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Starts a real EventPipe session.");
+
+        using var startupGate = new ManualResetEventSlim(false);
+        SampleProfilerSession? createdSession = null;
+        SampleProfilerSession.BeforeStartupForTests = () => startupGate.Wait(30_000);
+        SampleProfilerSession.OnSessionCreatedForTests = session => createdSession = session;
+
+        SamplingTransactionProfilerFactory factory;
+        try
+        {
+            factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
+
+            // The gate holds startup inside the window StartEventPipeSession() blocks in, so Dispose()
+            // runs before there is any session to stop.
+            factory.Dispose();
+            Assert.True(factory.IsDisposed);
+
+            startupGate.Set();
+            try
+            {
+                factory._sessionTask.Wait(60_000);
+            }
+            catch (AggregateException)
+            {
+                // Expected: startup ends cancelled once it sees the factory was disposed.
+            }
+        }
+        finally
+        {
+            SampleProfilerSession.BeforeStartupForTests = null;
+            SampleProfilerSession.OnSessionCreatedForTests = null;
+        }
+
+        factory._sessionTask.Exception?.InnerExceptions.Should()
+            .NotContain(e => e is ObjectDisposedException,
+                "startup must not read the CancellationTokenSource that Dispose() has already disposed");
+
+        createdSession.Should().NotBeNull();
+        createdSession!.IsStopped.Should().BeTrue(
+            "Dispose() found no session to stop, so startup has to stop the one it created");
+    }
+
+    [SkippableFact]
+    public async Task Session_Stop_ShutsDownWithoutError()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
+
+        SampleProfilerSession? session = null;
+        SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
+        await session!.WaitForFirstEventAsync(CancellationToken.None);
+
+        session.Stop();
+
+        _testOutputLogger.Entries.Select(e => e.Message).Should().NotContain(
+            m => m.StartsWith("Error during sampler profiler session shutdown"),
+            "a throw here leaves the EventPipeSession and TraceLogEventSource undisposed");
+
+        session.Stop();
+        session.IsStopped.Should().BeTrue();
+    }
+
     [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
