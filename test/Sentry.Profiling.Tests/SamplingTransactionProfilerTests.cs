@@ -229,6 +229,22 @@ public class SamplingTransactionProfilerTests
     }
 
     [SkippableFact]
+    public void Factory_StartAfterDispose_ReturnsNoProfiler()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Starts a real EventPipe session.");
+
+        var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
+        SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+        factory._sessionTask.IsCompletedSuccessfully.Should().BeTrue();
+
+        factory.Dispose();
+
+        var profiler = factory.Start(new TransactionTracer(Substitute.For<IHub>(), "test", ""), CancellationToken.None);
+
+        profiler.Should().BeNull("the session backing the factory has been stopped");
+    }
+
+    [SkippableFact]
     public void Factory_DisposedDuringSessionStartup_StopsTheSession()
     {
         Skip.If(TestEnvironment.IsGitHubActions, "Starts a real EventPipe session.");

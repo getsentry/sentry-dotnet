@@ -47,7 +47,7 @@ internal class SampleProfilerSession : IDisposable
     // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
     internal static int CircularBufferMB = 16;
 
-    internal const int ProcessingDrainTimeoutMs = 2_000;
+    private const int ProcessingDrainTimeoutMs = 2_000;
 
     internal TraceLogEventSource EventSource { get; }
 
