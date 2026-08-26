@@ -10,3 +10,6 @@
 [submodule "modules/sentry-cocoa"]
 	path = modules/sentry-cocoa
 	url = https://github.com/getsentry/sentry-cocoa.git
+[submodule "modules/app-runner"]
+	path = modules/app-runner
+	url = https://github.com/getsentry/app-runner.git

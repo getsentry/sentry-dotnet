@@ -64,6 +64,11 @@ public partial class App : Application
     public static void OnAppearing()
     {
         testArg = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ARG");
+        var testRunId = System.Environment.GetEnvironmentVariable("SENTRY_TEST_RUN_ID");
+        if (!string.IsNullOrEmpty(testRunId))
+        {
+            SentrySdk.SetTag("test_run_id", testRunId);
+        }
 
 #pragma warning disable CS0618
         if (Enum.TryParse<CrashType>(testArg, ignoreCase: true, out var crashType))
