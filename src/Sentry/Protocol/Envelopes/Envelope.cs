@@ -265,6 +265,40 @@ public sealed class Envelope : ISerializable, IDisposable
     {
         try
         {
+            // Derived content types may provide a different stream implementation.
+            if (attachment.Content is ByteAttachmentContent byteAttachment &&
+                byteAttachment.GetType() == typeof(ByteAttachmentContent))
+            {
+                if (byteAttachment.Bytes.Length != 0)
+                {
+                    items.Add(EnvelopeItem.FromAttachment(attachment));
+                }
+                else
+                {
+                    logger?.LogWarning("Did not add '{0}' to envelope because the byte array was empty.",
+                        attachment.FileName);
+                }
+
+                return;
+            }
+
+            if (attachment.Content is FileAttachmentContent { DeleteOnClose: false } fileAttachment &&
+                fileAttachment.GetType() == typeof(FileAttachmentContent))
+            {
+                using var lengthStream = fileAttachment.GetStream();
+                if (lengthStream.TryGetLength() != 0)
+                {
+                    items.Add(EnvelopeItem.FromAttachment(attachment));
+                }
+                else
+                {
+                    logger?.LogWarning("Did not add '{0}' to envelope because the file was empty.",
+                        attachment.FileName);
+                }
+
+                return;
+            }
+
             // We pull the stream out here so we can length check
             // to avoid adding an invalid attachment
             var stream = attachment.Content.GetStream();
