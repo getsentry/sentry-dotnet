@@ -13,9 +13,9 @@ public abstract partial class SentryStructuredLogger
 
     internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
-        return options.EnableLogs
-            ? new DefaultSentryStructuredLogger(hub, options, clock, batchCount, batchInterval)
-            : DisabledSentryStructuredLogger.Instance;
+        // Logs created directly via this API are always captured. Someone reaching for SentrySdk.Logger
+        // has already opted in; the logging integrations still honour SentryOptions.EnableLogs themselves.
+        return new DefaultSentryStructuredLogger(hub, options, clock, batchCount, batchInterval);
     }
 
     private protected SentryStructuredLogger()

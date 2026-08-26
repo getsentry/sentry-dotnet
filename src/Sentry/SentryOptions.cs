@@ -608,9 +608,16 @@ public class SentryOptions
     }
 
     /// <summary>
-    /// When set to <see langword="true"/>, logs are sent to Sentry.
-    /// Defaults to <see langword="false"/>.
+    /// When set to <see langword="true"/>, logs captured by the logging integrations
+    /// (<c>Sentry.Extensions.Logging</c>, <c>Sentry.Serilog</c>, <c>Sentry.NLog</c>, <c>Sentry.Log4Net</c>)
+    /// are sent to Sentry. Defaults to <see langword="false"/>.
     /// </summary>
+    /// <remarks>
+    /// This option does not apply to logs created directly via <see cref="SentryStructuredLogger"/>
+    /// (typically <c>SentrySdk.Logger</c>), which are always sent.
+    /// To filter or drop those, use <see cref="SetBeforeSendLog(Func{SentryLog, SentryLog})"/>
+    /// and return <see langword="null"/>.
+    /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
     public bool EnableLogs { get; set; } = false;
 
