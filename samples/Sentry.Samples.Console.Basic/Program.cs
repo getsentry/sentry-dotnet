@@ -40,7 +40,6 @@ SentrySdk.Init(options =>
     // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
     options.TracesSampleRate = 1.0;
 
-    // Logs created via SentrySdk.Logger are always sent - no option needed.
     options.SetBeforeSendLog(static log =>
     {
         // A demonstration of how you can drop logs based on some attribute they have

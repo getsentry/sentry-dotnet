@@ -615,7 +615,6 @@ public class SentryOptions
     /// <remarks>
     /// This option does not apply to logs created directly via <see cref="SentryStructuredLogger"/>
     /// (typically <c>SentrySdk.Logger</c>), which are always sent.
-    /// To filter or drop those, use <see cref="SetBeforeSendLog(Func{SentryLog, SentryLog})"/>
     /// and return <see langword="null"/>.
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
