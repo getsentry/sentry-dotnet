@@ -632,12 +632,24 @@ public class SentryOptions
         _beforeSendLog = beforeSendLog;
     }
 
+    internal const string ObsoleteEnableMetrics =
+        "Metrics are always enabled. This option is ignored and will be removed in version 7.0.0. " +
+        "To drop metrics, use SetBeforeSendMetric and return null.";
+
     /// <summary>
-    /// When set to <see langword="false"/>, the SDK does not generate and send metrics to Sentry via <see cref="SentrySdk.Metrics"/>.
-    /// Defaults to <see langword="true"/>.
+    /// Metrics are always sent to Sentry via <see cref="SentrySdk.Metrics"/>.
     /// </summary>
+    /// <remarks>
+    /// This option no longer has any effect. The getter always returns <see langword="true"/> and the setter is ignored.
+    /// To filter or drop metrics, use <see cref="SetBeforeSendMetric(Func{SentryMetric, SentryMetric})"/> and return <see langword="null"/>.
+    /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
-    public bool EnableMetrics { get; set; } = true;
+    [Obsolete(ObsoleteEnableMetrics)]
+    public bool EnableMetrics
+    {
+        get => true;
+        set { }
+    }
 
     private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
 
