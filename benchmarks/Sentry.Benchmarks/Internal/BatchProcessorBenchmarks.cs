@@ -2,7 +2,7 @@ using BenchmarkDotNet.Attributes;
 using Sentry.Extensibility;
 using Sentry.Internal;
 
-namespace Sentry.Benchmarks;
+namespace Sentry.Benchmarks.Internal;
 
 /// <summary>
 /// <see cref="BatchProcessor{TItem}"/> (formerly "Sentry.Internal.StructuredLogBatchProcessor") was originally developed as Batch Processor for Logs only.
