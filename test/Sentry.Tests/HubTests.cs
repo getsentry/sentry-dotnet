@@ -1994,30 +1994,11 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Logger_IsDisabled_DoesNotCaptureLog()
+    public void Logger_EnableLogsDisabled_StillCapturesLog()
     {
         // Arrange
+        // EnableLogs gates the logging integrations. Logs created directly via this API are always captured.
         Assert.False(_fixture.Options.EnableLogs);
-        var hub = _fixture.GetSut();
-
-        // Act
-        hub.Logger.LogWarning("Message");
-        hub.Logger.Flush();
-
-        // Assert
-        _fixture.Client.Received(0).CaptureEnvelope(
-            Arg.Is<Envelope>(envelope =>
-                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
-            )
-        );
-        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
-    }
-
-    [Fact]
-    public void Logger_IsEnabled_DoesCaptureLog()
-    {
-        // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -2034,30 +2015,21 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Logger_EnableAfterCreate_HasNoEffect()
+    public void Logger_DoesCaptureLog()
     {
         // Arrange
-        Assert.False(_fixture.Options.EnableLogs);
         var hub = _fixture.GetSut();
 
         // Act
-        _fixture.Options.EnableLogs = true;
+        hub.Logger.LogWarning("Message");
+        hub.Logger.Flush();
 
         // Assert
-        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
-    }
-
-    [Fact]
-    public void Logger_DisableAfterCreate_HasNoEffect()
-    {
-        // Arrange
-        _fixture.Options.EnableLogs = true;
-        var hub = _fixture.GetSut();
-
-        // Act
-        _fixture.Options.EnableLogs = false;
-
-        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
         hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
     }
 
@@ -2065,7 +2037,6 @@ public partial class HubTests : IDisposable
     public async Task Logger_FlushAsync_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -2090,7 +2061,6 @@ public partial class HubTests : IDisposable
     public void Logger_Dispose_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act

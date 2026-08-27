@@ -23,7 +23,6 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <remarks>
     /// Available options:
     /// <list type="bullet">
-    /// <item><see cref="Sentry.SentryOptions.EnableLogs"/></item>
     /// <item><see cref="Sentry.SentryOptions.SetBeforeSendLog(System.Func{SentryLog, SentryLog})"/></item>
     /// </list>
     /// </remarks>
