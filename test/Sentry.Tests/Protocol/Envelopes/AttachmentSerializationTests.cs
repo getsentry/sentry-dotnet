@@ -158,6 +158,32 @@ public partial class AttachmentSerializationTests
     }
 
     [Fact]
+    public void Serialization_SameEventEnvelopeWithByteAttachmentTwiceSynchronously_PreservesPayload()
+    {
+        // Arrange
+        const string attachmentContent = "test attachment content";
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new ByteAttachmentContent(Encoding.UTF8.GetBytes(attachmentContent)),
+            "test.txt",
+            "text/plain");
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            attachments: [attachment]);
+
+        // Act
+        var firstSerialization =
+            envelope.SerializeToString(_testOutputLogger, _fakeClock);
+        var secondSerialization =
+            envelope.SerializeToString(_testOutputLogger, _fakeClock);
+
+        // Assert
+        firstSerialization.Should().Contain(attachmentContent);
+        secondSerialization.Should().Be(firstSerialization);
+    }
+
+    [Fact]
     public void Serialization_SameEventEnvelopeWithStreamAttachmentTwiceSynchronously_PreservesPayload()
     {
         // Arrange
@@ -310,5 +336,57 @@ public partial class AttachmentSerializationTests
         // Assert
         firstSerialization.Should().Contain(attachmentContent);
         secondSerialization.Should().Be(firstSerialization);
+    }
+
+    [Fact]
+    public async Task Serialization_SameEnvelopeWithDerivedFileAttachmentContentTwice_PreservesPayload()
+    {
+        // Arrange
+        const string attachmentContent = "test attachment content";
+        using var attachmentStream =
+            new MemoryStream(Encoding.UTF8.GetBytes(attachmentContent));
+
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new SingleStreamDerivedFileAttachmentContent(attachmentStream),
+            "test.txt",
+            "text/plain");
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            attachments: [attachment]);
+
+        // Act
+        var firstSerialization =
+            await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+        var secondSerialization =
+            await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        // Assert
+        firstSerialization.Should().Contain(attachmentContent);
+        secondSerialization.Should().Be(firstSerialization);
+    }
+
+    [Fact]
+    public void FromEvent_EmptyByteAttachment_DoesNotAddAttachment()
+    {
+        // Arrange
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new ByteAttachmentContent([]),
+            "empty.txt",
+            "text/plain");
+
+        // Act
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            attachments: [attachment],
+            logger: _testOutputLogger);
+
+        // Assert
+        envelope.Items
+            .Count(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment)
+            .Should()
+            .Be(0);
     }
 }

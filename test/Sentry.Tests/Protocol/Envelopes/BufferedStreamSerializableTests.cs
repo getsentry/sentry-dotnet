@@ -45,6 +45,25 @@ public class BufferedStreamSerializableTests
             .Should().Be(attachmentContent);
     }
 
+    [Fact]
+    public async Task SerializeAsync_SourceThrows_DisposesSourceAndPropagatesException()
+    {
+        // Arrange
+        using var source = new ThrowingReadStream();
+        using var serializable = new BufferedStreamSerializable(source);
+        using var output = new MemoryStream();
+
+        // Act
+        Func<Task> action = () => serializable.SerializeAsync(output, null);
+
+        // Assert
+        await action.Should()
+            .ThrowAsync<IOException>()
+            .WithMessage("Test exception.");
+
+        source.WasDisposed.Should().BeTrue();
+    }
+
     private sealed class GatedMemoryStream : MemoryStream
     {
         private readonly TaskCompletionSource<bool> _copyStarted =
@@ -71,6 +90,27 @@ public class BufferedStreamSerializableTests
 
             await _continueCopy.Task.ConfigureAwait(false);
             await base.CopyToAsync(destination, bufferSize, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class ThrowingReadStream : MemoryStream
+    {
+        public bool WasDisposed { get; private set; }
+
+        public override Task CopyToAsync(
+            Stream destination,
+            int bufferSize,
+            CancellationToken cancellationToken) =>
+            Task.FromException(new IOException("Test exception."));
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                WasDisposed = true;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

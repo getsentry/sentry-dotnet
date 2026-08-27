@@ -125,4 +125,17 @@ public partial class AttachmentSerializationTests
 
         Stream IAttachmentContent.GetStream() => _stream;
     }
+
+    private sealed class SingleStreamDerivedFileAttachmentContent : FileAttachmentContent, IAttachmentContent
+    {
+        private readonly Stream _stream;
+
+        public SingleStreamDerivedFileAttachmentContent(Stream stream)
+            : base("unused")
+        {
+            _stream = stream;
+        }
+
+        Stream IAttachmentContent.GetStream() => _stream;
+    }
 }
