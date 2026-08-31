@@ -36,6 +36,8 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     internal int TrimCount;
 
+    private bool _trimFailed;
+
     private bool _errorLogged = false;
 
     public SamplingTransactionProfilerFactory(SentryOptions options, TimeSpan startupTimeout)
@@ -150,7 +152,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     /// </summary>
     private void TrimSessionStateIfNeeded(SampleProfilerSession session)
     {
-        if (session.TraceLog.CallStacks.Count <= MaxCallStackCount)
+        if (_trimFailed || session.TraceLog.CallStacks.Count <= MaxCallStackCount)
         {
             return;
         }
@@ -164,8 +166,10 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         }
         catch (Exception e)
         {
-            // Never let this take down event processing for the whole session.
-            _options.LogWarning(e, "Failed to trim profiler session state.");
+            // Latch off rather than retrying on every subsequent sample, which would throw and log
+            // at sample rate on the event processing thread.
+            _trimFailed = true;
+            _options.LogError(e, "Failed to trim profiler session state. Profiling memory use is no longer bounded.");
         }
     }
 

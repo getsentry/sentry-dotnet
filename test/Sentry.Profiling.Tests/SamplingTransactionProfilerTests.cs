@@ -641,6 +641,51 @@ public class SamplingTransactionProfilerTests
         }
     }
 
+    [SkippableFact]
+    public void Profiler_WhenTrimFails_StopsRetrying()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI.");
+
+        var originalMax = SamplingTransactionProfilerFactory.MaxCallStackCount;
+        SamplingTransactionProfilerFactory.MaxCallStackCount = 100;
+        var attempts = 0;
+        SampleProfilerSession.OnTrimForTests = () =>
+        {
+            attempts++;
+            throw new InvalidOperationException("Test exception");
+        };
+        try
+        {
+            using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+            SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+
+            var stopwatch = Stopwatch.StartNew();
+            var random = new Random(4242);
+            while (stopwatch.ElapsedMilliseconds < 3_000)
+            {
+                RecursiveWork(random.Next(8, 24), random);
+            }
+
+            SkipIfFailsInCI(() =>
+            {
+                if (attempts == 0)
+                {
+                    throw new Exception("The trim was never attempted, so the latch was not exercised.");
+                }
+            });
+
+            // Without the latch this would be attempted on every sample for the rest of the session,
+            // throwing and logging each time on the event processing thread.
+            Assert.Equal(1, attempts);
+            Assert.Equal(0, factory.TrimCount);
+        }
+        finally
+        {
+            SampleProfilerSession.OnTrimForTests = null;
+            SamplingTransactionProfilerFactory.MaxCallStackCount = originalMax;
+        }
+    }
+
     private static long RecursiveWork(int depth, Random random)
     {
         if (depth <= 0)

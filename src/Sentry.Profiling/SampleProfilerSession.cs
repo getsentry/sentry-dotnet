@@ -67,6 +67,7 @@ internal class SampleProfilerSession : IDisposable
     /// </summary>
     internal void TrimLiveSessionState()
     {
+        OnTrimForTests?.Invoke();
         TraceLog.TrimLiveSessionState();
         TrimGeneration++;
     }
@@ -76,6 +77,8 @@ internal class SampleProfilerSession : IDisposable
     internal static Action? BeforeStartupForTests;
 
     internal static Action<SampleProfilerSession>? OnSessionCreatedForTests;
+
+    internal static Action? OnTrimForTests;
 
     private static InterlockedBoolean _throwOnNextStartupForTests = false;
 
