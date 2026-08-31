@@ -67,7 +67,7 @@ internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
             return;
         }
 
-        if (TimeZoneInfo.TryConvertWindowsIdToIanaId(cronTrigger.TimeZone.Id, RegionInfo.CurrentRegion.TwoLetterISORegionName, out string? iana))
+        if (TimeZoneInfo.TryConvertWindowsIdToIanaId(cronTrigger.TimeZone.Id, RegionInfo.GetCurrentRegionOrNull()?.TwoLetterISORegionName, out string? iana))
         {
             options.TimeZone = iana;
         }
@@ -78,11 +78,7 @@ internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
 
         string monitorSlug = information.MonitorSlug;
         string cron = cronTrigger.CronExpressionString.Replace("?", "*", StringComparison.OrdinalIgnoreCase);
-        var cronSpan = cron.Split(" ", StringSplitOptions.RemoveEmptyEntries)
-#if NET9_0_OR_GREATER
-            .AsSpan()
-#endif
-            ;
+        var cronSpan = cron.Split(" ", StringSplitOptions.RemoveEmptyEntries).AsSpan();
 
         if (cronSpan.Length is 6 or 7)
         {
