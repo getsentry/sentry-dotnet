@@ -19,16 +19,12 @@ public static class GlobalConfigurationExtensions
     /// <returns></returns>
     public static IQuartzBuilder UseSentry(this IQuartzBuilder configuration, IServiceCollection serviceCollection, Action<SentryCronJobOptions>? configure = null)
     {
-        serviceCollection.AddSingleton<SentryCronJobListener>();
-
         if (configure is not null)
         {
             serviceCollection.Configure(configure);
         }
 
-        configuration.AddJobListener<SentryCronJobListener>(sp => sp.GetRequiredService<SentryCronJobListener>());
-
-        return configuration;
+        return configuration.AddJobMiddleware<SentryCronJobMiddleware>();
     }
 
     /// <summary>
@@ -39,9 +35,9 @@ public static class GlobalConfigurationExtensions
     /// <param name="options"></param>
     /// <param name="logger"></param>
     /// <returns></returns>
-    internal static IQuartzBuilder UseSentry(this IQuartzBuilder configuration, IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobListener> logger)
+    internal static IQuartzBuilder UseSentry(this IQuartzBuilder configuration, IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobMiddleware> logger)
     {
-        configuration.AddJobListener(new SentryCronJobListener(options, hub, logger));
+        configuration.AddJobMiddleware(new SentryCronJobMiddleware(options, hub, logger));
         return configuration;
     }
 }
