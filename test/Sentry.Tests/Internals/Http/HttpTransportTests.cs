@@ -711,9 +711,15 @@ public partial class HttpTransportTests
             // Act
             await httpTransport.SendEnvelopeAsync(envelope);
 
+            // The transport doesn't own the envelope items, so the file outlives the send.
+            File.Exists(tempFilePath).Should().BeTrue();
+
+            envelope.Dispose();
+
             // Assert
-            // The file is streamed as part of the successful send, and should be
-            // deleted once the stream backing the envelope item is closed/disposed.
+            // The file is streamed as part of the successful send, and is deleted once the
+            // stream backing the envelope item is closed - which happens when the owning
+            // envelope is disposed, as BackgroundWorker does after each send.
             File.Exists(tempFilePath).Should().BeFalse();
         }
         finally
