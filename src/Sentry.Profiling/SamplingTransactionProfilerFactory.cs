@@ -17,7 +17,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     private const int SHUTDOWN_TIMEOUT_MS = 2_000;
 
     // Once the interning tables exceed this many entries we discard them ASAP
-    internal static int MaxCallStackCount = 100_000;
+    internal int MaxCallStackCount = 100_000;
 
     private readonly SentryOptions _options;
 

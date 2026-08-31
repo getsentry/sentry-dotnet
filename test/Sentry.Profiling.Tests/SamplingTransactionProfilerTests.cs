@@ -544,44 +544,36 @@ public class SamplingTransactionProfilerTests
 
         // The interning tables grow whether or not a profile is running, so this deliberately never
         // starts one - the trim has to happen off the back of ordinary samples. See #5469.
-        var originalMax = SamplingTransactionProfilerFactory.MaxCallStackCount;
-        SamplingTransactionProfilerFactory.MaxCallStackCount = 100;
-        try
-        {
-            using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
-            SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
-            var traceLog = factory._sessionTask.Result.TraceLog;
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+        factory.MaxCallStackCount = 100;
+        SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+        var traceLog = factory._sessionTask.Result.TraceLog;
 
-            // Produce a variety of stack shapes so the sampler has something to intern. Run for the
-            // full duration rather than stopping at the first trim, so we observe the steady state.
-            var stopwatch = Stopwatch.StartNew();
-            var random = new Random(4242);
-            var highWaterMark = 0;
-            while (stopwatch.ElapsedMilliseconds < 3_000)
+        // Produce a variety of stack shapes so the sampler has something to intern. Run for the
+        // full duration rather than stopping at the first trim, so we observe the steady state.
+        var stopwatch = Stopwatch.StartNew();
+        var random = new Random(4242);
+        var highWaterMark = 0;
+        while (stopwatch.ElapsedMilliseconds < 3_000)
+        {
+            RecursiveWork(random.Next(8, 24), random);
+            highWaterMark = Math.Max(highWaterMark, traceLog.CallStacks.Count);
+        }
+
+        SkipIfFailsInCI(() =>
+        {
+            if (factory.TrimCount == 0)
             {
-                RecursiveWork(random.Next(8, 24), random);
-                highWaterMark = Math.Max(highWaterMark, traceLog.CallStacks.Count);
+                throw new Exception($"No trim occurred; call stacks peaked at {highWaterMark}.");
             }
+        });
 
-            SkipIfFailsInCI(() =>
-            {
-                if (factory.TrimCount == 0)
-                {
-                    throw new Exception($"No trim occurred; call stacks peaked at {highWaterMark}.");
-                }
-            });
+        Assert.True(factory.TrimCount > 0, $"Expected at least one trim, call stacks peaked at {highWaterMark}.");
 
-            Assert.True(factory.TrimCount > 0, $"Expected at least one trim, call stacks peaked at {highWaterMark}.");
-
-            // The table refills immediately after each trim, so its size at any instant is noise. What
-            // matters is that it stays bounded - untrimmed this workload reaches thousands in 3s.
-            Assert.True(highWaterMark < SamplingTransactionProfilerFactory.MaxCallStackCount * 20,
-                $"Expected the interning table to stay bounded, but it peaked at {highWaterMark}.");
-        }
-        finally
-        {
-            SamplingTransactionProfilerFactory.MaxCallStackCount = originalMax;
-        }
+        // The table refills immediately after each trim, so its size at any instant is noise. What
+        // matters is that it stays bounded - untrimmed this workload reaches thousands in 3s.
+        Assert.True(highWaterMark < factory.MaxCallStackCount * 20,
+            $"Expected the interning table to stay bounded, but it peaked at {highWaterMark}.");
     }
 
     [SkippableFact]
@@ -593,52 +585,44 @@ public class SamplingTransactionProfilerTests
         // back to back under load, so gating the trim on "no profile running" would starve it
         // exactly when the tables grow fastest. The profile is then collected to show that trimming
         // mid-profile does not corrupt its output.
-        var originalMax = SamplingTransactionProfilerFactory.MaxCallStackCount;
-        SamplingTransactionProfilerFactory.MaxCallStackCount = 100;
-        try
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+        factory.MaxCallStackCount = 100;
+        SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+
+        var clock = SentryStopwatch.StartNew();
+        var transactionTracer = new TransactionTracer(Substitute.For<IHub>(), "test", "");
+        var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
+        SkipIfFailsInCI(() => ArgumentNullException.ThrowIfNull(sut));
+        transactionTracer.TransactionProfiler = sut;
+
+        // Discard trims from before the profile started - the tiny budget means the session
+        // startup alone can trigger one. From here every trim happens while _inProgress is true.
+        factory.TrimCount = 0;
+
+        // Run for a fixed duration rather than stopping at the first trim: the profile needs to
+        // last long enough for samples to actually be dispatched to it, or there is nothing to
+        // validate at the end.
+        var stopwatch = Stopwatch.StartNew();
+        var random = new Random(4242);
+        while (stopwatch.ElapsedMilliseconds < 3_000)
         {
-            using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
-            SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+            RecursiveWork(random.Next(8, 24), random);
+        }
 
-            var clock = SentryStopwatch.StartNew();
-            var transactionTracer = new TransactionTracer(Substitute.For<IHub>(), "test", "");
-            var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
-            SkipIfFailsInCI(() => ArgumentNullException.ThrowIfNull(sut));
-            transactionTracer.TransactionProfiler = sut;
-
-            // Discard trims from before the profile started - the tiny budget means the session
-            // startup alone can trigger one. From here every trim happens while _inProgress is true.
-            factory.TrimCount = 0;
-
-            // Run for a fixed duration rather than stopping at the first trim: the profile needs to
-            // last long enough for samples to actually be dispatched to it, or there is nothing to
-            // validate at the end.
-            var stopwatch = Stopwatch.StartNew();
-            var random = new Random(4242);
-            while (stopwatch.ElapsedMilliseconds < 3_000)
+        SkipIfFailsInCI(() =>
+        {
+            if (factory.TrimCount == 0)
             {
-                RecursiveWork(random.Next(8, 24), random);
+                throw new Exception("No trim occurred while a profile was running.");
             }
+        });
+        Assert.True(factory.TrimCount > 0, "Expected trimming to happen even while a profile is running.");
 
-            SkipIfFailsInCI(() =>
-            {
-                if (factory.TrimCount == 0)
-                {
-                    throw new Exception("No trim occurred while a profile was running.");
-                }
-            });
-            Assert.True(factory.TrimCount > 0, "Expected trimming to happen even while a profile is running.");
-
-            sut!.Finish();
-            var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
-            var collectTask = sut.CollectAsync(new SentryTransaction(transactionTracer));
-            collectTask.Wait();
-            ValidateProfile(collectTask.Result.Profile, elapsedNanoseconds);
-        }
-        finally
-        {
-            SamplingTransactionProfilerFactory.MaxCallStackCount = originalMax;
-        }
+        sut!.Finish();
+        var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
+        var collectTask = sut.CollectAsync(new SentryTransaction(transactionTracer));
+        collectTask.Wait();
+        ValidateProfile(collectTask.Result.Profile, elapsedNanoseconds);
     }
 
     [SkippableFact]
@@ -646,8 +630,6 @@ public class SamplingTransactionProfilerTests
     {
         Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI.");
 
-        var originalMax = SamplingTransactionProfilerFactory.MaxCallStackCount;
-        SamplingTransactionProfilerFactory.MaxCallStackCount = 100;
         var attempts = 0;
         SampleProfilerSession.OnTrimForTests = () =>
         {
@@ -657,6 +639,7 @@ public class SamplingTransactionProfilerTests
         try
         {
             using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+            factory.MaxCallStackCount = 100;
             SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
 
             var stopwatch = Stopwatch.StartNew();
@@ -682,7 +665,6 @@ public class SamplingTransactionProfilerTests
         finally
         {
             SampleProfilerSession.OnTrimForTests = null;
-            SamplingTransactionProfilerFactory.MaxCallStackCount = originalMax;
         }
     }
 
