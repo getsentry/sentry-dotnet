@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Quartz" Version="4.0.0-alpha.1" />
+    <PackageReference Include="Quartz" Version="4.0.0-alpha.4" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
