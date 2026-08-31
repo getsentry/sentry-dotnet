@@ -45,7 +45,10 @@ internal class SpotlightHttpTransport : HttpTransport
             try
             {
                 // Send to spotlight
-                using var processedEnvelope = ProcessEnvelope(envelope);
+                // Deliberately not disposed here: these are the caller's EnvelopeItem instances,
+                // shared with the still in-flight sentryTask above. Disposing them would close
+                // the attachment streams out from under that request. The caller owns them.
+                var processedEnvelope = ProcessEnvelope(envelope);
                 if (processedEnvelope.Items.Count > 0)
                 {
                     using var request = CreateRequest(processedEnvelope);

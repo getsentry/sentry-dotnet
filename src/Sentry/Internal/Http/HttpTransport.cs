@@ -35,7 +35,10 @@ internal class HttpTransport : HttpTransportBase, ITransport
     /// </remarks>
     public virtual async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
     {
-        using var processedEnvelope = ProcessEnvelope(envelope);
+        // Deliberately not disposed here: ProcessEnvelope returns a new Envelope wrapping the
+        // caller's EnvelopeItem instances, so this transport is a borrower, not the owner.
+        // The caller (e.g. BackgroundWorker) disposes them once the send has completed.
+        var processedEnvelope = ProcessEnvelope(envelope);
         if (processedEnvelope.Items.Count > 0)
         {
             using var request = CreateRequest(processedEnvelope);
