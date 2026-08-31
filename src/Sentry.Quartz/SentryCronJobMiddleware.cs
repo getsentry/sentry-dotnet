@@ -1,60 +1,63 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Quartz;
 
 namespace Sentry.Quartz;
 
-internal sealed partial class SentryCronJobListener : IJobListener
+internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
 {
     private readonly SentryCronJobOptions _options;
-    private readonly ConcurrentDictionary<string, SentryId> _fireInstanceId = new();
     private readonly ConcurrentDictionary<Type, SentryCronInformation> _sentryCronInformation = [];
     private readonly IHub _hub;
-    private readonly ILogger<SentryCronJobListener> _logger;
+    private readonly ILogger<SentryCronJobMiddleware> _logger;
 
-    public SentryCronJobListener(IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobListener> logger)
+    public SentryCronJobMiddleware(IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobMiddleware> logger)
     {
         _hub = hub;
         _logger = logger;
         _options = options.Value;
     }
 
-    public string Name { get; } = "Sentry Job Listener";
-
-    public ValueTask JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default)
+    public async ValueTask Invoke(IJobExecutionContext context, JobExecutionDelegate next, CancellationToken cancellationToken)
     {
         var jobType = context.JobInstance.GetType();
         var info = _sentryCronInformation.GetOrAdd(jobType, _ => new SentryCronInformation(context.JobInstance));
 
+        var sentryId = StartQuartz(context, info);
+        try
+        {
+            await next(context, cancellationToken).ConfigureAwait(false);
+            CompleteCheckIn(info, sentryId, CheckInStatus.Ok);
+        }
+        catch
+        {
+            CompleteCheckIn(info, sentryId, CheckInStatus.Error);
+            throw;
+        }
+    }
+
+    private SentryId? StartQuartz(IJobExecutionContext context, SentryCronInformation info)
+    {
         if (info.ShouldWriteStatusToSentry)
         {
-            var sentryId = _hub.CaptureCheckIn(info.MonitorSlug, CheckInStatus.InProgress, configureMonitorOptions: options =>
+            return _hub.CaptureCheckIn(info.MonitorSlug, CheckInStatus.InProgress, configureMonitorOptions: options =>
             {
                 if (_options.EnableUpsertCronMonitor && context.Trigger is ICronTrigger cronTrigger)
                 {
                     UpsertCronMonitor(cronTrigger, info, options);
                 }
             });
-
-            _fireInstanceId.TryAdd(context.FireInstanceId, sentryId);
         }
 
-        return ValueTask.CompletedTask;
+        return null;
     }
 
-    public ValueTask JobWasExecuted(IJobExecutionContext context, JobExecutionException? jobException, CancellationToken cancellationToken = default)
+    private void CompleteCheckIn(SentryCronInformation info, SentryId? sentryId, CheckInStatus status)
     {
-        var jobType = context.JobInstance.GetType();
-
-        if (_sentryCronInformation.TryGetValue(jobType, out var info) && info.ShouldWriteStatusToSentry)
+        if (sentryId is not null)
         {
-            var status = jobException is not null ? CheckInStatus.Error : CheckInStatus.Ok;
-            _fireInstanceId.TryRemove(context.FireInstanceId, out var checkInId);
-
-            _hub.CaptureCheckIn(info.MonitorSlug, status, checkInId);
+            _hub.CaptureCheckIn(info.MonitorSlug, status, sentryId);
         }
-
-        return ValueTask.CompletedTask;
     }
 
     private void UpsertCronMonitor(ICronTrigger cronTrigger, SentryCronInformation information, SentryMonitorOptions options)
@@ -75,7 +78,11 @@ internal sealed partial class SentryCronJobListener : IJobListener
 
         string monitorSlug = information.MonitorSlug;
         string cron = cronTrigger.CronExpressionString.Replace("?", "*", StringComparison.OrdinalIgnoreCase);
-        var cronSpan = cron.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+        var cronSpan = cron.Split(" ", StringSplitOptions.RemoveEmptyEntries)
+#if NET9_0_OR_GREATER
+            .AsSpan()
+#endif
+            ;
 
         if (cronSpan.Length is 6 or 7)
         {
