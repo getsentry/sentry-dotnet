@@ -172,7 +172,16 @@ public partial class SentryAppender : AppenderSkeleton
             .Where(kvp => kvp.Value != null)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString() ?? "");
 
-        _hub.AddBreadcrumb(message, category, type: null, data, level ?? default);
+        var exception = loggingEvent.ExceptionObject;
+
+        _hub.AddBreadcrumb(
+            clock: null,
+            message,
+            category,
+            type: null,
+            data,
+            level ?? default,
+            hint: exception is null ? null : new SentryHint(HintTypes.Exception, exception));
         return;
     }
 

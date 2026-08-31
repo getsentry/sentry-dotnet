@@ -587,7 +587,19 @@ internal class Hub : IHub, IDisposable
                     {"exception_message", exceptionMessage}
                 };
             }
-            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Fatal);
+
+            // Provide the original exception in a Hint, so that the BeforeBreadcrumb callback can filter or modify
+            // the breadcrumb based on the exception itself (e.g. by type) rather than by matching on its message.
+            var hint = new SentryHint(_options);
+            hint.Items[HintTypes.Exception] = exception;
+
+            var breadcrumb = new Breadcrumb(
+                message: breadcrumbMessage,
+                data: data,
+                category: "Exception",
+                level: BreadcrumbLevel.Fatal);
+
+            scope.AddBreadcrumb(breadcrumb, hint);
         }
         catch (Exception e)
         {

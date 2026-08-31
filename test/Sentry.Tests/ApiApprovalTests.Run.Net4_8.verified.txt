@@ -113,6 +113,7 @@ namespace Sentry
     }
     public static class HintTypes
     {
+        public const string Exception = "exception";
         public const string HttpResponseMessage = "http-response-message";
     }
     public readonly struct HttpStatusCodeRange : System.IEquatable<Sentry.HttpStatusCodeRange>
@@ -137,6 +138,7 @@ namespace Sentry
         public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
+        public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Infrastructure.ISystemClock? clock, string message, string? category, string? type, System.Collections.Generic.IDictionary<string, string>? data, Sentry.BreadcrumbLevel level, Sentry.SentryHint? hint) { }
         public static Sentry.SentryId CaptureException(this Sentry.IHub hub, System.Exception ex, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureException(this Sentry.IHub hub, System.Exception ex, bool handled, bool terminal, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureFeedback(this Sentry.IHub hub, Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null) { }

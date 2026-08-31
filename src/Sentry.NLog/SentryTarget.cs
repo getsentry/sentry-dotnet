@@ -425,8 +425,10 @@ public sealed partial class SentryTarget : TargetWithContext
             _clock,
             message,
             breadcrumbCategory,
+            type: null,
             data: data,
-            level: logEvent.Level.ToBreadcrumbLevel());
+            level: logEvent.Level.ToBreadcrumbLevel(),
+            hint: exception is null ? null : new SentryHint(HintTypes.Exception, exception));
     }
 
     private void CreateSentryEvent(LogEventInfo logEvent, Exception? exception, bool shouldIncludeProperties, IHub hub)

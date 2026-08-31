@@ -314,6 +314,47 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_Exception_BreadcrumbHintContainsException()
+    {
+        // Arrange
+        SentryHint hint = null;
+        _fixture.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
+        {
+            hint = h;
+            return breadcrumb;
+        });
+        using var hub = _fixture.GetSut();
+        var exception = new Exception("original");
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Items[HintTypes.Exception].Should().BeSameAs(exception);
+    }
+
+    [Fact]
+    public void CaptureEvent_Exception_BeforeBreadcrumbCanFilterOnExceptionType()
+    {
+        // Arrange
+        _fixture.Options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+            hint.Items.TryGetValue(HintTypes.Exception, out var exception) && exception is InvalidOperationException
+                ? null
+                : breadcrumb);
+        using var hub = _fixture.GetSut();
+        var scope = hub.ScopeManager.GetCurrent().Key;
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(new InvalidOperationException("filtered")));
+        hub.CaptureEvent(new SentryEvent(new Exception("kept")));
+
+        // Assert
+        scope.Breadcrumbs.Should().ContainSingle(b => b.Category == "Exception")
+            .Which.Message.Should().Be("kept");
+    }
+
+    [Fact]
     public void CaptureEvent_WithMessageAndException_StoresExceptionMessageAsData()
     {
         // Arrange
