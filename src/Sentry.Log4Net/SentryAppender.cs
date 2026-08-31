@@ -172,8 +172,6 @@ public partial class SentryAppender : AppenderSkeleton
             .Where(kvp => kvp.Value != null)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString() ?? "");
 
-        var exception = loggingEvent.ExceptionObject;
-
         _hub.AddBreadcrumb(
             clock: null,
             message,
@@ -181,7 +179,7 @@ public partial class SentryAppender : AppenderSkeleton
             type: null,
             data,
             level ?? default,
-            hint: exception is null ? null : new SentryHint(HintTypes.Exception, exception));
+            hint: loggingEvent.ExceptionObject.ToHint());
         return;
     }
 

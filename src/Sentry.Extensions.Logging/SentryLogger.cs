@@ -83,7 +83,7 @@ internal sealed class SentryLogger : ILogger
                 null,
                 data,
                 logLevel.ToBreadcrumbLevel(),
-                exception is null ? null : new SentryHint(HintTypes.Exception, exception));
+                exception.ToHint());
         }
     }
 

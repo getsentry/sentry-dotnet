@@ -428,7 +428,7 @@ public sealed partial class SentryTarget : TargetWithContext
             type: null,
             data: data,
             level: logEvent.Level.ToBreadcrumbLevel(),
-            hint: exception is null ? null : new SentryHint(HintTypes.Exception, exception));
+            hint: exception.ToHint());
     }
 
     private void CreateSentryEvent(LogEventInfo logEvent, Exception? exception, bool shouldIncludeProperties, IHub hub)

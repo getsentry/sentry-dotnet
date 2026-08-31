@@ -164,7 +164,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
                 type: null,
                 data: data,
                 level: logEvent.Level.ToBreadcrumbLevel(),
-                hint: exception is null ? null : new SentryHint(HintTypes.Exception, exception));
+                hint: exception.ToHint());
         }
 
         // Read the options from the Hub, rather than the Sink's Serilog-Options, because 'EnableLogs' is declared in the base 'SentryOptions', rather than the derived 'SentrySerilogOptions'.
