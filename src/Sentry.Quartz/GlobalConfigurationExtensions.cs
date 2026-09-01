@@ -28,6 +28,16 @@ public static class GlobalConfigurationExtensions
     }
 
     /// <summary>
+    /// Adds middleware to track job execution duration metrics
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
+    public static IQuartzBuilder AddSentryMetrics(this IQuartzBuilder configuration)
+    {
+        return configuration.AddJobMiddleware<SentryMetricsMiddleware>();
+    }
+
+    /// <summary>
     /// For testing
     /// </summary>
     /// <param name="configuration"></param>
