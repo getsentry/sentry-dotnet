@@ -20,6 +20,11 @@ internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
 
     public async ValueTask Invoke(IJobExecutionContext context, JobExecutionDelegate next, CancellationToken cancellationToken)
     {
+        if (context.Trigger is not ICronTrigger)
+        {
+            return;
+        }
+
         var jobType = context.JobInstance.GetType();
         var info = _sentryCronInformation.GetOrAdd(jobType, _ => new SentryCronInformation(context.JobInstance));
 
