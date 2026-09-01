@@ -82,26 +82,30 @@ internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
         }
 
         string monitorSlug = information.MonitorSlug;
-        string cron = cronTrigger.CronExpressionString.Replace("?", "*", StringComparison.OrdinalIgnoreCase);
-        var cronSpan = cron.Split(" ", StringSplitOptions.RemoveEmptyEntries).AsSpan();
+        string cron = cronTrigger.CronExpressionString;
+        string[] fields = cron.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        if (cronSpan.Length is 6 or 7)
+        if (fields.Length is 6 or 7)
         {
-            if (!cronSpan[0].Equals("0", StringComparison.OrdinalIgnoreCase))
+            if (fields[0] != "0" && !information.WarningShownForSecondsParameterIssue)
             {
-                if (!information.WarningShownForSecondsParameterIssue)
-                {
-                    information.WarningShownForSecondsParameterIssue = true;
-                    LogGranularityWarning(monitorSlug, cron);
-                }
+                information.WarningShownForSecondsParameterIssue = true;
+                LogGranularityWarning(monitorSlug, cron);
             }
-            cronSpan = cronSpan[1..6];
+
+            fields = fields[1..6];
         }
 
         try
         {
-            string crontab = string.Join(" ", cronSpan);
-            options.Interval(crontab);
+            string crontab = string.Join(" ", fields);
+            var cronExpression = CronExpression.Parse(crontab, CronFormat.Unix);
+
+            string[] normalized = cronExpression.CronExpressionString
+                .Replace("?", "*", StringComparison.OrdinalIgnoreCase)
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            options.Interval(string.Join(" ", normalized[1..6]));
         }
         catch (ArgumentException ex)
         {
