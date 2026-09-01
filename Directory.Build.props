@@ -24,18 +24,18 @@
     <WarningsNotAsErrors>NU1902;NU1903</WarningsNotAsErrors>
 
     <!-- Centralized TFM versions -->
-    <LatestTfm>net10.0</LatestTfm>
-    <PreviousTfm>net9.0</PreviousTfm>
-    <OldestTfm>net8.0</OldestTfm>
-    <CurrentTfms>net8.0;net9.0;net10.0</CurrentTfms>
-    <LatestAndroidTfm>net10.0-android36.0</LatestAndroidTfm>
-    <PreviousAndroidTfm>net9.0-android35.0</PreviousAndroidTfm>
-    <LatestIosTfm>net10.0-ios26</LatestIosTfm>
-    <PreviousIosTfm>net9.0-ios18.0</PreviousIosTfm>
-    <LatestMacCatalystTfm>net10.0-maccatalyst26</LatestMacCatalystTfm>
-    <PreviousMacCatalystTfm>net9.0-maccatalyst18.0</PreviousMacCatalystTfm>
-    <LatestWindowsTfm>net10.0-windows10.0.19041.0</LatestWindowsTfm>
-    <PreviousWindowsTfm>net9.0-windows10.0.19041.0</PreviousWindowsTfm>
+    <LatestTfm>net11.0</LatestTfm>
+    <PreviousTfm>net10.0</PreviousTfm>
+    <OldestTfm>net10.0</OldestTfm>
+    <CurrentTfms>net10.0;net11.0</CurrentTfms>
+    <LatestAndroidTfm>net11.0-android37.0</LatestAndroidTfm>
+    <PreviousAndroidTfm>net10.0-android36.0</PreviousAndroidTfm>
+    <LatestIosTfm>net11.0-ios26.5</LatestIosTfm>
+    <PreviousIosTfm>net10.0-ios26</PreviousIosTfm>
+    <LatestMacCatalystTfm>net11.0-maccatalyst26.5</LatestMacCatalystTfm>
+    <PreviousMacCatalystTfm>net10.0-maccatalyst26</PreviousMacCatalystTfm>
+    <LatestWindowsTfm>net11.0-windows10.0.19041.0</LatestWindowsTfm>
+    <PreviousWindowsTfm>net10.0-windows10.0.19041.0</PreviousWindowsTfm>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Release' And '$(VersionSuffix)' == ''">
