@@ -11,13 +11,13 @@ namespace Sentry.Quartz;
 public static class GlobalConfigurationExtensions
 {
     /// <summary>
-    /// Uses Sentry
+    /// Adds middleware to track CRON jobs to Sentry
     /// </summary>
     /// <param name="configuration"></param>
     /// <param name="configure"></param>
     /// <param name="serviceCollection"></param>
     /// <returns></returns>
-    public static IQuartzBuilder UseSentry(this IQuartzBuilder configuration, IServiceCollection serviceCollection, Action<SentryCronJobOptions>? configure = null)
+    public static IQuartzBuilder AddSentryCronJob(this IQuartzBuilder configuration, IServiceCollection serviceCollection, Action<SentryCronJobOptions>? configure = null)
     {
         if (configure is not null)
         {
@@ -35,7 +35,7 @@ public static class GlobalConfigurationExtensions
     /// <param name="options"></param>
     /// <param name="logger"></param>
     /// <returns></returns>
-    internal static IQuartzBuilder UseSentry(this IQuartzBuilder configuration, IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobMiddleware> logger)
+    internal static IQuartzBuilder AddSentryCronJob(this IQuartzBuilder configuration, IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobMiddleware> logger)
     {
         configuration.AddJobMiddleware(new SentryCronJobMiddleware(options, hub, logger));
         return configuration;
