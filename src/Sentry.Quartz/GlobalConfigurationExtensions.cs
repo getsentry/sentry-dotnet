@@ -14,16 +14,11 @@ public static class GlobalConfigurationExtensions
     /// Adds middleware to track CRON jobs to Sentry
     /// </summary>
     /// <param name="configuration"></param>
-    /// <param name="configure"></param>
-    /// <param name="serviceCollection"></param>
+    /// <param name="configure">Configures the options</param>
     /// <returns></returns>
-    public static IQuartzBuilder AddSentryCronJob(this IQuartzBuilder configuration, IServiceCollection serviceCollection, Action<SentryCronJobOptions>? configure = null)
+    public static IQuartzBuilder AddSentryCronJob(this IQuartzBuilder configuration, Action<SentryCronJobOptions>? configure = null)
     {
-        if (configure is not null)
-        {
-            serviceCollection.Configure(configure);
-        }
-
+        configuration.ConfigureOptions(configure);
         return configuration.AddJobMiddleware<SentryCronJobMiddleware>();
     }
 
