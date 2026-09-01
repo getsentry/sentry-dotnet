@@ -11,7 +11,7 @@ internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
     private readonly IHub _hub;
     private readonly ILogger<SentryCronJobMiddleware> _logger;
 
-    public SentryCronJobMiddleware(IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobMiddleware> logger)
+    public SentryCronJobMiddleware(IHub hub, IOptions<SentryCronJobOptions> options, ILogger<SentryCronJobMiddleware> logger)
     {
         _hub = hub;
         _logger = logger;
