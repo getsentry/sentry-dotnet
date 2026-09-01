@@ -21,6 +21,20 @@
     <TargetPlatformMinVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>
 
+  <!--
+    MAUI 11 pulls in Microsoft.Windows.SDK.BuildTools.MSIX, whose PRI expansion target shells
+    out to makepri.exe - a Windows-only executable. Cross-building a net11.0-windows TFM from
+    macOS/Linux therefore fails with APPX0002 / "Exec format error". net10.0-windows is
+    unaffected, so this is specific to the .NET 11 tooling.
+
+    Skipping PRI expansion when the host isn't Windows keeps the cross-build working. It only
+    affects packaged-app resource generation, which a library cross-build doesn't produce, and
+    Windows CI still runs the full path.
+  -->
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows' And !$([MSBuild]::IsOSPlatform('Windows'))">
+    <AppxGeneratePriEnabled>false</AppxGeneratePriEnabled>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <Compile Remove="**\*.Android.cs" />
     <Compile Remove="**\Android\**\*.cs" />

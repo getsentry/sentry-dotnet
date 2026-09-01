@@ -42,10 +42,11 @@
       <_TestAPK Include="2" Properties="_Aot=False;_Store=False;_Compressed=True" />
       <_TestAPK Include="3" Properties="_Aot=False;_Store=True;_Compressed=False" />
       <_TestAPK Include="4" Properties="_Aot=False;_Store=True;_Compressed=True" />
-      <_TestAPK Include="5" Properties="_Aot=True;_Store=False;_Compressed=False" />
-      <_TestAPK Include="6" Properties="_Aot=True;_Store=False;_Compressed=True" />
-      <_TestAPK Include="7" Properties="_Aot=True;_Store=True;_Compressed=False" />
-      <_TestAPK Include="8" Properties="_Aot=True;_Store=True;_Compressed=True" />
+      <!-- Mono AOT is gone on .NET 11 Android (NETSDK1242); these read as Skip'd tests anyway. -->
+      <_TestAPK Include="5" Properties="_Aot=True;_Store=False;_Compressed=False" Condition="'$(TargetFramework)' == 'net10.0-android'" />
+      <_TestAPK Include="6" Properties="_Aot=True;_Store=False;_Compressed=True" Condition="'$(TargetFramework)' == 'net10.0-android'" />
+      <_TestAPK Include="7" Properties="_Aot=True;_Store=True;_Compressed=False" Condition="'$(TargetFramework)' == 'net10.0-android'" />
+      <_TestAPK Include="8" Properties="_Aot=True;_Store=True;_Compressed=True" Condition="'$(TargetFramework)' == 'net10.0-android'" />
     </ItemGroup>
 
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="%(_TestAPK.Properties)" BuildInParallel="false" />
@@ -53,8 +54,8 @@
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
       <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
-      <!-- RunAOTCompilation is Mono-only; .NET 11 Android defaults to CoreCLR and errors
-           with XA4216/XA1044 if the property is set while CoreCLR is in use. -->
+      <!-- RunAOTCompilation is Mono-only, and .NET 11 removed Mono for Android (NETSDK1242),
+           so the AOT variants are only built for TFMs that still have it. -->
       <_RuntimeProps Condition="'$(_Aot)' == 'True'">RunAOTCompilation=true;UseMonoRuntime=true</_RuntimeProps>
       <_RuntimeProps Condition="'$(_Aot)' != 'True'">RunAOTCompilation=false</_RuntimeProps>
       <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
