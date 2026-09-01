@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Quartz;
 
 namespace Sentry.Quartz;
@@ -5,9 +6,9 @@ namespace Sentry.Quartz;
 internal sealed class SentryMetricsMiddleware : IJobExecutionMiddleware
 {
     private readonly IHub _sentryHub;
-    private readonly SentryMetricsOptions _options;
+    private readonly IOptions<SentryMetricsOptions> _options;
 
-    public SentryMetricsMiddleware(IHub sentryHub, SentryMetricsOptions options)
+    public SentryMetricsMiddleware(IHub sentryHub, IOptions<SentryMetricsOptions> options)
     {
         _sentryHub = sentryHub;
         _options = options;
@@ -25,8 +26,8 @@ internal sealed class SentryMetricsMiddleware : IJobExecutionMiddleware
     {
         if (!context.JobDetail.JobDataMap.TryGetBoolean("LogMetrics", out bool logMetrics) || logMetrics)
         {
-            var metricsName = _options.ResolveMetricsName(context.JobDetail);
-            var additionalAttributes = _options.AdditionalAttributes?.Invoke(context.JobDetail);
+            var metricsName = _options.Value.ResolveMetricsName(context.JobDetail);
+            var additionalAttributes = _options.Value.AdditionalAttributes?.Invoke(context.JobDetail);
             return new SentryMetricsLogger(metricsName, additionalAttributes, _sentryHub);
         }
 
