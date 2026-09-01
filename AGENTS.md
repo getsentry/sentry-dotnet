@@ -1,5 +1,11 @@
 # Agent Instructions
 
+The Sentry SDK for .NET: a multi-package repo (`Sentry`, `Sentry.AspNetCore`, `Sentry.Maui`,
+`Sentry.Serilog`, `Sentry.OpenTelemetry`, ~25 packages under `src/`) built with the .NET SDK
+pinned in `global.json`. It spans .NET Framework through the latest .NET, plus Android, iOS
+and Mac Catalyst via bindings over the native Sentry SDKs — see [Platform Targets](#platform-targets)
+for the target frameworks and per-platform toolchain requirements.
+
 ## Getting Started
 
 **Check out the submodules first.** The native SDKs and several build/tooling projects live in git submodules under `modules/` (e.g. `sentry-native`, `sentry-cocoa`, `perfview`). Without them, builds, solution-filter generation, and other tooling break in confusing ways — e.g. `scripts/generate-solution-filters.ps1` silently drops the missing projects from the `*.slnf` files.
@@ -72,6 +78,48 @@ pwsh scripts/device-test.ps1 ios
 dotnet format Sentry.slnx --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs --exclude ./test/Sentry.Tests/AttributeReaderTests.cs
 ```
 
+### Before you're done
+
+A change isn't finished until these are clean:
+
+```sh
+dotnet build Sentry-CI-Build-macOS.slnf   # or the .slnf matching your OS
+dotnet test Sentry-CI-Build-macOS.slnf
+dotnet format Sentry.slnx --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs --exclude ./test/Sentry.Tests/AttributeReaderTests.cs
+git status                                # see the note below
+```
+
+`git status` matters because the API-approval tests call Verify's `AutoVerify`
+(`test/Sentry.Testing/ApiExtensions.cs`): a local test run **silently rewrites** the
+`*.verified.txt` snapshots and still reports green. Check for snapshot churn after any run that
+touches public API, and commit it deliberately.
+
+For a full Release-mode build and test — what CI runs — use `./build.sh` (`./build.cmd` on
+Windows).
+
+## Boundaries
+
+### 🚫 Never edit these — generated, vendored, or guarded by CI
+
+| Path | Instead |
+|------|---------|
+| `*.slnf` | Edit `scripts/generate-solution-filters-config.yml`, then run `scripts/generate-solution-filters.ps1` |
+| `CHANGELOG.md` | Generated on squash-merge from the PR title. `.github/workflows/changelog-guard.yml` fails CI on manual entries |
+| `src/Sentry.Bindings.Cocoa/ApiDefinitions.cs`, `StructsAndEnums.cs` | Edit `scripts/patch-cocoa-bindings.cs`, then run `scripts/generate-cocoa-bindings.ps1` |
+| `modules/**` | Git submodules pointing at other repositories — change them upstream, never in place |
+| `*.verified.*` | Run the tests, then `pwsh ./scripts/accept-verifier-changes.ps1` |
+
+### 🚫 Never commit secrets
+
+Never commit auth tokens, API keys or credentials. The DSNs checked into `samples/` point at
+Sentry's own demo projects — don't swap in one from a real project.
+
+### ⚠️ Ask first
+
+- Breaking or removing public API (see [Key Conventions](#key-conventions))
+- Adding a package dependency — the SDK deliberately keeps its dependency surface minimal
+- Changing anything under `.github/workflows/`
+
 ## Repository Layout
 
 ```
@@ -136,15 +184,61 @@ Public API diffs are stored as Verify snapshot files. After any public API chang
 2. Accept the diff: `pwsh ./scripts/accept-verifier-changes.ps1`
 3. Commit the updated `*.verified.*` snapshot files
 
-## Changelog
+## Git Workflow
 
-- If the change is not user-facing, either write `#skip-changelog` to the PR description or add the `skip-changelog` label to the PR
-- Otherwise generated automatically from [Commit message conventions](https://develop.sentry.dev/engineering-practices/commit-messages/)
-  - Do **NOT** add changelogs manually
+- Branch off `main`. Open the PR as a draft while you work on it, and mark it ready once CI is
+  green and tests are in place.
+- Link the issue with a plain auto-close keyword on its own line in the PR body — `Closes #1234`,
+  not inline code and not a bare URL — so GitHub registers the link.
+- **Never `git add -A`.** After merging `main`, the recorded submodule pointers move but the
+  working copies under `modules/` do not until you run `git submodule update --init --recursive`.
+  `git add -A` then stages the stale copies and silently reverts a submodule pointer inside a
+  commit that has nothing to do with submodules. Stage explicit paths instead, and check the
+  full delta before pushing:
+
+```sh
+git diff origin/main...HEAD --stat   # should list only files you meant to touch
+```
+
+### PR titles are changelog entries
+
+The PR title becomes the squash-merge commit message and, from there, the changelog line. It
+must be a [conventional commit](https://develop.sentry.dev/engineering-practices/commit-messages/)
+that stands on its own as a release note:
+
+```
+feat: allow users to control Mechanism.Handled for captured exceptions
+fix(serilog): logs from application namespaces beginning with "Sentry" are discarded
+chore(deps): update Native SDK to v0.16.3
+```
+
+The prefix selects the CHANGELOG section (defined in `.github/release.yml`):
+
+| Prefix | Section |
+|--------|---------|
+| `feat:` | Features ✨ |
+| `fix:` / `bugfix:` | Fixes 🐛 |
+| `chore(deps):` | Dependencies ⬆️ |
+| any type with `!`, e.g. `feat!:` | Breaking Changes 🛠 |
+| anything else | omitted from the changelog |
+
+### Changelog
+
+`CHANGELOG.md` is generated — see [Boundaries](#boundaries).
+Do **NOT** add entries manually. For a change that isn't user-facing, put `#skip-changelog` in
+the PR description or add the `skip-changelog` label.
 
 ```sh
 # Get PR number for current branch
 gh pr view --json number -q '.number'
+```
+
+### Commit Attribution
+
+AI commits MUST include:
+
+```
+Co-Authored-By: <Agent Name> <agent-email-or-noreply@example.com>
 ```
 
 ## Key Conventions
@@ -153,7 +247,13 @@ gh pr view --json number -q '.number'
 - Maintain **backwards compatibility** — avoid breaking public API without strong justification
 - Platform-specific code lives in `src/Sentry/Platforms/` and is conditionally compiled
 
-## Code Style: prefer no comments
+## Code Style
+
+`.editorconfig` is authoritative for formatting and analyzer severity. `dotnet format` (see
+[Essential Commands](#essential-commands)) enforces it — run it before pushing rather than
+hand-formatting.
+
+### Prefer no comments
 
 This repository favours clean, readable code that needs no comments at all. Reach for a
 better name or a smaller method before reaching for a comment. Where something genuinely
@@ -163,6 +263,36 @@ minimal comment is fine, but the code and the PR description are the documentati
 Do not add comments that restate what the code already says. In particular, don't annotate
 members as being exposed for tests (`// Exposed for tests`) — that's already apparent from
 the member being `internal` and from tests being its only callers.
+
+❌ Comments that restate the code, or explain a member's visibility:
+
+```csharp
+// Exposed for tests
+internal bool HasFlushed { get; private set; }
+
+// Loop through the envelope items and send each one
+foreach (var item in envelope.Items)
+{
+    await SendItemAsync(item, cancellationToken).ConfigureAwait(false);
+}
+```
+
+✅ Names carry the meaning; a comment earns its place only where the code can't speak:
+
+```csharp
+internal bool HasFlushed { get; private set; }
+
+foreach (var item in envelope.Items)
+{
+    await SendItemAsync(item, cancellationToken).ConfigureAwait(false);
+}
+
+// Method info is currently only exposed by ToString(), see https://github.com/dotnet/runtime/issues/92869
+internal static SentryStackFrame ParseNativeAOTToString(string info)
+```
+
+(that last one is real, from `src/Sentry/Internal/DebugStackTrace.cs` — it records an upstream
+runtime limitation the code itself can't convey.)
 
 ## Adding New Options (AOT Compatibility)
 
@@ -177,14 +307,7 @@ When adding a configurable property to any of the classes descending from `Sentr
 
 The same pattern applies to `BindableSentryAspNetCoreOptions`, `BindableSentryMauiOptions`, `BindableSentryLoggingOptions`, and the platform-specific partial classes under `src/Sentry/Platforms/`.
 
-## Commit Attribution
-
-AI commits MUST include:
-```
-Co-Authored-By: <Agent Name> <agent-email-or-noreply@example.com>
-```
-
-### Code Intelligence
+## Code Intelligence
 
 Prefer LSP over Grep/Read for code navigation — it's faster, precise, and avoids reading entire files:
 
