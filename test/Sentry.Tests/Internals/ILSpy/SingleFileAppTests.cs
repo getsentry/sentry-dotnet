@@ -30,12 +30,10 @@ public class SingleFileAppTests
         InValidBundleFile = Path.Combine(testRoot, invalidBundle);
     }
 
-#if NET10_0
+#if NET11_0
+    private static string TargetFramework => "net11.0";
+#elif NET10_0
     private static string TargetFramework => "net10.0";
-#elif NET9_0
-    private static string TargetFramework => "net9.0";
-#elif NET8_0
-    private static string TargetFramework => "net8.0";
 #else
     // Adding a new TFM to the project? Include it above
 #error "Target Framework not yet supported for single file apps"

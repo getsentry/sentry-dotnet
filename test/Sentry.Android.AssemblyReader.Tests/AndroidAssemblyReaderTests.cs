@@ -6,10 +6,10 @@ public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
 
-#if NET10_0
+#if NET11_0
+    private static string TargetFramework => "net11.0";
+#elif NET10_0
     private static string TargetFramework => "net10.0";
-#elif NET9_0
-    private static string TargetFramework => "net9.0";
 #else
     // Adding a new TFM to the project? Include it above
 #error "Target Framework not yet supported for AndroidAssemblyReader"
@@ -51,10 +51,10 @@ public class AndroidAssemblyReaderTests
         using var sut = GetSut(isAot: false, isAssemblyStore: true, isCompressed: true);
         switch (TargetFramework)
         {
-            case "net10.0":
+            case "net11.0":
                 Assert.IsType<AndroidAssemblyStoreReader>(sut);
                 break;
-            case "net9.0":
+            case "net10.0":
                 Assert.IsType<AndroidAssemblyStoreReader>(sut);
                 break;
             default:
@@ -71,10 +71,10 @@ public class AndroidAssemblyReaderTests
         using var sut = GetSut(isAot: false, isAssemblyStore: false, isCompressed: true);
         switch (TargetFramework)
         {
-            case "net10.0":
+            case "net11.0":
                 Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
                 break;
-            case "net9.0":
+            case "net10.0":
                 Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
                 break;
             default:
