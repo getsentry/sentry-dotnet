@@ -538,6 +538,155 @@ public class SamplingTransactionProfilerTests
     }
 
     [SkippableFact]
+    public void Profiler_WhenNoProfileRunning_TrimsInternedCallStacks()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI.");
+
+        // The interning tables grow whether or not a profile is running, so this deliberately never
+        // starts one - the trim has to happen off the back of ordinary samples. See #5469.
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+        factory.MaxCallStackCount = 100;
+        SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+        var traceLog = factory._sessionTask.Result.TraceLog;
+
+        // Produce a variety of stack shapes so the sampler has something to intern. Run for the
+        // full duration rather than stopping at the first trim, so we observe the steady state.
+        var stopwatch = Stopwatch.StartNew();
+        var random = new Random(4242);
+        var highWaterMark = 0;
+        while (stopwatch.ElapsedMilliseconds < 3_000)
+        {
+            RecursiveWork(random.Next(8, 24), random);
+            highWaterMark = Math.Max(highWaterMark, traceLog.CallStacks.Count);
+        }
+
+        SkipIfFailsInCI(() =>
+        {
+            if (factory.TrimCount == 0)
+            {
+                throw new Exception($"No trim occurred; call stacks peaked at {highWaterMark}.");
+            }
+        });
+
+        Assert.True(factory.TrimCount > 0, $"Expected at least one trim, call stacks peaked at {highWaterMark}.");
+
+        // The table refills immediately after each trim, so its size at any instant is noise. What
+        // matters is that it stays bounded - untrimmed this workload reaches thousands in 3s.
+        Assert.True(highWaterMark < factory.MaxCallStackCount * 20,
+            $"Expected the interning table to stay bounded, but it peaked at {highWaterMark}.");
+    }
+
+    [SkippableFact]
+    public void Profiler_WhileProfileRunning_StillTrimsInternedCallStacks()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI.");
+
+        // A profile is held open for the whole test. Trimming must still happen: profiles can run
+        // back to back under load, so gating the trim on "no profile running" would starve it
+        // exactly when the tables grow fastest. The profile is then collected to show that trimming
+        // mid-profile does not corrupt its output.
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+        factory.MaxCallStackCount = 100;
+        SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+
+        var clock = SentryStopwatch.StartNew();
+        var transactionTracer = new TransactionTracer(Substitute.For<IHub>(), "test", "");
+        var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
+        SkipIfFailsInCI(() => ArgumentNullException.ThrowIfNull(sut));
+        transactionTracer.TransactionProfiler = sut;
+
+        // Discard trims from before the profile started - the tiny budget means the session
+        // startup alone can trigger one. From here every trim happens while _inProgress is true.
+        factory.TrimCount = 0;
+
+        // Run for a fixed duration rather than stopping at the first trim: the profile needs to
+        // last long enough for samples to actually be dispatched to it, or there is nothing to
+        // validate at the end.
+        var stopwatch = Stopwatch.StartNew();
+        var random = new Random(4242);
+        while (stopwatch.ElapsedMilliseconds < 3_000)
+        {
+            RecursiveWork(random.Next(8, 24), random);
+        }
+
+        SkipIfFailsInCI(() =>
+        {
+            if (factory.TrimCount == 0)
+            {
+                throw new Exception("No trim occurred while a profile was running.");
+            }
+        });
+        Assert.True(factory.TrimCount > 0, "Expected trimming to happen even while a profile is running.");
+
+        sut!.Finish();
+        var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
+        var collectTask = sut.CollectAsync(new SentryTransaction(transactionTracer));
+        collectTask.Wait();
+        ValidateProfile(collectTask.Result.Profile, elapsedNanoseconds);
+    }
+
+    [SkippableFact]
+    public void Profiler_WhenTrimFails_StopsRetrying()
+    {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI.");
+
+        var attempts = 0;
+        SampleProfilerSession.OnTrimForTests = () =>
+        {
+            attempts++;
+            throw new InvalidOperationException("Test exception");
+        };
+        try
+        {
+            using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(30));
+            factory.MaxCallStackCount = 100;
+            SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+
+            var stopwatch = Stopwatch.StartNew();
+            var random = new Random(4242);
+            while (stopwatch.ElapsedMilliseconds < 3_000)
+            {
+                RecursiveWork(random.Next(8, 24), random);
+            }
+
+            SkipIfFailsInCI(() =>
+            {
+                if (attempts == 0)
+                {
+                    throw new Exception("The trim was never attempted, so the latch was not exercised.");
+                }
+            });
+
+            // Without the latch this would be attempted on every sample for the rest of the session,
+            // throwing and logging each time on the event processing thread.
+            Assert.Equal(1, attempts);
+            Assert.Equal(0, factory.TrimCount);
+        }
+        finally
+        {
+            SampleProfilerSession.OnTrimForTests = null;
+        }
+    }
+
+    private static long RecursiveWork(int depth, Random random)
+    {
+        if (depth <= 0)
+        {
+            double sink = 0;
+            for (var i = 1; i < 5_000; i++)
+            {
+                sink += Math.Sqrt(i);
+            }
+            return (long)sink;
+        }
+
+        // Branch so that different calls produce different stack shapes.
+        return (random.Next(2) == 0)
+            ? RecursiveWork(depth - 1, random) + depth
+            : RecursiveWork(depth - 1, random) - depth;
+    }
+
+    [SkippableFact]
     public void Downsampler_ShouldSample_Works()
     {
         var sut = new Downsampler();
