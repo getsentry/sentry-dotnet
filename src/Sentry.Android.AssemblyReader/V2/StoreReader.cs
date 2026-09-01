@@ -10,13 +10,14 @@ namespace Sentry.Android.AssemblyReader.V2;
 internal partial class StoreReader : AssemblyStoreReader
 {
     // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
-#if NET9_0
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000002;
-#else
+    // Each .NET release bumps the assembly store format: v2 in .NET 9, v3 in .NET 10, v4 in
+    // .NET 11. v4 changes the header/index layout as well as the version number, so it needs
+    // the upstream reader changes ported, not just a new constant - bumping the version alone
+    // gets past IsSupported() and then fails with EndOfStreamException in Prepare().
+    // Until that port lands, .NET 11 stores are reported as unsupported, which
+    // AndroidHelpers.GetAndroidAssemblyReader handles by logging and returning null.
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000003; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000003;
-#endif
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK = 0xF0000000;
     private const uint ASSEMBLY_STORE_ABI_AARCH64 = 0x00010000;
     private const uint ASSEMBLY_STORE_ABI_ARM = 0x00020000;
