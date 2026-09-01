@@ -16,6 +16,9 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     private const int SHUTDOWN_TIMEOUT_MS = 2_000;
 
+    // Once the interning tables exceed this many entries we discard them ASAP
+    internal int MaxCallStackCount = 100_000;
+
     private readonly SentryOptions _options;
 
     internal Task<SampleProfilerSession> _sessionTask;
@@ -30,6 +33,10 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         get { lock (_sessionLock) { return _disposed; } }
     }
+
+    internal int TrimCount;
+
+    private bool _trimFailed;
 
     private bool _errorLogged = false;
 
@@ -53,6 +60,8 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
             // This can block indefinitely.
             await session.WaitForFirstEventAsync(shutdownToken).ConfigureAwait(false);
+
+            session.SampleEventParser.ThreadSample += _ => TrimSessionStateIfNeeded(session);
 
             return session;
         });
@@ -135,6 +144,33 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             }
         }
         return null;
+    }
+
+    /// <summary>
+    /// Must run on the event processing thread, which is the only thread allowed to trim - hence
+    /// hanging off ThreadSample rather than off profile completion.
+    /// </summary>
+    private void TrimSessionStateIfNeeded(SampleProfilerSession session)
+    {
+        if (_trimFailed || session.TraceLog.CallStacks.Count <= MaxCallStackCount)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Trimming profiler session state, {0} interned call stacks.", session.TraceLog.CallStacks.Count);
+            // Costs the in-flight sample: its stack mapping goes with the tables, so AddSample skips it.
+            session.TrimLiveSessionState();
+            TrimCount++;
+        }
+        catch (Exception e)
+        {
+            // Latch off rather than retrying on every subsequent sample, which would throw and log
+            // at sample rate on the event processing thread.
+            _trimFailed = true;
+            _options.LogError(e, "Failed to trim profiler session state. Profiling memory use is no longer bounded.");
+        }
     }
 
     public void Dispose()
