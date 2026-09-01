@@ -12,19 +12,19 @@ BeforeDiscovery {
 }
 
 Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
-    # Note: we can't run against net10 and net9 becaus .NET 10 requires Xcode 26.5 and .NET 9 requires Xcode 26.0.
-    # The macOS GitHub Actions runners only have Xcode 26.1+ installed and no support for Xcode 26.5 is planned for
-    # net9.0-ios: https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
+    # Note: only the latest iOS TFM is covered. Each .NET release pins a different Xcode
+    # version and the macOS GitHub Actions runners carry a limited set - see
+    # https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
     #
     # TODO: add coreclr when available
-    @{ tfm = "net10.0-ios26.5"; configuration = "Release"; runtime = "mono" }
-    @{ tfm = "net10.0-ios26.5"; configuration = "Debug";   runtime = "mono" }
+    @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "mono" }
+    @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "mono" }
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
+        Copy-Item -Path "$PSScriptRoot/maui-app" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
 
         $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()

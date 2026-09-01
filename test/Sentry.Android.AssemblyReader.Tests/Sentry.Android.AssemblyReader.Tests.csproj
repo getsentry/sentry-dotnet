@@ -53,11 +53,15 @@
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
       <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
+      <!-- RunAOTCompilation is Mono-only; .NET 11 Android defaults to CoreCLR and errors
+           with XA4216/XA1044 if the property is set while CoreCLR is in use. -->
+      <_RuntimeProps Condition="'$(_Aot)' == 'True'">RunAOTCompilation=true;UseMonoRuntime=true</_RuntimeProps>
+      <_RuntimeProps Condition="'$(_Aot)' != 'True'">RunAOTCompilation=false</_RuntimeProps>
       <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
       <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>
     <!-- Note we use RunAOTCompilation rather than PublishAot here - full NativeAOT compilation on Android is still experimental  -->
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;RunAOTCompilation=$(_Aot);UseNativeAot=false;_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;$(_RuntimeProps);UseNativeAot=false;_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
 
     <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
     <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />
