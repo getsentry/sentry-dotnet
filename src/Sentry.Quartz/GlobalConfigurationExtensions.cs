@@ -16,7 +16,7 @@ public static class GlobalConfigurationExtensions
     /// <param name="configuration"></param>
     /// <param name="configure">Configures the options</param>
     /// <returns></returns>
-    public static IQuartzBuilder AddSentryCronJob(this IQuartzBuilder configuration, Action<SentryCronJobOptions>? configure = null)
+    public static IQuartzBuilder AddSentryCronJobs(this IQuartzBuilder configuration, Action<SentryCronJobOptions>? configure = null)
     {
         configuration.ConfigureOptions(configure);
         return configuration.AddJobMiddleware<SentryCronJobMiddleware>();
@@ -33,6 +33,16 @@ public static class GlobalConfigurationExtensions
     }
 
     /// <summary>
+    /// Adds middleware that pushes a scope to sentry before job execution
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
+    public static IQuartzBuilder AddSentryScope(this IQuartzBuilder configuration)
+    {
+        return configuration.AddJobMiddleware<SentryScopeMiddleware>();
+    }
+
+    /// <summary>
     /// For testing
     /// </summary>
     /// <param name="configuration"></param>
@@ -40,9 +50,9 @@ public static class GlobalConfigurationExtensions
     /// <param name="options"></param>
     /// <param name="logger"></param>
     /// <returns></returns>
-    internal static IQuartzBuilder AddSentryCronJob(this IQuartzBuilder configuration, IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobMiddleware> logger)
+    internal static IQuartzBuilder AddSentryCronJobs(this IQuartzBuilder configuration, IOptions<SentryCronJobOptions> options, IHub hub, ILogger<SentryCronJobMiddleware> logger)
     {
-        configuration.AddJobMiddleware(new SentryCronJobMiddleware(options, hub, logger));
+        configuration.AddJobMiddleware(new SentryCronJobMiddleware(hub, options, logger));
         return configuration;
     }
 }
