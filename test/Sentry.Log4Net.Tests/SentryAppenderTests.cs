@@ -345,8 +345,10 @@ public partial class SentryAppenderTests : IDisposable
         Assert.Equal(expectedBreadcrumbMsg, breadcrumb.Message);
     }
 
-    [Fact]
-    public void DoAppend_BreadcrumbWithException_ProvidesExceptionInHint()
+    [Theory]
+    [InlineData(false)] // logger.Warn("message", ex) -> ExceptionObject
+    [InlineData(true)]  // logger.Warn(ex)            -> MessageObject
+    public void DoAppend_BreadcrumbWithException_ProvidesExceptionInHint(bool exceptionAsMessage)
     {
         SentryHint hint = null;
         _fixture.Scope.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
@@ -355,13 +357,16 @@ public partial class SentryAppenderTests : IDisposable
             return breadcrumb;
         });
         var expectedException = new Exception("expected");
+        var evt = exceptionAsMessage
+            ? new LoggingEvent(null, null, "logger", Level.Warn, expectedException, null)
+            : new LoggingEvent(null, null, "logger", Level.Warn, "log4net breadcrumb", expectedException);
 
         var sut = _fixture.GetSut();
         sut.Threshold = Level.Debug;
         sut.MinimumEventLevel = Level.Error;
 
         // Level.Warn is below the MinimumEventLevel, so only a breadcrumb is added
-        sut.DoAppend(new LoggingEvent(null, null, "logger", Level.Warn, "log4net breadcrumb", expectedException));
+        sut.DoAppend(evt);
 
         hint.Should().NotBeNull();
         hint.Items[HintTypes.Exception].Should().BeSameAs(expectedException);
