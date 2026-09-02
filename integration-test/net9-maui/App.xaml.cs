@@ -61,6 +61,16 @@ public partial class App : Application
         return new Window(new AppShell());
     }
 
+    public static void OnActivated()
+    {
+        testArg = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ARG");
+
+        if (HasTestArg("OnActivated"))
+        {
+            throw new ApplicationException("This exception was thrown deliberately from AppDelegate.OnActivated.");
+        }
+    }
+
     public static void OnAppearing()
     {
         testArg = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ARG");
