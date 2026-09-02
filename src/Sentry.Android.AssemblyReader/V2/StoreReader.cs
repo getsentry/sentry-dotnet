@@ -203,7 +203,7 @@ internal partial class StoreReader : AssemblyStoreReader
 
                 uint descriptor_index = reader.ReadUInt32();
 #if NET10_0_OR_GREATER
-            bool ignore = reader.ReadByte () != 0;
+                bool ignore = reader.ReadByte() != 0;
 #else
                 bool ignore = false;
 #endif
