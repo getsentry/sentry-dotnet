@@ -434,13 +434,13 @@ jobs:
         run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64 -p:NO_MOBILE=true
 
       - name: Publish Test app (Android)
-        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-android35.0 -r android-arm64
+        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-android36.0 -r android-arm64
 
 # We can't publish iOS applications on CI yet. We'd need a valid bundle identifier and to install the relevant
 # certificates/profiles on CI (presumably certs associated with the Sentry org).
 # See https://youtrack.jetbrains.com/issue/RIDER-17115/Could-not-find-any-available-provisioning-profiles-for-iOS
 #      - name: Publish Test app (iOS)
-#        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-ios18.0 -r ios-arm64
+#        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-ios26 -r ios-arm64
 
   test-solution-filters:
     runs-on: ubuntu-22.04

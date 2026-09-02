@@ -7,16 +7,10 @@ public sealed class LocalDbFixture : IDisposable
     public static string InstanceName =>
 #if NETFRAMEWORK
         "SqlListenerTests4";
-#elif NET6_0
-        "SqlListenerTests6";
-#elif NET7_0
-        "SqlListenerTests7";
-#elif NET8_0
-        "SqlListenerTests8";
-#elif NET9_0
-        "SqlListenerTests9";
 #elif NET10_0
         "SqlListenerTests10";
+#elif NET11_0
+        "SqlListenerTests11";
 #else
 #error Needs a version specific name to prevent the tests from tripping over one another when running in parallel
 #endif

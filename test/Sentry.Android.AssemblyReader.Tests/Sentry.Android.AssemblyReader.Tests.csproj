@@ -32,8 +32,8 @@
   <Target Name="BuildTestAPKs" BeforeTargets="BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <!-- Restore exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="EnsureAndroidTestAppRestored" RemoveProperties="TargetFramework" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net11.0-android" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v11.0'" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net10.0-android" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v10.0'" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v9.0'" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
     <!-- https://learn.microsoft.com/visualstudio/msbuild/msbuild-batching -->
@@ -42,10 +42,11 @@
       <_TestAPK Include="2" Properties="_Aot=False;_Store=False;_Compressed=True" />
       <_TestAPK Include="3" Properties="_Aot=False;_Store=True;_Compressed=False" />
       <_TestAPK Include="4" Properties="_Aot=False;_Store=True;_Compressed=True" />
-      <_TestAPK Include="5" Properties="_Aot=True;_Store=False;_Compressed=False" />
-      <_TestAPK Include="6" Properties="_Aot=True;_Store=False;_Compressed=True" />
-      <_TestAPK Include="7" Properties="_Aot=True;_Store=True;_Compressed=False" />
-      <_TestAPK Include="8" Properties="_Aot=True;_Store=True;_Compressed=True" />
+      <!-- Mono AOT is gone on .NET 11 Android (NETSDK1242); these read as Skip'd tests anyway. -->
+      <_TestAPK Include="5" Properties="_Aot=True;_Store=False;_Compressed=False" Condition="'$(TargetFramework)' == 'net10.0-android'" />
+      <_TestAPK Include="6" Properties="_Aot=True;_Store=False;_Compressed=True" Condition="'$(TargetFramework)' == 'net10.0-android'" />
+      <_TestAPK Include="7" Properties="_Aot=True;_Store=True;_Compressed=False" Condition="'$(TargetFramework)' == 'net10.0-android'" />
+      <_TestAPK Include="8" Properties="_Aot=True;_Store=True;_Compressed=True" Condition="'$(TargetFramework)' == 'net10.0-android'" />
     </ItemGroup>
 
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="%(_TestAPK.Properties)" BuildInParallel="false" />
@@ -53,11 +54,15 @@
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
       <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
+      <!-- RunAOTCompilation is Mono-only, and .NET 11 removed Mono for Android (NETSDK1242),
+           so the AOT variants are only built for TFMs that still have it. -->
+      <_RuntimeProps Condition="'$(_Aot)' == 'True'">RunAOTCompilation=true;UseMonoRuntime=true</_RuntimeProps>
+      <_RuntimeProps Condition="'$(_Aot)' != 'True'">RunAOTCompilation=false</_RuntimeProps>
       <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
       <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>
     <!-- Note we use RunAOTCompilation rather than PublishAot here - full NativeAOT compilation on Android is still experimental  -->
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;RunAOTCompilation=$(_Aot);UseNativeAot=false;_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;$(_RuntimeProps);UseNativeAot=false;_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
 
     <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
     <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />

@@ -21,19 +21,17 @@ $cases = @(
     @{ configuration = 'Release'; runtime = 'mono' }
     @{ configuration = 'Debug';   runtime = 'mono' }
 )
-# CoreCLR on Android requires .NET 10 or later
-if ($dotnet_version -ne 'net9.0') {
-    $cases += @(
-        @{ configuration = 'Release'; runtime = 'coreclr' }
-        @{ configuration = 'Debug';   runtime = 'coreclr' }
-    )
-}
+# CoreCLR on Android requires .NET 10 or later, which every supported framework now is.
+$cases += @(
+    @{ configuration = 'Release'; runtime = 'coreclr' }
+    @{ configuration = 'Debug';   runtime = 'coreclr' }
+)
 Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
+        Copy-Item -Path "$PSScriptRoot/maui-app" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
 
         # replace {{SENTRY_DSN}} in MauiProgram.cs

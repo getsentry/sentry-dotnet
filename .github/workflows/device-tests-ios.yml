@@ -29,7 +29,7 @@ on:
       # Integration tests
       - 'integration-test/android.Tests.ps1'
       - 'integration-test/ios.Tests.ps1'
-      - 'integration-test/net9-maui/**'
+      - 'integration-test/maui-app/**'
       - 'integration-test/common.ps1'
       - 'integration-test/Directory.Build.*'
       # Native libraries and modules

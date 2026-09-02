@@ -1,9 +1,9 @@
 . $PSScriptRoot/pester.ps1
 
-$global:longTermFramework = 'net8.0'
-$global:previousFramework = 'net9.0'
-$global:latestFramework = 'net10.0'
-$global:currentFrameworks = @($longTermFramework, $previousFramework, $latestFramework)
+$global:longTermFramework = 'net10.0'
+$global:previousFramework = 'net10.0'
+$global:latestFramework = 'net11.0'
+$global:currentFrameworks = @($previousFramework, $latestFramework)
 
 AfterAll {
     Pop-Location
@@ -16,8 +16,8 @@ BeforeAll {
     function GetAndroidTpv($framework)
     {
         switch ($framework) {
-            'net9.0' { return '35.0' }   # matches PreviousAndroidTfm (net9.0-android35.0)
-            'net10.0' { return '36.0' }  # matches LatestAndroidTfm (net10.0-android36.0)
+            'net10.0' { return '36.0' }  # matches PreviousAndroidTfm (net10.0-android36.0)
+            'net11.0' { return '37.0' }  # matches LatestAndroidTfm (net11.0-android37.0)
             default { throw "Unsupported framework '$framework' for Android target platform version." }
         }
     }
@@ -25,8 +25,8 @@ BeforeAll {
     function GetIosTpv($framework)
     {
         switch ($framework) {
-            'net9.0' { return '18.0' }   # matches PreviousIosTfm / PreviousMacCatalystTfm
-            'net10.0' { return '26' }    # aligns with ios26 / maccatalyst26
+            'net10.0' { return '26' }     # matches PreviousIosTfm / PreviousMacCatalystTfm
+            'net11.0' { return '26.5' }   # matches LatestIosTfm / LatestMacCatalystTfm
             default { throw "Unsupported framework '$framework' for iOS target platform version." }
         }
     }
