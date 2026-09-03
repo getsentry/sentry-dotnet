@@ -191,6 +191,32 @@ public static class HubExtensions
         string? type = null,
         IDictionary<string, string>? data = null,
         BreadcrumbLevel level = default)
+        => hub.AddBreadcrumb(clock, message, category, type, data, level, hint: null);
+
+    /// <summary>
+    /// Adds a breadcrumb using a custom <see cref="ISystemClock"/> which allows better testability.
+    /// </summary>
+    /// <param name="hub">The Hub which holds the scope stack.</param>
+    /// <param name="clock">The system clock.</param>
+    /// <param name="message">The message.</param>
+    /// <param name="category">Category.</param>
+    /// <param name="type">Breadcrumb type.</param>
+    /// <param name="data">Additional data.</param>
+    /// <param name="level">Breadcrumb level.</param>
+    /// <param name="hint">A hint provided with the breadcrumb in the BeforeBreadcrumb callback.</param>
+    /// <remarks>
+    /// This method is to be used by integrations to allow testing.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static void AddBreadcrumb(
+        this IHub hub,
+        ISystemClock? clock,
+        string message,
+        string? category,
+        string? type,
+        IDictionary<string, string>? data,
+        BreadcrumbLevel level,
+        SentryHint? hint)
     {
         // Not to throw on code that ignores nullability warnings.
         if (hub.IsNull())
@@ -207,9 +233,7 @@ public static class HubExtensions
             level
         );
 
-        hub.AddBreadcrumb(
-            breadcrumb
-            );
+        hub.AddBreadcrumb(breadcrumb, hint);
     }
 
     /// <summary>

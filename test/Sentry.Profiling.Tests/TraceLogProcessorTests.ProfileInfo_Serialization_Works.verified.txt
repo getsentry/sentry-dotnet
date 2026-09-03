@@ -251,17 +251,17 @@
     frames: [
       {
         function: System.IO.Pipes.PipeStream.ReadCore(value class System.Span`1<unsigned int8>),
-        module: System.IO.Pipes.il,
+        module: System.IO.Pipes,
         in_app: false
       },
       {
         function: System.IO.Pipes.PipeStream.Read(unsigned int8[],int32,int32),
-        module: System.IO.Pipes.il,
+        module: System.IO.Pipes,
         in_app: false
       },
       {
         function: System.IO.BinaryReader.ReadBytes(int32),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
@@ -344,142 +344,142 @@
       },
       {
         function: System.Threading.LowLevelLifoSemaphore.WaitForSignal(int32),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.LowLevelLifoSemaphore.Wait(int32,bool),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.Thread.StartCallback(),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.WaitHandle.WaitOneNoCheck(int32),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.WaitHandle.WaitOne(int32),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.PortableThreadPool+GateThread.GateThreadStart(),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Text.Unicode.Utf8Utility.TranscodeToUtf16(unsigned int8*,int32,wchar*,int32,unsigned int8*&,wchar*&),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Text.UTF8Encoding.GetChars(unsigned int8*,int32,wchar*,int32),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.String.CreateStringFromEncoding(unsigned int8*,int32,class System.Text.Encoding),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Reflection.MdFieldInfo.get_Name(),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Diagnostics.Tracing.EventSource.AddProviderEnumKind(class System.Diagnostics.Tracing.ManifestBuilder,class System.Reflection.FieldInfo,class System.String),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Diagnostics.Tracing.EventSource.CreateManifestAndDescriptors(class System.Type,class System.String,class System.Diagnostics.Tracing.EventSource,value class System.Diagnostics.Tracing.EventManifestOptions),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Diagnostics.Tracing.EventSource.DoCommand(class System.Diagnostics.Tracing.EventCommandEventArgs),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Diagnostics.Tracing.EventSource.SendCommand(class System.Diagnostics.Tracing.EventListener,value class System.Diagnostics.Tracing.EventProviderType,int32,int32,value class System.Diagnostics.Tracing.EventCommand,bool,value class System.Diagnostics.Tracing.EventLevel,value class System.Diagnostics.Tracing.EventKeywords,class System.Collections.Generic.IDictionary`2<class System.String,class System.String>),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Diagnostics.Tracing.EventSource+OverrideEventProvider.OnControllerCommand(value class System.Diagnostics.Tracing.ControllerCommand,class System.Collections.Generic.IDictionary`2<class System.String,class System.String>,int32,int32),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Diagnostics.Tracing.EventProvider.EtwEnableCallBack(value class System.Guid&,int32,unsigned int8,int64,int64,value class EVENT_FILTER_DESCRIPTOR*,void*),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.Tasks.Task`1[System.Int32].InnerInvoke(),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(class System.Threading.Thread,class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.Tasks.Task.ExecuteEntryUnsafe(class System.Threading.Thread),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.Tasks.Task.ExecuteFromThreadPool(class System.Threading.Thread),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Threading.ThreadPoolWorkQueue.Dispatch(),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Collections.Concurrent.ConcurrentDictionary`2[System.__Canon,System.IntPtr].TryAddInternal(!0,value class System.Nullable`1<int32>,!1,bool,bool,!1&),
-        module: System.Collections.Concurrent.il,
+        module: System.Collections.Concurrent,
         in_app: false
       },
       {
         function: System.Collections.Concurrent.ConcurrentDictionary`2[System.__Canon,System.IntPtr].set_Item(!0,!1),
-        module: System.Collections.Concurrent.il,
+        module: System.Collections.Concurrent,
         in_app: false
       },
       {
@@ -502,12 +502,12 @@
       },
       {
         function: System.MulticastDelegate.CombineImpl(class System.Delegate),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
         function: System.Delegate.Combine(class System.Delegate,class System.Delegate),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {
@@ -597,7 +597,7 @@
       },
       {
         function: System.Collections.Generic.Dictionary`2[System.__Canon,Avalonia.Media.KnownColor]..ctor(class System.Collections.Generic.IEqualityComparer`1<!0>),
-        module: System.Private.CoreLib.il,
+        module: System.Private.CoreLib,
         in_app: false
       },
       {

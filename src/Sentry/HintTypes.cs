@@ -9,4 +9,9 @@ public static class HintTypes
     /// Used for HttpResponseMessage hints
     /// </summary>
     public const string HttpResponseMessage = "http-response-message";
+
+    /// <summary>
+    /// Used for the <see cref="System.Exception"/> that a breadcrumb was created from
+    /// </summary>
+    public const string Exception = "exception";
 }

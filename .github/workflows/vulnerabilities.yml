@@ -1,10 +1,16 @@
 name: List vulnerable packages
 
+# Deliberately NOT triggered on `pull_request`.
+#
+# `dotnet package list --vulnerable` consults live advisory data, so a GHSA published
+# overnight against one of our transitive dependencies would turn every open PR red -
+# halting unrelated work until the dependency is updated, which is routine maintenance
+# rather than a defect in the PR. Running on a schedule keeps the signal without making
+# it a gate on everybody's work.
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *" # once a day
-  pull_request:
 
 jobs:
   list-vulnerable-packages:
@@ -31,5 +37,8 @@ jobs:
         shell: bash
         run: |
           dotnet package list --project Sentry.slnx --vulnerable --include-transitive --no-restore | tee vulnerable.txt
-          # https://github.com/getsentry/sentry-dotnet/issues/2814
-          # ! grep 'has the following vulnerable packages' vulnerable.txt
+
+          if grep -q 'has the following vulnerable packages' vulnerable.txt; then
+            echo "::error::Vulnerable packages detected - see the job output above for the affected projects and advisories."
+            exit 1
+          fi

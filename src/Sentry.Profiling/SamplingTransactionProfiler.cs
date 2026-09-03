@@ -24,7 +24,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         _cancellationToken = cancellationToken;
         _startTimeMs = session.Elapsed.TotalMilliseconds;
         _endTimeMs = double.MaxValue;
-        _processor = new SampleProfileBuilder(options, session.TraceLog);
+        _processor = new SampleProfileBuilder(options, session);
         session.SampleEventParser.ThreadSample += OnThreadSample;
         cancellationToken.Register(() =>
         {

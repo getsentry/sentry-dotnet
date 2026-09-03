@@ -82,7 +82,8 @@ internal sealed class SentryLogger : ILogger
                 CategoryName,
                 null,
                 data,
-                logLevel.ToBreadcrumbLevel());
+                logLevel.ToBreadcrumbLevel(),
+                exception.ToHint());
         }
     }
 

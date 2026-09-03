@@ -49,3 +49,27 @@ And for reference, you can create a JSON that can be displayed by [SpeedScope](h
 ```shell-script
 dotnet-trace convert sample.nettrace --format Speedscope
 ```
+
+## Regenerating `sample.etlx` after a perfview submodule bump
+
+`sample.etlx` is committed, and its format version is tied to the TraceEvent build in
+`modules/perfview`. A submodule bump can therefore leave it unreadable, which surfaces as:
+
+```
+FastSerialization.SerializationException : File format is version 74 App accepts formats >= 78.
+```
+
+To regenerate it, delete the file and run the tests once — `TraceLogProcessorTests` rebuilds it from
+`sample.nettrace` when it is absent:
+
+```shell-script
+rm test/Sentry.Profiling.Tests/Resources/sample.etlx
+dotnet test test/Sentry.Profiling.Tests --filter "FullyQualifiedName~TraceLogProcessorTests"
+```
+
+Then commit the regenerated file, along with any `*.verified.txt` snapshot changes it produces
+(`pwsh ./scripts/accept-verifier-changes.ps1` — review the diff, module names in particular).
+
+Do **not** leave it uncommitted and rely on regeneration at test time. The path is shared by every
+target framework, and `dotnet test` runs one host per TFM, so they race on both this file and the
+`sample.etlx.new` temp that TraceEvent writes alongside it.

@@ -50,13 +50,16 @@ public class TraceLogProcessorTests
         if (!File.Exists(etlxFilePath))
         {
             var etlFilePath = Path.ChangeExtension(etlxFilePath, "nettrace");
-            var source = new EventPipeEventSource(etlFilePath);
-            typeof(TraceLog)
-            .GetMethod(
+            using var source = new EventPipeEventSource(etlFilePath);
+            var createFromEventPipeEventSources = typeof(TraceLog).GetMethod(
                 "CreateFromEventPipeEventSources",
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
-                new Type[] { typeof(TraceEventDispatcher), typeof(string), typeof(TraceLogOptions) })?
-            .Invoke(null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
+                new Type[] { typeof(TraceEventDispatcher), typeof(string), typeof(TraceLogOptions) })
+                ?? throw new InvalidOperationException(
+                    "TraceLog.CreateFromEventPipeEventSources was not found. Has the perfview submodule changed its signature?");
+
+            createFromEventPipeEventSources.Invoke(
+                null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
         }
 
         using var traceLog = new TraceLog(etlxFilePath);

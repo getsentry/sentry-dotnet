@@ -314,6 +314,47 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_Exception_BreadcrumbHintContainsException()
+    {
+        // Arrange
+        SentryHint hint = null;
+        _fixture.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
+        {
+            hint = h;
+            return breadcrumb;
+        });
+        using var hub = _fixture.GetSut();
+        var exception = new Exception("original");
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Items[HintTypes.Exception].Should().BeSameAs(exception);
+    }
+
+    [Fact]
+    public void CaptureEvent_Exception_BeforeBreadcrumbCanFilterOnExceptionType()
+    {
+        // Arrange
+        _fixture.Options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+            hint.Items.TryGetValue(HintTypes.Exception, out var exception) && exception is InvalidOperationException
+                ? null
+                : breadcrumb);
+        using var hub = _fixture.GetSut();
+        var scope = hub.ScopeManager.GetCurrent().Key;
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(new InvalidOperationException("filtered")));
+        hub.CaptureEvent(new SentryEvent(new Exception("kept")));
+
+        // Assert
+        scope.Breadcrumbs.Should().ContainSingle(b => b.Category == "Exception")
+            .Which.Message.Should().Be("kept");
+    }
+
+    [Fact]
     public void CaptureEvent_WithMessageAndException_StoresExceptionMessageAsData()
     {
         // Arrange
@@ -1994,30 +2035,11 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Logger_IsDisabled_DoesNotCaptureLog()
+    public void Logger_EnableLogsDisabled_StillCapturesLog()
     {
         // Arrange
+        // EnableLogs gates the logging integrations. Logs created directly via this API are always captured.
         Assert.False(_fixture.Options.EnableLogs);
-        var hub = _fixture.GetSut();
-
-        // Act
-        hub.Logger.LogWarning("Message");
-        hub.Logger.Flush();
-
-        // Assert
-        _fixture.Client.Received(0).CaptureEnvelope(
-            Arg.Is<Envelope>(envelope =>
-                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
-            )
-        );
-        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
-    }
-
-    [Fact]
-    public void Logger_IsEnabled_DoesCaptureLog()
-    {
-        // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -2034,30 +2056,21 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Logger_EnableAfterCreate_HasNoEffect()
+    public void Logger_DoesCaptureLog()
     {
         // Arrange
-        Assert.False(_fixture.Options.EnableLogs);
         var hub = _fixture.GetSut();
 
         // Act
-        _fixture.Options.EnableLogs = true;
+        hub.Logger.LogWarning("Message");
+        hub.Logger.Flush();
 
         // Assert
-        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
-    }
-
-    [Fact]
-    public void Logger_DisableAfterCreate_HasNoEffect()
-    {
-        // Arrange
-        _fixture.Options.EnableLogs = true;
-        var hub = _fixture.GetSut();
-
-        // Act
-        _fixture.Options.EnableLogs = false;
-
-        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
         hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
     }
 
@@ -2065,7 +2078,6 @@ public partial class HubTests : IDisposable
     public async Task Logger_FlushAsync_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -2090,7 +2102,6 @@ public partial class HubTests : IDisposable
     public void Logger_Dispose_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -2112,30 +2123,9 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Metrics_IsDisabled_DoesNotCaptureMetric()
+    public void Metrics_DoesCaptureMetric()
     {
         // Arrange
-        _fixture.Options.EnableMetrics = false;
-        var hub = _fixture.GetSut();
-
-        // Act
-        hub.Metrics.EmitCounter("sentry_tests.hub_tests.counter", 1);
-        hub.Metrics.Flush();
-
-        // Assert
-        _fixture.Client.Received(0).CaptureEnvelope(
-            Arg.Is<Envelope>(envelope =>
-                envelope.Items.Single(item => item.Header["type"].Equals("trace_metric")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
-            )
-        );
-        hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
-    }
-
-    [Fact]
-    public void Metrics_IsEnabled_DoesCaptureMetric()
-    {
-        // Arrange
-        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
@@ -2152,38 +2142,9 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Metrics_EnableAfterCreate_HasNoEffect()
-    {
-        // Arrange
-        _fixture.Options.EnableMetrics = false;
-        var hub = _fixture.GetSut();
-
-        // Act
-        _fixture.Options.EnableMetrics = true;
-
-        // Assert
-        hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
-    }
-
-    [Fact]
-    public void Metrics_DisableAfterCreate_HasNoEffect()
-    {
-        // Arrange
-        Assert.True(_fixture.Options.EnableMetrics);
-        var hub = _fixture.GetSut();
-
-        // Act
-        _fixture.Options.EnableMetrics = false;
-
-        // Assert
-        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
-    }
-
-    [Fact]
     public async Task Metrics_FlushAsync_DoesCaptureMetric()
     {
         // Arrange
-        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
@@ -2208,7 +2169,6 @@ public partial class HubTests : IDisposable
     public void Metrics_Dispose_DoesCaptureMetric()
     {
         // Arrange
-        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
