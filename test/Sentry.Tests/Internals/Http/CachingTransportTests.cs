@@ -1,6 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
-using SentryStreamExtensions = Sentry.Internal.Extensions.StreamExtensions;
 
 namespace Sentry.Tests.Internals.Http;
 
@@ -316,7 +315,7 @@ public class CachingTransportTests : IDisposable
         _options.FileSystem.CreateFileForWriting(filePath, out var file);
 
         // A crash mid-write leaves a file with no header and no newline anywhere in it
-        var zeroes = new byte[4 * SentryStreamExtensions.MaxLineLength];
+        var zeroes = new byte[4 * Envelope.MaxHeaderLineLength];
         file.Write(zeroes, 0, zeroes.Length);
         file.Dispose();
 

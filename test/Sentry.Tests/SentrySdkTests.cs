@@ -358,7 +358,7 @@ public class SentrySdkTests : IDisposable
 
         // A crash mid-write leaves a file with no header and no newline anywhere in it
         var file = Path.Combine(cachePath!, "poison.envelope");
-        File.WriteAllBytes(file, new byte[2 * Internal.Extensions.StreamExtensions.MaxLineLength]);
+        File.WriteAllBytes(file, new byte[2 * Envelope.MaxHeaderLineLength]);
 
         // Act
         await RunSdk();

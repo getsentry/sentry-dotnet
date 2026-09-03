@@ -11,6 +11,13 @@ namespace Sentry.Protocol.Envelopes;
 /// </summary>
 public sealed class Envelope : ISerializable, IDisposable
 {
+    /// <summary>
+    /// The envelope header is a single short JSON object (the SDK name and version, the event ID
+    /// and optionally the dynamic sampling context), so a stream with no newline within this many
+    /// bytes is corrupt. Bounding the read stops us buffering a whole corrupt file into memory.
+    /// </summary>
+    internal const int MaxHeaderLineLength = 64 * 1024;
+
     // caches the event id from the header
     private SentryId? _eventId;
 
@@ -483,7 +490,7 @@ public sealed class Envelope : ISerializable, IDisposable
         Stream stream,
         CancellationToken cancellationToken = default)
     {
-        var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+        var buffer = await stream.ReadLineAsync(MaxHeaderLineLength, cancellationToken).ConfigureAwait(false);
 
         var header =
             Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)
