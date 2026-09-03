@@ -6,7 +6,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IDisposable
+internal class Hub : IHub, IHubInternal, IDisposable
 {
     private readonly Lock _sessionPauseLock = new();
 
@@ -173,10 +173,14 @@ internal class Hub : IHub, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext)
         => StartTransaction(context, customSamplingContext, null);
 
+    public ITransactionTracer StartTransaction(ITransactionContext context, TimeSpan? idleTimeout)
+        => StartTransaction(context, new Dictionary<string, object?>(), null, idleTimeout);
+
     internal ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
-        DynamicSamplingContext? dynamicSamplingContext)
+        DynamicSamplingContext? dynamicSamplingContext,
+        TimeSpan? idleTimeout = null)
     {
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.
@@ -261,7 +265,7 @@ internal class Hub : IHub, IDisposable
             return unsampledTransaction;
         }
 
-        var transaction = new TransactionTracer(this, context)
+        var transaction = new TransactionTracer(this, context, idleTimeout)
         {
             SampleRate = sampleRate,
             SampleRand = sampleRand,

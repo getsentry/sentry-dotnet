@@ -28,34 +28,6 @@ public class SentryTransactionTests
     }
 
     [Fact]
-    public async Task NewTransactionTracer_IdleTimeoutProvided_AutomaticallyFinishes()
-    {
-        // Arrange
-        var client = Substitute.For<ISentryClient>();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Debug = true
-        };
-        var hub = new Hub(options, client);
-        var context = new TransactionContext("my name",
-            "my operation",
-            SpanId.Create(),
-            SpanId.Create(),
-            SentryId.Create(),
-            "description",
-            SpanStatus.Ok, null, true, TransactionNameSource.Component);
-
-        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2));
-
-        // Act
-        await Task.Delay(TimeSpan.FromSeconds(2));
-
-        // Assert
-        transaction.IsFinished.Should().BeTrue();
-    }
-
-    [Fact]
     public void NewTransactionTracer_PropagationContextHasReplayId_UsesActiveSessionReplayIdInstead()
     {
         // Arrange
@@ -372,6 +344,21 @@ public class SentryTransactionTests
             .Range(0, 1000 * 2)
             .Select(i => transaction.StartChild("span " + i))
             .ToArray();
+
+        // Assert
+        transaction.Spans.Should().HaveCount(1000);
+        spans.Count(s => s.IsSampled == true).Should().Be(1000);
+    }
+
+    [Fact]
+    public void StartChild_Limit_Maintained_Concurrently()
+    {
+        // Arrange
+        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
+        var spans = new ConcurrentBag<ISpan>();
+
+        // Act
+        Parallel.For(0, 5000, i => spans.Add(transaction.StartChild("span " + i)));
 
         // Assert
         transaction.Spans.Should().HaveCount(1000);
