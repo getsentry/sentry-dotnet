@@ -34,12 +34,8 @@ jobs:
       # The dotnet package list command doesn't change its exit code on detection, so tee to a file and scan it
       # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
       #
-      # --source pins the query to nuget.org, which is the only feed in nuget.config that publishes a
-      # VulnerabilityInfo resource - the four Azure DevOps feeds have none, so they can only ever
-      # contribute zero advisories. Pinning is also what keeps the step running at all: unlike restore,
-      # `dotnet package list` ignores packageSourceMapping and queries every configured source for
-      # every package, and `perfview-build` answers 401 - not 404 - for anything it hasn't cached,
-      # which NuGet treats as fatal. That is the same feed, and the same failure, as #5528.
+      # --source pins the query to nuget.org - the only feed that publishes a
+      # VulnerabilityInfo resource. The other feeds can error out with 401s
       - name: List vulnerable packages
         shell: bash
         run: |
