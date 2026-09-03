@@ -24,6 +24,7 @@
       "src\\Sentry.OpenTelemetry.Exporter\\Sentry.OpenTelemetry.Exporter.csproj",
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
+      "src\\Sentry.Quartz\\Sentry.Quartz.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.Analyzers.Tests\\Sentry.Analyzers.Tests.csproj",
