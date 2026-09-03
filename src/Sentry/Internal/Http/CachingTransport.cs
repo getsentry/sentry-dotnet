@@ -327,16 +327,35 @@ internal class CachingTransport : ITransport, IDisposable
 
         _options.LogDebug("Reading cached envelope: {0}", file);
 
-        try
-        {
-            var stream = _fileSystem.OpenFileForReading(file);
+        var stream = _fileSystem.OpenFileForReading(file);
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using (stream)
+        using (stream)
 #else
-            await using (stream.ConfigureAwait(false))
+        await using (stream.ConfigureAwait(false))
 #endif
+        {
+            Envelope? envelope = null;
+            try
             {
-                using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
+                envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // We're shutting down rather than failing to read the file, so leave it be.
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Anything else means we can't read this file, and we never will be able to, so
+                // discard it rather than failing the same way again on every subsequent launch.
+                // We may throw away the odd envelope on a transient read error, which is a far
+                // better outcome than a corrupt file stalling the cache indefinitely.
+                LogFailureWithDiscard(file, ex);
+            }
+
+            if (envelope is not null)
+            {
+                using (envelope)
                 {
                     // Don't even try to send it if we are requesting cancellation.
                     cancellation.ThrowIfCancellationRequested();
@@ -385,11 +404,6 @@ internal class CachingTransport : ITransport, IDisposable
                 }
             }
         }
-        catch (Exception ex) when (ex is JsonException or InvalidDataException)
-        {
-            // A file that won't deserialize now won't later either, so drop it instead of retrying
-            LogFailureWithDiscard(file, ex);
-        }
 
         // Envelope & file stream must be disposed prior to reaching this point
 
@@ -411,7 +425,9 @@ internal class CachingTransport : ITransport, IDisposable
         }
     }
 
-    // Only corrupt files get here and they can be huge, so don't read the whole thing
+    /// <summary>
+    /// Only corrupt files get here and they can be huge, so don't read the whole thing
+    /// </summary>
     private string? TryReadContentsForLogging(string file)
     {
         const int maxLength = 8 * 1024;
