@@ -33,10 +33,18 @@ jobs:
 
       # The dotnet package list command doesn't change its exit code on detection, so tee to a file and scan it
       # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
+      #
+      # --source pins the query to nuget.org, which is the only feed in nuget.config that publishes a
+      # VulnerabilityInfo resource - the four Azure DevOps feeds have none, so they can only ever
+      # contribute zero advisories. Pinning is also what keeps the step running at all: unlike restore,
+      # `dotnet package list` ignores packageSourceMapping and queries every configured source for
+      # every package, and `perfview-build` answers 401 - not 404 - for anything it hasn't cached,
+      # which NuGet treats as fatal. That is the same feed, and the same failure, as #5528.
       - name: List vulnerable packages
         shell: bash
         run: |
-          dotnet package list --project Sentry.slnx --vulnerable --include-transitive --no-restore | tee vulnerable.txt
+          dotnet package list --project Sentry.slnx --vulnerable --include-transitive --no-restore \
+            --source https://api.nuget.org/v3/index.json | tee vulnerable.txt
 
           if grep -q 'has the following vulnerable packages' vulnerable.txt; then
             echo "::error::Vulnerable packages detected - see the job output above for the affected projects and advisories."
