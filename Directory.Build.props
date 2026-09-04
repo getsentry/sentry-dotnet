@@ -1,7 +1,10 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.10.0</VersionPrefix>
+    <VersionPrefix>6.10.1</VersionPrefix>
+    <!-- TEST BRANCH ONLY: distinct prerelease so this build cannot be confused with,
+         or resolved instead of, the released 6.10.0. Do not merge. -->
+    <VersionSuffix>alpha.8921.1</VersionSuffix>
     <LangVersion>14.0</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
