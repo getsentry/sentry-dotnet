@@ -1339,11 +1339,17 @@ namespace Sentry
     {
         public StringOrRegex(System.Text.RegularExpressions.Regex regex) { }
         public StringOrRegex(string stringOrRegex) { }
+        public Sentry.StringOrRegexType Type { get; }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string ToString() { }
         public static Sentry.StringOrRegex op_Implicit(System.Text.RegularExpressions.Regex regex) { }
         public static Sentry.StringOrRegex op_Implicit(string stringOrRegex) { }
+    }
+    public enum StringOrRegexType
+    {
+        String = 0,
+        Regex = 1,
     }
     public class TransactionContext : Sentry.SpanContext, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
