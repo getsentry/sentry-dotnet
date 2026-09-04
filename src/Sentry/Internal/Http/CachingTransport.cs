@@ -346,10 +346,7 @@ internal class CachingTransport : ITransport, IDisposable
             }
             catch (Exception ex)
             {
-                // Anything else means we can't read this file, and we never will be able to, so
-                // discard it rather than failing the same way again on every subsequent launch.
-                // We may throw away the odd envelope on a transient read error, which is a far
-                // better outcome than a corrupt file stalling the cache indefinitely.
+                // Discard if we can't read the file - to avoid an infinite retry loop
                 LogFailureWithDiscard(file, ex);
             }
 
