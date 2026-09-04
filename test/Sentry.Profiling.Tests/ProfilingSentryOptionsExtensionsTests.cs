@@ -2,6 +2,7 @@ namespace Sentry.Profiling.Tests;
 
 #nullable enable
 
+[Collection(nameof(ProfilingTestCollection))]
 public class ProfilingSentryOptionsExtensionsTests
 {
     private readonly InMemoryDiagnosticLogger _logger = new();
