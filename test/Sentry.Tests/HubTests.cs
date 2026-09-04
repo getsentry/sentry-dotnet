@@ -2517,67 +2517,6 @@ public partial class HubTests : IDisposable
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void CaptureAttachment_HubEnabled(bool enabled)
-    {
-        // Arrange
-        var hub = _fixture.GetSut();
-        if (!enabled)
-        {
-            hub.Dispose();
-        }
-
-        _fixture.Client.CaptureEnvelope(Arg.Any<Envelope>()).Returns(true);
-
-        var eventId = SentryId.Create();
-        var attachment = new SentryAttachment(
-            AttachmentType.Default,
-            new ByteAttachmentContent("test content"u8.ToArray()),
-            "test.txt",
-            "text/plain");
-
-        // Act
-        var result = hub.CaptureAttachment(eventId, attachment);
-
-        // Assert
-        result.Should().Be(enabled);
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
-    [Fact]
-    public void CaptureAttachment_SentryIdEmpty_ReturnsFalse()
-    {
-        // Arrange
-        var hub = _fixture.GetSut();
-
-        var eventId = SentryId.Empty;
-        var attachment = new SentryAttachment(AttachmentType.Default, NullAttachmentContent.Instance, "test.txt", "text/plain");
-
-        // Act
-        var result = hub.CaptureAttachment(eventId, attachment);
-
-        // Assert
-        result.Should().Be(false);
-        _fixture.Client.DidNotReceive().CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
-    [Fact]
-    public void CaptureAttachment_AttachmentNull_ReturnsFalse()
-    {
-        // Arrange
-        var hub = _fixture.GetSut();
-        var eventId = SentryId.Create();
-
-        // Act
-        var result = hub.CaptureAttachment(eventId, null!);
-
-        // Assert
-        result.Should().Be(false);
-        _fixture.Client.DidNotReceive().CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
     public void CaptureSession_HubEnabled(bool enabled)
     {
         // Arrange

@@ -12,27 +12,6 @@ public partial class AttachmentSerializationTests
     }
 
     [Fact]
-    public async Task Serialization_SameByteAttachmentEnvelopeTwice_PreservesPayload()
-    {
-        // Arrange
-        var attachment = new SentryAttachment(
-            AttachmentType.Default,
-            new ByteAttachmentContent("test attachment content"u8.ToArray()),
-            "test.txt",
-            "text/plain");
-
-        using var envelope = Envelope.FromAttachment(SentryId.Create(), attachment);
-
-        // Act
-        var firstSerialization = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
-        var secondSerialization = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
-
-        // Assert
-        firstSerialization.Should().Contain("test attachment content");
-        secondSerialization.Should().Be(firstSerialization);
-    }
-
-    [Fact]
     public async Task Serialization_SameEventEnvelopeWithByteAttachmentTwice_PreservesPayload()
     {
         // Arrange

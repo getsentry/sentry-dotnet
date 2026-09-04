@@ -886,28 +886,6 @@ internal class Hub : IHub, IDisposable
         return SentryId.Empty;
     }
 
-    // Internal capture method that allows the Unity SDK to send attachments after an already captured event.
-    // Kept internal as the preferred way of adding attachments is either on the scope or directly on the event.
-    // See https://develop.sentry.dev/sdk/data-model/envelope-items/#attachment
-    internal bool CaptureAttachment(SentryId eventId, SentryAttachment attachment)
-    {
-        if (!IsEnabled || eventId == SentryId.Empty || attachment.IsNull())
-        {
-            return false;
-        }
-
-        try
-        {
-            var envelope = Envelope.FromAttachment(eventId, attachment, _options.DiagnosticLogger);
-            return CaptureEnvelope(envelope);
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failure to capture attachment");
-            return false;
-        }
-    }
-
     public async Task FlushAsync(TimeSpan timeout)
     {
         try

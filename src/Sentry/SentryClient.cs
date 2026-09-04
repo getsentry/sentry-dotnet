@@ -435,14 +435,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
-        if (CaptureEnvelope(envelope))
-        {
-#if SENTRY_UNITY
-            @event.IsCaptured = true; // See SentryEvent.Unity.cs for more details.
-#endif
-            return processedEvent.EventId;
-        }
-        return SentryId.Empty;
+        return CaptureEnvelope(envelope) ? processedEvent.EventId : SentryId.Empty;
     }
 
     private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
