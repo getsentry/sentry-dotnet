@@ -301,6 +301,38 @@ public class CachingTransportTests : IDisposable
     }
 
     [Fact]
+    public async Task Handle_Oversized_Malformed_Envelopes_Gracefully()
+    {
+        // Arrange
+        var cacheDirectoryPath =
+            _options.TryGetProcessSpecificCacheDirectoryPath() ??
+            throw new InvalidOperationException("Cache directory or DSN is not set.");
+        var processingDirectoryPath = Path.Combine(cacheDirectoryPath, "__processing");
+        var fileName = $"{Guid.NewGuid()}.envelope";
+        var filePath = Path.Combine(processingDirectoryPath, fileName);
+
+        _options.FileSystem.CreateDirectory(processingDirectoryPath);
+        _options.FileSystem.CreateFileForWriting(filePath, out var file);
+
+        // A crash mid-write leaves a file with no header and no newline anywhere in it
+        var zeroes = new byte[4 * Envelope.MaxHeaderLineLength];
+        file.Write(zeroes, 0, zeroes.Length);
+        file.Dispose();
+
+        // Act
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+        await transport.FlushAsync(); // Flush the worker to process
+
+        // Assert
+        _options.FileSystem.FileExists(filePath).Should().BeFalse();
+
+        var entry = _logger.Entries
+            .Should().ContainSingle(x => x.Message.Contains("discarding cached envelope")).Subject;
+        entry.Message.Should().Contain("(truncated)");
+    }
+
+    [Fact]
     public async Task NonTransientExceptionShouldLog()
     {
         // Arrange

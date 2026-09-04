@@ -2,8 +2,22 @@ namespace Sentry.Internal.Extensions;
 
 internal static class StreamExtensions
 {
+    /// <summary>
+    /// Reads a single line from the stream.
+    /// </summary>
+    /// <param name="stream">The stream to read from.</param>
+    /// <param name="maxLength">
+    /// When supplied, the maximum number of bytes the line may occupy. Callers that know what a
+    /// reasonable length looks like should pass it, so that a corrupt stream containing no newline
+    /// fails fast instead of being buffered into memory in its entirety.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <exception cref="InvalidDataException">
+    /// No newline was found within <paramref name="maxLength"/> bytes.
+    /// </exception>
     public static async Task<byte[]> ReadLineAsync(
         this Stream stream,
+        int? maxLength = null,
         CancellationToken cancellationToken = default)
     {
         // This approach avoids reading one byte at a time.
@@ -37,6 +51,12 @@ internal static class StreamExtensions
             }
 
             result.Write(buffer.Array, 0, bytesRead);
+
+            if (maxLength is { } limit && result.Length > limit)
+            {
+                throw new InvalidDataException(
+                    $"Expected a line of at most {limit} bytes but found no newline within that many.");
+            }
         }
 
         stream.Position -= overreach;

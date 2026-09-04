@@ -31,6 +31,12 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string FileNameKey = "filename";
 
     /// <summary>
+    /// An item header is a single short JSON object.
+    /// Bounding the read stops us buffering a whole corrupt file into memory.
+    /// </summary>
+    internal const int MaxHeaderLineLength = 64 * 1024;
+
+    /// <summary>
     /// Header associated with this envelope item.
     /// </summary>
     public IReadOnlyDictionary<string, object?> Header { get; }
@@ -431,7 +437,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         Stream stream,
         CancellationToken cancellationToken = default)
     {
-        var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+        var buffer = await stream.ReadLineAsync(MaxHeaderLineLength, cancellationToken).ConfigureAwait(false);
 
         return
             Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)
