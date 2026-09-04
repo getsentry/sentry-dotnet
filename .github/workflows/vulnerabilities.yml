@@ -33,10 +33,14 @@ jobs:
 
       # The dotnet package list command doesn't change its exit code on detection, so tee to a file and scan it
       # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
+      #
+      # --source pins the query to nuget.org - the only feed that publishes a
+      # VulnerabilityInfo resource. The other feeds can error out with 401s
       - name: List vulnerable packages
         shell: bash
         run: |
-          dotnet package list --project Sentry.slnx --vulnerable --include-transitive --no-restore | tee vulnerable.txt
+          dotnet package list --project Sentry.slnx --vulnerable --include-transitive --no-restore \
+            --source https://api.nuget.org/v3/index.json | tee vulnerable.txt
 
           if grep -q 'has the following vulnerable packages' vulnerable.txt; then
             echo "::error::Vulnerable packages detected - see the job output above for the affected projects and advisories."
