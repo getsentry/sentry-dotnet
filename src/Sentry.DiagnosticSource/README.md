@@ -36,3 +36,7 @@ After initializing the SDK, it will subscribe to the currently implemented integ
 ![Transaction with database events that came from the Diagnostic Source integration](.assets/transaction_with_ds_integration.png)
 ![Query compiler span](.assets/db_query_compiler.png)
 ![Query](.assets/db_query.png)
+
+### Known SqlClient limitation
+
+SqlClient does not expose every command result through its DiagnosticSource events. In particular, batch queries and queries that use OUTPUT may not produce complete database spans because of a limitation in SqlDataReader. See [dotnet/SqlClient#1839](https://github.com/dotnet/SqlClient/issues/1839) for the upstream issue.
