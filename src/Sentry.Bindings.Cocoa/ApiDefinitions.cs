@@ -1337,6 +1337,10 @@ interface SentryObjCOptions
     [Export("maxBreadcrumbs")]
     nuint MaxBreadcrumbs { get; set; }
 
+    // @property (nonatomic) NSUInteger maxFeatureFlags;
+    [Export("maxFeatureFlags")]
+    nuint MaxFeatureFlags { get; set; }
+
     // @property (nonatomic) BOOL enableNetworkBreadcrumbs;
     [Export("enableNetworkBreadcrumbs")]
     bool EnableNetworkBreadcrumbs { get; set; }
@@ -1750,6 +1754,18 @@ interface SentryObjCInternalScopeApi
     // -(NSDictionary<NSString *,NSDictionary<NSString *,id> *> * _Nonnull)serializedContexts;
     [Export("serializedContexts")]
     NSDictionary<NSString, NSDictionary<NSString, NSObject>> SerializedContexts { get; }
+
+    // -(void)withCurrentScope:(SentryObjCScope * _Nonnull)scope callback:(void (^ _Nonnull)(void))callback;
+    [Export("withCurrentScope:callback:")]
+    void WithCurrentScope(SentryObjCScope scope, Action callback);
+
+    // -(SentryObjCScope * _Nonnull)createScope;
+    [Export("createScope")]
+    SentryObjCScope CreateScope { get; }
+
+    // -(SentryObjCScope * _Nonnull)cloneScope:(SentryObjCScope * _Nonnull)scope;
+    [Export("cloneScope:")]
+    SentryObjCScope CloneScope(SentryObjCScope scope);
 }
 
 // @interface SentryObjCInternalSdkApi : NSObject
