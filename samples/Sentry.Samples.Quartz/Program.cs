@@ -14,6 +14,9 @@ public static class Program
 
         builder.WebHost.UseSentry();
 
+        builder.Services.AddQuartzHttpApi();
+        builder.Services.AddQuartzDashboard();
+
         builder.Services.AddQuartz(quartz =>
         {
             quartz.AddSentryScope();
@@ -38,6 +41,16 @@ public static class Program
         }).AddQuartzHostedService();
 
         var app = builder.Build();
+
+        // app.UseAuthentication();
+        // app.UseAuthorization();
+        app.UseAntiforgery();
+        app.MapStaticAssets();
+
+        // No authorization is configured in this sample, so the dashboard is left open. Real
+        // applications should call RequireAuthorization() with a policy instead of AllowAnonymous().
+        app.MapQuartzHttpApi().AllowAnonymous();
+        app.MapQuartzDashboard().AllowAnonymous();
 
         app.Run();
     }
