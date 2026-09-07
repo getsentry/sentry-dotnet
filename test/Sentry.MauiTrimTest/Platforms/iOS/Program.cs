@@ -12,4 +12,9 @@ public class Program
         // you can specify it here.
         UIApplication.Main(args, null, typeof(AppDelegate));
     }
+
+    public Program
+    (IntPtr javaReference, Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
+    {
+    }
 }
