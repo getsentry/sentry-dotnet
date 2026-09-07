@@ -104,7 +104,11 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
 }
 
 Describe 'MAUI (<framework>)' -ForEach @(
-    @{ framework = $previousFramework }
+    # Latest, not previous: each .NET for iOS SDK pack pins an exact Xcode version, and only
+    # the net11.0 one matches the Xcode that CI (and local dev) is on. A net10.0-ios app build
+    # fails with "requires Xcode 26.0. The current version of Xcode is 26.6". Libraries skip
+    # that check, which is why only app builds like this one are affected.
+    @{ framework = $latestFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
         ResetLocalPackages
@@ -178,20 +182,24 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios$iosTpv"
         Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-            'libmono-component-debugger.dylib',
-            'libmono-component-diagnostics_tracing.dylib',
-            'libmono-component-hot_reload.dylib',
-            'libmono-component-marshal-ilgen.dylib',
-            'libmonosgen-2.0.dylib',
+            # .NET 11 replaced Mono with CoreCLR on iOS, so the native libraries uploaded are
+            # the CoreCLR set (libcoreclr, libclrjit, libmscor*) rather than the Mono ones.
+            'libclrjit.dylib',
+            'libcoreclr.dylib',
+            'libmscordaccore.dylib',
+            'libmscordbi.dylib',
             'libSystem.Globalization.Native.dylib',
             'libSystem.IO.Compression.Native.dylib',
             'libSystem.Native.dylib',
             'libSystem.Net.Security.Native.dylib',
             'libSystem.Security.Cryptography.Native.Apple.dylib',
+            'libxamarin-dotnet-coreclr-debug.dylib',
+            'libxamarin-dotnet-coreclr.dylib',
             'libxamarin-dotnet-debug.dylib',
             'libxamarin-dotnet.dylib',
             'maui-app',
             'maui-app.pdb',
+            'maui-app.r2r',
             'Microsoft.iOS.pdb',
             'Microsoft.Maui.Controls.pdb',
             'Microsoft.Maui.Controls.Xaml.pdb',
