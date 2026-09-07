@@ -4,6 +4,9 @@
     <IsAotCompatible>false</IsAotCompatible>
     <UseNativeAot>false</UseNativeAot>
     <SupportedOSPlatformVersion>24</SupportedOSPlatformVersion>
+    <!-- .NET 11 Android turns ReadyToRun on by default; it can't be produced for the
+         Android RIDs here (NETSDK1094/NETSDK1096). -->
+    <PublishReadyToRun>false</PublishReadyToRun>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

@@ -2,6 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net11.0-android37.0</TargetFramework>
     <SupportedOSPlatformVersion>24</SupportedOSPlatformVersion>
+    <!-- .NET 11 Android turns ReadyToRun on by default; it can't be produced for the
+         Android RIDs here (NETSDK1094/NETSDK1096). Same as Sentry.Samples.Maui. -->
+    <PublishReadyToRun>false</PublishReadyToRun>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ApplicationId>io.sentry.dotnet.samples.android</ApplicationId>

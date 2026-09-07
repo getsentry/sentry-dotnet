@@ -23,6 +23,12 @@
     <!-- https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/8.0/dotnet-restore-audit#version-introduced -->
     <WarningsNotAsErrors>NU1902;NU1903</WarningsNotAsErrors>
 
+    <!-- Supporting a .NET 11 preview means depending on preview Microsoft.Extensions /
+         Microsoft.AspNetCore packages, and pack rejects a stable version with prerelease
+         dependencies. Kept as a warning rather than silenced. Remove at .NET 11 GA, when
+         those references move to stable versions. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU5104</WarningsNotAsErrors>
+
     <!-- Centralized TFM versions -->
     <LatestTfm>net11.0</LatestTfm>
     <PreviousTfm>net10.0</PreviousTfm>

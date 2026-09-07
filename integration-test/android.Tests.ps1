@@ -17,15 +17,18 @@ BeforeDiscovery {
     $script:emulator = Get-AndroidEmulatorId
 }
 
+# CoreCLR runs on every framework we still support.
 $cases = @(
-    @{ configuration = 'Release'; runtime = 'mono' }
-    @{ configuration = 'Debug';   runtime = 'mono' }
-)
-# CoreCLR on Android requires .NET 10 or later, which every supported framework now is.
-$cases += @(
     @{ configuration = 'Release'; runtime = 'coreclr' }
     @{ configuration = 'Debug';   runtime = 'coreclr' }
 )
+# .NET 11 removed the Mono runtime for Android (NETSDK1242), so mono only applies below it.
+if ([version]($dotnet_version -replace '^net', '') -lt [version]'11.0') {
+    $cases += @(
+        @{ configuration = 'Release'; runtime = 'mono' }
+        @{ configuration = 'Debug';   runtime = 'mono' }
+    )
+}
 Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
