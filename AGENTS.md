@@ -220,7 +220,7 @@ The prefix selects the CHANGELOG section (defined in `.github/release.yml`):
 | `fix:` / `bugfix:` | Fixes 🐛 |
 | `chore(deps):` | Dependencies ⬆️ |
 | any type with `!`, e.g. `feat!:` | Breaking Changes 🛠 |
-| anything else | omitted from the changelog |
+| anything else (`ci:`, `docs:`, `deps:`, `meta:`, …) | Other |
 
 ### Changelog
 
