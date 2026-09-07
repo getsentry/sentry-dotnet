@@ -25,7 +25,10 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
         . $PSScriptRoot/../scripts/device-test-utils.ps1
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "$PSScriptRoot/maui-app" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
+        # Note: maui-device, not maui-app. cli.Tests.ps1 generates a fresh app from the
+        # MAUI template at integration-test/maui-app and deletes whatever is there first, so
+        # this source app must not share that name.
+        Copy-Item -Path "$PSScriptRoot/maui-device" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
 
         $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()

@@ -34,7 +34,10 @@ Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cas
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "$PSScriptRoot/maui-app" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
+        # Note: maui-device, not maui-app. cli.Tests.ps1 generates a fresh app from the
+        # MAUI template at integration-test/maui-app and deletes whatever is there first, so
+        # this source app must not share that name.
+        Copy-Item -Path "$PSScriptRoot/maui-device" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
 
         # replace {{SENTRY_DSN}} in MauiProgram.cs
