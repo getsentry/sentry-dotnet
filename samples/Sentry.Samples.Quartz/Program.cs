@@ -24,6 +24,14 @@ public static class Program
             quartz.AddSentryCronJobs(options =>
             {
                 options.EnableUpsertCronMonitor = builder.Environment.IsProduction();
+                options.ConfigureSentryMonitorOptions = (jobDetail, options) =>
+                {
+                    if (jobDetail.Key.Name == nameof(SecondJob))
+                    {
+                        options.FailureIssueThreshold = 10;
+                        options.RecoveryThreshold = 10;
+                    }
+                };
             });
 
             var jobKey1 = new JobKey(nameof(FirstJob));
@@ -70,12 +78,17 @@ public class FirstJob : IJob
 [SentryCronMonitorSlug("job-that-throws")]
 public class SecondJob : IJob
 {
+    private static readonly Random _random = new Random();
+
     public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
     {
         Console.WriteLine($"Starting to do some heavy work at: {DateTime.Now}");
         await Task.Delay(1000, cancellationToken);
         Console.WriteLine($"Finished doing some heavy work at: {DateTime.Now}");
-        throw new Exception();
+        if (_random.Next(100) < 10)
+        {
+            throw new Exception();
+        }
     }
 }
 

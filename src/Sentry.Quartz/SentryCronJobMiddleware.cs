@@ -50,6 +50,7 @@ internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
                 if (_options.EnableUpsertCronMonitor && context.Trigger is ICronTrigger cronTrigger)
                 {
                     UpsertCronMonitor(cronTrigger, info, options);
+                    _options.ConfigureSentryMonitorOptions?.Invoke(context.JobDetail, options);
                 }
             });
         }
