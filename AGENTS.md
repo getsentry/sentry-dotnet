@@ -103,7 +103,7 @@ Windows).
 
 | Path | Instead |
 |------|---------|
-| `*.slnf` | Edit `scripts/generate-solution-filters-config.yml`, then run `scripts/generate-solution-filters.ps1` |
+| `*.slnf` | Edit `scripts/generate-solution-filters-config.yaml`, then run `scripts/generate-solution-filters.ps1` |
 | `CHANGELOG.md` | Generated on squash-merge from the PR title. `.github/workflows/changelog-guard.yml` fails CI on manual entries |
 | `src/Sentry.Bindings.Cocoa/ApiDefinitions.cs`, `StructsAndEnums.cs` | Edit `scripts/patch-cocoa-bindings.cs`, then run `scripts/generate-cocoa-bindings.ps1` |
 | `modules/**` | Git submodules pointing at other repositories — change them upstream, never in place |
