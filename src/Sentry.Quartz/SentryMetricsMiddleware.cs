@@ -35,10 +35,27 @@ internal sealed class SentryMetricsMiddleware : IJobExecutionMiddleware
     }
 }
 
+/// <summary>
+/// Options used by <see cref="SentryMetricsMiddleware"/> to control how Quartz job execution metrics are
+/// reported to Sentry.
+/// </summary>
 public class SentryMetricsOptions
 {
+    /// <summary>
+    /// A function used to resolve the name of the metric emitted for a job's execution duration.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <c>quartz.job.duration.{group}.{name}</c>, based on the job's <see cref="IJobDetail.Key"/>.
+    /// </remarks>
     public Func<IJobDetail, string> ResolveMetricsName { get; set; } = jobDetail => $"quartz.job.duration.{jobDetail.Key.Group}.{jobDetail.Key.Name}";
 
+    /// <summary>
+    /// An optional function used to compute additional attributes to attach to the emitted duration metric,
+    /// based on the job being executed.
+    /// <remarks>
+    /// Returns <see langword="null"/> by default, meaning no additional
+    /// attributes are attached.</remarks>
+    /// </summary>
     public Func<IJobDetail, IDictionary<string, object>>? AdditionalAttributes { get; set; }
 }
 
