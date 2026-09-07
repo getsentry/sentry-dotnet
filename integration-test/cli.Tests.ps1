@@ -167,7 +167,11 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'libxamarin-app.so',
             'maui-app.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch "Found 23 debug information files \(1 with embedded sources\)"
+        # The exact count moves with the SDK - it went from 23 to 25 when the .NET 11 Android
+        # workload started emitting a separate .dbg.so - so only assert it's non-zero, as the
+        # iOS case below already does.
+        $nonZeroNumberRegex = '[1-9][0-9]*';
+        $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
