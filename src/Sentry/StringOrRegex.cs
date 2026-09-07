@@ -3,22 +3,6 @@ using Sentry.Internal;
 namespace Sentry;
 
 /// <summary>
-/// The type of value stored by <see cref="StringOrRegex"/>.
-/// </summary>
-public enum StringOrRegexType
-{
-    /// <summary>
-    /// A plain string.
-    /// </summary>
-    String,
-
-    /// <summary>
-    /// A regular expression.
-    /// </summary>
-    Regex,
-}
-
-/// <summary>
 /// Stores either a plain string or a Regular Expression, typically to match against filters in the SentryOptions
 /// </summary>
 [TypeConverter(typeof(StringOrRegexTypeConverter))]
@@ -28,9 +12,9 @@ public class StringOrRegex
     internal readonly string? _string;
 
     /// <summary>
-    /// Gets the type of value stored by this instance.
+    /// Whether this instance contains a regular expression.
     /// </summary>
-    public StringOrRegexType Type { get; }
+    public bool IsRegex => _regex is Regex;
 
     /// <summary>
     /// Constructs a <see cref="StringOrRegex"/> instance.
@@ -39,7 +23,6 @@ public class StringOrRegex
     public StringOrRegex(string stringOrRegex)
     {
         _string = stringOrRegex;
-        Type = StringOrRegexType.String;
     }
 
     /// <summary>
@@ -49,11 +32,7 @@ public class StringOrRegex
     /// <remarks>
     /// Use this constructor when you want the match to be performed using a regular expression.
     /// </remarks>
-    public StringOrRegex(Regex regex)
-    {
-        _regex = regex;
-        Type = StringOrRegexType.Regex;
-    }
+    public StringOrRegex(Regex regex) => _regex = regex;
 
     /// <summary>
     /// Implicitly converts a <see cref="string"/> to a <see cref="StringOrRegex"/>.
