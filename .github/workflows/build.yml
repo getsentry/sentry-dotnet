@@ -404,6 +404,11 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
+          # aot.Tests.ps1 has the Container test, so it needs the same pin as the Integration
+          # test step above: the tag the SDK derives (11.0.0-preview.7-noble-chiseled) doesn't
+          # exist. This tag is multi-arch and covers linux/arm/v7 for the linux-arm leg; the
+          # win-x86 leg skips the Container test. Remove at GA.
+          ContainerBaseImage: 'mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-resolute-chiseled'
         with:
           path: integration-test/aot.Tests.ps1
 
