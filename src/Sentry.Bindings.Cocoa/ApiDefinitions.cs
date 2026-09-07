@@ -1761,7 +1761,7 @@ interface SentryObjCInternalScopeApi
 
     // -(SentryObjCScope * _Nonnull)createScope;
     [Export("createScope")]
-    SentryObjCScope CreateScope { get; }
+    SentryObjCScope CreateScope();
 
     // -(SentryObjCScope * _Nonnull)cloneScope:(SentryObjCScope * _Nonnull)scope;
     [Export("cloneScope:")]
