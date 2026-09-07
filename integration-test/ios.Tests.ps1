@@ -16,9 +16,10 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
     # version and the macOS GitHub Actions runners carry a limited set - see
     # https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
     #
-    # TODO: add coreclr when available
-    @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "mono" }
-    @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "mono" }
+    # .NET 11 removed the Mono runtime for iOS as well as Android (NETSDK1242), so coreclr
+    # is the only option here now.
+    @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "coreclr" }
+    @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "coreclr" }
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1

@@ -297,6 +297,12 @@ jobs:
 #        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
         if: ${{ (matrix.rid != 'linux-musl-x64') }}
+        env:
+          # The SDK derives the runtime-deps tag from the runtime version, which gives
+          # 11.0.0-preview.7-noble-chiseled. That doesn't exist: .NET 11 images moved from
+          # noble to resolute, and previews only ship under the floating 11.0-preview tags.
+          # Remove at GA, when the derived tag resolves again.
+          ContainerBaseImage: ${{ contains(matrix.rid, 'musl') && 'mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-alpine' || 'mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-resolute-chiseled' }}
         uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         with:
           path: integration-test
