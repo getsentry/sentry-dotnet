@@ -13,4 +13,8 @@ public class Program : MauiApplication
         var app = new Program();
         app.Run(args);
     }
+
+    public Program(IntPtr javaReference, Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
+    {
+    }
 }
