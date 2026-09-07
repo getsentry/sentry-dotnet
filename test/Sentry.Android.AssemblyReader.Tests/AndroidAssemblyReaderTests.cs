@@ -21,7 +21,7 @@ public class AndroidAssemblyReaderTests
     // re-enable these once that port lands.
     private const string StoreV4SkipReason =
         "Android assembly store v4 (.NET 11 / CoreCLR) is not supported yet - see getsentry/sentry-dotnet#5454";
-#if NET11_0_OR_GREATER && !ANDROID
+#if NET11_0_OR_GREATER
     private const bool StoreV4Unsupported = true;
 #else
     private const bool StoreV4Unsupported = false;
