@@ -47,17 +47,19 @@ Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cas
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
         $useMonoRuntime = if ($runtime -eq 'mono') { 'true' } else { 'false' }
-        # Restore separately, without UseMonoRuntime. It's a global property, so during restore
-        # it reaches every target framework in the graph - including net11.0-android, where Mono
-        # no longer exists (NETSDK1242) - even though only one framework is built below.
-        dotnet restore Sentry.Maui.Device.IntegrationTestApp.csproj --runtime $rid
-        | ForEach-Object { Write-Host $_ }
+        # Set UseMonoRuntime on the app project, scoped to the framework under test, rather than
+        # passing it with -p. As a global property it reaches every framework in the graph during
+        # restore - including net11.0-android, where Mono no longer exists (NETSDK1242) - and it
+        # has to be set at restore time so the right runtime pack is downloaded (NETSDK1112).
+        (Get-Content Sentry.Maui.Device.IntegrationTestApp.csproj) `
+            -replace '<UseMaui>true</UseMaui>', ("<UseMaui>true</UseMaui>`n    " + `
+                "<UseMonoRuntime Condition=`"'`$(TargetFramework)' == '$tfm'`">$useMonoRuntime</UseMonoRuntime>") `
+        | Set-Content Sentry.Maui.Device.IntegrationTestApp.csproj
+
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
-            --no-restore `
             --configuration $configuration `
             --framework $tfm `
-            --runtime $rid `
-            -p:UseMonoRuntime=$useMonoRuntime
+            --runtime $rid
         | ForEach-Object { Write-Host $_ }
         Write-Host '::endgroup::'
         $LASTEXITCODE | Should -Be 0

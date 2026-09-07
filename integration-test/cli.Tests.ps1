@@ -161,6 +161,9 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'libsentry-android.so',
             'libsentry.so',
             'libsentrysupplemental.so',
+            # The .NET 11 Android workload splits the debug symbols out of libxamarin-app.so
+            # into a separate .dbg.so, so both are now uploaded.
+            'libxamarin-app.dbg.so',
             'libxamarin-app.so',
             'maui-app.pdb'
         )
