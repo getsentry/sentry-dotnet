@@ -123,7 +123,7 @@ public static partial class SentrySdk
 
                 if (options.TracesSampler is { } tracesSampler)
                 {
-                    o.TracesSampler = new TracesSamplerCallback(tracesSampler);
+                    o.TracesSampler = new TracesSamplerCallback(tracesSampler, options);
                 }
             }
 
