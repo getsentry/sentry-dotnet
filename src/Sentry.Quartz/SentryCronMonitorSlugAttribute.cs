@@ -1,4 +1,4 @@
-﻿namespace Sentry.Quartz;
+namespace Sentry.Quartz;
 
 /// <summary>
 /// Sentry Monitor Slug Attribute
