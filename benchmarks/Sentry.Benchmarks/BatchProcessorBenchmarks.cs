@@ -27,7 +27,6 @@ public class BatchProcessorBenchmarks
         SentryOptions options = new()
         {
             Dsn = DsnSamples.ValidDsn,
-            EnableLogs = true,
         };
 
         var batchInterval = Timeout.InfiniteTimeSpan;

@@ -11,9 +11,8 @@ public partial class SentryStructuredLoggerTests
     [InlineData(SentryLogLevel.Warning)]
     [InlineData(SentryLogLevel.Error)]
     [InlineData(SentryLogLevel.Fatal)]
-    public void Log_Enabled_CapturesEnvelope(SentryLogLevel level)
+    public void Log_CapturesEnvelope(SentryLogLevel level)
     {
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -33,27 +32,8 @@ public partial class SentryStructuredLoggerTests
     [InlineData(SentryLogLevel.Warning)]
     [InlineData(SentryLogLevel.Error)]
     [InlineData(SentryLogLevel.Fatal)]
-    public void Log_Disabled_DoesNotCaptureEnvelope(SentryLogLevel level)
+    public void Log_ConfigureLog_CapturesEnvelope(SentryLogLevel level)
     {
-        _fixture.Options.EnableLogs.Should().BeFalse();
-        var logger = _fixture.GetSut();
-
-        logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
-        logger.Flush();
-
-        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
-    [Theory]
-    [InlineData(SentryLogLevel.Trace)]
-    [InlineData(SentryLogLevel.Debug)]
-    [InlineData(SentryLogLevel.Info)]
-    [InlineData(SentryLogLevel.Warning)]
-    [InlineData(SentryLogLevel.Error)]
-    [InlineData(SentryLogLevel.Fatal)]
-    public void Log_ConfigureLog_Enabled_CapturesEnvelope(SentryLogLevel level)
-    {
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -73,27 +53,8 @@ public partial class SentryStructuredLoggerTests
     [InlineData(SentryLogLevel.Warning)]
     [InlineData(SentryLogLevel.Error)]
     [InlineData(SentryLogLevel.Fatal)]
-    public void Log_ConfigureLog_Disabled_DoesNotCaptureEnvelope(SentryLogLevel level)
-    {
-        _fixture.Options.EnableLogs.Should().BeFalse();
-        var logger = _fixture.GetSut();
-
-        logger.Log(level, ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
-        logger.Flush();
-
-        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
-    [Theory]
-    [InlineData(SentryLogLevel.Trace)]
-    [InlineData(SentryLogLevel.Debug)]
-    [InlineData(SentryLogLevel.Info)]
-    [InlineData(SentryLogLevel.Warning)]
-    [InlineData(SentryLogLevel.Error)]
-    [InlineData(SentryLogLevel.Fatal)]
     public void Log_WithoutParameters_DoesNotAttachTemplateAttribute(SentryLogLevel level)
     {
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -123,7 +84,6 @@ public partial class SentryStructuredLoggerTests
     [InlineData(SentryLogLevel.Fatal)]
     public void Log_InvalidFormatButWithoutParameters_CapturesEnvelope(SentryLogLevel level)
     {
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;

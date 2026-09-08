@@ -41,6 +41,7 @@ var nodes = tree.GetCompilationUnitRoot()
     .PropertyToMethod("Sentry*", "Serialize")
     .PropertyToMethod("SentryObjCSpan", "ToTraceHeader")
     .PropertyToMethod("SentryObjCTraceContext", "ToBaggage")
+    .PropertyToMethod("SentryObjCInternalScopeApi", "CreateScope")
     // Verify the rest
     .VerifyProperty("*Sentry*", "*", "MethodToProperty") // TODO: replace broad patterns with one-by-one verification
     .VerifyProperty("SentryObjCOptions", "*Targets", "StronglyTypedNSArray")

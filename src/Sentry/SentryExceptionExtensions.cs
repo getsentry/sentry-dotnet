@@ -1,3 +1,4 @@
+using Sentry;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -7,6 +8,14 @@ using Sentry.Protocol;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryExceptionExtensions
 {
+    /// <summary>
+    /// Creates a <see cref="SentryHint"/> carrying the exception that a breadcrumb was created from, or
+    /// <see langword="null"/> if there is no exception.
+    /// </summary>
+    internal static SentryHint? ToHint(this Exception? exception) => exception is null
+        ? null
+        : new SentryHint(HintTypes.Exception, exception);
+
     /// <summary>
     /// Set a tag that will be added to the event when the exception is captured.
     /// </summary>

@@ -1,0 +1,9 @@
+// Applied to the sentry-cocoa build (via XCODE_XCCONFIG_FILE in build-sentry-cocoa.sh).
+//
+// The .NET SDK runs under the managed (.NET/mono) runtime, so SentryCrash must be compiled with
+// SENTRY_CRASH_MANAGED_RUNTIME=1 - it gates how the signal / mach-exception monitors cooperate with
+// the managed runtime's own signal handling. Without it, native capture of managed crashes is
+// broken (the "captures managed crash" device tests fail). sentry-cocoa's packaging scripts don't
+// expose extra build settings, so we inject the define here; xcodebuild applies it to every target,
+// including the SentryCrash C sources. See getsentry/sentry-dotnet#5492.
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) SENTRY_CRASH_MANAGED_RUNTIME=1

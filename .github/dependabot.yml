@@ -46,6 +46,10 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 2
+  ignore:
+    # FluentAssertions v8.0.0 changed license; see https://fluentassertions.com/releases/#800
+    - dependency-name: "FluentAssertions"
+      update-types: ["version-update:semver-major"]
 
 - package-ecosystem: "github-actions"
   directories:

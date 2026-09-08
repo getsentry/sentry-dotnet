@@ -8,9 +8,8 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Counter)]
     [InlineData(SentryMetricType.Gauge)]
     [InlineData(SentryMetricType.Distribution)]
-    public void Emit_Enabled_CapturesEnvelope(SentryMetricType type)
+    public void Emit_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -27,24 +26,8 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Counter)]
     [InlineData(SentryMetricType.Gauge)]
     [InlineData(SentryMetricType.Distribution)]
-    public void Emit_Disabled_DoesNotCaptureEnvelope(SentryMetricType type)
+    public void Emit_Attributes_CapturesEnvelope(SentryMetricType type)
     {
-        _fixture.Options.EnableMetrics = false;
-        var metrics = _fixture.GetSut();
-
-        metrics.Emit<int>(type, 1, []);
-        metrics.Flush();
-
-        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
-    [Theory]
-    [InlineData(SentryMetricType.Counter)]
-    [InlineData(SentryMetricType.Gauge)]
-    [InlineData(SentryMetricType.Distribution)]
-    public void Emit_Attributes_Enabled_CapturesEnvelope(SentryMetricType type)
-    {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -61,24 +44,8 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Counter)]
     [InlineData(SentryMetricType.Gauge)]
     [InlineData(SentryMetricType.Distribution)]
-    public void Emit_Attributes_Disabled_DoesNotCaptureEnvelope(SentryMetricType type)
-    {
-        _fixture.Options.EnableMetrics = false;
-        var metrics = _fixture.GetSut();
-
-        metrics.Emit<int>(type, 1, [new KeyValuePair<string, object>("attribute-key", "attribute-value")]);
-        metrics.Flush();
-
-        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
-    [Theory]
-    [InlineData(SentryMetricType.Counter)]
-    [InlineData(SentryMetricType.Gauge)]
-    [InlineData(SentryMetricType.Distribution)]
     public void Emit_Byte_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -97,7 +64,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Int16_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -116,7 +82,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Int32_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -135,7 +100,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Int64_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -154,7 +118,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Single_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -173,7 +136,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Double_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -192,7 +154,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Decimal_DoesNotCaptureEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         metrics.Emit<decimal>(type, 1m, []);
@@ -213,7 +174,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Half_DoesNotCaptureEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         metrics.Emit<Half>(type, Half.One, []);
@@ -234,7 +194,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Enum_DoesNotCaptureEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         metrics.Emit<StringComparison>(type, (StringComparison)1, []);
@@ -254,7 +213,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution, nameof(SentryMetricType.Distribution), typeof(int))]
     public void Emit_Name_Null_DoesNotCaptureEnvelope(SentryMetricType type, string arg0, Type arg1)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         metrics.Emit<int>(type, null!, 1);
@@ -274,7 +232,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution, nameof(SentryMetricType.Distribution), typeof(int))]
     public void Emit_Name_Empty_DoesNotCaptureEnvelope(SentryMetricType type, string arg0, Type arg1)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         metrics.Emit<int>(type, "", 1);
@@ -320,7 +277,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Unit_String_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -338,7 +294,6 @@ public partial class SentryMetricEmitterTests
     [InlineData(SentryMetricType.Distribution)]
     public void Emit_Unit_MeasurementUnit_CapturesEnvelope(SentryMetricType type)
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;

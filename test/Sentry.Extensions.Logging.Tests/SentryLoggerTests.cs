@@ -59,6 +59,26 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void Log_BreadcrumbWithException_ProvidesExceptionInHint()
+    {
+        SentryHint hint = null;
+        _fixture.Scope.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
+        {
+            hint = h;
+            return breadcrumb;
+        });
+        var expectedException = new Exception("expected message");
+
+        var sut = _fixture.GetSut();
+
+        // LogLevel.Warning is below the default MinimumEventLevel, so only a breadcrumb is added
+        sut.Log<object>(LogLevel.Warning, default, null, expectedException, null);
+
+        hint.Should().NotBeNull();
+        hint.Items[HintTypes.Exception].Should().BeSameAs(expectedException);
+    }
+
+    [Fact]
     public void Log_WithEventId_EventIdAsTagOnEvent()
     {
         var expectedEventId = new EventId(10, "EventId-!@#$%^&*(");

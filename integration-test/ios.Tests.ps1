@@ -25,6 +25,9 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
+        # clean up potential old copied build outputs that may target a different configuration or runtime
+        Remove-Item -Path "$PSScriptRoot/mobile-app/bin", "$PSScriptRoot/mobile-app/obj" `
+            -Recurse -Force -ErrorAction SilentlyContinue
         Push-Location $PSScriptRoot/mobile-app
 
         $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
@@ -104,6 +107,19 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"(EXC_[A-Z_]+|SIG[A-Z]+)`""
+        $result.Envelopes() | Should -HaveCount 1
+    }
+
+    It 'does not leak managed exception as NSException (<configuration>, <runtime>)' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunIosApp -Dsn $url -TestArg "OnActivated"
+            RunIosApp -Dsn $url
+        }
+
+        $result.HasErrors() | Should -BeFalse
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"nsexception`""
         $result.Envelopes() | Should -HaveCount 1
     }
 

@@ -1,5 +1,35 @@
 # Changelog
 
+## 6.10.0
+
+### Features ✨
+
+- feat: Logs sent via `SentrySdk.Logger` no longer require `EnableLogs` by @jamescrosswell in [#5512](https://github.com/getsentry/sentry-dotnet/pull/5512)
+- feat: `SentryOptions.EnableMetrics` is obsolete and ignored by @jamescrosswell in [#5509](https://github.com/getsentry/sentry-dotnet/pull/5509)
+
+### Fixes 🐛
+
+- fix: Prevent managed exceptions from leaking as NSExceptions, resulting in duplicate exception capture on iOS by @jpnurmi in [#5525](https://github.com/getsentry/sentry-dotnet/pull/5525)
+- fix(profiling): release the EventPipe session when the SDK shuts down by @jamescrosswell in [#5470](https://github.com/getsentry/sentry-dotnet/pull/5470)
+- fix: Memory leak in Sentry.Profiling due to EventLog interning tables growing indefinitely by @jamescrosswell in [#5503](https://github.com/getsentry/sentry-dotnet/pull/5503)
+- fix: Attachments not being sent properly when Spotlight is enabled by @XAN9xXx in [#5511](https://github.com/getsentry/sentry-dotnet/pull/5511)
+- fix: Heap dump files are now deleted from disk once they have been sent to Sentry by @XAN9xXx in [#5481](https://github.com/getsentry/sentry-dotnet/pull/5481)
+- fix: populate sentry.sdk.name and sentry.sdk.version for console apps by @zkasuran in [#5483](https://github.com/getsentry/sentry-dotnet/pull/5483)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Java SDK to v8.54.0 by @github-actions in [#5517](https://github.com/getsentry/sentry-dotnet/pull/5517)
+- chore(deps): update Cocoa SDK to v9.26.1 by @github-actions in [#5516](https://github.com/getsentry/sentry-dotnet/pull/5516)
+- chore(deps): update CLI to v3.7.0 by @github-actions in [#5520](https://github.com/getsentry/sentry-dotnet/pull/5520)
+- chore(deps): update Native SDK to v0.16.4 by @github-actions in [#5508](https://github.com/getsentry/sentry-dotnet/pull/5508)
+- chore(deps): update Java SDK to v8.53.0 by @github-actions in [#5484](https://github.com/getsentry/sentry-dotnet/pull/5484)
+
+### Other
+
+- deps: update perfview (removes the .il suffix from profile module names) by @jamescrosswell in [#5502](https://github.com/getsentry/sentry-dotnet/pull/5502)
+
 ## 6.9.0
 
 ### Features ✨

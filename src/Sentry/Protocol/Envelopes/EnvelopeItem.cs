@@ -31,6 +31,12 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string FileNameKey = "filename";
 
     /// <summary>
+    /// An item header is a single short JSON object.
+    /// Bounding the read stops us buffering a whole corrupt file into memory.
+    /// </summary>
+    internal const int MaxHeaderLineLength = 64 * 1024;
+
+    /// <summary>
     /// Header associated with this envelope item.
     /// </summary>
     public IReadOnlyDictionary<string, object?> Header { get; }
@@ -329,11 +335,43 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// </summary>
     public static EnvelopeItem FromAttachment(SentryAttachment attachment)
     {
+        if (attachment.Content is ByteAttachmentContent byteContent &&
+            byteContent.GetType() == typeof(ByteAttachmentContent))
+        {
+            var payload = new AttachmentSerializable(byteContent);
+            var payloadLength = byteContent.Bytes.Length;
+
+            return CreateAttachmentItem(attachment, payload, payloadLength);
+        }
+
+        if (attachment.Content is FileAttachmentContent { DeleteOnClose: false } fileContent &&
+            fileContent.GetType() == typeof(FileAttachmentContent))
+        {
+            using var lengthStream = fileContent.GetStream();
+
+            var payload = new AttachmentSerializable(fileContent);
+            var payloadLength = lengthStream.TryGetLength();
+
+            return CreateAttachmentItem(attachment, payload, payloadLength);
+        }
+
         var stream = attachment.Content.GetStream();
+
         return FromAttachment(attachment, stream);
     }
 
     internal static EnvelopeItem FromAttachment(SentryAttachment attachment, Stream stream)
+    {
+        var payloadLength = stream.TryGetLength();
+        var payload = new BufferedStreamSerializable(stream);
+
+        return CreateAttachmentItem(attachment, payload, payloadLength);
+    }
+
+    private static EnvelopeItem CreateAttachmentItem(
+        SentryAttachment attachment,
+        ISerializable payload,
+        long? payloadLength)
     {
         var attachmentType = attachment.Type switch
         {
@@ -349,13 +387,13 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         var header = new Dictionary<string, object?>(5, StringComparer.Ordinal)
         {
             [TypeKey] = TypeValueAttachment,
-            [LengthKey] = stream.TryGetLength(),
+            [LengthKey] = payloadLength,
             [FileNameKey] = attachment.FileName,
             ["attachment_type"] = attachmentType,
             ["content_type"] = attachment.ContentType
         };
 
-        return new EnvelopeItem(header, new StreamSerializable(stream));
+        return new EnvelopeItem(header, payload);
     }
 
     /// <summary>
@@ -399,7 +437,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         Stream stream,
         CancellationToken cancellationToken = default)
     {
-        var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+        var buffer = await stream.ReadLineAsync(MaxHeaderLineLength, cancellationToken).ConfigureAwait(false);
 
         return
             Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)

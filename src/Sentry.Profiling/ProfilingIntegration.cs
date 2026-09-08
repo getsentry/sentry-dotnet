@@ -6,9 +6,14 @@ namespace Sentry.Profiling;
 /// <summary>
 /// Enables transaction performance profiling.
 /// </summary>
-public class ProfilingIntegration : ISdkIntegration
+public class ProfilingIntegration : ISdkIntegration, IDisposable
 {
     private TimeSpan _startupTimeout;
+
+    private readonly object _lock = new();
+    private SentryOptions? _options;
+    private SamplingTransactionProfilerFactory? _ownedFactory;
+    private int _registrations;
 
     /// <summary>
     /// Initializes the profiling integration.
@@ -35,7 +40,21 @@ public class ProfilingIntegration : ISdkIntegration
         {
             try
             {
-                options.TransactionProfilerFactory ??= new SamplingTransactionProfilerFactory(options, _startupTimeout);
+                lock (_lock)
+                {
+                    if (options.TransactionProfilerFactory is null)
+                    {
+                        var factory = new SamplingTransactionProfilerFactory(options, _startupTimeout);
+                        options.TransactionProfilerFactory = factory;
+                        _options = options;
+                        _ownedFactory = factory;
+                        _registrations = 1;
+                    }
+                    else if (ReferenceEquals(options.TransactionProfilerFactory, _ownedFactory))
+                    {
+                        _registrations++;
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -46,5 +65,31 @@ public class ProfilingIntegration : ISdkIntegration
         {
             options.LogInfo("Profiling Integration is disabled because profiling is disabled by configuration.");
         }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        SamplingTransactionProfilerFactory factory;
+        lock (_lock)
+        {
+            // Another hub may have registered this integration and still be using the factory.
+            if (_ownedFactory is null || --_registrations > 0)
+            {
+                return;
+            }
+
+            factory = _ownedFactory;
+
+            if (_options is { } options && ReferenceEquals(options.TransactionProfilerFactory, factory))
+            {
+                options.TransactionProfilerFactory = null;
+            }
+
+            _ownedFactory = null;
+            _options = null;
+        }
+
+        factory.Dispose();
     }
 }

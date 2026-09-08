@@ -4,7 +4,7 @@ This directory includes samples using the main SDK which is part of the [Sentry]
 
 Regardless if you are interested in one of the frameworks or libraries integrations, make sure to check out also the `Console` samples.
 
-These packages are not independant/disconnected integrations with Sentry. They all use the same underlying API to capture context data and event capture.
+These packages are not independent/disconnected integrations with Sentry. They all use the same underlying API to capture context data and event capture.
 
 For example the `Console.Customized` sample will show you many of the settings which are available also if you are using the `ASP.NET Core` integration. Not necessarily all the same examples will be included in the latter.
 

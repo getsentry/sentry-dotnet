@@ -11,6 +11,12 @@ namespace Sentry.Protocol.Envelopes;
 /// </summary>
 public sealed class Envelope : ISerializable, IDisposable
 {
+    /// <summary>
+    /// The envelope header is a single short JSON object.
+    /// Bounding the read stops us buffering a whole corrupt file into memory.
+    /// </summary>
+    internal const int MaxHeaderLineLength = 64 * 1024;
+
     // caches the event id from the header
     private SentryId? _eventId;
 
@@ -265,6 +271,42 @@ public sealed class Envelope : ISerializable, IDisposable
     {
         try
         {
+            // Derived content types may provide a different stream implementation.
+            if (attachment.Content is ByteAttachmentContent byteAttachment &&
+                byteAttachment.GetType() == typeof(ByteAttachmentContent))
+            {
+                if (byteAttachment.Bytes.Length != 0)
+                {
+                    items.Add(EnvelopeItem.FromAttachment(attachment));
+                }
+                else
+                {
+                    logger?.LogWarning("Did not add '{0}' to envelope because the byte array was empty.",
+                        attachment.FileName);
+                }
+
+                return;
+            }
+
+            if (attachment.Content is FileAttachmentContent { DeleteOnClose: false } fileAttachment &&
+                fileAttachment.GetType() == typeof(FileAttachmentContent))
+            {
+                var item = EnvelopeItem.FromAttachment(attachment);
+                if (item.TryGetLength() != 0)
+                {
+                    items.Add(item);
+                }
+                else
+                {
+                    item.Dispose();
+
+                    logger?.LogWarning("Did not add '{0}' to envelope because the file was empty.",
+                        attachment.FileName);
+                }
+
+                return;
+            }
+
             // We pull the stream out here so we can length check
             // to avoid adding an invalid attachment
             var stream = attachment.Content.GetStream();
@@ -483,7 +525,7 @@ public sealed class Envelope : ISerializable, IDisposable
         Stream stream,
         CancellationToken cancellationToken = default)
     {
-        var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+        var buffer = await stream.ReadLineAsync(MaxHeaderLineLength, cancellationToken).ConfigureAwait(false);
 
         var header =
             Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)

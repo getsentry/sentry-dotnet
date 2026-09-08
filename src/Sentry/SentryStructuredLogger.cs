@@ -13,9 +13,7 @@ public abstract partial class SentryStructuredLogger
 
     internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
-        return options.EnableLogs
-            ? new DefaultSentryStructuredLogger(hub, options, clock, batchCount, batchInterval)
-            : DisabledSentryStructuredLogger.Instance;
+        return new DefaultSentryStructuredLogger(hub, options, clock, batchCount, batchInterval);
     }
 
     private protected SentryStructuredLogger()
