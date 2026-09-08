@@ -6,9 +6,9 @@ using Quartz;
 namespace Sentry.Quartz;
 
 /// <summary>
-/// Quartz.NET Extensions for <see cref="GlobalConfigurationExtensions"/>.
+/// Quartz.NET Extensions for <see cref="IQuartzBuilderExtensions"/>.
 /// </summary>
-public static class GlobalConfigurationExtensions
+public static class IQuartzBuilderExtensions
 {
     /// <summary>
     /// Adds middleware to track CRON jobs to Sentry
