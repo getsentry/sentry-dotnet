@@ -203,6 +203,7 @@
     <Project Path="test/Sentry.OpenTelemetry.Exporter.Tests/Sentry.OpenTelemetry.Exporter.Tests.csproj" />
     <Project Path="test/Sentry.OpenTelemetry.Tests/Sentry.OpenTelemetry.Tests.csproj" />
     <Project Path="test/Sentry.Profiling.Tests/Sentry.Profiling.Tests.csproj" />
+    <Project Path="test/Sentry.Quartz.Tests/Sentry.Quartz.Tests.csproj" />
     <Project Path="test/Sentry.Serilog.Tests/Sentry.Serilog.Tests.csproj" />
     <Project Path="test/Sentry.Testing.CrashableApp/Sentry.Testing.CrashableApp.csproj" />
     <Project Path="test/Sentry.Testing/Sentry.Testing.csproj" />

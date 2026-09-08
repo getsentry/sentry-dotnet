@@ -82,6 +82,7 @@
       "test\\Sentry.OpenTelemetry.Exporter.Tests\\Sentry.OpenTelemetry.Exporter.Tests.csproj",
       "test\\Sentry.OpenTelemetry.Tests\\Sentry.OpenTelemetry.Tests.csproj",
       "test\\Sentry.Profiling.Tests\\Sentry.Profiling.Tests.csproj",
+      "test\\Sentry.Quartz.Tests\\Sentry.Quartz.Tests.csproj",
       "test\\Sentry.Serilog.Tests\\Sentry.Serilog.Tests.csproj",
       "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",

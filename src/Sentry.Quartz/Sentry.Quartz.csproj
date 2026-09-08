@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-<!--    <InternalsVisibleTo Include="Sentry.Quartz.Tests" PublicKey="$(SentryPublicKey)" />-->
+    <InternalsVisibleTo Include="Sentry.Quartz.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>
