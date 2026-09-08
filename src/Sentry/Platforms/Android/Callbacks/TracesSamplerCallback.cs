@@ -18,9 +18,9 @@ internal class TracesSamplerCallback : JavaObject, JavaSdk.SentryOptions.ITraces
 
     public JavaDouble? Sample(JavaSdk.SamplingContext c)
     {
-        var context = c.ToTransactionSamplingContext();
         try
         {
+            var context = c.ToTransactionSamplingContext();
             return (JavaDouble?)_tracesSampler.Invoke(context);
         }
         catch (Exception exception)
