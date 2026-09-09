@@ -153,6 +153,17 @@ gh pr view --json number -q '.number'
 - Maintain **backwards compatibility** — avoid breaking public API without strong justification
 - Platform-specific code lives in `src/Sentry/Platforms/` and is conditionally compiled
 
+## Code Style: prefer no comments
+
+This repository favours clean, readable code that needs no comments at all. Reach for a
+better name or a smaller method before reaching for a comment. Where something genuinely
+isn't obvious — a non-intuitive framework behaviour, a workaround for an upstream bug — a
+minimal comment is fine, but the code and the PR description are the documentation.
+
+Do not add comments that restate what the code already says. In particular, don't annotate
+members as being exposed for tests (`// Exposed for tests`) — that's already apparent from
+the member being `internal` and from tests being its only callers.
+
 ## Adding New Options (AOT Compatibility)
 
 `SentryOptions` is **not** bound directly from configuration. Instead, a parallel `BindableSentryOptions` class (`src/Sentry/BindableSentryOptions.cs`) exists for AOT-safe configuration binding.

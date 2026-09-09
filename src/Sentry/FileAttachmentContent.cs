@@ -9,7 +9,10 @@ public class FileAttachmentContent : IAttachmentContent
 {
     private readonly bool _readFileAsynchronously;
 
-    private readonly bool _deleteOnClose;
+    /// <summary>
+    /// Whether to delete the file when the stream is closed.
+    /// </summary>
+    internal bool DeleteOnClose { get; }
 
     /// <summary>
     /// The path to the file to attach.
@@ -38,12 +41,12 @@ public class FileAttachmentContent : IAttachmentContent
     /// </summary>
     /// <param name="filePath">The path to the file to attach.</param>
     /// <param name="readFileAsynchronously">Whether to use async file I/O to read the file.</param>
-    /// <param name="deleteOnClose">Whether to delete the file when it closed.</param>
+    /// <param name="deleteOnClose">Whether to delete the file when the stream is closed.</param>
     public FileAttachmentContent(string filePath, bool readFileAsynchronously, bool deleteOnClose)
     {
         FilePath = filePath;
+        DeleteOnClose = deleteOnClose;
         _readFileAsynchronously = readFileAsynchronously;
-        _deleteOnClose = deleteOnClose;
     }
 
     /// <inheritdoc />
@@ -56,7 +59,7 @@ public class FileAttachmentContent : IAttachmentContent
             options |= FileOptions.Asynchronous;
         }
 
-        if (_deleteOnClose)
+        if (DeleteOnClose)
         {
             options |= FileOptions.DeleteOnClose;
         }

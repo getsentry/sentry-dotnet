@@ -8,8 +8,10 @@ runs:
     - name: Set Environment Variables
       shell: bash
       run: |
+        # actions/setup-java v6 exports the ARM64 path as JAVA_HOME_<version>_AARCH64;
+        # v5 and earlier used JAVA_HOME_<version>_ARM64. Accept either.
         if [[ "$RUNNER_ARCH" == "ARM64" ]]; then
-          echo "JAVA_HOME_21=$JAVA_HOME_21_ARM64" >> $GITHUB_ENV
+          echo "JAVA_HOME_21=${JAVA_HOME_21_AARCH64:-$JAVA_HOME_21_ARM64}" >> $GITHUB_ENV
         else
           echo "JAVA_HOME_21=$JAVA_HOME_21_X64" >> $GITHUB_ENV
         fi

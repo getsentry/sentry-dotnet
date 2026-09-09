@@ -34,7 +34,6 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <remarks>
     /// Available options:
     /// <list type="bullet">
-    /// <item><see cref="Sentry.SentryOptions.EnableMetrics"/></item>
     /// <item><see cref="Sentry.SentryOptions.SetBeforeSendMetric(System.Func{SentryMetric, SentryMetric})"/></item>
     /// </list>
     /// </remarks>

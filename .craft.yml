@@ -5,23 +5,85 @@ targets:
   - name: nuget
   - name: github
   - name: registry
+    # Every package carries name/packageUrl/mainDocsUrl so craft can create the registry entry
+    # itself when we add a new package. Craft only reads them for a package it hasn't published
+    # before, but a missing `name` fails the whole registry target rather than just that package -
+    # which has caught us on nearly every new package, most recently #5495.
+    # Keep these in sync with the registry: craft writes them over the manifest on every release.
     sdks:
       nuget:Sentry:
+        name: Sentry
+        packageUrl: https://www.nuget.org/packages/Sentry
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/
       nuget:Sentry.AspNetCore:
+        name: Sentry.AspNetCore
+        packageUrl: https://www.nuget.org/packages/Sentry.AspNetCore
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/aspnetcore/
       nuget:Sentry.AspNetCore.Grpc:
+        name: Sentry.AspNetCore.Grpc
+        packageUrl: https://www.nuget.org/packages/Sentry.AspNetCore.Grpc
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/aspnetcore/
       nuget:Sentry.AspNetCore.Blazor.WebAssembly:
+        name: Sentry.AspNetCore.Blazor.WebAssembly
+        packageUrl: https://www.nuget.org/packages/Sentry.AspNetCore.Blazor.WebAssembly
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/blazor-webassembly/
       nuget:Sentry.AspNet:
+        name: Sentry.AspNet
+        packageUrl: https://www.nuget.org/packages/Sentry.AspNet
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/aspnet/
       nuget:Sentry.DiagnosticSource:
+        name: Sentry.DiagnosticSource
+        packageUrl: https://www.nuget.org/packages/Sentry.DiagnosticSource
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/automatic-instrumentation/#diagnosticsource-integration
       nuget:Sentry.EntityFramework:
+        name: Sentry.EntityFramework
+        packageUrl: https://www.nuget.org/packages/Sentry.EntityFramework
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/entityframework/
       nuget:Sentry.Extensions.AI:
+        name: Sentry.Extensions.AI
+        packageUrl: https://www.nuget.org/packages/Sentry.Extensions.AI
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/ai-agents-module/
       nuget:Sentry.Extensions.Logging:
+        name: Sentry.Extensions.Logging
+        packageUrl: https://www.nuget.org/packages/Sentry.Extensions.Logging
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/extensions-logging/
       nuget:Sentry.Google.Cloud.Functions:
+        name: Sentry.Google.Cloud.Functions
+        packageUrl: https://www.nuget.org/packages/Sentry.Google.Cloud.Functions
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/google-cloud-functions/
       nuget:Sentry.Hangfire:
+        name: Sentry.Hangfire
+        packageUrl: https://www.nuget.org/packages/Sentry.Hangfire
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/crons/hangfire/
       nuget:Sentry.Log4Net:
+        name: Sentry.Log4Net
+        packageUrl: https://www.nuget.org/packages/Sentry.Log4Net
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/log4net/
       nuget:Sentry.Maui:
+        name: Sentry.Maui
+        packageUrl: https://www.nuget.org/packages/Sentry.Maui
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/maui/
       nuget:Sentry.Maui.CommunityToolkit.Mvvm:
+        name: Sentry.Maui.CommunityToolkit.Mvvm
+        packageUrl: https://www.nuget.org/packages/Sentry.Maui.CommunityToolkit.Mvvm
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/maui/
       nuget:Sentry.NLog:
+        name: Sentry.NLog
+        packageUrl: https://www.nuget.org/packages/Sentry.NLog
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/nlog/
       nuget:Sentry.OpenTelemetry:
+        name: Sentry.OpenTelemetry
+        packageUrl: https://www.nuget.org/packages/Sentry.OpenTelemetry
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/opentelemetry/
       nuget:Sentry.OpenTelemetry.Exporter:
+        name: Sentry.OpenTelemetry.Exporter
+        packageUrl: https://www.nuget.org/packages/Sentry.OpenTelemetry.Exporter
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/opentelemetry-otlp/
       nuget:Sentry.Serilog:
+        name: Sentry.Serilog
+        packageUrl: https://www.nuget.org/packages/Sentry.Serilog
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/serilog/
       nuget:Sentry.Profiling:
+        name: Sentry.Profiling
+        packageUrl: https://www.nuget.org/packages/Sentry.Profiling
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/profiling/

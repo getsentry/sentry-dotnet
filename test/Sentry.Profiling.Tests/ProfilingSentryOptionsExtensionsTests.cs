@@ -62,6 +62,79 @@ public class ProfilingSentryOptionsExtensionsTests
     }
 
     [Fact]
+    public void HubDispose_DisposesTheProfilerFactoryItCreated()
+    {
+        _options.TracesSampleRate = 1.0;
+        _options.ProfilesSampleRate = 1.0;
+
+        var hub = GetSut();
+        var factory = (SamplingTransactionProfilerFactory)_options.TransactionProfilerFactory!;
+        Assert.False(factory.IsDisposed);
+
+        hub.Dispose();
+
+        Assert.True(factory.IsDisposed);
+    }
+
+    [Fact]
+    public void HubDispose_OptionsReusedByANewHub_ProfilerFactoryIsRecreated()
+    {
+        _options.TracesSampleRate = 1.0;
+        _options.ProfilesSampleRate = 1.0;
+
+        using (var first = GetSut())
+        {
+            Assert.NotNull(_options.TransactionProfilerFactory);
+        }
+
+        using var second = GetSut();
+
+        var factory = (SamplingTransactionProfilerFactory)_options.TransactionProfilerFactory!;
+        factory.IsDisposed.Should().BeFalse(
+            "a disposed factory left in the options would silently stop profiling for the new hub");
+    }
+
+    [Fact]
+    public void HubDispose_WhileAnotherHubIsStillRegistered_KeepsTheProfilerFactoryAlive()
+    {
+        _options.TracesSampleRate = 1.0;
+        _options.ProfilesSampleRate = 1.0;
+
+        // SentrySdk.Init is UseHub(InitHub(options)) - the replacement hub registers before the
+        // outgoing one is disposed.
+        var first = GetSut();
+        var factory = (SamplingTransactionProfilerFactory)_options.TransactionProfilerFactory!;
+        var second = GetSut();
+
+        first.Dispose();
+
+        _options.TransactionProfilerFactory.Should().BeSameAs(factory);
+        factory.IsDisposed.Should().BeFalse("the replacement hub is still using it");
+
+        second.Dispose();
+
+        factory.IsDisposed.Should().BeTrue("the last hub using it has gone");
+        _options.TransactionProfilerFactory.Should().BeNull();
+    }
+
+    [Fact]
+    public void HubDispose_DoesNotDisposeAProfilerFactoryItDidNotCreate()
+    {
+        _options.TracesSampleRate = 1.0;
+        _options.ProfilesSampleRate = 1.0;
+
+        var externalFactory = Substitute.For<ITransactionProfilerFactory, IDisposable>();
+        _options.TransactionProfilerFactory = externalFactory;
+
+        using (var hub = GetSut())
+        {
+            Assert.Same(externalFactory, _options.TransactionProfilerFactory);
+        }
+
+        ((IDisposable)externalFactory).DidNotReceive().Dispose();
+    }
+
+    [Fact]
     public void AddProfilingIntegration_DoesntDuplicate()
     {
         var options = new SentryOptions();
