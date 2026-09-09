@@ -80,7 +80,16 @@ public static partial class SentrySdk
                 nativeOptions.TracesSampler = cocoaContext =>
                 {
                     var context = cocoaContext.ToTransactionSamplingContext();
-                    var result = tracesSampler(context);
+                    double? result;
+                    try
+                    {
+                        result = tracesSampler(context);
+                    }
+                    catch (Exception ex)
+                    {
+                        options.LogError(ex, "TracesSampler callback failed.");
+                        result = null;
+                    }
 
                     // Note: Nullable result is allowed but delegate is generated incorrectly
                     // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
