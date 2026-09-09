@@ -11,6 +11,10 @@ public sealed class LocalDbFixture : IDisposable
         "SqlListenerTests10";
 #elif NET11_0
         "SqlListenerTests11";
+#elif NET9_0
+        "SqlListenerTests9";
+#elif NET8_0
+        "SqlListenerTests8";
 #else
 #error Needs a version specific name to prevent the tests from tripping over one another when running in parallel
 #endif

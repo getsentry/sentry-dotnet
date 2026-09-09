@@ -28,8 +28,8 @@
     <!-- Centralized TFM versions -->
     <LatestTfm>net11.0</LatestTfm>
     <PreviousTfm>net10.0</PreviousTfm>
-    <OldestTfm>net10.0</OldestTfm>
-    <CurrentTfms>net10.0;net11.0</CurrentTfms>
+    <OldestTfm>net8.0</OldestTfm>
+    <CurrentTfms>net8.0;net9.0;net10.0;net11.0</CurrentTfms>
     <LatestAndroidTfm>net11.0-android37.0</LatestAndroidTfm>
     <PreviousAndroidTfm>net10.0-android36.0</PreviousAndroidTfm>
     <LatestIosTfm>net11.0-ios26.5</LatestIosTfm>

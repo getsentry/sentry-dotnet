@@ -27,6 +27,10 @@ internal static class ReferenceAssembliesExtensions
                 return Net110;
 #elif NET10_0
                 return ReferenceAssemblies.Net.Net100;
+#elif NET9_0
+                return ReferenceAssemblies.Net.Net90;
+#elif NET8_0
+                return ReferenceAssemblies.Net.Net80;
 #else
 #warning Target Framework not implemented.
                 throw new UnreachableException();

@@ -34,6 +34,7 @@ We prefer code that explains itself, so comments should be kept to a minimum:
 ## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
+  - [.NET 11.0](https://dotnet.microsoft.com/download/dotnet/11.0)
   - [.NET 10.0](https://dotnet.microsoft.com/download/dotnet/10.0)
   - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
@@ -185,6 +186,43 @@ fix it. Most of these repeat annually — please extend this section rather than
 The single most useful habit: **`dotnet pack` and the integration tests, run locally, catch most
 of this.** Building and testing a solution filter does not — several of these only appear at pack
 time, in the integration tests, or in projects that aren't in any filter.
+
+### Which target frameworks we support
+
+Mobile and non-mobile follow different rules, because mobile workloads are far more expensive to
+keep working across versions:
+
+- **Mobile** (`-android`, `-ios`, `-maccatalyst`, `-windows`): every .NET version still supported
+  by Microsoft — in practice the latest two.
+- **Non-mobile**: the latest two LTS releases, plus every STS release after the older of them.
+
+So while .NET 10 is the latest LTS we support net8.0 and later; when .NET 12 ships that becomes
+net10.0 and later. The count oscillates between three and four: each year adds one TFM, and every
+second year — when a new LTS lands — drops two.
+
+These map onto properties in `Directory.Build.props`, and nothing else needs to change:
+
+| Property | Holds | Used by |
+| --- | --- | --- |
+| `CurrentTfms` | the whole non-mobile set | the 13 packages and 20 test projects that aren't mobile-specific |
+| `OldestTfm` | first entry of `CurrentTfms` | — |
+| `LatestTfm` / `PreviousTfm` | the two newest non-mobile TFMs | `Sentry.Maui`, `Sentry.Maui.CommunityToolkit.Mvvm`, `Sentry.Android.AssemblyReader`, benchmarks |
+| `Latest*Tfm` / `Previous*Tfm` | the two newest per mobile platform | the mobile TFM lists |
+
+Because the mobile projects reference `LatestTfm`/`PreviousTfm` rather than `CurrentTfms`, widening
+the non-mobile set does **not** pull mobile along with it.
+
+Two things don't follow automatically when you add or drop a non-mobile TFM:
+
+- **Exhaustive `#if` ladders.** `SingleFileAppTests.cs`, `ReferenceAssembliesExtensions.cs` and
+  `LocalDbFixture.cs` switch on the exact TFM and `#error` on an unknown one. They fail loudly, by
+  design — add an arm rather than a fallback.
+- **Verify snapshots.** Each non-mobile TFM has its own `.DotNet{N}_0.` variants. The
+  `ApiApprovalTests` ones are regenerated and committed by the `verify api` workflow, so in practice
+  only the behavioural snapshots need attention.
+
+When dropping a TFM, delete its snapshots but **leave the `#elif NET{N}_0` arms in `src/` alone** —
+they cost nothing, and the next LTS transition brings some of those versions back.
 
 ### Recurring, expect these every time
 
