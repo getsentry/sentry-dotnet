@@ -16,8 +16,8 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
     # versions to test a single version of .NET.
     # See https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
     #
-    # Both runtimes: .NET 11 makes CoreCLR the default but Mono remains opt-in-able and
-    # supported through .NET 11 servicing, so we keep testing it.
+    # Both runtimes: .NET 11 makes CoreCLR the default and plans to drop Mono for mobile at GA;
+    # UseMonoRuntime is an escape hatch for the pre-releases. See #5553.
     @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "coreclr" }
     @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "coreclr" }
     @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "mono" }
@@ -38,10 +38,9 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
         $useMonoRuntime = if ($runtime -eq 'mono') { 'true' } else { 'false' }
-        # .NET 11 preview 7 rejects UseMonoRuntime on mobile TFMs with NETSDK1242, even though the
-        # documented opt-back is UseMonoRuntime alone. _DisableCheckForUnsupportedMonoMobileRuntime
-        # turns that check off; it is an SDK-internal property and should be dropped once the
-        # documented path works. See https://github.com/getsentry/sentry-dotnet/pull/5529#issuecomment-5599219968
+        # See the note in android.Tests.ps1: preview 7 rejects UseMonoRuntime on mobile TFMs with
+        # NETSDK1242, and _DisableCheckForUnsupportedMonoMobileRuntime turns that check off.
+        # Both go away when Mono does, at .NET 11 GA - see #5553.
         $monoArgs = @()
         if ($useMonoRuntime -eq 'true')
         {

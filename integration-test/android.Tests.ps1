@@ -17,8 +17,9 @@ BeforeDiscovery {
     $script:emulator = Get-AndroidEmulatorId
 }
 
-# Both runtimes, on every framework we support. .NET 11 makes CoreCLR the default but
-# Mono remains opt-in-able and supported through .NET 11 servicing, so we keep testing it.
+# Both runtimes, on every framework we support. .NET 11 makes CoreCLR the default and plans to
+# drop Mono for mobile at GA; UseMonoRuntime is an escape hatch for the pre-releases. We keep
+# testing Mono for as long as it exists - see #5553 for the GA cleanup.
 $cases = @(
     @{ configuration = 'Release'; runtime = 'coreclr' }
     @{ configuration = 'Debug';   runtime = 'coreclr' }
@@ -51,10 +52,11 @@ Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cas
         # restore, and it has to be set at restore time so the right runtime pack is downloaded
         # (NETSDK1112).
         #
-        # .NET 11 preview 7 rejects UseMonoRuntime on mobile TFMs with NETSDK1242, even though
-        # the documented opt-back is UseMonoRuntime alone. _DisableCheckForUnsupportedMonoMobileRuntime
-        # turns that check off; it is an SDK-internal property and should be dropped once the
-        # documented path works. See https://github.com/getsentry/sentry-dotnet/pull/5529#issuecomment-5599219968
+        # .NET 11 preview 7 rejects UseMonoRuntime on mobile TFMs with NETSDK1242, even though the
+        # blog documents UseMonoRuntime alone as the pre-release opt-back. The SDK's own
+        # _DisableCheckForUnsupportedMonoMobileRuntime turns that check off, and the Mono runtime
+        # packs still ship, so this produces a real Mono build. Both this and the Mono cases above
+        # go away when Mono does, at .NET 11 GA - see #5553.
         $monoProps = "<UseMonoRuntime Condition=`"'`$(TargetFramework)' == '$tfm'`">$useMonoRuntime</UseMonoRuntime>"
         if ($useMonoRuntime -eq 'true')
         {
