@@ -84,11 +84,23 @@ modules/              # Native SDK submodules (sentry-native, Ben.Demystifier, e
 scripts/              # Build and maintenance scripts
 ```
 
+## Upgrading to a new .NET major version
+
+Taking a dependency on a new .NET preview breaks the same handful of things every year -
+package/version pinning, container base images, per-TFM `ItemGroup`s, platform minimums, CI
+runner setup, Xcode pinning and Verify snapshots. Read
+[CONTRIBUTING.md -> Upgrading to a new .NET major version](CONTRIBUTING.md#upgrading-to-a-new-net-major-version)
+before starting one, and extend it with anything new you hit.
+
+Two things worth knowing up front, because they cost the most time when missed:
+`dotnet pack` and the integration tests catch most of it and a solution-filter build does not,
+and the local checks must be run **serially**.
+
 ## Platform Targets
 
 ### Non-mobile (Linux / macOS / Windows)
 - Use `SentryNoMobile.slnf` — no extra toolchain needed.
-- Targets: `net9.0`, `net10.0`, `netstandard2.0`, `netstandard2.1`, `net462`.
+- Targets: `net10.0`, `net11.0`, `netstandard2.0`, `netstandard2.1`, `net462`.
 
 ### Android
 - Requires `JAVA_HOME` set and Java installed.
