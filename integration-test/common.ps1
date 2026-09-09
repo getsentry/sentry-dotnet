@@ -90,9 +90,8 @@ BeforeAll {
         if (-not (Test-Path env:CI))
         {
             Write-Host "Packaging $name, expected output path: $packagePath"
-            # Exclude the Windows target frameworks when packing off Windows. MAUI 11 generates a
-            # .pri via the Windows-only makepri.exe, so a net11.0-windows build can't run here -
-            # and unlike CI, which packs with --no-build, this pack builds. The Windows assets
+            # Exclude Windows TFMs when not packing on Windows. MAUI 11 generates a
+            # .pri via the Windows-only makepri.exe. The Windows assets
             # aren't needed by the mobile and console apps these tests exercise.
             $packArgs = @("$PSScriptRoot/../src/$name", '-c', 'Release', '--nologo',
                 "-p:Version=$packageVersion", '-p:IsPackable=true')

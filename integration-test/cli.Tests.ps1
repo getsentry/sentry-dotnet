@@ -104,10 +104,8 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
 }
 
 Describe 'MAUI (<framework>)' -ForEach @(
-    # Latest, not previous: each .NET for iOS SDK pack pins an exact Xcode version, and only
-    # the net11.0 one matches the Xcode that CI (and local dev) is on. A net10.0-ios app build
-    # fails with "requires Xcode 26.0. The current version of Xcode is 26.6". Libraries skip
-    # that check, which is why only app builds like this one are affected.
+    # Each .NET for iOS SDK pins an Xcode version. Our CI builds use a runner matching
+    # the latest. Only app builds are affected (not libraries/packages).
     @{ framework = $latestFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
@@ -165,15 +163,13 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'libsentry-android.so',
             'libsentry.so',
             'libsentrysupplemental.so',
-            # The .NET 11 Android workload splits the debug symbols out of libxamarin-app.so
-            # into a separate .dbg.so, so both are now uploaded.
+            # .NET 11 splits the debug symbols into a separate .dbg.so
             'libxamarin-app.dbg.so',
             'libxamarin-app.so',
             'maui-app.pdb'
         )
-        # The exact count moves with the SDK - it went from 23 to 25 when the .NET 11 Android
-        # workload started emitting a separate .dbg.so - so only assert it's non-zero, as the
-        # iOS case below already does.
+        # The exact count differs per SDK version (went from 23 to 25 in .NET 11)
+        # So only assert it's non-zero (same as we do for iOS)
         $nonZeroNumberRegex = '[1-9][0-9]*';
         $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
@@ -182,8 +178,6 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios$iosTpv"
         Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-            # .NET 11 replaced Mono with CoreCLR on iOS, so the native libraries uploaded are
-            # the CoreCLR set (libcoreclr, libclrjit, libmscor*) rather than the Mono ones.
             'libclrjit.dylib',
             'libcoreclr.dylib',
             'libmscordaccore.dylib',

@@ -411,9 +411,8 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
-          # This job runs aot.Tests.ps1, which has the Container test, so it needs the same pin.
-          # The glibc tag is multi-arch and covers linux/arm/v7 for the linux-arm leg; the
-          # win-x86 leg skips the Container test.
+          # aot.Tests.ps1 has the Container test, so it needs the same pin.
+          # The glibc tag covers linux/arm/v7; win-x86 skips the Container test.
           ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_GLIBC }}
         with:
           path: integration-test/aot.Tests.ps1

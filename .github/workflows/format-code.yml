@@ -44,10 +44,7 @@ jobs:
         #
         # We exclude `test/Sentry.MauiTrimTest/Platforms` because dotnet-format adds an Android
         # JNI constructor to the iOS, MacCatalyst and Tizen `Program` types, which don't have an
-        # Android base type - breaking those TFMs. MAUI projects surface every platform folder in
-        # every TFM's Compile items (the SDK filters them later during the build), so the tool
-        # analyses iOS sources in an Android context and misapplies the fix.
-        # - see https://github.com/getsentry/sentry-dotnet/pull/5529#discussion_r3945970550
+        # Android base type - breaking those TFMs.
         run: dotnet format Sentry.slnx --no-restore --report ./dotnet-format-report --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs ./test/Sentry.MauiTrimTest/Platforms
 
       - name: Upload Format Report

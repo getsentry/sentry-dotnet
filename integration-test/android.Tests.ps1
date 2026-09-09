@@ -22,7 +22,7 @@ $cases = @(
     @{ configuration = 'Release'; runtime = 'coreclr' }
     @{ configuration = 'Debug';   runtime = 'coreclr' }
 )
-# .NET 11 removed the Mono runtime for Android (NETSDK1242), so mono only applies below it.
+# .NET 11 removed the Mono runtime for Android (NETSDK1242)
 if ([version]($dotnet_version -replace '^net', '') -lt [version]'11.0') {
     $cases += @(
         @{ configuration = 'Release'; runtime = 'mono' }

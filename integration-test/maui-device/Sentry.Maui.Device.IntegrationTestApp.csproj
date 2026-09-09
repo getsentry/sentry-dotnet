@@ -10,8 +10,8 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Maui.Device.IntegrationTestApp</RootNamespace>
     <UseMaui>true</UseMaui>
-    <!-- ReadyToRun can't target Android at all - crossgen2 fails with "Target OS 'android' is
-         not supported" - but the .NET 11 SDK turns it on by default (NETSDK1096). -->
+    <!-- ReadyToRun can't target Android - crossgen2 fails with "Target OS 'android' is
+         not supported" - but .NET 11 turns it on by default (NETSDK1096). -->
     <PublishReadyToRun>false</PublishReadyToRun>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
