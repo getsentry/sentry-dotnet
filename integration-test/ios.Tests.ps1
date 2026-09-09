@@ -15,8 +15,13 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
     # Note: only the latest iOS TFM is covered. Each github runner only has Xcode
     # versions to test a single version of .NET.
     # See https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
+    #
+    # Both runtimes: .NET 11 makes CoreCLR the default but Mono remains opt-in-able and
+    # supported through .NET 11 servicing, so we keep testing it.
     @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "coreclr" }
     @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "coreclr" }
+    @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "mono" }
+    @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "mono" }
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
@@ -33,11 +38,21 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
         $useMonoRuntime = if ($runtime -eq 'mono') { 'true' } else { 'false' }
+        # .NET 11 preview 7 rejects UseMonoRuntime on mobile TFMs with NETSDK1242, even though the
+        # documented opt-back is UseMonoRuntime alone. _DisableCheckForUnsupportedMonoMobileRuntime
+        # turns that check off; it is an SDK-internal property and should be dropped once the
+        # documented path works. See https://github.com/getsentry/sentry-dotnet/pull/5529#issuecomment-5599219968
+        $monoArgs = @()
+        if ($useMonoRuntime -eq 'true')
+        {
+            $monoArgs = @('-p:_DisableCheckForUnsupportedMonoMobileRuntime=true')
+        }
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
             --configuration $configuration `
             --framework $tfm `
             --runtime $rid `
-            -p:UseMonoRuntime=$useMonoRuntime
+            -p:UseMonoRuntime=$useMonoRuntime `
+            @monoArgs
         | ForEach-Object { Write-Host $_ }
         Write-Host '::endgroup::'
         $LASTEXITCODE | Should -Be 0

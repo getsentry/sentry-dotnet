@@ -20,7 +20,7 @@ public class AndroidAssemblyReaderTests
     // non-store APKs fail. Tracked by https://github.com/getsentry/sentry-dotnet/issues/5454;
     // re-enable these once that port lands.
     private const string StoreV4SkipReason =
-        "Android assembly store v4 (.NET 11 / CoreCLR) is not supported yet - see getsentry/sentry-dotnet#5454";
+        "Android assembly store v4 (.NET 11) is not supported yet - see getsentry/sentry-dotnet#5454";
 #if NET11_0_OR_GREATER
     private const bool StoreV4Unsupported = true;
 #else
@@ -124,8 +124,8 @@ public class AndroidAssemblyReaderTests
         Skip.If(!isAssemblyStore);
         Skip.If(!isCompressed);
 #elif NET11_0_OR_GREATER
-        // .NET 11 removed the Mono runtime for Android (NETSDK1242) and RunAOTCompilation is
-        // Mono-only, so no AOT APK can be produced to read. See the APK matrix in the csproj.
+        // The AOT APK matrix is net10-only for now - see the note in the csproj. Unreachable while
+        // StoreV4Unsupported skips everything above, but keeps this honest if that check goes first.
         Skip.If(isAot);
 #endif
         using var sut = GetSut(isAot, isAssemblyStore, isCompressed);
