@@ -193,6 +193,7 @@
     <Project Path="test/Sentry.Google.Cloud.Functions.Tests/Sentry.Google.Cloud.Functions.Tests.csproj" />
     <Project Path="test/Sentry.Hangfire.Tests/Sentry.Hangfire.Tests.csproj" />
     <Project Path="test/Sentry.Log4Net.Tests/Sentry.Log4Net.Tests.csproj" />
+    <Project Path="test/Sentry.Log4Net.V3.Tests/Sentry.Log4Net.V3.Tests.csproj" />
     <Project Path="test/Sentry.Maui.CommunityToolkit.Mvvm.Tests/Sentry.Maui.CommunityToolkit.Mvvm.Tests.csproj" />
     <Project Path="test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj" />
     <Project Path="test/Sentry.Maui.Tests/Sentry.Maui.Tests.csproj" />
