@@ -8,10 +8,7 @@ name: List vulnerable packages
 # rather than a defect in the PR. Running on a schedule keeps the signal without making
 # it a gate on everybody's work.
 #
-# Weekly rather than daily: we deliberately floor our PackageReferences at the oldest
-# version that works, so consumers keep the freedom to resolve higher. Most findings here
-# are therefore informational - a floor we won't raise - rather than something to action,
-# and a daily red run trains people to ignore it.
+# Weekly rather than daily - we don't publish nightly builds for sentry-dotnet anyway
 on:
   workflow_dispatch:
   schedule:
