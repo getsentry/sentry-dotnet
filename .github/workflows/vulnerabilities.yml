@@ -7,10 +7,15 @@ name: List vulnerable packages
 # halting unrelated work until the dependency is updated, which is routine maintenance
 # rather than a defect in the PR. Running on a schedule keeps the signal without making
 # it a gate on everybody's work.
+#
+# Weekly rather than daily: we deliberately floor our PackageReferences at the oldest
+# version that works, so consumers keep the freedom to resolve higher. Most findings here
+# are therefore informational - a floor we won't raise - rather than something to action,
+# and a daily red run trains people to ignore it.
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # once a day
+    - cron: "0 0 * * 4" # once a week, on Thursdays
 
 jobs:
   list-vulnerable-packages:
