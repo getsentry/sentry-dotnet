@@ -16,12 +16,12 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
     # versions to test a single version of .NET.
     # See https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
     #
-    # Both runtimes: .NET 11 makes CoreCLR the default and plans to drop Mono for mobile at GA;
-    # UseMonoRuntime is an escape hatch for the pre-releases. See #5553.
+    # CoreCLR only: as of .NET 11 preview 6 it is the only runtime for MAUI mobile apps and the
+    # UseMonoRuntime property was removed. Mono on iOS is therefore covered only by net10.0, which
+    # this job can't build alongside net11.0 because of the Xcode pinning noted above. See
+    # https://devblogs.microsoft.com/dotnet/coreclr-progress-and-mono-timeline-dotnet-maui/
     @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "coreclr" }
     @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "coreclr" }
-    @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "mono" }
-    @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "mono" }
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
@@ -38,20 +38,11 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
         $useMonoRuntime = if ($runtime -eq 'mono') { 'true' } else { 'false' }
-        # See the note in android.Tests.ps1: preview 7 rejects UseMonoRuntime on mobile TFMs with
-        # NETSDK1242, and _DisableCheckForUnsupportedMonoMobileRuntime turns that check off.
-        # Both go away when Mono does, at .NET 11 GA - see #5553.
-        $monoArgs = @()
-        if ($useMonoRuntime -eq 'true')
-        {
-            $monoArgs = @('-p:_DisableCheckForUnsupportedMonoMobileRuntime=true')
-        }
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
             --configuration $configuration `
             --framework $tfm `
             --runtime $rid `
-            -p:UseMonoRuntime=$useMonoRuntime `
-            @monoArgs
+            -p:UseMonoRuntime=$useMonoRuntime
         | ForEach-Object { Write-Host $_ }
         Write-Host '::endgroup::'
         $LASTEXITCODE | Should -Be 0

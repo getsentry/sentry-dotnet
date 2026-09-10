@@ -124,8 +124,8 @@ public class AndroidAssemblyReaderTests
         Skip.If(!isAssemblyStore);
         Skip.If(!isCompressed);
 #elif NET11_0_OR_GREATER
-        // The AOT APK matrix is net10-only for now - see the note in the csproj. Unreachable while
-        // StoreV4Unsupported skips everything above, but keeps this honest if that check goes first.
+        // RunAOTCompilation is Mono-only and .NET 11 supports only CoreCLR for mobile, so no AOT
+        // APK can be produced to read. See the APK matrix in the csproj.
         Skip.If(isAot);
 #endif
         using var sut = GetSut(isAot, isAssemblyStore, isCompressed);

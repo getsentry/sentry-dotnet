@@ -17,15 +17,20 @@ BeforeDiscovery {
     $script:emulator = Get-AndroidEmulatorId
 }
 
-# Both runtimes, on every framework we support. .NET 11 makes CoreCLR the default and plans to
-# drop Mono for mobile at GA; UseMonoRuntime is an escape hatch for the pre-releases. We keep
-# testing Mono for as long as it exists - see #5553 for the GA cleanup.
+# CoreCLR runs on every framework we still support. Mono is tested only where it is supported:
+# as of .NET 11 preview 6 CoreCLR is the only runtime for MAUI mobile apps and the UseMonoRuntime
+# property was removed, so net11.0 is CoreCLR-only. See
+# https://devblogs.microsoft.com/dotnet/coreclr-progress-and-mono-timeline-dotnet-maui/
 $cases = @(
     @{ configuration = 'Release'; runtime = 'coreclr' }
     @{ configuration = 'Debug';   runtime = 'coreclr' }
-    @{ configuration = 'Release'; runtime = 'mono' }
-    @{ configuration = 'Debug';   runtime = 'mono' }
 )
+if ([version]($dotnet_version -replace '^net', '') -lt [version]'11.0') {
+    $cases += @(
+        @{ configuration = 'Release'; runtime = 'mono' }
+        @{ configuration = 'Debug';   runtime = 'mono' }
+    )
+}
 Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
@@ -52,18 +57,13 @@ Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cas
         # restore, and it has to be set at restore time so the right runtime pack is downloaded
         # (NETSDK1112).
         #
-        # .NET 11 preview 7 rejects UseMonoRuntime on mobile TFMs with NETSDK1242, even though the
-        # blog documents UseMonoRuntime alone as the pre-release opt-back. The SDK's own
-        # _DisableCheckForUnsupportedMonoMobileRuntime turns that check off, and the Mono runtime
-        # packs still ship, so this produces a real Mono build. Both this and the Mono cases above
-        # go away when Mono does, at .NET 11 GA - see #5553.
-        $monoProps = "<UseMonoRuntime Condition=`"'`$(TargetFramework)' == '$tfm'`">$useMonoRuntime</UseMonoRuntime>"
-        if ($useMonoRuntime -eq 'true')
-        {
-            $monoProps += "`n    <_DisableCheckForUnsupportedMonoMobileRuntime Condition=`"'`$(TargetFramework)' == '$tfm'`">true</_DisableCheckForUnsupportedMonoMobileRuntime>"
-        }
+        # Set UseMonoRuntime on the app project, scoped to the framework under test, rather than
+        # passing it with -p. As a global property it reaches every framework in the graph during
+        # restore - including net11.0-android, where the SDK rejects it (NETSDK1242) - and it has
+        # to be set at restore time so the right runtime pack is downloaded (NETSDK1112).
         (Get-Content Sentry.Maui.Device.IntegrationTestApp.csproj) `
-            -replace '<UseMaui>true</UseMaui>', ("<UseMaui>true</UseMaui>`n    " + $monoProps) `
+            -replace '<UseMaui>true</UseMaui>', ("<UseMaui>true</UseMaui>`n    " + `
+                "<UseMonoRuntime Condition=`"'`$(TargetFramework)' == '$tfm'`">$useMonoRuntime</UseMonoRuntime>") `
         | Set-Content Sentry.Maui.Device.IntegrationTestApp.csproj
 
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
