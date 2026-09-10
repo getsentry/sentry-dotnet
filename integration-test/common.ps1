@@ -1,9 +1,9 @@
 . $PSScriptRoot/pester.ps1
 
-$global:longTermFramework = 'net8.0'
-$global:previousFramework = 'net9.0'
-$global:latestFramework = 'net10.0'
-$global:currentFrameworks = @($longTermFramework, $previousFramework, $latestFramework)
+$global:longTermFramework = 'net10.0'
+$global:previousFramework = 'net10.0'
+$global:latestFramework = 'net11.0'
+$global:currentFrameworks = @($previousFramework, $latestFramework)
 
 AfterAll {
     Pop-Location
@@ -16,8 +16,8 @@ BeforeAll {
     function GetAndroidTpv($framework)
     {
         switch ($framework) {
-            'net9.0' { return '35.0' }   # matches PreviousAndroidTfm (net9.0-android35.0)
-            'net10.0' { return '36.0' }  # matches LatestAndroidTfm (net10.0-android36.0)
+            'net10.0' { return '36.0' }  # matches PreviousAndroidTfm (net10.0-android36.0)
+            'net11.0' { return '37.0' }  # matches LatestAndroidTfm (net11.0-android37.0)
             default { throw "Unsupported framework '$framework' for Android target platform version." }
         }
     }
@@ -25,8 +25,8 @@ BeforeAll {
     function GetIosTpv($framework)
     {
         switch ($framework) {
-            'net9.0' { return '18.0' }   # matches PreviousIosTfm / PreviousMacCatalystTfm
-            'net10.0' { return '26' }    # aligns with ios26 / maccatalyst26
+            'net10.0' { return '26' }     # matches PreviousIosTfm / PreviousMacCatalystTfm
+            'net11.0' { return '26.5' }   # matches LatestIosTfm / LatestMacCatalystTfm
             default { throw "Unsupported framework '$framework' for iOS target platform version." }
         }
     }
@@ -90,7 +90,16 @@ BeforeAll {
         if (-not (Test-Path env:CI))
         {
             Write-Host "Packaging $name, expected output path: $packagePath"
-            dotnet pack "$PSScriptRoot/../src/$name" -c Release --nologo -p:Version=$packageVersion -p:IsPackable=true | ForEach-Object { Write-Host $_ }
+            # Exclude Windows TFMs when not packing on Windows. MAUI 11 generates a
+            # .pri via the Windows-only makepri.exe. The Windows assets
+            # aren't needed by the mobile and console apps these tests exercise.
+            $packArgs = @("$PSScriptRoot/../src/$name", '-c', 'Release', '--nologo',
+                "-p:Version=$packageVersion", '-p:IsPackable=true')
+            if (-not $IsWindows)
+            {
+                $packArgs += '-p:NO_WINDOWS=true'
+            }
+            dotnet pack $packArgs | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to package $name."

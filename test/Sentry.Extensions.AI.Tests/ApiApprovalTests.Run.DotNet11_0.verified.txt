@@ -1,0 +1,27 @@
+﻿namespace Microsoft.Extensions.AI
+{
+    public static class SentryAIExtensions
+    {
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+        public static Microsoft.Extensions.AI.IChatClient AddSentry(this Microsoft.Extensions.AI.IChatClient client, System.Action<Sentry.Extensions.AI.SentryAIOptions>? configure = null) { }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+        public static Microsoft.Extensions.AI.ChatOptions AddSentryToolInstrumentation(this Microsoft.Extensions.AI.ChatOptions options) { }
+    }
+}
+namespace Sentry.Extensions.AI
+{
+    public class SentryAIOptions
+    {
+        public SentryAIOptions() { }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+        public Sentry.Extensions.AI.SentryAIOptions.SentryAIExperimentalOptions Experimental { get; set; }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+        public sealed class SentryAIExperimentalOptions
+        {
+            public SentryAIExperimentalOptions() { }
+            public string AgentName { get; set; }
+            public bool RecordInputs { get; set; }
+            public bool RecordOutputs { get; set; }
+        }
+    }
+}

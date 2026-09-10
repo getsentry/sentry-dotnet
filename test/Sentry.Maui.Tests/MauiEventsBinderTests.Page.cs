@@ -66,17 +66,10 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "otherPage"
         };
-#if NET9_0
-        var navigatedToEventArgs = (NavigatedToEventArgs)
-            typeof(NavigatedToEventArgs)
-                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, [typeof(Page)])!
-                .Invoke([otherPage]);
-#elif NET10_0
         var navigatedToEventArgs = (NavigatedToEventArgs)
             typeof(NavigatedToEventArgs)
                 .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, [typeof(Page), typeof(NavigationType)])!
                 .Invoke([otherPage, NavigationType.Replace]);
-#endif
 
         // Act
         page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
@@ -106,17 +99,10 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "otherPage"
         };
-#if NET9_0
-        var navigatedToEventArgs = (NavigatedToEventArgs)
-            typeof(NavigatedToEventArgs)
-                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, [typeof(Page)])!
-                .Invoke([otherPage]);
-#elif NET10_0
         var navigatedToEventArgs = (NavigatedToEventArgs)
             typeof(NavigatedToEventArgs)
                 .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, [typeof(Page), typeof(NavigationType)])!
                 .Invoke([otherPage, NavigationType.Replace]);
-#endif
 
         page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
         Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check

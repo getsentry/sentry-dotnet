@@ -197,7 +197,8 @@ public static partial class SentrySdk
 
     private static string GetDefaultDistributionString() => GetBundleValue("CFBundleVersion");
 
-    private static string GetBundleValue(string key) => NSBundle.MainBundle.ObjectForInfoDictionary(key).ToString();
+    private static string GetBundleValue(string key) =>
+        NSBundle.MainBundle.ObjectForInfoDictionary(key)?.ToString() ?? string.Empty;
 
     private static CocoaSdk.SentryObjCHttpStatusCodeRange[] GetFailedRequestStatusCodes(IList<HttpStatusCodeRange> httpStatusCodeRanges)
     {

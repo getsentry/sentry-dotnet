@@ -58,7 +58,7 @@ runs:
       uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
-        packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
+        packages: platform-tools platforms;android-35 platforms;android-36 platforms;android-37.0 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
 
     - name: Install Mono (macOS)
@@ -85,6 +85,7 @@ runs:
         dotnet-version: |
           8.0.x
           9.0.310
+          10.0.x
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK

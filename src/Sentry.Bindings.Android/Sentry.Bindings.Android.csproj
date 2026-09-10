@@ -76,6 +76,15 @@
   <!-- Dependencies for AndroidMavenLibrary references
        Matching what was shipped in the 10.0.100 workloads to avoid NU1608 warnings
        -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v11.0'">
+    <!-- These track what MAUI 11 resolves indirectly; mismatches surface as NU1608. -->
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.11.0.1" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.11.0.1" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.17.0" />
+    <!-- See the net10.0 group below for why this version is pinned the way it is -->
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.2.20" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v10.0'">
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.9.2.1" />
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.9.2.1" />

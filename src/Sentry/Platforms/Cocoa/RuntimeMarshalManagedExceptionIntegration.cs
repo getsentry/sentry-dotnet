@@ -26,7 +26,7 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
 
     // Internal for testability
     [SecurityCritical]
-    internal void Handle(object sender, MarshalManagedExceptionEventArgs e)
+    internal void Handle(object? sender, MarshalManagedExceptionEventArgs e)
     {
         _options?.LogDebug("Runtime Marshal Managed Exception mode {0}", e.ExceptionMode.ToString("G"));
 

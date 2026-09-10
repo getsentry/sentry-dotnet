@@ -104,7 +104,9 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
 }
 
 Describe 'MAUI (<framework>)' -ForEach @(
-    @{ framework = $previousFramework }
+    # Each .NET for iOS SDK pins an Xcode version. Our CI builds use a runner matching
+    # the latest. Only app builds are affected (not libraries/packages).
+    @{ framework = $latestFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
         ResetLocalPackages
@@ -161,30 +163,37 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'libsentry-android.so',
             'libsentry.so',
             'libsentrysupplemental.so',
+            # .NET 11 splits the debug symbols into a separate .dbg.so
+            'libxamarin-app.dbg.so',
             'libxamarin-app.so',
             'maui-app.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch "Found 23 debug information files \(1 with embedded sources\)"
+        # The exact count differs per SDK version (went from 23 to 25 in .NET 11)
+        # So only assert it's non-zero (same as we do for iOS)
+        $nonZeroNumberRegex = '[1-9][0-9]*';
+        $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios$iosTpv"
         Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-            'libmono-component-debugger.dylib',
-            'libmono-component-diagnostics_tracing.dylib',
-            'libmono-component-hot_reload.dylib',
-            'libmono-component-marshal-ilgen.dylib',
-            'libmonosgen-2.0.dylib',
+            'libclrjit.dylib',
+            'libcoreclr.dylib',
+            'libmscordaccore.dylib',
+            'libmscordbi.dylib',
             'libSystem.Globalization.Native.dylib',
             'libSystem.IO.Compression.Native.dylib',
             'libSystem.Native.dylib',
             'libSystem.Net.Security.Native.dylib',
             'libSystem.Security.Cryptography.Native.Apple.dylib',
+            'libxamarin-dotnet-coreclr-debug.dylib',
+            'libxamarin-dotnet-coreclr.dylib',
             'libxamarin-dotnet-debug.dylib',
             'libxamarin-dotnet.dylib',
             'maui-app',
             'maui-app.pdb',
+            'maui-app.r2r',
             'Microsoft.iOS.pdb',
             'Microsoft.Maui.Controls.pdb',
             'Microsoft.Maui.Controls.Xaml.pdb',

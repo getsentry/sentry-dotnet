@@ -10,6 +10,20 @@ on:
       - "**.md"
   workflow_dispatch:
 
+# While we track a .NET preview or RC, the runtime-deps tag the SDK derives from the runtime
+# version doesn't exist yet, so the container integration tests have to be told which image to
+# use. Which runtimes need pinning varies by release: for .NET 10 it was only linux-musl, for
+# .NET 11 the glibc runtimes need it too because the images moved from noble to resolute.
+#
+# At GA, blank these two values - do NOT delete them or the steps that use them. They are needed
+# again for every subsequent preview. An empty value is ignored (see integration-test/aot.Tests.ps1),
+# so the SDK goes back to deriving the tag itself.
+#
+# See CONTRIBUTING.md -> "Upgrading to a new .NET major version".
+env:
+  CONTAINER_BASE_IMAGE_GLIBC: 'mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-resolute-chiseled'
+  CONTAINER_BASE_IMAGE_MUSL: 'mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-alpine'
+
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.rid }})
@@ -292,25 +306,24 @@ jobs:
           name: ${{ github.sha }}
           path: src
 
+      # ContainerBaseImage comes from the workflow-level env block at the top of this file.
       - name: Integration test
-#       # Note that when upgrading .NET versions, linux-musl may need special handling... see comments below
-#        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
-        # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
-        if: ${{ (matrix.rid != 'linux-musl-x64') }}
+        # TODO: Re-enable linux-musl-x64 once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
+        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
+        env:
+          ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_GLIBC }}
         uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         with:
           path: integration-test
 
-#      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
-#      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
-#      # by passing it as parameter to aot.Tests.ps1 via an environment variable
-#      - name: Integration test (musl)
-#        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
-#        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
-#        env:
-#          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
-#        with:
-#          path: integration-test
+      - name: Integration test (musl)
+        # TODO: Include linux-musl-x64 once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
+        if: ${{ (matrix.rid == 'linux-musl-arm64') }}
+        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
+        env:
+          ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_MUSL }}
+        with:
+          path: integration-test
 
   ms-build:
     needs: build-sentry-native
@@ -398,6 +411,9 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
+          # aot.Tests.ps1 has the Container test, so it needs the same pin.
+          # The glibc tag covers linux/arm/v7; win-x86 skips the Container test.
+          ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_GLIBC }}
         with:
           path: integration-test/aot.Tests.ps1
 
@@ -434,13 +450,13 @@ jobs:
         run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64 -p:NO_MOBILE=true
 
       - name: Publish Test app (Android)
-        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-android35.0 -r android-arm64
+        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-android36.0 -r android-arm64
 
 # We can't publish iOS applications on CI yet. We'd need a valid bundle identifier and to install the relevant
 # certificates/profiles on CI (presumably certs associated with the Sentry org).
 # See https://youtrack.jetbrains.com/issue/RIDER-17115/Could-not-find-any-available-provisioning-profiles-for-iOS
 #      - name: Publish Test app (iOS)
-#        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-ios18.0 -r ios-arm64
+#        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-ios26 -r ios-arm64
 
   test-solution-filters:
     runs-on: ubuntu-22.04

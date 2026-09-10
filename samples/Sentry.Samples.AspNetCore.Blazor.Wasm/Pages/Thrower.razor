@@ -21,8 +21,14 @@
         }
         finally
         {
-            // To re-render the event ID
+            // To re-render the event ID.
+            // .NET 11 adds BL0012, which flags StateHasChanged in an event handler as
+            // redundant because Blazor re-renders automatically afterwards. That does not
+            // hold here: this handler always throws, so the automatic re-render never runs
+            // and the event ID would not appear without this call.
+#pragma warning disable BL0012
             StateHasChanged();
+#pragma warning restore BL0012
         }
 
     }
