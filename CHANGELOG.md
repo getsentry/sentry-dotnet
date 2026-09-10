@@ -1,5 +1,26 @@
 # Changelog
 
+## 6.11.0
+
+### Features ✨
+
+- feat: Expose StringOrRegex discriminator by @limbonaut in [#5543](https://github.com/getsentry/sentry-dotnet/pull/5543)
+- feat: Provide the exception in the Hint passed to BeforeBreadcrumb by @jamescrosswell in [#5523](https://github.com/getsentry/sentry-dotnet/pull/5523)
+
+### Fixes 🐛
+
+- fix: isolate TracesSampler callback failures by @elkampu in [#5545](https://github.com/getsentry/sentry-dotnet/pull/5545)
+- fix: validate envelope item payload lengths before allocating a read buffer by @thaildhe172591 in [#5541](https://github.com/getsentry/sentry-dotnet/pull/5541)
+- fix: discard corrupt cache files instead of looping on them (resulting in an OOM exception) by @lgarczyn in [#5507](https://github.com/getsentry/sentry-dotnet/pull/5507)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.27.0 by @github-actions in [#5539](https://github.com/getsentry/sentry-dotnet/pull/5539)
+- chore(deps): update Java SDK to v8.55.0 by @github-actions in [#5538](https://github.com/getsentry/sentry-dotnet/pull/5538)
+- chore(deps): update Native SDK to v0.16.5 by @github-actions in [#5532](https://github.com/getsentry/sentry-dotnet/pull/5532)
+
 ## 6.10.0
 
 ### Features ✨
