@@ -40,10 +40,9 @@ public partial class SentryAppender
         // against null, so we do too rather than rely on log4net's internals.
         if (loggingEvent.GetProperties() is { } properties)
         {
-            // Read through GetKeys()/the indexer rather than enumerating the dictionary. log4net 3.x added
-            // IDictionary<string, object?> to PropertiesDictionary, which changed what its non-generic
-            // IEnumerable yields (KeyValuePair<string, object?> instead of DictionaryEntry), so enumerating
-            // silently matched nothing there. GetKeys() behaves the same on both majors.
+            // Read via GetKeys()/the indexer rather than enumerating: PropertiesDictionary's non-generic
+            // IEnumerable yields DictionaryEntry on log4net 2.x but KeyValuePair on 3.x. GetKeys() is the
+            // same on both.
             foreach (var key in properties.GetKeys())
             {
                 if (string.IsNullOrEmpty(key) || key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase) || Guid.TryParse(key, out _))
