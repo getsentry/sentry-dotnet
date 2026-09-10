@@ -7,20 +7,17 @@ namespace Sentry.Log4Net.Tests;
 
 public partial class SentryAppenderTests
 {
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void DoAppend_StructuredLogging_IsEnabled(bool isEnabled)
+    [Fact]
+    public void DoAppend_StructuredLogging_CapturesLog()
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = isEnabled;
 
         var sut = _fixture.GetSut();
 
         sut.DoAppend(CreateLoggingEvent(Level.Info, "Message"));
 
-        capturer.Logs.Should().HaveCount(isEnabled ? 1 : 0);
+        capturer.Logs.Should().HaveCount(1);
     }
 
     public static TheoryData<Level, SentryLogLevel> LogLevelData => new()
@@ -52,7 +49,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
 
@@ -68,7 +64,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.Environment = "test-environment";
         _fixture.Options.Release = "test-release";
 
@@ -121,7 +116,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
 
@@ -157,7 +151,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
 
@@ -189,7 +182,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         sut.MinimumEventLevel = Level.Error;
@@ -206,7 +198,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         sut.MinimumEventLevel = Level.Fatal;
@@ -223,7 +214,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.Environment = "options-environment";
 
         var sut = _fixture.GetSut();
@@ -240,7 +230,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         sut.SendIdentity = true;
@@ -262,7 +251,6 @@ public partial class SentryAppenderTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
 

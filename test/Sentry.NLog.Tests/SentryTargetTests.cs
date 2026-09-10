@@ -594,27 +594,17 @@ public partial class SentryTargetTests
     }
 
     [Fact]
-    public void EnableLogs_Default_False()
+    public void EnableLogs_IsObsoleteAndAlwaysEnabled()
     {
         var target = (SentryTarget)_fixture.GetTarget();
-        Assert.False(target.EnableLogs);
-    }
 
-    [Fact]
-    public void EnableLogs_SetInOptions_ReturnsValue()
-    {
-        _fixture.Options.EnableLogs = true;
-        var target = (SentryTarget)_fixture.GetTarget();
+#pragma warning disable CS0618 // Type or member is obsolete
         Assert.True(target.EnableLogs);
-    }
 
-    [Fact]
-    public void EnableLogs_SetterReplacesOptions()
-    {
-        _fixture.Options.EnableLogs = false;
-        var target = (SentryTarget)_fixture.GetTarget();
-        target.EnableLogs = true;
+        target.EnableLogs = false;
+
         Assert.True(target.EnableLogs);
+#pragma warning restore CS0618
     }
 
     [Fact]

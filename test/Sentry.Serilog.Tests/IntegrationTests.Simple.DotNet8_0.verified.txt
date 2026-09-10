@@ -277,5 +277,26 @@
         }
       }
     ]
+  },
+  {
+    Header: {
+      sdk: {
+        name: sentry.dotnet
+      }
+    },
+    Items: [
+      {
+        Header: {
+          content_type: application/vnd.sentry.items.log+json,
+          item_count: 4,
+          type: log
+        },
+        Payload: {
+          Source: {
+            Length: 4
+          }
+        }
+      }
+    ]
   }
 ]

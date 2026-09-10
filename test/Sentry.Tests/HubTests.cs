@@ -1994,27 +1994,6 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Logger_EnableLogsDisabled_StillCapturesLog()
-    {
-        // Arrange
-        // EnableLogs gates the logging integrations. Logs created directly via this API are always captured.
-        Assert.False(_fixture.Options.EnableLogs);
-        var hub = _fixture.GetSut();
-
-        // Act
-        hub.Logger.LogWarning("Message");
-        hub.Logger.Flush();
-
-        // Assert
-        _fixture.Client.Received(1).CaptureEnvelope(
-            Arg.Is<Envelope>(envelope =>
-                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
-            )
-        );
-        hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
-    }
-
-    [Fact]
     public void Logger_DoesCaptureLog()
     {
         // Arrange

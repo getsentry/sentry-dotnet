@@ -26,33 +26,8 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
     }
 
     [Fact]
-    public async Task StructuredLogging_Disabled()
+    public async Task StructuredLogging_CapturesLogs()
     {
-        Assert.False(EnableLogs);
-
-        var handler = new RequestHandler
-        {
-            Path = "/log",
-            Handler = context =>
-            {
-                context.RequestServices.GetRequiredService<ILogger<AspNetCoreIntegrationTests>>().LogInformation("Hello, World!");
-                return Task.CompletedTask;
-            }
-        };
-
-        Handlers = new[] { handler };
-        Build();
-        await HttpClient.GetAsync(handler.Path);
-        await ServiceProvider.GetRequiredService<IHub>().FlushAsync();
-
-        Assert.Empty(Logs);
-    }
-
-    [Fact]
-    public async Task StructuredLogging_Enabled()
-    {
-        EnableLogs = true;
-
         var handler = new RequestHandler
         {
             Path = "/log",
