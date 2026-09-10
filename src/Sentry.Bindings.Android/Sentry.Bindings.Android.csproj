@@ -136,6 +136,15 @@
     <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.1.1" Bind="false" />
   </ItemGroup>
 
+  <!--
+    The Android SDK auto-globs Transforms/**/*.xml into every TFM, so transforms that only apply to
+    newer generators have to be removed explicitly for the older ones - an entry matching no nodes
+    warns BG8A00. See the file itself for what it does and why android 36 doesn't need it.
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' != '' And $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '11.0'))">
+    <TransformFile Remove="Transforms\Metadata.Net11OrGreater.xml" />
+  </ItemGroup>
+
   <ItemGroup>
     <AndroidLibrary Include="..\..\lib\sentry-android-supplemental\bin\sentry-android-supplemental.jar" />
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\arm64-v8a\libsentrysupplemental.so" Abi="arm64-v8a" />
