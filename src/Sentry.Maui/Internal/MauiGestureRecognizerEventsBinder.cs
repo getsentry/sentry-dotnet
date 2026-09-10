@@ -151,6 +151,11 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     private static void OnPanGesture(object? sender, PanUpdatedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PanGestureRecognizer.PanUpdated),
+        // The array casts on these collection expressions are required. BreadcrumbEvent's extraData is
+        // params IEnumerable<(string key, string value)>, and on the -windows TFMs CsWinRT1032 rejects a
+        // collection expression whose target is a non-mutable interface type, because the type the
+        // compiler synthesises isn't trim/AOT-safe for WinRT. Casting to a concrete array satisfies it.
+        ((string key, string value)[])
         [
             ("GestureId", e.GestureId.ToString()),
             ("StatusType", e.StatusType.ToString()),
@@ -173,6 +178,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     private static void OnPinchGesture(object? sender, PinchGestureUpdatedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PinchGestureRecognizer.PinchUpdated),
+        ((string key, string value)[])
         [
             ("GestureStatus", e.Status.ToString()),
             ("Scale", e.Scale.ToString()),
@@ -183,12 +189,12 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     private static void OnSwipeGesture(object? sender, SwipedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(SwipeGestureRecognizer.Swiped),
-        [("Direction", e.Direction.ToString())]
+        ((string key, string value)[])[("Direction", e.Direction.ToString())]
     ));
 
     private static void OnTapGesture(object? sender, TappedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(TapGestureRecognizer.Tapped),
-        [("ButtonMask", e.Buttons.ToString())]
+        ((string key, string value)[])[("ButtonMask", e.Buttons.ToString())]
     ));
 }
