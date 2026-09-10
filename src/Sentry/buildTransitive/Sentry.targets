@@ -180,7 +180,11 @@
     <SentryCLIUploadAfterTargets>_CopyAotSymbols</SentryCLIUploadAfterTargets>
     <!-- .NET 11 removed _CopyAotSymbols. "NativeCompile" now adds the native symbols to
          ResolvedFileToPublish, so they are copied as part of "Publish" itself and there is
-         no post-publish copy target to hook. Without this the upload silently never runs. -->
+         no post-publish copy target to hook. Without this the upload silently never runs.
+         Keyed on the TFM, not the SDK, because _CopyAotSymbols ships in the ILCompiler package
+         and the SDK picks that per TargetFramework (KnownILCompilerPack) - so net8/9/10 keep it
+         even when built with the .NET 11 SDK. Details:
+         https://github.com/getsentry/sentry-dotnet/pull/5529#discussion_r3974672374 -->
     <SentryCLIUploadAfterTargets Condition="'$(_SentryIsNet11OrGreater)' == 'true'">Publish</SentryCLIUploadAfterTargets>
   </PropertyGroup>
   <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
