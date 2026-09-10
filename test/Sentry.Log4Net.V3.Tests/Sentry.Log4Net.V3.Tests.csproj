@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(LatestTfm)</TargetFrameworks>
+    <!-- These tests fail on Mono -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
+  </PropertyGroup>
+
+  <!--
+    The appender tests from Sentry.Log4Net.Tests, run against log4net 3.x instead of 2.x.
+
+    Sentry.Log4Net keeps its 2.0.12 floor, so this covers what users on log4net 3.x actually get: the
+    2.x-compiled appender loaded against the 3.x assembly. log4net 3.x added IDictionary<string, object?>
+    to PropertiesDictionary, which changes what its non-generic IEnumerable yields - a runtime-only
+    difference that no amount of building against 2.x can catch. See #5557.
+
+    Source is linked rather than duplicated so the two majors can never drift apart. The Verify-based
+    tests are deliberately not linked: their snapshots are keyed off the original file paths, and running
+    them from two projects would have both writing the same files.
+  -->
+  <ItemGroup>
+    <Compile Include="..\Sentry.Log4Net.Tests\SentryAppenderTests.cs" Link="SentryAppenderTests.cs" />
+    <Compile Include="..\Sentry.Log4Net.Tests\SentryAppenderTests.Structured.cs" Link="SentryAppenderTests.Structured.cs">
+      <DependentUpon>SentryAppenderTests.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="3.4.0" />
+    <ProjectReference Include="..\..\src\Sentry.Log4Net\Sentry.Log4Net.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+
+    <Using Include="log4net" />
+    <Using Include="log4net.Core" />
+    <Using Include="log4net.Appender" />
+    <Using Include="log4net.Layout" />
+    <Using Include="log4net.Repository.Hierarchy" />
+    <Using Include="Sentry.Log4Net" />
+  </ItemGroup>
+
+</Project>
