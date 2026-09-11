@@ -1,0 +1,26 @@
+﻿<metadata>
+
+  <!--
+    Binding transforms that only apply from .NET 11 (android 37) onwards. Scoped by an explicit
+    TransformFile Remove in Sentry.Bindings.Android.csproj, because the Android SDK auto-globs
+    Transforms/**/*.xml into every TFM and an entry that matches nothing warns with BG8A00.
+  -->
+
+  <!--
+    TombstoneParser.parse(Tombstone) takes com.abovevacant.epitaph.core.Tombstone, from the epitaph
+    library that sentry-android-core depends on. We reference epitaph with Bind="false" (see the
+    AndroidMavenLibrary items in Sentry.Bindings.Android.csproj), so there is no C# type for it, and
+    the generated binding emits an unresolvable `global::Com.Abovevacant.Epitaph.Core.Tombstone`:
+
+      error CS0400: The type or namespace name 'Com' could not be found in the global namespace
+
+    The android 36 generator drops methods whose parameter types are unbound before the transforms
+    run (the overload is in api.xml.class-parse but not api.xml), so this is unnecessary - and would
+    warn BG8A00 - there. The android 37 generator keeps it, which is why this file exists.
+
+    We never call TombstoneParser from C#, and the parameterless parse() overload is unaffected, so
+    drop just the overload.
+  -->
+  <remove-node path="/api/package[@name='io.sentry.android.core.internal.tombstone']/class[@name='TombstoneParser']/method[@name='parse' and count(parameter)=1 and parameter[1][@type='com.abovevacant.epitaph.core.Tombstone']]" />
+
+</metadata>

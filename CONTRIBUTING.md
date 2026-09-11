@@ -237,6 +237,9 @@ they cost nothing, and the next LTS transition brings some of those versions bac
 | `NETSDK1094` / `NETSDK1096` optimizing assemblies for performance failed | app `.csproj`s with an Android TFM | ReadyToRun can't target Android at all (`crossgen2`: `Target OS 'android' is not supported`), but the SDK may enable it by default. Set `PublishReadyToRun=false` on the affected app. |
 | iOS app builds fail with `requires Xcode X, the current version is Y` | `integration-test/*.ps1`, device test apps | Each .NET for iOS SDK pack pins an **exact** Xcode version, so only one iOS TFM is buildable on a given machine. Build the TFM matching the Xcode that CI pins, and don't try to cover two. Libraries skip this check, which is why only app builds are affected. |
 | Verify snapshots missing for the new TFM | `test/**/*.verified.txt` | Delete the snapshots for dropped TFMs. New ones for macOS-covered TFMs regenerate on a local test run. The `.Windows.` and `Net4_8` ones can only be produced on Windows — take them from the `<rid>-verify-test-results` CI artifact rather than hand-writing them; they are UTF-8 with BOM and no trailing newline. |
+| `CS0400` The type or namespace name '...' could not be found | `src/Sentry.Bindings.Android/Transforms/` | Newer Android binding generators stopped pruning methods whose parameter/return types are unbound, so a `Bind="false"` Java dependency (e.g. epitaph) leaks an unresolvable type into the generated C#. `remove-node` the offending member. Because the older generator already pruned it, the same entry warns `BG8A00` there - put net-N-only entries in their own transform file and `TransformFile Remove` it for older TFMs, since the SDK auto-globs `Transforms/**/*.xml` into every TFM. |
+| `CsWinRT1032` Collection expressions targeting non mutable interface type | any `-windows` TFM | A newer CsWinRT rejects a collection expression whose target is a non-mutable interface (`IEnumerable<T>`), because the synthesised type isn't trim/AOT-safe for WinRT. Cast the expression to a concrete array rather than changing the public signature it's passed to. |
+| `IL2037` No members were resolved for '...' | `Directory.Build.props` | External ILLink descriptors naming members that don't resolve - we ship none of our own, so these are always the platform's (MAUI 11 RC 1 emitted 154 when linking an Apple app). `ILLinkTreatWarningsAsErrors` defaults to `TreatWarningsAsErrors`, so add the id to `WarningsNotAsErrors` to demote rather than silence it, and drop that once the platform fixes the descriptors. |
 
 ### Places that don't follow the usual rules
 
@@ -269,6 +272,31 @@ What genuinely can't be checked locally on macOS: the Windows jobs (`net48`, the
 `Net4_8` snapshots), the Linux-only `Container` test in `aot.Tests.ps1` (it requires a Linux
 *host*, not just Docker), and anything caused by the CI runner's environment rather than the code —
 for those, read `.github/actions/environment/action.yml` against the TFMs you just added.
+
+Two traps when reading a local build of the samples:
+
+- **`CS1029` "Sign up for a free Sentry Account and enter your DSN here"** is the intended prompt in
+  `samples/SamplesShared.cs`, guarded by `#if !CI_BUILD`. It never fires in CI, and while it does
+  fire the samples don't compile, so nothing downstream of them — notably the ILLink step — runs.
+  Prefix the build with `GITHUB_ACTIONS=true` to get CI's defines and actually exercise that path.
+- **Don't read a piped build's exit code.** `dotnet build ... | tail` reports `tail`'s status, so a
+  failed build looks like a pass. Grep the output for `error` instead.
+
+### Is it the new SDK, or was it already broken?
+
+Worth doing before writing any fix, and it takes one rebuild of one project: swap `global.json` back
+to the previous SDK/workload set, rebuild the single project and TFM that failed, and compare. The
+old workload set is usually still installed, so this costs minutes.
+
+```shell-script
+git show origin/main:global.json > global.json    # or the branch you're basing on
+dotnet build <the one project> -c Release -f <the one TFM> -t:Rebuild
+git checkout global.json
+```
+
+This is what identified both `CsWinRT1032` and `IL2037` in the .NET 11 RC 1 bump as genuine
+toolchain regressions rather than local noise, and it's equally good at proving something *isn't*
+yours to fix.
 
 ## Maintaining the Ben.Demystifier Submodule
 
