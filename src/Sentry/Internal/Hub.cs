@@ -171,7 +171,8 @@ internal class Hub : IHub, IDisposable
     public ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
-        => StartTransaction(context, customSamplingContext, null);
+        // A context returned by ContinueTrace carries the Dynamic Sampling Context of the incoming baggage.
+        => StartTransaction(context, customSamplingContext, (context as TransactionContext)?.DynamicSamplingContext);
 
     internal ITransactionTracer StartTransaction(
         ITransactionContext context,
@@ -406,7 +407,13 @@ internal class Hub : IHub, IDisposable
             parentSpanId: propagationContext.ParentSpanId,
             traceId: propagationContext.TraceId,
             isSampled: traceHeader?.IsSampled,
-            isParentSampled: traceHeader?.IsSampled);
+            isParentSampled: traceHeader?.IsSampled)
+        {
+            // Hand the incoming DSC to the transaction that gets started from this context, so it is propagated
+            // unchanged (same as the ASP.NET Core middleware does). The transaction gets its own instance rather
+            // than the one stored on the scope, because StartTransaction may still adjust it (sample rate, replay id).
+            DynamicSamplingContext = traceHeader is null ? null : baggageHeader?.CreateDynamicSamplingContext(_replaySession)
+        };
     }
 
     internal bool ShouldContinueTrace(BaggageHeader? baggageHeader)

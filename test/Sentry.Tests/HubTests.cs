@@ -1947,6 +1947,106 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void StartTransaction_ContextFromContinueTraceWithBaggage_PropagatesIncomingDynamicSamplingContext()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var traceHeader = new SentryTraceHeader(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
+            SpanId.Parse("2000000000000000"), true);
+        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "5bd5f6d346b442dd9177dce9302fd737"},
+            {"sentry-public_key", "49d0f7386ad645858ae85020e393bef3"},
+            {"sentry-sample_rate", "0.5"},
+            {"sentry-sample_rand", "0.1234"},
+            {"sentry-sampled", "true"}
+        });
+        var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name", "test-operation");
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext);
+
+        // Assert
+        var tracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+        tracer.IsSampled.Should().BeTrue();
+        tracer.SampleRand.Should().Be(0.1234);
+        tracer.DynamicSamplingContext.Should().NotBeNull();
+        tracer.DynamicSamplingContext!.Items.Should().Contain(baggageHeader.GetSentryMembers());
+    }
+
+    [Fact]
+    public void StartTransaction_ContextFromContinueTraceWithBaggage_SampledOut_PropagatesIncomingDynamicSamplingContext()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var traceHeader = new SentryTraceHeader(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
+            SpanId.Parse("2000000000000000"), false);
+        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "5bd5f6d346b442dd9177dce9302fd737"},
+            {"sentry-public_key", "49d0f7386ad645858ae85020e393bef3"},
+            {"sentry-sample_rate", "0.5"},
+            {"sentry-sample_rand", "0.9876"},
+            {"sentry-sampled", "false"}
+        });
+        var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name", "test-operation");
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext);
+
+        // Assert
+        var unsampled = transaction.Should().BeOfType<UnsampledTransaction>().Subject;
+        unsampled.SampleRand.Should().Be(0.9876);
+        unsampled.DynamicSamplingContext.Should().NotBeNull();
+        unsampled.DynamicSamplingContext!.Items.Should().Contain(baggageHeader.GetSentryMembers());
+    }
+
+    [Fact]
+    public void StartTransaction_ContextFromContinueTraceWithHeadersAsStrings_PropagatesIncomingDynamicSamplingContext()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var traceHeader = "5bd5f6d346b442dd9177dce9302fd737-2000000000000000-1";
+        var baggageHeader = "sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737,sentry-public_key=49d0f7386ad645858ae85020e393bef3,sentry-sample_rate=0.5,sentry-sample_rand=0.1234,sentry-sampled=true";
+        var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name", "test-operation");
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext);
+
+        // Assert
+        var tracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+        tracer.SampleRand.Should().Be(0.1234);
+        tracer.DynamicSamplingContext.Should().NotBeNull();
+        tracer.DynamicSamplingContext!.Items.Should().Contain(new Dictionary<string, string>
+        {
+            ["trace_id"] = "5bd5f6d346b442dd9177dce9302fd737",
+            ["public_key"] = "49d0f7386ad645858ae85020e393bef3",
+            ["sample_rate"] = "0.5",
+            ["sample_rand"] = "0.1234",
+            ["sampled"] = "true"
+        });
+    }
+
+    [Fact]
+    public void StartTransaction_ContextFromContinueTraceWithoutBaggage_CreatesDynamicSamplingContextFromTransaction()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var traceHeader = new SentryTraceHeader(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
+            SpanId.Parse("2000000000000000"), true);
+        var transactionContext = hub.ContinueTrace(traceHeader, (BaggageHeader)null, "test-name", "test-operation");
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext);
+
+        // Assert
+        var tracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+        tracer.DynamicSamplingContext.Should().NotBeNull();
+        tracer.DynamicSamplingContext!.Items["trace_id"].Should().Be("5bd5f6d346b442dd9177dce9302fd737");
+        tracer.DynamicSamplingContext.Items["public_key"].Should().Be(_fixture.Options.ParsedDsn.PublicKey);
+    }
+
+    [Fact]
     public void CaptureTransaction_AfterTransactionFinishes_ResetsTransactionOnScope()
     {
         // Arrange
