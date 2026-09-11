@@ -2028,7 +2028,7 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void StartTransaction_ContextFromContinueTraceWithoutBaggage_CreatesDynamicSamplingContextFromTransaction()
+    public void StartTransaction_ContextFromContinueTraceWithoutBaggage_FreezesEmptyDynamicSamplingContext()
     {
         // Arrange
         var hub = _fixture.GetSut();
@@ -2040,9 +2040,51 @@ public partial class HubTests : IDisposable
         var transaction = hub.StartTransaction(transactionContext);
 
         // Assert
+        // A sentry-trace header without baggage comes from an SDK without dynamic sampling support, so the DSC
+        // is frozen as empty rather than created from this transaction (same as the ASP.NET Core middleware).
+        var tracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+        tracer.DynamicSamplingContext.Should().NotBeNull();
+        tracer.DynamicSamplingContext!.IsEmpty.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_ContextFromContinueTraceWithInvalidBaggage_CreatesDynamicSamplingContextFromTransaction()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var traceHeader = new SentryTraceHeader(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
+            SpanId.Parse("2000000000000000"), true);
+        // Missing the required public_key and sample_rate members, so no DSC can be created from it.
+        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "5bd5f6d346b442dd9177dce9302fd737"}
+        });
+        var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name", "test-operation");
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext);
+
+        // Assert
         var tracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
         tracer.DynamicSamplingContext.Should().NotBeNull();
         tracer.DynamicSamplingContext!.Items["trace_id"].Should().Be("5bd5f6d346b442dd9177dce9302fd737");
+        tracer.DynamicSamplingContext.Items["public_key"].Should().Be(_fixture.Options.ParsedDsn.PublicKey);
+    }
+
+    [Fact]
+    public void StartTransaction_ContextFromContinueTraceWithoutTraceHeader_CreatesDynamicSamplingContextFromTransaction()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var transactionContext = hub.ContinueTrace((SentryTraceHeader)null, (BaggageHeader)null, "test-name", "test-operation");
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext);
+
+        // Assert
+        var tracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+        tracer.DynamicSamplingContext.Should().NotBeNull();
+        tracer.DynamicSamplingContext!.IsEmpty.Should().BeFalse();
         tracer.DynamicSamplingContext.Items["public_key"].Should().Be(_fixture.Options.ParsedDsn.PublicKey);
     }
 
