@@ -192,10 +192,9 @@ public static partial class SentrySdk
             // See https://github.com/getsentry/sentry-dotnet/issues/3828
             var networkLogger = new AndroidDiagnosticLogger(options.DiagnosticLogger);
             var buildInfoProvider = new BuildInfoProvider(networkLogger);
-            var timeProvider = AndroidCurrentDateProvider.Instance!;
             var mainHandler = new AndroidHandler(AndroidLooper.MainLooper!);
             o.ConnectionStatusProvider =
-                new AndroidConnectionStatusProvider(AppContext, o, buildInfoProvider, timeProvider, mainHandler).JavaCast<IConnectionStatusProvider>();
+                new AndroidConnectionStatusProvider(AppContext, o, buildInfoProvider, o.MonotonicTicker!, mainHandler).JavaCast<IConnectionStatusProvider>();
             o.AddIntegration(new SystemEventsBreadcrumbsIntegration(AppContext, mainHandler).JavaCast<JavaSdk.IIntegration>());
         });
 
