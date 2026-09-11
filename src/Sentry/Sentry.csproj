@@ -173,6 +173,7 @@
     <InternalsVisibleTo Include="Sentry.OpenTelemetry.Exporter.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Profiling" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Profiling.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Quartz.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Serilog" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Serilog.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Testing" PublicKey="$(SentryPublicKey)" />
