@@ -26,7 +26,14 @@ var code = Header + File.ReadAllText(args[0]);
 
 // Fix broken multi-line comments
 code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\()\n\s*", "$1");
-code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""", "$1 ");
+// A single message can be split over three or more adjacent string literals. The pattern is
+// anchored on DEPRECATED_MSG_ATTRIBUTE( and scanning resumes past each match, so one pass joins
+// only the first pair - repeat to a fixed point or the tail stays on its own uncommented line.
+for (string previous = ""; previous != code;)
+{
+    previous = code;
+    code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""", "$1 ");
+}
 
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
@@ -72,6 +79,9 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveProperty("SentryObjCOptions", "BeforeSendLog")
     .RemoveProperty("SentryObjCOptions", "BeforeSendMetric")
     .RemoveProperty("SentryObjCOptions", "ConfigureUserFeedback")
+    .RemoveProperty("SentryObjCOptions", "BeforeSendWithHint")
+    .RemoveProperty("SentryObjCOptions", "BeforeBreadcrumbWithHint")
+    .RemoveProperty("SentryObjCOptions", "ConfigureProfiling")
     // SentryObjCSDK is both the public entry point and the hybrid-SDK gateway (via `internal`).
     // Keep the public members the .NET SDK calls plus the `internal` accessor; drop the rest, whose
     // signatures reference SentryObjC* types we don't whitelist.
