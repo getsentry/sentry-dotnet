@@ -26,6 +26,14 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
   </ItemGroup>
 
+  <!-- EF Core's Sqlite provider floors SQLitePCLRaw at a vulnerable version on every .NET
+       target we test (2.1.6 / 2.1.10 / 2.1.11). Pin it forward rather than bumping EF Core,
+       so each TFM still tests against the baseline EF Core release above.
+       https://github.com/advisories/GHSA-2m69-gcr7-jv3q -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.13" />
+  </ItemGroup>
+
   <!-- Test .NET Framework -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
