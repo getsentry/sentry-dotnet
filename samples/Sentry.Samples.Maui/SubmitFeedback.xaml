@@ -17,8 +17,16 @@
             <Button Text="Attach Screenshot" Clicked="OnAttachScreenshotClicked" Margin="0,20,0,0" />
 
             <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Margin="0,20,0,0" Spacing="10">
-                <Button Text="Cancel" Clicked="OnCancelClicked" BackgroundColor="Red" TextColor="White" />
-                <Button Text="Submit" Clicked="OnSubmitClicked" BackgroundColor="Green" TextColor="White" />
+                <ImageButton x:Name="CancelBtn" Clicked="OnCancelClicked" BackgroundColor="Red" HeightRequest="44" WidthRequest="44" Padding="10" SemanticProperties.Description="Cancel">
+                    <ImageButton.Source>
+                        <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xF00D;" Color="White" Size="18" />
+                    </ImageButton.Source>
+                </ImageButton>
+                <ImageButton x:Name="SubmitBtn" Clicked="OnSubmitClicked" BackgroundColor="Green" HeightRequest="44" WidthRequest="44" Padding="10" SemanticProperties.Description="Submit">
+                    <ImageButton.Source>
+                        <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xF00C;" Color="White" Size="18" />
+                    </ImageButton.Source>
+                </ImageButton>
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>
