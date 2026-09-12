@@ -17,6 +17,15 @@ public class TransactionContext : SpanContext, ITransactionContext
     public bool? IsParentSampled { get; }
 
     /// <summary>
+    /// The Dynamic Sampling Context received from the upstream SDK, when this context was created by
+    /// <see cref="IHub.ContinueTrace(SentryTraceHeader?, BaggageHeader?, string?, string?)"/> from a baggage header.
+    /// A transaction started from this context propagates it unchanged instead of creating a new one, so that
+    /// <c>sample_rand</c> and the other frozen items stay the same across the whole trace.
+    /// </summary>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/dynamic-sampling-context/#unified-propagation-mechanism"/>
+    internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
+
+    /// <summary>
     /// Initializes an instance of <see cref="TransactionContext"/>.
     /// </summary>
     public TransactionContext(

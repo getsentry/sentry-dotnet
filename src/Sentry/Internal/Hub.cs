@@ -171,7 +171,8 @@ internal class Hub : IHub, IDisposable
     public ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
-        => StartTransaction(context, customSamplingContext, null);
+        // A context returned by ContinueTrace carries the Dynamic Sampling Context of the incoming baggage.
+        => StartTransaction(context, customSamplingContext, (context as TransactionContext)?.DynamicSamplingContext);
 
     internal ITransactionTracer StartTransaction(
         ITransactionContext context,
@@ -406,7 +407,22 @@ internal class Hub : IHub, IDisposable
             parentSpanId: propagationContext.ParentSpanId,
             traceId: propagationContext.TraceId,
             isSampled: traceHeader?.IsSampled,
-            isParentSampled: traceHeader?.IsSampled);
+            isParentSampled: traceHeader?.IsSampled)
+        {
+            // Hand the incoming DSC to the transaction that gets started from this context, so it is propagated
+            // unchanged (same as the ASP.NET Core middleware does). The transaction gets its own instance rather
+            // than the one stored on the scope, because StartTransaction may still adjust it (sample rate, replay id).
+            // A sentry-trace header without a baggage header comes from an older SDK without dynamic sampling
+            // support, in which case the DSC is frozen as empty instead of being created from the transaction. See:
+            // https://develop.sentry.dev/sdk/telemetry/traces/dynamic-sampling-context/#freezing-dynamic-sampling-context
+            // https://develop.sentry.dev/sdk/telemetry/traces/dynamic-sampling-context/#unified-propagation-mechanism
+            DynamicSamplingContext = (traceHeader, baggageHeader) switch
+            {
+                (null, _) => null,
+                (_, null) => DynamicSamplingContext.Empty(),
+                _ => propagationContext.DynamicSamplingContext?.Clone()
+            }
+        };
     }
 
     internal bool ShouldContinueTrace(BaggageHeader? baggageHeader)
