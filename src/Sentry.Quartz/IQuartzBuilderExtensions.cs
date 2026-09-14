@@ -36,10 +36,11 @@ public static class IQuartzBuilderExtensions
     /// Adds middleware that pushes a scope to sentry before job execution
     /// </summary>
     /// <param name="configuration"></param>
+    /// <param name="configure">Configures the options</param>
     /// <returns></returns>
-    public static IQuartzBuilder AddSentryScope(this IQuartzBuilder configuration)
+    public static IQuartzBuilder AddSentryScope(this IQuartzBuilder configuration, Action<SentryScopeMiddlewareOptions>? configure = null)
     {
-        return configuration.AddJobMiddleware<SentryScopeMiddleware>();
+        return configuration.AddJobMiddleware<SentryScopeMiddleware>().ConfigureOptions(configure);
     }
 
     /// <summary>
