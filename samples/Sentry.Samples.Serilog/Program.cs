@@ -1,3 +1,4 @@
+using Sentry.Serilog;
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
@@ -7,29 +8,35 @@ internal static class Program
 {
     private static void Main()
     {
+        // Initialise Sentry. The Serilog sink below doesn't do this for you.
+        using var _ = SentrySdk.Init(options =>
+        {
+#if !SENTRY_DSN_DEFINED_IN_ENV
+            // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+            options.Dsn = SamplesShared.Dsn;
+#endif
+
+            options.AttachStacktrace = true;
+            // send PII like the username of the user logged in to the device
+            options.SendDefaultPii = true;
+            // Apply properties from the Serilog LogContext (like MyTaskId below) to Sentry events
+            options.UseSerilog();
+        });
+
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
+            // Other overloads exist, for example, configuring the sink with no parameters at all.
             .WriteTo.Sentry(options =>
             {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-                // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
-                // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-                options.Dsn = SamplesShared.Dsn;
-#endif
-
                 // Debug and higher are stored as breadcrumbs (default os Information)
                 options.MinimumBreadcrumbLevel = LogEventLevel.Debug;
                 // Error and higher is sent as event (default is Error)
                 options.MinimumEventLevel = LogEventLevel.Error;
-                options.AttachStacktrace = true;
-                // send PII like the username of the user logged in to the device
-                options.SendDefaultPii = true;
                 // Optional Serilog text formatter used to format LogEvent to string. If TextFormatter is set, FormatProvider is ignored.
                 options.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
-                // Other configuration
             })
             .CreateLogger();
 

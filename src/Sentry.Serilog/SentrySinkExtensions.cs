@@ -9,142 +9,11 @@ namespace Serilog;
 public static class SentrySinkExtensions
 {
     /// <summary>
-    /// Initialize Sentry and add the SentrySink for Serilog.
-    /// </summary>
-    /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
-    /// <param name="dsn">The Sentry DSN (required). <seealso cref="SentryOptions.Dsn"/></param>
-    /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
-    /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
-    /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
-    /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
-    /// <param name="sendDefaultPii">Whether to include default Personal Identifiable information. <seealso cref="SentryOptions.SendDefaultPii"/></param>
-    /// <param name="isEnvironmentUser">Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event. <seealso cref="SentryOptions.IsEnvironmentUser"/></param>
-    /// <param name="serverName">Gets or sets the name of the server running the application. <seealso cref="SentryOptions.ServerName"/></param>
-    /// <param name="attachStackTrace">Whether to send the stack trace of a event captured without an exception. <seealso cref="SentryOptions.AttachStacktrace"/></param>
-    /// <param name="maxBreadcrumbs">Gets or sets the maximum breadcrumbs. <seealso cref="SentryOptions.MaxBreadcrumbs"/></param>
-    /// <param name="sampleRate">The rate to sample events. <seealso cref="SentryOptions.SampleRate"/></param>
-    /// <param name="release">The release version of the application. <seealso cref="SentryOptions.Release"/></param>
-    /// <param name="environment">The environment the application is running. <seealso cref="SentryOptions.Environment"/></param>
-    /// <param name="maxQueueItems">The maximum number of events to keep while the worker attempts to send them. <seealso cref="SentryOptions.MaxQueueItems"/></param>
-    /// <param name="shutdownTimeout">How long to wait for events to be sent before shutdown. <seealso cref="SentryOptions.ShutdownTimeout"/></param>
-    /// <param name="decompressionMethods">Decompression methods accepted. <seealso cref="SentryOptions.DecompressionMethods"/></param>
-    /// <param name="requestBodyCompressionLevel">The level of which to compress the <see cref="SentryEvent"/> before sending to Sentry. <seealso cref="SentryOptions.RequestBodyCompressionLevel"/></param>
-    /// <param name="requestBodyCompressionBuffered">Whether the body compression is buffered and the request 'Content-Length' known in advance. <seealso cref="SentryOptions.RequestBodyCompressionBuffered"/></param>
-    /// <param name="debug">Whether to log diagnostics messages. <seealso cref="SentryOptions.Debug"/></param>
-    /// <param name="diagnosticLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticLevel"/></param>
-    /// <param name="reportAssembliesMode">What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/></param>
-    /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
-    /// <param name="defaultTags">Default tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
-    /// <param name="enableLogs">Ignored. Structured logs are always sent. To drop logs, use <see cref="SentryOptions.SetBeforeSendLog(Func{SentryLog, SentryLog})"/> and return <see langword="null"/>.</param>
-    /// <param name="restrictedToMinimumLevel">The minimum level for events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified. <seealso cref="SentrySerilogOptions.RestrictedToMinimumLevel"/></param>
-    /// <param name="levelSwitch">A switch allowing the pass-through minimum level to be changed at runtime. <seealso cref="SentrySerilogOptions.LevelSwitch"/></param>
-    /// <returns><see cref="LoggerConfiguration"/></returns>
-    /// <example>This sample shows how each item may be set from within a configuration file:
-    /// <code>
-    /// {
-    ///     "Serilog": {
-    ///         "Using": [
-    ///             "Serilog",
-    ///             "Sentry",
-    ///         ],
-    ///         "WriteTo": [{
-    ///                 "Name": "Sentry",
-    ///                 "Args": {
-    ///                     "dsn": "https://MY-DSN@sentry.io",
-    ///                     "minimumBreadcrumbLevel": "Verbose",
-    ///                     "minimumEventLevel": "Error",
-    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}",
-    ///                     "sendDefaultPii": false,
-    ///                     "isEnvironmentUser": false,
-    ///                     "serverName": "MyServerName",
-    ///                     "attachStackTrace": false,
-    ///                     "maxBreadcrumbs": 20,
-    ///                     "sampleRate": 0.5,
-    ///                     "release": "0.0.1",
-    ///                     "environment": "staging",
-    ///                     "maxQueueItems": 100,
-    ///                     "shutdownTimeout": "00:00:05",
-    ///                     "decompressionMethods": "GZip",
-    ///                     "requestBodyCompressionLevel": "NoCompression",
-    ///                     "requestBodyCompressionBuffered": false,
-    ///                     "debug": false,
-    ///                     "diagnosticLevel": "Debug",
-    ///                     "reportAssembliesMode": ReportAssembliesMode.None,
-    ///                     "deduplicateMode": "All",
-    ///                     "defaultTags": {
-    ///                         "key-1", "value-1",
-    ///                         "key-2", "value-2"
-    ///                     }
-    ///                 }
-    ///             }
-    ///         ]
-    ///     }
-    /// }
-    /// </code>
-    /// </example>
-    public static LoggerConfiguration Sentry(
-        this LoggerSinkConfiguration loggerConfiguration,
-        string dsn,
-        LogEventLevel? minimumBreadcrumbLevel = null,
-        LogEventLevel? minimumEventLevel = null,
-        IFormatProvider? formatProvider = null,
-        ITextFormatter? textFormatter = null,
-        bool? sendDefaultPii = null,
-        bool? isEnvironmentUser = null,
-        string? serverName = null,
-        bool? attachStackTrace = null,
-        int? maxBreadcrumbs = null,
-        float? sampleRate = null,
-        string? release = null,
-        string? environment = null,
-        int? maxQueueItems = null,
-        TimeSpan? shutdownTimeout = null,
-        DecompressionMethods? decompressionMethods = null,
-        CompressionLevel? requestBodyCompressionLevel = null,
-        bool? requestBodyCompressionBuffered = null,
-        bool? debug = null,
-        SentryLevel? diagnosticLevel = null,
-        ReportAssembliesMode? reportAssembliesMode = null,
-        DeduplicateMode? deduplicateMode = null,
-        Dictionary<string, string>? defaultTags = null,
-        bool? enableLogs = null,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch? levelSwitch = null)
-    {
-        return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
-            dsn,
-            minimumEventLevel,
-            minimumBreadcrumbLevel,
-            formatProvider,
-            textFormatter,
-            sendDefaultPii,
-            isEnvironmentUser,
-            serverName,
-            attachStackTrace,
-            maxBreadcrumbs,
-            sampleRate,
-            release,
-            environment,
-            maxQueueItems,
-            shutdownTimeout,
-            decompressionMethods,
-            requestBodyCompressionLevel,
-            requestBodyCompressionBuffered,
-            debug,
-            diagnosticLevel,
-            reportAssembliesMode,
-            deduplicateMode,
-            defaultTags,
-            enableLogs,
-            restrictedToMinimumLevel,
-            levelSwitch));
-    }
-
-    /// <summary>
     /// <para>Adds a Sentry Sink for Serilog.</para>
     /// <remarks>
-    /// Note this overload doesn't initialize Sentry for you, so you'll need to have already done so. Alternatively you
-    /// can use use the overload of this extension method, passing a DSN string in the first argument.
+    /// This doesn't initialise Sentry. Initialise Sentry separately, using <c>SentrySdk.Init</c> or another Sentry
+    /// integration (such as ASP.NET Core or MAUI), and call <see cref="SentryOptionExtensions.UseSerilog"/> on the
+    /// options used to do so.
     /// </remarks>
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
@@ -186,49 +55,23 @@ public static class SentrySinkExtensions
         LoggingLevelSwitch? levelSwitch = null)
     {
         return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
-            null,
             minimumEventLevel,
             minimumBreadcrumbLevel,
             formatProvider,
             textFormatter,
-            restrictedToMinimumLevel: restrictedToMinimumLevel,
-            levelSwitch: levelSwitch));
+            restrictedToMinimumLevel,
+            levelSwitch));
     }
 
     internal static void ConfigureSentrySerilogOptions(
         SentrySerilogOptions sentrySerilogOptions,
-        string? dsn,
         LogEventLevel? minimumEventLevel = null,
         LogEventLevel? minimumBreadcrumbLevel = null,
         IFormatProvider? formatProvider = null,
         ITextFormatter? textFormatter = null,
-        bool? sendDefaultPii = null,
-        bool? isEnvironmentUser = null,
-        string? serverName = null,
-        bool? attachStackTrace = null,
-        int? maxBreadcrumbs = null,
-        float? sampleRate = null,
-        string? release = null,
-        string? environment = null,
-        int? maxQueueItems = null,
-        TimeSpan? shutdownTimeout = null,
-        DecompressionMethods? decompressionMethods = null,
-        CompressionLevel? requestBodyCompressionLevel = null,
-        bool? requestBodyCompressionBuffered = null,
-        bool? debug = null,
-        SentryLevel? diagnosticLevel = null,
-        ReportAssembliesMode? reportAssembliesMode = null,
-        DeduplicateMode? deduplicateMode = null,
-        Dictionary<string, string>? defaultTags = null,
-        bool? enableLogs = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         LoggingLevelSwitch? levelSwitch = null)
     {
-        if (dsn is not null)
-        {
-            sentrySerilogOptions.Dsn = dsn;
-        }
-
         if (minimumEventLevel.HasValue)
         {
             sentrySerilogOptions.MinimumEventLevel = minimumEventLevel.Value;
@@ -249,115 +92,17 @@ public static class SentrySinkExtensions
             sentrySerilogOptions.TextFormatter = textFormatter;
         }
 
-        if (sendDefaultPii.HasValue)
-        {
-            sentrySerilogOptions.SendDefaultPii = sendDefaultPii.Value;
-        }
-
-        if (isEnvironmentUser.HasValue)
-        {
-            sentrySerilogOptions.IsEnvironmentUser = isEnvironmentUser.Value;
-        }
-
-        if (!string.IsNullOrWhiteSpace(serverName))
-        {
-            sentrySerilogOptions.ServerName = serverName;
-        }
-
-        if (attachStackTrace.HasValue)
-        {
-            sentrySerilogOptions.AttachStacktrace = attachStackTrace.Value;
-        }
-
-        if (maxBreadcrumbs.HasValue)
-        {
-            sentrySerilogOptions.MaxBreadcrumbs = maxBreadcrumbs.Value;
-        }
-
-        if (sampleRate.HasValue)
-        {
-            sentrySerilogOptions.SampleRate = sampleRate;
-        }
-
-        if (!string.IsNullOrWhiteSpace(release))
-        {
-            sentrySerilogOptions.Release = release;
-        }
-
-        if (!string.IsNullOrWhiteSpace(environment))
-        {
-            sentrySerilogOptions.Environment = environment;
-        }
-
-        if (maxQueueItems.HasValue)
-        {
-            sentrySerilogOptions.MaxQueueItems = maxQueueItems.Value;
-        }
-
-        if (shutdownTimeout.HasValue)
-        {
-            sentrySerilogOptions.ShutdownTimeout = shutdownTimeout.Value;
-        }
-
-        if (decompressionMethods.HasValue)
-        {
-            sentrySerilogOptions.DecompressionMethods = decompressionMethods.Value;
-        }
-
-        if (requestBodyCompressionLevel.HasValue)
-        {
-            sentrySerilogOptions.RequestBodyCompressionLevel = requestBodyCompressionLevel.Value;
-        }
-
-        if (requestBodyCompressionBuffered.HasValue)
-        {
-            sentrySerilogOptions.RequestBodyCompressionBuffered = requestBodyCompressionBuffered.Value;
-        }
-
-        if (debug.HasValue)
-        {
-            sentrySerilogOptions.Debug = debug.Value;
-        }
-
-        if (diagnosticLevel.HasValue)
-        {
-            sentrySerilogOptions.DiagnosticLevel = diagnosticLevel.Value;
-        }
-
-        if (reportAssembliesMode.HasValue)
-        {
-            sentrySerilogOptions.ReportAssembliesMode = reportAssembliesMode.Value;
-        }
-
-        if (deduplicateMode.HasValue)
-        {
-            sentrySerilogOptions.DeduplicateMode = deduplicateMode.Value;
-        }
-
         sentrySerilogOptions.RestrictedToMinimumLevel = restrictedToMinimumLevel;
         sentrySerilogOptions.LevelSwitch = levelSwitch;
-
-        // Serilog-specific items
-        sentrySerilogOptions.InitializeSdk = dsn is not null;  // Inferred from the Sentry overload that is used
-        if (defaultTags?.Count > 0)
-        {
-            foreach (var tag in defaultTags)
-            {
-                sentrySerilogOptions.DefaultTags.Add(tag.Key, tag.Value);
-            }
-        }
-
-        // This only works when the SDK is initialized using the LoggerSinkConfiguration extensions. If the SDK is
-        // initialized using some other integration then the processor will need to be added manually to whichever
-        // options are used to initialize the SDK.
-        if (sentrySerilogOptions.InitializeSdk)
-        {
-            sentrySerilogOptions.ApplySerilogScopeToEvents();
-        }
     }
 
     /// <summary>
-    /// Add Sentry sink to Serilog.
+    /// <para>Adds a Sentry Sink for Serilog.</para>
+    /// <remarks>
+    /// This doesn't initialise Sentry. Initialise Sentry separately, using <c>SentrySdk.Init</c> or another Sentry
+    /// integration (such as ASP.NET Core or MAUI), and call <see cref="SentryOptionExtensions.UseSerilog"/> on the
+    /// options used to do so.
+    /// </remarks>
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration.</param>
     /// <param name="configureOptions">The configure options callback.</param>
@@ -368,12 +113,6 @@ public static class SentrySinkExtensions
         var options = new SentrySerilogOptions();
         configureOptions?.Invoke(options);
 
-        IDisposable? sdkDisposable = null;
-        if (options.InitializeSdk)
-        {
-            sdkDisposable = SentrySdk.Init(options);
-        }
-
-        return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable), options.RestrictedToMinimumLevel, options.LevelSwitch);
+        return loggerConfiguration.Sink(new SentrySink(options), options.RestrictedToMinimumLevel, options.LevelSwitch);
     }
 }
