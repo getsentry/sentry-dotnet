@@ -4,6 +4,7 @@
  *     - Adding support for AssemblyStore v3 format that shipped in .NET 10 (https://github.com/dotnet/android/pull/10249)
  * Updated from https://github.com/dotnet/android/blob/f1aecf9e6ae80fe3f3992ec1f52ef953dac7c06b/.github/skills/read-assembly-store/src/AssemblyStore/StoreReader_V2.cs
  *     - Adding support for AssemblyStore v4 format (CoreCLR) that ships in .NET 11
+ *     - Deriving the index entry size from the header rather than the ABI
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
