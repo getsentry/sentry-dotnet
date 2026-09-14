@@ -23,16 +23,6 @@ public static class IQuartzBuilderExtensions
         }
 
         /// <summary>
-        /// Adds middleware to track job execution duration metrics
-        /// </summary>
-        /// <param name="configure">Configures the options</param>
-        /// <returns></returns>
-        public IQuartzBuilder AddSentryMetrics(Action<SentryMetricsOptions>? configure = null)
-        {
-            return configuration.AddJobMiddleware<SentryMetricsMiddleware>().ConfigureOptions(configure);
-        }
-
-        /// <summary>
         /// Adds middleware that pushes a scope to sentry before job execution
         /// </summary>
         /// <param name="configure">Configures the options</param>
