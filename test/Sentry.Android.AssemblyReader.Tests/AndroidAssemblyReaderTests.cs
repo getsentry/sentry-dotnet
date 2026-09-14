@@ -15,18 +15,6 @@ public class AndroidAssemblyReaderTests
 #error "Target Framework not yet supported for AndroidAssemblyReader"
 #endif
 
-    // .NET 11 Android moved to CoreCLR and emits v4 assembly stores, which our vendored
-    // reader does not understand yet - it also changes ELF payload discovery, so even the
-    // non-store APKs fail. Tracked by https://github.com/getsentry/sentry-dotnet/issues/5454;
-    // re-enable these once that port lands.
-    private const string StoreV4SkipReason =
-        "Android assembly store v4 (.NET 11) is not supported yet - see getsentry/sentry-dotnet#5454";
-#if NET11_0_OR_GREATER
-    private const bool StoreV4Unsupported = true;
-#else
-    private const bool StoreV4Unsupported = false;
-#endif
-
     public AndroidAssemblyReaderTests(ITestOutputHelper output)
     {
         _output = output;
@@ -57,7 +45,6 @@ public class AndroidAssemblyReaderTests
     [SkippableFact]
     public void CreatesCorrectStoreReader()
     {
-        Skip.If(StoreV4Unsupported, StoreV4SkipReason);
 #if ANDROID
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
@@ -78,7 +65,6 @@ public class AndroidAssemblyReaderTests
     [SkippableFact]
     public void CreatesCorrectArchiveReader()
     {
-        Skip.If(StoreV4Unsupported, StoreV4SkipReason);
 #if ANDROID
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
@@ -86,7 +72,9 @@ public class AndroidAssemblyReaderTests
         switch (TargetFramework)
         {
             case "net11.0":
-                Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
+                // CoreCLR always loads assemblies from the store, so AndroidUseAssemblyStore=false has no effect:
+                // https://github.com/dotnet/android/pull/12033
+                Assert.IsType<AndroidAssemblyStoreReader>(sut);
                 break;
             case "net10.0":
                 Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
@@ -101,7 +89,6 @@ public class AndroidAssemblyReaderTests
     [InlineData(true)]
     public void ReturnsNullIfAssemblyDoesntExist(bool isAssemblyStore)
     {
-        Skip.If(StoreV4Unsupported, StoreV4SkipReason);
         using var sut = GetSut(isAot: false, isAssemblyStore, isCompressed: true);
         Assert.Null(sut.TryReadAssembly("NonExistent.dll"));
     }
@@ -117,7 +104,6 @@ public class AndroidAssemblyReaderTests
     [MemberData(nameof(ReadsAssemblyPermutations))]
     public void ReadsAssembly(bool isAot, bool isAssemblyStore, bool isCompressed, string assemblyName)
     {
-        Skip.If(StoreV4Unsupported, StoreV4SkipReason);
 #if ANDROID
         // No need to run all combinations - we only test the current APK which is likely JIT compressed assembly store.
         Skip.If(isAot);

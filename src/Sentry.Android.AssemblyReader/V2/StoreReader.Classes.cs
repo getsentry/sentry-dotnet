@@ -39,6 +39,10 @@ internal partial class StoreReader
 
     internal sealed class IndexEntry
     {
+        // The ignore flag is a bool, written to the binary as a single byte
+        public const uint NativeSize32 = 2 * sizeof(uint) + sizeof(byte);
+        public const uint NativeSize64 = sizeof(ulong) + sizeof(uint) + sizeof(byte);
+
         public readonly ulong name_hash;
         public readonly uint descriptor_index;
         public readonly bool ignore;

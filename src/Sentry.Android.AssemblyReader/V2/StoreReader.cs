@@ -193,25 +193,18 @@ internal partial class StoreReader : AssemblyStoreReader
             StoreStream.Seek((long)elfOffset + header.NativeSize, SeekOrigin.Begin);
             using var reader = CreateReader();
 
+            var indexEntrySize = GetIndexEntrySize(header);
             var index = new List<IndexEntry>();
             for (uint i = 0; i < header.index_entry_count; i++)
             {
-                ulong name_hash;
-                if (Is64Bit)
+                var name_hash = indexEntrySize switch
                 {
-                    name_hash = reader.ReadUInt64();
-                }
-                else
-                {
-                    name_hash = (ulong)reader.ReadUInt32();
-                }
-
+                    IndexEntry.NativeSize64 => reader.ReadUInt64(),
+                    IndexEntry.NativeSize32 => reader.ReadUInt32(),
+                    _ => throw new InvalidOperationException($"Assembly store '{StorePath}' index entry size {indexEntrySize} is not supported.")
+                };
                 uint descriptor_index = reader.ReadUInt32();
-#if NET10_0_OR_GREATER
                 bool ignore = reader.ReadByte() != 0;
-#else
-                bool ignore = false;
-#endif
                 index.Add(new IndexEntry(name_hash, descriptor_index, ignore));
             }
 
@@ -272,5 +265,21 @@ internal partial class StoreReader : AssemblyStoreReader
             }
             Assemblies = storeItems.AsReadOnly();
         }
+    }
+
+    // Name hash width depends on the runtime, not the ABI: CoreCLR stores use 32-bit CRC32 hashes on every ABI
+    private uint GetIndexEntrySize(Header header)
+    {
+        if (header.index_entry_count == 0)
+        {
+            return 0;
+        }
+
+        if (header.index_size % header.index_entry_count != 0)
+        {
+            throw new InvalidOperationException($"Assembly store '{StorePath}' index is corrupted: index size {header.index_size} is not evenly divisible by entry count {header.index_entry_count}.");
+        }
+
+        return header.index_size / header.index_entry_count;
     }
 }
