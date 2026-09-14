@@ -2,6 +2,8 @@
  * Adapted from https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.cs
  * Updated from https://github.com/dotnet/android/blob/64018e13e53cec7246e54866b520d3284de344e0/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.cs
  *     - Adding support for AssemblyStore v3 format that shipped in .NET 10 (https://github.com/dotnet/android/pull/10249)
+ * Updated from https://github.com/dotnet/android/blob/f1aecf9e6ae80fe3f3992ec1f52ef953dac7c06b/.github/skills/read-assembly-store/src/AssemblyStore/StoreReader_V2.cs
+ *     - Adding support for AssemblyStore v4 format (CoreCLR) that ships in .NET 11
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
@@ -10,15 +12,13 @@ namespace Sentry.Android.AssemblyReader.V2;
 internal partial class StoreReader : AssemblyStoreReader
 {
     // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
-    // Each .NET release bumps the assembly store format: v2 in .NET 9, v3 in .NET 10, v4 in
-    // .NET 11. v4 changes the header/index layout as well as the version number, so it needs
-    // the upstream reader changes ported, not just a new constant - bumping the version alone
-    // gets past IsSupported() and then fails with EndOfStreamException in Prepare().
-    // Until that port lands, .NET 11 stores are reported as unsupported, which
-    // AndroidHelpers.GetAndroidAssemblyReader handles by logging and returning null.
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000003; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000003;
+    // Each .NET release bumps the assembly store format: v3 in .NET 10, v4 (CoreCLR) in .NET 11.
+    private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT_V3 = 0x80000003;
+    private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT_V3 = 0x00000003;
+    private const uint ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_64BIT_V4 = 0x80000004; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
+    private const uint ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_32BIT_V4 = 0x00000004;
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK = 0xF0000000;
+    private const uint ASSEMBLY_STORE_FORMAT_NUMBER_MASK = 0x0000FFFF;
     private const uint ASSEMBLY_STORE_ABI_AARCH64 = 0x00010000;
     private const uint ASSEMBLY_STORE_ABI_ARM = 0x00020000;
     private const uint ASSEMBLY_STORE_ABI_X64 = 0x00030000;
@@ -89,10 +89,14 @@ internal partial class StoreReader : AssemblyStoreReader
         : base(store, path, logger)
     {
         supportedVersions = new HashSet<uint> {
-            ASSEMBLY_STORE_FORMAT_VERSION_64BIT | ASSEMBLY_STORE_ABI_AARCH64,
-            ASSEMBLY_STORE_FORMAT_VERSION_64BIT | ASSEMBLY_STORE_ABI_X64,
-            ASSEMBLY_STORE_FORMAT_VERSION_32BIT | ASSEMBLY_STORE_ABI_ARM,
-            ASSEMBLY_STORE_FORMAT_VERSION_32BIT | ASSEMBLY_STORE_ABI_X86,
+            ASSEMBLY_STORE_FORMAT_VERSION_64BIT_V3 | ASSEMBLY_STORE_ABI_AARCH64,
+            ASSEMBLY_STORE_FORMAT_VERSION_64BIT_V3 | ASSEMBLY_STORE_ABI_X64,
+            ASSEMBLY_STORE_FORMAT_VERSION_32BIT_V3 | ASSEMBLY_STORE_ABI_ARM,
+            ASSEMBLY_STORE_FORMAT_VERSION_32BIT_V3 | ASSEMBLY_STORE_ABI_X86,
+            ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_64BIT_V4 | ASSEMBLY_STORE_ABI_AARCH64,
+            ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_64BIT_V4 | ASSEMBLY_STORE_ABI_X64,
+            ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_32BIT_V4 | ASSEMBLY_STORE_ABI_ARM,
+            ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_32BIT_V4 | ASSEMBLY_STORE_ABI_X86,
         };
     }
 
@@ -157,8 +161,9 @@ internal partial class StoreReader : AssemblyStoreReader
             var entry_count = reader.ReadUInt32();
             var index_entry_count = reader.ReadUInt32();
             var index_size = reader.ReadUInt32();
+            var content_id = (version & ASSEMBLY_STORE_FORMAT_NUMBER_MASK) >= 4 ? reader.ReadUInt64() : 0;
 
-            header = new Header(magic, version, entry_count, index_entry_count, index_size);
+            header = new Header(magic, version, entry_count, index_entry_count, index_size, content_id);
             return true;
         }
     }
@@ -185,7 +190,7 @@ internal partial class StoreReader : AssemblyStoreReader
             AssemblyCount = header.entry_count;
             IndexEntryCount = header.index_entry_count;
 
-            StoreStream.Seek((long)elfOffset + Header.NativeSize, SeekOrigin.Begin);
+            StoreStream.Seek((long)elfOffset + header.NativeSize, SeekOrigin.Begin);
             using var reader = CreateReader();
 
             var index = new List<IndexEntry>();
