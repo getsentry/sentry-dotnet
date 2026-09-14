@@ -3,6 +3,9 @@ using K4os.Compression.LZ4;
 
 namespace Sentry.Android.AssemblyReader.Tests;
 
+// Assembly.Location is empty on Android, where assemblies load from the APK. The device run covers
+// decompression through AndroidAssemblyReaderTests.ReadsAssembly instead.
+#if !ANDROID
 public class ArchiveUtilsTests
 {
     private const uint Lz4Magic = 0x5A4C4158; // 'XALZ'
@@ -99,3 +102,4 @@ public class ArchiveUtilsTests
             .Should().Be(typeof(ArchiveUtilsTests).Assembly.GetName().Name);
     }
 }
+#endif
