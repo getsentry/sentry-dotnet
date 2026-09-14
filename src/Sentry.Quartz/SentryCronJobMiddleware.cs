@@ -7,7 +7,7 @@ namespace Sentry.Quartz;
 internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
 {
     private readonly SentryCronJobOptions _options;
-    private readonly ConcurrentDictionary<Type, SentryCronInformation> _sentryCronInformation = [];
+    private readonly ConcurrentDictionary<string, SentryCronInformation> _sentryCronInformation = [];
     private readonly IHub _hub;
     private readonly ILogger<SentryCronJobMiddleware> _logger;
 
@@ -20,8 +20,8 @@ internal sealed partial class SentryCronJobMiddleware : IJobExecutionMiddleware
 
     public async ValueTask Invoke(IJobExecutionContext context, JobExecutionDelegate next, CancellationToken cancellationToken)
     {
-        var jobType = context.JobInstance.GetType();
-        var info = _sentryCronInformation.GetOrAdd(jobType, _ => new SentryCronInformation(context.JobInstance));
+        var jobId = context.JobDetail.Key.ToString();
+        var info = _sentryCronInformation.GetOrAdd(jobId, _ => new SentryCronInformation(context.JobInstance));
 
         var sentryId = StartQuartz(context, info);
         try
