@@ -11,7 +11,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         if (!isEnabled)
         {
@@ -41,7 +40,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -57,7 +55,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.Environment = "test-environment";
         _fixture.Options.Release = "test-release";
 
@@ -125,7 +122,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -144,7 +140,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -163,7 +158,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -179,7 +173,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -195,7 +188,6 @@ public partial class SentryTargetTests
     {
         // Force the structured-log capture to fail.
         _fixture.Hub.Logger.Returns(_ => throw new InvalidOperationException("structured logging failed"));
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
         // Surface any exception that escapes the target, so an unguarded failure would fail this test.

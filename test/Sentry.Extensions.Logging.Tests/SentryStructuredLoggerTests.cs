@@ -44,11 +44,9 @@ public class SentryStructuredLoggerTests : IDisposable
             Hub.Logger.Returns(logger);
 
             EnableHub(true);
-            EnableLogs(true);
         }
 
         public void EnableHub(bool isEnabled) => Hub.IsEnabled.Returns(isEnabled);
-        public void EnableLogs(bool isEnabled) => Options.Value.EnableLogs = isEnabled;
 
         public void WithActiveSpan(SentryId traceId, SpanId spanId)
         {
@@ -250,14 +248,12 @@ public class SentryStructuredLoggerTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, true, LogLevel.Information, true)]
-    [InlineData(false, true, LogLevel.Information, false)]
-    [InlineData(true, false, LogLevel.Information, false)]
-    [InlineData(true, true, LogLevel.None, false)]
-    public void IsEnabled_HubAndOptions_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel logLevel, bool expectedIsEnabled)
+    [InlineData(true, LogLevel.Information, true)]
+    [InlineData(false, LogLevel.Information, false)]
+    [InlineData(true, LogLevel.None, false)]
+    public void IsEnabled_Hub_Returns(bool isHubEnabled, LogLevel logLevel, bool expectedIsEnabled)
     {
         _fixture.EnableHub(isHubEnabled);
-        _fixture.EnableLogs(isLogsEnabled);
         var logger = _fixture.GetSut();
 
         var isEnabled = logger.IsEnabled(logLevel);

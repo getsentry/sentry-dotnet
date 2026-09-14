@@ -56,11 +56,6 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
 
     public void Emit(LogEvent logEvent)
     {
-        if (!IsEnabled(logEvent))
-        {
-            return;
-        }
-
         if (isReentrant.Value)
         {
             _options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
@@ -76,15 +71,6 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
         {
             isReentrant.Value = false;
         }
-    }
-
-    private bool IsEnabled(LogEvent logEvent)
-    {
-        var options = _hubAccessor().GetSentryOptions();
-
-        return logEvent.Level >= _options.MinimumEventLevel
-            || logEvent.Level >= _options.MinimumBreadcrumbLevel
-            || options?.EnableLogs is true;
     }
 
     private void InnerEmit(LogEvent logEvent)
@@ -165,11 +151,11 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
                 level: logEvent.Level.ToBreadcrumbLevel());
         }
 
-        // Read the options from the Hub, rather than the Sink's Serilog-Options, because 'EnableLogs' is declared in the base 'SentryOptions', rather than the derived 'SentrySerilogOptions'.
-        // In cases where Sentry's Serilog-Sink is added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through ASP.NET Core),
-        // then the 'EnableLogs' option of this Sink's Serilog-Options is default, but the Hub's Sentry-Options have the actual user-defined value configured.
+        // Read the options from the Hub, rather than the Sink's Serilog-Options. In cases where Sentry's Serilog-Sink is
+        // added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through
+        // ASP.NET Core), only the Hub's Sentry-Options have the actual user-defined values configured.
         var options = hub.GetSentryOptions();
-        if (options?.EnableLogs is true)
+        if (options is not null)
         {
             CaptureStructuredLog(hub, options, logEvent, formatted, template);
         }

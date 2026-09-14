@@ -78,8 +78,8 @@ internal partial class BindableSentryOptions
         options.Distribution = Distribution ?? options.Distribution;
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
+#pragma warning disable CS0618 // Bound so existing configuration keys still resolve; the values are ignored.
         options.EnableLogs = EnableLogs ?? options.EnableLogs;
-#pragma warning disable CS0618 // Bound so existing configuration keys still resolve; the value is ignored.
         options.EnableMetrics = EnableMetrics ?? options.EnableMetrics;
 #pragma warning restore CS0618
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;

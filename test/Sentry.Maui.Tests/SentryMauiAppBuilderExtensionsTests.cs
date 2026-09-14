@@ -340,7 +340,6 @@ public partial class SentryMauiAppBuilderExtensionsTests
         // Act
         builder.UseSentry((SentryMauiOptions options) =>
         {
-            options.EnableLogs = true;
             options.InitializeSdk = false;
         });
 
@@ -362,7 +361,6 @@ public partial class SentryMauiAppBuilderExtensionsTests
         // Act
         builder.UseSentry((SentryMauiOptions options) =>
         {
-            options.EnableLogs = true;
             options.InitializeSdk = false;
         });
 

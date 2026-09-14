@@ -90,7 +90,7 @@ public partial class SentryAppender : AppenderSkeleton
             }
         }
 
-        CaptureStructuredLogIfEnabled(loggingEvent);
+        CaptureStructuredLog(loggingEvent);
 
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
 
@@ -103,10 +103,10 @@ public partial class SentryAppender : AppenderSkeleton
         CreateSentryEvent(loggingEvent, exception);
     }
 
-    private void CaptureStructuredLogIfEnabled(LoggingEvent loggingEvent)
+    private void CaptureStructuredLog(LoggingEvent loggingEvent)
     {
         var options = _hub.GetSentryOptions();
-        if (options is not { EnableLogs: true })
+        if (options is null)
         {
             return;
         }

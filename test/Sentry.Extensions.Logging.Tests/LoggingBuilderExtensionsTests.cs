@@ -13,7 +13,6 @@ public class LoggingBuilderExtensionsTests
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry(options =>
         {
-            options.EnableLogs = true;
             options.InitializeSdk = false;
         }));
         using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -35,7 +34,6 @@ public class LoggingBuilderExtensionsTests
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry(options =>
         {
-            options.EnableLogs = true;
             options.InitializeSdk = false;
         }));
         using var serviceProvider = serviceCollection.BuildServiceProvider();

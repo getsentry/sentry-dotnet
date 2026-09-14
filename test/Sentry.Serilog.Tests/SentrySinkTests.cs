@@ -13,6 +13,7 @@ public partial class SentrySinkTests
         public Fixture()
         {
             Hub.IsEnabled.Returns(true);
+            Hub.Logger.Returns(new InMemorySentryStructuredLogger());
             HubAccessor = () => Hub;
             Hub.SubstituteConfigureScope(Scope);
             SentryClientExtensions.SentryOptionsForTestingOnly = Options;

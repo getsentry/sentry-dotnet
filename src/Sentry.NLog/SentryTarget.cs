@@ -136,12 +136,20 @@ public sealed partial class SentryTarget : TargetWithContext
     }
 
     /// <summary>
-    /// Controls whether logs are generated and sent.
+    /// Logs are always generated and sent.
     /// </summary>
+    /// <remarks>
+    /// This option no longer has any effect. The getter always returns <see langword="true"/> and the setter is ignored.
+    /// To filter or drop logs, use <see cref="SentryOptions.SetBeforeSendLog(Func{SentryLog, SentryLog})"/> and return <see langword="null"/>.
+    /// </remarks>
+    [Obsolete(SentryOptions.ObsoleteEnableLogs)]
     public bool EnableLogs
     {
-        get => Options.EnableLogs;
-        set => Options.EnableLogs = value;
+        get => true;
+        set
+        {
+            // Logs are always enabled. This option is deliberately ignored.
+        }
     }
 
     /// <summary>
@@ -363,11 +371,10 @@ public sealed partial class SentryTarget : TargetWithContext
             CreateBreadcrumb(logEvent, exception, shouldIncludeProperties, hub);
         }
 
-        // Read the options from the Hub rather than the Target's NLog-Options because 'EnableLogs' is declared in the
-        // base 'SentryOptions', rather than the derived 'SentryNLogOptions'. If the NLog-Target is added without a DSN
-        // (i.e. without initialising the SDK), then base options will only be initialised in the Hub options.
+        // Read the options from the Hub rather than the Target's NLog-Options. If the NLog-Target is added without a
+        // DSN (i.e. without initialising the SDK), then base options will only be initialised in the Hub options.
         var sentryOptions = hub.GetSentryOptions();
-        if (sentryOptions?.EnableLogs is true)
+        if (sentryOptions is not null)
         {
             try
             {

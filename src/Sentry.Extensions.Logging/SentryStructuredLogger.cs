@@ -29,7 +29,6 @@ internal sealed class SentryStructuredLogger : ILogger
     public bool IsEnabled(LogLevel logLevel)
     {
         return _hub.IsEnabled
-            && _options.EnableLogs
             && logLevel != LogLevel.None;
     }
 

@@ -84,17 +84,6 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Create_EnableLogsDisabled_NewDefaultInstance()
-    {
-        // EnableLogs gates the logging integrations, not this API.
-        _fixture.Options.EnableLogs.Should().BeFalse();
-
-        var instance = _fixture.GetSut();
-
-        instance.Should().BeOfType<DefaultSentryStructuredLogger>();
-    }
-
-    [Fact]
     public void Log_WithoutActiveSpan_CapturesEnvelope()
     {
         _fixture.WithoutActiveSpan();

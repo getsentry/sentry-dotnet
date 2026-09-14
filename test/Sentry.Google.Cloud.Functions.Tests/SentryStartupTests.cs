@@ -127,7 +127,6 @@ public class SentryStartupTests
     {
         LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
-            options.EnableLogs = true;
             options.InitializeSdk = false;
         });
 
@@ -147,7 +146,6 @@ public class SentryStartupTests
     {
         LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
-            options.EnableLogs = true;
             options.InitializeSdk = false;
         });
 

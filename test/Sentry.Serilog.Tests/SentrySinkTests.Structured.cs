@@ -4,21 +4,18 @@ namespace Sentry.Serilog.Tests;
 
 public partial class SentrySinkTests
 {
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Emit_StructuredLogging_IsEnabled(bool isEnabled)
+    [Fact]
+    public void Emit_StructuredLogging_CapturesLog()
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = isEnabled;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
 
         logger.Write(LogEventLevel.Information, "Message");
 
-        capturer.Logs.Should().HaveCount(isEnabled ? 1 : 0);
+        capturer.Logs.Should().HaveCount(1);
     }
 
     [Theory]
@@ -28,7 +25,6 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         if (!isEnabled)
         {
@@ -54,7 +50,6 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -71,7 +66,6 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.Environment = "test-environment";
         _fixture.Options.Release = "test-release";
 
@@ -140,7 +134,6 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -156,7 +149,6 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
