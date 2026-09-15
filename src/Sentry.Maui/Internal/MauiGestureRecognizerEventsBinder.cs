@@ -151,11 +151,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     private static void OnPanGesture(object? sender, PanUpdatedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PanGestureRecognizer.PanUpdated),
-        // The array casts on these collection expressions are required. BreadcrumbEvent's extraData is
-        // params IEnumerable<(string key, string value)>, and on the -windows TFMs CsWinRT1032 rejects a
-        // collection expression whose target is a non-mutable interface type, because the type the
-        // compiler synthesises isn't trim/AOT-safe for WinRT. Casting to a concrete array satisfies it.
-        ((string key, string value)[])
+        // Array cast required for WinRT  trim/AOT safety
         [
             ("GestureId", e.GestureId.ToString()),
             ("StatusType", e.StatusType.ToString()),

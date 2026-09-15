@@ -50,7 +50,6 @@ jobs:
                 - /tmp/node24:/__e/node24
           - os: macos-26 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
-          # VS 2026 images; the native lib still builds with the VS 2022 toolset (see build-sentry-native.ps1)
           - os: windows-2025-vs2026
             rid: win-x64
           - os: windows-11-vs2026-arm
