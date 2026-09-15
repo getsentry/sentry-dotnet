@@ -151,7 +151,8 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     private static void OnPanGesture(object? sender, PanUpdatedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PanGestureRecognizer.PanUpdated),
-        // Array cast required for WinRT  trim/AOT safety
+        // Array cast required for WinRT trim/AOT safety
+        ((string key, string value)[])
         [
             ("GestureId", e.GestureId.ToString()),
             ("StatusType", e.StatusType.ToString()),
