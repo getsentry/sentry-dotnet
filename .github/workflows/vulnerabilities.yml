@@ -33,18 +33,15 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry.slnx --nologo
 
-      # The dotnet package list command doesn't change its exit code on detection, so tee to a file and scan it
-      # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
+      # `dotnet package list` doesn't change its exit code on detection, so the script reads its
+      # JSON output and decides. See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
       #
-      # --source pins the query to nuget.org - the only feed that publishes a
-      # VulnerabilityInfo resource. The other feeds can error out with 401s
+      # Advisories we've reviewed and decided to hold on are recorded, with reasoning, in
+      # scripts/vulnerability-allowlist.json. Anything not listed there fails the run.
+      #
+      # NuGetAuditSuppress - the mechanism you'd normally reach for - is not an option here:
+      # `dotnet package list --vulnerable` ignores it entirely (it only silences restore-time
+      # NU19xx warnings), and restore-time auditing doesn't produce findings in this repo
+      # anyway, because the audit can't use the extra feeds in NuGet.config.
       - name: List vulnerable packages
-        shell: bash
-        run: |
-          dotnet package list --project Sentry.slnx --vulnerable --include-transitive --no-restore \
-            --source https://api.nuget.org/v3/index.json | tee vulnerable.txt
-
-          if grep -q 'has the following vulnerable packages' vulnerable.txt; then
-            echo "::error::Vulnerable packages detected - see the job output above for the affected projects and advisories."
-            exit 1
-          fi
+        run: pwsh scripts/check-vulnerabilities.ps1
