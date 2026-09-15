@@ -21,7 +21,6 @@ internal partial class StoreReader
         // Index size in bytes
         public readonly uint index_size;
 
-        // Only present in v4+ stores
         public readonly ulong content_id;
 
         public uint NativeSize => 5 * sizeof(uint) + ((version & ASSEMBLY_STORE_FORMAT_NUMBER_MASK) >= 4 ? sizeof(ulong) : 0u);
