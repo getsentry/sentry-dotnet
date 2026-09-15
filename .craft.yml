@@ -87,3 +87,7 @@ targets:
         name: Sentry.Profiling
         packageUrl: https://www.nuget.org/packages/Sentry.Profiling
         mainDocsUrl: https://docs.sentry.io/platforms/dotnet/profiling/
+      nuget:Sentry.Quartz:
+        name: Sentry.Quartz
+        packageUrl: https://www.nuget.org/packages/Sentry.Quartz
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/crons/
