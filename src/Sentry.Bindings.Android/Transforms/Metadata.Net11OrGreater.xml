@@ -1,6 +1,6 @@
 ﻿<metadata>
 
-  <!-- epitaph is Bind="false", so this overload fails to compile (CS0400). Android 36 bindings already omit it. -->
+  <!-- We reference epitaph with Bind="false", so this overload fails to compile (CS0400). Android 36 bindings already omit it. -->
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.tombstone']/class[@name='TombstoneParser']/method[@name='parse' and count(parameter)=1 and parameter[1][@type='com.abovevacant.epitaph.core.Tombstone']]" />
 
 </metadata>
