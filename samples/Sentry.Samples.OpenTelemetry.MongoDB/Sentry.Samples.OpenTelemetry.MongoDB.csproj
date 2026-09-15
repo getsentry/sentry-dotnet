@@ -10,7 +10,8 @@
   <ItemGroup>
     <!-- MongoDB.Driver 3.7.0 and later has built-in OpenTelemetry instrumentation -->
     <PackageReference Include="MongoDB.Driver" Version="3.9.0" />
-    <PackageReference Include="OpenTelemetry" Version="1.15.0" />
+    <PackageReference Include="OpenTelemetry" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.18.0" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
