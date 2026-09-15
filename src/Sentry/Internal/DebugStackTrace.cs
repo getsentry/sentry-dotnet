@@ -518,19 +518,21 @@ internal class DebugStackTrace : SentryStackTrace
     {
         try
         {
-            assemblyName = module.FullyQualifiedName;
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            if (assemblyName is null or ModuleExtensions.UnknownLocation)
+            var location = module.FullyQualifiedName is { } name and not ModuleExtensions.UnknownLocation ? name : null;
+            if (options.AssemblyReader is { } reader)
+            {
+                // CoreCLR on Android loads assemblies from the APK, so they have no location
+                assemblyName = location ?? module.ScopeName;
+                return reader.Invoke(assemblyName);
+            }
+            if (location is null)
             {
                 // When publishing as a single file or compiling AOT FullyQualifiedName will be null. This logic
                 // compensates for the UnconditionalSuppressMessage attribute applied to this method.
                 assemblyName = null;
                 return null;
             }
-            if (options.AssemblyReader is { } reader)
-            {
-                return reader.Invoke(assemblyName);
-            }
+            assemblyName = location;
 
             if (options.FileSystem.FileExists(assemblyName))
             {
