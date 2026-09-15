@@ -9,51 +9,58 @@ public class IntegrationTests
     {
         var transport = new RecordingTransport();
 
-        var configuration = new LoggerConfiguration();
-        configuration.Enrich.FromLogContext();
-        configuration.MinimumLevel.Debug();
-        configuration.WriteTo.Sentry(
-            _ =>
-            {
-                _.TracesSampleRate = 1;
-                _.MinimumBreadcrumbLevel = LogEventLevel.Debug;
-                _.MinimumEventLevel = LogEventLevel.Debug;
-                _.Transport = transport;
-                _.Dsn = ValidDsn;
-                _.SendDefaultPii = true;
-                _.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
-                _.AttachStacktrace = false;
-                _.Release = "test-release";
-            });
-
-        Log.Logger = configuration.CreateLogger();
-        using (LogContext.PushProperty("MyTaskId", 42))
-        using (LogContext.PushProperty(
-                   "inventory",
-                   new
+        using (SentrySdk.Init(
+                   options =>
                    {
-                       SmallPotion = 3,
-                       BigPotion = 0,
-                       CheeseWheels = 512
+                       options.TracesSampleRate = 1;
+                       options.Transport = transport;
+                       options.Dsn = ValidDsn;
+                       options.SendDefaultPii = true;
+                       options.AttachStacktrace = false;
+                       options.Release = "test-release";
+                       options.UseSerilog();
                    }))
         {
-            Log.Verbose("Verbose message which is not sent.");
-            Log.Debug("Debug message stored as breadcrumb.");
-            Log.ForContext("MyTaskId", 65).Debug("Message with a different MyTaskId");
-            Log.Error("Some event that includes the previous breadcrumbs");
+            var configuration = new LoggerConfiguration();
+            configuration.Enrich.FromLogContext();
+            configuration.MinimumLevel.Debug();
+            configuration.WriteTo.Sentry(
+                _ =>
+                {
+                    _.MinimumBreadcrumbLevel = LogEventLevel.Debug;
+                    _.MinimumEventLevel = LogEventLevel.Debug;
+                    _.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
+                });
 
-            try
+            Log.Logger = configuration.CreateLogger();
+            using (LogContext.PushProperty("MyTaskId", 42))
+            using (LogContext.PushProperty(
+                       "inventory",
+                       new
+                       {
+                           SmallPotion = 3,
+                           BigPotion = 0,
+                           CheeseWheels = 512
+                       }))
             {
-                throw new("Exception message");
+                Log.Verbose("Verbose message which is not sent.");
+                Log.Debug("Debug message stored as breadcrumb.");
+                Log.ForContext("MyTaskId", 65).Debug("Message with a different MyTaskId");
+                Log.Error("Some event that includes the previous breadcrumbs");
+
+                try
+                {
+                    throw new("Exception message");
+                }
+                catch (Exception exception)
+                {
+                    exception.Data.Add("details", "Do work always throws.");
+                    Log.Fatal(exception, "Error: with exception");
+                }
             }
-            catch (Exception exception)
-            {
-                exception.Data.Add("details", "Do work always throws.");
-                Log.Fatal(exception, "Error: with exception");
-            }
+
+            Log.CloseAndFlush();
         }
-
-        Log.CloseAndFlush();
 
         return Verify(transport.Envelopes)
             .UniqueForRuntimeAndVersion()
@@ -64,31 +71,34 @@ public class IntegrationTests
     public Task LoggingInsideTheContextOfLogging()
     {
         var transport = new RecordingTransport();
-
-        var configuration = new LoggerConfiguration();
-
         var diagnosticLogger = new InMemoryDiagnosticLogger();
-        configuration.WriteTo.Sentry(
-            _ =>
-            {
-                _.TracesSampleRate = 1;
-                _.Transport = transport;
-                _.DiagnosticLogger = diagnosticLogger;
-                _.Dsn = ValidDsn;
-                _.Debug = true;
-                _.AttachStacktrace = false;
-                _.Release = "test-release";
-            });
 
-        Log.Logger = configuration.CreateLogger();
+        using (SentrySdk.Init(
+                   options =>
+                   {
+                       options.TracesSampleRate = 1;
+                       options.Transport = transport;
+                       options.DiagnosticLogger = diagnosticLogger;
+                       options.Dsn = ValidDsn;
+                       options.Debug = true;
+                       options.AttachStacktrace = false;
+                       options.Release = "test-release";
+                       options.UseSerilog();
+                   }))
+        {
+            var configuration = new LoggerConfiguration();
+            configuration.WriteTo.Sentry(_ => { });
 
-        SentrySdk.ConfigureScope(
-            scope =>
-            {
-                scope.OnEvaluating += (_, _) => Log.Error("message from OnEvaluating");
-                Log.Error("message");
-            });
-        Log.CloseAndFlush();
+            Log.Logger = configuration.CreateLogger();
+
+            SentrySdk.ConfigureScope(
+                scope =>
+                {
+                    scope.OnEvaluating += (_, _) => Log.Error("message from OnEvaluating");
+                    Log.Error("message");
+                });
+            Log.CloseAndFlush();
+        }
 
         return Verify(
                 new
@@ -105,30 +115,33 @@ public class IntegrationTests
     public Task StructuredLogging()
     {
         var transport = new RecordingTransport();
-
-        var configuration = new LoggerConfiguration();
-        configuration.MinimumLevel.Debug();
         var diagnosticLogger = new InMemoryDiagnosticLogger();
-        configuration.WriteTo.Sentry(
-            _ =>
-            {
-                _.MinimumEventLevel = (LogEventLevel)int.MaxValue;
-                _.Transport = transport;
-                _.DiagnosticLogger = diagnosticLogger;
-                _.Dsn = ValidDsn;
-                _.Debug = true;
-                _.Environment = "test-environment";
-                _.Release = "test-release";
-            });
 
-        Log.Logger = configuration.CreateLogger();
+        using (SentrySdk.Init(
+                   options =>
+                   {
+                       options.Transport = transport;
+                       options.DiagnosticLogger = diagnosticLogger;
+                       options.Dsn = ValidDsn;
+                       options.Debug = true;
+                       options.Environment = "test-environment";
+                       options.Release = "test-release";
+                       options.UseSerilog();
+                   }))
+        {
+            var configuration = new LoggerConfiguration();
+            configuration.MinimumLevel.Debug();
+            configuration.WriteTo.Sentry(_ => _.MinimumEventLevel = (LogEventLevel)int.MaxValue);
 
-        Log.Debug("Debug message with a Scalar property: {Scalar}", 42);
-        Log.Information("Information message with a Sequence property: {Sequence}", new object[] { new int[] { 41, 42, 43 } });
-        Log.Warning("Warning message with a Dictionary property: {Dictionary}", new Dictionary<string, string> { { "key", "value" } });
-        Log.Error("Error message with a Structure property: {Structure}", (Number: 42, Text: "42"));
+            Log.Logger = configuration.CreateLogger();
 
-        Log.CloseAndFlush();
+            Log.Debug("Debug message with a Scalar property: {Scalar}", 42);
+            Log.Information("Information message with a Sequence property: {Sequence}", new object[] { new int[] { 41, 42, 43 } });
+            Log.Warning("Warning message with a Dictionary property: {Dictionary}", new Dictionary<string, string> { { "key", "value" } });
+            Log.Error("Error message with a Structure property: {Structure}", (Number: 42, Text: "42"));
+
+            Log.CloseAndFlush();
+        }
 
         var envelopes = transport.Envelopes;
         var logs = transport.Payloads.OfType<JsonSerializable>()

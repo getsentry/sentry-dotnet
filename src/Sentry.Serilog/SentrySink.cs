@@ -3,11 +3,9 @@ namespace Sentry.Serilog;
 /// <summary>
 /// Sentry Sink for Serilog
 /// </summary>
-/// <inheritdoc cref="IDisposable" />
 /// <inheritdoc cref="ILogEventSink" />
-internal sealed partial class SentrySink : ILogEventSink, IDisposable
+internal sealed partial class SentrySink : ILogEventSink
 {
-    private readonly IDisposable? _sdkDisposable;
     private readonly SentrySerilogOptions _options;
 
     internal static readonly SdkVersion NameAndVersion
@@ -29,13 +27,12 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
     private readonly Func<IHub> _hubAccessor;
     private readonly ISystemClock _clock;
 
-    public SentrySink(
-        SentrySerilogOptions options,
-        IDisposable? sdkDisposable)
+    private volatile bool _checkedUseSerilog;
+
+    public SentrySink(SentrySerilogOptions options)
         : this(
             options,
             () => HubAdapter.Instance,
-            sdkDisposable,
             SystemClock.Clock)
     {
     }
@@ -43,13 +40,11 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
     internal SentrySink(
         SentrySerilogOptions options,
         Func<IHub> hubAccessor,
-        IDisposable? sdkDisposable,
         ISystemClock clock)
     {
         _options = options;
         _hubAccessor = hubAccessor;
         _clock = clock;
-        _sdkDisposable = sdkDisposable;
     }
 
     private static AsyncLocal<bool> isReentrant = new();
@@ -58,7 +53,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
     {
         if (isReentrant.Value)
         {
-            _options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
+            _hubAccessor()?.GetSentryOptions()?.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
             return;
         }
 
@@ -86,6 +81,12 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
         if (_hubAccessor() is not { IsEnabled: true } hub)
         {
             return;
+        }
+
+        var options = hub.GetSentryOptions();
+        if (options is not null)
+        {
+            WarnIfUseSerilogNotCalled(options);
         }
 
         var exception = logEvent.Exception;
@@ -151,13 +152,25 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
                 level: logEvent.Level.ToBreadcrumbLevel());
         }
 
-        // Read the options from the Hub, rather than the Sink's Serilog-Options. In cases where Sentry's Serilog-Sink is
-        // added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through
-        // ASP.NET Core), only the Hub's Sentry-Options have the actual user-defined values configured.
-        var options = hub.GetSentryOptions();
         if (options is not null)
         {
             CaptureStructuredLog(hub, options, logEvent, formatted, template);
+        }
+    }
+
+    private void WarnIfUseSerilogNotCalled(SentryOptions options)
+    {
+        if (_checkedUseSerilog)
+        {
+            return;
+        }
+
+        _checkedUseSerilog = true;
+        if (!options.HasSerilogScopeEventProcessor())
+        {
+            options.LogWarning(
+                "The Sentry sink for Serilog is in use, but UseSerilog() was not called on the options used to initialise Sentry. " +
+                "Properties from the Serilog LogContext will not be applied to Sentry events.");
         }
     }
 
@@ -188,6 +201,4 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
             }
         }
     }
-
-    public void Dispose() => _sdkDisposable?.Dispose();
 }

@@ -41,6 +41,10 @@
             Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
+            },
+            Tags: {
+              inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
+              MyTaskId: 42
             }
           }
         }
@@ -95,6 +99,10 @@
             Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 65
+            },
+            Tags: {
+              inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
+              MyTaskId: 42
             }
           }
         }
@@ -153,6 +161,10 @@
             Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
+            },
+            Tags: {
+              inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
+              MyTaskId: 42
             }
           }
         }
@@ -203,8 +215,8 @@
                       FileName: IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
-                      LineNumber: 47,
-                      ColumnNumber: 17,
+                      LineNumber: 53,
+                      ColumnNumber: 21,
                       AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
                       ContextLine: null,
                       InApp: false,
@@ -270,6 +282,10 @@
               }
             ],
             Extra: {
+              inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
+              MyTaskId: 42
+            },
+            Tags: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
             }
