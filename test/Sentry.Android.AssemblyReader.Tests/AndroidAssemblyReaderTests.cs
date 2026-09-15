@@ -72,8 +72,7 @@ public class AndroidAssemblyReaderTests
         switch (TargetFramework)
         {
             case "net11.0":
-                // CoreCLR always loads assemblies from the store, so AndroidUseAssemblyStore=false has no effect:
-                // https://github.com/dotnet/android/pull/12033
+                // CoreCLR ignores AndroidUseAssemblyStore=false: https://github.com/dotnet/android/pull/12033
                 Assert.IsType<AndroidAssemblyStoreReader>(sut);
                 break;
             case "net10.0":

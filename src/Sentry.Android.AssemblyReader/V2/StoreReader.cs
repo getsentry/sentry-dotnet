@@ -13,7 +13,6 @@ namespace Sentry.Android.AssemblyReader.V2;
 internal partial class StoreReader : AssemblyStoreReader
 {
     // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
-    // Each .NET release bumps the assembly store format: v3 in .NET 10, v4 (CoreCLR) in .NET 11.
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT_V3 = 0x80000003;
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT_V3 = 0x00000003;
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_64BIT_V4 = 0x80000004; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant

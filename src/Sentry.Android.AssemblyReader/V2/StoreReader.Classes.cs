@@ -21,7 +21,6 @@ internal partial class StoreReader
         // Index size in bytes
         public readonly uint index_size;
 
-        // Only present in v4+ stores
         public readonly ulong content_id;
 
         public uint NativeSize => 5 * sizeof(uint) + ((version & ASSEMBLY_STORE_FORMAT_NUMBER_MASK) >= 4 ? sizeof(ulong) : 0u);
@@ -39,7 +38,6 @@ internal partial class StoreReader
 
     internal sealed class IndexEntry
     {
-        // The ignore flag is a bool, written to the binary as a single byte
         public const uint NativeSize32 = 2 * sizeof(uint) + sizeof(byte);
         public const uint NativeSize64 = sizeof(ulong) + sizeof(uint) + sizeof(byte);
 

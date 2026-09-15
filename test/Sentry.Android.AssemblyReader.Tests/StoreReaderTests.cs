@@ -60,9 +60,6 @@ public class StoreReaderTests
         act.Should().Throw<InvalidOperationException>().WithMessage("*testStore*index*");
     }
 
-    /// <summary>
-    /// Builds a minimal assembly store with a single assembly, using the v3/v4 layout.
-    /// </summary>
     private static MemoryStream CreateStore(uint version, int nameHashSize, string assemblyName)
     {
         var stream = new MemoryStream();
