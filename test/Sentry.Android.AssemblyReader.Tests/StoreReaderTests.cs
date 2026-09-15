@@ -38,9 +38,6 @@ public class StoreReaderTests
         reader.Should().BeNull();
     }
 
-    /// <summary>
-    /// Builds a minimal assembly store with a single assembly, using the v3/v4 layout.
-    /// </summary>
     private static MemoryStream CreateStore(uint version, bool is64Bit, string assemblyName)
     {
         var stream = new MemoryStream();
