@@ -105,7 +105,7 @@ Windows).
 |------|---------|
 | `*.slnf` | Edit `scripts/generate-solution-filters-config.yaml`, then run `scripts/generate-solution-filters.ps1` |
 | `CHANGELOG.md` | Generated on squash-merge from the PR title. `.github/workflows/changelog-guard.yml` fails CI on manual entries |
-| `src/Sentry.Bindings.Cocoa/ApiDefinitions.cs`, `StructsAndEnums.cs` | Edit `scripts/patch-cocoa-bindings.cs`, then run `scripts/generate-cocoa-bindings.ps1` |
+| `src/Sentry.Bindings.Cocoa/ApiDefinition.cs`, `StructsAndEnums.cs` | Edit `scripts/patch-cocoa-bindings.cs`, then run `scripts/generate-cocoa-bindings.ps1` |
 | `modules/**` | Git submodules pointing at other repositories — change them upstream, never in place |
 | `*.verified.*` | Run the tests, then `pwsh ./scripts/accept-verifier-changes.ps1` |
 
@@ -147,7 +147,7 @@ scripts/              # Build and maintenance scripts
 - **macOS only**. Requires Xcode.
 - `Sentry.Bindings.Cocoa` wraps the native Cocoa SDK.
 - Device tests run in CI only.
-- `src/Sentry.Bindings.Cocoa/ApiDefinitions.cs` and `StructsAndEnums.cs` are **auto-generated** — do not edit them directly. All changes must go in `scripts/patch-cocoa-bindings.cs` and be applied by running `scripts/generate-cocoa-bindings.ps1`.
+- `src/Sentry.Bindings.Cocoa/ApiDefinition.cs` and `StructsAndEnums.cs` are **auto-generated** — do not edit them directly. All changes must go in `scripts/patch-cocoa-bindings.cs` and be applied by running `scripts/generate-cocoa-bindings.ps1`.
 
 ### MAUI
 - Requires MAUI workloads: `sudo dotnet workload restore` (macOS/Linux) or `dotnet workload restore` (Windows).

@@ -9,7 +9,7 @@ using CodeFormatter = Microsoft.CodeAnalysis.Formatting.Formatter;
 
 if (args.Length != 1)
 {
-    Console.Error.WriteLine("Usage: patch-cocoa-bindings.cs <path/to/ApiDefinitions.cs>");
+    Console.Error.WriteLine("Usage: patch-cocoa-bindings.cs <path/to/ApiDefinition.cs>");
     return;
 }
 

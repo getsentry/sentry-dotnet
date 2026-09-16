@@ -17,7 +17,7 @@
        See getsentry/sentry-dotnet#5492. -->
   <PropertyGroup>
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC-Dynamic.xcframework</SentryCocoaFramework>
-    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/Headers/**/*.h</SentryCocoaBindingInputs>
+    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;../../.config/dotnet-tools.json;$(SentryCocoaCache)Carthage/.built-from-sha;$(SentryCocoaCache)Carthage/Headers/**/*.h</SentryCocoaBindingInputs>
     <!-- Resolve path to modules/sentry-cocoa/.git -->
     <SentryCocoaGitFile Condition="Exists('$(SentryCocoaCache).git')">$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
     <!-- Standalone clone: .git is a directory -->
@@ -43,7 +43,7 @@
   <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
 
     <!-- Set up the binding project. -->
-    <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
 
@@ -100,7 +100,7 @@
   <Target Name="_GenerateSentryCocoaBindings"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           Inputs="$(SentryCocoaBindingInputs)"
-          Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
+          Outputs="ApiDefinition.cs;StructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerGenerateSentryCocoaBindings">

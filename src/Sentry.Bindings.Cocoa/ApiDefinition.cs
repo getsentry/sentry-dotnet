@@ -1463,7 +1463,7 @@ interface SentryObjCOptions
 
     [Wrap("WeakUrlSessionDelegate")]
     [NullAllowed]
-    NSUrlSessionDelegate UrlSessionDelegate { get; set; }
+    INSUrlSessionDelegate UrlSessionDelegate { get; set; }
 
     // @property (nonatomic, weak) id<NSURLSessionDelegate> _Nullable urlSessionDelegate;
     [NullAllowed, Export("urlSessionDelegate", ArgumentSemantic.Weak)]
