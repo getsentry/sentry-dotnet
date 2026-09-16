@@ -30,7 +30,7 @@ jobs:
             rid: macos
             slnf: Sentry-CI-Build-macOS.slnf
           # Windows is required to produce the .NET Framework (net48 / Net4_8) verified files
-          - os: windows-latest
+          - os: windows-2025-vs2026
             rid: win-x64
             slnf: Sentry-CI-Build-Windows.slnf
 
