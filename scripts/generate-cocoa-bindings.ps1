@@ -49,10 +49,6 @@ dotnet sharpie bind -sdk $iPhoneSdkVersion `
     -c -Wno-objc-property-no-attribute `
     -F"$iPhoneSdkPath/System/Library/SubFrameworks" # needed for UIUtilities.framework in Xcode 26+
 
-# The dotnet tool emits ApiDefinition.cs; the committed file and the csproj both use the plural
-# name. Renamed here so this change stays a pure toolchain swap - the file rename is a follow-up.
-Move-Item "$BindingsPath/ApiDefinition.cs" "$BindingsPath/ApiDefinitions.cs" -Force
-
 # Ensure backup path exists
 if (!(Test-Path $BackupPath))
 {
@@ -70,9 +66,9 @@ Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 & dotnet run "$PSScriptRoot/patch-cocoa-bindings.cs" "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
 
 ################################################################################
-# Patch ApiDefinitions.cs
+# Patch ApiDefinition.cs
 ################################################################################
-$File = 'ApiDefinitions.cs'
+$File = 'ApiDefinition.cs'
 Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 & dotnet run "$PSScriptRoot/patch-cocoa-bindings.cs" "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
