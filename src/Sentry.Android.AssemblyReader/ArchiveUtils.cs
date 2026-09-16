@@ -2,6 +2,9 @@ namespace Sentry.Android.AssemblyReader;
 
 internal static class ArchiveUtils
 {
+    internal const uint Lz4Magic = 0x5A4C4158; // 'XALZ', little-endian
+    internal const uint ZstandardMagic = 0x535A4158; // 'XAZS', little-endian
+
     internal static PEReader CreatePEReader(string assemblyName, MemoryStream inputStream, DebugLogger? logger)
     {
         var decompressedStream = TryDecompress(assemblyName, inputStream, logger); // Returns null if not compressed
@@ -30,12 +33,10 @@ internal static class ArchiveUtils
     /// <seealso href="https://github.com/dotnet/android/blob/f1aecf9e6ae80fe3f3992ec1f52ef953dac7c06b/.github/skills/read-assembly-store/src/AssemblyStore/AssemblyCompression.cs" />
     private static Stream? TryDecompress(string assemblyName, MemoryStream inputStream, DebugLogger? logger)
     {
-        const uint lz4Magic = 0x5A4C4158; // 'XALZ', little-endian
-        const uint zstandardMagic = 0x535A4158; // 'XAZS', little-endian
         const int payloadOffset = 12;
         var reader = new BinaryReader(inputStream);
         var magic = reader.ReadUInt32();
-        if (magic is not (lz4Magic or zstandardMagic))
+        if (magic is not (Lz4Magic or ZstandardMagic))
         {
             // Restore the input stream to the beginning if we're not decompressing.
             inputStream.Position = 0;
@@ -45,7 +46,7 @@ internal static class ArchiveUtils
         var decompressedLength = reader.ReadInt32();
         Debug.Assert(inputStream.Position == payloadOffset);
         var inputLength = (int)(inputStream.Length - payloadOffset);
-        var format = magic == lz4Magic ? "LZ4" : "Zstandard";
+        var format = magic == Lz4Magic ? "LZ4" : "Zstandard";
 
         logger?.Invoke(DebugLoggerLevel.Debug, "Decompressing assembly ({0} bytes uncompressed) using {1}", decompressedLength, format);
 
@@ -57,23 +58,26 @@ internal static class ArchiveUtils
 
         var inputBuffer = inputStream is MemorySlice slice ? slice.FullBuffer : inputStream.GetBuffer();
         var offset = inputStream is MemorySlice memorySlice ? memorySlice.Offset + payloadOffset : payloadOffset;
-        var decoded = magic == lz4Magic
-            ? LZ4Codec.Decode(inputBuffer, offset, inputLength, outputBuffer, 0, decompressedLength)
-            : DecompressZstandard(assemblyName, inputBuffer.AsSpan(offset, inputLength), outputBuffer.AsSpan(0, decompressedLength));
+        int decoded;
+        if (magic == Lz4Magic)
+        {
+            decoded = LZ4Codec.Decode(inputBuffer, offset, inputLength, outputBuffer, 0, decompressedLength);
+        }
+        else
+        {
+#if NET11_0_OR_GREATER
+            decoded = ZstandardDecoder.TryDecompress(inputBuffer.AsSpan(offset, inputLength),
+                outputBuffer.AsSpan(0, decompressedLength), out var bytesWritten) ? bytesWritten : -1;
+#else
+            throw new NotSupportedException($"Assembly {assemblyName} is Zstandard compressed, which requires .NET 11 or later");
+#endif
+        }
         if (decoded != decompressedLength)
         {
             throw new Exception($"Failed to decompress {format} data of assembly {assemblyName} - decoded {decoded} instead of expected {decompressedLength} bytes");
         }
         return outputStream;
     }
-
-#if NET11_0_OR_GREATER
-    private static int DecompressZstandard(string assemblyName, ReadOnlySpan<byte> source, Span<byte> destination) =>
-        ZstandardDecoder.TryDecompress(source, destination, out var bytesWritten) ? bytesWritten : -1;
-#else
-    private static int DecompressZstandard(string assemblyName, ReadOnlySpan<byte> source, Span<byte> destination) =>
-        throw new NotSupportedException($"Assembly {assemblyName} is Zstandard compressed, which requires .NET 11 or later");
-#endif
 
     // Allows consumer to access the underlying buffer even if the MemoryStream is created as a slice over another.
     // Plain MemoryStream would throw "MemoryStream's internal buffer cannot be accessed."

@@ -7,9 +7,6 @@ namespace Sentry.Android.AssemblyReader.Tests;
 #if !ANDROID
 public class ArchiveUtilsTests
 {
-    private const uint Lz4Magic = 0x5A4C4158; // 'XALZ'
-    private const uint ZstandardMagic = 0x535A4158; // 'XAZS'
-
     private static readonly byte[] Assembly = File.ReadAllBytes(typeof(ArchiveUtilsTests).Assembly.Location);
 
     [Fact]
@@ -26,7 +23,7 @@ public class ArchiveUtilsTests
         var compressed = new byte[LZ4Codec.MaximumOutputSize(Assembly.Length)];
         var length = LZ4Codec.Encode(Assembly, 0, Assembly.Length, compressed, 0, compressed.Length);
 
-        using var peReader = ArchiveUtils.CreatePEReader("test.dll", WithHeader(Lz4Magic, compressed.AsSpan(0, length)), null);
+        using var peReader = ArchiveUtils.CreatePEReader("test.dll", WithHeader(ArchiveUtils.Lz4Magic, compressed.AsSpan(0, length)), null);
 
         AssertIsThisAssembly(peReader);
     }
@@ -38,7 +35,7 @@ public class ArchiveUtilsTests
         var compressed = new byte[ZstandardEncoder.GetMaxCompressedLength(Assembly.Length)];
         ZstandardEncoder.TryCompress(Assembly, compressed, out var length).Should().BeTrue();
 
-        using var peReader = ArchiveUtils.CreatePEReader("test.dll", WithHeader(ZstandardMagic, compressed.AsSpan(0, length)), null);
+        using var peReader = ArchiveUtils.CreatePEReader("test.dll", WithHeader(ArchiveUtils.ZstandardMagic, compressed.AsSpan(0, length)), null);
 
         AssertIsThisAssembly(peReader);
     }
@@ -48,7 +45,7 @@ public class ArchiveUtilsTests
     {
         var garbage = new byte[64];
 
-        var act = () => ArchiveUtils.CreatePEReader("test.dll", WithHeader(ZstandardMagic, garbage), null);
+        var act = () => ArchiveUtils.CreatePEReader("test.dll", WithHeader(ArchiveUtils.ZstandardMagic, garbage), null);
 
         act.Should().Throw<Exception>().WithMessage("*Zstandard*test.dll*");
     }
@@ -56,7 +53,7 @@ public class ArchiveUtilsTests
     [Fact]
     public void CreatePEReader_Zstandard_ThrowsNotSupported()
     {
-        var act = () => ArchiveUtils.CreatePEReader("test.dll", WithHeader(ZstandardMagic, new byte[64]), null);
+        var act = () => ArchiveUtils.CreatePEReader("test.dll", WithHeader(ArchiveUtils.ZstandardMagic, new byte[64]), null);
 
         act.Should().Throw<NotSupportedException>().WithMessage("*test.dll*Zstandard*");
     }
@@ -67,7 +64,7 @@ public class ArchiveUtilsTests
     {
         var compressed = new byte[LZ4Codec.MaximumOutputSize(Assembly.Length)];
         var length = LZ4Codec.Encode(Assembly, 0, Assembly.Length, compressed, 0, compressed.Length);
-        var entry = WithHeader(Lz4Magic, compressed.AsSpan(0, length)).ToArray();
+        var entry = WithHeader(ArchiveUtils.Lz4Magic, compressed.AsSpan(0, length)).ToArray();
 
         const int prefix = 100;
         var store = new MemoryStream();
