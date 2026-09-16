@@ -151,6 +151,8 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     private static void OnPanGesture(object? sender, PanUpdatedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PanGestureRecognizer.PanUpdated),
+        // Array cast required for WinRT trim/AOT safety
+        ((string key, string value)[])
         [
             ("GestureId", e.GestureId.ToString()),
             ("StatusType", e.StatusType.ToString()),
@@ -173,6 +175,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     private static void OnPinchGesture(object? sender, PinchGestureUpdatedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PinchGestureRecognizer.PinchUpdated),
+        ((string key, string value)[])
         [
             ("GestureStatus", e.Status.ToString()),
             ("Scale", e.Scale.ToString()),
@@ -183,12 +186,12 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     private static void OnSwipeGesture(object? sender, SwipedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(SwipeGestureRecognizer.Swiped),
-        [("Direction", e.Direction.ToString())]
+        ((string key, string value)[])[("Direction", e.Direction.ToString())]
     ));
 
     private static void OnTapGesture(object? sender, TappedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(TapGestureRecognizer.Tapped),
-        [("ButtonMask", e.Buttons.ToString())]
+        ((string key, string value)[])[("ButtonMask", e.Buttons.ToString())]
     ));
 }

@@ -13,7 +13,7 @@ internal static class ReferenceAssembliesExtensions
     // package catches up.
     private static readonly ReferenceAssemblies Net110 = new(
         "net11.0",
-        new PackageIdentity("Microsoft.NETCore.App.Ref", "11.0.0-preview.7.26381.103"),
+        new PackageIdentity("Microsoft.NETCore.App.Ref", "11.0.0-rc.1.26425.128"),
         Path.Combine("ref", "net11.0"));
 #endif
 
