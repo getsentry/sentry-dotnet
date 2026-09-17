@@ -10,14 +10,14 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
         resource.AddService(
             serviceName: serviceName,
             serviceVersion: serviceVersion))
-    .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
+    .AddSentryOtlpExporter(dsn) // <-- Configure OpenTelemetry to send traces to Sentry
     .Build();
 
 SentrySdk.Init(o =>
 {
-    options.Dsn = "...Your DSN...";
+    options.Dsn = dsn;
     options.TracesSampleRate = 1.0;
-    options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+    options.UseOtlp(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
 ```
 
@@ -29,4 +29,4 @@ and/or to downstream services.
 
 If you need to further customize header propagation in your application (e.g. propagating other vendor specific headers)
 then you can do so by creating a `CompositeTextMapPropagator` consisting of the custom propagator(s) you need plus the
-`SentryPropagator`. You can supply this as an optional parameter to the `AddSentry` method.
+`SentryPropagator`. You can supply this as an optional parameter to the `AddSentryOtlpExporter` method.
