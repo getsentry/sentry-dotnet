@@ -10,7 +10,6 @@ public sealed partial class SentryTarget : TargetWithContext
     internal Func<IHub> HubAccessor { get; }
 
     private readonly ISystemClock _clock;
-    private IDisposable? _sdkDisposable;
 
     internal static readonly SdkVersion NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
 
@@ -38,12 +37,11 @@ public sealed partial class SentryTarget : TargetWithContext
         : this(
             options,
             () => HubAdapter.Instance,
-            null,
             SystemClock.Clock)
     {
     }
 
-    internal SentryTarget(SentryNLogOptions options, Func<IHub> hubAccessor, IDisposable? sdkInstance, ISystemClock clock)
+    internal SentryTarget(SentryNLogOptions options, Func<IHub> hubAccessor, ISystemClock clock)
     {
         Options = options;
         HubAccessor = hubAccessor;
@@ -54,15 +52,10 @@ public sealed partial class SentryTarget : TargetWithContext
         Layout = "${message}";
         BreadcrumbCategory = Options.BreadcrumbCategoryLayout ?? "${logger}";
         IncludeEventProperties = true;
-
-        if (sdkInstance != null)
-        {
-            _sdkDisposable = sdkInstance;
-        }
     }
 
     /// <summary>
-    /// Options for both the <see cref="SentryTarget"/> and the sentry sdk itself.
+    /// Options for the <see cref="SentryTarget"/>.
     /// </summary>
     public SentryNLogOptions Options { get; }
 
@@ -71,33 +64,6 @@ public sealed partial class SentryTarget : TargetWithContext
     /// </summary>
     [ArrayParameter(typeof(TargetPropertyWithContext), "tag")]
     public IList<TargetPropertyWithContext> Tags => Options.Tags;
-
-    /// <summary>
-    /// Configured layout for Data Source Name of a given project in Sentry
-    /// </summary>
-    public Layout? Dsn
-    {
-        get => Options.DsnLayout;
-        set => Options.DsnLayout = value;
-    }
-
-    /// <summary>
-    /// Configured layout for application Release version to Sentry
-    /// </summary>
-    public Layout? Release
-    {
-        get => Options.ReleaseLayout;
-        set => Options.ReleaseLayout = value;
-    }
-
-    /// <summary>
-    /// Configured layout for application Environment to Sentry
-    /// </summary>
-    public Layout? Environment
-    {
-        get => Options.EnvironmentLayout;
-        set => Options.EnvironmentLayout = value;
-    }
 
     /// <summary>
     /// An optional layout specific to breadcrumbs. If not set, uses the same layout as the standard <see cref="TargetWithContext.Layout"/>.
@@ -153,19 +119,6 @@ public sealed partial class SentryTarget : TargetWithContext
     }
 
     /// <summary>
-    /// Whether the NLog integration should initialize the SDK.
-    /// </summary>
-    /// <remarks>
-    /// By default, if a DSN is provided to the NLog integration it will initialize the SDK.
-    /// This might be not ideal when using multiple integrations in case you want another one doing the Init.
-    /// </remarks>
-    public bool InitializeSdk
-    {
-        get => Options.InitializeSdk;
-        set => Options.InitializeSdk = value;
-    }
-
-    /// <summary>
     /// Set this to <see langword="true" /> to ignore log messages that don't contain an exception.
     /// </summary>
     public bool IgnoreEventsWithNoException
@@ -195,17 +148,7 @@ public sealed partial class SentryTarget : TargetWithContext
     }
 
     /// <summary>
-    /// How many seconds to wait after triggering <see cref="LogManager.Shutdown()"/> before just shutting down the
-    /// Sentry sdk.
-    /// </summary>
-    public int ShutdownTimeoutSeconds
-    {
-        get => Options.ShutdownTimeoutSeconds;
-        set => Options.ShutdownTimeoutSeconds = value;
-    }
-
-    /// <summary>
-    /// How long to wait for the flush to finish, in seconds. Defaults to 2 seconds.
+    /// How long to wait for the flush to finish, in seconds. Defaults to 15 seconds.
     /// </summary>
     public int FlushTimeoutSeconds
     {
@@ -223,13 +166,6 @@ public sealed partial class SentryTarget : TargetWithContext
     }
 
     /// <inheritdoc />
-    protected override void CloseTarget()
-    {
-        _sdkDisposable?.Dispose();
-        base.CloseTarget();
-    }
-
-    /// <inheritdoc />
     protected override void InitializeTarget()
     {
         // If a layout has been configured on the options, replace the default logger.
@@ -239,40 +175,6 @@ public sealed partial class SentryTarget : TargetWithContext
         }
 
         base.InitializeTarget();
-
-        if (InternalLogger.IsDebugEnabled || InternalLogger.IsInfoEnabled || InternalLogger.IsWarnEnabled || InternalLogger.IsErrorEnabled || InternalLogger.IsFatalEnabled)
-        {
-            var existingLogger = Options.DiagnosticLogger;
-            if (existingLogger is not NLogDiagnosticLogger)
-            {
-                Options.DiagnosticLogger = new NLogDiagnosticLogger(existingLogger);
-            }
-            Options.Debug = true;
-        }
-
-        var customDsn = Dsn?.Render(LogEventInfo.CreateNullEvent());
-        if (!string.IsNullOrEmpty(customDsn))
-        {
-            Options.Dsn = customDsn;
-        }
-
-        var customRelease = Release?.Render(LogEventInfo.CreateNullEvent());
-        if (!string.IsNullOrEmpty(customRelease))
-        {
-            Options.Release = customRelease;
-        }
-
-        var customEnvironment = Environment?.Render(LogEventInfo.CreateNullEvent());
-        if (!string.IsNullOrEmpty(customEnvironment))
-        {
-            Options.Environment = customEnvironment;
-        }
-
-        // If the sdk is not there, set it on up.
-        if (InitializeSdk && _sdkDisposable == null)
-        {
-            _sdkDisposable = SentrySdk.Init(Options);
-        }
 
         if (!HubAccessor().IsEnabled)
         {
@@ -315,7 +217,7 @@ public sealed partial class SentryTarget : TargetWithContext
 
         if (isReentrant.Value)
         {
-            Options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message:{logEvent.Message}");
+            HubAccessor()?.GetSentryOptions()?.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message:{logEvent.Message}");
             return;
         }
 
@@ -327,7 +229,7 @@ public sealed partial class SentryTarget : TargetWithContext
         }
         catch (Exception exception)
         {
-            Options.DiagnosticLogger?.LogError(exception, "Failed to write log event");
+            HubAccessor()?.GetSentryOptions()?.DiagnosticLogger?.LogError(exception, "Failed to write log event");
             throw;
         }
         finally
@@ -371,8 +273,6 @@ public sealed partial class SentryTarget : TargetWithContext
             CreateBreadcrumb(logEvent, exception, shouldIncludeProperties, hub);
         }
 
-        // Read the options from the Hub rather than the Target's NLog-Options. If the NLog-Target is added without a
-        // DSN (i.e. without initialising the SDK), then base options will only be initialised in the Hub options.
         var sentryOptions = hub.GetSentryOptions();
         if (sentryOptions is not null)
         {
@@ -450,8 +350,6 @@ public sealed partial class SentryTarget : TargetWithContext
             },
             Logger = logEvent.LoggerName,
             Level = logEvent.Level.ToSentryLevel(),
-            Release = Options.Release,
-            Environment = Options.Environment,
             User = GetUser(logEvent) ?? new SentryUser(),
         };
 

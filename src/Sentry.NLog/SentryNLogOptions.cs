@@ -1,28 +1,19 @@
 namespace Sentry.NLog;
 
 /// <summary>
-/// Sentry Options for NLog logging. All properties can be configured via code or in NLog.config xml file.
+/// Options for the Sentry target for NLog. All properties can be configured via code or in NLog.config xml file.
 /// </summary>
-/// <inheritdoc />
+/// <remarks>
+/// These options only configure the target. The Sentry SDK itself is configured and initialised separately, using
+/// <c>SentrySdk.Init</c> or another Sentry integration (such as ASP.NET Core or MAUI).
+/// </remarks>
 [NLogConfigurationItem]
-public class SentryNLogOptions : SentryOptions
+public class SentryNLogOptions
 {
-    /// <inheritdoc />
-    public SentryNLogOptions()
-    {
-        // NLog's default flush timeout is 15 seconds, so we will do the same.
-        FlushTimeout = TimeSpan.FromSeconds(15);
-    }
-
     /// <summary>
-    /// How many seconds to wait after triggering <see cref="LogManager.Shutdown()"/> before just shutting down the
-    /// Sentry sdk.
+    /// How long to wait for Sentry to flush when NLog is flushed. Defaults to 15 seconds, the same as NLog.
     /// </summary>
-    public int ShutdownTimeoutSeconds
-    {
-        get => (int)ShutdownTimeout.TotalSeconds;
-        set => ShutdownTimeout = TimeSpan.FromSeconds(value);
-    }
+    public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(15);
 
     /// <summary>
     /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.
@@ -69,37 +60,10 @@ public class SentryNLogOptions : SentryOptions
     public Layout? Layout { get; set; }
 
     /// <summary>
-    /// Configured layout for Dsn-Address to Sentry
-    /// </summary>
-    [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-    public Layout? DsnLayout { get; set; }
-
-    /// <summary>
-    /// Configured layout for application Release version to Sentry
-    /// </summary>
-    [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-    public Layout? ReleaseLayout { get; set; }
-
-    /// <summary>
-    /// Configured layout for application Environment to Sentry
-    /// </summary>
-    [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-    public Layout? EnvironmentLayout { get; set; }
-
-    /// <summary>
     /// Any additional tags to apply to each logged message.
     /// </summary>
     [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
     public IList<TargetPropertyWithContext> Tags { get; } = new List<TargetPropertyWithContext>();
-
-    /// <summary>
-    /// Whether the NLog integration should initialize the SDK.
-    /// </summary>
-    /// <remarks>
-    /// By default, if a DSN is provided to the NLog integration it will initialize the SDK.
-    /// This might be not ideal when using multiple integrations in case you want another one doing the Init.
-    /// </remarks>
-    public bool InitializeSdk { get; set; } = true;
 
     /// <summary>
     /// Optionally configure one or more parts of the user information to be rendered dynamically from an NLog layout

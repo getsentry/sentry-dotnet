@@ -7,7 +7,7 @@ public partial class SentryTargetTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Write_StructuredLogging_UseHubOptionsOverTargetOptions(bool isEnabled)
+    public void Write_StructuredLogging_RequiresHubOptions(bool isEnabled)
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
@@ -55,8 +55,8 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Environment = "test-environment";
-        _fixture.Options.Release = "test-release";
+        _fixture.SentryOptions.Environment = "test-environment";
+        _fixture.SentryOptions.Release = "test-release";
 
         if (withActiveSpan)
         {

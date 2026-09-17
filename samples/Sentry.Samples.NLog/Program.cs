@@ -12,6 +12,18 @@ public static class Program
 
     private static void Main()
     {
+        // Initialise Sentry SDK itself
+        using var _ = SentrySdk.Init(options =>
+        {
+#if !SENTRY_DSN_DEFINED_IN_ENV
+            // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+            options.Dsn = SamplesShared.Dsn;
+#endif
+            options.AttachStacktrace = true;
+            options.SendDefaultPii = true; // Send Personal Identifiable information like the username of the user logged in to the device
+        });
+
         try
         {
             // You can configure your logger using a configuration file:
@@ -97,28 +109,18 @@ public static class Program
 
     private static void UsingCodeConfiguration()
     {
-        // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
+        // Configure NLog to send logs to Sentry
         var config = LogManager.Configuration = new LoggingConfiguration();
         _ = config
             .AddSentry(options =>
             {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-                // A DSN is required. You can set here in code, in the SENTRY_DSN environment variable or in the
-                // NLog.config file.
-                // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-                options.Dsn = SamplesShared.Dsn;
-#endif
                 options.Layout = "${message}";
                 options.BreadcrumbLayout = "${logger}: ${message}"; // Optionally specify a separate format for breadcrumbs
 
                 options.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default is Info)
-                options.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
-
-                options.AttachStacktrace = true;
-                options.SendDefaultPii = true; // Send Personal Identifiable information like the username of the user logged in to the device
+                options.MinimumEventLevel = LogLevel.Error; // Error and higher are sent as events (default is Error)
 
                 options.IncludeEventDataOnBreadcrumbs = true; // Optionally include event properties with breadcrumbs
-                options.ShutdownTimeoutSeconds = 5;
 
                 //Optionally specify user properties via NLog (here using MappedDiagnosticsLogicalContext as an example)
                 options.User = new SentryNLogUser
@@ -134,8 +136,6 @@ public static class Program
                 };
 
                 options.AddTag("logger", "${logger}");  // Send the logger name as a tag
-
-                // Other configuration
             });
 
         config.AddTarget(new DebuggerTarget("debugger"));
