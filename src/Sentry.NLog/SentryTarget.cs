@@ -148,15 +148,6 @@ public sealed partial class SentryTarget : TargetWithContext
     }
 
     /// <summary>
-    /// How long to wait for the flush to finish, in seconds. Defaults to 15 seconds.
-    /// </summary>
-    public int FlushTimeoutSeconds
-    {
-        get => (int)Options.FlushTimeout.TotalSeconds;
-        set => Options.FlushTimeout = TimeSpan.FromSeconds(value);
-    }
-
-    /// <summary>
     /// Optionally configure one or more parts of the user information to be rendered dynamically from an NLog layout
     /// </summary>
     public SentryNLogUser? User
@@ -186,7 +177,7 @@ public sealed partial class SentryTarget : TargetWithContext
     protected override void FlushAsync(AsyncContinuation asyncContinuation)
     {
         _ = HubAccessor()
-            .FlushAsync(Options.FlushTimeout)
+            .FlushAsync()
             .ContinueWith(t => asyncContinuation(t.Exception));
     }
 

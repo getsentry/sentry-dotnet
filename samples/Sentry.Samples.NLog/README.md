@@ -22,7 +22,6 @@ The following options are available for the NLog Sentry Target:
     ignoreEventsWithNoException="False"
     includeEventDataOnBreadcrumbs="False"
     includeEventPropertiesAsTags="True"
-    flushTimeoutSeconds="15"
     >
         <tag name="exception" layout="${exception:format=shorttype}" includeEmptyValue="false" /><!-- Repeatable SentryEvent Tags -->
         <contextproperty name="threadid" layout="${threadid}" includeEmptyValue="true" />        <!-- Repeatable SentryEvent Data -->
@@ -47,7 +46,6 @@ The following options are available for the NLog Sentry Target:
 * **minimumEventLevel** - Send NLog LogEvents as SentryEvent when matching severity (or worse). Default: _Error_
 * **minimumBreadcrumbLevel** - Send NLog LogEvents as Breadcrumbs when matching severity (or worse). Default: _Info_
 * **ignoreEventsWithNoException** - Ignore NLog LogEvents without an exception. Default: _False_
-* **flushTimeoutSeconds** - Flush timeout in seconds before aborting flush to Sentry. Default: _15_
 * **user**
    * **id**
    * **username**

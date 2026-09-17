@@ -75,7 +75,7 @@ public partial class SentryTargetTests
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
                     </extensions>
                     <targets>
-                        <target type='Sentry' name='sentry' minimumEventLevel='Warn' flushTimeoutSeconds='5'>
+                        <target type='Sentry' name='sentry' minimumEventLevel='Warn' ignoreEventsWithNoException='true'>
                             <options>
                                 <includeEventPropertiesAsTags>True</includeEventPropertiesAsTags>
                             </options>
@@ -91,7 +91,7 @@ public partial class SentryTargetTests
         var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
         Assert.NotNull(t);
         Assert.Equal(LogLevel.Warn, t.Options.MinimumEventLevel);
-        Assert.Equal(TimeSpan.FromSeconds(5), t.Options.FlushTimeout);
+        Assert.True(t.Options.IgnoreEventsWithNoException);
         Assert.True(t.Options.IncludeEventPropertiesAsTags);
     }
 
@@ -413,11 +413,12 @@ public partial class SentryTargetTests
     }
 
     [Fact]
-    public async Task LogManager_WhenFlushCalled_CallsSentryFlushAsync()
+    public async Task LogManager_WhenFlushCalled_FlushesHubWithSdkFlushTimeout()
     {
         var timeout = TimeSpan.FromSeconds(2);
+        var sdkFlushTimeout = TimeSpan.FromSeconds(3);
 
-        _fixture.Options.FlushTimeout = timeout;
+        _fixture.SentryOptions.FlushTimeout = sdkFlushTimeout;
         var factory = _fixture.GetLoggerFactory(asyncTarget: true);
 
         // Verify that it's asynchronous
@@ -447,7 +448,7 @@ public partial class SentryTargetTests
         Assert.True(tcs.Task.IsCompleted);
 
         testDisposable.Received().Dispose();
-        await hub.Received().FlushAsync(Arg.Any<TimeSpan>());
+        await hub.Received().FlushAsync(sdkFlushTimeout);
     }
 
     [Fact]
@@ -574,38 +575,12 @@ public partial class SentryTargetTests
     }
 
     [Fact]
-    public void FlushTimeoutSeconds_ValueFromOptions()
-    {
-        var expected = 10;
-        _fixture.Options.FlushTimeout = TimeSpan.FromSeconds(expected);
-        var target = (SentryTarget)_fixture.GetTarget();
-        Assert.Equal(expected, target.FlushTimeoutSeconds);
-    }
-
-    [Fact]
-    public void FlushTimeoutSeconds_SetterReplacesOptions()
-    {
-        var expected = 100;
-        _fixture.Options.FlushTimeout = TimeSpan.FromSeconds(expected);
-        var target = (SentryTarget)_fixture.GetTarget();
-        target.FlushTimeoutSeconds = expected;
-        Assert.Equal(expected, target.FlushTimeoutSeconds);
-    }
-
-    [Fact]
     public void IgnoreEventsWithNoException_SetterReplacesOptions()
     {
         _fixture.Options.IgnoreEventsWithNoException = false;
         var target = (SentryTarget)_fixture.GetTarget();
         target.IgnoreEventsWithNoException = true;
         Assert.True(target.IgnoreEventsWithNoException);
-    }
-
-    [Fact]
-    public void FlushTimeoutSeconds_Default_15Seconds()
-    {
-        var target = (SentryTarget)_fixture.GetTarget();
-        Assert.Equal(15, target.FlushTimeoutSeconds);
     }
 
     [Fact]

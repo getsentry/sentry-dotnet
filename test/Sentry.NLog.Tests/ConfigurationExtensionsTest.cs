@@ -12,10 +12,9 @@ public class ConfigurationExtensionsTest
     [Fact]
     public void AddSentry_ConfigCallback_CallbackInvoked()
     {
-        var expected = TimeSpan.FromDays(1);
-        var actual = new LoggingConfiguration().AddSentry(o => o.FlushTimeout = expected);
+        var actual = new LoggingConfiguration().AddSentry(o => o.MinimumEventLevel = LogLevel.Warn);
         var sentryTarget = Assert.IsType<SentryTarget>(actual.AllTargets[0]);
-        Assert.Equal(expected.TotalSeconds, sentryTarget.FlushTimeoutSeconds);
+        Assert.Equal(LogLevel.Warn.ToString(), sentryTarget.MinimumEventLevel);
     }
 
     [Fact]
