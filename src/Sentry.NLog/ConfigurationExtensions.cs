@@ -16,62 +16,17 @@ public static class ConfigurationExtensions
     /// Adds a target for Sentry to the NLog configuration.
     /// </summary>
     /// <remarks>
-    /// If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If nothing is
-    /// found, SDK is disabled.
+    /// This doesn't initialise Sentry. Initialise Sentry separately, using <c>SentrySdk.Init</c> or another Sentry
+    /// integration (such as ASP.NET Core or MAUI).
     /// </remarks>
     /// <param name="configuration">The NLog configuration.</param>
     /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
-    /// <returns>The configuration.</returns>
-    public static LoggingConfiguration AddSentry(
-        this LoggingConfiguration configuration,
-        Action<SentryNLogOptions>? optionsConfig = null)
-    {
-        // Not to throw on code that ignores nullability warnings.
-        if (configuration.IsNull())
-        {
-            return configuration!;
-        }
-
-        return configuration.AddSentry(null, DefaultTargetName, optionsConfig);
-    }
-
-    /// <summary>
-    /// Adds a target for Sentry to the NLog configuration.
-    /// </summary>
-    /// <param name="configuration">The NLog configuration.</param>
-    /// <param name="dsn">
-    /// The sentry DSN. If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN.
-    /// If nothing is found, SDK is disabled.
-    /// </param>
-    /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
-    /// <returns>The configuration.</returns>
-    public static LoggingConfiguration AddSentry(
-        this LoggingConfiguration configuration,
-        string? dsn,
-        Action<SentryNLogOptions>? optionsConfig = null)
-    {
-        // Not to throw on code that ignores nullability warnings.
-        if (configuration.IsNull())
-        {
-            return configuration!;
-        }
-
-        return configuration.AddSentry(dsn, DefaultTargetName, optionsConfig);
-    }
-
-    /// <summary>
-    /// Adds a target for Sentry to the NLog configuration.
-    /// </summary>
-    /// <param name="configuration">The NLog configuration.</param>
-    /// <param name="dsn">The sentry DSN.</param>
     /// <param name="targetName">The name to give the new target.</param>
-    /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
     /// <returns>The configuration.</returns>
     public static LoggingConfiguration AddSentry(
         this LoggingConfiguration configuration,
-        string? dsn,
-        string targetName,
-        Action<SentryNLogOptions>? optionsConfig = null)
+        Action<SentryNLogOptions>? optionsConfig = null,
+        string targetName = DefaultTargetName)
     {
         // Not to throw on code that ignores nullability warnings.
         if (configuration.IsNull())
@@ -94,11 +49,6 @@ public static class ConfigurationExtensions
             Name = targetName,
             Layout = "${message}",
         };
-
-        if (dsn != null && string.IsNullOrWhiteSpace(options.Dsn))
-        {
-            options.Dsn = dsn;
-        }
 
         configuration.AddTarget(targetName, target);
 

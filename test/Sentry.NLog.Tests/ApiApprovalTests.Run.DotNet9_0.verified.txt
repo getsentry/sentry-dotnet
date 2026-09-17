@@ -3,37 +3,27 @@ namespace NLog
 {
     public static class ConfigurationExtensions
     {
-        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
-        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, string? dsn, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
-        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, string? dsn, string targetName, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
+        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null, string targetName = "sentry") { }
         public static void AddTag(this Sentry.NLog.SentryNLogOptions options, string name, NLog.Layouts.Layout layout) { }
     }
 }
 namespace Sentry.NLog
 {
     [NLog.Config.NLogConfigurationItem]
-    public class SentryNLogOptions : Sentry.SentryOptions
+    public class SentryNLogOptions
     {
         public SentryNLogOptions() { }
         [NLog.Config.NLogConfigurationIgnoreProperty]
         public NLog.Layouts.Layout? BreadcrumbCategoryLayout { get; set; }
         [NLog.Config.NLogConfigurationIgnoreProperty]
         public NLog.Layouts.Layout? BreadcrumbLayout { get; set; }
-        [NLog.Config.NLogConfigurationIgnoreProperty]
-        public NLog.Layouts.Layout? DsnLayout { get; set; }
-        [NLog.Config.NLogConfigurationIgnoreProperty]
-        public NLog.Layouts.Layout? EnvironmentLayout { get; set; }
         public bool IgnoreEventsWithNoException { get; set; }
         public bool IncludeEventDataOnBreadcrumbs { get; set; }
         public bool IncludeEventPropertiesAsTags { get; set; }
-        public bool InitializeSdk { get; set; }
         [NLog.Config.NLogConfigurationIgnoreProperty]
         public NLog.Layouts.Layout? Layout { get; set; }
         public NLog.LogLevel? MinimumBreadcrumbLevel { get; set; }
         public NLog.LogLevel? MinimumEventLevel { get; set; }
-        [NLog.Config.NLogConfigurationIgnoreProperty]
-        public NLog.Layouts.Layout? ReleaseLayout { get; set; }
-        public int ShutdownTimeoutSeconds { get; set; }
         [NLog.Config.NLogConfigurationIgnoreProperty]
         public System.Collections.Generic.IList<NLog.Targets.TargetPropertyWithContext> Tags { get; }
         [NLog.Config.NLogConfigurationIgnoreProperty]
@@ -58,25 +48,18 @@ namespace Sentry.NLog
         public SentryTarget(Sentry.NLog.SentryNLogOptions options) { }
         public NLog.Layouts.Layout? BreadcrumbCategory { get; set; }
         public NLog.Layouts.Layout? BreadcrumbLayout { get; set; }
-        public NLog.Layouts.Layout? Dsn { get; set; }
         [System.Obsolete("Logs are always enabled. This option is ignored and will be removed in a future m" +
             "ajor version. To drop logs, use SetBeforeSendLog and return null.")]
         public bool EnableLogs { get; set; }
-        public NLog.Layouts.Layout? Environment { get; set; }
-        public int FlushTimeoutSeconds { get; set; }
         public bool IgnoreEventsWithNoException { get; set; }
         public bool IncludeEventDataOnBreadcrumbs { get; set; }
         public bool IncludeEventPropertiesAsTags { get; set; }
-        public bool InitializeSdk { get; set; }
         public string MinimumBreadcrumbLevel { get; set; }
         public string MinimumEventLevel { get; set; }
         public Sentry.NLog.SentryNLogOptions Options { get; }
-        public NLog.Layouts.Layout? Release { get; set; }
-        public int ShutdownTimeoutSeconds { get; set; }
         [NLog.Config.ArrayParameter(typeof(NLog.Targets.TargetPropertyWithContext), "tag")]
         public System.Collections.Generic.IList<NLog.Targets.TargetPropertyWithContext> Tags { get; }
         public Sentry.NLog.SentryNLogUser? User { get; set; }
-        protected override void CloseTarget() { }
         protected override void FlushAsync(NLog.Common.AsyncContinuation asyncContinuation) { }
         protected override void InitializeTarget() { }
         protected override void Write(NLog.LogEventInfo logEvent) { }

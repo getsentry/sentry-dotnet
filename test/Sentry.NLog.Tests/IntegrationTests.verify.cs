@@ -12,52 +12,58 @@ public class IntegrationTests
 
         var transport = new RecordingTransport();
 
-        var configuration = new LoggingConfiguration();
-
-        configuration.AddSentry(
-            options =>
-            {
-                options.TracesSampleRate = 1;
-                options.Layout = "${message}";
-                options.Transport = transport;
-                options.DiagnosticLevel = SentryLevel.Debug;
-                options.IncludeEventDataOnBreadcrumbs = true;
-                options.MinimumBreadcrumbLevel = LogLevel.Debug;
-                options.Dsn = ValidDsn;
-                options.Release = "test-release";
-                options.User = new SentryNLogUser
-                {
-                    Id = "${scopeproperty:item=id}",
-                    Username = "${scopeproperty:item=username}",
-                    Email = "${scopeproperty:item=email}",
-                    IpAddress = "${scopeproperty:item=ipAddress}",
-                    Segment = "${scopeproperty:item=segment}",
-                    Other =
-                    {
-                        new TargetPropertyWithContext("mood", "joyous")
-                    },
-                };
-
-                options.AddTag("logger", "${logger}");
-            });
-
-        LogManager.Configuration = configuration;
-
-        var log = LogManager.GetCurrentClassLogger();
-
-        using (ScopeContext.PushProperty("id", "myId"))
+        using (SentrySdk.Init(
+                   options =>
+                   {
+                       options.TracesSampleRate = 1;
+                       options.Transport = transport;
+                       options.DiagnosticLevel = SentryLevel.Debug;
+                       options.Dsn = ValidDsn;
+                       options.Release = "test-release";
+                   }))
         {
-            try
-            {
-                throw new("Exception message");
-            }
-            catch (Exception exception)
-            {
-                log.Error(exception, "message = {arg}", "arg value");
-            }
-        }
+            var configuration = new LoggingConfiguration();
 
-        LogManager.Flush();
+            configuration.AddSentry(
+                options =>
+                {
+                    options.Layout = "${message}";
+                    options.IncludeEventDataOnBreadcrumbs = true;
+                    options.MinimumBreadcrumbLevel = LogLevel.Debug;
+                    options.User = new SentryNLogUser
+                    {
+                        Id = "${scopeproperty:item=id}",
+                        Username = "${scopeproperty:item=username}",
+                        Email = "${scopeproperty:item=email}",
+                        IpAddress = "${scopeproperty:item=ipAddress}",
+                        Segment = "${scopeproperty:item=segment}",
+                        Other =
+                        {
+                            new TargetPropertyWithContext("mood", "joyous")
+                        },
+                    };
+
+                    options.AddTag("logger", "${logger}");
+                });
+
+            LogManager.Configuration = configuration;
+
+            var log = LogManager.GetCurrentClassLogger();
+
+            using (ScopeContext.PushProperty("id", "myId"))
+            {
+                try
+                {
+                    throw new("Exception message");
+                }
+                catch (Exception exception)
+                {
+                    log.Error(exception, "message = {arg}", "arg value");
+                }
+            }
+
+            LogManager.Flush();
+        }
 
         return Verify(transport.Envelopes)
             .UniqueForRuntimeAndVersion()
@@ -68,33 +74,35 @@ public class IntegrationTests
     public Task LoggingInsideTheContextOfLogging()
     {
         var transport = new RecordingTransport();
-
-        var configuration = new LoggingConfiguration();
-
         var diagnosticLogger = new InMemoryDiagnosticLogger();
-        configuration.AddSentry(
-            options =>
-            {
-                options.TracesSampleRate = 1;
-                options.Debug = true;
-                options.DiagnosticLogger = diagnosticLogger;
-                options.Transport = transport;
-                options.Dsn = ValidDsn;
-                options.AttachStacktrace = false;
-                options.Release = "test-release";
-            });
 
-        LogManager.Configuration = configuration;
+        using (SentrySdk.Init(
+                   options =>
+                   {
+                       options.TracesSampleRate = 1;
+                       options.Debug = true;
+                       options.DiagnosticLogger = diagnosticLogger;
+                       options.Transport = transport;
+                       options.Dsn = ValidDsn;
+                       options.AttachStacktrace = false;
+                       options.Release = "test-release";
+                   }))
+        {
+            var configuration = new LoggingConfiguration();
+            configuration.AddSentry();
 
-        var log = LogManager.GetCurrentClassLogger();
+            LogManager.Configuration = configuration;
 
-        SentrySdk.ConfigureScope(
-            scope =>
-            {
-                scope.OnEvaluating += (_, _) => log.Error("message from OnEvaluating");
-                log.Error("message");
-            });
-        LogManager.Flush();
+            var log = LogManager.GetCurrentClassLogger();
+
+            SentrySdk.ConfigureScope(
+                scope =>
+                {
+                    scope.OnEvaluating += (_, _) => log.Error("message from OnEvaluating");
+                    log.Error("message");
+                });
+            LogManager.Flush();
+        }
 
         return Verify(
                 new
