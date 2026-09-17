@@ -10,7 +10,7 @@ public static class SentryOptionsExtensions
 {
     internal const string ObsoleteMessage =
         "Use UseOtlp from the Sentry.OpenTelemetry.Exporter package instead. " +
-        "This method will be removed in version 7.0.0.";
+        "This method will be removed in future versions.";
 
     /// <summary>
     /// Enables OpenTelemetry instrumentation with Sentry
