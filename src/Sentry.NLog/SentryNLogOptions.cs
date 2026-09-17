@@ -1,7 +1,7 @@
 namespace Sentry.NLog;
 
 /// <summary>
-/// Options for the Sentry target for NLog. All properties can be configured via code or in NLog.config xml file.
+/// Options for the Sentry target for NLog. All properties can be configured via code or the NLog.config file.
 /// </summary>
 /// <remarks>
 /// These options only configure the target. The Sentry SDK itself is configured and initialised separately, using

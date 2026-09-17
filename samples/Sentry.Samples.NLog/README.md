@@ -2,9 +2,9 @@
 
 This is a simple console application that demonstrates how you can add Sentry to your application using NLog.
 
-This project attempts to sample the integration by using code only and also via the configuration file.
-In both cases the Sentry target only sends logs to Sentry. The Sentry SDK itself is initialised separately, with
-`SentrySdk.Init` in `Program.cs`, so **you need to add your own DSN** there to see the events sent in your Sentry project.
+This project demonstrates configuring Sentry and NLog via code and configuration.
+The Sentry target configures NLog to send logs to Sentry. The Sentry SDK itself is initialised via the call to `SentrySdk.Init`
+in `Program.cs`, so **you need to add your own DSN** there to see the events sent in your Sentry project.
 
 You can get your [Sentry DSN at sentry.io](https://sentry.io).
 
