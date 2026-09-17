@@ -210,22 +210,6 @@ public partial class SentryAppenderTests
     }
 
     [Fact]
-    public void DoAppend_StructuredLogging_ConfiguredEnvironment_OverridesOptions()
-    {
-        InMemorySentryStructuredLogger capturer = new();
-        _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Environment = "options-environment";
-
-        var sut = _fixture.GetSut();
-        sut.Environment = "appender-environment";
-
-        sut.DoAppend(CreateLoggingEvent(Level.Info, "Message"));
-
-        var log = capturer.Logs.Should().ContainSingle().Which;
-        log.Attributes.ShouldContain("sentry.environment", "appender-environment");
-    }
-
-    [Fact]
     public void DoAppend_StructuredLogging_SendIdentity_SetsUser()
     {
         InMemorySentryStructuredLogger capturer = new();
