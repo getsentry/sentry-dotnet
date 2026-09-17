@@ -375,7 +375,7 @@ public class SentryHttpMessageHandlerTests
         returnedSpan.Should().NotBeNull();
         returnedSpan!.Operation.Should().Be("http.client");
         returnedSpan.Description.Should().Be($"{method} {url}");
-        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        returnedSpan.Received(1).SetData(OtelSemanticConventions.AttributeHttpRequestMethod, method);
     }
 
     [Fact]
@@ -398,8 +398,8 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         span.Should().NotBeNull();
-        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
-        span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)status);
+        span.Data.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
+        span.Data[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)status);
     }
 
 #if NET5_0_OR_GREATER

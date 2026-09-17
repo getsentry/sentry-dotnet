@@ -155,7 +155,7 @@ namespace Sentry
     {
         System.IO.Stream GetStream();
     }
-    public interface IEventLike : Sentry.IHasExtra, Sentry.IHasTags
+    public interface IEventLike : Sentry.IHasTags
     {
         System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         Sentry.SentryContexts Contexts { get; set; }
@@ -267,7 +267,7 @@ namespace Sentry
     {
         Sentry.SentryUser? Create();
     }
-    public interface ISpan : Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanData, Sentry.Protocol.ITraceContext, System.IDisposable
+    public interface ISpan : Sentry.IHasData, Sentry.IHasTags, Sentry.ISpanData, Sentry.Protocol.ITraceContext, System.IDisposable
     {
         new string? Description { get; set; }
         new string Operation { get; set; }
@@ -278,7 +278,7 @@ namespace Sentry
         void Finish(System.Exception exception, Sentry.SpanStatus status);
         Sentry.ISpan StartChild(string operation);
     }
-    public interface ISpanData : Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.Protocol.ITraceContext
+    public interface ISpanData : Sentry.IHasData, Sentry.IHasTags, Sentry.Protocol.ITraceContext
     {
         System.DateTimeOffset? EndTimestamp { get; }
         bool IsFinished { get; }
@@ -302,7 +302,7 @@ namespace Sentry
         string Name { get; }
         Sentry.TransactionNameSource NameSource { get; }
     }
-    public interface ITransactionData : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
+    public interface ITransactionData : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasTags, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
         string? Platform { get; set; }
     }
@@ -313,7 +313,7 @@ namespace Sentry
         Sentry.SentryId TraceId { get; }
         void ConfigureScope(System.Action<Sentry.Scope> configureScope);
     }
-    public interface ITransactionTracer : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext, System.IDisposable
+    public interface ITransactionTracer : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext, System.IDisposable
     {
         new bool? IsParentSampled { get; set; }
         new string Name { get; set; }
@@ -1031,15 +1031,13 @@ namespace Sentry
         public string? UserAgent { get; }
         public void ReportError() { }
     }
-    public class SentrySpan : Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
+    public class SentrySpan : Sentry.IHasData, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
     {
         public SentrySpan(Sentry.ISpan tracer) { }
         public SentrySpan(Sentry.SpanId? parentSpanId, string operation) { }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Data { get; }
         public string? Description { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
-        [System.Obsolete("Use Data")]
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public bool IsFinished { get; }
         public bool? IsSampled { get; }
         public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
@@ -1053,8 +1051,6 @@ namespace Sentry
         public Sentry.SentryId TraceId { get; }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetData(string key, object? value) { }
-        [System.Obsolete("Use SetData")]
-        public void SetExtra(string key, object? value) { }
         public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
         public void UnsetTag(string key) { }
@@ -1134,7 +1130,7 @@ namespace Sentry
         public override string ToString() { }
         public static Sentry.SentryTraceHeader? Parse(string value) { }
     }
-    public class SentryTransaction : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
+    public class SentryTransaction : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public SentryTransaction(Sentry.ITransactionTracer tracer) { }
         public SentryTransaction(string name, string operation) { }
@@ -1147,8 +1143,6 @@ namespace Sentry
         public System.DateTimeOffset? EndTimestamp { get; }
         public string? Environment { get; set; }
         public Sentry.SentryId EventId { get; }
-        [System.Obsolete("Use Data")]
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public bool IsFinished { get; }
         public bool? IsParentSampled { get; set; }
@@ -1175,8 +1169,6 @@ namespace Sentry
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetData(string key, object? value) { }
-        [System.Obsolete("Use SetData")]
-        public void SetExtra(string key, object? value) { }
         public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
         public void UnsetTag(string key) { }
@@ -1287,13 +1279,12 @@ namespace Sentry
         OutOfRange = 15,
         DataLoss = 16,
     }
-    public sealed class SpanTracer : Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.Protocol.ITraceContext, System.IDisposable
+    public sealed class SpanTracer : Sentry.IHasData, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.Protocol.ITraceContext, System.IDisposable
     {
         public SpanTracer(Sentry.IHub hub, Sentry.TransactionTracer transaction, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string operation) { }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Data { get; }
         public string? Description { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public bool IsFinished { get; }
         public bool? IsSampled { get; }
         public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
@@ -1312,7 +1303,6 @@ namespace Sentry
         public void Finish(System.Exception exception, Sentry.SpanStatus status) { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetData(string key, object? value) { }
-        public void SetExtra(string key, object? value) { }
         public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
         public Sentry.ISpan StartChild(string operation) { }
@@ -1367,7 +1357,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> CustomSamplingContext { get; }
         public Sentry.ITransactionContext TransactionContext { get; }
     }
-    public sealed class TransactionTracer : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.ITransactionTracer, Sentry.Protocol.ITraceContext, System.IDisposable
+    public sealed class TransactionTracer : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.ITransactionTracer, Sentry.Protocol.ITraceContext, System.IDisposable
     {
         public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
@@ -1377,8 +1367,6 @@ namespace Sentry
         public string? Distribution { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
         public string? Environment { get; set; }
-        [System.Obsolete("Use Data")]
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public bool IsFinished { get; }
         public bool? IsParentSampled { get; set; }
@@ -1411,8 +1399,6 @@ namespace Sentry
         public Sentry.ISpan? GetLastActiveSpan() { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetData(string key, object? value) { }
-        [System.Obsolete("Use SetData")]
-        public void SetExtra(string key, object? value) { }
         public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
         public Sentry.ISpan StartChild(string operation) { }

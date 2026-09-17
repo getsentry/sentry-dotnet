@@ -86,7 +86,7 @@ internal class SentryTracingMiddleware
                 transaction.SpanId,
                 transaction.TraceId);
 
-            transaction?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, context.Request.Method);
+            transaction?.SetData(OtelSemanticConventions.AttributeHttpRequestMethod, context.Request.Method);
 
             return transaction;
         }
@@ -174,7 +174,7 @@ internal class SentryTracingMiddleware
                     transaction.Name = transactionName;
                 }
 
-                transaction.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, context.Response.StatusCode);
+                transaction.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, context.Response.StatusCode);
                 var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
 
                 // If no Name was found for Transaction, then we don't have the route.

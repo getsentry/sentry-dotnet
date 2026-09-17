@@ -92,12 +92,6 @@ public sealed class SpanTracer : IBaseTracer, ISpan
     public void SetData(string key, object? value) =>
         _data[key] = value;
 
-    /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => Data;
-
-    /// <inheritdoc />
-    public void SetExtra(string key, object? value) => SetData(key, value);
-
     internal Func<bool>? IsFiltered { get; set; }
 
     /// <summary>
