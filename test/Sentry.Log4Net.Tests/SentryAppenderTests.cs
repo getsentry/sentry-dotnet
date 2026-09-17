@@ -4,36 +4,21 @@ public partial class SentryAppenderTests : IDisposable
 {
     private class Fixture
     {
-        public bool InitInvoked { get; set; }
-        public string DsnReceivedOnInit { get; set; }
-        public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
-        public Func<string, IDisposable> InitAction { get; set; }
         public IHub Hub { get; set; } = Substitute.For<IHub>();
-        public Func<IHub> HubAccessor { get; set; }
         public Scope Scope { get; } = new(new SentryOptions());
-        public string Dsn { get; set; } = "dsn";
         public SentryOptions Options { get; } = new();
 
         public Fixture()
         {
-            HubAccessor = () => Hub;
+            Hub.IsEnabled.Returns(true);
             Hub.SubstituteConfigureScope(Scope);
-            InitAction = s =>
-            {
-                DsnReceivedOnInit = s;
-                InitInvoked = true;
-                return SdkDisposeHandle;
-            };
         }
 
         public SentryAppender GetSut()
         {
             SentryClientExtensions.SentryOptionsForTestingOnly = Options;
 
-            var sut = new SentryAppender(InitAction, Hub)
-            {
-                Dsn = Dsn
-            };
+            var sut = new SentryAppender(Hub);
             sut.ActivateOptions();
             return sut;
         }
@@ -185,66 +170,19 @@ public partial class SentryAppenderTests : IDisposable
     }
 
     [Fact]
-    public void Append_NoDsn_InitNotCalled()
+    public void Append_DisabledHub_HubNotCalled()
     {
-        _fixture.Dsn = null;
-        var sut = _fixture.GetSut();
-
-        var evt = new LoggingEvent(new LoggingEventData());
-        sut.DoAppend(evt);
-
-        Assert.False(_fixture.InitInvoked);
-    }
-
-    [Fact]
-    public void Append_WithEnabledHub_InitNotCalled()
-    {
-        _ = _fixture.Hub.IsEnabled.Returns(true);
-        var sut = _fixture.GetSut();
-
-        var evt = new LoggingEvent(new LoggingEventData());
-        sut.DoAppend(evt);
-
-        Assert.False(_fixture.InitInvoked);
-    }
-
-    [Fact]
-    public void Append_WithDsn_InitCalled()
-    {
-        var sut = _fixture.GetSut();
-
-        var evt = new LoggingEvent(new LoggingEventData());
-        sut.DoAppend(evt);
-
-        Assert.True(_fixture.InitInvoked);
-        Assert.Same(_fixture.Dsn, _fixture.DsnReceivedOnInit);
-    }
-
-    [Fact]
-    public void Append_NoDsn_HubNotCalled()
-    {
-        _fixture.Dsn = null;
-        var sut = _fixture.GetSut();
-
-        var evt = new LoggingEvent(new LoggingEventData());
-        sut.DoAppend(evt);
-
-        Assert.False(_fixture.InitInvoked);
-        _ = _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(null);
-    }
-
-    [Fact]
-    public void Append_NoDsnAndDisabledHub_HubNotCalled()
-    {
-        _fixture.Dsn = null;
         _ = _fixture.Hub.IsEnabled.Returns(false);
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
         var sut = _fixture.GetSut();
 
         var evt = new LoggingEvent(new LoggingEventData());
         sut.DoAppend(evt);
 
-        Assert.False(_fixture.InitInvoked);
         _ = _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(null);
+        capturer.Logs.Should().BeEmpty();
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
     }
 
     [Fact]
@@ -284,39 +222,12 @@ public partial class SentryAppenderTests : IDisposable
         ThreadContext.Properties[id] = expected;
 
         var sut = _fixture.GetSut();
-        sut.Dsn = "dsn";
 
         var evt = new LoggingEvent(new LoggingEventData());
         sut.DoAppend(evt);
 
         _ = _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra[id] == expected));
-    }
-
-    [Fact]
-    public void Append_ByDefault_DoesNotSetEnvironment()
-    {
-        var sut = _fixture.GetSut();
-        var evt = new LoggingEvent(new LoggingEventData());
-
-        sut.DoAppend(evt);
-
-        _ = _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == null));
-    }
-
-    [Fact]
-    public void Append_ConfiguredEnvironment()
-    {
-        const string expected = "dev";
-        var sut = _fixture.GetSut();
-        sut.Environment = expected;
-        var evt = new LoggingEvent(new LoggingEventData());
-
-        sut.DoAppend(evt);
-
-        _ = _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
     }
 
     [Fact]
@@ -387,22 +298,5 @@ public partial class SentryAppenderTests : IDisposable
         // Event is sent instead.
         _ = _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == expectedMessage));
-    }
-
-    [Fact]
-    public void Close_DisposesSdk()
-    {
-        const string expectedDsn = "dsn";
-        var sut = _fixture.GetSut();
-        sut.Dsn = expectedDsn;
-
-        var evt = new LoggingEvent(new LoggingEventData());
-        sut.DoAppend(evt);
-
-        _fixture.SdkDisposeHandle.DidNotReceive().Dispose();
-
-        sut.Close();
-
-        _fixture.SdkDisposeHandle.Received(1).Dispose();
     }
 }

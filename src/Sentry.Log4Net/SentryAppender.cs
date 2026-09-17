@@ -7,11 +7,6 @@ namespace Sentry.Log4Net;
 /// </summary>
 public partial class SentryAppender : AppenderSkeleton
 {
-    private readonly Func<string, IDisposable> _initAction;
-    private volatile IDisposable? _sdkHandle;
-
-    private readonly Lock _initSync = new();
-
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryAppender).Assembly.GetNameAndVersion();
 
@@ -26,17 +21,9 @@ public partial class SentryAppender : AppenderSkeleton
     private readonly IHub _hub;
 
     /// <summary>
-    /// Sentry DSN.
-    /// </summary>
-    public string? Dsn { get; set; }
-    /// <summary>
     /// Whether to send the Identity or not.
     /// </summary>
     public bool SendIdentity { get; set; }
-    /// <summary>
-    /// Environment to send in the event.
-    /// </summary>
-    public string? Environment { get; set; }
 
     /// <summary>
     /// Lowest level required for a log message to become an event.
@@ -53,15 +40,12 @@ public partial class SentryAppender : AppenderSkeleton
     /// <summary>
     /// Creates a new instance of the <see cref="SentryAppender"/>.
     /// </summary>
-    public SentryAppender() : this(SentrySdk.Init, HubAdapter.Instance)
+    public SentryAppender() : this(HubAdapter.Instance)
     { }
 
-    internal SentryAppender(
-        Func<string, IDisposable> initAction,
-        IHub hubGetter)
+    internal SentryAppender(IHub hub)
     {
-        _initAction = initAction;
-        _hub = hubGetter;
+        _hub = hub;
     }
 
     /// <summary>
@@ -76,18 +60,9 @@ public partial class SentryAppender : AppenderSkeleton
             return;
         }
 
-        if (!_hub.IsEnabled && _sdkHandle == null)
+        if (!_hub.IsEnabled)
         {
-            if (Dsn == null)
-            {
-                return;
-            }
-
-            lock (_initSync)
-            {
-                // ReSharper disable once NonAtomicCompoundOperator Double init guarded by the lock
-                _sdkHandle ??= _initAction(Dsn);
-            }
+            return;
         }
 
         CaptureStructuredLog(loggingEvent);
@@ -113,7 +88,7 @@ public partial class SentryAppender : AppenderSkeleton
 
         try
         {
-            CaptureStructuredLog(_hub, options, loggingEvent, Environment, SendIdentity);
+            CaptureStructuredLog(_hub, options, loggingEvent, SendIdentity);
         }
         catch (Exception ex)
         {
@@ -153,11 +128,6 @@ public partial class SentryAppender : AppenderSkeleton
             {
                 Id = loggingEvent.Identity
             };
-        }
-
-        if (!string.IsNullOrWhiteSpace(Environment))
-        {
-            evt.Environment = Environment;
         }
 
         _hub.CaptureEvent(evt);
@@ -236,15 +206,5 @@ public partial class SentryAppender : AppenderSkeleton
         {
             yield return new KeyValuePair<string, object?>("log4net-level", loggingEvent.Level.Name);
         }
-    }
-
-    /// <summary>
-    /// Disposes the SDK if initialized.
-    /// </summary>
-    protected override void OnClose()
-    {
-        base.OnClose();
-
-        _sdkHandle?.Dispose();
     }
 }

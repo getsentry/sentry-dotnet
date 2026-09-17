@@ -2,7 +2,7 @@ namespace Sentry.Log4Net;
 
 public partial class SentryAppender
 {
-    private static void CaptureStructuredLog(IHub hub, SentryOptions options, LoggingEvent loggingEvent, string? environment, bool sendIdentity)
+    private static void CaptureStructuredLog(IHub hub, SentryOptions options, LoggingEvent loggingEvent, bool sendIdentity)
     {
         if (loggingEvent.ToSentryLogLevel() is not { } level)
         {
@@ -19,12 +19,6 @@ public partial class SentryAppender
         var scope = hub.GetScope();
         log.SetDefaultAttributes(options, scope, Sdk);
         log.SetOrigin("auto.log.log4net");
-
-        // Honor the appender-level settings, overriding the scope/options defaults, to match the SentryEvent path.
-        if (!string.IsNullOrWhiteSpace(environment))
-        {
-            log.SetAttribute("sentry.environment", environment!);
-        }
 
         if (sendIdentity && !string.IsNullOrEmpty(loggingEvent.Identity))
         {
