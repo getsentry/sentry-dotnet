@@ -958,7 +958,7 @@ public class ScopeExtensionsTests
     }
 
     [Fact]
-    public void Apply_Environment_Null()
+    public void Apply_Environment_Null_TargetUsesOptionsEnvironment()
     {
         var sut = _fixture.GetSut();
         sut.Environment = null;
@@ -966,7 +966,7 @@ public class ScopeExtensionsTests
         var target = _fixture.GetSut();
         sut.Apply(target);
 
-        Assert.Null(target.Environment);
+        Assert.Equal(target.Options.SettingLocator.GetEnvironment(), target.Environment);
     }
 
     [Fact]

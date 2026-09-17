@@ -404,7 +404,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.SentryContexts Contexts { get; set; }
         public string? Distribution { get; set; }
-        public string? Environment { get; set; }
+        public string Environment { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public Sentry.SentryLevel? Level { get; set; }
