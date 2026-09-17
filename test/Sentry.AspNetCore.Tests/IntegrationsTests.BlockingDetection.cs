@@ -97,8 +97,8 @@ public partial class IntegrationsTests
                 Path = "/blocking",
                 Handler = _ =>
                 {
-                    using var manualResetEvent = new ManualResetEventSlim(false);
-                    manualResetEvent.Wait(25);
+                    using var manualResetEvent = new ManualResetEvent(false);
+                    manualResetEvent.WaitOne(25);
                     return Task.CompletedTask;
                 }
             }
