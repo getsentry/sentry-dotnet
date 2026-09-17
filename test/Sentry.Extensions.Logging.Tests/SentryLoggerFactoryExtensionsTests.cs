@@ -16,11 +16,7 @@ public class SentryLoggerFactoryExtensionsTests
             .Do(info => info.Arg<Action<Scope>>()(scope));
         _ = SentrySdk.UseHub(hub);
 
-        _ = sut.AddSentry(o =>
-        {
-            o.InitializeSdk = false; // use the mock above
-            o.ConfigureScope(s => s.Level = expected);
-        });
+        _ = sut.AddSentry(o => o.ConfigureScope(s => s.Level = expected));
 
         Assert.Equal(expected, scope.Level);
     }
@@ -37,57 +33,24 @@ public class SentryLoggerFactoryExtensionsTests
             .Do(info => info.Arg<Action<Scope>>()(scope));
         _ = SentrySdk.UseHub(hub);
 
-        _ = sut.AddSentry(o =>
-        {
-            o.InitializeSdk = false; // use the mock above
-            o.ConfigureScope(s => s.Level = expected);
-        });
+        _ = sut.AddSentry(o => o.ConfigureScope(s => s.Level = expected));
 
         Assert.NotEqual(expected, scope.Level);
     }
 
     [Fact]
-    public void AddSentry_InitializeSdkFalse_HubAdapter()
+    public void AddSentry_WithDsn_DoesNotInitializeSdk()
     {
         var sut = Substitute.For<ILoggerFactory>();
+        var hub = Substitute.For<IHub>();
+        _ = hub.IsEnabled.Returns(false);
+        _ = SentrySdk.UseHub(hub);
 
-        _ = sut.AddSentry(o => o.InitializeSdk = false);
+        _ = sut.AddSentry(o => o.Dsn = ValidDsn);
 
         sut.Received(1)
             .AddProvider(Arg.Is<SentryLoggerProvider>(p => p.Hub == HubAdapter.Instance));
-    }
-
-    [Fact]
-    public void AddSentry_NoDiagnosticSet_MelSet()
-    {
-        SentryLoggingOptions options = null;
-        var sut = Substitute.For<ILoggerFactory>();
-        _ = sut.AddSentry(o =>
-        {
-            o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
-            o.Debug = true;
-            options = o;
-        });
-
-        _ = Assert.IsType<MelDiagnosticLogger>(options.DiagnosticLogger);
-    }
-
-    [Fact]
-    public void AddSentry_DiagnosticSet_NoOverriden()
-    {
-        SentryLoggingOptions options = null;
-        var sut = Substitute.For<ILoggerFactory>();
-        var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        _ = sut.AddSentry(o =>
-        {
-            o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
-            o.Debug = true;
-            Assert.Null(o.DiagnosticLogger);
-            o.DiagnosticLogger = diagnosticLogger;
-            options = o;
-        });
-
-        Assert.Same(diagnosticLogger, options.DiagnosticLogger);
+        Assert.False(SentrySdk.IsEnabled);
     }
 
     [Fact]

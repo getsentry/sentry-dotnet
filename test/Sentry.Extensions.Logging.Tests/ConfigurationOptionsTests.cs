@@ -49,22 +49,14 @@ public class ConfigurationOptionsTests
 
         using (new AssertionScope())
         {
-            sentryLoggingOptions.InitializeSdk.Should().BeFalse();
             sentryLoggingOptions.MinimumBreadcrumbLevel.Should().Be(LogLevel.Warning);
             sentryLoggingOptions.MinimumEventLevel.Should().Be(LogLevel.Critical);
         }
     }
 
     [Fact]
-    public void SentryOptions_InitializeTrue_ValuesAppliedFromLoggingOptions()
+    public void SentryOptions_ValuesFromAppSettings()
     {
-        var dict = new Dictionary<string, string>
-        {
-            {"Sentry:InitializeSdk", "true"},
-        };
-
-        _ = _fixture.Builder.AddInMemoryCollection(dict);
-
         var provider = _fixture.GetSut();
         var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
 

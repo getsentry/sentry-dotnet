@@ -6,7 +6,6 @@
     "IncludeActivityData": true,
     "MinimumBreadcrumbLevel": "Error",
     "MinimumEventLevel": "Critical",
-    "InitializeSdk": "false",
     "MaxBreadcrumbs": "999",
     "SampleRate": 1.0,
     "Release": "7f5d9a1",

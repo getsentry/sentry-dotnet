@@ -4,7 +4,6 @@
     {
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder) { }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration) { }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, string dsn) { }
     }
     public static class SentryLoggerFactoryExtensions
     {
@@ -31,7 +30,6 @@ namespace Sentry.Extensions.Logging
     public class SentryLoggingOptions : Sentry.SentryOptions
     {
         public SentryLoggingOptions() { }
-        public bool InitializeSdk { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
         public void ConfigureScope(System.Action<Sentry.Scope> action) { }

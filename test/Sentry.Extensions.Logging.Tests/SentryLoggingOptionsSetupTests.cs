@@ -54,8 +54,7 @@ public class SentryLoggingOptionsSetupTests
             JsonPreserveReferences = true,
 
             MinimumBreadcrumbLevel = LogLevel.Debug,
-            MinimumEventLevel = LogLevel.Error,
-            InitializeSdk = true
+            MinimumEventLevel = LogLevel.Error
         };
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>
@@ -105,7 +104,6 @@ public class SentryLoggingOptionsSetupTests
                 ["JsonPreserveReferences"] = expected.JsonPreserveReferences.ToString(),
                 ["MinimumBreadcrumbLevel"] = expected.MinimumBreadcrumbLevel.ToString(),
                 ["MinimumEventLevel"] = expected.MinimumEventLevel.ToString(),
-                ["InitializeSdk"] = expected.InitializeSdk.ToString(),
             })
             .Build();
 
@@ -162,7 +160,6 @@ public class SentryLoggingOptionsSetupTests
 
             actual.MinimumBreadcrumbLevel.Should().Be(expected.MinimumBreadcrumbLevel);
             actual.MinimumEventLevel.Should().Be(expected.MinimumEventLevel);
-            actual.InitializeSdk.Should().Be(expected.InitializeSdk);
         }
     }
 }

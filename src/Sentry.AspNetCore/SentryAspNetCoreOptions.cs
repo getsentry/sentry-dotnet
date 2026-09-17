@@ -108,6 +108,8 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     {
         // Don't report Environment.UserName as the user.
         IsEnvironmentUser = false;
+
+        InitializeSdk = true;
     }
 
     internal void SetEnvironment(IWebHostEnvironment hostingEnvironment)

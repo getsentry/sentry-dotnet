@@ -262,7 +262,6 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         Assert.True(options.IncludeActivityData);
         Assert.Equal(LogLevel.Error, options.MinimumBreadcrumbLevel);
         Assert.Equal(LogLevel.Critical, options.MinimumEventLevel);
-        Assert.False(options.InitializeSdk);
         Assert.Equal(999, options.MaxBreadcrumbs);
         Assert.Equal(1, options.SampleRate);
         Assert.Equal("7f5d9a1", options.Release);

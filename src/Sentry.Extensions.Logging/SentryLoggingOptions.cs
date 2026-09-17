@@ -31,15 +31,15 @@ public class SentryLoggingOptions : SentryOptions
     public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
     /// <summary>
-    /// Whether to initialize this SDK through this integration
-    /// </summary>
-    public bool InitializeSdk { get; set; } = true;
-
-    /// <summary>
     /// Add a callback to configure the scope upon SDK initialization
     /// </summary>
     /// <param name="action">The function to invoke when initializing the SDK</param>
     public void ConfigureScope(Action<Scope> action) => ConfigureScopeCallbacks = ConfigureScopeCallbacks.Concat(new[] { action }).ToArray();
+
+    /// <summary>
+    /// Whether the integration owning these options initializes the SDK
+    /// </summary>
+    internal bool InitializeSdk { get; set; }
 
     /// <summary>
     /// Log entry filters

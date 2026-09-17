@@ -46,5 +46,10 @@ public static class WebAssemblyHostBuilderExtensions
 /// </summary>
 public class SentryBlazorOptions : SentryLoggingOptions
 {
+    /// <summary>
+    /// Creates a new instance of <see cref="SentryBlazorOptions"/>.
+    /// </summary>
+    public SentryBlazorOptions() => InitializeSdk = true;
+
     // Awesome Blazor specific options go here
 }
