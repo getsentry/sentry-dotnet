@@ -15,8 +15,7 @@ public class Program
             c.Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                // Add Sentry integration with Serilog. This only configures the sink - Sentry itself is
-                // initialised by UseSentry below.
+                // Configure Serilog to send logs to Sentry. This only configures the sink - Sentry is initialised below.
                 .WriteTo.Sentry(s =>
                 {
                     // Sets the minimum log level required to add a log message as breadcrumb
@@ -25,9 +24,9 @@ public class Program
                     s.MinimumEventLevel = LogEventLevel.Error;
                 }));
 
-        // Add Sentry integration
-        // It can be defined via configuration (including `appsettings.json`)
-        // or coded explicitly, in the options callback: o.Dsn = ""; o.Release = "1.0"; ...
+        // Add the Sentry integration.
+        // Most options can be defined via binding configuration (including `appsettings.json` as we do here)
+        // or coded explicitly, in the options callback below (as we do with the DSN and Serilog log context)
         builder.WebHost.UseSentry(o =>
         {
 #if !SENTRY_DSN_DEFINED_IN_ENV

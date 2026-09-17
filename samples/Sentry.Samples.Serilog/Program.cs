@@ -8,7 +8,7 @@ internal static class Program
 {
     private static void Main()
     {
-        // Initialise Sentry. The Serilog sink below doesn't do this for you.
+        // Initialise Sentry SDK itself
         using var _ = SentrySdk.Init(options =>
         {
 #if !SENTRY_DSN_DEFINED_IN_ENV
@@ -28,12 +28,12 @@ internal static class Program
             .Enrich.FromLogContext()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            // Other overloads exist, for example, configuring the sink with no parameters at all.
+            // Configure Serilog to send logs to Sentry
             .WriteTo.Sentry(options =>
             {
                 // Debug and higher are stored as breadcrumbs (default os Information)
                 options.MinimumBreadcrumbLevel = LogEventLevel.Debug;
-                // Error and higher is sent as event (default is Error)
+                // Error and higher are sent as events (default is Error)
                 options.MinimumEventLevel = LogEventLevel.Error;
                 // Optional Serilog text formatter used to format LogEvent to string. If TextFormatter is set, FormatProvider is ignored.
                 options.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
