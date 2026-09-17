@@ -19,7 +19,7 @@
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC-Dynamic.xcframework</SentryCocoaFramework>
     <!-- No Carthage/Headers glob: Inputs doesn't expand wildcards, and an ItemGroup glob is empty on a fresh clone, which skips the target.
        .built-from-sha is written after the headers and suffices for the checks. -->
-    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;../../.config/dotnet-tools.json;$(SentryCocoaCache)Carthage/.built-from-sha</SentryCocoaBindingInputs>
+    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;../../scripts/patch-cocoa-bindings.cs;../../.config/dotnet-tools.json;$(SentryCocoaCache)Carthage/.built-from-sha</SentryCocoaBindingInputs>
     <!-- Resolve path to modules/sentry-cocoa/.git -->
     <SentryCocoaGitFile Condition="Exists('$(SentryCocoaCache).git')">$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
     <!-- Standalone clone: .git is a directory -->
