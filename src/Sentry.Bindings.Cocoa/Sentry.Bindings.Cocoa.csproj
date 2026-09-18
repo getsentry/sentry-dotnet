@@ -18,6 +18,7 @@
   <PropertyGroup>
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\SentryObjC-Dynamic.xcframework</SentryCocoaFramework>
     <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;../../scripts/patch-cocoa-bindings.cs;../../.config/dotnet-tools.json;$(SentryCocoaCache)Carthage/.built-from-sha</SentryCocoaBindingInputs>
+    <SentryCocoaBindingsStamp>$(MSBuildThisFileDirectory)obj/cocoa-bindings.stamp</SentryCocoaBindingsStamp>
     <!-- Resolve path to modules/sentry-cocoa/.git -->
     <SentryCocoaGitFile Condition="Exists('$(SentryCocoaCache).git')">$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache).git))</SentryCocoaGitFile>
     <!-- Standalone clone: .git is a directory -->
@@ -100,13 +101,14 @@
   <Target Name="_GenerateSentryCocoaBindings"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           Inputs="$(SentryCocoaBindingInputs)"
-          Outputs="ApiDefinition.cs;StructsAndEnums.cs">
+          Outputs="ApiDefinition.cs;StructsAndEnums.cs;$(SentryCocoaBindingsStamp)">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerGenerateSentryCocoaBindings">
     <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" />
     <!-- See https://github.com/getsentry/sentry-dotnet/pull/2558 -->
     <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 -PathToCheck $(MSBuildThisFileDirectory)" />
+    <Touch Files="$(SentryCocoaBindingsStamp)" AlwaysCreate="true" />
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299. -->
