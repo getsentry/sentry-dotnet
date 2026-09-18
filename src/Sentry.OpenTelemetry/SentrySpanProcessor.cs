@@ -259,10 +259,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // Use the end timestamp from the activity data.
             spanTracer.EndTimestamp = data.StartTimeUtc + data.Duration;
 
-            // Spans set otel attributes in extras (passed to Sentry as "data" on the span).
             // Resource attributes do not need to be set, as they would be identical as those set on the transaction.
-            spanTracer.SetExtras(attributes);
-            spanTracer.SetExtra("otel.kind", data.Kind);
+            foreach (var (key, value) in attributes)
+            {
+                spanTracer.SetData(key, value);
+            }
+            spanTracer.SetData("otel.kind", data.Kind);
             if (statusCode is { } responseStatusCode)
             {
                 // Set this as a tag so that it's searchable in Sentry

@@ -79,14 +79,6 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
     public void SetData(string key, object? value) =>
         (_data ??= new Dictionary<string, object?>())[key] = value;
 
-    /// <inheritdoc />
-    [Obsolete("Use Data")]
-    public IReadOnlyDictionary<string, object?> Extra => Data;
-
-    /// <inheritdoc />
-    [Obsolete("Use SetData")]
-    public void SetExtra(string key, object? value) => SetData(key, value);
-
     /// <summary>
     /// Initializes an instance of <see cref="SentrySpan"/>.
     /// </summary>

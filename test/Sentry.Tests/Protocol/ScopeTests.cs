@@ -686,6 +686,21 @@ public class ScopeExtensionsTests
     }
 
     [Fact]
+    public void Apply_Extra_TransactionTarget_SetAsData()
+    {
+        var sut = _fixture.GetSut();
+        sut.SetExtra("sut", "sut");
+        sut.SetExtra("conflict", "sut");
+        var target = new SentryTransaction("name", "op");
+        target.SetData("conflict", "target");
+
+        sut.Apply(target);
+
+        Assert.Equal("sut", target.Data["sut"]);
+        Assert.Equal("target", target.Data["conflict"]);
+    }
+
+    [Fact]
     public void Apply_Tags_OnTarget_MergedWithSource()
     {
         var sut = _fixture.GetSut();

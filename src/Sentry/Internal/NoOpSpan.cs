@@ -18,7 +18,6 @@ internal class NoOpSpan : ISpan
     public virtual SentryId TraceId => SentryId.Empty;
     public virtual bool? IsSampled => default;
     public IReadOnlyDictionary<string, string> Tags => ImmutableDictionary<string, string>.Empty;
-    public IReadOnlyDictionary<string, object?> Extra => ImmutableDictionary<string, object?>.Empty;
     public IReadOnlyDictionary<string, object?> Data => ImmutableDictionary<string, object?>.Empty;
     public DateTimeOffset StartTimestamp => default;
     public DateTimeOffset? EndTimestamp => null;
@@ -65,10 +64,6 @@ internal class NoOpSpan : ISpan
     }
 
     public void UnsetTag(string key)
-    {
-    }
-
-    public void SetExtra(string key, object? value)
     {
     }
 

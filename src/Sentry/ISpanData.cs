@@ -5,7 +5,7 @@ namespace Sentry;
 /// <summary>
 /// Immutable data belonging to a span.
 /// </summary>
-public interface ISpanData : ITraceContext, IHasData, IHasTags, IHasExtra
+public interface ISpanData : ITraceContext, IHasData, IHasTags
 {
     /// <summary>
     /// Start timestamp.

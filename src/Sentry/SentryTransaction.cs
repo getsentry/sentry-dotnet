@@ -335,15 +335,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
     public IReadOnlyDictionary<string, object?> Data => _contexts.Trace.Data;
 
     /// <inheritdoc />
-    [Obsolete("Use Data")]
-    public IReadOnlyDictionary<string, object?> Extra => _contexts.Trace.Data;
-
-    /// <inheritdoc />
-    [Obsolete("Use SetData")]
-    public void SetExtra(string key, object? value) =>
-        SetData(key, value);
-
-    /// <inheritdoc />
     public void SetData(string key, object? value) =>
         _contexts.Trace.SetData(key, value);
 

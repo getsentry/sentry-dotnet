@@ -11,7 +11,7 @@ namespace Sentry;
 /// Scope data is sent together with any event captured
 /// during the lifetime of the scope.
 /// </remarks>
-public class Scope : IEventLike
+public class Scope : IEventLike, IHasExtra
 {
     internal SentryOptions Options { get; }
 
@@ -493,12 +493,26 @@ public class Scope : IEventLike
             other.AddBreadcrumb(breadcrumb);
         }
 
-        foreach (var (key, value) in Extra)
+        switch (other)
         {
-            if (!other.Extra.ContainsKey(key))
-            {
-                other.SetExtra(key, value);
-            }
+            case IHasExtra hasExtra:
+                foreach (var (key, value) in Extra)
+                {
+                    if (!hasExtra.Extra.ContainsKey(key))
+                    {
+                        hasExtra.SetExtra(key, value);
+                    }
+                }
+                break;
+            case IHasData hasData:
+                foreach (var (key, value) in Extra)
+                {
+                    if (!hasData.Data.ContainsKey(key))
+                    {
+                        hasData.SetData(key, value);
+                    }
+                }
+                break;
         }
 
         foreach (var (key, value) in Tags)
