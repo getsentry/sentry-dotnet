@@ -144,30 +144,32 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public string? Distribution { get; set; }
 
+    private string? _environment;
+
     /// <inheritdoc />
-    public string? Environment
+    /// <remarks>Setting this to <c>null</c> reverts to the environment resolved from the options.</remarks>
+    [AllowNull]
+    public string Environment
     {
-        get;
+        get => _environment ?? Options.SettingLocator.GetEnvironment();
         set
         {
-            if (field == value)
+            if (value is null)
+            {
+                Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
+                value = Options.SettingLocator.GetEnvironment();
+            }
+
+            if (_environment == value)
             {
                 return;
             }
 
-            if (value is null)
-            {
-                Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
-                field = Options.Environment;
-            }
-            else
-            {
-                field = value;
-            }
+            _environment = value;
 
             if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
             {
-                observer.SetEnvironment(field);
+                observer.SetEnvironment(value);
             }
         }
     }
@@ -515,7 +517,17 @@ public class Scope : IEventLike
 
         other.Release ??= Release;
         other.Distribution ??= Distribution;
-        other.Environment ??= Environment;
+        if (other is Scope otherScope)
+        {
+            if (otherScope._environment is null && _environment is not null)
+            {
+                otherScope.Environment = _environment;
+            }
+        }
+        else
+        {
+            other.Environment ??= Environment;
+        }
         other.TransactionName ??= TransactionName;
         other.Level ??= Level;
 

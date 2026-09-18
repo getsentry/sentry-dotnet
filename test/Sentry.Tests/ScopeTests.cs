@@ -771,6 +771,45 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Environment_NotSet_ReturnsOptionsEnvironment()
+    {
+        var scope = new Scope(new SentryOptions { Environment = "staging" });
+
+        scope.Environment.Should().Be("staging");
+    }
+
+    [Fact]
+    public void Environment_NotSetInOptions_ReturnsDefaultEnvironment()
+    {
+        var scope = new Scope(new SentryOptions());
+
+        scope.Environment.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public void Apply_EnvironmentNotSetOnScope_EventGetsOptionsEnvironment()
+    {
+        var scope = new Scope(new SentryOptions { Environment = "staging" });
+        var evt = new SentryEvent();
+
+        scope.Apply(evt);
+
+        evt.Environment.Should().Be("staging");
+    }
+
+    [Fact]
+    public void Apply_EnvironmentSetOnTarget_TargetEnvironmentPreserved()
+    {
+        var options = new SentryOptions { Environment = "production" };
+        var source = new Scope(options) { Environment = "staging" };
+        var target = new Scope(options) { Environment = "development" };
+
+        source.Apply(target);
+
+        target.Environment.Should().Be("development");
+    }
+
+    [Fact]
     public void SetEnvironment_SameValue_ObserverNotifiedOnce()
     {
         // Arrange
