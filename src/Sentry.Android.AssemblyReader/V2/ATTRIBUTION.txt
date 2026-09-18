@@ -1,6 +1,14 @@
 Parts of the code in this subdirectory have been adapted from
 https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/assembly-store-reader.csproj
 
+and subsequently updated from:
+- https://github.com/dotnet/android/tree/64018e13e53cec7246e54866b520d3284de344e0/tools/assembly-store-reader-mk2
+  (assembly store v3, .NET 10)
+- https://github.com/dotnet/android/tree/f1aecf9e6ae80fe3f3992ec1f52ef953dac7c06b/.github/skills/read-assembly-store
+  (assembly store v4 and index entry sizing, .NET 11)
+
+Individual files note which of these they were updated from.
+
 The original license is as follows:
 
 The MIT License (MIT)
