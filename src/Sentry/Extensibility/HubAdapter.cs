@@ -1,4 +1,5 @@
 using Sentry.Infrastructure;
+using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Extensibility;
@@ -12,7 +13,7 @@ namespace Sentry.Extensibility;
 /// </remarks>
 /// <inheritdoc cref="IHub" />
 [DebuggerStepThrough]
-public sealed class HubAdapter : IHub
+public sealed class HubAdapter : IHub, IHubInternal
 {
     /// <summary>
     /// The single instance which forwards all calls to <see cref="SentrySdk"/>
@@ -120,6 +121,13 @@ public sealed class HubAdapter : IHub
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
         => SentrySdk.StartTransaction(context, customSamplingContext, dynamicSamplingContext);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    ITransactionTracer IHubInternal.StartTransaction(ITransactionContext context, TimeSpan? idleTimeout)
+        => SentrySdk.StartTransaction(context, idleTimeout);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
