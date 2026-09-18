@@ -1279,7 +1279,7 @@ interface SentryObjCExperimentalOptions
     [Export("enableUnhandledCPPExceptionsV2")]
     bool EnableUnhandledCPPExceptionsV2 { get; set; }
 
-    // @property (nonatomic) BOOL enableWatchdogTerminationsV2;
+    // @property (nonatomic) BOOL enableWatchdogTerminationsV2 __attribute__((deprecated("enableWatchdogTerminationsV2 is deprecated and will be removed in v10, where the improved watchdog termination tracking mechanism is enabled by default.")));
     [Export("enableWatchdogTerminationsV2")]
     bool EnableWatchdogTerminationsV2 { get; set; }
 
@@ -1489,7 +1489,7 @@ interface SentryObjCOptions
     [Export("sendClientReports")]
     bool SendClientReports { get; set; }
 
-    // @property (nonatomic) BOOL enableAppHangTracking;
+    // @property (nonatomic) BOOL enableAppHangTracking __attribute__((deprecated("App Hang tracking is deprecated and will be removed in v10 because it can produce less relevant stack traces and false positives. Enable the MetricKit integration using ``SentrySDKOptions/enableMetricKit`` for system-provided hang diagnostics.", "enableMetricKit")));
     [Export("enableAppHangTracking")]
     bool EnableAppHangTracking { get; set; }
 
@@ -1589,7 +1589,7 @@ interface SentryObjCOptions
     [Export("enableStandaloneAppStartTracing")]
     bool EnableStandaloneAppStartTracing { get; set; }
 
-    // @property (nonatomic) BOOL enableReportNonFullyBlockingAppHangs;
+    // @property (nonatomic) BOOL enableReportNonFullyBlockingAppHangs __attribute__((deprecated("App Hang tracking is deprecated and will be removed in v10 because it can produce less relevant stack traces and false positives. Enable the MetricKit integration using ``SentrySDKOptions/enableMetricKit`` for system-provided hang diagnostics.", "enableMetricKit")));
     [Export("enableReportNonFullyBlockingAppHangs")]
     bool EnableReportNonFullyBlockingAppHangs { get; set; }
 
@@ -1597,7 +1597,7 @@ interface SentryObjCOptions
     [Export("sessionReplay", ArgumentSemantic.Strong)]
     SentryObjCReplayOptions SessionReplay { get; set; }
 
-    // @property (nonatomic) BOOL enableSigtermReporting;
+    // @property (nonatomic) BOOL enableSigtermReporting __attribute__((deprecated("This property will be removed in v10. KSCrash always catches SIGTERM, records a clean exit, and never writes a crash report for it.")));
     [Export("enableSigtermReporting")]
     bool EnableSigtermReporting { get; set; }
 
