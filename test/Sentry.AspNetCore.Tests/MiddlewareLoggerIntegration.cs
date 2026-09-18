@@ -35,11 +35,7 @@ public class MiddlewareLoggerIntegration : IDisposable
         public Fixture()
         {
             HubAccessor = () => Hub;
-            var loggingOptions = new SentryLoggingOptions
-            {
-                InitializeSdk = false,
-            };
-            loggingOptions.InitializeSdk = false;
+            var loggingOptions = new SentryLoggingOptions();
 
             Client.When(client => client.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>(), Arg.Any<SentryHint>()))
                 .Do(callback => callback.Arg<Scope>().Evaluate());

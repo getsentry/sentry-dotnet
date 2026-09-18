@@ -703,4 +703,33 @@ public partial class SentryOptionsTests
         installationId2.Should().Be(installationId1);
         logger.Received(0).Log(SentryLevel.Debug, "Resolved installation ID '{0}'.", null, Arg.Any<string>());
     }
+
+    [Fact]
+    public void ApplyDefaultTags_TagInEvent_DoesNotOverrideTag()
+    {
+        const string key = "key";
+        const string expected = "event tag value";
+        var sut = new SentryOptions();
+        var target = new SentryEvent();
+        target.SetTag(key, expected);
+        sut.DefaultTags[key] = "default value";
+
+        sut.ApplyDefaultTags(target);
+
+        Assert.Equal(expected, target.Tags[key]);
+    }
+
+    [Fact]
+    public void ApplyDefaultTags_TagNotInEvent_AppliesTag()
+    {
+        const string key = "key";
+        const string expected = "default tag value";
+        var sut = new SentryOptions();
+        var target = new SentryEvent();
+        sut.DefaultTags[key] = expected;
+
+        sut.ApplyDefaultTags(target);
+
+        Assert.Equal(expected, target.Tags[key]);
+    }
 }

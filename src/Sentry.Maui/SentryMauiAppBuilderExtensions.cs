@@ -78,7 +78,7 @@ public static class SentryMauiAppBuilderExtensions
         // This is ultimately the class that enables all the MauiElementEventBinders above
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
 
-        services.AddSentry<SentryMauiOptions>();
+        services.AddSentry<SentryMauiOptions>(initializeSdk: false);
 
         builder.RegisterMauiEventsBinder();
 

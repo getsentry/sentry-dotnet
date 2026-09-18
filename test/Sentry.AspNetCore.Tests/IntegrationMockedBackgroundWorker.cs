@@ -37,7 +37,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     [Fact]
     public async Task DisabledSdk_UnhandledException_NoEventCaptured()
     {
-        Configure = o => o.InitializeSdk = false;
+        Configure = o => o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
 
         Build();
         _ = await HttpClient.GetAsync("/throw");
@@ -49,7 +49,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     [Fact]
     public void DisabledSdk_WithLogger_NoEventCaptured()
     {
-        Configure = o => o.InitializeSdk = false;
+        Configure = o => o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
 
         Build();
         var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
@@ -262,7 +262,6 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         Assert.True(options.IncludeActivityData);
         Assert.Equal(LogLevel.Error, options.MinimumBreadcrumbLevel);
         Assert.Equal(LogLevel.Critical, options.MinimumEventLevel);
-        Assert.False(options.InitializeSdk);
         Assert.Equal(999, options.MaxBreadcrumbs);
         Assert.Equal(1, options.SampleRate);
         Assert.Equal("7f5d9a1", options.Release);

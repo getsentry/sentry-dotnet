@@ -191,6 +191,32 @@ public partial class SentryMauiAppBuilderExtensionsTests
     }
 
     [Fact]
+    public void UseSentry_ConfigureScope_AppliedWhenSdkInitialized()
+    {
+        // Arrange
+        SentryEvent @event = null;
+        var builder = _fixture.Builder
+            .UseSentry(options =>
+            {
+                options.ConfigureScope(scope => scope.SetTag("configured", "at-init"));
+                options.SetBeforeSend((e, _) =>
+                {
+                    @event = e;
+                    return null;
+                });
+            });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        client.CaptureMessage("test");
+
+        // Assert
+        Assert.NotNull(@event);
+        Assert.Equal("at-init", @event.Tags["configured"]);
+    }
+
+    [Fact]
     public void UseSentry_EnablesHub()
     {
         // Arrange
@@ -338,10 +364,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
         var builder = _fixture.Builder;
 
         // Act
-        builder.UseSentry((SentryMauiOptions options) =>
-        {
-            options.InitializeSdk = false;
-        });
+        builder.UseSentry();
 
         using var serviceProvider = builder.Services.BuildServiceProvider();
         var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>().ToArray();
@@ -359,10 +382,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
         var builder = _fixture.Builder;
 
         // Act
-        builder.UseSentry((SentryMauiOptions options) =>
-        {
-            options.InitializeSdk = false;
-        });
+        builder.UseSentry();
 
         using var serviceProvider = builder.Services.BuildServiceProvider();
         var loggerFilterOptions = serviceProvider.GetRequiredService<IOptions<LoggerFilterOptions>>().Value;

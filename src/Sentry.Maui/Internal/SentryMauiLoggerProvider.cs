@@ -12,12 +12,12 @@ namespace Sentry.Maui.Internal;
 internal sealed class SentryMauiLoggerProvider : SentryLoggerProvider
 {
     public SentryMauiLoggerProvider(IOptions<SentryMauiOptions> options, IHub hub)
-        : base(options, hub)
+        : base(hub, SystemClock.Clock, options.Value.Logging)
     {
     }
 
     internal SentryMauiLoggerProvider(SentryMauiOptions options, IHub hub, ISystemClock clock)
-        : base(hub, clock, options)
+        : base(hub, clock, options.Logging)
     {
     }
 }
