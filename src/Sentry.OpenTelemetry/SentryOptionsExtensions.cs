@@ -8,6 +8,10 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class SentryOptionsExtensions
 {
+    internal const string ObsoleteMessage =
+        "Use UseOtlp from the Sentry.OpenTelemetry.Exporter package instead. " +
+        "This method will be removed in future versions.";
+
     /// <summary>
     /// Enables OpenTelemetry instrumentation with Sentry
     /// </summary>
@@ -28,10 +32,7 @@ public static class SentryOptionsExtensions
     /// It's recommended that you set this to <c>true</c> since mixing OpenTelemetry and Sentry traces may yield
     /// unexpected results. It is <c>false</c> by default for backward compatibility only.
     /// </param>
-    /// <remarks>
-    /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
-    /// We recommend you use the Sentry.OpenTelemetry.Exporter integration instead.
-    /// </remarks>
+    [Obsolete(ObsoleteMessage)]
     public static void UseOpenTelemetry(this SentryOptions options, TracerProviderBuilder traceProviderBuilder,
         TextMapPropagator? defaultTextMapPropagator = null, bool disableSentryTracing = false)
     {
@@ -52,10 +53,7 @@ public static class SentryOptionsExtensions
     /// It's recommended that you set this to <c>true</c> since mixing OpenTelemetry and Sentry traces may yield
     /// unexpected results. It is <c>false</c> by default for backward compatibility only.
     /// </param>
-    /// <remarks>
-    /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
-    /// We recommend you use the Sentry.OpenTelemetry.Exporter integration instead.
-    /// </remarks>
+    [Obsolete(ObsoleteMessage)]
     public static void UseOpenTelemetry(this SentryOptions options, bool disableSentryTracing = false)
     {
         options.Instrumenter = Instrumenter.OpenTelemetry;

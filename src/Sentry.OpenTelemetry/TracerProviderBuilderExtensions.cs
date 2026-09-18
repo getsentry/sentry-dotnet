@@ -11,6 +11,10 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class TracerProviderBuilderExtensions
 {
+    internal const string ObsoleteMessage =
+        "Use AddSentryOtlpExporter from the Sentry.OpenTelemetry.Exporter package instead. " +
+        "This method will be removed in version 7.0.0.";
+
     /// <summary>
     /// <para>
     /// Ensures OpenTelemetry trace information is sent to Sentry. OpenTelemetry spans will be converted to Sentry spans
@@ -35,10 +39,7 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    /// <remarks>
-    /// This method of initialising the Sentry OpenTelemetry integration will be deprecated in a future major release.
-    /// We recommend you use the Sentry.OpenTelemetry.Exporter integration instead.
-    /// </remarks>
+    [Obsolete(ObsoleteMessage)]
     public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder,
         TextMapPropagator? defaultTextMapPropagator = null)
     {
