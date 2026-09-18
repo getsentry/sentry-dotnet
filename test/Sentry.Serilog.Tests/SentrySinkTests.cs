@@ -5,25 +5,30 @@ public partial class SentrySinkTests
     private class Fixture
     {
         public SentrySerilogOptions Options { get; set; } = new();
+        public InMemoryDiagnosticLogger DiagnosticLogger { get; } = new();
+        public SentryOptions SentryOptions { get; }
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public Func<IHub> HubAccessor { get; set; }
-        public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
         public Scope Scope { get; } = new(new SentryOptions());
 
         public Fixture()
         {
+            SentryOptions = new SentryOptions
+            {
+                Debug = true,
+                DiagnosticLogger = DiagnosticLogger
+            };
             Hub.IsEnabled.Returns(true);
             Hub.Logger.Returns(new InMemorySentryStructuredLogger());
             HubAccessor = () => Hub;
             Hub.SubstituteConfigureScope(Scope);
-            SentryClientExtensions.SentryOptionsForTestingOnly = Options;
+            SentryClientExtensions.SentryOptionsForTestingOnly = SentryOptions;
         }
 
         public SentrySink GetSut()
             => new(
                 Options,
                 HubAccessor,
-                SdkDisposeHandle,
                 new MockClock());
     }
 
@@ -218,27 +223,46 @@ public partial class SentrySinkTests
     }
 
     [Fact]
-    public void Close_DisposesSdk()
+    public void Emit_UseSerilogNotCalled_LogsWarningOnce()
     {
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
             Enumerable.Empty<LogEventProperty>());
         sut.Emit(evt);
+        sut.Emit(evt);
 
-        _fixture.SdkDisposeHandle.DidNotReceive().Dispose();
-
-        sut.Dispose();
-
-        _fixture.SdkDisposeHandle.Received(1).Dispose();
+        _fixture.DiagnosticLogger.Entries
+            .Where(e => e.Level == SentryLevel.Warning && e.Message.Contains("UseSerilog()"))
+            .Should().ContainSingle();
     }
 
     [Fact]
-    public void Close_NoDisposeHandleProvided_DoesNotThrow()
+    public void Emit_UseSerilogCalled_NoWarning()
     {
-        _fixture.SdkDisposeHandle = null;
+        _fixture.SentryOptions.UseSerilog();
         var sut = _fixture.GetSut();
-        sut.Dispose();
+
+        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>());
+        sut.Emit(evt);
+
+        _fixture.DiagnosticLogger.Entries
+            .Should().NotContain(e => e.Message.Contains("UseSerilog()"));
+    }
+
+    [Fact]
+    public void Emit_DisabledHub_NoWarning()
+    {
+        _fixture.Hub.IsEnabled.Returns(false);
+        var sut = _fixture.GetSut();
+
+        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>());
+        sut.Emit(evt);
+
+        _fixture.DiagnosticLogger.Entries
+            .Should().NotContain(e => e.Message.Contains("UseSerilog()"));
     }
 
     [Fact]

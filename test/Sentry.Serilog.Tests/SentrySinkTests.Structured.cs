@@ -21,7 +21,7 @@ public partial class SentrySinkTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Emit_StructuredLogging_UseHubOptionsOverSinkOptions(bool isEnabled)
+    public void Emit_StructuredLogging_RequiresHubOptions(bool isEnabled)
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
@@ -66,8 +66,8 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Environment = "test-environment";
-        _fixture.Options.Release = "test-release";
+        _fixture.SentryOptions.Environment = "test-environment";
+        _fixture.SentryOptions.Release = "test-release";
 
         if (withActiveSpan)
         {
