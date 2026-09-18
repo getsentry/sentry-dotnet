@@ -40,14 +40,16 @@ public partial class SentryAppender
         // against null, so we do too rather than rely on log4net's internals.
         if (loggingEvent.GetProperties() is { } properties)
         {
-            foreach (var property in properties)
+            foreach (var key in properties.GetKeys())
             {
-                if (property is DictionaryEntry { Key: string key, Value: { } value })
+                if (string.IsNullOrEmpty(key) || key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase) || Guid.TryParse(key, out _))
                 {
-                    if (key.Length != 0 && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase) && !Guid.TryParse(key, out _))
-                    {
-                        log.SetAttribute($"property.{key}", value);
-                    }
+                    continue;
+                }
+
+                if (properties[key] is { } value)
+                {
+                    log.SetAttribute($"property.{key}", value);
                 }
             }
         }
