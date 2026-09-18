@@ -5,52 +5,14 @@ namespace Sentry.Extensions.Logging.Tests;
 public class SentryLoggerFactoryExtensionsTests
 {
     [Fact]
-    public void AddSentry_ConfigureScope_HubEnabledTrue_InvokesCallback()
-    {
-        const SentryLevel expected = SentryLevel.Debug;
-        var sut = Substitute.For<ILoggerFactory>();
-        var hub = Substitute.For<IHub>();
-        _ = hub.IsEnabled.Returns(true);
-        var scope = new Scope(new SentryOptions());
-        hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(info => info.Arg<Action<Scope>>()(scope));
-        _ = SentrySdk.UseHub(hub);
-
-        _ = sut.AddSentry(o => o.ConfigureScope(s => s.Level = expected));
-
-        Assert.Equal(expected, scope.Level);
-    }
-
-    [Fact]
-    public void AddSentry_ConfigureScope_HubEnabledFalse_DoesNotInvokesCallback()
-    {
-        const SentryLevel expected = SentryLevel.Debug;
-        var sut = Substitute.For<ILoggerFactory>();
-        var hub = Substitute.For<IHub>();
-        _ = hub.IsEnabled.Returns(false);
-        var scope = new Scope(new SentryOptions());
-        hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(info => info.Arg<Action<Scope>>()(scope));
-        _ = SentrySdk.UseHub(hub);
-
-        _ = sut.AddSentry(o => o.ConfigureScope(s => s.Level = expected));
-
-        Assert.NotEqual(expected, scope.Level);
-    }
-
-    [Fact]
-    public void AddSentry_WithDsn_DoesNotInitializeSdk()
+    public void AddSentry_ProviderUsesHubAdapter()
     {
         var sut = Substitute.For<ILoggerFactory>();
-        var hub = Substitute.For<IHub>();
-        _ = hub.IsEnabled.Returns(false);
-        _ = SentrySdk.UseHub(hub);
 
-        _ = sut.AddSentry(o => o.Dsn = ValidDsn);
+        _ = sut.AddSentry();
 
         sut.Received(1)
             .AddProvider(Arg.Is<SentryLoggerProvider>(p => p.Hub == HubAdapter.Instance));
-        Assert.False(SentrySdk.IsEnabled);
     }
 
     [Fact]
@@ -60,7 +22,7 @@ public class SentryLoggerFactoryExtensionsTests
         var expected = Substitute.For<ILoggerFactory>();
         _ = expected.AddSentry(o =>
         {
-            o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
+            o.MinimumEventLevel = LogLevel.Critical;
             callbackInvoked = true;
         });
 
@@ -81,7 +43,7 @@ public class SentryLoggerFactoryExtensionsTests
     public void AddSentry_ReturnsSameFactory()
     {
         var expected = Substitute.For<ILoggerFactory>();
-        var actual = expected.AddSentry(o => o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue);
+        var actual = expected.AddSentry(o => o.MinimumEventLevel = LogLevel.Critical);
 
         Assert.Same(expected, actual);
     }
@@ -90,7 +52,7 @@ public class SentryLoggerFactoryExtensionsTests
     public void AddSentry_ConfigureOptionsOverload_ReturnsSameFactory()
     {
         var expected = Substitute.For<ILoggerFactory>();
-        var actual = expected.AddSentry(o => o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue);
+        var actual = expected.AddSentry(o => o.MinimumEventLevel = LogLevel.Critical);
 
         Assert.Same(expected, actual);
     }
@@ -103,7 +65,7 @@ public class SentryLoggerFactoryExtensionsTests
         var invoked = false;
         _ = expected.AddSentry(o =>
         {
-            o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
+            o.MinimumEventLevel = LogLevel.Critical;
             Assert.NotNull(o);
             invoked = true;
         });

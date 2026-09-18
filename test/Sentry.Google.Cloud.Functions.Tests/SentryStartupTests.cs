@@ -127,7 +127,7 @@ public class SentryStartupTests
     {
         LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
-            options.InitializeSdk = false;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         });
 
         var sut = new SentryStartup();
@@ -146,7 +146,7 @@ public class SentryStartupTests
     {
         LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
-            options.InitializeSdk = false;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         });
 
         var sut = new SentryStartup();

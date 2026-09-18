@@ -29,12 +29,7 @@ public class ConfigurationOptionsTests
         {
             var configuration = Builder.Build();
             var services = new ServiceCollection();
-            _ = services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry(o =>
-            {
-                o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-                o.InitNativeSdks = false;
-                o.AutoSessionTracking = false;
-            }));
+            _ = services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry());
             return services.BuildServiceProvider();
         }
     }
@@ -52,36 +47,6 @@ public class ConfigurationOptionsTests
             sentryLoggingOptions.MinimumBreadcrumbLevel.Should().Be(LogLevel.Warning);
             sentryLoggingOptions.MinimumEventLevel.Should().Be(LogLevel.Critical);
         }
-    }
-
-    [Fact]
-    public void SentryOptions_ValuesFromAppSettings()
-    {
-        var provider = _fixture.GetSut();
-        var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
-
-        Assert.Equal(150, sentryLoggingOptions.MaxBreadcrumbs);
-        Assert.Equal("e386dfd", sentryLoggingOptions.Release);
-        Assert.Equal(ValidDsn, sentryLoggingOptions.Dsn);
-    }
-
-    [Fact]
-    public void SentryOptions_DefaultTags_ValuesApplied()
-    {
-        const string expectedKey = "expected_key";
-        const string expectedValue = "expected value";
-        var dict = new Dictionary<string, string>
-        {
-            {"Sentry:DefaultTags:" + expectedKey, expectedValue},
-        };
-
-        _ = _fixture.Builder.AddInMemoryCollection(dict);
-
-        var provider = _fixture.GetSut();
-        var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
-
-        sentryLoggingOptions.DefaultTags.Should().ContainKey(expectedKey);
-        sentryLoggingOptions.DefaultTags[expectedKey].Should().Be(expectedValue);
     }
 
     [Fact]

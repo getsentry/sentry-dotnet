@@ -61,12 +61,6 @@ internal class SentryLoggerProvider : ILoggerProvider
                     }
                 }
             });
-
-            // Add scope configuration to hub from options
-            foreach (var callback in options.ConfigureScopeCallbacks)
-            {
-                hub.ConfigureScope(callback);
-            }
         }
     }
 

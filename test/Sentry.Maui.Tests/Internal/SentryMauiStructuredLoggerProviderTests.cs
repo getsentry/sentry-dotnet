@@ -6,21 +6,18 @@ using Sentry.Maui.Internal;
 
 namespace Sentry.Maui.Tests.Internal;
 
-public class SentryMauiStructuredLoggerProviderTests
+public class SentryMauiStructuredLoggerProviderTests : IDisposable
 {
     private class Fixture
     {
-        public IOptions<SentryMauiOptions> Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
         public SdkVersion Sdk { get; }
 
         public Fixture()
         {
-            var loggingOptions = new SentryMauiOptions();
-
-            Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
+            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions();
             Clock = new MockClock();
             Sdk = new SdkVersion
             {
@@ -33,11 +30,13 @@ public class SentryMauiStructuredLoggerProviderTests
 
         public SentryMauiStructuredLoggerProvider GetSut()
         {
-            return new SentryMauiStructuredLoggerProvider(Options.Value, Hub, Clock, Sdk);
+            return new SentryMauiStructuredLoggerProvider(Hub, Clock, Sdk);
         }
     }
 
     private readonly Fixture _fixture = new();
+
+    public void Dispose() => SentryClientExtensions.SentryOptionsForTestingOnly = null;
 
     [Fact]
     public void Type_CustomAttributes_HasProviderAliasAttribute()
@@ -55,7 +54,6 @@ public class SentryMauiStructuredLoggerProviderTests
         using var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>()
-            .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
@@ -84,7 +82,6 @@ public class SentryMauiStructuredLoggerProviderTests
         using var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>()
-            .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 

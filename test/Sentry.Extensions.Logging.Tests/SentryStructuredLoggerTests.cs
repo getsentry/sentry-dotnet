@@ -10,7 +10,7 @@ public class SentryStructuredLoggerTests : IDisposable
     private class Fixture
     {
         public string CategoryName { get; internal set; }
-        public IOptions<SentryLoggingOptions> Options { get; }
+        public SentryOptions Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
         public SdkVersion Sdk { get; }
@@ -20,18 +20,18 @@ public class SentryStructuredLoggerTests : IDisposable
 
         public Fixture()
         {
-            var loggingOptions = new SentryLoggingOptions
+            Options = new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
                 Environment = "my-environment",
                 Release = "my-release",
             };
+            SentryClientExtensions.SentryOptionsForTestingOnly = Options;
 
             CategoryName = nameof(CategoryName);
-            Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
-            Hub.SubstituteConfigureScope(new Scope(loggingOptions));
+            Hub.SubstituteConfigureScope(new Scope(Options));
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
             Sdk = new SdkVersion
             {
@@ -58,7 +58,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
         public SentryStructuredLogger GetSut()
         {
-            return new SentryStructuredLogger(CategoryName, Options.Value, Hub, Clock, Sdk);
+            return new SentryStructuredLogger(CategoryName, Hub, Clock, Sdk);
         }
     }
 
@@ -66,6 +66,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
     public void Dispose()
     {
+        SentryClientExtensions.SentryOptionsForTestingOnly = null;
         _fixture.CapturedLogs.Should().BeEmpty();
         _fixture.DiagnosticLogger.Entries.Should().BeEmpty();
     }
@@ -129,7 +130,7 @@ public class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Log_WithoutActiveSpan_CaptureLog()
     {
-        var scope = new Scope(_fixture.Options.Value);
+        var scope = new Scope(_fixture.Options);
         _fixture.Hub.GetSpan().Returns((ISpan?)null);
         _fixture.Hub.SubstituteConfigureScope(scope);
         var logger = _fixture.GetSut();
