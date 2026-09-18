@@ -35,7 +35,7 @@ internal class DynamicSamplingContext
         // Validate and set required values
         if (traceId == SentryId.Empty)
         {
-            throw new ArgumentOutOfRangeException(nameof(traceId), "cannot be empty");
+            throw new ArgumentException("cannot be empty", nameof(traceId));
         }
 
         if (string.IsNullOrWhiteSpace(publicKey))
