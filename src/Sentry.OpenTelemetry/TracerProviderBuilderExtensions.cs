@@ -11,7 +11,7 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class TracerProviderBuilderExtensions
 {
-    internal const string ObsoleteMessage =
+    internal const string ObsoleteAddSentry =
         "Use AddSentryOtlpExporter from the Sentry.OpenTelemetry.Exporter package instead. " +
         "This method will be removed in future versions.";
 
@@ -39,7 +39,7 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    [Obsolete(ObsoleteMessage)]
+    [Obsolete(ObsoleteAddSentry)]
     public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder,
         TextMapPropagator? defaultTextMapPropagator = null)
     {
