@@ -1,25 +1,7 @@
 # Overview
 
 This sample demonstrates how a console application that is instrumented with the OpenTelemetry .NET SDK can be
-configured to send trace information to Sentry, with the following initialization code:
-
-```csharp
-using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-    .AddSource(serviceName)
-    .ConfigureResource(resource =>
-        resource.AddService(
-            serviceName: serviceName,
-            serviceVersion: serviceVersion))
-    .AddSentryOtlpExporter(dsn) // <-- Configure OpenTelemetry to send traces to Sentry
-    .Build();
-
-SentrySdk.Init(o =>
-{
-    options.Dsn = dsn;
-    options.TracesSampleRate = 1.0;
-    options.UseOtlp(); // <-- Configure Sentry to use OpenTelemetry trace information
-});
-```
+configured to send trace information to Sentry.
 
 ## Customizing propagation
 
