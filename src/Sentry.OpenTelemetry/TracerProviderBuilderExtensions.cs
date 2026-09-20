@@ -13,7 +13,7 @@ public static class TracerProviderBuilderExtensions
 {
     internal const string ObsoleteMessage =
         "Use AddSentryOtlpExporter from the Sentry.OpenTelemetry.Exporter package instead. " +
-        "This method will be removed in version 7.0.0.";
+        "This method will be removed in future versions.";
 
     /// <summary>
     /// <para>
