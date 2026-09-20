@@ -1,5 +1,27 @@
 # Changelog
 
+## 6.11.1
+
+### Fixes 🐛
+
+- fix(cocoa): iOS and Mac Catalyst apps no longer crash in `[NSURLSessionTask cancel]` when a request is cancelled after it has already completed with `Native.EnableSwizzling` enabled (Cocoa SDK v9.29.0). Note that native crashes now set `mechanism.synthetic`, so expect a one-time regrouping of existing crash issues as your app adopts this version. by @github-actions in [#5596](https://github.com/getsentry/sentry-dotnet/pull/5596)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Native SDK to v0.16.8 by @github-actions in [#5600](https://github.com/getsentry/sentry-dotnet/pull/5600)
+- chore(deps): raise the OpenTelemetry floor to 1.12.0 by @jamescrosswell in [#5588](https://github.com/getsentry/sentry-dotnet/pull/5588)
+- chore(deps): update Java SDK to v8.57.0 by @github-actions in [#5590](https://github.com/getsentry/sentry-dotnet/pull/5590)
+- chore(deps): update CLI to v3.8.0 by @github-actions in [#5591](https://github.com/getsentry/sentry-dotnet/pull/5591)
+- chore(deps): update Java SDK to v8.56.0 by @github-actions in [#5562](https://github.com/getsentry/sentry-dotnet/pull/5562)
+- chore(deps): update Cocoa SDK to v9.28.0 by @github-actions in [#5561](https://github.com/getsentry/sentry-dotnet/pull/5561)
+- chore(deps): update Native SDK to v0.16.6 by @github-actions in [#5563](https://github.com/getsentry/sentry-dotnet/pull/5563)
+
+### Other
+
+- test: add ASP.NET Core blocking detection integration tests by @z0rimo in [#5578](https://github.com/getsentry/sentry-dotnet/pull/5578)
+
 ## 6.11.0
 
 ### Features ✨
