@@ -1,29 +1,7 @@
 # Overview
 
 This sample demonstrates how an ASP.NET Core application that is instrumented with the OpenTelemetry .NET SDK can be 
-configured to send trace information to Sentry, with the following initialization code:
-
-```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddOpenTelemetry()
-    .WithTracing(tracerProviderBuilder =>
-        tracerProviderBuilder
-            .AddSource(Telemetry.ActivitySource.Name)
-            .ConfigureResource(resource => resource.AddService(Telemetry.ServiceName))
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddSentryOtlpExporter(dsn) // <-- Configure OpenTelemetry to send trace information to Sentry
-    );
-
-builder.WebHost.UseSentry(options =>
-{
-    options.Dsn = dsn;
-    options.Debug = builder.Environment.IsDevelopment();
-    options.TracesSampleRate = 1.0;
-    options.UseOtlp(); // <-- Configure Sentry to use OpenTelemetry trace information
-});
-```
+configured to send trace information to Sentry.
 
 ## Customizing propagation
 
