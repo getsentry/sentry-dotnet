@@ -104,6 +104,41 @@ public class SentrySerilogSinkExtensionsTests
         Assert.Null(ex);
     }
 
+    [Fact]
+    public void Sentry_DsnOverload_InvokedByName_Throws()
+    {
+        var method = typeof(SentrySinkExtensions)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Single(m => m.Name == nameof(SentrySinkExtensions.Sentry)
+                         && m.GetParameters().Any(p => p.Name == "dsn"));
+
+        var arguments = method.GetParameters()
+            .Select(p => p.Name == "dsn"
+                ? "https://key@sentry.io/1"
+                : p.HasDefaultValue ? p.DefaultValue : null)
+            .ToArray();
+        arguments[0] = new LoggerConfiguration().WriteTo;
+
+        var exception = Assert.Throws<TargetInvocationException>(() => method.Invoke(null, arguments));
+
+        Assert.IsType<NotSupportedException>(exception.InnerException);
+        Assert.Contains("no longer initializes the SDK", exception.InnerException!.Message);
+    }
+
+    [Fact]
+    public void Sentry_DsnOverload_IsObsoleteAsError()
+    {
+        var method = typeof(SentrySinkExtensions)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Single(m => m.Name == nameof(SentrySinkExtensions.Sentry)
+                         && m.GetParameters().Any(p => p.Name == "dsn"));
+
+        var obsolete = method.GetCustomAttribute<ObsoleteAttribute>();
+
+        Assert.NotNull(obsolete);
+        Assert.True(obsolete!.IsError);
+    }
+
     private static void AssertEqualDeep(object expected, object actual)
     {
         var serializedLeftObject = JsonSerializer.Serialize(expected);
