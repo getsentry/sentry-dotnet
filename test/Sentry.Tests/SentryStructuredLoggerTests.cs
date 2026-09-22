@@ -13,10 +13,12 @@ public partial class SentryStructuredLoggerTests : IDisposable
         {
             DiagnosticLogger = new InMemoryDiagnosticLogger();
             Hub = Substitute.For<IHub>();
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>();
             Options = new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
+                ClientReportRecorder = ClientReportRecorder,
             };
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
             BatchSize = 2;
@@ -39,6 +41,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
 
         public InMemoryDiagnosticLogger DiagnosticLogger { get; }
         public IHub Hub { get; }
+        public IClientReportRecorder ClientReportRecorder { get; }
         public SentryOptions Options { get; }
         public ISystemClock Clock { get; }
         public int BatchSize { get; set; }
@@ -148,6 +151,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
     }
 
     [Fact]
@@ -178,6 +182,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("The configureLog callback threw an exception. The Log will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
     }
 
     [Fact]
@@ -194,6 +199,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("The BeforeSendLog callback threw an exception. The Log will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
     }
 
     [Fact]

@@ -17,7 +17,17 @@ internal static class SentryEventHelper
 
         foreach (var processor in processors)
         {
-            processedEvent = processor.DoProcessEvent(processedEvent, effectiveHint);
+            try
+            {
+                processedEvent = processor.DoProcessEvent(processedEvent, effectiveHint);
+            }
+            catch (Exception e)
+            {
+                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, dataCategory);
+                options.LogError(e, "Event processor {0} threw an exception. The event will be dropped.", processor.GetType().Name);
+                return null;
+            }
+
             if (processedEvent == null)
             {
                 options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, dataCategory);

@@ -388,6 +388,23 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_EventProcessorThrows_DropsEventAndRecordsDiscard()
+    {
+        var processor = Substitute.For<ISentryEventProcessor>();
+        processor.Process(Arg.Any<SentryEvent>()).Throws(new InvalidOperationException());
+
+        _fixture.SentryOptions.AddEventProcessor(processor);
+
+        var sut = _fixture.GetSut();
+        var id = sut.CaptureEvent(new SentryEvent());
+
+        id.Should().Be(SentryId.Empty);
+        _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+    }
+
+    [Fact]
     public void CaptureEvent_ExceptionFilter_RecordsDiscard()
     {
         var filter = Substitute.For<IExceptionFilter>();
@@ -1691,6 +1708,31 @@ public partial class SentryClientTests : IDisposable
         var reason = DiscardReason.EventProcessor;
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Transaction);
         // 1 for each span + one for the root transaction / span
+        var expectedDroppedSpanCount = transaction.Spans.Count + 1;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Span, expectedDroppedSpanCount);
+    }
+
+    [Fact]
+    public void CaptureTransaction_TransactionProcessorThrows_DropsTransactionAndRecordsDiscard()
+    {
+        // Arrange
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
+        processor.Process(Arg.Any<SentryTransaction>(), Arg.Any<SentryHint>()).Throws(new InvalidOperationException());
+        _fixture.SentryOptions.AddTransactionProcessor(processor);
+
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "test name", "test operation");
+        transaction.StartChild("span1");
+        transaction.StartChild("span2");
+        transaction.EndTimestamp = DateTimeOffset.Now; // finished
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(new SentryTransaction(transaction));
+
+        // Assert
+        _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        var reason = DiscardReason.EventProcessor;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Transaction);
         var expectedDroppedSpanCount = transaction.Spans.Count + 1;
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Span, expectedDroppedSpanCount);
     }
