@@ -3,7 +3,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace Sentry.Extensions.Logging.Tests;
 
-public class SentryLoggingOptionsTests : BindableTests<SentryLoggingOptions>
+// Dsn and InitializeSdk are tombstones: bound so that configuration fails loudly, never applied.
+public class SentryLoggingOptionsTests() : BindableTests<SentryLoggingOptions>("Dsn", "InitializeSdk")
 {
     [Fact]
     public void BindableProperties_MatchOptionsProperties()

@@ -19,7 +19,18 @@ public static class LoggingBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder)
-        => builder.AddSentry(null);
+        => builder.AddSentry((Action<SentryLoggingOptions>?)null);
+
+    /// <summary>
+    /// Not supported. The logging integration no longer initializes the SDK.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    /// <param name="dsn">No longer supported.</param>
+    /// <returns>Never returns.</returns>
+    /// <exception cref="NotSupportedException">Always.</exception>
+    [Obsolete(SentryLoggingOptions.ObsoleteSdkInitialization, error: true)]
+    public static ILoggingBuilder AddSentry(this ILoggingBuilder builder, string dsn)
+        => throw new NotSupportedException(SentryLoggingOptions.ObsoleteSdkInitialization);
 
     /// <summary>
     /// Adds the Sentry logging integration.

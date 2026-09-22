@@ -11,6 +11,33 @@ namespace Sentry.Extensions.Logging;
 /// </remarks>
 public class SentryLoggingOptions
 {
+    internal const string ObsoleteSdkInitialization =
+        "The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be " +
+        "supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove " +
+        "'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.";
+
+    /// <summary>
+    /// Not supported. The logging integration no longer initializes the SDK.
+    /// </summary>
+    /// <exception cref="NotSupportedException">When set.</exception>
+    [Obsolete(ObsoleteSdkInitialization, error: true)]
+    public string? Dsn
+    {
+        get => null;
+        set => throw new NotSupportedException(ObsoleteSdkInitialization);
+    }
+
+    /// <summary>
+    /// Not supported. The logging integration no longer initializes the SDK.
+    /// </summary>
+    /// <exception cref="NotSupportedException">When set.</exception>
+    [Obsolete(ObsoleteSdkInitialization, error: true)]
+    public bool InitializeSdk
+    {
+        get => false;
+        set => throw new NotSupportedException(ObsoleteSdkInitialization);
+    }
+
     /// <summary>
     /// Gets or sets the minimum breadcrumb level.
     /// </summary>

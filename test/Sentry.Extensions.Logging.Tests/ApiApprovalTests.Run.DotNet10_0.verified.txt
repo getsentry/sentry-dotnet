@@ -4,6 +4,8 @@
     {
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder) { }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration) { }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.", true)]
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, string dsn) { }
     }
     public static class SentryLoggerFactoryExtensions
     {
@@ -37,6 +39,10 @@ namespace Sentry.Extensions.Logging
     public class SentryLoggingOptions
     {
         public SentryLoggingOptions() { }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.", true)]
+        public string? Dsn { get; set; }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.", true)]
+        public bool InitializeSdk { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
     }
