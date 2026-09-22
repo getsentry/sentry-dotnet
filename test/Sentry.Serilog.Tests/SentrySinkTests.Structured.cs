@@ -115,9 +115,9 @@ public partial class SentrySinkTests
         log.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
         origin.Should().Be("auto.log.serilog");
         log.TryGetAttribute("sentry.sdk.name", out object? sdkName).Should().BeTrue();
-        sdkName.Should().Be(SentrySink.SdkName);
+        sdkName.Should().Be(SdkVersion.Instance.Name);
         log.TryGetAttribute("sentry.sdk.version", out object? sdkVersion).Should().BeTrue();
-        sdkVersion.Should().Be(SentrySink.NameAndVersion.Version);
+        sdkVersion.Should().Be(SdkVersion.Instance.Version);
 
         log.TryGetAttribute("property.Scalar-Property", out object? scalar).Should().BeTrue();
         scalar.Should().Be(42);
