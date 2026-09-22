@@ -10,7 +10,7 @@ public static class SentrySinkExtensions
 {
     private const string ObsoleteDsnOverload =
         "The Sentry sink no longer initializes the SDK, so a DSN can no longer be supplied to it. " +
-        "Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), call UseSerilog() " +
+        "Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), call UseSerilog() " +
         "on those options, and remove 'dsn' and any other core SDK settings from the sink configuration.";
 
     /// <summary>
