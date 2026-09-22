@@ -30,8 +30,6 @@ internal sealed partial class SentrySink : ILogEventSink
         _hubAccessor = hubAccessor;
         _clock = clock;
 
-        // Sentry is already initialised when SentrySdk.Init runs before the Serilog configuration.
-        // Otherwise InnerEmit registers on the first log event instead.
         if (hubAccessor() is { IsEnabled: true } hub && hub.GetSentryOptions() is { } sentryOptions)
         {
             EnsureSerilogScopeEventProcessor(sentryOptions);
@@ -42,8 +40,7 @@ internal sealed partial class SentrySink : ILogEventSink
 
     public void Emit(LogEvent logEvent)
     {
-        // Must precede the reentrancy check below: the SDK's own diagnostics are routed back through
-        // Serilog, and answering them with another diagnostic is what makes the feedback loop endless.
+        // Must precede the reentrancy check below to avoid an infinite recursion
         logEvent.TryGetSourceContext(out var context);
         if (SentrySdkNamespaces.IsSentrySdk(context))
         {
