@@ -12,6 +12,43 @@ public static class ConfigurationExtensions
     // Internal for testability
     internal const string DefaultTargetName = "sentry";
 
+    internal const string ObsoleteDsnOverload =
+        "The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. " +
+        "Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'dsn', " +
+        "'initializeSdk' and any other core SDK settings from the target configuration.";
+
+    /// <summary>
+    /// Not supported. The Sentry target no longer initializes the SDK.
+    /// </summary>
+    /// <param name="configuration">The NLog configuration.</param>
+    /// <param name="dsn">No longer supported.</param>
+    /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
+    /// <returns>Never returns.</returns>
+    /// <exception cref="NotSupportedException">Always.</exception>
+    [Obsolete(ObsoleteDsnOverload, error: true)]
+    public static LoggingConfiguration AddSentry(
+        this LoggingConfiguration configuration,
+        string? dsn,
+        Action<SentryNLogOptions>? optionsConfig = null)
+        => throw new NotSupportedException(ObsoleteDsnOverload);
+
+    /// <summary>
+    /// Not supported. The Sentry target no longer initializes the SDK.
+    /// </summary>
+    /// <param name="configuration">The NLog configuration.</param>
+    /// <param name="dsn">No longer supported.</param>
+    /// <param name="targetName">The name to give the new target.</param>
+    /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
+    /// <returns>Never returns.</returns>
+    /// <exception cref="NotSupportedException">Always.</exception>
+    [Obsolete(ObsoleteDsnOverload, error: true)]
+    public static LoggingConfiguration AddSentry(
+        this LoggingConfiguration configuration,
+        string? dsn,
+        string targetName,
+        Action<SentryNLogOptions>? optionsConfig = null)
+        => throw new NotSupportedException(ObsoleteDsnOverload);
+
     /// <summary>
     /// Adds a target for Sentry to the NLog configuration.
     /// </summary>

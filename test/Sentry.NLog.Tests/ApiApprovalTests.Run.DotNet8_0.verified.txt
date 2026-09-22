@@ -4,6 +4,10 @@ namespace NLog
     public static class ConfigurationExtensions
     {
         public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null, string targetName = "sentry") { }
+        [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
+        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, string? dsn, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
+        [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
+        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, string? dsn, string targetName, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
         public static void AddTag(this Sentry.NLog.SentryNLogOptions options, string name, NLog.Layouts.Layout layout) { }
     }
 }
@@ -48,12 +52,16 @@ namespace Sentry.NLog
         public SentryTarget(Sentry.NLog.SentryNLogOptions options) { }
         public NLog.Layouts.Layout? BreadcrumbCategory { get; set; }
         public NLog.Layouts.Layout? BreadcrumbLayout { get; set; }
+        [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
+        public NLog.Layouts.Layout? Dsn { get; set; }
         [System.Obsolete("Logs are always enabled. This option is ignored and will be removed in a future m" +
             "ajor version. To drop logs, use SetBeforeSendLog and return null.")]
         public bool EnableLogs { get; set; }
         public bool IgnoreEventsWithNoException { get; set; }
         public bool IncludeEventDataOnBreadcrumbs { get; set; }
         public bool IncludeEventPropertiesAsTags { get; set; }
+        [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
+        public bool InitializeSdk { get; set; }
         public string MinimumBreadcrumbLevel { get; set; }
         public string MinimumEventLevel { get; set; }
         public Sentry.NLog.SentryNLogOptions Options { get; }
