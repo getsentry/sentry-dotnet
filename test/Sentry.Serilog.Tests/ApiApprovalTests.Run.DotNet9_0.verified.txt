@@ -22,5 +22,7 @@ namespace Serilog
     {
         public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, System.Action<Sentry.Serilog.SentrySerilogOptions> configureOptions) { }
         public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, Serilog.Events.LogEventLevel? minimumEventLevel = default, Serilog.Events.LogEventLevel? minimumBreadcrumbLevel = default, System.IFormatProvider? formatProvider = null, Serilog.Formatting.ITextFormatter? textFormatter = null, Serilog.Events.LogEventLevel restrictedToMinimumLevel = 0, Serilog.Core.LoggingLevelSwitch? levelSwitch = null) { }
+        [System.Obsolete(@"The Sentry sink no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), call UseSerilog() on those options, and remove 'dsn' and any other core SDK settings from the sink configuration.", true)]
+        public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, string dsn, Serilog.Events.LogEventLevel? minimumEventLevel = default, Serilog.Events.LogEventLevel? minimumBreadcrumbLevel = default, System.IFormatProvider? formatProvider = null, Serilog.Formatting.ITextFormatter? textFormatter = null, Serilog.Events.LogEventLevel restrictedToMinimumLevel = 0, Serilog.Core.LoggingLevelSwitch? levelSwitch = null) { }
     }
 }
