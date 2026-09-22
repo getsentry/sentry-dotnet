@@ -134,32 +134,32 @@ public class SentryOptions
     /// <summary>
     /// A list of exception processors
     /// </summary>
-    internal List<(Type Type, Lazy<ISentryEventExceptionProcessor> Lazy)> ExceptionProcessors { get; set; }
+    internal ConcurrentBagLite<(Type Type, Lazy<ISentryEventExceptionProcessor> Lazy)> ExceptionProcessors { get; set; }
 
     /// <summary>
     /// A list of transaction processors
     /// </summary>
-    internal List<ISentryTransactionProcessor>? TransactionProcessors { get; set; }
+    internal ConcurrentBagLite<ISentryTransactionProcessor>? TransactionProcessors { get; set; }
 
     /// <summary>
     /// A list of event processors
     /// </summary>
-    internal List<(Type Type, Lazy<ISentryEventProcessor> Lazy)> EventProcessors { get; set; }
+    internal ConcurrentBagLite<(Type Type, Lazy<ISentryEventProcessor> Lazy)> EventProcessors { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
+    internal ConcurrentBagLite<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryTransactionProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryTransactionProcessor>>> TransactionProcessorsProviders { get; set; }
+    internal ConcurrentBagLite<Func<IEnumerable<ISentryTransactionProcessor>>> TransactionProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
+    internal ConcurrentBagLite<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
 
     private DefaultIntegrations _defaultIntegrations;
 
@@ -1777,7 +1777,7 @@ public class SentryOptions
     {
         if (TransactionProcessors == null)
         {
-            TransactionProcessors = processors.ToList();
+            TransactionProcessors = new(processors);
         }
         else
         {
@@ -1797,7 +1797,7 @@ public class SentryOptions
     /// </summary>
     /// <param name="processorProvider">The transaction processor provider.</param>
     public void AddTransactionProcessorProvider(Func<IEnumerable<ISentryTransactionProcessor>> processorProvider)
-        => TransactionProcessorsProviders = TransactionProcessorsProviders.Concat(new[] { processorProvider }).ToList();
+        => TransactionProcessorsProviders.Add(processorProvider);
 
     /// <summary>
     /// Add the exception processor provider.
