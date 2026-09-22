@@ -27,7 +27,7 @@ internal sealed partial class SentrySink : ILogEventSink
     private readonly Func<IHub> _hubAccessor;
     private readonly ISystemClock _clock;
 
-    private volatile bool _checkedUseSerilog;
+    private int _checkedUseSerilog;
 
     public SentrySink(SentrySerilogOptions options)
         : this(
@@ -160,12 +160,11 @@ internal sealed partial class SentrySink : ILogEventSink
 
     private void WarnIfUseSerilogNotCalled(SentryOptions options)
     {
-        if (_checkedUseSerilog)
+        if (Interlocked.Exchange(ref _checkedUseSerilog, 1) != 0)
         {
             return;
         }
 
-        _checkedUseSerilog = true;
         if (!options.HasSerilogScopeEventProcessor())
         {
             options.LogWarning(
