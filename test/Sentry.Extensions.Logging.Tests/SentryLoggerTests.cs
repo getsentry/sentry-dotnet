@@ -215,6 +215,37 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void LogCritical_FilterThrows_CapturesEventAndLogsError()
+    {
+        var exception = new InvalidOperationException("filter failed");
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw exception);
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Options.ReceivedLogError(exception,
+            "The {0} log filter callback failed. The log entry will not be filtered.",
+            nameof(DelegateLogEntryFilter));
+    }
+
+    [Fact]
+    public void LogCritical_FilterThrows_OtherFiltersStillApply()
+    {
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw new InvalidOperationException("filter failed"));
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => true);
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+    }
+
+    [Fact]
     public void LogCritical_DefaultOptions_CapturesEvent()
     {
         const string expected = "message";

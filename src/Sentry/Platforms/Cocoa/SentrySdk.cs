@@ -62,7 +62,17 @@ public static partial class SentrySdk
                 // See https://github.com/getsentry/sentry-cocoa/issues/2325
                 var hint = new SentryHint();
                 var breadcrumb = b.ToBreadcrumb(options.DiagnosticLogger);
-                var result = beforeBreadcrumb(breadcrumb, hint)?.ToCocoaBreadcrumb();
+
+                CocoaSdk.SentryObjCBreadcrumb? result;
+                try
+                {
+                    result = beforeBreadcrumb(breadcrumb, hint)?.ToCocoaBreadcrumb();
+                }
+                catch (Exception ex)
+                {
+                    options.LogError(ex, "BeforeBreadcrumb callback failed.");
+                    result = null;
+                }
 
                 // Note: Nullable result is allowed but delegate is generated incorrectly
                 // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294

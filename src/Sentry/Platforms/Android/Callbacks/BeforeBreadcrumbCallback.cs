@@ -1,14 +1,19 @@
 using Sentry.Android.Extensions;
+using Sentry.Extensibility;
 
 namespace Sentry.Android.Callbacks;
 
 internal class BeforeBreadcrumbCallback : JavaObject, JavaSdk.SentryOptions.IBeforeBreadcrumbCallback
 {
     private readonly Func<Breadcrumb, SentryHint, Breadcrumb?> _beforeBreadcrumb;
+    private readonly SentryOptions _options;
 
-    public BeforeBreadcrumbCallback(Func<Breadcrumb, SentryHint, Breadcrumb?> beforeBreadcrumb)
+    public BeforeBreadcrumbCallback(
+        Func<Breadcrumb, SentryHint, Breadcrumb?> beforeBreadcrumb,
+        SentryOptions options)
     {
         _beforeBreadcrumb = beforeBreadcrumb;
+        _options = options;
     }
 
     public JavaSdk.Breadcrumb? Execute(JavaSdk.Breadcrumb b, JavaSdk.Hint h)
@@ -18,7 +23,17 @@ internal class BeforeBreadcrumbCallback : JavaObject, JavaSdk.SentryOptions.IBef
 
         var breadcrumb = b.ToBreadcrumb();
         var hint = h.ToHint();
-        var result = _beforeBreadcrumb.Invoke(breadcrumb, hint);
+
+        Breadcrumb? result;
+        try
+        {
+            result = _beforeBreadcrumb.Invoke(breadcrumb, hint);
+        }
+        catch (Exception exception)
+        {
+            _options.LogError(exception, "BeforeBreadcrumb callback failed.");
+            return null;
+        }
 
         if (result == breadcrumb)
         {
