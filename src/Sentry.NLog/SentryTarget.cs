@@ -56,6 +56,28 @@ public sealed partial class SentryTarget : TargetWithContext
     public IList<TargetPropertyWithContext> Tags => Options.Tags;
 
     /// <summary>
+    /// Not supported. The Sentry target no longer initializes the SDK.
+    /// </summary>
+    /// <exception cref="NotSupportedException">When set.</exception>
+    [Obsolete(ConfigurationExtensions.ObsoleteDsnOverload, error: true)]
+    public Layout? Dsn
+    {
+        get => null;
+        set => throw new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
+    }
+
+    /// <summary>
+    /// Not supported. The Sentry target no longer initializes the SDK.
+    /// </summary>
+    /// <exception cref="NotSupportedException">When set.</exception>
+    [Obsolete(ConfigurationExtensions.ObsoleteDsnOverload, error: true)]
+    public bool InitializeSdk
+    {
+        get => false;
+        set => throw new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
+    }
+
+    /// <summary>
     /// An optional layout specific to breadcrumbs. If not set, uses the same layout as the standard <see cref="TargetWithContext.Layout"/>.
     /// </summary>
     public Layout? BreadcrumbLayout

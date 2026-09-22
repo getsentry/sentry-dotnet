@@ -9,6 +9,22 @@ public partial class SentryAppender : AppenderSkeleton
 {
     private readonly IHub _hub;
 
+    internal const string ObsoleteDsn =
+        "The Sentry appender no longer initializes the SDK, so a DSN can no longer be supplied to it. " +
+        "Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'Dsn' " +
+        "and any other core SDK settings from the appender configuration.";
+
+    /// <summary>
+    /// Not supported. The Sentry appender no longer initializes the SDK.
+    /// </summary>
+    /// <exception cref="NotSupportedException">When set.</exception>
+    [Obsolete(ObsoleteDsn, error: true)]
+    public string? Dsn
+    {
+        get => null;
+        set => throw new NotSupportedException(ObsoleteDsn);
+    }
+
     /// <summary>
     /// Whether to send the Identity or not.
     /// </summary>
