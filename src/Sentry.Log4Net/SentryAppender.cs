@@ -7,17 +7,6 @@ namespace Sentry.Log4Net;
 /// </summary>
 public partial class SentryAppender : AppenderSkeleton
 {
-    internal static readonly SdkVersion NameAndVersion
-        = typeof(SentryAppender).Assembly.GetNameAndVersion();
-
-    private static readonly SdkVersion Sdk = new()
-    {
-        Name = SdkName,
-        Version = NameAndVersion.Version,
-    };
-
-    private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
-
     private readonly IHub _hub;
 
     /// <summary>
@@ -30,12 +19,6 @@ public partial class SentryAppender : AppenderSkeleton
     /// Every level above threshold and below this level will become a breadcrumb.
     /// </summary>
     public Level? MinimumEventLevel { get; set; }
-
-    /// <summary>
-    /// log4net SDK name.
-    /// </summary>
-    /// <see href="https://github.com/getsentry/sentry-release-registry" />
-    internal const string SdkName = "sentry.dotnet.log4net";
 
     /// <summary>
     /// Creates a new instance of the <see cref="SentryAppender"/>.
@@ -103,17 +86,6 @@ public partial class SentryAppender : AppenderSkeleton
             Logger = loggingEvent.LoggerName,
             Level = loggingEvent.ToSentryLevel()
         };
-
-        if (evt.Sdk is { } sdk)
-        {
-            sdk.Name = SdkName;
-            sdk.Version = NameAndVersion.Version;
-
-            if (NameAndVersion.Version is { } version)
-            {
-                sdk.AddPackage(ProtocolPackageName, version);
-            }
-        }
 
         if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
         {

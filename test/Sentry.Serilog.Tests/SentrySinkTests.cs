@@ -82,44 +82,6 @@ public partial class SentrySinkTests
         _fixture.Scope.Breadcrumbs.Should().NotBeEmpty();
     }
 
-    [Fact]
-    public void Emit_SerilogSdk_Name()
-    {
-        var sut = _fixture.GetSut();
-
-        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
-            Enumerable.Empty<LogEventProperty>());
-
-        sut.Emit(evt);
-
-        var expected = typeof(SentrySink).Assembly.GetNameAndVersion();
-        _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == SentrySink.SdkName
-                                                   && e.Sdk.Version == expected.Version));
-    }
-
-    [Fact]
-    public void Emit_SerilogSdk_Packages()
-    {
-        var sut = _fixture.GetSut();
-
-        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
-            Enumerable.Empty<LogEventProperty>());
-
-        SentryEvent actual = null;
-        _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
-            .Do(c => actual = c.Arg<SentryEvent>());
-
-        sut.Emit(evt);
-
-        var expected = typeof(SentrySink).Assembly.GetNameAndVersion();
-
-        Assert.NotNull(actual);
-        var package = Assert.Single(actual.Sdk.Packages);
-        Assert.Equal("nuget:" + expected.Name, package!.Name);
-        Assert.Equal(expected.Version, package.Version);
-    }
-
     internal class EventLogLevelsData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()

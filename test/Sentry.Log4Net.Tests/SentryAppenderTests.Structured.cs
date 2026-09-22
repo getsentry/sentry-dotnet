@@ -99,8 +99,8 @@ public partial class SentryAppenderTests
         log.Attributes.ShouldContain("sentry.environment", "test-environment");
         log.Attributes.ShouldContain("sentry.release", "test-release");
         log.Attributes.ShouldContain("sentry.origin", "auto.log.log4net");
-        log.Attributes.ShouldContain("sentry.sdk.name", SentryAppender.SdkName);
-        log.Attributes.ShouldContain("sentry.sdk.version", SentryAppender.NameAndVersion.Version);
+        log.Attributes.ShouldContain("sentry.sdk.name", SdkVersion.Instance.Name!);
+        log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version!);
         log.Attributes.ShouldContain("category.name", "TestLogger");
 
         log.Attributes.ShouldContain("property.Text-Property", "4");

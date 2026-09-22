@@ -11,17 +11,7 @@ public sealed partial class SentryTarget : TargetWithContext
 
     private readonly ISystemClock _clock;
 
-    internal static readonly SdkVersion NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
-
-    private static readonly SdkVersion Sdk = new()
-    {
-        Name = Constants.SdkName,
-        Version = NameAndVersion.Version,
-    };
-
     internal static readonly string AdditionalGroupingKeyProperty = "AdditionalGroupingKey";
-
-    private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryTarget"/>.
@@ -343,17 +333,6 @@ public sealed partial class SentryTarget : TargetWithContext
             Level = logEvent.Level.ToSentryLevel(),
             User = GetUser(logEvent) ?? new SentryUser(),
         };
-
-        if (evt.Sdk is { } sdk)
-        {
-            sdk.Name = Constants.SdkName;
-            sdk.Version = NameAndVersion.Version;
-
-            if (NameAndVersion.Version is { } version)
-            {
-                sdk.AddPackage(ProtocolPackageName, version);
-            }
-        }
 
         if (Tags.Count > 0 || IncludeEventPropertiesAsTags && logEvent.HasProperties)
         {

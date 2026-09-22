@@ -98,8 +98,8 @@ public partial class SentryTargetTests
         log.Attributes.ShouldContain("sentry.environment", "test-environment");
         log.Attributes.ShouldContain("sentry.release", "test-release");
         log.Attributes.ShouldContain("sentry.origin", "auto.log.nlog");
-        log.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
-        log.Attributes.ShouldContain("sentry.sdk.version", SentryTarget.NameAndVersion.Version);
+        log.Attributes.ShouldContain("sentry.sdk.name", SdkVersion.Instance.Name!);
+        log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version!);
         log.Attributes.ShouldContain("category.name", "sentry");
 
         log.Attributes.ShouldContain("property.Text-Property-Key", "Text-Property-Value");
