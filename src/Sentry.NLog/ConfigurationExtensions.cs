@@ -14,7 +14,7 @@ public static class ConfigurationExtensions
 
     internal const string ObsoleteDsnOverload =
         "The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. " +
-        "Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'dsn', " +
+        "Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'dsn', " +
         "'initializeSdk' and any other core SDK settings from the target configuration.";
 
     /// <summary>
