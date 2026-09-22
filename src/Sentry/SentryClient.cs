@@ -253,9 +253,6 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction, _options.DiagnosticLogger, attachments));
     }
 
-#if NET6_0_OR_GREATER
-    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
-#endif
     private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint)
     {
         if (_options.BeforeSendTransactionInternal is null)
@@ -267,36 +264,13 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return _options.BeforeSendTransactionInternal?.Invoke(transaction, hint);
+            return _options.BeforeSendTransactionInternal.Invoke(transaction, hint);
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsTrimmed)
-            {
-                // Attempt to demystify exceptions before adding them as breadcrumbs.
-                e.Demystify();
-            }
-
-            _options.LogError(e, "The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.");
-
-            var data = new Dictionary<string, string>
-            {
-                {"message", e.Message}
-            };
-
-            if (e.StackTrace is not null)
-            {
-                data.Add("stackTrace", e.StackTrace);
-            }
-
-            transaction.AddBreadcrumb(
-                message: "BeforeSendTransaction callback failed.",
-                category: "SentryClient",
-                data: data,
-                level: BreadcrumbLevel.Error);
+            _options.LogError(e, "The BeforeSendTransaction callback threw an exception. The transaction will be dropped.");
+            return null;
         }
-
-        return transaction;
     }
 
     /// <inheritdoc />
