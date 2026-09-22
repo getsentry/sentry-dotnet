@@ -42,10 +42,4 @@ public class SentryLoggerProviderTests
 
         Assert.Equal(expectedCategory, actual.CategoryName);
     }
-
-    [Fact]
-    public void NameAndVersion_Name_NotNull() => Assert.NotNull(SentryLoggerProvider.NameAndVersion.Name);
-
-    [Fact]
-    public void NameAndVersion_Version_NotNull() => Assert.NotNull(SentryLoggerProvider.NameAndVersion.Version);
 }

@@ -94,10 +94,10 @@ public class SentryStructuredLoggerProviderTests : IDisposable
         categoryName.Should().Be(typeof(SentryStructuredLoggerProviderTests).FullName);
 
         capturedLog.TryGetAttribute("sentry.sdk.name", out object? name).Should().BeTrue();
-        name.Should().Be(Constants.SdkName);
+        name.Should().Be(SdkVersion.Instance.Name);
 
         capturedLog.TryGetAttribute("sentry.sdk.version", out object? version).Should().BeTrue();
-        version.Should().Be(SentryLoggerProvider.NameAndVersion.Version);
+        version.Should().Be(SdkVersion.Instance.Version);
 
         capturedLog.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
         origin.Should().Be("auto.log.extensions_logging");

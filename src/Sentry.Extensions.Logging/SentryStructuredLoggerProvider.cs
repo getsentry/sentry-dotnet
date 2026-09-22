@@ -11,14 +11,14 @@ internal class SentryStructuredLoggerProvider : ILoggerProvider
 {
     private readonly IHub _hub;
     private readonly ISystemClock _clock;
-    private readonly SdkVersion _sdk;
+    private readonly SdkVersion? _sdk;
 
     public SentryStructuredLoggerProvider(IHub hub)
-        : this(hub, SystemClock.Clock, CreateSdkVersion())
+        : this(hub, SystemClock.Clock, sdk: null)
     {
     }
 
-    internal SentryStructuredLoggerProvider(IHub hub, ISystemClock clock, SdkVersion sdk)
+    internal SentryStructuredLoggerProvider(IHub hub, ISystemClock clock, SdkVersion? sdk)
     {
         _hub = hub;
         _clock = clock;
@@ -32,14 +32,5 @@ internal class SentryStructuredLoggerProvider : ILoggerProvider
 
     public void Dispose()
     {
-    }
-
-    private static SdkVersion CreateSdkVersion()
-    {
-        return new SdkVersion
-        {
-            Name = Constants.SdkName,
-            Version = SentryLoggerProvider.NameAndVersion.Version,
-        };
     }
 }

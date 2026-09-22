@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Infrastructure;
-using Sentry.Reflection;
 
 namespace Sentry.Extensions.Logging;
 
@@ -15,9 +14,6 @@ internal class SentryLoggerProvider : ILoggerProvider
     private readonly SentryLoggingOptions _options;
 
     internal IHub Hub { get; }
-
-    internal static readonly SdkVersion NameAndVersion
-        = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryLoggerProvider"/>.

@@ -9,9 +9,9 @@ internal sealed class SentryStructuredLogger : ILogger
     private readonly string? _categoryName;
     private readonly IHub _hub;
     private readonly ISystemClock _clock;
-    private readonly SdkVersion _sdk;
+    private readonly SdkVersion? _sdk;
 
-    internal SentryStructuredLogger(string categoryName, IHub hub, ISystemClock clock, SdkVersion sdk)
+    internal SentryStructuredLogger(string categoryName, IHub hub, ISystemClock clock, SdkVersion? sdk)
     {
         _categoryName = categoryName;
         _clock = clock;
