@@ -17,7 +17,7 @@ public partial class SentryAppender
         var log = SentryLog.Create(hub, timestamp, level, message, template, parameters);
 
         var scope = hub.GetScope();
-        log.SetDefaultAttributes(options, scope, Sdk);
+        log.SetDefaultAttributes(options, scope);
         log.SetOrigin("auto.log.log4net");
 
         if (sendIdentity && !string.IsNullOrEmpty(loggingEvent.Identity))
