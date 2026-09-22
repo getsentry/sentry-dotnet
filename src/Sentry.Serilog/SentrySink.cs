@@ -8,26 +8,10 @@ internal sealed partial class SentrySink : ILogEventSink
 {
     private readonly SentrySerilogOptions _options;
 
-    internal static readonly SdkVersion NameAndVersion
-        = typeof(SentrySink).Assembly.GetNameAndVersion();
-
-    private static readonly SdkVersion Sdk = new()
-    {
-        Name = SdkName,
-        Version = NameAndVersion.Version,
-    };
-
-    /// <summary>
-    /// Serilog SDK name.
-    /// </summary>
-    public const string SdkName = "sentry.dotnet.serilog";
-
-    private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
-
     private readonly Func<IHub> _hubAccessor;
     private readonly ISystemClock _clock;
 
-    private volatile bool _checkedUseSerilog;
+    private int _checkedUseSerilog;
 
     public SentrySink(SentrySerilogOptions options)
         : this(
@@ -107,17 +91,6 @@ internal sealed partial class SentrySink : ILogEventSink
                 Level = logEvent.Level.ToSentryLevel()
             };
 
-            if (evt.Sdk is { } sdk)
-            {
-                sdk.Name = SdkName;
-                sdk.Version = NameAndVersion.Version;
-
-                if (NameAndVersion.Version is { } version)
-                {
-                    sdk.AddPackage(ProtocolPackageName, version);
-                }
-            }
-
             evt.SetExtras(GetLoggingEventProperties(logEvent));
 
             hub.CaptureEvent(evt);
@@ -160,12 +133,11 @@ internal sealed partial class SentrySink : ILogEventSink
 
     private void WarnIfUseSerilogNotCalled(SentryOptions options)
     {
-        if (_checkedUseSerilog)
+        if (Interlocked.Exchange(ref _checkedUseSerilog, 1) != 0)
         {
             return;
         }
 
-        _checkedUseSerilog = true;
         if (!options.HasSerilogScopeEventProcessor())
         {
             options.LogWarning(

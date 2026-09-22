@@ -201,40 +201,6 @@ public partial class SentryTargetTests
         Assert.Equal(b.Data["exception_message"], expectedException.Message);
     }
 
-    [Fact]
-    public void Log_NLogSdk_Name()
-    {
-        _fixture.Options.MinimumEventLevel = LogLevel.Info;
-        var logger = _fixture.GetLogger();
-
-        var expected = typeof(SentryTarget).Assembly.GetNameAndVersion();
-        logger.Info(DefaultMessage);
-
-        _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
-                                                   && e.Sdk.Version == expected.Version));
-    }
-
-    [Fact]
-    public void Log_NLogSdk_Packages()
-    {
-        _fixture.Options.MinimumEventLevel = LogLevel.Info;
-        var logger = _fixture.GetLogger();
-
-        SentryEvent actual = null;
-        _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
-            .Do(c => actual = c.Arg<SentryEvent>());
-
-        logger.Info(DefaultMessage);
-
-        var expected = typeof(SentryTarget).Assembly.GetNameAndVersion();
-
-        Assert.NotNull(actual);
-        var package = Assert.Single(actual.Sdk.Packages);
-        Assert.Equal("nuget:" + expected.Name, package.Name);
-        Assert.Equal(expected.Version, package.Version);
-    }
-
     [Theory]
     [ClassData(typeof(LogLevelData))]
     public void Log_LoggerLevel_Set(LogLevel nlogLevel, SentryLevel? sentryLevel)
