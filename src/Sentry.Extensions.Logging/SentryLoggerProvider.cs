@@ -13,15 +13,11 @@ internal class SentryLoggerProvider : ILoggerProvider
 {
     private readonly ISystemClock _clock;
     private readonly SentryLoggingOptions _options;
-    private readonly IDisposable? _scope;
-    private readonly IDisposable? _disposableHub;
 
     internal IHub Hub { get; }
 
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryLogger).Assembly.GetNameAndVersion();
-
-    private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryLoggerProvider"/>.
@@ -39,29 +35,9 @@ internal class SentryLoggerProvider : ILoggerProvider
         ISystemClock clock,
         SentryLoggingOptions options)
     {
-        _disposableHub = hub as IDisposable;
-
         Hub = hub;
         _clock = clock;
         _options = options;
-
-        if (hub.IsEnabled)
-        {
-            _scope = hub.PushScope();
-            hub.ConfigureScope(static s =>
-            {
-                if (s.Sdk is { } sdk)
-                {
-                    sdk.Name = Constants.SdkName;
-                    sdk.Version = NameAndVersion.Version;
-
-                    if (NameAndVersion.Version is { } version)
-                    {
-                        sdk.AddPackage(ProtocolPackageName, version);
-                    }
-                }
-            });
-        }
     }
 
     /// <summary>
@@ -71,12 +47,7 @@ internal class SentryLoggerProvider : ILoggerProvider
     /// <returns>A logger.</returns>
     public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, Hub);
 
-    /// <summary>
-    /// Dispose.
-    /// </summary>
     public void Dispose()
     {
-        _scope?.Dispose();
-        _disposableHub?.Dispose();
     }
 }

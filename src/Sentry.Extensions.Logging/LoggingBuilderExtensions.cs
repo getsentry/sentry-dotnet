@@ -19,7 +19,7 @@ public static class LoggingBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder)
-        => builder.AddSentry((Action<SentryLoggingOptions>?)null);
+        => builder.AddSentry(null);
 
     /// <summary>
     /// Adds the Sentry logging integration.
