@@ -18,13 +18,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore.Blazor.WebAssembly\Sentry.AspNetCore.Blazor.WebAssembly.csproj" />
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry.Exporter\Sentry.OpenTelemetry.Exporter.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="OpenTelemetry" Version="1.18.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.18.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.18.0" />
   </ItemGroup>
 
 </Project>

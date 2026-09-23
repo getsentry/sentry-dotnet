@@ -31,7 +31,7 @@ internal class BeforeBreadcrumbCallback : JavaObject, JavaSdk.SentryOptions.IBef
         }
         catch (Exception exception)
         {
-            _options.LogError(exception, "BeforeBreadcrumb callback failed.");
+            _options.LogError(exception, "Android BeforeBreadcrumb callback failed.");
             return null;
         }
 
