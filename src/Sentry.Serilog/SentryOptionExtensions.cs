@@ -5,7 +5,7 @@ namespace Sentry.Serilog;
 /// </summary>
 public static class SentryOptionExtensions
 {
-    private static readonly object Sync = new();
+    private static readonly Lock Sync = new();
 
     /// <summary>
     /// Enables the Serilog integration, so that properties from the Serilog <c>LogContext</c> get applied to all Sentry
@@ -36,5 +36,4 @@ public static class SentryOptionExtensions
 
     internal static bool HasSerilogScopeEventProcessor(this SentryOptions options)
         => options.EventProcessors.Any(processor => processor.Type == typeof(SerilogScopeEventProcessor));
-
 }
