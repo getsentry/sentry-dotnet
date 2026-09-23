@@ -821,6 +821,34 @@ public class Scope : IEventLike
                 contentType));
 
     /// <summary>
+    /// Adds a file attachment, optionally gzip-compressed while the envelope is written.
+    /// </summary>
+    /// <remarks>
+    /// A compressed attachment is named after the file with a <c>.gz</c> suffix and, unless a
+    /// content type is given, sent as <c>application/gzip</c>. Compression happens on the SDK's
+    /// background worker, not on the thread capturing the event.
+    /// </remarks>
+    /// <param name="filePath">The path to the file to attach.</param>
+    /// <param name="compress">Whether to gzip the file when the envelope is written.</param>
+    /// <param name="type">The type of attachment.</param>
+    /// <param name="contentType">The content type of the attachment.</param>
+    public void AddAttachment(string filePath, bool compress, AttachmentType type = AttachmentType.Default, string? contentType = null)
+    {
+        if (!compress)
+        {
+            AddAttachment(filePath, type, contentType);
+            return;
+        }
+
+        AddAttachment(
+            new SentryAttachment(
+                type,
+                new GzipFileAttachmentContent(filePath),
+                Path.GetFileName(filePath) + ".gz",
+                contentType ?? "application/gzip"));
+    }
+
+    /// <summary>
     /// We need this lock to prevent a potential race condition in <see cref="ResetTransaction"/>.
     /// </summary>
     private readonly ReaderWriterLockSlim _transactionLock = new();

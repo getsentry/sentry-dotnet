@@ -111,7 +111,14 @@ namespace Sentry
         public FileAttachmentContent(string filePath) { }
         public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
         public FileAttachmentContent(string filePath, bool readFileAsynchronously, bool deleteOnClose) { }
-        public System.IO.Stream GetStream() { }
+        public virtual System.IO.Stream GetStream() { }
+    }
+    public class GzipFileAttachmentContent : Sentry.FileAttachmentContent
+    {
+        public GzipFileAttachmentContent(string filePath) { }
+        public GzipFileAttachmentContent(string filePath, System.IO.Compression.CompressionLevel compressionLevel) { }
+        public System.IO.Compression.CompressionLevel CompressionLevel { get; }
+        public override System.IO.Stream GetStream() { }
     }
     public static class HasExtraExtensions
     {
@@ -422,6 +429,7 @@ namespace Sentry
         public void AddAttachment(string filePath, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public void AddAttachment(System.IO.Stream stream, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public void AddAttachment(byte[] data, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
+        public void AddAttachment(string filePath, bool compress, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint hint) { }
         public void AddEventProcessor(Sentry.Extensibility.ISentryEventProcessor processor) { }
@@ -610,6 +618,7 @@ namespace Sentry
         public System.Collections.Generic.IDictionary<string, object?> Items { get; }
         public void AddAttachment(string filePath, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public void AddAttachment(byte[] data, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
+        public void AddAttachment(string filePath, bool compress, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public static Sentry.SentryHint WithAttachments(params Sentry.SentryAttachment[] attachments) { }
         public static Sentry.SentryHint WithAttachments(System.Collections.Generic.IEnumerable<Sentry.SentryAttachment> attachments) { }
     }

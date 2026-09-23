@@ -754,6 +754,53 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public async Task Roundtrip_WithEvent_WithGzipFileAttachment_Success()
+    {
+        // Arrange
+        using var tempDir = new TempDirectory();
+        var filePath = Path.Combine(tempDir.Path, "player.log");
+        var text = string.Concat(Enumerable.Repeat("Hello world! ", 20_000));
+        File.WriteAllText(filePath, text);
+
+        var @event = new SentryEvent();
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new GzipFileAttachmentContent(filePath),
+            "player.log.gz",
+            "application/gzip");
+
+        using var envelope = Envelope.FromEvent(@event, _testOutputLogger, new[] { attachment });
+        using var stream = new MemoryStream();
+
+        // Act
+        await envelope.SerializeAsync(stream, _testOutputLogger);
+        stream.Seek(0, SeekOrigin.Begin);
+
+        using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
+
+        // Assert
+        envelopeRoundtrip.Items.Should().HaveCount(2);
+
+        var item = envelopeRoundtrip.Items[1];
+        item.Header["filename"].Should().Be("player.log.gz");
+        item.Header["content_type"].Should().Be("application/gzip");
+
+        using var payload = new MemoryStream();
+        await item.Payload.SerializeAsync(payload, _testOutputLogger);
+        payload.Length.Should().BeLessThan(text.Length / 10);
+        item.TryGetOrRecalculateLength().Should().Be(payload.Length);
+
+        stream.Seek(0, SeekOrigin.Begin);
+        var serialized = await new StreamReader(stream).ReadToEndAsync();
+        serialized.Should().Contain($"\"length\":{payload.Length}");
+
+        payload.Position = 0;
+        using var gunzip = new System.IO.Compression.GZipStream(payload, System.IO.Compression.CompressionMode.Decompress);
+        using var reader = new StreamReader(gunzip);
+        (await reader.ReadToEndAsync()).Should().Be(text);
+    }
+
+    [Fact]
     public void FromTransaction_WithNullAttachment_SkipsItAndLogsWarning()
     {
         // Arrange

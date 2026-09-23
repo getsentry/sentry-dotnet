@@ -91,3 +91,67 @@ public class FileAttachmentContentTests
         return false;
     }
 }
+
+public class GzipFileAttachmentContentTests
+{
+    [Fact]
+    public void Ctor_IsFileAttachmentContent_SoObserversGetTheRawPath()
+    {
+        var content = new GzipFileAttachmentContent("/some/path/file.txt");
+
+        content.Should().BeAssignableTo<FileAttachmentContent>();
+        content.FilePath.Should().Be("/some/path/file.txt");
+        content.CompressionLevel.Should().Be(System.IO.Compression.CompressionLevel.Optimal);
+    }
+
+    [Fact]
+    public void GetStream_RoundTripsThroughGzip()
+    {
+        // Arrange
+        using var tempDir = new TempDirectory();
+        var filePath = Path.Combine(tempDir.Path, "MyFile.txt");
+        var text = string.Concat(Enumerable.Repeat("Hello world! ", 50_000));
+        File.WriteAllText(filePath, text);
+        var content = new GzipFileAttachmentContent(filePath, System.IO.Compression.CompressionLevel.Fastest);
+
+        // Act
+        using var compressed = new MemoryStream();
+        using (var stream = content.GetStream())
+        {
+            stream.CanSeek.Should().BeFalse();
+            stream.CopyTo(compressed);
+        }
+
+        // Assert
+        compressed.Length.Should().BeLessThan(text.Length / 10);
+        compressed.Position = 0;
+        using var gunzip = new System.IO.Compression.GZipStream(compressed, System.IO.Compression.CompressionMode.Decompress);
+        using var reader = new StreamReader(gunzip);
+        reader.ReadToEnd().Should().Be(text);
+    }
+
+    [Fact]
+    public void GetStream_DoesNotLockFile()
+    {
+        // Arrange
+        using var tempDir = new TempDirectory();
+        var filePath = Path.Combine(tempDir.Path, "MyFile.txt");
+        File.WriteAllText(filePath, "Hello world!");
+        var content = new GzipFileAttachmentContent(filePath);
+
+        // Act
+        using var stream = content.GetStream();
+
+        // Assert
+        using var writer = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+        writer.CanWrite.Should().BeTrue();
+    }
+
+    [Fact]
+    public void GetStream_MissingFile_Throws()
+    {
+        var content = new GzipFileAttachmentContent(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+
+        Assert.Throws<FileNotFoundException>(() => content.GetStream());
+    }
+}

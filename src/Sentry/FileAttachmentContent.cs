@@ -50,7 +50,7 @@ public class FileAttachmentContent : IAttachmentContent
     }
 
     /// <inheritdoc />
-    public Stream GetStream()
+    public virtual Stream GetStream()
     {
         var options = FileOptions.None;
 

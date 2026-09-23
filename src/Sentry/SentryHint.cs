@@ -83,6 +83,39 @@ public class SentryHint
     }
 
     /// <summary>
+    /// Takes a path and adds the file as an attachment to the hint, optionally gzip-compressed
+    /// while the envelope is written.
+    /// </summary>
+    /// <remarks>
+    /// A compressed attachment is named after the file with a <c>.gz</c> suffix and, unless a
+    /// content type is given, sent as <c>application/gzip</c>. Compression happens on the SDK's
+    /// background worker, not on the thread capturing the event.
+    /// </remarks>
+    /// <param name="filePath">The path to the file to attach.</param>
+    /// <param name="compress">Whether to gzip the file when the envelope is written.</param>
+    /// <param name="type">The type of attachment.</param>
+    /// <param name="contentType">The content type of the attachment.</param>
+    public void AddAttachment(
+        string filePath,
+        bool compress,
+        AttachmentType type = AttachmentType.Default,
+        string? contentType = null)
+    {
+        if (!compress)
+        {
+            AddAttachment(filePath, type, contentType);
+            return;
+        }
+
+        _attachments.Add(
+            new SentryAttachment(
+                type,
+                new GzipFileAttachmentContent(filePath),
+                Path.GetFileName(filePath) + ".gz",
+                contentType ?? "application/gzip"));
+    }
+
+    /// <summary>
     /// Adds a 'byte[]' as attachment to the hind.
     /// </summary>
     /// <param name="data">The byte array to be attached</param>

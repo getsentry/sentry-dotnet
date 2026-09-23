@@ -30,6 +30,45 @@ public class HintTests : IDisposable
     }
 
     [Fact]
+    public void AddAttachment_FileCompressed_AddsGzipAttachmentToHint()
+    {
+        // Arrange
+        var attachmentPath = Path.Combine(_testDirectory, "player.log");
+        File.WriteAllText(attachmentPath, "Hello world!");
+
+        var hint = new SentryHint(new SentryOptions());
+
+        // Act
+        hint.AddAttachment(attachmentPath, compress: true);
+
+        // Assert
+        var attachment = Assert.Single(hint.Attachments);
+        Assert.Equal("player.log.gz", attachment.FileName);
+        Assert.Equal("application/gzip", attachment.ContentType);
+        var content = Assert.IsType<GzipFileAttachmentContent>(attachment.Content);
+        Assert.Equal(attachmentPath, content.FilePath);
+    }
+
+    [Fact]
+    public void AddAttachment_FileNotCompressed_AddsPlainAttachmentToHint()
+    {
+        // Arrange
+        var attachmentPath = Path.Combine(_testDirectory, "player.log");
+        File.WriteAllText(attachmentPath, "Hello world!");
+
+        var hint = new SentryHint(new SentryOptions());
+
+        // Act
+        hint.AddAttachment(attachmentPath, compress: false);
+
+        // Assert
+        var attachment = Assert.Single(hint.Attachments);
+        Assert.Equal("player.log", attachment.FileName);
+        Assert.Null(attachment.ContentType);
+        Assert.IsType<FileAttachmentContent>(attachment.Content);
+    }
+
+    [Fact]
     public void AddAttachment_ByteArray_AddsToHint()
     {
         // Arrange

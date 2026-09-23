@@ -852,6 +852,55 @@ public class ScopeTests
         observer.Received(expectedCount).AddAttachment(Arg.Is(attachment));
     }
 
+    [Fact]
+    public void AddAttachment_FileCompressed_AddsGzipAttachmentAndObserverGetsRawPath()
+    {
+        // Arrange
+        using var tempDir = new TempDirectory();
+        var filePath = Path.Combine(tempDir.Path, "player.log");
+        File.WriteAllText(filePath, "Hello world!");
+
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+
+        // Act
+        scope.AddAttachment(filePath, compress: true);
+
+        // Assert
+        var attachment = Assert.Single(scope.Attachments);
+        Assert.Equal("player.log.gz", attachment.FileName);
+        Assert.Equal("application/gzip", attachment.ContentType);
+        var content = Assert.IsType<GzipFileAttachmentContent>(attachment.Content);
+        Assert.Equal(filePath, content.FilePath);
+
+        var synced = observer.ReceivedCalls().Single().GetArguments().OfType<SentryAttachment>().Single();
+        var syncedContent = Assert.IsAssignableFrom<FileAttachmentContent>(synced.Content);
+        Assert.Equal(filePath, syncedContent.FilePath);
+    }
+
+    [Fact]
+    public void AddAttachment_FileNotCompressed_AddsPlainAttachment()
+    {
+        // Arrange
+        using var tempDir = new TempDirectory();
+        var filePath = Path.Combine(tempDir.Path, "player.log");
+        File.WriteAllText(filePath, "Hello world!");
+        var scope = new Scope(new SentryOptions());
+
+        // Act
+        scope.AddAttachment(filePath, compress: false, contentType: "text/plain");
+
+        // Assert
+        var attachment = Assert.Single(scope.Attachments);
+        Assert.Equal("player.log", attachment.FileName);
+        Assert.Equal("text/plain", attachment.ContentType);
+        Assert.IsType<FileAttachmentContent>(attachment.Content);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
