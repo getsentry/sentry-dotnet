@@ -89,6 +89,7 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
         if (configuredMetric is null)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.TraceMetric);
+            _options.DiagnosticLogger?.LogInfo("Metric dropped by BeforeSendMetric callback.");
             return;
         }
 

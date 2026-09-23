@@ -104,6 +104,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         if (configuredLog is null)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+            _options.DiagnosticLogger?.LogInfo("Log dropped by BeforeSendLog callback.");
             return;
         }
 
