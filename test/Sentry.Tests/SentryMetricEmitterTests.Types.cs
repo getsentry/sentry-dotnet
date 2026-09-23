@@ -163,6 +163,7 @@ public partial class SentryMetricEmitterTests
         var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Warning);
         entry.Message.Should().Be("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.");
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
         entry.Exception.Should().BeNull();
         entry.Args.Should().BeEquivalentTo([typeof(decimal)]);
     }
@@ -183,6 +184,7 @@ public partial class SentryMetricEmitterTests
         var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Warning);
         entry.Message.Should().Be("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.");
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
         entry.Exception.Should().BeNull();
         entry.Args.Should().BeEquivalentTo([typeof(Half)]);
     }
@@ -203,6 +205,7 @@ public partial class SentryMetricEmitterTests
         var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Warning);
         entry.Message.Should().Be("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.");
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
         entry.Exception.Should().BeNull();
         entry.Args.Should().BeEquivalentTo([typeof(StringComparison)]);
     }
@@ -222,6 +225,7 @@ public partial class SentryMetricEmitterTests
         var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Warning);
         entry.Message.Should().Be("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}");
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
         entry.Exception.Should().BeNull();
         entry.Args.Should().BeEquivalentTo<object>([arg0, arg1]);
     }
@@ -241,6 +245,7 @@ public partial class SentryMetricEmitterTests
         var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Warning);
         entry.Message.Should().Be("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}");
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
         entry.Exception.Should().BeNull();
         entry.Args.Should().BeEquivalentTo<object>([arg0, arg1]);
     }

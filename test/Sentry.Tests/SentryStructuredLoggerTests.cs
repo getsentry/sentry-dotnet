@@ -167,6 +167,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("Template string does not match the provided argument. The Log will be dropped.");
         entry.Exception.Should().BeOfType<FormatException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.LogItem);
     }
 
     [Fact]
