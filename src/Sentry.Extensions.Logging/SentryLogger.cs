@@ -192,8 +192,8 @@ internal sealed class SentryLogger : ILogger
         }
         catch (Exception e)
         {
-            _options.LogError(e, "The {0} log filter callback failed. The log entry will not be filtered.", filter.GetType().Name);
-            return false;
+            _options.LogError(e, "The {0} log filter callback failed. The log entry will be filtered out.", filter.GetType().Name);
+            return true;
         }
     }
 
