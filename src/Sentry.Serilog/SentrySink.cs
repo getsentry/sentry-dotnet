@@ -3,39 +3,20 @@ namespace Sentry.Serilog;
 /// <summary>
 /// Sentry Sink for Serilog
 /// </summary>
-/// <inheritdoc cref="IDisposable" />
 /// <inheritdoc cref="ILogEventSink" />
-internal sealed partial class SentrySink : ILogEventSink, IDisposable
+internal sealed partial class SentrySink : ILogEventSink
 {
-    private readonly IDisposable? _sdkDisposable;
     private readonly SentrySerilogOptions _options;
-
-    internal static readonly SdkVersion NameAndVersion
-        = typeof(SentrySink).Assembly.GetNameAndVersion();
-
-    private static readonly SdkVersion Sdk = new()
-    {
-        Name = SdkName,
-        Version = NameAndVersion.Version,
-    };
-
-    /// <summary>
-    /// Serilog SDK name.
-    /// </summary>
-    public const string SdkName = "sentry.dotnet.serilog";
-
-    private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     private readonly Func<IHub> _hubAccessor;
     private readonly ISystemClock _clock;
 
-    public SentrySink(
-        SentrySerilogOptions options,
-        IDisposable? sdkDisposable)
+    private int _registeredScopeEventProcessor;
+
+    public SentrySink(SentrySerilogOptions options)
         : this(
             options,
             () => HubAdapter.Instance,
-            sdkDisposable,
             SystemClock.Clock)
     {
     }
@@ -43,29 +24,39 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
     internal SentrySink(
         SentrySerilogOptions options,
         Func<IHub> hubAccessor,
-        IDisposable? sdkDisposable,
         ISystemClock clock)
     {
         _options = options;
         _hubAccessor = hubAccessor;
         _clock = clock;
-        _sdkDisposable = sdkDisposable;
+
+        if (hubAccessor() is { IsEnabled: true } hub && hub.GetSentryOptions() is { } sentryOptions)
+        {
+            EnsureSerilogScopeEventProcessor(sentryOptions);
+        }
     }
 
     private static AsyncLocal<bool> isReentrant = new();
 
     public void Emit(LogEvent logEvent)
     {
+        // Must precede the reentrancy check below to avoid an infinite recursion
+        logEvent.TryGetSourceContext(out var context);
+        if (SentrySdkNamespaces.IsSentrySdk(context))
+        {
+            return;
+        }
+
         if (isReentrant.Value)
         {
-            _options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
+            _hubAccessor()?.GetSentryOptions()?.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
             return;
         }
 
         isReentrant.Value = true;
         try
         {
-            InnerEmit(logEvent);
+            InnerEmit(logEvent, context);
         }
         finally
         {
@@ -73,19 +64,17 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
         }
     }
 
-    private void InnerEmit(LogEvent logEvent)
+    private void InnerEmit(LogEvent logEvent, string? context)
     {
-        if (logEvent.TryGetSourceContext(out var context))
-        {
-            if (SentrySdkNamespaces.IsSentrySdk(context))
-            {
-                return;
-            }
-        }
-
         if (_hubAccessor() is not { IsEnabled: true } hub)
         {
             return;
+        }
+
+        var options = hub.GetSentryOptions();
+        if (options is not null)
+        {
+            EnsureSerilogScopeEventProcessor(options);
         }
 
         var exception = logEvent.Exception;
@@ -105,17 +94,6 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
                 },
                 Level = logEvent.Level.ToSentryLevel()
             };
-
-            if (evt.Sdk is { } sdk)
-            {
-                sdk.Name = SdkName;
-                sdk.Version = NameAndVersion.Version;
-
-                if (NameAndVersion.Version is { } version)
-                {
-                    sdk.AddPackage(ProtocolPackageName, version);
-                }
-            }
 
             evt.SetExtras(GetLoggingEventProperties(logEvent));
 
@@ -151,14 +129,29 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
                 level: logEvent.Level.ToBreadcrumbLevel());
         }
 
-        // Read the options from the Hub, rather than the Sink's Serilog-Options. In cases where Sentry's Serilog-Sink is
-        // added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through
-        // ASP.NET Core), only the Hub's Sentry-Options have the actual user-defined values configured.
-        var options = hub.GetSentryOptions();
         if (options is not null)
         {
             CaptureStructuredLog(hub, options, logEvent, formatted, template);
         }
+    }
+
+    private void EnsureSerilogScopeEventProcessor(SentryOptions options)
+    {
+        if (Interlocked.Exchange(ref _registeredScopeEventProcessor, 1) != 0)
+        {
+            return;
+        }
+
+        if (!options.TryUseSerilog())
+        {
+            return;
+        }
+
+        options.LogWarning(
+            "The Sentry sink for Serilog registered the Serilog scope event processor automatically, because " +
+            "UseSerilog() was not called on the options used to initialise Sentry. Events captured before the sink " +
+            "received its first log event will not have properties from the Serilog LogContext applied. Call " +
+            "UseSerilog() when initialising Sentry to apply them to every event.");
     }
 
     private string FormatLogEvent(LogEvent logEvent)
@@ -188,6 +181,4 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
             }
         }
     }
-
-    public void Dispose() => _sdkDisposable?.Dispose();
 }
