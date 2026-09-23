@@ -3,8 +3,10 @@
  * Updated from https://github.com/dotnet/android/blob/64018e13e53cec7246e54866b520d3284de344e0/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.cs
  *     - Adding support for AssemblyStore v3 format that shipped in .NET 10 (https://github.com/dotnet/android/pull/10249)
  * Updated from https://github.com/dotnet/android/blob/f1aecf9e6ae80fe3f3992ec1f52ef953dac7c06b/.github/skills/read-assembly-store/src/AssemblyStore/StoreReader_V2.cs
- *     - Adding support for AssemblyStore v4 format (CoreCLR) that ships in .NET 11
+ *     - Adding support for AssemblyStore v4 format (CoreCLR), which only ever shipped in .NET 11 previews
  *     - Deriving the index entry size from the header rather than the ABI
+ * Reviewed against https://github.com/dotnet/android/commit/8f7c4d4fa53c6682f2c4f2d2caf08e9fb4d8cd60
+ *     - v4 was reverted before .NET 11 GA (dotnet/android#12780); CoreCLR emits v3 again
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
@@ -15,7 +17,8 @@ internal partial class StoreReader : AssemblyStoreReader
     // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT_V3 = 0x80000003;
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT_V3 = 0x00000003;
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_64BIT_V4 = 0x80000004; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
+    // v4 was only emitted by .NET 11 previews; it was reverted to v3 before GA by dotnet/android#12780
+    private const uint ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_64BIT_V4 = 0x80000004;
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_32BIT_V4 = 0x00000004;
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK = 0xF0000000;
     internal const uint ASSEMBLY_STORE_FORMAT_NUMBER_MASK = 0x0000FFFF;

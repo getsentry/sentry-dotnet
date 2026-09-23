@@ -5,11 +5,12 @@ namespace Sentry.Android.AssemblyReader.Tests;
 public class StoreReaderTests
 {
     [Theory]
-    [InlineData(0x80000003u | 0x00010000u, true, sizeof(ulong))] // v3, 64-bit, arm64
+    [InlineData(0x80000003u | 0x00010000u, true, sizeof(ulong))] // v3, 64-bit, arm64 (MonoVM)
+    [InlineData(0x80000003u | 0x00010000u, true, sizeof(uint))] // v3, 64-bit, arm64 (CoreCLR)
     [InlineData(0x00000003u | 0x00020000u, false, sizeof(uint))] // v3, 32-bit, arm
-    [InlineData(0x80000004u | 0x00030000u, true, sizeof(ulong))] // v4, 64-bit, x86_64 (MonoVM)
-    [InlineData(0x80000004u | 0x00030000u, true, sizeof(uint))] // v4, 64-bit, x86_64 (CoreCLR)
-    [InlineData(0x00000004u | 0x00040000u, false, sizeof(uint))] // v4, 32-bit, x86
+    [InlineData(0x80000004u | 0x00030000u, true, sizeof(ulong))] // v4, 64-bit, x86_64 (MonoVM, .NET 11 previews)
+    [InlineData(0x80000004u | 0x00030000u, true, sizeof(uint))] // v4, 64-bit, x86_64 (CoreCLR, .NET 11 previews)
+    [InlineData(0x00000004u | 0x00040000u, false, sizeof(uint))] // v4, 32-bit, x86 (.NET 11 previews)
     public void Create_SupportedVersion_ReadsStore(uint version, bool is64Bit, int nameHashSize)
     {
         // Arrange
