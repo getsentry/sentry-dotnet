@@ -96,6 +96,11 @@ Two things worth knowing up front, because they cost the most time when missed:
 `dotnet pack` and the integration tests catch most of it and a solution-filter build does not,
 and the local checks must be run **serially**.
 
+- Build samples locally with `GITHUB_ACTIONS=true`. Without CI's `CI_BUILD` define they stop at the
+  DSN `#error` in `samples/SamplesShared.cs`, so later steps such as ILLink never run.
+- To tell a new-SDK regression from an existing failure, rebuild just the failing project and TFM
+  with the previous `global.json`.
+
 ## Platform Targets
 
 ### Non-mobile (Linux / macOS / Windows)
