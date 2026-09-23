@@ -25,7 +25,6 @@ public class SentryLoggingOptionsConfigurationBindingTests
     [Theory]
     [InlineData("Sentry:Dsn", "https://key@sentry.io/1")]
     [InlineData("Sentry:InitializeSdk", "true")]
-    [InlineData("Sentry:InitializeSdk", "false")]
     public void BindConfiguration_WithSdkSetting_Throws(string key, string value)
     {
         var exception = BindConfiguration(key, value);
@@ -34,9 +33,25 @@ public class SentryLoggingOptionsConfigurationBindingTests
         Assert.Contains("SentrySdk.Init", exception.ToString());
     }
 
+    [Theory]
+    [InlineData("Sentry:MinimumEventLevel", nameof(LogLevel.Warning))]
+    // Asking not to initialize is what now always happens, so it is not an error.
+    [InlineData("Sentry:InitializeSdk", "false")]
+    public void BindConfiguration_WithoutSdkSetting_DoesNotThrow(string key, string value)
+        => Assert.Null(BindConfiguration(key, value));
+
     [Fact]
-    public void BindConfiguration_WithLoggingSetting_DoesNotThrow()
-        => Assert.Null(BindConfiguration("Sentry:MinimumEventLevel", nameof(LogLevel.Warning)));
+    public void BindOptionsDirectly_WithLoggingSetting_DoesNotThrow()
+    {
+        // The netstandard2.0 path binds onto the options directly, and writes each property's value back.
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["MinimumEventLevel"] = nameof(LogLevel.Warning) })
+            .Build();
+        var options = new SentryLoggingOptions();
+
+        Assert.Null(Record.Exception(() => config.Bind(options)));
+        Assert.Equal(LogLevel.Warning, options.MinimumEventLevel);
+    }
 
     [Theory]
     [InlineData("Dsn", "https://key@sentry.io/1")]

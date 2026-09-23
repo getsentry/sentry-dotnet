@@ -11,7 +11,7 @@ internal class BindableSentryLoggingOptions
 
     public void ApplyTo(SentryLoggingOptions options)
     {
-        if (Dsn is not null || InitializeSdk is not null)
+        if (Dsn is not null || InitializeSdk == true)
         {
             throw new NotSupportedException(SentryLoggingOptions.ObsoleteSdkInitialization);
         }

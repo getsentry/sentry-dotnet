@@ -24,7 +24,14 @@ public class SentryLoggingOptions
     public string? Dsn
     {
         get => null;
-        set => throw new NotSupportedException(ObsoleteSdkInitialization);
+        // Only a supplied value is an error: the configuration binder writes the getter's value back.
+        set
+        {
+            if (value is not null)
+            {
+                throw new NotSupportedException(ObsoleteSdkInitialization);
+            }
+        }
     }
 
     /// <summary>
@@ -35,7 +42,13 @@ public class SentryLoggingOptions
     public bool InitializeSdk
     {
         get => false;
-        set => throw new NotSupportedException(ObsoleteSdkInitialization);
+        set
+        {
+            if (value)
+            {
+                throw new NotSupportedException(ObsoleteSdkInitialization);
+            }
+        }
     }
 
     /// <summary>
