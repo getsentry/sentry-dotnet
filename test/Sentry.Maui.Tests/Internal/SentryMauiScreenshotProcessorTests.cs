@@ -5,7 +5,7 @@ namespace Sentry.Maui.Tests.Internal;
 public class SentryMauiScreenshotProcessorTests
 {
     [Fact]
-    public void Process_BeforeCaptureScreenshotThrows_KeepsEventAndSkipsScreenshot()
+    public void Process_BeforeScreenshotCaptureThrows_KeepsEventAndSkipsScreenshot()
     {
         // Arrange
         var exception = new InvalidOperationException("callback failed");
@@ -30,11 +30,11 @@ public class SentryMauiScreenshotProcessorTests
         logger.Entries.Should().ContainSingle(entry =>
             entry.Level == SentryLevel.Error &&
             entry.Exception == exception &&
-            entry.Message == "BeforeCaptureScreenshot callback failed.");
+            entry.Message == "BeforeScreenshotCapture callback failed.");
     }
 
     [Fact]
-    public void Process_BeforeCaptureScreenshotReturnsTrue_AddsScreenshot()
+    public void Process_BeforeScreenshotCaptureReturnsTrue_AddsScreenshot()
     {
         // Arrange
         var options = new SentryMauiOptions();

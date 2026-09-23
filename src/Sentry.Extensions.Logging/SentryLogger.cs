@@ -52,7 +52,12 @@ internal sealed class SentryLogger : ILogger
 
         var message = formatter?.Invoke(state, exception);
 
-        if (ShouldCaptureEvent(logLevel, eventId, exception))
+        if (IsFromSentry() || IsEfExceptionMessage(eventId) || IsFiltered(logLevel, eventId, exception))
+        {
+            return;
+        }
+
+        if (ShouldCaptureEvent(logLevel))
         {
             var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName);
 
@@ -65,7 +70,7 @@ internal sealed class SentryLogger : ILogger
             }
         }
 
-        if (ShouldAddBreadcrumb(logLevel, eventId, exception))
+        if (ShouldAddBreadcrumb(logLevel))
         {
             var data = eventId.ToDictionaryOrNull();
 
@@ -154,25 +159,13 @@ internal sealed class SentryLogger : ILogger
         return @event;
     }
 
-    private bool ShouldCaptureEvent(
-        LogLevel logLevel,
-        EventId eventId,
-        Exception? exception)
+    private bool ShouldCaptureEvent(LogLevel logLevel)
         => _options.MinimumEventLevel != LogLevel.None
-           && logLevel >= _options.MinimumEventLevel
-           && !IsFromSentry()
-           && !IsEfExceptionMessage(eventId)
-           && !IsFiltered(logLevel, eventId, exception);
+           && logLevel >= _options.MinimumEventLevel;
 
-    private bool ShouldAddBreadcrumb(
-        LogLevel logLevel,
-        EventId eventId,
-        Exception? exception)
+    private bool ShouldAddBreadcrumb(LogLevel logLevel)
         => _options.MinimumBreadcrumbLevel != LogLevel.None
-           && logLevel >= _options.MinimumBreadcrumbLevel
-           && !IsFromSentry()
-           && !IsEfExceptionMessage(eventId)
-           && !IsFiltered(logLevel, eventId, exception);
+           && logLevel >= _options.MinimumBreadcrumbLevel;
 
     private bool IsFiltered(
         LogLevel logLevel,
@@ -192,8 +185,8 @@ internal sealed class SentryLogger : ILogger
         }
         catch (Exception e)
         {
-            _options.LogError(e, "The {0} log filter callback failed. The log entry will not be filtered.", filter.GetType().Name);
-            return false;
+            _options.LogError(e, "The {0} log filter callback failed. The log entry will be filtered out.", filter.GetType().Name);
+            return true;
         }
     }
 

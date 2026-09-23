@@ -70,7 +70,7 @@ public static partial class SentrySdk
                 }
                 catch (Exception ex)
                 {
-                    options.LogError(ex, "BeforeBreadcrumb callback failed.");
+                    options.LogError(ex, "Cocoa BeforeBreadcrumb callback failed.");
                     result = null;
                 }
 
