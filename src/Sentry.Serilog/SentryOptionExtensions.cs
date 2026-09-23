@@ -26,5 +26,5 @@ public static class SentryOptionExtensions
     }
 
     internal static bool HasSerilogScopeEventProcessor(this SentryOptions options)
-        => options.EventProcessors.Exists(processor => processor.Type == typeof(SerilogScopeEventProcessor));
+        => options.EventProcessors.Any(processor => processor.Type == typeof(SerilogScopeEventProcessor));
 }
