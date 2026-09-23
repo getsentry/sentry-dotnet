@@ -82,8 +82,9 @@ public class ArchiveUtilsTests
         var stream = new MemoryStream();
         using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
         {
+            const uint descriptorIndex = 0;
             writer.Write(magic);
-            writer.Write(0u); // descriptor index
+            writer.Write(descriptorIndex);
             writer.Write(Assembly.Length);
             writer.Write(payload);
         }

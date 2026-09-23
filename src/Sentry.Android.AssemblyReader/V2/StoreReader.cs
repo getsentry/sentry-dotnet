@@ -18,7 +18,7 @@ internal partial class StoreReader : AssemblyStoreReader
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_64BIT_V4 = 0x80000004; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_CORECLR_32BIT_V4 = 0x00000004;
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK = 0xF0000000;
-    private const uint ASSEMBLY_STORE_FORMAT_NUMBER_MASK = 0x0000FFFF;
+    internal const uint ASSEMBLY_STORE_FORMAT_NUMBER_MASK = 0x0000FFFF;
     private const uint ASSEMBLY_STORE_ABI_AARCH64 = 0x00010000;
     private const uint ASSEMBLY_STORE_ABI_ARM = 0x00020000;
     private const uint ASSEMBLY_STORE_ABI_X64 = 0x00030000;

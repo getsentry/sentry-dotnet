@@ -540,9 +540,9 @@ internal class DebugStackTrace : SentryStackTrace
                 return new PEReader(assembly);
             }
         }
-        catch
+        catch (Exception e)
         {
-            // Swallow and return null below
+            options.LogDebug("Failed to read assembly for module '{0}': {1}", module.GetNameOrScopeName(), e.Message);
         }
         assemblyName = null;
         return null;

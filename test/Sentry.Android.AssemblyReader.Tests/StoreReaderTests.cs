@@ -68,25 +68,28 @@ public class StoreReaderTests
             var indexEntrySize = nameHashSize + sizeof(uint) + sizeof(byte);
             WriteHeader(writer, version, indexEntryCount: 1, (uint)indexEntrySize);
 
-            // Index
+            const ulong nameHash64 = 0xDEADBEEFDEADBEEF;
+            const uint nameHash32 = 0xDEADBEEF;
+            const uint descriptorIndex = 0;
+            const byte ignore = 0;
+            const int descriptorFieldCount = 7;
+
             if (nameHashSize == sizeof(ulong))
             {
-                writer.Write(0xDEADBEEFDEADBEEFul); // name_hash
+                writer.Write(nameHash64);
             }
             else
             {
-                writer.Write(0xDEADBEEFu); // name_hash
+                writer.Write(nameHash32);
             }
-            writer.Write(0u); // descriptor_index
-            writer.Write((byte)0); // ignore
+            writer.Write(descriptorIndex);
+            writer.Write(ignore);
 
-            // Descriptor: mapping_index, data offset/size, debug offset/size, config offset/size
-            for (var i = 0; i < 7; i++)
+            for (var i = 0; i < descriptorFieldCount; i++)
             {
                 writer.Write(0u);
             }
 
-            // Names
             var nameBytes = Encoding.UTF8.GetBytes(assemblyName);
             writer.Write((uint)nameBytes.Length);
             writer.Write(nameBytes);
@@ -98,14 +101,17 @@ public class StoreReaderTests
 
     private static void WriteHeader(BinaryWriter writer, uint version, uint indexEntryCount, uint indexSize)
     {
+        const uint entryCount = 1;
+        const ulong contentId = 0x0123456789ABCDEF;
+
         writer.Write(Utils.AssemblyStoreMagic);
         writer.Write(version);
-        writer.Write(1u); // entry_count
+        writer.Write(entryCount);
         writer.Write(indexEntryCount);
         writer.Write(indexSize);
-        if ((version & 0xFFFF) >= 4)
+        if ((version & StoreReader.ASSEMBLY_STORE_FORMAT_NUMBER_MASK) >= 4)
         {
-            writer.Write(0x0123456789ABCDEFul); // content_id
+            writer.Write(contentId);
         }
     }
 
