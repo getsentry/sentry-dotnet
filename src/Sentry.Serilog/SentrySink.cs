@@ -142,12 +142,11 @@ internal sealed partial class SentrySink : ILogEventSink
             return;
         }
 
-        if (options.HasSerilogScopeEventProcessor())
+        if (!options.TryUseSerilog())
         {
             return;
         }
 
-        options.UseSerilog();
         options.LogWarning(
             "The Sentry sink for Serilog registered the Serilog scope event processor automatically, because " +
             "UseSerilog() was not called on the options used to initialise Sentry. Events captured before the sink " +
