@@ -181,6 +181,12 @@ Do not add comments that restate what the code already says. In particular, don'
 members as being exposed for tests (`// Exposed for tests`) — that's already apparent from
 the member being `internal` and from tests being its only callers.
 
+**This applies to the library, not to `samples/`.** Samples are documentation: people read them
+to learn how to wire Sentry up, and copy them as a starting point. Comment them generously,
+including the configuration files — `appsettings.json` and the like carry `//` comments in this
+repo even though JSON doesn't officially support them, and that has never caused a problem.
+When a sample changes, update its comments rather than dropping them.
+
 ## Adding New Options (AOT Compatibility)
 
 `SentryOptions` is **not** bound directly from configuration. Instead, a parallel `BindableSentryOptions` class (`src/Sentry/BindableSentryOptions.cs`) exists for AOT-safe configuration binding.
