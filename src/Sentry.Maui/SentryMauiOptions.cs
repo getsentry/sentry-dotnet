@@ -7,7 +7,7 @@ namespace Sentry.Maui;
 /// <summary>
 /// Sentry MAUI integration options
 /// </summary>
-public class SentryMauiOptions : SentryLoggingOptions
+public class SentryMauiOptions : SentryHostOptions
 {
     /// <summary>
     /// Creates a new instance of <see cref="SentryMauiOptions"/>.

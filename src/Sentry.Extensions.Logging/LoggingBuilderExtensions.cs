@@ -22,12 +22,15 @@ public static class LoggingBuilderExtensions
         => builder.AddSentry((Action<SentryLoggingOptions>?)null);
 
     /// <summary>
-    /// Adds the Sentry logging integration.
+    /// Not supported. The logging integration no longer initializes the SDK.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <param name="dsn">The DSN.</param>
+    /// <param name="dsn">No longer supported.</param>
+    /// <returns>Never returns.</returns>
+    /// <exception cref="NotSupportedException">Always.</exception>
+    [Obsolete(SentryLoggingOptions.ObsoleteSdkInitialization, error: true)]
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder, string dsn)
-        => builder.AddSentry(o => o.Dsn = dsn);
+        => throw new NotSupportedException(SentryLoggingOptions.ObsoleteSdkInitialization);
 
     /// <summary>
     /// Adds the Sentry logging integration.
@@ -35,12 +38,6 @@ public static class LoggingBuilderExtensions
     /// <param name="builder">The builder.</param>
     /// <param name="optionsConfiguration">The options configuration.</param>
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder, Action<SentryLoggingOptions>? optionsConfiguration)
-        => builder.AddSentry<SentryLoggingOptions>(optionsConfiguration);
-
-    internal static ILoggingBuilder AddSentry<TOptions>(
-        this ILoggingBuilder builder,
-        Action<TOptions>? optionsConfiguration)
-        where TOptions : SentryLoggingOptions, new()
     {
         builder.AddConfiguration();
 
@@ -49,14 +46,14 @@ public static class LoggingBuilderExtensions
             builder.Services.Configure(optionsConfiguration);
         }
 
-        builder.Services.AddSingleton<IConfigureOptions<TOptions>, SentryLoggingOptionsSetup>();
+        builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
         builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
         builder.Services.AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>();
-        builder.Services.AddSentry<TOptions>();
+        builder.Services.AddSentryHub();
 
         // All logs should flow to the SentryLogger, regardless of level.
-        // Filtering of events is handled in SentryLogger, using SentryOptions.MinimumEventLevel
-        // Filtering of breadcrumbs is handled in SentryLogger, using SentryOptions.MinimumBreadcrumbLevel
+        // Filtering of events is handled in SentryLogger, using SentryLoggingOptions.MinimumEventLevel
+        // Filtering of breadcrumbs is handled in SentryLogger, using SentryLoggingOptions.MinimumBreadcrumbLevel
         builder.AddFilter<SentryLoggerProvider>(_ => true);
 
         // Logs from the SentryLogger should not flow to the SentryStructuredLogger as this may cause recursive invocations.

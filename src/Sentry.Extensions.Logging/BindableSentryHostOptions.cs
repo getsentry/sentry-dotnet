@@ -2,20 +2,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Sentry.Extensions.Logging;
 
-internal class BindableSentryLoggingOptions
+/// <inheritdoc cref="BindableSentryOptions"/>
+internal class BindableSentryHostOptions : BindableSentryOptions
 {
     public LogLevel? MinimumBreadcrumbLevel { get; set; }
     public LogLevel? MinimumEventLevel { get; set; }
-    public string? Dsn { get; set; }
-    public bool? InitializeSdk { get; set; }
 
-    public void ApplyTo(SentryLoggingOptions options)
+    public void ApplyTo(SentryHostOptions options)
     {
-        if (Dsn is not null || InitializeSdk == true)
-        {
-            throw new NotSupportedException(SentryLoggingOptions.ObsoleteSdkInitialization);
-        }
-
+        base.ApplyTo(options);
         options.MinimumBreadcrumbLevel = MinimumBreadcrumbLevel ?? options.MinimumBreadcrumbLevel;
         options.MinimumEventLevel = MinimumEventLevel ?? options.MinimumEventLevel;
     }

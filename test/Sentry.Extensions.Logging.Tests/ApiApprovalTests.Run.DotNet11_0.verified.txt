@@ -4,6 +4,7 @@
     {
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder) { }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration) { }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.", true)]
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, string dsn) { }
     }
     public static class SentryLoggerFactoryExtensions
@@ -28,16 +29,27 @@ namespace Sentry.Extensions.Logging
         public bool IsEnabled(Sentry.SentryLevel level) { }
         public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
     }
-    public class SentryLoggingOptions : Sentry.SentryOptions
+    public abstract class SentryHostOptions : Sentry.SentryOptions
     {
-        public SentryLoggingOptions() { }
-        public bool InitializeSdk { get; set; }
+        protected SentryHostOptions() { }
         public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
         public void ConfigureScope(System.Action<Sentry.Scope> action) { }
     }
+    public class SentryLoggingOptions
+    {
+        public SentryLoggingOptions() { }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.", true)]
+        public string? Dsn { get; set; }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.", true)]
+        public bool InitializeSdk { get; set; }
+        public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
+        public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
+    }
     public static class SentryLoggingOptionsExtensions
     {
+        public static void AddLogEntryFilter(this Sentry.Extensions.Logging.SentryHostOptions options, Sentry.Extensions.Logging.ILogEntryFilter filter) { }
+        public static void AddLogEntryFilter(this Sentry.Extensions.Logging.SentryHostOptions options, System.Func<string, Microsoft.Extensions.Logging.LogLevel, Microsoft.Extensions.Logging.EventId, System.Exception?, bool> filter) { }
         public static void AddLogEntryFilter(this Sentry.Extensions.Logging.SentryLoggingOptions options, Sentry.Extensions.Logging.ILogEntryFilter filter) { }
         public static void AddLogEntryFilter(this Sentry.Extensions.Logging.SentryLoggingOptions options, System.Func<string, Microsoft.Extensions.Logging.LogLevel, Microsoft.Extensions.Logging.EventId, System.Exception?, bool> filter) { }
     }
@@ -47,6 +59,6 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddSentry<TOptions>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services)
-            where TOptions : Sentry.Extensions.Logging.SentryLoggingOptions, new () { }
+            where TOptions : Sentry.Extensions.Logging.SentryHostOptions, new () { }
     }
 }

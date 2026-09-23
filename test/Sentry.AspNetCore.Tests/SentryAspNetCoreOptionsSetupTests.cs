@@ -49,7 +49,7 @@ public class SentryAspNetCoreOptionsSetupTests
         sut.Configure(_target);
 
         //Assert
-        Assert.Contains(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, null));
+        Assert.Contains(_target.Logging.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, null));
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class SentryAspNetCoreOptionsSetupTests
         sut.Configure(_target);
 
         // Assert
-        Assert.Contains(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, new Exception()));
+        Assert.Contains(_target.Logging.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, new Exception()));
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class SentryAspNetCoreOptionsSetupTests
         sut.Configure(_target);
 
         // Assert
-        Assert.DoesNotContain(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Trace, 1, null));
+        Assert.DoesNotContain(_target.Logging.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Trace, 1, null));
     }
 
     [Theory]

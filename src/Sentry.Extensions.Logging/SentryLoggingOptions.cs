@@ -5,9 +5,52 @@ namespace Sentry.Extensions.Logging;
 /// <summary>
 /// Sentry logging integration options
 /// </summary>
-/// <inheritdoc />
-public class SentryLoggingOptions : SentryOptions
+/// <remarks>
+/// These only configure which log entries are sent to Sentry. Sentry itself is initialized separately, with
+/// <see cref="SentrySdk.Init(Action{SentryOptions})"/> or a framework integration such as <c>UseSentry</c>.
+/// </remarks>
+public class SentryLoggingOptions
 {
+    internal const string ObsoleteSdkInitialization =
+        "The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be " +
+        "supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove " +
+        "'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.";
+
+    /// <summary>
+    /// Not supported. The logging integration no longer initializes the SDK.
+    /// </summary>
+    /// <exception cref="NotSupportedException">When set.</exception>
+    [Obsolete(ObsoleteSdkInitialization, error: true)]
+    public string? Dsn
+    {
+        get => null;
+        // Only a supplied value is an error: the configuration binder writes the getter's value back.
+        set
+        {
+            if (value is not null)
+            {
+                throw new NotSupportedException(ObsoleteSdkInitialization);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Not supported. The logging integration no longer initializes the SDK.
+    /// </summary>
+    /// <exception cref="NotSupportedException">When set.</exception>
+    [Obsolete(ObsoleteSdkInitialization, error: true)]
+    public bool InitializeSdk
+    {
+        get => false;
+        set
+        {
+            if (value)
+            {
+                throw new NotSupportedException(ObsoleteSdkInitialization);
+            }
+        }
+    }
+
     /// <summary>
     /// Gets or sets the minimum breadcrumb level.
     /// </summary>
@@ -31,23 +74,7 @@ public class SentryLoggingOptions : SentryOptions
     public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
     /// <summary>
-    /// Whether to initialize this SDK through this integration
-    /// </summary>
-    public bool InitializeSdk { get; set; } = true;
-
-    /// <summary>
-    /// Add a callback to configure the scope upon SDK initialization
-    /// </summary>
-    /// <param name="action">The function to invoke when initializing the SDK</param>
-    public void ConfigureScope(Action<Scope> action) => ConfigureScopeCallbacks = ConfigureScopeCallbacks.Concat(new[] { action }).ToArray();
-
-    /// <summary>
     /// Log entry filters
     /// </summary>
     internal ILogEntryFilter[] Filters { get; set; } = Array.Empty<ILogEntryFilter>();
-
-    /// <summary>
-    /// List of callbacks to be invoked when initializing the SDK
-    /// </summary>
-    internal Action<Scope>[] ConfigureScopeCallbacks { get; set; } = Array.Empty<Action<Scope>>();
 }

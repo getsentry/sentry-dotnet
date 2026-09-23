@@ -61,7 +61,7 @@ public class SentryWebHostBuilderExtensionsTests
     [Theory, MemberData(nameof(ExpectedServices))]
     public void UseSentry_Callback_ServicesRegistered(Action<IServiceCollection> assert)
     {
-        _ = WebHostBuilder.UseSentry(o => o.InitializeSdk = false);
+        _ = WebHostBuilder.UseSentry(o => o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue);
         assert(Services);
     }
 
@@ -88,7 +88,7 @@ public class SentryWebHostBuilderExtensionsTests
 #endif
         WebHostBuilder.UseSentry((SentryAspNetCoreOptions options) =>
         {
-            options.InitializeSdk = false;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         });
         using var serviceProvider = Services.BuildServiceProvider();
 
@@ -104,7 +104,7 @@ public class SentryWebHostBuilderExtensionsTests
     {
         WebHostBuilder.UseSentry((SentryAspNetCoreOptions options) =>
         {
-            options.InitializeSdk = false;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         });
         using var serviceProvider = Services.BuildServiceProvider();
 

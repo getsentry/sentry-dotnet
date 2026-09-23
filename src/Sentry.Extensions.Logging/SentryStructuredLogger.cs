@@ -7,15 +7,13 @@ namespace Sentry.Extensions.Logging;
 internal sealed class SentryStructuredLogger : ILogger
 {
     private readonly string? _categoryName;
-    private readonly SentryLoggingOptions _options;
     private readonly IHub _hub;
     private readonly ISystemClock _clock;
-    private readonly SdkVersion _sdk;
+    private readonly SdkVersion? _sdk;
 
-    internal SentryStructuredLogger(string categoryName, SentryLoggingOptions options, IHub hub, ISystemClock clock, SdkVersion sdk)
+    internal SentryStructuredLogger(string categoryName, IHub hub, ISystemClock clock, SdkVersion? sdk)
     {
         _categoryName = categoryName;
-        _options = options;
         _clock = clock;
         _hub = hub;
         _sdk = sdk;
@@ -34,7 +32,7 @@ internal sealed class SentryStructuredLogger : ILogger
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        if (!IsEnabled(logLevel))
+        if (!IsEnabled(logLevel) || _hub.GetSentryOptions() is not { } options)
         {
             return;
         }
@@ -52,7 +50,7 @@ internal sealed class SentryStructuredLogger : ILogger
         }
         catch (FormatException e)
         {
-            _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
+            options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
             return;
         }
 
@@ -87,7 +85,7 @@ internal sealed class SentryStructuredLogger : ILogger
         };
 
         var scope = _hub.GetScope();
-        log.SetDefaultAttributes(_options, scope, _sdk);
+        log.SetDefaultAttributes(options, scope, _sdk);
         log.SetOrigin("auto.log.extensions_logging");
 
         if (_categoryName is not null)

@@ -8,7 +8,7 @@ using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 namespace Sentry.AspNetCore;
 
 /// <inheritdoc cref="BindableSentryOptions"/>
-internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
+internal class BindableSentryAspNetCoreOptions : BindableSentryHostOptions
 {
     public bool? IncludeActivityData { get; set; }
     public RequestSize? MaxRequestBodySize { get; set; }

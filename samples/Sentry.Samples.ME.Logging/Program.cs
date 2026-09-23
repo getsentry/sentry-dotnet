@@ -1,39 +1,43 @@
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 
+// Initialise the Sentry SDK. The logging integration added below only forwards log messages to Sentry.
+using var sentry = SentrySdk.Init(options =>
+{
+#if !SENTRY_DSN_DEFINED_IN_ENV
+    // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+    // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+    options.Dsn = SamplesShared.Dsn;
+#endif
+
+    // Set to true to SDK debugging to see the internal messages through the logging library.
+    options.Debug = false;
+    // Configure the level of Sentry internal logging
+    options.DiagnosticLevel = SentryLevel.Debug;
+
+    options.MaxBreadcrumbs = 150; // Increasing from default 100
+    options.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion
+
+    options.SetBeforeSendLog(static log =>
+    {
+        log.SetAttribute("attribute-key", "attribute-value");
+        return log;
+    });
+});
+
+SentrySdk.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
+
 using var loggerFactory = LoggerFactory.Create(builder =>
 {
     builder.AddConsole();
     builder.AddSentry(options =>
     {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-        // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
-        // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-        options.Dsn = SamplesShared.Dsn;
-#endif
-
-        // Set to true to SDK debugging to see the internal messages through the logging library.
-        options.Debug = false;
-        // Configure the level of Sentry internal logging
-        options.DiagnosticLevel = SentryLevel.Debug;
-
-        options.MaxBreadcrumbs = 150; // Increasing from default 100
-        options.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion
-
         // Optionally configure options: The default values are:
         options.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
         options.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
 
-        options.SetBeforeSendLog(static log =>
-        {
-            log.SetAttribute("attribute-key", "attribute-value");
-            return log;
-        });
-
         // Don't keep as a breadcrumb or send events for messages of level less than Critical with exception of type DivideByZeroException
         options.AddLogEntryFilter((_, level, _, exception) => level < LogLevel.Critical && exception is DivideByZeroException);
-
-        options.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
     });
     // Don't send logs for messages of level less than Warning for category Program
     builder.AddFilter(typeof(Program).FullName, LogLevel.Warning);
@@ -86,8 +90,6 @@ using (logger.BeginScope(new Dictionary<string, string>
     Dependency.Work("8 - This unhandled exception is captured and includes Scope (A, B) and crumbs: (2, 4, 5) and event (3) ");
 }
 
-// Disposing the LoggerFactory will close the SDK since it was initialized through
-// the integration while calling .Init()
 
 internal static class Dependency
 {
