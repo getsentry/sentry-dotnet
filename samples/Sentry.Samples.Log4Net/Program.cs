@@ -10,7 +10,7 @@ internal class Program
 
     private static void Main()
     {
-        // Initialise the Sentry SDK. The SentryAppender configured in app.config only sends log events to Sentry.
+        // Initialise the Sentry SDK. 
         using var _ = SentrySdk.Init(options =>
         {
 #if !SENTRY_DSN_DEFINED_IN_ENV
