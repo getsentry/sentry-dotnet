@@ -5,14 +5,16 @@ namespace Sentry.Android.AssemblyReader.Tests;
 public class StoreReaderTests
 {
     [Theory]
-    [InlineData(0x80000003u | 0x00010000u, true)] // v3, 64-bit, arm64
-    [InlineData(0x00000003u | 0x00020000u, false)] // v3, 32-bit, arm
-    [InlineData(0x80000004u | 0x00030000u, true)] // v4, 64-bit, x86_64
-    [InlineData(0x00000004u | 0x00040000u, false)] // v4, 32-bit, x86
-    public void Create_SupportedVersion_ReadsStore(uint version, bool is64Bit)
+    [InlineData(0x80000003u | 0x00010000u, true, sizeof(ulong))] // v3, 64-bit, arm64 (MonoVM)
+    [InlineData(0x80000003u | 0x00010000u, true, sizeof(uint))] // v3, 64-bit, arm64 (CoreCLR)
+    [InlineData(0x00000003u | 0x00020000u, false, sizeof(uint))] // v3, 32-bit, arm
+    [InlineData(0x80000004u | 0x00030000u, true, sizeof(ulong))] // v4, 64-bit, x86_64 (MonoVM, .NET 11 previews)
+    [InlineData(0x80000004u | 0x00030000u, true, sizeof(uint))] // v4, 64-bit, x86_64 (CoreCLR, .NET 11 previews)
+    [InlineData(0x00000004u | 0x00040000u, false, sizeof(uint))] // v4, 32-bit, x86 (.NET 11 previews)
+    public void Create_SupportedVersion_ReadsStore(uint version, bool is64Bit, int nameHashSize)
     {
         // Arrange
-        using var stream = CreateStore(version, is64Bit, "testAssembly.dll");
+        using var stream = CreateStore(version, nameHashSize, "testAssembly.dll");
 
         // Act
         var reader = AssemblyStoreReader.Create(stream, "testStore", null);
@@ -29,7 +31,7 @@ public class StoreReaderTests
     public void Create_UnsupportedVersion_ReturnsNull(uint version)
     {
         // Arrange
-        using var stream = CreateStore(version, is64Bit: true, "testAssembly.dll");
+        using var stream = CreateStore(version, sizeof(ulong), "testAssembly.dll");
 
         // Act
         var reader = AssemblyStoreReader.Create(stream, "testStore", null);
@@ -38,43 +40,57 @@ public class StoreReaderTests
         reader.Should().BeNull();
     }
 
-    private static MemoryStream CreateStore(uint version, bool is64Bit, string assemblyName)
+    [Theory]
+    [InlineData(12u, 1u)] // v2 layout: 64-bit hash, no ignore flag
+    [InlineData(17u, 2u)] // not evenly divisible
+    public void Create_InvalidIndexSize_Throws(uint indexSize, uint indexEntryCount)
+    {
+        // Arrange
+        using var stream = new MemoryStream();
+        using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+        {
+            WriteHeader(writer, 0x80000004u | 0x00010000u, indexEntryCount, indexSize);
+            writer.Write(new byte[indexSize]);
+        }
+        stream.Position = 0;
+
+        // Act
+        var act = () => AssemblyStoreReader.Create(stream, "testStore", null);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage("*testStore*index*");
+    }
+
+    private static MemoryStream CreateStore(uint version, int nameHashSize, string assemblyName)
     {
         var stream = new MemoryStream();
         using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
         {
-            var indexEntrySize = (is64Bit ? sizeof(ulong) : sizeof(uint)) + sizeof(uint) + sizeof(byte);
+            var indexEntrySize = nameHashSize + sizeof(uint) + sizeof(byte);
+            WriteHeader(writer, version, indexEntryCount: 1, (uint)indexEntrySize);
 
-            // Header
-            writer.Write(Utils.AssemblyStoreMagic);
-            writer.Write(version);
-            writer.Write(1u); // entry_count
-            writer.Write(1u); // index_entry_count
-            writer.Write((uint)indexEntrySize); // index_size
-            if ((version & 0xFFFF) >= 4)
-            {
-                writer.Write(0x0123456789ABCDEFul); // content_id
-            }
+            const ulong nameHash64 = 0xDEADBEEFDEADBEEF;
+            const uint nameHash32 = 0xDEADBEEF;
+            const uint descriptorIndex = 0;
+            const byte ignore = 0;
+            const int descriptorFieldCount = 7;
 
-            // Index
-            if (is64Bit)
+            if (nameHashSize == sizeof(ulong))
             {
-                writer.Write(0xDEADBEEFDEADBEEFul); // name_hash
+                writer.Write(nameHash64);
             }
             else
             {
-                writer.Write(0xDEADBEEFu); // name_hash
+                writer.Write(nameHash32);
             }
-            writer.Write(0u); // descriptor_index
-            writer.Write((byte)0); // ignore
+            writer.Write(descriptorIndex);
+            writer.Write(ignore);
 
-            // Descriptor: mapping_index, data offset/size, debug offset/size, config offset/size
-            for (var i = 0; i < 7; i++)
+            for (var i = 0; i < descriptorFieldCount; i++)
             {
                 writer.Write(0u);
             }
 
-            // Names
             var nameBytes = Encoding.UTF8.GetBytes(assemblyName);
             writer.Write((uint)nameBytes.Length);
             writer.Write(nameBytes);
@@ -82,6 +98,22 @@ public class StoreReaderTests
 
         stream.Position = 0;
         return stream;
+    }
+
+    private static void WriteHeader(BinaryWriter writer, uint version, uint indexEntryCount, uint indexSize)
+    {
+        const uint entryCount = 1;
+        const ulong contentId = 0x0123456789ABCDEF;
+
+        writer.Write(Utils.AssemblyStoreMagic);
+        writer.Write(version);
+        writer.Write(entryCount);
+        writer.Write(indexEntryCount);
+        writer.Write(indexSize);
+        if ((version & StoreReader.ASSEMBLY_STORE_FORMAT_NUMBER_MASK) >= 4)
+        {
+            writer.Write(contentId);
+        }
     }
 
     [Fact]
