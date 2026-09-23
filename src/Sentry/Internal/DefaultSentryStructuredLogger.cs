@@ -39,6 +39,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
             }
             catch (FormatException e)
             {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.LogItem);
                 _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
                 return;
             }
@@ -103,6 +104,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         if (configuredLog is null)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+            _options.DiagnosticLogger?.LogInfo("Log dropped by BeforeSendLog callback.");
             return;
         }
 

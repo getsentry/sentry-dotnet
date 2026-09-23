@@ -118,6 +118,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().Be(expected);
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [Fact]
@@ -135,6 +136,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().Be("none");
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [Fact]
@@ -152,6 +154,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().Be("custom_unit");
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [Fact]
@@ -169,6 +172,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().BeEmpty();
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [Fact]
@@ -186,6 +190,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().BeNull();
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [Fact]
@@ -203,6 +208,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().BeNull();
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [Fact]
@@ -221,6 +227,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().Be("custom_unit");
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [Fact]
@@ -239,6 +246,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().BeEmpty();
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [Fact]
@@ -257,6 +265,7 @@ public partial class SentryMetricEmitterTests
 
         captured.Should().NotBeNull();
         captured.Unit.Should().BeNull();
+        _fixture.DiagnosticLogger.Dequeue().Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
     }
 
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance", Justification = "The generic SentryMetric type is internal. Testing via the public abstract base type.")]

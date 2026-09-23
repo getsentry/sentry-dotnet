@@ -27,12 +27,14 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
     {
         if (!SentryMetric.IsSupported(typeof(T)))
         {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
             _options.DiagnosticLogger?.LogWarning("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.", typeof(T));
             return;
         }
 
         if (string.IsNullOrEmpty(name))
         {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
             _options.DiagnosticLogger?.LogWarning("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}", type.ToString(), typeof(T));
             return;
         }
@@ -46,12 +48,14 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
     {
         if (!SentryMetric.IsSupported(typeof(T)))
         {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
             _options.DiagnosticLogger?.LogWarning("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.", typeof(T));
             return;
         }
 
         if (string.IsNullOrEmpty(name))
         {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
             _options.DiagnosticLogger?.LogWarning("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}", type.ToString(), typeof(T));
             return;
         }
@@ -85,6 +89,7 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
         if (configuredMetric is null)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.TraceMetric);
+            _options.DiagnosticLogger?.LogInfo("Metric dropped by BeforeSendMetric callback.");
             return;
         }
 

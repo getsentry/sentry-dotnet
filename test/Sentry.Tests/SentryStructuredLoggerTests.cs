@@ -152,6 +152,11 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+        var entry = _fixture.DiagnosticLogger.Dequeue();
+        entry.Level.Should().Be(SentryLevel.Info);
+        entry.Message.Should().Be("Log dropped by BeforeSendLog callback.");
+        entry.Exception.Should().BeNull();
+        entry.Args.Should().BeEmpty();
     }
 
     [Fact]
@@ -167,6 +172,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("Template string does not match the provided argument. The Log will be dropped.");
         entry.Exception.Should().BeOfType<FormatException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.LogItem);
     }
 
     [Fact]
