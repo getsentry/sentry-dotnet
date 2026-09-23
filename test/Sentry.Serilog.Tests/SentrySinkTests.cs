@@ -228,6 +228,80 @@ public partial class SentrySinkTests
     }
 
     [Fact]
+    public void Ctor_SentryAlreadyInitialised_RegistersScopeEventProcessor()
+    {
+        _ = _fixture.GetSut();
+
+        _fixture.SentryOptions.HasSerilogScopeEventProcessor().Should().BeTrue();
+    }
+
+    [Fact]
+    public void Emit_SentryInitialisedAfterCtor_RegistersScopeEventProcessor()
+    {
+        _fixture.Hub.IsEnabled.Returns(false);
+        var sut = _fixture.GetSut();
+        _fixture.SentryOptions.HasSerilogScopeEventProcessor().Should().BeFalse();
+
+        _fixture.Hub.IsEnabled.Returns(true);
+        sut.Emit(new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>()));
+
+        _fixture.SentryOptions.HasSerilogScopeEventProcessor().Should().BeTrue();
+    }
+
+    [Fact]
+    public void Ctor_DisabledHub_DoesNotRegisterScopeEventProcessor()
+    {
+        _fixture.Hub.IsEnabled.Returns(false);
+
+        _ = _fixture.GetSut();
+
+        _fixture.SentryOptions.HasSerilogScopeEventProcessor().Should().BeFalse();
+    }
+
+    [Fact]
+    public void Ctor_UseSerilogAlreadyCalled_DoesNotRegisterASecondProcessor()
+    {
+        _fixture.SentryOptions.UseSerilog();
+
+        _ = _fixture.GetSut();
+
+        _fixture.SentryOptions.EventProcessors
+            .Count(p => p.Type == typeof(SerilogScopeEventProcessor))
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void Emit_SdkDiagnosticArrivesWhileEmitting_IsIgnored()
+    {
+        var sut = _fixture.GetSut();
+        var sdkDiagnostic = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Warning, null, MessageTemplate.Empty,
+            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry.ISentryClient")) });
+        _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>())).Do(_ => sut.Emit(sdkDiagnostic));
+
+        sut.Emit(new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>()));
+
+        _fixture.DiagnosticLogger.Entries
+            .Should().NotContain(e => e.Message.Contains("Reentrant log event detected"));
+    }
+
+    [Fact]
+    public void Emit_ApplicationLogArrivesWhileEmitting_ReportsReentrancy()
+    {
+        var sut = _fixture.GetSut();
+        var applicationLog = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Warning, null, MessageTemplate.Empty,
+            new[] { new LogEventProperty("SourceContext", new ScalarValue("MyApp.Service")) });
+        _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>())).Do(_ => sut.Emit(applicationLog));
+
+        sut.Emit(new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>()));
+
+        _fixture.DiagnosticLogger.Entries
+            .Should().Contain(e => e.Message.Contains("Reentrant log event detected"));
+    }
+
+    [Fact]
     public void Emit_WithFormat_EventCaptured()
     {
         const string expectedMessage = "Test {structured} log";
