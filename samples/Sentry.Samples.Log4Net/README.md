@@ -2,8 +2,8 @@
 
 This is a simple console application that demonstrates how you can add Sentry to your applications using log4net.
 
-`Program.cs` doesn't have any reference to Sentry. In fact, it doesn't even include a `using Sentry;` directive.
-The integration is simply done by adding the [Sentry.Log4Net](https://www.nuget.org/packages/Sentry.Log4Net) package to you project and configuring the appender via xml.
+The Sentry SDK is initialised via the call to `SentrySdk.Init` in `Program.cs`. Log events are sent to Sentry by adding the
+[Sentry.Log4Net](https://www.nuget.org/packages/Sentry.Log4Net) package to your project and configuring the appender via xml.
 
 It's also possible to use the SDK directly on your app as the documentation describes.
 If you for example call `SentrySdk.AddBreadcrumb("crumb")`, all log4net events will include that breadcrumb.
@@ -12,7 +12,7 @@ If you for example call `SentrySdk.AddBreadcrumb("crumb")`, all log4net events w
 
 ## Running this sample
 
-> First modify the `app.config` and add **your own DSN**. You can get one at   [sentry.io](sentry.io). This will make sure you can see the result of running this app by looking at what this creates in Sentry.
+> First modify `Program.cs` and add **your own DSN**. You can get one at   [sentry.io](sentry.io). This will make sure you can see the result of running this app by looking at what this creates in Sentry.
 
 Now you're ready to run the code.
 
