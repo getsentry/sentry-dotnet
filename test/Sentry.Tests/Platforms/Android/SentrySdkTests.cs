@@ -112,5 +112,28 @@ public class SentrySdkTests
         beforeSend.DidNotReceive().Invoke(Arg.Any<SentryEvent>(), Arg.Any<SentryHint>());
         result.Should().Be(evt);
     }
+
+    [Fact]
+    public void BeforeSendWrapper_BeforeSendThrows_ReturnsNullAndLogsError()
+    {
+        // Arrange
+        var exception = new InvalidOperationException("callback failed");
+        var logger = new InMemoryDiagnosticLogger();
+        var options = new SentryOptions { Debug = true, DiagnosticLogger = logger };
+        options.Native.EnableBeforeSend = true;
+        options.SetBeforeSend((SentryEvent _, SentryHint _) => throw exception);
+        var evt = new SentryEvent();
+        var hint = new SentryHint();
+
+        // Act
+        var result = SentrySdk.BeforeSendWrapper(options).Invoke(evt, hint);
+
+        // Assert
+        result.Should().BeNull();
+        logger.Entries.Should().ContainSingle(entry =>
+            entry.Level == SentryLevel.Error &&
+            entry.Exception == exception &&
+            entry.Message == "Android BeforeSend callback failed.");
+    }
 }
 #endif

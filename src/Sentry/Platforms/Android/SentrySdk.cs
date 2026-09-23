@@ -238,9 +238,21 @@ public static partial class SentrySdk
             }
 
             // Call the user defined BeforeSend callback, if it's defined - otherwise return the event as-is
-            return (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
-                ? beforeSend(evt, hint)
-                : evt;
+            if (!options.Native.EnableBeforeSend || options.BeforeSendInternal is not { } beforeSend)
+            {
+                return evt;
+            }
+
+            try
+            {
+                return beforeSend(evt, hint);
+            }
+            catch (Exception e)
+            {
+                // Dropping the event is left to the Java SDK, which also records the client report for it.
+                options.LogError(e, "Android BeforeSend callback failed.");
+                return null;
+            }
         };
     }
 
