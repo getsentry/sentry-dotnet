@@ -50,9 +50,9 @@ jobs:
                 - /tmp/node24:/__e/node24
           - os: macos-26 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
-          - os: windows-latest
+          - os: windows-2025-vs2026
             rid: win-x64
-          - os: windows-11-arm
+          - os: windows-11-vs2026-arm
             rid: win-arm64
 
     steps:
@@ -121,10 +121,11 @@ jobs:
           - os: macos-26 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
             slnf: Sentry-CI-Build-macOS.slnf
-          - os: windows-latest
+          # .NET 10+ Native AOT requires VS 2026 (https://github.com/dotnet/runtime/issues/133835)
+          - os: windows-2025-vs2026
             rid: win-x64
             slnf: Sentry-CI-Build-Windows.slnf
-          - os: windows-11-arm
+          - os: windows-11-vs2026-arm
             rid: win-arm64
             slnf: Sentry-CI-Build-Windows-arm64.slnf
 
@@ -385,7 +386,7 @@ jobs:
         include:
           - os: ubuntu-24.04-arm
             rid: linux-arm
-          - os: windows-latest
+          - os: windows-2025-vs2026
             rid: win-x86
 
     steps:

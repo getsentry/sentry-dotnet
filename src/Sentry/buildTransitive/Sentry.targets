@@ -222,7 +222,11 @@
 
     <PropertyGroup>
       <SentryCLIUploadItems>$(SentryCLIUploadDirectory)</SentryCLIUploadItems>
+      <!--
+        Apple SDK's trimmer output directory renamed from "linked" to "postprocessed-assemblies" in .NET 11 RC 1.
+      -->
       <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)linked')">$(SentryCLIUploadItems) $(IntermediateOutputPath)linked/*.pdb</SentryCLIUploadItems>
+      <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(SentryCLIUploadItems) $(IntermediateOutputPath)postprocessed-assemblies/*.pdb</SentryCLIUploadItems>
       <SentryCLIUploadItems Condition="'@(AndroidNativeSymbolFilesExceptDll)' != ''">$(SentryCLIUploadItems) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')</SentryCLIUploadItems>
     </PropertyGroup>
 
