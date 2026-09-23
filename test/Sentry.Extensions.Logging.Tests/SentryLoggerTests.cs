@@ -215,6 +215,25 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void LogCritical_EventAndBreadcrumbLevelsBothMet_EvaluatesFilterOnce()
+    {
+        var invocations = 0;
+        _fixture.Options.MinimumEventLevel = LogLevel.Critical;
+        _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Debug;
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) =>
+        {
+            invocations++;
+            return false;
+        });
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        invocations.Should().Be(1);
+    }
+
+    [Fact]
     public void LogCritical_FilterThrows_DoesNotCaptureEventAndLogsError()
     {
         var exception = new InvalidOperationException("filter failed");
