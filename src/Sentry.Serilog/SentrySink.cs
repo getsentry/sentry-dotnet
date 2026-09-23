@@ -11,7 +11,7 @@ internal sealed partial class SentrySink : ILogEventSink
     private readonly Func<IHub> _hubAccessor;
     private readonly ISystemClock _clock;
 
-    private int _checkedUseSerilog;
+    private int _registeredScopeEventProcessor;
 
     public SentrySink(SentrySerilogOptions options)
         : this(
@@ -29,12 +29,24 @@ internal sealed partial class SentrySink : ILogEventSink
         _options = options;
         _hubAccessor = hubAccessor;
         _clock = clock;
+
+        if (hubAccessor() is { IsEnabled: true } hub && hub.GetSentryOptions() is { } sentryOptions)
+        {
+            EnsureSerilogScopeEventProcessor(sentryOptions);
+        }
     }
 
     private static AsyncLocal<bool> isReentrant = new();
 
     public void Emit(LogEvent logEvent)
     {
+        // Must precede the reentrancy check below to avoid an infinite recursion
+        logEvent.TryGetSourceContext(out var context);
+        if (SentrySdkNamespaces.IsSentrySdk(context))
+        {
+            return;
+        }
+
         if (isReentrant.Value)
         {
             _hubAccessor()?.GetSentryOptions()?.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
@@ -44,7 +56,7 @@ internal sealed partial class SentrySink : ILogEventSink
         isReentrant.Value = true;
         try
         {
-            InnerEmit(logEvent);
+            InnerEmit(logEvent, context);
         }
         finally
         {
@@ -52,16 +64,8 @@ internal sealed partial class SentrySink : ILogEventSink
         }
     }
 
-    private void InnerEmit(LogEvent logEvent)
+    private void InnerEmit(LogEvent logEvent, string? context)
     {
-        if (logEvent.TryGetSourceContext(out var context))
-        {
-            if (SentrySdkNamespaces.IsSentrySdk(context))
-            {
-                return;
-            }
-        }
-
         if (_hubAccessor() is not { IsEnabled: true } hub)
         {
             return;
@@ -70,7 +74,7 @@ internal sealed partial class SentrySink : ILogEventSink
         var options = hub.GetSentryOptions();
         if (options is not null)
         {
-            WarnIfUseSerilogNotCalled(options);
+            EnsureSerilogScopeEventProcessor(options);
         }
 
         var exception = logEvent.Exception;
@@ -131,19 +135,23 @@ internal sealed partial class SentrySink : ILogEventSink
         }
     }
 
-    private void WarnIfUseSerilogNotCalled(SentryOptions options)
+    private void EnsureSerilogScopeEventProcessor(SentryOptions options)
     {
-        if (Interlocked.Exchange(ref _checkedUseSerilog, 1) != 0)
+        if (Interlocked.Exchange(ref _registeredScopeEventProcessor, 1) != 0)
         {
             return;
         }
 
-        if (!options.HasSerilogScopeEventProcessor())
+        if (!options.TryUseSerilog())
         {
-            options.LogWarning(
-                "The Sentry sink for Serilog is in use, but UseSerilog() was not called on the options used to initialise Sentry. " +
-                "Properties from the Serilog LogContext will not be applied to Sentry events.");
+            return;
         }
+
+        options.LogWarning(
+            "The Sentry sink for Serilog registered the Serilog scope event processor automatically, because " +
+            "UseSerilog() was not called on the options used to initialise Sentry. Events captured before the sink " +
+            "received its first log event will not have properties from the Serilog LogContext applied. Call " +
+            "UseSerilog() when initialising Sentry to apply them to every event.");
     }
 
     private string FormatLogEvent(LogEvent logEvent)

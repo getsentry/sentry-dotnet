@@ -5,6 +5,8 @@ namespace Sentry.Serilog;
 /// </summary>
 public static class SentryOptionExtensions
 {
+    private static readonly Lock Sync = new();
+
     /// <summary>
     /// Enables the Serilog integration, so that properties from the Serilog <c>LogContext</c> get applied to all Sentry
     /// events.
@@ -15,16 +17,23 @@ public static class SentryOptionExtensions
     /// do this for you. Calling this more than once has no additional effect.
     /// </remarks>
     /// <param name="options">The options used to initialise Sentry.</param>
-    public static void UseSerilog(this SentryOptions options)
-    {
-        if (options.HasSerilogScopeEventProcessor())
-        {
-            return;
-        }
+    public static void UseSerilog(this SentryOptions options) => options.TryUseSerilog();
 
-        options.AddEventProcessor(new SerilogScopeEventProcessor(options));
+    // Sinks sharing one set of options can reach this concurrently, so the check and the add have to be atomic.
+    internal static bool TryUseSerilog(this SentryOptions options)
+    {
+        lock (Sync)
+        {
+            if (options.HasSerilogScopeEventProcessor())
+            {
+                return false;
+            }
+
+            options.AddEventProcessor(new SerilogScopeEventProcessor(options));
+            return true;
+        }
     }
 
     internal static bool HasSerilogScopeEventProcessor(this SentryOptions options)
-        => options.EventProcessors.Exists(processor => processor.Type == typeof(SerilogScopeEventProcessor));
+        => options.EventProcessors.Any(processor => processor.Type == typeof(SerilogScopeEventProcessor));
 }
