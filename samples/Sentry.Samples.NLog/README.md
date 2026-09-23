@@ -2,20 +2,17 @@
 
 This is a simple console application that demonstrates how you can add Sentry to your application using NLog.
 
-This project attempts to sample the integration by using code only and also via the configuration file.
-In both cases **you need to add your own DSN** so you can see the events sent in your Sentry project.
+This project demonstrates configuring Sentry and NLog via code and configuration.
+The Sentry target configures NLog to send logs to Sentry. The Sentry SDK itself is initialised via the call to `SentrySdk.Init`
+in `Program.cs`, so **you need to add your own DSN** there to see the events sent in your Sentry project.
 
 You can get your [Sentry DSN at sentry.io](https://sentry.io).
-Make sure to add it to both `NLog.config` and `Program.cs` in this directory.
 
 ## Configuration of NLog.config
 The following options are available for the NLog Sentry Target:
 
 ```xml
 <target xsi:type="Sentry" name="sentry"
-    dsn="https://123@sentry.io/456"
-    environment="${environment:cached=true:ASPNETCORE_ENVIRONMENT}"
-    release="${assembly-version:cached=true:type=File}"
     layout="${message}"
     includeEventProperties="True"
     includeMdlc="False"
@@ -25,17 +22,9 @@ The following options are available for the NLog Sentry Target:
     ignoreEventsWithNoException="False"
     includeEventDataOnBreadcrumbs="False"
     includeEventPropertiesAsTags="True"
-    initializeSdk="True"
-    flushTimeoutSeconds="15"
     >
         <tag name="exception" layout="${exception:format=shorttype}" includeEmptyValue="false" /><!-- Repeatable SentryEvent Tags -->
         <contextproperty name="threadid" layout="${threadid}" includeEmptyValue="true" />        <!-- Repeatable SentryEvent Data -->
-        <!-- Advanced options can be configured here-->
-        <options
-            sendDefaultPii="False"
-            isEnvironmentUser="True"
-            attachStacktrace="False"
-        />
         <!-- Optionally specify user properties via NLog (here using MappedDiagnosticsLogicalContext as an example) -->
         <user
             id="${mdlc:item=id}" 
@@ -48,10 +37,6 @@ The following options are available for the NLog Sentry Target:
 </target>
 ```
 
-* **dsn** - Sentry Data Source Name Address. See also https://sentry.io
-* **initializeSdk** -  Whether the NLog target should initialize the Sentry SDK (Using Dsn). Default: _True_
-* **environment** - Application Environment sent to Sentry
-* **release** - Application Release Version sent to Sentry
 * **layout** - NLog Layout for rendering SentryEvent message. Default: _${message}_
 * **includeEventProperties** - Include LogEvent properties as Data on SentryEvent. Default: _True_
 * **includeEventPropertiesAsTags** - Include LogEvent properties as extra Tags on SentryEvent. Default: _False_
@@ -61,17 +46,12 @@ The following options are available for the NLog Sentry Target:
 * **minimumEventLevel** - Send NLog LogEvents as SentryEvent when matching severity (or worse). Default: _Error_
 * **minimumBreadcrumbLevel** - Send NLog LogEvents as Breadcrumbs when matching severity (or worse). Default: _Info_
 * **ignoreEventsWithNoException** - Ignore NLog LogEvents without an exception. Default: _False_
-* **flushTimeoutSeconds** - Flush timeout in seconds before aborting flush to Sentry. Default: _15_
 * **user**
    * **id**
    * **username**
    * **email**
    * **ipAddress**
    * **other** - Any arbitrary key-value pairs to be included as properties for a user on every event.
-* **options**
-   * **sendDefaultPii** - Whether to include default Personal Identifiable information (UserName / IP-Address). Default: _False_
-   * **isEnvironmentUser** - Lookup Environment.User if having enabled **sendDefaultPii**. Default: _True_
-   * **attachStacktrace** - Whether to send the stack trace of a event captured without an exception. Default: _False_
 
 There is filtering logic in the Sentry Target that is usually handled by NLog Logging Rules and Filters.
 Mostly because the same Sentry Target is writing both breadcrumbs and actual SentryEvents.

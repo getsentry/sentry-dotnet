@@ -7,7 +7,7 @@ public partial class SentryTargetTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Write_StructuredLogging_UseHubOptionsOverTargetOptions(bool isEnabled)
+    public void Write_StructuredLogging_RequiresHubOptions(bool isEnabled)
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
@@ -55,8 +55,8 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Environment = "test-environment";
-        _fixture.Options.Release = "test-release";
+        _fixture.SentryOptions.Environment = "test-environment";
+        _fixture.SentryOptions.Release = "test-release";
 
         if (withActiveSpan)
         {
@@ -98,8 +98,8 @@ public partial class SentryTargetTests
         log.Attributes.ShouldContain("sentry.environment", "test-environment");
         log.Attributes.ShouldContain("sentry.release", "test-release");
         log.Attributes.ShouldContain("sentry.origin", "auto.log.nlog");
-        log.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
-        log.Attributes.ShouldContain("sentry.sdk.version", SentryTarget.NameAndVersion.Version);
+        log.Attributes.ShouldContain("sentry.sdk.name", SdkVersion.Instance.Name!);
+        log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version!);
         log.Attributes.ShouldContain("category.name", "sentry");
 
         log.Attributes.ShouldContain("property.Text-Property-Key", "Text-Property-Value");

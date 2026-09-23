@@ -8,13 +8,13 @@ public partial class SentryTargetTests
 
     private class Fixture
     {
-        public SentryNLogOptions Options { get; } = new() { Dsn = ValidDsn };
+        public SentryNLogOptions Options { get; } = new();
+
+        public SentryOptions SentryOptions { get; } = new() { Dsn = ValidDsn };
 
         public IHub Hub { get; } = Substitute.For<IHub>();
 
         public Func<IHub> HubAccessor { get; set; }
-
-        public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
 
         public Scope Scope { get; }
 
@@ -24,7 +24,7 @@ public partial class SentryTargetTests
             HubAccessor = () => Hub;
             Scope = new Scope(new SentryOptions());
             Hub.SubstituteConfigureScope(Scope);
-            SentryClientExtensions.SentryOptionsForTestingOnly = Options;
+            SentryClientExtensions.SentryOptionsForTestingOnly = SentryOptions;
         }
 
         public Target GetTarget(bool asyncTarget = false)
@@ -32,11 +32,9 @@ public partial class SentryTargetTests
             var target = new SentryTarget(
                 Options,
                 HubAccessor,
-                SdkDisposeHandle,
                 new MockClock())
             {
                 Name = "sentry",
-                Dsn = Options.Dsn ?? Options.DsnLayout,
             };
 
             if (asyncTarget)
@@ -77,9 +75,9 @@ public partial class SentryTargetTests
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
                     </extensions>
                     <targets>
-                        <target type='Sentry' name='sentry' dsn='{ValidDsn}' release='1.2.3' environment='test'>
+                        <target type='Sentry' name='sentry' minimumEventLevel='Warn' ignoreEventsWithNoException='true'>
                             <options>
-                                <attachStacktrace>True</attachStacktrace>
+                                <includeEventPropertiesAsTags>True</includeEventPropertiesAsTags>
                             </options>
                         </target>
                     </targets>
@@ -92,14 +90,9 @@ public partial class SentryTargetTests
 
         var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
         Assert.NotNull(t);
-        if (t.Options.Dsn != null)
-        {
-            Assert.Equal(ValidDsn, t.Options.Dsn);
-        }
-
-        Assert.Equal("test", t.Options.Environment);
-        Assert.Equal("1.2.3", t.Options.Release);
-        Assert.True(t.Options.AttachStacktrace);
+        Assert.Equal(LogLevel.Warn, t.Options.MinimumEventLevel);
+        Assert.True(t.Options.IgnoreEventsWithNoException);
+        Assert.True(t.Options.IncludeEventPropertiesAsTags);
     }
 
     [Fact]
@@ -111,7 +104,7 @@ public partial class SentryTargetTests
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
                     </extensions>
                     <targets>
-                        <target type='Sentry' name='sentry' dsn='{ValidDsn}'>
+                        <target type='Sentry' name='sentry'>
                             <user username='myUser'>
                                 <other name='mood' layout='joyous'/>
                             </user>
@@ -126,7 +119,6 @@ public partial class SentryTargetTests
 
         var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
         Assert.NotNull(t);
-        Assert.Equal(ValidDsn, t.Options.Dsn);
         Assert.Equal("myUser", t.User?.Username?.ToString());
 
         var other = t.User?.Other;
@@ -137,27 +129,8 @@ public partial class SentryTargetTests
     }
 
     [Fact]
-    public void Shutdown_DisposesSdk()
+    public void Shutdown_DoesNotThrow()
     {
-        _fixture.Options.InitializeSdk = false;
-        var target = _fixture.GetTarget();
-        LogManager.Setup().LoadConfiguration(c => c.ForLogger().WriteTo(target));
-
-        var sut = LogManager.GetCurrentClassLogger();
-
-        sut.Error(DefaultMessage);
-
-        _fixture.SdkDisposeHandle.DidNotReceive().Dispose();
-
-        LogManager.Shutdown();
-
-        _fixture.SdkDisposeHandle.Received(1).Dispose();
-    }
-
-    [Fact]
-    public void Shutdown_NoDisposeHandleProvided_DoesNotThrow()
-    {
-        _fixture.Options.InitializeSdk = false;
         var factory = _fixture.GetLoggerFactory();
 
         var sut = factory.GetCurrentClassLogger();
@@ -226,40 +199,6 @@ public partial class SentryTargetTests
         Assert.NotNull(b.Data);
         Assert.Equal(b.Data["exception_type"], expectedException.GetType().ToString());
         Assert.Equal(b.Data["exception_message"], expectedException.Message);
-    }
-
-    [Fact]
-    public void Log_NLogSdk_Name()
-    {
-        _fixture.Options.MinimumEventLevel = LogLevel.Info;
-        var logger = _fixture.GetLogger();
-
-        var expected = typeof(SentryTarget).Assembly.GetNameAndVersion();
-        logger.Info(DefaultMessage);
-
-        _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
-                                                   && e.Sdk.Version == expected.Version));
-    }
-
-    [Fact]
-    public void Log_NLogSdk_Packages()
-    {
-        _fixture.Options.MinimumEventLevel = LogLevel.Info;
-        var logger = _fixture.GetLogger();
-
-        SentryEvent actual = null;
-        _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
-            .Do(c => actual = c.Arg<SentryEvent>());
-
-        logger.Info(DefaultMessage);
-
-        var expected = typeof(SentryTarget).Assembly.GetNameAndVersion();
-
-        Assert.NotNull(actual);
-        var package = Assert.Single(actual.Sdk.Packages);
-        Assert.Equal("nuget:" + expected.Name, package.Name);
-        Assert.Equal(expected.Version, package.Version);
     }
 
     [Theory]
@@ -440,11 +379,12 @@ public partial class SentryTargetTests
     }
 
     [Fact]
-    public async Task LogManager_WhenFlushCalled_CallsSentryFlushAsync()
+    public async Task LogManager_WhenFlushCalled_FlushesHubWithSdkFlushTimeout()
     {
         var timeout = TimeSpan.FromSeconds(2);
+        var sdkFlushTimeout = TimeSpan.FromSeconds(3);
 
-        _fixture.Options.FlushTimeout = timeout;
+        _fixture.SentryOptions.FlushTimeout = sdkFlushTimeout;
         var factory = _fixture.GetLoggerFactory(asyncTarget: true);
 
         // Verify that it's asynchronous
@@ -474,69 +414,7 @@ public partial class SentryTargetTests
         Assert.True(tcs.Task.IsCompleted);
 
         testDisposable.Received().Dispose();
-        await hub.Received().FlushAsync(Arg.Any<TimeSpan>());
-    }
-
-    [SkippableFact]
-    public void InitializeTarget_InitializesSdk()
-    {
-#if SENTRY_DSN_DEFINED_IN_ENV
-        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
-#endif
-        _fixture.Options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
-        _fixture.SdkDisposeHandle = null;
-        _fixture.Options.InitializeSdk = true;
-
-        var logWriter = new StringWriter();
-
-        try
-        {
-            InternalLogger.LogWriter = logWriter;
-            InternalLogger.LogLevel = LogLevel.Debug;
-
-            _fixture.GetLoggerFactory();
-
-            var logOutput = logWriter.ToString();
-            Assert.Contains("Init called with an empty string as the DSN. Sentry SDK will be disabled.", logOutput);
-        }
-        finally
-        {
-            InternalLogger.LogWriter = null;
-            InternalLogger.LogLevel = LogLevel.Off;
-        }
-    }
-
-    [Fact]
-    public void Dsn_ReturnsDsnFromOptions_Null()
-    {
-        _fixture.Options.Dsn = null;
-        var target = (SentryTarget)_fixture.GetTarget();
-        Assert.Null(target.Dsn);
-    }
-
-    [Fact]
-    public void Dsn_ReturnsDsnFromOptions_Instance()
-    {
-        var expectedDsn = "https://a@sentry.io/1";
-        _fixture.Options.Dsn = expectedDsn;
-        var target = (SentryTarget)_fixture.GetTarget();
-        Assert.Equal(expectedDsn, target.Options.Dsn);
-    }
-
-    [Fact]
-    public void Dsn_SupportsNLogLayout_Lookup()
-    {
-        var expectedDsn = "https://a@sentry.io/1";
-        var target = (SentryTarget)_fixture.GetTarget();
-        target.Dsn = "${var:mydsn}";
-        var logFactory = new LogFactory();
-        var logConfig = new LoggingConfiguration(logFactory)
-        {
-            Variables = { ["mydsn"] = expectedDsn }
-        };
-        logConfig.AddRuleForAllLevels(target);
-        logFactory.Configuration = logConfig;
-        Assert.Equal(expectedDsn, target.Options.Dsn);
+        await hub.Received().FlushAsync(sdkFlushTimeout);
     }
 
     [Fact]
@@ -663,64 +541,12 @@ public partial class SentryTargetTests
     }
 
     [Fact]
-    public void ShutdownTimeoutSeconds_ValueFromOptions()
-    {
-        const int expected = 60;
-        _fixture.Options.ShutdownTimeoutSeconds = expected;
-        var target = (SentryTarget)_fixture.GetTarget();
-        Assert.Equal(expected, target.ShutdownTimeoutSeconds);
-    }
-
-    [Fact]
-    public void ShutdownTimeoutSeconds_Default_2Seconds()
-    {
-        var target = (SentryTarget)_fixture.GetTarget();
-        Assert.Equal(2, target.ShutdownTimeoutSeconds);
-    }
-
-    [Fact]
-    public void ShutdownTimeoutSeconds_SetterReplacesOptions()
-    {
-        var expected = 60;
-        _fixture.Options.ShutdownTimeoutSeconds = int.MinValue;
-        var target = (SentryTarget)_fixture.GetTarget();
-        target.ShutdownTimeoutSeconds = expected;
-        Assert.Equal(expected, target.ShutdownTimeoutSeconds);
-    }
-
-    [Fact]
-    public void FlushTimeoutSeconds_ValueFromOptions()
-    {
-        var expected = 10;
-        _fixture.Options.FlushTimeout = TimeSpan.FromSeconds(expected);
-        var target = (SentryTarget)_fixture.GetTarget();
-        Assert.Equal(expected, target.FlushTimeoutSeconds);
-    }
-
-    [Fact]
-    public void FlushTimeoutSeconds_SetterReplacesOptions()
-    {
-        var expected = 100;
-        _fixture.Options.FlushTimeout = TimeSpan.FromSeconds(expected);
-        var target = (SentryTarget)_fixture.GetTarget();
-        target.FlushTimeoutSeconds = expected;
-        Assert.Equal(expected, target.FlushTimeoutSeconds);
-    }
-
-    [Fact]
     public void IgnoreEventsWithNoException_SetterReplacesOptions()
     {
         _fixture.Options.IgnoreEventsWithNoException = false;
         var target = (SentryTarget)_fixture.GetTarget();
         target.IgnoreEventsWithNoException = true;
         Assert.True(target.IgnoreEventsWithNoException);
-    }
-
-    [Fact]
-    public void FlushTimeoutSeconds_Default_15Seconds()
-    {
-        var target = (SentryTarget)_fixture.GetTarget();
-        Assert.Equal(15, target.FlushTimeoutSeconds);
     }
 
     [Fact]
