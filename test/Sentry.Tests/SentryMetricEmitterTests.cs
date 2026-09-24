@@ -162,7 +162,7 @@ public partial class SentryMetricEmitterTests : IDisposable
         entry.Message.Should().Be("The BeforeSendMetric callback threw an exception. The Metric will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
-        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.TraceMetric);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.TraceMetric);
     }
 
     [Fact]

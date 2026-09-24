@@ -188,7 +188,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("The configureLog callback threw an exception. The Log will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
-        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.LogItem);
     }
 
     [Fact]
@@ -205,7 +205,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("The BeforeSendLog callback threw an exception. The Log will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
-        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.LogItem);
     }
 
     [Fact]
