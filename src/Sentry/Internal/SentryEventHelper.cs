@@ -57,7 +57,7 @@ internal static class SentryEventHelper
         }
         catch (Exception e)
         {
-            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
             options.LogError(e, "The BeforeSend callback threw an exception. The event will be dropped.");
             return null;
         }

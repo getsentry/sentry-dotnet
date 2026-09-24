@@ -386,7 +386,7 @@ public partial class SentryClientTests : IDisposable
         id.Should().Be(SentryId.Empty);
         _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         _fixture.ClientReportRecorder.Received(1)
-            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
         _fixture.SentryOptions.ReceivedLogError(exception, "The BeforeSend callback threw an exception. The event will be dropped.");
     }
 
@@ -1788,9 +1788,9 @@ public partial class SentryClientTests : IDisposable
         // Assert
         _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         _fixture.ClientReportRecorder.Received(1)
-            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
         _fixture.ClientReportRecorder.Received(1)
-            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, transaction.Spans.Count + 1);
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, transaction.Spans.Count + 1);
         _fixture.SentryOptions.ReceivedLogError(exception, "The BeforeSendTransaction callback threw an exception. The transaction will be dropped.");
         transaction.Breadcrumbs.Should().BeEmpty();
     }

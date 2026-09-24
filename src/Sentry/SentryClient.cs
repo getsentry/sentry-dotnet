@@ -233,12 +233,9 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        processedTransaction = BeforeSendTransaction(processedTransaction, hint);
+        processedTransaction = BeforeSendTransaction(processedTransaction, hint, spanCount);
         if (processedTransaction is null) // Rejected transaction
         {
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, spanCount);
-            _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
             return;
         }
 
@@ -253,7 +250,7 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction, _options.DiagnosticLogger, attachments));
     }
 
-    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint)
+    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint, int spanCount)
     {
         if (_options.BeforeSendTransactionInternal is null)
         {
@@ -264,10 +261,20 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return _options.BeforeSendTransactionInternal.Invoke(transaction, hint);
+            var processedTransaction = _options.BeforeSendTransactionInternal.Invoke(transaction, hint);
+            if (processedTransaction is null) // Rejected transaction
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, spanCount);
+                _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
+            }
+
+            return processedTransaction;
         }
         catch (Exception e)
         {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, spanCount);
             _options.LogError(e, "The BeforeSendTransaction callback threw an exception. The transaction will be dropped.");
             return null;
         }
