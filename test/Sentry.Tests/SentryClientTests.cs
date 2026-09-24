@@ -431,7 +431,7 @@ public partial class SentryClientTests : IDisposable
         id.Should().Be(SentryId.Empty);
         _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         _fixture.ClientReportRecorder.Received(1)
-            .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
     }
 
     [Fact]
@@ -1173,7 +1173,7 @@ public partial class SentryClientTests : IDisposable
         result.Should().Be(CaptureFeedbackResult.DroppedByBeforeSendFeedback);
         id.Should().Be(SentryId.Empty);
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Feedback);
     }
 
     [Fact]
@@ -1761,7 +1761,7 @@ public partial class SentryClientTests : IDisposable
 
         // Assert
         _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        var reason = DiscardReason.EventProcessor;
+        var reason = DiscardReason.CallbackError;
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Transaction);
         var expectedDroppedSpanCount = transaction.Spans.Count + 1;
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Span, expectedDroppedSpanCount);

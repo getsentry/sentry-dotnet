@@ -23,7 +23,7 @@ internal static class SentryEventHelper
             }
             catch (Exception e)
             {
-                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, dataCategory);
+                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, dataCategory);
                 options.LogError(e, "Event processor {0} threw an exception. The event will be dropped.", processor.GetType().Name);
                 return null;
             }
@@ -84,7 +84,7 @@ internal static class SentryEventHelper
         }
         catch (Exception e)
         {
-            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Feedback);
             options.LogError(e, "The BeforeSendFeedback callback threw an exception. The feedback will be dropped.");
             return null;
         }

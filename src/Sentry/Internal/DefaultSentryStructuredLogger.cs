@@ -71,7 +71,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         }
         catch (Exception e)
         {
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.LogItem);
             _options.DiagnosticLogger?.LogError(e, "The configureLog callback threw an exception. The Log will be dropped.");
             return;
         }
@@ -95,7 +95,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
             }
             catch (Exception e)
             {
-                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.LogItem);
                 _options.DiagnosticLogger?.LogError(e, "The BeforeSendLog callback threw an exception. The Log will be dropped.");
                 return;
             }

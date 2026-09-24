@@ -80,7 +80,7 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
             }
             catch (Exception e)
             {
-                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.TraceMetric);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.TraceMetric);
                 _options.DiagnosticLogger?.LogError(e, "The BeforeSendMetric callback threw an exception. The Metric will be dropped.");
                 return;
             }
