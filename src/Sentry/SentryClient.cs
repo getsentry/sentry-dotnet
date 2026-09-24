@@ -212,7 +212,7 @@ public class SentryClient : ISentryClient, IDisposable
         var processedTransaction = transaction;
         foreach (var processor in scope.GetAllTransactionProcessors())
         {
-            processedTransaction = processor.DoProcessTransaction(transaction, hint);
+            processedTransaction = processor.DoProcessTransaction(processedTransaction, hint);
             if (processedTransaction == null) // Rejected transaction
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
