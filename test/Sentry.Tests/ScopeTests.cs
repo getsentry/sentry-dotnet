@@ -535,6 +535,24 @@ public class ScopeTests
     }
 
     [Fact]
+    public void AddBreadcrumb_BeforeBreadcrumbThrows_DropsBreadcrumbAndLogsError()
+    {
+        // Arrange
+        var exception = new InvalidOperationException("callback failed");
+        var options = new SentryOptions();
+        options.SetBeforeBreadcrumb((_, _) => throw exception);
+        options.AddDiagnosticLoggerSubstitute();
+        var scope = new Scope(options);
+
+        // Act
+        scope.AddBreadcrumb(new Breadcrumb());
+
+        // Assert
+        scope.Breadcrumbs.Should().BeEmpty();
+        options.ReceivedLogError(exception, "BeforeBreadcrumb callback failed.");
+    }
+
+    [Fact]
     public void AddBreadcrumb_ScopeAttachments_Copied_To_Hint()
     {
         // Arrange
