@@ -214,7 +214,7 @@ public class SentryClient : ISentryClient, IDisposable
         {
             try
             {
-                processedTransaction = processor.DoProcessTransaction(transaction, hint);
+                processedTransaction = processor.DoProcessTransaction(processedTransaction, hint);
             }
             catch (Exception e)
             {
