@@ -183,9 +183,11 @@ public static partial class SentrySdk
 
         // Set options for the managed SDK that depend on the Cocoa SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new CocoaEventProcessor());
+#pragma warning disable CS0618
         options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;
         options.ScopeObserver = new CocoaScopeObserver(options);
+#pragma warning restore CS0618
 
         // Note: don't use AddProfilingIntegration as it would print a warning if user used it too.
         if (!options.HasIntegration<ProfilingIntegration>())

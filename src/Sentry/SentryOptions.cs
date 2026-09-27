@@ -83,16 +83,25 @@ public class SentryOptions
     }
 #endif
 
+    internal const string ObsoleteInternalOption =
+        "This option is intended for use by Sentry SDKs only and will be made internal in version 7.0.0.";
+
     /// <summary>
     /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
     /// NOTE: EnableScopeSync must be set true for the scope to be synced.
     /// </summary>
+    [Obsolete(ObsoleteInternalOption)]
     public IScopeObserver? ScopeObserver { get; set; }
 
     /// <summary>
     /// If true, the SDK's scope will be synced with the observed scope.
     /// </summary>
+    [Obsolete(ObsoleteInternalOption)]
     public bool EnableScopeSync { get; set; }
+
+#pragma warning disable CS0618
+    internal IScopeObserver? SyncedScopeObserver => EnableScopeSync ? ScopeObserver : null;
+#pragma warning restore CS0618
 
     /// <summary>
     /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
@@ -1270,6 +1279,7 @@ public class SentryOptions
     /// <summary>
     /// Delegate which is used to check whether the application crashed during last run.
     /// </summary>
+    [Obsolete(ObsoleteInternalOption)]
     public Func<bool>? CrashedLastRun { get; set; }
 
 #if IOS || MACCATALYST

@@ -164,7 +164,10 @@ internal class GlobalSessionManager : ISessionManager
             SessionEndStatus? status = null;
             try
             {
-                status = _options.CrashedLastRun?.Invoke() switch
+#pragma warning disable CS0618
+                var crashedLastRun = _options.CrashedLastRun;
+#pragma warning restore CS0618
+                status = crashedLastRun?.Invoke() switch
                 {
                     // Native crash (if native SDK enabled):
                     // This takes priority - escalate to Crashed even if session had pending unhandled

@@ -98,7 +98,7 @@ static partial class SentrySdk
         // but native crashes are captured and uploaded by the native SDK without going through that pipeline.
         // Forward them to the scope observer so the native layer attaches them to crash reports.
         // Bypassing the .NET scope keeps scope.Tags identical between native and non-native apps.
-        if (options is { EnableScopeSync: true, ScopeObserver: { } observer } && options.DefaultTags.Count > 0)
+        if (options.SyncedScopeObserver is { } observer && options.DefaultTags.Count > 0)
         {
             foreach (var tag in options.DefaultTags)
             {

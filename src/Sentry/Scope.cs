@@ -107,11 +107,7 @@ public class Scope : IEventLike
     // Internal for testing.
     internal Action<SentryUser?> UserChanged => user =>
     {
-        if (Options.EnableScopeSync &&
-            Options.ScopeObserver is { } observer)
-        {
-            observer.SetUser(user);
-        }
+        Options.SyncedScopeObserver?.SetUser(user);
     };
 
     private SentryUser? _user;
@@ -165,10 +161,7 @@ public class Scope : IEventLike
                 field = value;
             }
 
-            if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
-            {
-                observer.SetEnvironment(field);
-            }
+            Options.SyncedScopeObserver?.SetEnvironment(field);
         }
     }
 
@@ -248,17 +241,17 @@ public class Scope : IEventLike
             {
                 _transaction.Value = value;
 
-                if (Options.EnableScopeSync)
+                if (Options.SyncedScopeObserver is { } observer)
                 {
                     if (_transaction.Value != null)
                     {
                         // If there is a transaction set we propagate the trace to the native layer
-                        Options.ScopeObserver?.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
+                        observer.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
                     }
                     else
                     {
                         // If the transaction is being removed from the scope, reset and sync the trace as well
-                        Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                        observer.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
                     }
                 }
             }
@@ -358,20 +351,14 @@ public class Scope : IEventLike
         }
 
         _breadcrumbs.Enqueue(breadcrumb);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
-        }
+        Options.SyncedScopeObserver?.AddBreadcrumb(breadcrumb);
     }
 
     /// <inheritdoc />
     public void SetExtra(string key, object? value)
     {
         _extra[key] = value;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetExtra(key, value);
-        }
+        Options.SyncedScopeObserver?.SetExtra(key, value);
     }
 
     /// <inheritdoc />
@@ -383,20 +370,14 @@ public class Scope : IEventLike
         }
 
         _tags[key] = value;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetTag(key, value);
-        }
+        Options.SyncedScopeObserver?.SetTag(key, value);
     }
 
     /// <inheritdoc />
     public void UnsetTag(string key)
     {
         _tags.TryRemove(key, out _);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.UnsetTag(key);
-        }
+        Options.SyncedScopeObserver?.UnsetTag(key);
     }
 
     /// <summary>
@@ -405,19 +386,13 @@ public class Scope : IEventLike
     public void AddAttachment(SentryAttachment attachment)
     {
         _attachments.Add(attachment);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.AddAttachment(attachment);
-        }
+        Options.SyncedScopeObserver?.AddAttachment(attachment);
     }
 
     internal void SetPropagationContext(SentryPropagationContext propagationContext)
     {
         PropagationContext = propagationContext;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetTrace(propagationContext.TraceId, propagationContext.SpanId);
-        }
+        Options.SyncedScopeObserver?.SetTrace(propagationContext.TraceId, propagationContext.SpanId);
     }
 
     /// <summary>
@@ -448,10 +423,7 @@ public class Scope : IEventLike
     public void ClearAttachments()
     {
         _attachments.Clear();
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.ClearAttachments();
-        }
+        Options.SyncedScopeObserver?.ClearAttachments();
     }
 
     /// <summary>

@@ -63,7 +63,9 @@ internal partial class BindableSentryOptions
     public void ApplyTo(SentryOptions options)
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
+#pragma warning disable CS0618
         options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
+#pragma warning restore CS0618
         options.EnableBackpressureHandling = EnableBackpressureHandling ?? options.EnableBackpressureHandling;
         options.TagFilters = TagFilters?.Select(s => new StringOrRegex(s)).ToList() ?? options.TagFilters;
         options.IgnoreTransactions = IgnoreTransactions?.Select(s => new StringOrRegex(s)).ToList() ?? options.IgnoreTransactions;

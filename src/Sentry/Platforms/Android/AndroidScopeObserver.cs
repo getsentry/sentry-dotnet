@@ -14,7 +14,9 @@ internal sealed class AndroidScopeObserver : IScopeObserver
         _options = options;
 
         // Chain any previous observer, but guard against circular reference.
+#pragma warning disable CS0618
         var observer = options.ScopeObserver;
+#pragma warning restore CS0618
         _innerObserver = observer is AndroidScopeObserver ? null : observer;
     }
 

@@ -6,6 +6,7 @@ namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggingOptionsSetupTests
 {
+#pragma warning disable CS0618
     [Fact]
     public void Configure_BindsConfigurationToOptions()
     {
@@ -168,4 +169,5 @@ public class SentryLoggingOptionsSetupTests
             actual.InitializeSdk.Should().Be(expected.InitializeSdk);
         }
     }
+#pragma warning restore CS0618
 }

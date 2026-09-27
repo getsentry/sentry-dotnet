@@ -1237,8 +1237,10 @@ public class SentrySdkTests : IDisposable
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
+#pragma warning disable CS0618
             ScopeObserver = observer,
             EnableScopeSync = true,
+#pragma warning restore CS0618
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
             InitNativeSdks = false,
         };
@@ -1261,8 +1263,10 @@ public class SentrySdkTests : IDisposable
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
+#pragma warning disable CS0618
             ScopeObserver = observer,
             EnableScopeSync = false,
+#pragma warning restore CS0618
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
             InitNativeSdks = false,
         };

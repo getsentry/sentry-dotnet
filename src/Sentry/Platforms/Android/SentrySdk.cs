@@ -215,9 +215,11 @@ public static partial class SentrySdk
         {
             options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.Android.LogCatIntegration, options.Android.LogCatMaxLines));
         }
+#pragma warning disable CS0618
         options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
         options.ScopeObserver = new AndroidScopeObserver(options);
+#pragma warning restore CS0618
         // Don't capture Java Runtime exceptions in the managed SDK, since we already capture them in the native SDK
         options.AddExceptionFilterForType<Java.Lang.RuntimeException>();
 

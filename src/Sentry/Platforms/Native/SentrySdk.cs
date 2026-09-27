@@ -18,8 +18,10 @@ public static partial class SentrySdk
         }
 
         // Setup future scope updates
+#pragma warning disable CS0618
         options.ScopeObserver = new NativeScopeObserver(options);
         options.EnableScopeSync = true;
+#pragma warning restore CS0618
 
         // TODO: Do an initial scope sync - we cannot do it now because scope is not propagated until a .NET event is being processed.
         // options.PostInitCallbacks.Add((IHub hub) => hub.ConfigureScope((scope) =>
@@ -53,7 +55,9 @@ public static partial class SentrySdk
                 options.DiagnosticLogger?.LogDebug("Native SDK reported: 'crashedLastRun': '{0}'", crashedLastRun);
             }
         }
+#pragma warning disable CS0618
         options.CrashedLastRun = () => crashedLastRun;
+#pragma warning restore CS0618
     }
 
     internal static void CloseNativeSdk() => C.Close();

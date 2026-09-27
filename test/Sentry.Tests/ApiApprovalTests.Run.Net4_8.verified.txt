@@ -812,6 +812,8 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
         public bool CaptureFailedRequests { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
+        [System.Obsolete("This option is intended for use by Sentry SDKs only and will be made internal in " +
+            "version 7.0.0.")]
         public System.Func<bool>? CrashedLastRun { get; set; }
         public System.Func<System.Net.Http.HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
         public bool Debug { get; set; }
@@ -830,6 +832,8 @@ namespace Sentry
         [System.Obsolete("Metrics are always enabled. This option is ignored and will be removed in version" +
             " 7.0.0. To drop metrics, use SetBeforeSendMetric and return null.")]
         public bool EnableMetrics { get; set; }
+        [System.Obsolete("This option is intended for use by Sentry SDKs only and will be made internal in " +
+            "version 7.0.0.")]
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
@@ -855,6 +859,8 @@ namespace Sentry
         public bool RequestBodyCompressionBuffered { get; set; }
         public System.IO.Compression.CompressionLevel RequestBodyCompressionLevel { get; set; }
         public float? SampleRate { get; set; }
+        [System.Obsolete("This option is intended for use by Sentry SDKs only and will be made internal in " +
+            "version 7.0.0.")]
         public Sentry.IScopeObserver? ScopeObserver { get; set; }
         public bool SendClientReports { get; set; }
         public bool SendDefaultPii { get; set; }
