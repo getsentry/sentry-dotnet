@@ -1639,6 +1639,42 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureTransaction_MultipleTransactionProcessors_EachReceivesThePreviousResult()
+    {
+        // Arrange
+        var first = Substitute.For<ISentryTransactionProcessor>();
+        var second = Substitute.For<ISentryTransactionProcessor>();
+        var replacement = new SentryTransaction("replaced by first", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+        first.Process(Arg.Any<SentryTransaction>()).Returns(replacement);
+        second.Process(Arg.Any<SentryTransaction>()).Returns(callInfo => callInfo.Arg<SentryTransaction>());
+        _fixture.SentryOptions.AddTransactionProcessor(first);
+        _fixture.SentryOptions.AddTransactionProcessor(second);
+
+        var transaction = new SentryTransaction("original", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(arg => envelope = arg)).Returns(true);
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction);
+
+        // Assert
+        second.Received(1).Process(replacement);
+        envelope.Should().NotBeNull();
+        var sent = envelope.Items.Select(i => i.Payload).OfType<JsonSerializable>()
+            .Select(p => p.Source).OfType<SentryTransaction>().Single();
+        sent.Name.Should().Be("replaced by first");
+    }
+
+    [Fact]
     public void CaptureTransaction_TransactionProcessor_ReceivesScopeAttachments()
     {
         // Arrange
