@@ -1279,6 +1279,10 @@ interface SentryObjCExperimentalOptions
     [Export("enableUnhandledCPPExceptionsV2")]
     bool EnableUnhandledCPPExceptionsV2 { get; set; }
 
+    // @property (nonatomic) BOOL enableNewURLLoaderSwizzling;
+    [Export("enableNewURLLoaderSwizzling")]
+    bool EnableNewURLLoaderSwizzling { get; set; }
+
     // @property (nonatomic) BOOL enableWatchdogTerminationsV2 __attribute__((deprecated("enableWatchdogTerminationsV2 is deprecated and will be removed in v10, where the improved watchdog termination tracking mechanism is enabled by default.")));
     [Export("enableWatchdogTerminationsV2")]
     bool EnableWatchdogTerminationsV2 { get; set; }
@@ -1489,7 +1493,7 @@ interface SentryObjCOptions
     [Export("sendClientReports")]
     bool SendClientReports { get; set; }
 
-    // @property (nonatomic) BOOL enableAppHangTracking __attribute__((deprecated("App Hang tracking is deprecated and will be removed in v10 because it can produce less relevant stack traces and false positives. Enable the MetricKit integration using ``SentrySDKOptions/enableMetricKit`` for system-provided hang diagnostics.", "enableMetricKit")));
+    // @property (nonatomic) BOOL enableAppHangTracking;
     [Export("enableAppHangTracking")]
     bool EnableAppHangTracking { get; set; }
 
