@@ -16,5 +16,5 @@ permissions:
 jobs:
   changelog-preview:
     if: false
-    uses: getsentry/craft/.github/workflows/changelog-preview.yml@55694f8bf3a0fd051e21a877f57b4c0dd8e946bb # 2.31.0
+    uses: getsentry/craft/.github/workflows/changelog-preview.yml@b5451aa5604f399ebaef98c0850bece7d062e288 # 2.31.1
     secrets: inherit
