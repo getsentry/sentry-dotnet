@@ -146,31 +146,31 @@ public class Scope : IEventLike
 
     private string? _environment;
 
-    /// <inheritdoc />
-    /// <remarks>Setting this to <c>null</c> reverts to the environment resolved from the options.</remarks>
-    [AllowNull]
+    /// <inheritdoc cref="IEventLike.Environment" />
     public string Environment
     {
         get => _environment ?? Options.SettingLocator.GetEnvironment();
-        set
+        set => SetEnvironment(value);
+    }
+
+    string? IEventLike.Environment
+    {
+        get => Environment;
+        set => SetEnvironment(value);
+    }
+
+    private void SetEnvironment(string? environment)
+    {
+        if (_environment == environment)
         {
-            if (value is null)
-            {
-                Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
-                value = Options.SettingLocator.GetEnvironment();
-            }
+            return;
+        }
 
-            if (_environment == value)
-            {
-                return;
-            }
+        _environment = environment;
 
-            _environment = value;
-
-            if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
-            {
-                observer.SetEnvironment(value);
-            }
+        if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
+        {
+            observer.SetEnvironment(Environment);
         }
     }
 
@@ -433,7 +433,7 @@ public class Scope : IEventLike
         User = new();
         Release = default;
         Distribution = default;
-        Environment = default;
+        SetEnvironment(null);
         TransactionName = default;
         Transaction = default;
         Fingerprint = Array.Empty<string>();
@@ -519,9 +519,9 @@ public class Scope : IEventLike
         other.Distribution ??= Distribution;
         if (other is Scope otherScope)
         {
-            if (otherScope._environment is null && _environment is not null)
+            if (otherScope._environment is null)
             {
-                otherScope.Environment = _environment;
+                otherScope.SetEnvironment(_environment);
             }
         }
         else
