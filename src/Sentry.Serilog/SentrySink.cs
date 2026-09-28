@@ -1,3 +1,5 @@
+using Serilog.Debugging;
+
 namespace Sentry.Serilog;
 
 /// <summary>
@@ -10,8 +12,15 @@ internal sealed partial class SentrySink : ILogEventSink
 
     private readonly Func<IHub> _hubAccessor;
     private readonly ISystemClock _clock;
+    private readonly UninitializedSdkWarning _uninitializedSdkWarning;
 
     private int _registeredScopeEventProcessor;
+
+    internal const string UninitializedSdkMessage =
+        "Sentry: the Serilog sink dropped a log event because Sentry is not initialized, but a DSN was found " +
+        "in the environment or in an assembly attribute. The sink no longer initializes the SDK: call " +
+        "SentrySdk.Init (or UseSentry via one of the integrations) at startup and UseSerilog() on those options. " +
+        "See https://docs.sentry.io/platforms/dotnet/guides/serilog/";
 
     public SentrySink(SentrySerilogOptions options)
         : this(
@@ -24,11 +33,14 @@ internal sealed partial class SentrySink : ILogEventSink
     internal SentrySink(
         SentrySerilogOptions options,
         Func<IHub> hubAccessor,
-        ISystemClock clock)
+        ISystemClock clock,
+        UninitializedSdkWarning? uninitializedSdkWarning = null)
     {
         _options = options;
         _hubAccessor = hubAccessor;
         _clock = clock;
+        _uninitializedSdkWarning = uninitializedSdkWarning
+                                   ?? new UninitializedSdkWarning(message => SelfLog.WriteLine("{0}", message));
 
         if (hubAccessor() is { IsEnabled: true } hub && hub.GetSentryOptions() is { } sentryOptions)
         {
@@ -68,6 +80,11 @@ internal sealed partial class SentrySink : ILogEventSink
     {
         if (_hubAccessor() is not { IsEnabled: true } hub)
         {
+            if (logEvent.Level >= _options.MinimumEventLevel)
+            {
+                _uninitializedSdkWarning.WarnOnce(UninitializedSdkMessage);
+            }
+
             return;
         }
 
