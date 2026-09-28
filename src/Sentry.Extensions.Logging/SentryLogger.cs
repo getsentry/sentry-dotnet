@@ -9,19 +9,28 @@ internal sealed class SentryLogger : ILogger
     private readonly IHub _hub;
     private readonly ISystemClock _clock;
     private readonly SentryLoggingOptions _options;
+    private readonly UninitializedSdkWarning _uninitializedSdkWarning;
 
     internal string CategoryName { get; }
+
+    internal const string UninitializedSdkMessage =
+        "Sentry: the Microsoft.Extensions.Logging integration dropped a log event because Sentry is not " +
+        "initialized, but a DSN was found in the environment or in an assembly attribute. The logging " +
+        "integration no longer initializes the SDK: call SentrySdk.Init (or UseSentry via one of the " +
+        "integrations) at startup. See https://docs.sentry.io/platforms/dotnet/guides/extensions-logging/";
 
     internal SentryLogger(
         string categoryName,
         SentryLoggingOptions options,
         ISystemClock clock,
-        IHub hub)
+        IHub hub,
+        UninitializedSdkWarning? uninitializedSdkWarning = null)
     {
         CategoryName = categoryName;
         _options = options;
         _clock = clock;
         _hub = hub;
+        _uninitializedSdkWarning = uninitializedSdkWarning ?? new UninitializedSdkWarning();
     }
 
 #if NET8_0_OR_GREATER
@@ -31,9 +40,10 @@ internal sealed class SentryLogger : ILogger
     public IDisposable BeginScope<TState>(TState state) => _hub.PushScope(state);
 #endif
 
-    public bool IsEnabled(LogLevel logLevel)
-        => _hub.IsEnabled
-           && logLevel != LogLevel.None
+    public bool IsEnabled(LogLevel logLevel) => _hub.IsEnabled && IsEnabledForLevel(logLevel);
+
+    private bool IsEnabledForLevel(LogLevel logLevel)
+        => logLevel != LogLevel.None
            && (logLevel >= _options.MinimumBreadcrumbLevel
                || logLevel >= _options.MinimumEventLevel);
 
@@ -44,7 +54,17 @@ internal sealed class SentryLogger : ILogger
         Exception? exception,
         Func<TState, Exception?, string>? formatter)
     {
-        if (!IsEnabled(logLevel))
+        if (!_hub.IsEnabled)
+        {
+            if (logLevel != LogLevel.None && ShouldCaptureEvent(logLevel, eventId, exception))
+            {
+                _uninitializedSdkWarning.WarnOnce(UninitializedSdkMessage);
+            }
+
+            return;
+        }
+
+        if (!IsEnabledForLevel(logLevel))
         {
             return;
         }

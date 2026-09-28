@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry.Extensions.Logging;
 
@@ -12,6 +13,7 @@ internal class SentryLoggerProvider : ILoggerProvider
 {
     private readonly ISystemClock _clock;
     private readonly SentryLoggingOptions _options;
+    private readonly UninitializedSdkWarning _uninitializedSdkWarning;
 
     internal IHub Hub { get; }
 
@@ -29,11 +31,13 @@ internal class SentryLoggerProvider : ILoggerProvider
     internal SentryLoggerProvider(
         IHub hub,
         ISystemClock clock,
-        SentryLoggingOptions options)
+        SentryLoggingOptions options,
+        UninitializedSdkWarning? uninitializedSdkWarning = null)
     {
         Hub = hub;
         _clock = clock;
         _options = options;
+        _uninitializedSdkWarning = uninitializedSdkWarning ?? new UninitializedSdkWarning();
     }
 
     /// <summary>
@@ -41,7 +45,8 @@ internal class SentryLoggerProvider : ILoggerProvider
     /// </summary>
     /// <param name="categoryName">Category name.</param>
     /// <returns>A logger.</returns>
-    public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, Hub);
+    public ILogger CreateLogger(string categoryName)
+        => new SentryLogger(categoryName, _options, _clock, Hub, _uninitializedSdkWarning);
 
     public void Dispose()
     {
