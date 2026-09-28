@@ -113,7 +113,7 @@ public static partial class SentrySdk
 
             if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
             {
-                o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb);
+                o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb, options);
             }
 
             // These options we have behind feature flags
