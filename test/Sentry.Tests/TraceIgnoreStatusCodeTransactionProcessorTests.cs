@@ -16,8 +16,6 @@ public class TraceIgnoreStatusCodeTransactionProcessorTests
 
     [Theory]
     [InlineData(301)]
-    [InlineData(302)]
-    [InlineData(303)]
     [InlineData(305)]
     [InlineData(307)]
     [InlineData(308)]
@@ -41,6 +39,8 @@ public class TraceIgnoreStatusCodeTransactionProcessorTests
     [Theory]
     [InlineData(200)]
     [InlineData(300)]
+    [InlineData(302)]
+    [InlineData(303)]
     [InlineData(304)]
     [InlineData(400)]
     [InlineData(405)]

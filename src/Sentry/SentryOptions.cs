@@ -949,12 +949,12 @@ public class SentryOptions
 
     /// <summary>
     /// <para>Transactions will be dropped if the HTTP Response status code matches any of the configured ranges.</para>
-    /// <para>Defaults to 301-303, 305-399 and 401-404 (redirects other than 304 Not Modified, plus 401 to 404 client errors).</para>
+    /// <para>Defaults to 301, 305-399 and 401-404. 302 and 303 are traced, as they commonly redirect after a successful form POST.</para>
     /// <para>Clear the collection to capture transactions regardless of status code.</para>
     /// </summary>
     public IList<HttpStatusCodeRange> TraceIgnoreStatusCodes { get; set; } = new List<HttpStatusCodeRange>
     {
-        (301, 303),
+        301,
         (305, 399),
         (401, 404)
     };
