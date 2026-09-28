@@ -8,6 +8,13 @@ namespace Sentry.Log4Net;
 public partial class SentryAppender : AppenderSkeleton
 {
     private readonly IHub _hub;
+    private readonly UninitializedSdkWarning _uninitializedSdkWarning;
+
+    internal const string UninitializedSdkMessage =
+        "Sentry: the Sentry appender for log4net dropped a log event because Sentry is not initialized, but a " +
+        "DSN was found in the environment or in an assembly attribute. The appender no longer initializes the " +
+        "SDK: call SentrySdk.Init (or UseSentry via one of the integrations) at startup. " +
+        "See https://docs.sentry.io/platforms/dotnet/guides/log4net/";
 
     internal const string ObsoleteDsn =
         "The Sentry appender no longer initializes the SDK, so a DSN can no longer be supplied to it. " +
@@ -42,9 +49,12 @@ public partial class SentryAppender : AppenderSkeleton
     public SentryAppender() : this(HubAdapter.Instance)
     { }
 
-    internal SentryAppender(IHub hub)
+    internal SentryAppender(IHub hub, UninitializedSdkWarning? uninitializedSdkWarning = null)
     {
         _hub = hub;
+        _uninitializedSdkWarning = uninitializedSdkWarning
+                                   ?? new UninitializedSdkWarning(
+                                       message => LogLog.Warn(typeof(SentryAppender), message));
     }
 
     /// <summary>
@@ -61,6 +71,11 @@ public partial class SentryAppender : AppenderSkeleton
 
         if (!_hub.IsEnabled)
         {
+            if (MinimumEventLevel is null || loggingEvent.Level >= MinimumEventLevel)
+            {
+                _uninitializedSdkWarning.WarnOnce(UninitializedSdkMessage);
+            }
+
             return;
         }
 
