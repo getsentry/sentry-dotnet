@@ -10,8 +10,15 @@ public sealed partial class SentryTarget : TargetWithContext
     internal Func<IHub> HubAccessor { get; }
 
     private readonly ISystemClock _clock;
+    private readonly UninitializedSdkWarning _uninitializedSdkWarning;
 
     internal static readonly string AdditionalGroupingKeyProperty = "AdditionalGroupingKey";
+
+    internal const string UninitializedSdkMessage =
+        "Sentry: the Sentry target for NLog dropped a log event because Sentry is not initialized, but a DSN " +
+        "was found in the environment or in an assembly attribute. The target no longer initializes the SDK: " +
+        "call SentrySdk.Init (or UseSentry via one of the integrations) at startup. " +
+        "See https://docs.sentry.io/platforms/dotnet/guides/nlog/";
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryTarget"/>.
@@ -31,11 +38,17 @@ public sealed partial class SentryTarget : TargetWithContext
     {
     }
 
-    internal SentryTarget(SentryNLogOptions options, Func<IHub> hubAccessor, ISystemClock clock)
+    internal SentryTarget(
+        SentryNLogOptions options,
+        Func<IHub> hubAccessor,
+        ISystemClock clock,
+        UninitializedSdkWarning? uninitializedSdkWarning = null)
     {
         Options = options;
         HubAccessor = hubAccessor;
         _clock = clock;
+        _uninitializedSdkWarning = uninitializedSdkWarning
+                                   ?? new UninitializedSdkWarning(message => InternalLogger.Warn("{0}", message));
 
         // Overrides default layout. Still will be explicitly overwritten if manually configured in the
         // NLog.config file.
@@ -251,6 +264,11 @@ public sealed partial class SentryTarget : TargetWithContext
         var hub = HubAccessor();
         if (!hub.IsEnabled)
         {
+            if (logEvent.Level >= Options.MinimumEventLevel)
+            {
+                _uninitializedSdkWarning.WarnOnce(UninitializedSdkMessage);
+            }
+
             return;
         }
 
