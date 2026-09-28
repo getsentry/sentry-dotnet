@@ -212,7 +212,18 @@ public class SentryClient : ISentryClient, IDisposable
         var processedTransaction = transaction;
         foreach (var processor in scope.GetAllTransactionProcessors())
         {
-            processedTransaction = processor.DoProcessTransaction(processedTransaction, hint);
+            try
+            {
+                processedTransaction = processor.DoProcessTransaction(processedTransaction, hint);
+            }
+            catch (Exception e)
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, spanCount);
+                _options.LogError(e, "Transaction processor {0} threw an exception. The transaction will be dropped.", processor.GetType().Name);
+                return;
+            }
+
             if (processedTransaction == null) // Rejected transaction
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
