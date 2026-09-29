@@ -29,7 +29,10 @@ public static class ServiceCollectionExtensions
 
         if (initializeSdk)
         {
-            services.TryAddSingleton<Func<IHub>>(c =>
+            // Replaces rather than TryAdd: the logging integration registers a non-initializing accessor, and
+            // whichever is registered first would otherwise win. Initializing has to take precedence.
+            services.RemoveAll<Func<IHub>>();
+            services.AddSingleton<Func<IHub>>(c =>
             {
                 var options = c.GetRequiredService<IOptions<TOptions>>().Value;
                 var hub = SentrySdk.InitHub(options);
