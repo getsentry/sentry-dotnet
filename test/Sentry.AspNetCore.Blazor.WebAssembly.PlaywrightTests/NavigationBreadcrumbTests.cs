@@ -104,4 +104,46 @@ public class NavigationBreadcrumbTests : IAsyncLifetime
 
         await page.CloseAsync();
     }
+
+    [Fact]
+    public async Task UseSentry_MinimumBreadcrumbLevel_AppliesToLogBreadcrumbs()
+    {
+        var page = await _browser!.NewPageAsync();
+
+        var envelopeReceived = new TaskCompletionSource<string>();
+
+        await page.RouteAsync("**/api/0/envelope/**", async route =>
+        {
+            var body = route.Request.PostData;
+            if (body != null && body.Contains("playwright-log-breadcrumbs"))
+            {
+                envelopeReceived.TrySetResult(body);
+            }
+            await route.FulfillAsync(new RouteFulfillOptions
+            {
+                Status = 200,
+                ContentType = "application/json",
+                Body = "{}"
+            });
+        });
+
+        await page.GotoAsync($"{_app.BaseUrl}/log-breadcrumbs");
+        await page.WaitForSelectorAsync("h1:has-text('Log Breadcrumbs')");
+        await page.ClickAsync("#btn-log-and-capture");
+
+        var envelopeBody = await envelopeReceived.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+        var eventPayload = SentryEnvelopeParser.ExtractEventFromEnvelope(envelopeBody);
+        eventPayload.Should().NotBeNull("expected an event payload in the Sentry envelope");
+
+        var messages = eventPayload.Value.GetProperty("breadcrumbs").EnumerateArray()
+            .Where(b => b.TryGetProperty("message", out _))
+            .Select(b => b.GetProperty("message").GetString())
+            .ToList();
+
+        messages.Should().Contain("warning-log-breadcrumb");
+        messages.Should().NotContain("info-log-breadcrumb", "MinimumBreadcrumbLevel is set to Warning in UseSentry");
+
+        await page.CloseAsync();
+    }
 }

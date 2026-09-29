@@ -8,6 +8,7 @@ builder.UseSentry(options =>
     // Fake DSN — Playwright intercepts requests before they reach the network
     options.Dsn = "https://key@o0.ingest.sentry.io/0";
     options.AutoSessionTracking = false;
+    options.MinimumBreadcrumbLevel = LogLevel.Warning;
 });
 
 builder.RootComponents.Add<App>("#app");
