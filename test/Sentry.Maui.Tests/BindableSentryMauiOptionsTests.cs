@@ -9,7 +9,7 @@ public class BindableSentryMauiOptionsTests : BindableTests<SentryMauiOptions>
     public void BindableProperties_MatchOptionsProperties()
     {
         var actual = GetPropertyNames<BindableSentryMauiOptions>();
-        AssertContainsAllOptionsProperties(actual);
+        AssertPropertiesMatchOptions(actual);
     }
 
     [Fact]

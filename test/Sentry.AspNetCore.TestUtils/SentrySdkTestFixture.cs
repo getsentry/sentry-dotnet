@@ -76,6 +76,8 @@ public abstract class SentrySdkTestFixture : IDisposable
 
     public void Dispose()
     {
+        HttpClient?.Dispose();
+        TestServer?.Dispose();
         SentrySdk.Close();
     }
 }

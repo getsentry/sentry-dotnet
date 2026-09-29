@@ -18,9 +18,23 @@ internal class SentryMauiScreenshotProcessor : ISentryEventProcessorWithHint
 
     public SentryEvent? Process(SentryEvent @event, SentryHint hint)
     {
-        if (!_options.BeforeCaptureInternal?.Invoke(@event, hint) ?? false)
+        if (_options.BeforeScreenshotCaptureInternal is { } beforeCapture)
         {
-            return @event;
+            bool shouldCapture;
+            try
+            {
+                shouldCapture = beforeCapture.Invoke(@event, hint);
+            }
+            catch (Exception e)
+            {
+                _options.LogError(e, "BeforeScreenshotCapture callback failed.");
+                return @event;
+            }
+
+            if (!shouldCapture)
+            {
+                return @event;
+            }
         }
 
         hint.Attachments.Add(new ScreenshotAttachment(_options));

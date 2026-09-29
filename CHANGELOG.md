@@ -1,5 +1,78 @@
 # Changelog
 
+## 6.11.1
+
+### Fixes 🐛
+
+- fix(cocoa): iOS and Mac Catalyst apps no longer crash in `[NSURLSessionTask cancel]` when a request is cancelled after it has already completed with `Native.EnableSwizzling` enabled (Cocoa SDK v9.29.0). Note that native crashes now set `mechanism.synthetic`, so expect a one-time regrouping of existing crash issues as your app adopts this version. by @github-actions in [#5596](https://github.com/getsentry/sentry-dotnet/pull/5596)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Native SDK to v0.16.8 by @github-actions in [#5600](https://github.com/getsentry/sentry-dotnet/pull/5600)
+- chore(deps): raise the OpenTelemetry floor to 1.12.0 by @jamescrosswell in [#5588](https://github.com/getsentry/sentry-dotnet/pull/5588)
+- chore(deps): update Java SDK to v8.57.0 by @github-actions in [#5590](https://github.com/getsentry/sentry-dotnet/pull/5590)
+- chore(deps): update CLI to v3.8.0 by @github-actions in [#5591](https://github.com/getsentry/sentry-dotnet/pull/5591)
+- chore(deps): update Java SDK to v8.56.0 by @github-actions in [#5562](https://github.com/getsentry/sentry-dotnet/pull/5562)
+- chore(deps): update Cocoa SDK to v9.28.0 by @github-actions in [#5561](https://github.com/getsentry/sentry-dotnet/pull/5561)
+- chore(deps): update Native SDK to v0.16.6 by @github-actions in [#5563](https://github.com/getsentry/sentry-dotnet/pull/5563)
+
+### Other
+
+- test: add ASP.NET Core blocking detection integration tests by @z0rimo in [#5578](https://github.com/getsentry/sentry-dotnet/pull/5578)
+
+## 6.11.0
+
+### Features ✨
+
+- feat: Expose StringOrRegex discriminator by @limbonaut in [#5543](https://github.com/getsentry/sentry-dotnet/pull/5543)
+- feat: Provide the exception in the Hint passed to BeforeBreadcrumb by @jamescrosswell in [#5523](https://github.com/getsentry/sentry-dotnet/pull/5523)
+
+### Fixes 🐛
+
+- fix: isolate TracesSampler callback failures by @elkampu in [#5545](https://github.com/getsentry/sentry-dotnet/pull/5545)
+- fix: validate envelope item payload lengths before allocating a read buffer by @thaildhe172591 in [#5541](https://github.com/getsentry/sentry-dotnet/pull/5541)
+- fix: discard corrupt cache files instead of looping on them (resulting in an OOM exception) by @lgarczyn in [#5507](https://github.com/getsentry/sentry-dotnet/pull/5507)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.27.0 by @github-actions in [#5539](https://github.com/getsentry/sentry-dotnet/pull/5539)
+- chore(deps): update Java SDK to v8.55.0 by @github-actions in [#5538](https://github.com/getsentry/sentry-dotnet/pull/5538)
+- chore(deps): update Native SDK to v0.16.5 by @github-actions in [#5532](https://github.com/getsentry/sentry-dotnet/pull/5532)
+
+## 6.10.0
+
+### Features ✨
+
+- feat: Logs sent via `SentrySdk.Logger` no longer require `EnableLogs` by @jamescrosswell in [#5512](https://github.com/getsentry/sentry-dotnet/pull/5512)
+- feat: `SentryOptions.EnableMetrics` is obsolete and ignored by @jamescrosswell in [#5509](https://github.com/getsentry/sentry-dotnet/pull/5509)
+
+### Fixes 🐛
+
+- fix: Prevent managed exceptions from leaking as NSExceptions, resulting in duplicate exception capture on iOS by @jpnurmi in [#5525](https://github.com/getsentry/sentry-dotnet/pull/5525)
+- fix(profiling): release the EventPipe session when the SDK shuts down by @jamescrosswell in [#5470](https://github.com/getsentry/sentry-dotnet/pull/5470)
+- fix: Memory leak in Sentry.Profiling due to EventLog interning tables growing indefinitely by @jamescrosswell in [#5503](https://github.com/getsentry/sentry-dotnet/pull/5503)
+- fix: Attachments not being sent properly when Spotlight is enabled by @XAN9xXx in [#5511](https://github.com/getsentry/sentry-dotnet/pull/5511)
+- fix: Heap dump files are now deleted from disk once they have been sent to Sentry by @XAN9xXx in [#5481](https://github.com/getsentry/sentry-dotnet/pull/5481)
+- fix: populate sentry.sdk.name and sentry.sdk.version for console apps by @zkasuran in [#5483](https://github.com/getsentry/sentry-dotnet/pull/5483)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Java SDK to v8.54.0 by @github-actions in [#5517](https://github.com/getsentry/sentry-dotnet/pull/5517)
+- chore(deps): update Cocoa SDK to v9.26.1 by @github-actions in [#5516](https://github.com/getsentry/sentry-dotnet/pull/5516)
+- chore(deps): update CLI to v3.7.0 by @github-actions in [#5520](https://github.com/getsentry/sentry-dotnet/pull/5520)
+- chore(deps): update Native SDK to v0.16.4 by @github-actions in [#5508](https://github.com/getsentry/sentry-dotnet/pull/5508)
+- chore(deps): update Java SDK to v8.53.0 by @github-actions in [#5484](https://github.com/getsentry/sentry-dotnet/pull/5484)
+
+### Other
+
+- deps: update perfview (removes the .il suffix from profile module names) by @jamescrosswell in [#5502](https://github.com/getsentry/sentry-dotnet/pull/5502)
+
 ## 6.9.0
 
 ### Features ✨

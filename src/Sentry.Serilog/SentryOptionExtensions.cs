@@ -12,9 +12,10 @@ public static class SentryOptionExtensions
     /// events.
     /// </summary>
     /// <remarks>
-    /// Call this in the options callback of whichever method you use to initialise Sentry (for example
-    /// <c>SentrySdk.Init</c> or <c>UseSentry</c>). The Sentry sink for Serilog does not initialise Sentry, so it cannot
-    /// do this for you. Calling this more than once has no additional effect.
+    /// Optional: the Sentry sink does this for you once it starts logging,
+    /// so only events captured before then miss the tags.
+    /// Call this in the options callback when initializing Sentry to include them from the first event.
+    /// Calling it more than once has no additional effect.
     /// </remarks>
     /// <param name="options">The options used to initialise Sentry.</param>
     public static void UseSerilog(this SentryOptions options) => options.TryUseSerilog();

@@ -12,7 +12,7 @@ using GraphQL.Telemetry;
 using GraphQL.Types;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Sentry.OpenTelemetry;
+using Sentry.OpenTelemetry.Exporter;
 using Sentry.Samples.GraphQL.Server.Notes;
 
 namespace Sentry.Samples.GraphQL.Server;
@@ -29,6 +29,15 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+#if SENTRY_DSN_DEFINED_IN_ENV
+        var dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
+                  ?? throw new InvalidOperationException("SENTRY_DSN environment variable is not set");
+#else
+        // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+        // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+        var dsn = SamplesShared.Dsn;
+#endif
+
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracerProviderBuilder =>
                 tracerProviderBuilder
@@ -36,21 +45,17 @@ public static class Program
                     .ConfigureResource(resource => resource.AddService("Sentry.Samples.GraphQL.Server"))
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddSentry() // <-- Ensure telemetry is sent to Sentry
+                    .AddSentryOtlpExporter(dsn) // <-- Ensure telemetry is sent to Sentry
                 );
 
         builder.WebHost.UseSentry(options =>
         {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-            // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
-            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-            options.Dsn = SamplesShared.Dsn;
-#endif
+            options.Dsn = dsn;
 
             options.TracesSampleRate = 1.0;
             options.Debug = true;
             options.SendDefaultPii = true;
-            options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+            options.UseOtlp(); // <-- Configure Sentry to use OpenTelemetry trace information
         });
 
         builder.Services

@@ -335,15 +335,24 @@ public class Scope : IEventLike
         {
             hint.AddAttachmentsFromScope(this);
 
-            if (beforeBreadcrumb(breadcrumb, hint) is { } processedBreadcrumb)
+            Breadcrumb? processedBreadcrumb;
+            try
             {
-                breadcrumb = processedBreadcrumb;
+                processedBreadcrumb = beforeBreadcrumb(breadcrumb, hint);
             }
-            else
+            catch (Exception e)
+            {
+                Options.LogError(e, "BeforeBreadcrumb callback failed.");
+                return;
+            }
+
+            if (processedBreadcrumb is null)
             {
                 // Callback returned null, which means the breadcrumb should be dropped
                 return;
             }
+
+            breadcrumb = processedBreadcrumb;
         }
 
         if (Options.MaxBreadcrumbs <= 0)

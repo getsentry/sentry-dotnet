@@ -85,7 +85,7 @@ public partial class SentryAppender : AppenderSkeleton
 
         if (MinimumEventLevel is not null && loggingEvent.Level < MinimumEventLevel)
         {
-            AddBreadcrumbFromLoggingEvent(loggingEvent);
+            AddBreadcrumbFromLoggingEvent(loggingEvent, exception);
             return;
         }
 
@@ -136,7 +136,7 @@ public partial class SentryAppender : AppenderSkeleton
         _hub.CaptureEvent(evt);
     }
 
-    private void AddBreadcrumbFromLoggingEvent(LoggingEvent loggingEvent)
+    private void AddBreadcrumbFromLoggingEvent(LoggingEvent loggingEvent, Exception? exception)
     {
         var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
         var category = loggingEvent.LoggerName;
@@ -145,7 +145,14 @@ public partial class SentryAppender : AppenderSkeleton
             .Where(kvp => kvp.Value != null)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString() ?? "");
 
-        _hub.AddBreadcrumb(message, category, type: null, data, level ?? default);
+        _hub.AddBreadcrumb(
+            clock: null,
+            message,
+            category,
+            type: null,
+            data,
+            level ?? default,
+            hint: exception.ToHint());
         return;
     }
 

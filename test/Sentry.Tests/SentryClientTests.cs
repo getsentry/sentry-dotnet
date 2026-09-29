@@ -373,6 +373,36 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_BeforeSendThrows_DropsEventAndRecordsDiscard()
+    {
+        var exception = new InvalidOperationException("callback failed");
+        _fixture.SentryOptions.SetBeforeSend((_, _) => throw exception);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        var id = sut.CaptureEvent(@event);
+
+        id.Should().Be(SentryId.Empty);
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+        _fixture.SentryOptions.ReceivedLogError(exception, "The BeforeSend callback threw an exception. The event will be dropped.");
+    }
+
+    [Fact]
+    public void CaptureEvent_BeforeSendThrows_DoesNotAttachFailureToEvent()
+    {
+        _fixture.SentryOptions.SetBeforeSend((_, _) => throw new InvalidOperationException("callback failed"));
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event);
+
+        @event.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
     public void CaptureEvent_EventProcessor_RejectEvent_RecordsDiscard()
     {
         var processor = Substitute.For<ISentryEventProcessor>();
@@ -385,6 +415,23 @@ public partial class SentryClientTests : IDisposable
 
         _fixture.ClientReportRecorder.Received(1)
             .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+    }
+
+    [Fact]
+    public void CaptureEvent_EventProcessorThrows_DropsEventAndRecordsDiscard()
+    {
+        var processor = Substitute.For<ISentryEventProcessor>();
+        processor.Process(Arg.Any<SentryEvent>()).Throws(new InvalidOperationException());
+
+        _fixture.SentryOptions.AddEventProcessor(processor);
+
+        var sut = _fixture.GetSut();
+        var id = sut.CaptureEvent(new SentryEvent());
+
+        id.Should().Be(SentryId.Empty);
+        _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
     }
 
     [Fact]
@@ -1126,7 +1173,7 @@ public partial class SentryClientTests : IDisposable
         result.Should().Be(CaptureFeedbackResult.DroppedByBeforeSendFeedback);
         id.Should().Be(SentryId.Empty);
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Feedback);
     }
 
     [Fact]
@@ -1639,6 +1686,42 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureTransaction_MultipleTransactionProcessors_EachReceivesThePreviousResult()
+    {
+        // Arrange
+        var first = Substitute.For<ISentryTransactionProcessor>();
+        var second = Substitute.For<ISentryTransactionProcessor>();
+        var replacement = new SentryTransaction("replaced by first", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+        first.Process(Arg.Any<SentryTransaction>()).Returns(replacement);
+        second.Process(Arg.Any<SentryTransaction>()).Returns(callInfo => callInfo.Arg<SentryTransaction>());
+        _fixture.SentryOptions.AddTransactionProcessor(first);
+        _fixture.SentryOptions.AddTransactionProcessor(second);
+
+        var transaction = new SentryTransaction("original", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now
+        };
+
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(arg => envelope = arg)).Returns(true);
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction);
+
+        // Assert
+        second.Received(1).Process(replacement);
+        envelope.Should().NotBeNull();
+        var sent = envelope.Items.Select(i => i.Payload).OfType<JsonSerializable>()
+            .Select(p => p.Source).OfType<SentryTransaction>().Single();
+        sent.Name.Should().Be("replaced by first");
+    }
+
+    [Fact]
     public void CaptureTransaction_TransactionProcessor_ReceivesScopeAttachments()
     {
         // Arrange
@@ -1693,6 +1776,59 @@ public partial class SentryClientTests : IDisposable
         // 1 for each span + one for the root transaction / span
         var expectedDroppedSpanCount = transaction.Spans.Count + 1;
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Span, expectedDroppedSpanCount);
+    }
+
+    [Fact]
+    public void CaptureTransaction_TransactionProcessorThrows_DropsTransactionAndRecordsDiscard()
+    {
+        // Arrange
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
+        processor.Process(Arg.Any<SentryTransaction>(), Arg.Any<SentryHint>()).Throws(new InvalidOperationException());
+        _fixture.SentryOptions.AddTransactionProcessor(processor);
+
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "test name", "test operation");
+        transaction.StartChild("span1");
+        transaction.StartChild("span2");
+        transaction.EndTimestamp = DateTimeOffset.Now; // finished
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(new SentryTransaction(transaction));
+
+        // Assert
+        _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        var reason = DiscardReason.CallbackError;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Transaction);
+        var expectedDroppedSpanCount = transaction.Spans.Count + 1;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Span, expectedDroppedSpanCount);
+    }
+
+    [Fact]
+    public void CaptureTransaction_BeforeSendTransactionThrows_DropsTransactionAndRecordsDiscard()
+    {
+        // Arrange
+        var exception = new InvalidOperationException("callback failed");
+        _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => throw exception);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+
+        var hub = Substitute.For<IHub>();
+        var tracer = new TransactionTracer(hub, "test name", "test operation");
+        tracer.StartChild("span1");
+        tracer.StartChild("span2");
+        tracer.EndTimestamp = DateTimeOffset.Now; // finished
+        var transaction = new SentryTransaction(tracer) { IsSampled = true };
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction);
+
+        // Assert
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, transaction.Spans.Count + 1);
+        _fixture.SentryOptions.ReceivedLogError(exception, "The BeforeSendTransaction callback threw an exception. The transaction will be dropped.");
+        transaction.Breadcrumbs.Should().BeEmpty();
     }
 
     [Fact]

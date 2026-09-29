@@ -8,7 +8,6 @@ namespace Sentry;
 internal partial class BindableSentryOptions
 {
     public bool? IsGlobalModeEnabled { get; set; }
-    public bool? EnableScopeSync { get; set; }
     public bool? EnableBackpressureHandling { get; set; }
     public List<string>? TagFilters { get; set; }
     public List<string>? IgnoreTransactions { get; set; }
@@ -43,7 +42,6 @@ internal partial class BindableSentryOptions
     public bool? DisableFileWrite { get; set; }
     public TimeSpan? InitCacheFlushTimeout { get; set; }
     public Dictionary<string, string>? DefaultTags { get; set; }
-    public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
     public bool? PropagateTraceparent { get; set; }
@@ -64,7 +62,6 @@ internal partial class BindableSentryOptions
     public void ApplyTo(SentryOptions options)
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
-        options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
         options.EnableBackpressureHandling = EnableBackpressureHandling ?? options.EnableBackpressureHandling;
         options.TagFilters = TagFilters?.Select(s => new StringOrRegex(s)).ToList() ?? options.TagFilters;
         options.IgnoreTransactions = IgnoreTransactions?.Select(s => new StringOrRegex(s)).ToList() ?? options.IgnoreTransactions;
