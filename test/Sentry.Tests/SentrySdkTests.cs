@@ -1462,6 +1462,44 @@ public class SentrySdkTests : IDisposable
         // Assert
         eventProcessor.Invoked.Should().BeTrue();
     }
+
+    [Fact]
+    public void ProcessOnBeforeSend_BeforeSendThrows_DropsNativeEvent()
+    {
+        // Arrange
+        var exception = new InvalidOperationException("callback failed");
+        var logger = new InMemoryDiagnosticLogger();
+        var options = new SentryOptions { Debug = true, DiagnosticLogger = logger };
+        options.SetBeforeSend((SentryEvent _, SentryHint _) => throw exception);
+
+        var native = new Sentry.CocoaSdk.SentryObjCEvent();
+
+        // Act
+        var result = SentrySdk.ProcessOnBeforeSend(options, native, Substitute.For<IHub>());
+
+        // Assert
+        result.Should().BeNull();
+        logger.Entries.Should().ContainSingle(entry =>
+            entry.Level == SentryLevel.Error &&
+            entry.Exception == exception &&
+            entry.Message == "The BeforeSend callback threw an exception. The event will be dropped.");
+    }
+
+    [Fact]
+    public void ProcessOnBeforeSend_BeforeSendReturnsEvent_KeepsNativeEvent()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        options.SetBeforeSend((SentryEvent @event, SentryHint _) => @event);
+
+        var native = new Sentry.CocoaSdk.SentryObjCEvent();
+
+        // Act
+        var result = SentrySdk.ProcessOnBeforeSend(options, native, Substitute.For<IHub>());
+
+        // Assert
+        result.Should().BeSameAs(native);
+    }
 #endif
 
     public void Dispose()
