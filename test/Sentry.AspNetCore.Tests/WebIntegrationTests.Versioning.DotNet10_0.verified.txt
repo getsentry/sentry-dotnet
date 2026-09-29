@@ -92,9 +92,7 @@
       }
     },
     {
-      Source: {
-        Length: 7
-      }
+      Source: {}
     }
   ]
 }
