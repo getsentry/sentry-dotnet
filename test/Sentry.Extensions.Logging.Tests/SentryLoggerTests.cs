@@ -59,6 +59,26 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void Log_BreadcrumbWithException_ProvidesExceptionInHint()
+    {
+        SentryHint hint = null;
+        _fixture.Scope.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
+        {
+            hint = h;
+            return breadcrumb;
+        });
+        var expectedException = new Exception("expected message");
+
+        var sut = _fixture.GetSut();
+
+        // LogLevel.Warning is below the default MinimumEventLevel, so only a breadcrumb is added
+        sut.Log<object>(LogLevel.Warning, default, null, expectedException, null);
+
+        hint.Should().NotBeNull();
+        hint.Items[HintTypes.Exception].Should().BeSameAs(expectedException);
+    }
+
+    [Fact]
     public void Log_WithEventId_EventIdAsTagOnEvent()
     {
         var expectedEventId = new EventId(10, "EventId-!@#$%^&*(");
@@ -192,6 +212,67 @@ public class SentryLoggerTests
 
         _ = _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Any<SentryEvent>());
+    }
+
+    [Fact]
+    public void LogCritical_EventAndBreadcrumbLevelsBothMet_EvaluatesFilterOnce()
+    {
+        var invocations = 0;
+        _fixture.Options.MinimumEventLevel = LogLevel.Critical;
+        _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Debug;
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) =>
+        {
+            invocations++;
+            return false;
+        });
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        invocations.Should().Be(1);
+    }
+
+    [Fact]
+    public void LogCritical_FilterThrows_DoesNotCaptureEventAndLogsError()
+    {
+        var exception = new InvalidOperationException("filter failed");
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw exception);
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Options.ReceivedLogError(exception,
+            "The {0} log filter callback failed. The log entry will be filtered out.",
+            nameof(DelegateLogEntryFilter));
+    }
+
+    [Fact]
+    public void LogCritical_FilterThrows_DoesNotAddBreadcrumb()
+    {
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw new InvalidOperationException("filter failed"));
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void LogCritical_FilterThrows_DoesNotReachTheCaller()
+    {
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw new InvalidOperationException("filter failed"));
+
+        var sut = _fixture.GetSut();
+
+        var log = () => sut.LogCritical("message");
+
+        log.Should().NotThrow();
     }
 
     [Fact]

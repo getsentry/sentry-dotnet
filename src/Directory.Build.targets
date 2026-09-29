@@ -7,4 +7,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- With NoBuild, ResolveReferences would otherwise write a redundant .aar while dependent projects hash it: https://github.com/getsentry/sentry-dotnet/issues/5092 -->
+  <Target Name="_SentrySkipAarOnNoBuild" BeforeTargets="_CreateAar" Condition="'$(NoBuild)' == 'true' And '$(TargetPlatformIdentifier)' == 'android'">
+    <ItemGroup>
+      <_CreateAarInputs Remove="@(_CreateAarInputs)" />
+    </ItemGroup>
+  </Target>
+
 </Project>

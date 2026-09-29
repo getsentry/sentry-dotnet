@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "sharpie.bind.tool": {
+      "version": "26.6.0.18",
+      "commands": [
+        "sharpie"
+      ],
+      "rollForward": false
+    }
+  }
+}

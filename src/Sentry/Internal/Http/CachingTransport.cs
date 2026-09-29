@@ -327,16 +327,32 @@ internal class CachingTransport : ITransport, IDisposable
 
         _options.LogDebug("Reading cached envelope: {0}", file);
 
-        try
-        {
-            var stream = _fileSystem.OpenFileForReading(file);
+        var stream = _fileSystem.OpenFileForReading(file);
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using (stream)
+        using (stream)
 #else
-            await using (stream.ConfigureAwait(false))
+        await using (stream.ConfigureAwait(false))
 #endif
+        {
+            Envelope? envelope = null;
+            try
             {
-                using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
+                envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // We're shutting down rather than failing to read the file, so leave it be.
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Discard if we can't read the file - to avoid an infinite retry loop
+                LogFailureWithDiscard(file, ex);
+            }
+
+            if (envelope is not null)
+            {
+                using (envelope)
                 {
                     // Don't even try to send it if we are requesting cancellation.
                     cancellation.ThrowIfCancellationRequested();
@@ -385,11 +401,6 @@ internal class CachingTransport : ITransport, IDisposable
                 }
             }
         }
-        catch (JsonException ex)
-        {
-            // Log deserialization errors
-            LogFailureWithDiscard(file, ex);
-        }
 
         // Envelope & file stream must be disposed prior to reaching this point
 
@@ -399,18 +410,7 @@ internal class CachingTransport : ITransport, IDisposable
 
     private void LogFailureWithDiscard(string file, Exception ex)
     {
-        string? envelopeContents = null;
-        try
-        {
-            if (_fileSystem.FileExists(file))
-            {
-                envelopeContents = _fileSystem.ReadAllTextFromFile(file);
-            }
-        }
-        // ReSharper disable once EmptyGeneralCatchClause
-        catch
-        {
-        }
+        var envelopeContents = TryReadContentsForLogging(file);
 
         if (envelopeContents == null)
         {
@@ -419,6 +419,46 @@ internal class CachingTransport : ITransport, IDisposable
         else
         {
             _options.LogError(ex, "Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", file, envelopeContents);
+        }
+    }
+
+    /// <summary>
+    /// Only corrupt files get here and they can be huge, so don't read the whole thing
+    /// </summary>
+    private string? TryReadContentsForLogging(string file)
+    {
+        const int maxLength = 8 * 1024;
+
+        try
+        {
+            if (!_fileSystem.FileExists(file))
+            {
+                return null;
+            }
+
+            using var stream = _fileSystem.OpenFileForReading(file);
+
+            // One byte past the limit, so a full buffer means there was more to read
+            var buffer = new byte[maxLength + 1];
+            var read = 0;
+            while (read < buffer.Length)
+            {
+                var bytesRead = stream.Read(buffer, read, buffer.Length - read);
+                if (bytesRead <= 0)
+                {
+                    break;
+                }
+
+                read += bytesRead;
+            }
+
+            return read > maxLength
+                ? Encoding.UTF8.GetString(buffer, 0, maxLength) + "... (truncated)"
+                : Encoding.UTF8.GetString(buffer, 0, read);
+        }
+        catch
+        {
+            return null;
         }
     }
 

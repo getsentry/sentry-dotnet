@@ -17,7 +17,17 @@ internal static class SentryEventHelper
 
         foreach (var processor in processors)
         {
-            processedEvent = processor.DoProcessEvent(processedEvent, effectiveHint);
+            try
+            {
+                processedEvent = processor.DoProcessEvent(processedEvent, effectiveHint);
+            }
+            catch (Exception e)
+            {
+                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, dataCategory);
+                options.LogError(e, "Event processor {0} threw an exception. The event will be dropped.", processor.GetType().Name);
+                return null;
+            }
+
             if (processedEvent == null)
             {
                 options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, dataCategory);
@@ -28,9 +38,6 @@ internal static class SentryEventHelper
         return processedEvent;
     }
 
-#if NET6_0_OR_GREATER
-    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
-#endif
     public static SentryEvent? DoBeforeSend(SentryEvent? @event, SentryHint hint, SentryOptions options)
     {
         if (@event is null || options.BeforeSendInternal is null)
@@ -50,26 +57,9 @@ internal static class SentryEventHelper
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsTrimmed)
-            {
-                // Attempt to demystify exceptions before adding them as breadcrumbs.
-                e.Demystify();
-            }
-
-            options.LogError(e, "The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.");
-            var data = new Dictionary<string, string>
-            {
-                {"message", e.Message}
-            };
-            if (e.StackTrace is not null)
-            {
-                data.Add("stackTrace", e.StackTrace);
-            }
-            @event?.AddBreadcrumb(
-                "BeforeSend callback failed.",
-                category: "SentryClient",
-                data: data,
-                level: BreadcrumbLevel.Error);
+            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+            options.LogError(e, "The BeforeSend callback threw an exception. The event will be dropped.");
+            return null;
         }
 
         return @event;
@@ -94,7 +84,7 @@ internal static class SentryEventHelper
         }
         catch (Exception e)
         {
-            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Feedback);
+            options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Feedback);
             options.LogError(e, "The BeforeSendFeedback callback threw an exception. The feedback will be dropped.");
             return null;
         }
