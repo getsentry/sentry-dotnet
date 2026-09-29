@@ -949,9 +949,15 @@ public class SentryOptions
 
     /// <summary>
     /// <para>Transactions will be dropped if the HTTP Response status code matches any of the configured ranges.</para>
-    /// <para>Defaults to an empty collection (all transactions are captured regardless of status code).</para>
+    /// <para>Defaults to 301, 305-399 and 401-404. 302 and 303 are traced, as they commonly redirect after a successful form POST.</para>
+    /// <para>Clear the collection to capture transactions regardless of status code.</para>
     /// </summary>
-    public IList<HttpStatusCodeRange> TraceIgnoreStatusCodes { get; set; } = [];
+    public IList<HttpStatusCodeRange> TraceIgnoreStatusCodes { get; set; } = new List<HttpStatusCodeRange>
+    {
+        301,
+        (305, 399),
+        (401, 404)
+    };
 
     // The default failed request target list will match anything, but adding to the list should clear that.
     private Lazy<IList<StringOrRegex>> _failedRequestTargets = new(() =>
