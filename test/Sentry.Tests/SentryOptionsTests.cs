@@ -486,6 +486,22 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
+    public void AddEventProcessor_WhileProcessorsAreBeingEnumerated_DoesNotThrow()
+    {
+        // SentryEventHelper.ProcessEvent enumerates these lazily for the whole duration of a capture,
+        // so registering a processor from another thread must not invalidate an in-flight enumeration.
+        var sut = new SentryOptions();
+        using var inFlightCapture = sut.GetAllEventProcessors().GetEnumerator();
+        inFlightCapture.MoveNext();
+
+        sut.AddEventProcessor(Substitute.For<ISentryEventProcessor>());
+
+        var exception = Record.Exception(() => inFlightCapture.MoveNext());
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
     public void AddEventProcessorProvider_StoredInOptions()
     {
         var sut = new SentryOptions();

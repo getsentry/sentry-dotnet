@@ -342,4 +342,51 @@ public class SettingLocatorTests
         Assert.Equal(expected, release);
         Assert.Equal(expected, options.Release);
     }
+
+    [Fact]
+    public void TryGetDsn_WithNoValueAnywhere_ReturnsNull()
+    {
+        var options = new SentryOptions();
+        options.FakeSettings().AssemblyForAttributes = AssemblyCreationHelper.CreateAssembly();
+
+        Assert.Null(options.SettingLocator.TryGetDsn());
+    }
+
+    [Fact]
+    public void TryGetDsn_WithDsnInEnvironmentVariable_ReturnsDsnWithoutSettingIt()
+    {
+        var options = new SentryOptions();
+        options.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = ValidDsn;
+
+        Assert.Equal(ValidDsn, options.SettingLocator.TryGetDsn());
+        Assert.Null(options.Dsn);
+    }
+
+    [Fact]
+    public void TryGetDsn_WithDsnInAttribute_ReturnsDsn()
+    {
+        var options = new SentryOptions();
+        options.FakeSettings().AssemblyForAttributes = GetAssemblyWithDsn(ValidDsn);
+
+        Assert.Equal(ValidDsn, options.SettingLocator.TryGetDsn());
+    }
+
+    [Fact]
+    public void TryGetDsn_WithDisabledDsnInEnvironmentVariableButValidDsnInAttribute_ReturnsNull()
+    {
+        var options = new SentryOptions();
+        options.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = DisableSdkDsnValue;
+        options.FakeSettings().AssemblyForAttributes = GetAssemblyWithDsn(ValidDsn);
+
+        Assert.Null(options.SettingLocator.TryGetDsn());
+    }
+
+    [Fact]
+    public void TryGetDsn_WithDisabledDsnInOptions_ReturnsNull()
+    {
+        var options = new SentryOptions { Dsn = DisableSdkDsnValue };
+        options.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = ValidDsn;
+
+        Assert.Null(options.SettingLocator.TryGetDsn());
+    }
 }

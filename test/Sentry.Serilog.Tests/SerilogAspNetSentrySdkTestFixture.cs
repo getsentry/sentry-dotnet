@@ -32,7 +32,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         builder.ConfigureLogging(loggingBuilder =>
         {
             var logger = new LoggerConfiguration()
-                .WriteTo.Sentry(ValidDsn)
+                .WriteTo.Sentry()
                 .CreateLogger();
             loggingBuilder.AddSerilog(logger);
         });
