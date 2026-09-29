@@ -212,7 +212,18 @@ public class SentryClient : ISentryClient, IDisposable
         var processedTransaction = transaction;
         foreach (var processor in scope.GetAllTransactionProcessors())
         {
-            processedTransaction = processor.DoProcessTransaction(transaction, hint);
+            try
+            {
+                processedTransaction = processor.DoProcessTransaction(processedTransaction, hint);
+            }
+            catch (Exception e)
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, spanCount);
+                _options.LogError(e, "Transaction processor {0} threw an exception. The transaction will be dropped.", processor.GetType().Name);
+                return;
+            }
+
             if (processedTransaction == null) // Rejected transaction
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
@@ -222,12 +233,9 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        processedTransaction = BeforeSendTransaction(processedTransaction, hint);
+        processedTransaction = BeforeSendTransaction(processedTransaction, hint, spanCount);
         if (processedTransaction is null) // Rejected transaction
         {
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, spanCount);
-            _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
             return;
         }
 
@@ -242,10 +250,7 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction, _options.DiagnosticLogger, attachments));
     }
 
-#if NET6_0_OR_GREATER
-    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
-#endif
-    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint)
+    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint, int spanCount)
     {
         if (_options.BeforeSendTransactionInternal is null)
         {
@@ -256,36 +261,23 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return _options.BeforeSendTransactionInternal?.Invoke(transaction, hint);
+            var processedTransaction = _options.BeforeSendTransactionInternal.Invoke(transaction, hint);
+            if (processedTransaction is null) // Rejected transaction
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, spanCount);
+                _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
+            }
+
+            return processedTransaction;
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsTrimmed)
-            {
-                // Attempt to demystify exceptions before adding them as breadcrumbs.
-                e.Demystify();
-            }
-
-            _options.LogError(e, "The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.");
-
-            var data = new Dictionary<string, string>
-            {
-                {"message", e.Message}
-            };
-
-            if (e.StackTrace is not null)
-            {
-                data.Add("stackTrace", e.StackTrace);
-            }
-
-            transaction.AddBreadcrumb(
-                message: "BeforeSendTransaction callback failed.",
-                category: "SentryClient",
-                data: data,
-                level: BreadcrumbLevel.Error);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, spanCount);
+            _options.LogError(e, "The BeforeSendTransaction callback threw an exception. The transaction will be dropped.");
+            return null;
         }
-
-        return transaction;
     }
 
     /// <inheritdoc />

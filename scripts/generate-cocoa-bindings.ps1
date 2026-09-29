@@ -19,86 +19,14 @@ if (!$IsMacOS)
         -CategoryActivity Error -ErrorAction Stop
 }
 
-# Ensure Objective Sharpie is installed
-if (!(Get-Command sharpie -ErrorAction SilentlyContinue))
-{
-    Write-Output 'Objective Sharpie not found. Attempting to install via Homebrew.'
-    brew install --cask objectivesharpie
-
-    if (!(Get-Command sharpie -ErrorAction SilentlyContinue))
-    {
-        Write-Error 'Could not install Objective Sharpie automatically. Try installing from https://aka.ms/objective-sharpie manually.'
-    }
-}
-
-# Ensure Xamarin is installed (or sharpie won't produce expected output).
-if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
-{
-    Write-Output 'Xamarin.iOS not found. Attempting to install manually.'
-
-    # Download Xamarin.iOS package
-    $packageName = 'xamarin.ios-16.4.0.23.pkg'
-    $directDownloadUrl = 'https://github.com/getsentry/sentry-dotnet/releases/download/1.0.0.0-xamarin-ios/Xamarin.iOS.16.4.0.23.pkg'
-    $downloadPath = "/tmp/$packageName"
-    $expectedSha256 = '3c3a2e3c5adebf7955934862b89c82e4771b0fd44dfcfebad0d160033a6e0a1a'
-
-    Write-Output "Downloading Xamarin.iOS package..."
-    curl -L -o $downloadPath $directDownloadUrl
-
-    if ($LASTEXITCODE -ne 0)
-    {
-        Write-Error "Failed to download Xamarin.iOS package. Exit code: $LASTEXITCODE"
-    }
-
-    # Verify checksum
-    Write-Output "Verifying package checksum..."
-    $actualSha256 = (Get-FileHash -Path $downloadPath -Algorithm SHA256).Hash.ToLower()
-
-    if ($actualSha256 -ne $expectedSha256)
-    {
-        Write-Error "Checksum verification failed. Expected: $expectedSha256, Actual: $actualSha256"
-        Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
-        exit 1
-    }
-
-    Write-Output "Checksum verification passed."
-
-    if (Test-Path $downloadPath)
-    {
-        Write-Output "Downloaded package to $downloadPath"
-        Write-Output "Installing Xamarin.iOS package..."
-
-        # Install the package using installer command (requires sudo)
-        sudo installer -pkg $downloadPath -target /
-
-        if ($LASTEXITCODE -ne 0)
-        {
-            Write-Error "Failed to install Xamarin.iOS package. Exit code: $LASTEXITCODE"
-        }
-        else
-        {
-            Write-Output "Xamarin.iOS package installed successfully"
-        }
-
-        # Clean up downloaded file
-        Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
-    }
-    else
-    {
-        Write-Error "Downloaded package not found at $downloadPath"
-    }
-
-    if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
-    {
-        Write-Error 'Xamarin.iOS not found after installation.'
-    }
-}
+# Objective Sharpie is pinned in /.config/dotnet-tools.json.
+Write-Output 'Restoring the pinned Objective Sharpie dotnet tool.'
+dotnet tool restore
 
 # Get iPhone SDK version
-$XcodePath = (xcode-select -p) -replace '/Contents/Developer$', ''
-$iPhoneSdkVersion = sharpie xcode -xcode $XcodePath -sdks | grep -o -m 1 'iphoneos\S*'
+$iPhoneSdkVersion = "iphoneos$(xcrun --sdk iphoneos --show-sdk-version)"
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
-$iPhoneSdkPath = xcrun --show-sdk-path --sdk $iPhoneSdkVersion
+$iPhoneSdkPath = xcrun --show-sdk-path --sdk iphoneos
 Write-Output "iPhoneSdkPath: $iPhoneSdkPath"
 
 # Generate bindings.
@@ -110,10 +38,13 @@ Write-Output "iPhoneSdkPath: $iPhoneSdkPath"
 # The SentryObjC headers resolve their own imports via `__has_include` guards and don't use the
 # `SENTRY_HEADER` macro, so - unlike the classic Sentry.h/Sentry-Swift.h headers we used to bind -
 # no header patching is needed before invoking sharpie.
+#
+# The header must be passed via `--header`; as a bare positional argument sharpie hands it straight
+# to Clang, which then parses it as C and fails on the first Objective-C declaration.
 Write-Output 'Generating bindings with Objective Sharpie.'
-sharpie bind -sdk $iPhoneSdkVersion `
-    -scope "$CocoaSdkPath" `
-    "$HeadersPath/SentryObjC.h" `
+dotnet sharpie bind -sdk $iPhoneSdkVersion `
+    --scope "$CocoaSdkPath" `
+    --header "$HeadersPath/SentryObjC.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute `
     -F"$iPhoneSdkPath/System/Library/SubFrameworks" # needed for UIUtilities.framework in Xcode 26+
@@ -135,9 +66,9 @@ Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 & dotnet run "$PSScriptRoot/patch-cocoa-bindings.cs" "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
 
 ################################################################################
-# Patch ApiDefinitions.cs
+# Patch ApiDefinition.cs
 ################################################################################
-$File = 'ApiDefinitions.cs'
+$File = 'ApiDefinition.cs'
 Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 & dotnet run "$PSScriptRoot/patch-cocoa-bindings.cs" "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }

@@ -13,10 +13,12 @@ public partial class SentryMetricEmitterTests : IDisposable
         {
             DiagnosticLogger = new InMemoryDiagnosticLogger();
             Hub = Substitute.For<IHub>();
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>();
             Options = new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
+                ClientReportRecorder = ClientReportRecorder,
             };
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
             BatchSize = 2;
@@ -39,6 +41,7 @@ public partial class SentryMetricEmitterTests : IDisposable
 
         public InMemoryDiagnosticLogger DiagnosticLogger { get; }
         public IHub Hub { get; }
+        public IClientReportRecorder ClientReportRecorder { get; }
         public SentryOptions Options { get; }
         public ISystemClock Clock { get; }
         public int BatchSize { get; set; }
@@ -137,6 +140,12 @@ public partial class SentryMetricEmitterTests : IDisposable
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.TraceMetric);
+        var entry = _fixture.DiagnosticLogger.Dequeue();
+        entry.Level.Should().Be(SentryLevel.Info);
+        entry.Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
+        entry.Exception.Should().BeNull();
+        entry.Args.Should().BeEmpty();
     }
 
     [Fact]
@@ -153,6 +162,7 @@ public partial class SentryMetricEmitterTests : IDisposable
         entry.Message.Should().Be("The BeforeSendMetric callback threw an exception. The Metric will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.TraceMetric);
     }
 
     [Fact]

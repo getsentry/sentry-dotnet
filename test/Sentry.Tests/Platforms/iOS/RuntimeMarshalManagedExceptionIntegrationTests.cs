@@ -82,6 +82,18 @@ public class RuntimeMarshalManagedExceptionIntegrationTests
         _fixture.Runtime.Received(1).IgnoreNextSignal(6);
     }
 
+    [Fact]
+    public void Handle_ThrowObjectiveCException_ChangesModeToAbort()
+    {
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+        var args = new MarshalManagedExceptionEventArgs { Exception = new Exception(), ExceptionMode = MarshalManagedExceptionMode.ThrowObjectiveCException };
+
+        sut.Handle(this, args);
+
+        Assert.Equal(MarshalManagedExceptionMode.Abort, args.ExceptionMode);
+    }
+
     [Theory]
     [InlineData(MarshalManagedExceptionMode.Disable)]
     [InlineData(MarshalManagedExceptionMode.UnwindNativeCode)]

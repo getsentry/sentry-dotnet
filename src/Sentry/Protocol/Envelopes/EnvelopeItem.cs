@@ -31,6 +31,12 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string FileNameKey = "filename";
 
     /// <summary>
+    /// An item header is a single short JSON object.
+    /// Bounding the read stops us buffering a whole corrupt file into memory.
+    /// </summary>
+    internal const int MaxHeaderLineLength = 64 * 1024;
+
+    /// <summary>
     /// Header associated with this envelope item.
     /// </summary>
     public IReadOnlyDictionary<string, object?> Header { get; }
@@ -431,11 +437,30 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         Stream stream,
         CancellationToken cancellationToken = default)
     {
-        var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+        var buffer = await stream.ReadLineAsync(MaxHeaderLineLength, cancellationToken).ConfigureAwait(false);
 
         return
             Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)
             ?? throw new InvalidOperationException("Envelope item header is malformed.");
+    }
+
+    private static int GetPayloadBufferLength(Stream stream, long? payloadLength)
+    {
+        var remaining = stream.Length - stream.Position;
+        var length = payloadLength ?? remaining;
+
+        if (length < 0 || length > remaining)
+        {
+            throw new InvalidDataException(
+                $"Envelope item declares a payload of {length} bytes but only {remaining} remain.");
+        }
+
+        if (length > int.MaxValue)
+        {
+            throw new InvalidDataException($"Envelope item payload of {length} bytes is too large to buffer.");
+        }
+
+        return (int)length;
     }
 
     private static async Task<ISerializable> DeserializePayloadAsync(
@@ -454,7 +479,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // Event
         if (string.Equals(payloadType, TypeValueEvent, StringComparison.OrdinalIgnoreCase))
         {
-            var bufferLength = (int)(payloadLength ?? stream.Length);
+            var bufferLength = GetPayloadBufferLength(stream, payloadLength);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var sentryEvent = Json.Parse(buffer, SentryEvent.FromJson);
 
@@ -464,7 +489,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // Transaction
         if (string.Equals(payloadType, TypeValueTransaction, StringComparison.OrdinalIgnoreCase))
         {
-            var bufferLength = (int)(payloadLength ?? stream.Length);
+            var bufferLength = GetPayloadBufferLength(stream, payloadLength);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var transaction = Json.Parse(buffer, SentryTransaction.FromJson);
 
@@ -474,7 +499,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // Session
         if (string.Equals(payloadType, TypeValueSession, StringComparison.OrdinalIgnoreCase))
         {
-            var bufferLength = (int)(payloadLength ?? stream.Length);
+            var bufferLength = GetPayloadBufferLength(stream, payloadLength);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var sessionUpdate = Json.Parse(buffer, SessionUpdate.FromJson);
 
@@ -484,7 +509,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // Client Report
         if (string.Equals(payloadType, TypeValueClientReport, StringComparison.OrdinalIgnoreCase))
         {
-            var bufferLength = (int)(payloadLength ?? stream.Length);
+            var bufferLength = GetPayloadBufferLength(stream, payloadLength);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var clientReport = Json.Parse(buffer, ClientReport.FromJson);
 

@@ -65,6 +65,8 @@ public class WebIntegrationTests
         await Verify(new { result, transport.Payloads })
             .IgnoreStandardSentryMembers()
             .ScrubAspMembers()
+            // How many logs ASP.NET Core's own infrastructure emits per request is not deterministic.
+            .IgnoreMembers<StructuredLog>(_ => _.Length)
             .UniqueForTargetFrameworkAndVersion();
     }
 

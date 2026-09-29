@@ -314,6 +314,47 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_Exception_BreadcrumbHintContainsException()
+    {
+        // Arrange
+        SentryHint hint = null;
+        _fixture.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
+        {
+            hint = h;
+            return breadcrumb;
+        });
+        using var hub = _fixture.GetSut();
+        var exception = new Exception("original");
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Items[HintTypes.Exception].Should().BeSameAs(exception);
+    }
+
+    [Fact]
+    public void CaptureEvent_Exception_BeforeBreadcrumbCanFilterOnExceptionType()
+    {
+        // Arrange
+        _fixture.Options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+            hint.Items.TryGetValue(HintTypes.Exception, out var exception) && exception is InvalidOperationException
+                ? null
+                : breadcrumb);
+        using var hub = _fixture.GetSut();
+        var scope = hub.ScopeManager.GetCurrent().Key;
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(new InvalidOperationException("filtered")));
+        hub.CaptureEvent(new SentryEvent(new Exception("kept")));
+
+        // Assert
+        scope.Breadcrumbs.Should().ContainSingle(b => b.Category == "Exception")
+            .Which.Message.Should().Be("kept");
+    }
+
+    [Fact]
     public void CaptureEvent_WithMessageAndException_StoresExceptionMessageAsData()
     {
         // Arrange
@@ -1427,6 +1468,82 @@ public partial class HubTests : IDisposable
 
         // Assert
         transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_TracesSamplerThrows_FallsBackToStaticAndLogsError()
+    {
+        // Arrange
+        var exception = new InvalidOperationException("sampler failed");
+        _fixture.Options.TracesSampler = _ => throw exception;
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar");
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+        _fixture.Options.ReceivedLogError(exception, "TracesSampler callback failed.");
+    }
+
+    [Fact]
+    public void StartTransaction_TracesSamplerThrows_PreservesInheritedDecision()
+    {
+        // Arrange
+        _fixture.Options.TracesSampler = _ => throw new InvalidOperationException("sampler failed");
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
+        var traceHeader = new SentryTraceHeader(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"),
+            true);
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar", traceHeader);
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_TracesSamplerThrows_PreservesInheritedSampledOutDecision()
+    {
+        // Arrange
+        _fixture.Options.TracesSampler = _ => throw new InvalidOperationException("sampler failed");
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+        var traceHeader = new SentryTraceHeader(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"),
+            false);
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar", traceHeader);
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_TracesSamplerThrows_StaticSampleOut_RecordsSampleRateDiscard()
+    {
+        // Arrange
+        var recorder = Substitute.For<IClientReportRecorder>();
+        _fixture.Options.ClientReportRecorder = recorder;
+        _fixture.Options.TracesSampler = _ => throw new InvalidOperationException("sampler failed");
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar");
+        transaction.Finish();
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, 1);
     }
 
     [Fact]

@@ -205,20 +205,31 @@ internal class Hub : IHub, IDisposable
                 context,
                 customSamplingContext);
 
-            if (tracesSampler(samplingContext) is { } samplerSampleRate)
+            double? samplerSampleRate;
+            try
+            {
+                samplerSampleRate = tracesSampler(samplingContext);
+            }
+            catch (Exception ex)
+            {
+                _options.LogError(ex, "TracesSampler callback failed.");
+                samplerSampleRate = null;
+            }
+
+            if (samplerSampleRate is { } samplerRate)
             {
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
-                sampleRate = samplerSampleRate * _backpressureMonitor.GetDownsampleFactor();
+                sampleRate = samplerRate * _backpressureMonitor.GetDownsampleFactor();
                 isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
                 if (isSampled is false)
                 {
                     // If sampling out is only a result of the downsampling then we specify the reason as backpressure
                     // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
-                    discardReason = sampleRand < samplerSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+                    discardReason = sampleRand < samplerRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
                 }
 
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
-                dynamicSamplingContext?.SetSampleRate(samplerSampleRate);
+                dynamicSamplingContext?.SetSampleRate(samplerRate);
             }
         }
 
@@ -587,7 +598,17 @@ internal class Hub : IHub, IDisposable
                     {"exception_message", exceptionMessage}
                 };
             }
-            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Fatal);
+
+            var hint = new SentryHint(_options);
+            hint.Items[HintTypes.Exception] = exception;
+
+            var breadcrumb = new Breadcrumb(
+                message: breadcrumbMessage,
+                data: data,
+                category: "Exception",
+                level: BreadcrumbLevel.Fatal);
+
+            scope.AddBreadcrumb(breadcrumb, hint);
         }
         catch (Exception e)
         {

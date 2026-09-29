@@ -14,7 +14,7 @@ public class BindableNativeOptionsTests : BindableTests<SentryOptions.NativeOpti
     public void BindableProperties_MatchOptionsProperties()
     {
         var actual = GetPropertyNames<BindableSentryOptions.NativeOptions>();
-        AssertContainsAllOptionsProperties(actual);
+        AssertPropertiesMatchOptions(actual);
     }
 
     [Fact]

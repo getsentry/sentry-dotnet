@@ -9,7 +9,7 @@ public class BindableSentryAspNetCoreOptionsTests : BindableTests<SentryAspNetCo
     public void BindableProperties_MatchOptionsProperties()
     {
         var actual = GetPropertyNames<BindableSentryAspNetCoreOptions>();
-        AssertContainsAllOptionsProperties(actual);
+        AssertPropertiesMatchOptions(actual);
     }
 
     [Fact]

@@ -1279,7 +1279,11 @@ interface SentryObjCExperimentalOptions
     [Export("enableUnhandledCPPExceptionsV2")]
     bool EnableUnhandledCPPExceptionsV2 { get; set; }
 
-    // @property (nonatomic) BOOL enableWatchdogTerminationsV2;
+    // @property (nonatomic) BOOL enableNewURLLoaderSwizzling;
+    [Export("enableNewURLLoaderSwizzling")]
+    bool EnableNewURLLoaderSwizzling { get; set; }
+
+    // @property (nonatomic) BOOL enableWatchdogTerminationsV2 __attribute__((deprecated("enableWatchdogTerminationsV2 is deprecated and will be removed in v10, where the improved watchdog termination tracking mechanism is enabled by default.")));
     [Export("enableWatchdogTerminationsV2")]
     bool EnableWatchdogTerminationsV2 { get; set; }
 
@@ -1336,6 +1340,10 @@ interface SentryObjCOptions
     // @property (nonatomic) NSUInteger maxBreadcrumbs;
     [Export("maxBreadcrumbs")]
     nuint MaxBreadcrumbs { get; set; }
+
+    // @property (nonatomic) NSUInteger maxFeatureFlags;
+    [Export("maxFeatureFlags")]
+    nuint MaxFeatureFlags { get; set; }
 
     // @property (nonatomic) BOOL enableNetworkBreadcrumbs;
     [Export("enableNetworkBreadcrumbs")]
@@ -1459,7 +1467,7 @@ interface SentryObjCOptions
 
     [Wrap("WeakUrlSessionDelegate")]
     [NullAllowed]
-    NSUrlSessionDelegate UrlSessionDelegate { get; set; }
+    INSUrlSessionDelegate UrlSessionDelegate { get; set; }
 
     // @property (nonatomic, weak) id<NSURLSessionDelegate> _Nullable urlSessionDelegate;
     [NullAllowed, Export("urlSessionDelegate", ArgumentSemantic.Weak)]
@@ -1585,7 +1593,7 @@ interface SentryObjCOptions
     [Export("enableStandaloneAppStartTracing")]
     bool EnableStandaloneAppStartTracing { get; set; }
 
-    // @property (nonatomic) BOOL enableReportNonFullyBlockingAppHangs;
+    // @property (nonatomic) BOOL enableReportNonFullyBlockingAppHangs __attribute__((deprecated("App Hang tracking is deprecated and will be removed in v10 because it can produce less relevant stack traces and false positives. Enable the MetricKit integration using ``SentrySDKOptions/enableMetricKit`` for system-provided hang diagnostics.", "enableMetricKit")));
     [Export("enableReportNonFullyBlockingAppHangs")]
     bool EnableReportNonFullyBlockingAppHangs { get; set; }
 
@@ -1593,7 +1601,7 @@ interface SentryObjCOptions
     [Export("sessionReplay", ArgumentSemantic.Strong)]
     SentryObjCReplayOptions SessionReplay { get; set; }
 
-    // @property (nonatomic) BOOL enableSigtermReporting;
+    // @property (nonatomic) BOOL enableSigtermReporting __attribute__((deprecated("This property will be removed in v10. KSCrash always catches SIGTERM, records a clean exit, and never writes a crash report for it.")));
     [Export("enableSigtermReporting")]
     bool EnableSigtermReporting { get; set; }
 
@@ -1750,6 +1758,18 @@ interface SentryObjCInternalScopeApi
     // -(NSDictionary<NSString *,NSDictionary<NSString *,id> *> * _Nonnull)serializedContexts;
     [Export("serializedContexts")]
     NSDictionary<NSString, NSDictionary<NSString, NSObject>> SerializedContexts { get; }
+
+    // -(void)withCurrentScope:(SentryObjCScope * _Nonnull)scope callback:(void (^ _Nonnull)(void))callback;
+    [Export("withCurrentScope:callback:")]
+    void WithCurrentScope(SentryObjCScope scope, Action callback);
+
+    // -(SentryObjCScope * _Nonnull)createScope;
+    [Export("createScope")]
+    SentryObjCScope CreateScope();
+
+    // -(SentryObjCScope * _Nonnull)cloneScope:(SentryObjCScope * _Nonnull)scope;
+    [Export("cloneScope:")]
+    SentryObjCScope CloneScope(SentryObjCScope scope);
 }
 
 // @interface SentryObjCInternalSdkApi : NSObject
