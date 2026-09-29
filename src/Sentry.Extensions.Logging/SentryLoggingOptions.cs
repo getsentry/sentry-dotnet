@@ -13,8 +13,8 @@ public class SentryLoggingOptions
 {
     internal const string ObsoleteSdkInitialization =
         "The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be " +
-        "supplied to it. Initialize Sentry with SentrySdk.Init (or an integration such as UseSentry), and remove " +
-        "'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.";
+        "supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and " +
+        "remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.";
 
     /// <summary>
     /// Not supported. The logging integration no longer initializes the SDK.
