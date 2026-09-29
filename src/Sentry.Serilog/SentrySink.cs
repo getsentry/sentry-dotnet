@@ -142,8 +142,10 @@ internal sealed partial class SentrySink : ILogEventSink
                     ? exception?.Message ?? ""
                     : formatted,
                 context,
+                type: null,
                 data: data,
-                level: logEvent.Level.ToBreadcrumbLevel());
+                level: logEvent.Level.ToBreadcrumbLevel(),
+                hint: exception.ToHint());
         }
 
         if (options is not null)

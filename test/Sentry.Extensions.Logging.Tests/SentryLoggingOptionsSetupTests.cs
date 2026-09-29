@@ -13,7 +13,6 @@ public class SentryLoggingOptionsSetupTests
         var expected = new SentryLoggingOptions
         {
             IsGlobalModeEnabled = true,
-            EnableScopeSync = true,
             TagFilters = new List<StringOrRegex> { "tag1", "tag2" },
             SendDefaultPii = true,
             IsEnvironmentUser = true,
@@ -61,7 +60,6 @@ public class SentryLoggingOptionsSetupTests
             .AddInMemoryCollection(new Dictionary<string, string>
             {
                 ["IsGlobalModeEnabled"] = expected.IsGlobalModeEnabled.ToString(),
-                ["EnableScopeSync"] = expected.EnableScopeSync.ToString(),
                 ["TagFilters:0"] = expected.TagFilters.First().ToString(),
                 ["TagFilters:1"] = expected.TagFilters.Last().ToString(),
                 ["SendDefaultPii"] = expected.SendDefaultPii.ToString(),
@@ -122,7 +120,6 @@ public class SentryLoggingOptionsSetupTests
         using (new AssertionScope())
         {
             actual.IsGlobalModeEnabled.Should().Be(expected.IsGlobalModeEnabled);
-            actual.EnableScopeSync.Should().Be(expected.EnableScopeSync);
             actual.TagFilters.Should().BeEquivalentTo(expected.TagFilters);
             actual.SendDefaultPii.Should().Be(expected.SendDefaultPii);
             actual.IsEnvironmentUser.Should().Be(expected.IsEnvironmentUser);

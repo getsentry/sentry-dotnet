@@ -92,7 +92,7 @@ public class SentryMauiOptionsTests
 #endif
 
     [Fact]
-    public void BeforeCaptureScreenshot_Set()
+    public void BeforeScreenshotCapture_Set()
     {
         // Arrange
         var options = GetSut();
@@ -105,17 +105,17 @@ public class SentryMauiOptionsTests
         });
 
         // Assert
-        Assert.NotNull(options.BeforeCaptureInternal);
+        Assert.NotNull(options.BeforeScreenshotCaptureInternal);
     }
 
     [Fact]
-    public void BeforeCaptureScreenshot_NotSet()
+    public void BeforeScreenshotCapture_NotSet()
     {
         // Arrange
         var options = GetSut();
         options.AttachScreenshot = true;
 
         // Assert
-        Assert.Null(options.BeforeCaptureInternal);
+        Assert.Null(options.BeforeScreenshotCaptureInternal);
     }
 }

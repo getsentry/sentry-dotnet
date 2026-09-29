@@ -30,11 +30,11 @@ SentrySdk.Init(options =>
 {
     options.Dsn = dsn;
     options.Debug = true;
-    options.TracesSampleRate = 1.0;
     options.UseOtlp(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
 
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .SetSampler(new AlwaysOnSampler()) // <-- Configure trace sampling through OpenTelemetry
     .AddSource(activitySource.Name)
     .AddSource(MongoTelemetry.ActivitySourceName) // <-- Subscribe to the MongoDB driver's built-in instrumentation
     .AddProcessor(new Sentry.Samples.OpenTelemetry.MongoDB.RedactSensitiveMongoData()) // <-- Redact PII from query text BEFORE it's exported (see below)

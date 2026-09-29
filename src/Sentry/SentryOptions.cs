@@ -87,12 +87,12 @@ public class SentryOptions
     /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
     /// NOTE: EnableScopeSync must be set true for the scope to be synced.
     /// </summary>
-    public IScopeObserver? ScopeObserver { get; set; }
+    internal IScopeObserver? ScopeObserver { get; set; }
 
     /// <summary>
     /// If true, the SDK's scope will be synced with the observed scope.
     /// </summary>
-    public bool EnableScopeSync { get; set; }
+    internal bool EnableScopeSync { get; set; }
 
     /// <summary>
     /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
@@ -1280,7 +1280,7 @@ public class SentryOptions
     /// <summary>
     /// Delegate which is used to check whether the application crashed during last run.
     /// </summary>
-    public Func<bool>? CrashedLastRun { get; set; }
+    internal Func<bool>? CrashedLastRun { get; set; }
 
 #if IOS || MACCATALYST
     // this event currently isn't being pushed from Android

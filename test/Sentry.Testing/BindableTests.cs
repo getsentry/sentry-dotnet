@@ -97,11 +97,22 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
         throw new InvalidOperationException("Enum has no non-default values");
     }
 
-    protected void AssertContainsAllOptionsProperties(IEnumerable<string> actual)
+    protected void AssertPropertiesMatchOptions(IEnumerable<string> actual)
     {
-        var missing = Fixture.ExpectedPropertyNames.Where(x => !actual.Contains(x));
+        var bindableProperties = actual.ToList();
+        var optionsProperties = typeof(TOptions)
+            .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .Select(x => x.Name)
+            .ToList();
 
-        missing.Should().BeEmpty();
+        using (new AssertionScope())
+        {
+            Fixture.ExpectedPropertyNames.Where(x => !bindableProperties.Contains(x))
+                .Should().BeEmpty("every bindable option should be declared on the bindable class");
+
+            bindableProperties.Where(x => !optionsProperties.Contains(x))
+                .Should().BeEmpty($"a bindable property with no matching {typeof(TOptions).Name} property binds configuration that is then discarded");
+        }
     }
 
     protected void AssertContainsExpectedPropertyValues(TOptions actual)

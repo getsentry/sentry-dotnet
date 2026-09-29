@@ -20,6 +20,9 @@
     <Compile Update="IntegrationsTests.EventProcessor.cs">
       <DependentUpon>IntegrationsTests.cs</DependentUpon>
     </Compile>
+    <Compile Update="IntegrationsTests.BlockingDetection.cs">
+      <DependentUpon>IntegrationsTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>
