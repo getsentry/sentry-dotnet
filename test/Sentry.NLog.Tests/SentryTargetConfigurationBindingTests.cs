@@ -33,6 +33,12 @@ public class SentryTargetConfigurationBindingTests
         Assert.Null(LoadConfiguration("minimumEventLevel='Warn' includeEventPropertiesAsTags='true'"));
     }
 
+    [Fact]
+    public void LoadConfiguration_WithInitializeSdkFalse_DoesNotThrow()
+    {
+        Assert.Null(LoadConfiguration("initializeSdk='false'"));
+    }
+
     [Theory]
     [InlineData(2)]
     [InlineData(3)]
@@ -66,6 +72,55 @@ public class SentryTargetConfigurationBindingTests
         Assert.NotNull(obsolete);
         Assert.True(obsolete!.IsError);
     }
+
+    [Fact]
+    public void Dsn_WhenSet_WritesMigrationMessageToStandardError()
+    {
+        var standardError = new List<string>();
+
+        Set(GetTarget(standardError), "Dsn", (Layout)ValidDsn);
+
+        Assert.Contains(ConfigurationExtensions.ObsoleteDsnOverload, Assert.Single(standardError));
+    }
+
+    [Fact]
+    public void InitializeSdk_WhenSetToTrue_WritesMigrationMessageToStandardError()
+    {
+        var standardError = new List<string>();
+
+        Set(GetTarget(standardError), "InitializeSdk", true);
+
+        Assert.Contains(ConfigurationExtensions.ObsoleteDsnOverload, Assert.Single(standardError));
+    }
+
+    [Fact]
+    public void InitializeSdk_WhenSetToFalse_WritesNothing()
+    {
+        var standardError = new List<string>();
+
+        Set(GetTarget(standardError), "InitializeSdk", false);
+
+        Assert.Empty(standardError);
+    }
+
+    [Fact]
+    public void ReportUnsupportedSdkSetting_BothSettingsOnOneTarget_WritesOnce()
+    {
+        var standardError = new List<string>();
+        var target = GetTarget(standardError);
+
+        Set(target, "Dsn", (Layout)ValidDsn);
+        Set(target, "InitializeSdk", true);
+
+        Assert.Single(standardError);
+    }
+
+    private static SentryTarget GetTarget(List<string> standardError) =>
+        new(new SentryNLogOptions(), () => Substitute.For<IHub>(), new MockClock(),
+            new UninitializedSdkWarning { WriteToStandardError = standardError.Add });
+
+    private static void Set(SentryTarget target, string property, object value) =>
+        Record.Exception(() => typeof(SentryTarget).GetProperty(property)!.SetValue(target, value));
 
     private static MethodInfo DsnOverload(int parameterCount) => typeof(ConfigurationExtensions)
         .GetMethods(BindingFlags.Public | BindingFlags.Static)
