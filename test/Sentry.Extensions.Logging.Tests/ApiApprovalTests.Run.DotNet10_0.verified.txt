@@ -32,6 +32,7 @@ namespace Sentry.Extensions.Logging
     public abstract class SentryHostOptions : Sentry.SentryOptions
     {
         protected SentryHostOptions() { }
+        public new bool EnableLogs { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
         public void ConfigureScope(System.Action<Sentry.Scope> action) { }

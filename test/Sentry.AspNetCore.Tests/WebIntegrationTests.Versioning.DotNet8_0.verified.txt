@@ -90,9 +90,6 @@
           http.response.status_code: 200
         }
       }
-    },
-    {
-      Source: {}
     }
   ]
 }

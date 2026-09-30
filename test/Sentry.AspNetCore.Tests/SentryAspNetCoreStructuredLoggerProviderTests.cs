@@ -73,6 +73,17 @@ public class SentryAspNetCoreStructuredLoggerProviderTests : IDisposable
     }
 
     [Fact]
+    public void CreateLogger_DefaultOptions_IsNotEnabled()
+    {
+        using var hub = new Hub(new SentryAspNetCoreOptions { Dsn = ValidDsn }, Substitute.For<ISentryClient>());
+        var provider = new SentryAspNetCoreStructuredLoggerProvider(hub);
+
+        var logger = provider.CreateLogger("CategoryName");
+
+        logger.IsEnabled(LogLevel.Critical).Should().BeFalse();
+    }
+
+    [Fact]
     public void CreateLogger_DependencyInjection_CanLog()
     {
         SentryLog? capturedLog = null;
