@@ -39,7 +39,7 @@ public class SentryAppenderConfigurationBindingTests
         try
         {
             var repository = LogManager.CreateRepository(Guid.NewGuid().ToString());
-            var exception = Record.Exception(() => XmlConfigurator.Configure(repository, document.DocumentElement));
+            var exception = Record.Exception(() => XmlConfigurator.Configure(repository, document.DocumentElement!));
             return (exception, repository.GetAppenders().Length, string.Join(" | ", errors));
         }
         finally
