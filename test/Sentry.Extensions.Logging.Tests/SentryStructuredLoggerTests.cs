@@ -267,6 +267,19 @@ public class SentryStructuredLoggerTests : IDisposable
         }
     }
 
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void IsEnabled_HostOptions_ReturnsEnableLogs(bool enableLogs, bool expectedIsEnabled)
+    {
+        using var hub = new Hub(new HostOptions { Dsn = ValidDsn, EnableLogs = enableLogs }, Substitute.For<ISentryClient>());
+        var logger = new SentryStructuredLogger(_fixture.CategoryName, hub, _fixture.Clock, _fixture.Sdk);
+
+        logger.IsEnabled(LogLevel.Information).Should().Be(expectedIsEnabled);
+    }
+
+    private class HostOptions : SentryHostOptions;
+
     [Fact]
     public void BeginScope_Dispose_NoOp()
     {

@@ -25,6 +25,14 @@ public abstract class SentryHostOptions : SentryOptions
     }
 
     /// <summary>
+    /// Whether to send log entries to Sentry as structured logs.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see langword="false"/>.
+    /// </remarks>
+    public new bool EnableLogs { get; set; }
+
+    /// <summary>
     /// Add a callback to configure the scope upon SDK initialization
     /// </summary>
     /// <param name="action">The function to invoke when initializing the SDK</param>
