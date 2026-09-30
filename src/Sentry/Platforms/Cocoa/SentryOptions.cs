@@ -69,25 +69,6 @@ public partial class SentryOptions
         public bool EnableAppHangTracking { get; set; } = false;
 
         /// <summary>
-        /// IMPORTANT: App Hangs V2 is now the default.
-        /// <br/>
-        /// As of version 8.39.0-beta.1 of the sentry-cocoa SDK, you can enable AppHangsV2, which is available on iOS and tvOS.
-        /// Starting with version 9.0.0, App Hangs V2 is enabled by default.
-        /// The main difference is that AppHangsV2 differentiates between fully-blocking and non-fully-blocking
-        /// app hangs, which you might choose to ignore. A fully-blocking app hang is when the main thread is stuck
-        /// completely, and the app can't render a single frame.
-        /// A non-fully-blocking app hang is when the app appears stuck to the user, but can still render a few frames.
-        /// Fully-blocking app hangs are more actionable because the stacktrace shows the exact blocking location on
-        /// the main thread. Non-fully-blocking app hangs can have a stacktrace that doesn't highlight the exact
-        /// blocking location, since the main thread isn't completely blocked.
-        /// </summary>
-        /// <remarks>
-        /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/#app-hangs-v2
-        /// </remarks>
-        [Obsolete("App Hangs V2 is now the default. Use EnableAppHangTracking instead.")]
-        public bool EnableAppHangTrackingV2 { get; set; } = false;
-
-        /// <summary>
         /// When enabled, the SDK adds breadcrumbs for various system events.
         /// The default value is <c>true</c> (enabled).
         /// </summary>
@@ -253,19 +234,6 @@ public partial class SentryOptions
         public bool EnableTracing { get; set; } = false;
 
         internal List<string>? InAppIncludes { get; private set; }
-
-        /// <summary>
-        /// Add prefix to exclude from 'InApp' stacktrace list by the Cocoa SDK.
-        /// Note that this uses iOS module names, not .NET namespaces.
-        /// </summary>
-        /// <param name="prefix">The string used to filter the stacktrace to be excluded from InApp.</param>
-        /// <remarks>
-        /// https://docs.sentry.io/platforms/apple/configuration/options/#in-app-exclude
-        /// </remarks>
-        [Obsolete("This option had no effect and was removed.")]
-        public void AddInAppExclude(string prefix)
-        {
-        }
 
         /// <summary>
         /// Add prefix to include as in 'InApp' stacktrace by the Cocoa SDK.

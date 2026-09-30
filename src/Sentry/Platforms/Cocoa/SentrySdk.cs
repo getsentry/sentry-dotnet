@@ -135,9 +135,7 @@ public static partial class SentrySdk
         nativeOptions.AppHangTimeoutInterval = options.Native.AppHangTimeoutInterval.TotalSeconds;
         nativeOptions.IdleTimeout = options.Native.IdleTimeout.TotalSeconds;
         nativeOptions.Dist = options.Distribution;
-#pragma warning disable CS0618 // Type or member is obsolete
-        nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking || options.Native.EnableAppHangTrackingV2;
-#pragma warning restore CS0618 // Type or member is obsolete
+        nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking;
         nativeOptions.EnableAutoBreadcrumbTracking = options.Native.EnableAutoBreadcrumbTracking;
         nativeOptions.EnableAutoPerformanceTracing = options.Native.EnableAutoPerformanceTracing;
         nativeOptions.EnableCoreDataTracing = options.Native.EnableCoreDataTracing;
