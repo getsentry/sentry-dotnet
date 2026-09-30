@@ -11,6 +11,7 @@ public sealed partial class SentryTarget : TargetWithContext
 
     private readonly ISystemClock _clock;
     private readonly UninitializedSdkWarning _uninitializedSdkWarning;
+    private bool _reportedUnsupportedSdkSetting;
 
     internal static readonly string AdditionalGroupingKeyProperty = "AdditionalGroupingKey";
 
@@ -76,11 +77,7 @@ public sealed partial class SentryTarget : TargetWithContext
     public Layout? Dsn
     {
         get => null;
-        set
-        {
-            _uninitializedSdkWarning.WriteToStandardError("Sentry: " + ConfigurationExtensions.ObsoleteDsnOverload);
-            throw new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
-        }
+        set => throw ReportUnsupportedSdkSetting();
     }
 
     /// <summary>
@@ -95,7 +92,7 @@ public sealed partial class SentryTarget : TargetWithContext
         {
             if (value)
             {
-                throw new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
+                throw ReportUnsupportedSdkSetting();
             }
         }
     }
@@ -189,6 +186,18 @@ public sealed partial class SentryTarget : TargetWithContext
     {
         get => Options.User;
         set => Options.User = value;
+    }
+
+    // NLog discards the exception unless throwConfigExceptions is on. Report once: a v6 config may set both.
+    private NotSupportedException ReportUnsupportedSdkSetting()
+    {
+        if (!_reportedUnsupportedSdkSetting)
+        {
+            _reportedUnsupportedSdkSetting = true;
+            _uninitializedSdkWarning.WriteToStandardError("Sentry: " + ConfigurationExtensions.ObsoleteDsnOverload);
+        }
+
+        return new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
     }
 
     /// <inheritdoc />

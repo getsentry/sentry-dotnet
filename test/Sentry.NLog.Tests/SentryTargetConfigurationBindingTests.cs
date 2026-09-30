@@ -77,13 +77,50 @@ public class SentryTargetConfigurationBindingTests
     public void Dsn_WhenSet_WritesMigrationMessageToStandardError()
     {
         var standardError = new List<string>();
-        var warning = new UninitializedSdkWarning { WriteToStandardError = standardError.Add };
-        var target = new SentryTarget(new SentryNLogOptions(), () => Substitute.For<IHub>(), new MockClock(), warning);
 
-        Record.Exception(() => typeof(SentryTarget).GetProperty("Dsn")!.SetValue(target, (Layout)ValidDsn));
+        Set(GetTarget(standardError), "Dsn", (Layout)ValidDsn);
 
         Assert.Contains(ConfigurationExtensions.ObsoleteDsnOverload, Assert.Single(standardError));
     }
+
+    [Fact]
+    public void InitializeSdk_WhenSetToTrue_WritesMigrationMessageToStandardError()
+    {
+        var standardError = new List<string>();
+
+        Set(GetTarget(standardError), "InitializeSdk", true);
+
+        Assert.Contains(ConfigurationExtensions.ObsoleteDsnOverload, Assert.Single(standardError));
+    }
+
+    [Fact]
+    public void InitializeSdk_WhenSetToFalse_WritesNothing()
+    {
+        var standardError = new List<string>();
+
+        Set(GetTarget(standardError), "InitializeSdk", false);
+
+        Assert.Empty(standardError);
+    }
+
+    [Fact]
+    public void ReportUnsupportedSdkSetting_BothSettingsOnOneTarget_WritesOnce()
+    {
+        var standardError = new List<string>();
+        var target = GetTarget(standardError);
+
+        Set(target, "Dsn", (Layout)ValidDsn);
+        Set(target, "InitializeSdk", true);
+
+        Assert.Single(standardError);
+    }
+
+    private static SentryTarget GetTarget(List<string> standardError) =>
+        new(new SentryNLogOptions(), () => Substitute.For<IHub>(), new MockClock(),
+            new UninitializedSdkWarning { WriteToStandardError = standardError.Add });
+
+    private static void Set(SentryTarget target, string property, object value) =>
+        Record.Exception(() => typeof(SentryTarget).GetProperty(property)!.SetValue(target, value));
 
     private static MethodInfo DsnOverload(int parameterCount) => typeof(ConfigurationExtensions)
         .GetMethods(BindingFlags.Public | BindingFlags.Static)
