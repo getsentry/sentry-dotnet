@@ -35,6 +35,7 @@ public static class MauiProgram
                 options.AttachScreenshot = true;
 
                 options.Debug = true;
+                options.EnableLogs = true;
                 options.SampleRate = 1.0F;
 
                 // The Sentry MVVM Community Toolkit integration automatically creates traces for async relay commands,
@@ -78,7 +79,7 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        // Configure Logging, including Structured Logs sent to Sentry
+        // Configure Logging, including Structured Logs sent to Sentry (see 'EnableLogs = true')
         builder.Logging.AddFilter(null, LogLevel.Warning);
         builder.Logging.AddFilter("Sentry.Samples.Maui", LogLevel.Information);
 
