@@ -171,6 +171,32 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     }
 
     [Fact]
+    public async Task UnhandledException_AnotherServiceProviderBuiltAndDisposed_EventCaptured()
+    {
+        IServiceCollection services = null;
+        ConfigureServices = s => services = s;
+        Build();
+
+        using (var throwaway = services.BuildServiceProvider())
+        {
+            _ = throwaway.GetRequiredService<IHub>();
+        }
+
+        _ = await HttpClient.GetAsync("/throw");
+
+        _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+            e.Items
+                .Select(i => i.Payload)
+                .OfType<JsonSerializable>()
+                .Select(i => i.Source)
+                .OfType<SentryEvent>()
+                .Single()
+                .Exception
+                .Message == "test error"
+        ));
+    }
+
+    [Fact]
     public async Task SendDefaultPii_FalseWithoutUserInRequest_NoUserNameSent()
     {
         Configure = o => o.SendDefaultPii = false;
