@@ -21,7 +21,6 @@ internal partial class BindableSentryOptions
         public bool? EnableMemoryIntrospection { get; set; }
         public bool? EnableNetworkBreadcrumbs { get; set; }
         public bool? EnableNetworkTracking { get; set; }
-        public bool? EnableWatchdogTerminationTracking { get; set; }
         public bool? EnableSwizzling { get; set; }
         public bool? EnableUIViewControllerTracing { get; set; }
         public bool? EnableUserInteractionTracing { get; set; }
@@ -42,9 +41,6 @@ internal partial class BindableSentryOptions
             options.EnableMemoryIntrospection = EnableMemoryIntrospection ?? options.EnableMemoryIntrospection;
             options.EnableNetworkBreadcrumbs = EnableNetworkBreadcrumbs ?? options.EnableNetworkBreadcrumbs;
             options.EnableNetworkTracking = EnableNetworkTracking ?? options.EnableNetworkTracking;
-#pragma warning disable CS0618 // Type or member is obsolete
-            options.EnableWatchdogTerminationTracking = EnableWatchdogTerminationTracking ?? options.EnableWatchdogTerminationTracking;
-#pragma warning restore CS0618 // Type or member is obsolete
             options.EnableSwizzling = EnableSwizzling ?? options.EnableSwizzling;
             options.EnableUIViewControllerTracing = EnableUIViewControllerTracing ?? options.EnableUIViewControllerTracing;
             options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
