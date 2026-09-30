@@ -143,8 +143,9 @@ public static partial class SentrySdk
         nativeOptions.EnableMemoryIntrospection = options.Native.EnableMemoryIntrospection;
         nativeOptions.EnableNetworkBreadcrumbs = options.Native.EnableNetworkBreadcrumbs;
         nativeOptions.EnableNetworkTracking = options.Native.EnableNetworkTracking;
-        // Prone to false positives on .NET, see https://github.com/getsentry/sentry-dotnet/issues/3860
-        nativeOptions.EnableWatchdogTerminationTracking = false;
+#pragma warning disable CS0618 // Type or member is obsolete
+        nativeOptions.EnableWatchdogTerminationTracking = options.Native.EnableWatchdogTerminationTracking;
+#pragma warning restore CS0618 // Type or member is obsolete
         nativeOptions.EnableSwizzling = options.Native.EnableSwizzling;
         nativeOptions.EnableUIViewControllerTracing = options.Native.EnableUIViewControllerTracing;
         nativeOptions.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
