@@ -16,7 +16,7 @@ public class TraceIgnoreStatusCodeTransactionProcessorTests
 
     private static SentryTransaction TransactionWithStatusCode(int statusCode)
     {
-        var transaction = new SentryTransaction("name", "operation");
+        var transaction = new SentryTransaction("name", "http.server");
         transaction.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, statusCode);
         return transaction;
     }
@@ -96,13 +96,31 @@ public class TraceIgnoreStatusCodeTransactionProcessorTests
         result.Should().BeSameAs(transaction);
     }
 
+    [Theory]
+    [InlineData("http.client")]
+    [InlineData("custom")]
+    public void Process_NotIncomingRequest_ReturnsTransaction(string operation)
+    {
+        // Arrange
+        var options = OptionsWithIgnoredCodes(404);
+        var processor = new TraceIgnoreStatusCodeTransactionProcessor(options);
+        var transaction = new SentryTransaction("name", operation);
+        transaction.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, 404);
+
+        // Act
+        var result = processor.Process(transaction);
+
+        // Assert
+        result.Should().BeSameAs(transaction);
+    }
+
     [Fact]
     public void Process_NoStatusCodeExtra_ReturnsTransaction()
     {
         // Arrange
         var options = OptionsWithIgnoredCodes((100, 599));
         var processor = new TraceIgnoreStatusCodeTransactionProcessor(options);
-        var transaction = new SentryTransaction("name", "operation");
+        var transaction = new SentryTransaction("name", "http.server");
 
         // Act
         var result = processor.Process(transaction);
@@ -118,7 +136,7 @@ public class TraceIgnoreStatusCodeTransactionProcessorTests
         // Arrange
         var options = OptionsWithIgnoredCodes(404);
         var processor = new TraceIgnoreStatusCodeTransactionProcessor(options);
-        var transaction = new SentryTransaction("name", "operation");
+        var transaction = new SentryTransaction("name", "http.server");
         transaction.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, (short)404);
 
         // Act
