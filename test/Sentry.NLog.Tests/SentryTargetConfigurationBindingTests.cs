@@ -33,6 +33,12 @@ public class SentryTargetConfigurationBindingTests
         Assert.Null(LoadConfiguration("minimumEventLevel='Warn' includeEventPropertiesAsTags='true'"));
     }
 
+    [Fact]
+    public void LoadConfiguration_WithInitializeSdkFalse_DoesNotThrow()
+    {
+        Assert.Null(LoadConfiguration("initializeSdk='false'"));
+    }
+
     [Theory]
     [InlineData(2)]
     [InlineData(3)]
@@ -65,6 +71,18 @@ public class SentryTargetConfigurationBindingTests
 
         Assert.NotNull(obsolete);
         Assert.True(obsolete!.IsError);
+    }
+
+    [Fact]
+    public void Dsn_WhenSet_WritesMigrationMessageToStandardError()
+    {
+        var standardError = new List<string>();
+        var warning = new UninitializedSdkWarning { WriteToStandardError = standardError.Add };
+        var target = new SentryTarget(new SentryNLogOptions(), () => Substitute.For<IHub>(), new MockClock(), warning);
+
+        Record.Exception(() => typeof(SentryTarget).GetProperty("Dsn")!.SetValue(target, (Layout)ValidDsn));
+
+        Assert.Contains(ConfigurationExtensions.ObsoleteDsnOverload, Assert.Single(standardError));
     }
 
     private static MethodInfo DsnOverload(int parameterCount) => typeof(ConfigurationExtensions)

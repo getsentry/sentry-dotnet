@@ -76,7 +76,11 @@ public sealed partial class SentryTarget : TargetWithContext
     public Layout? Dsn
     {
         get => null;
-        set => throw new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
+        set
+        {
+            _uninitializedSdkWarning.WriteToStandardError("Sentry: " + ConfigurationExtensions.ObsoleteDsnOverload);
+            throw new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
+        }
     }
 
     /// <summary>
@@ -87,7 +91,13 @@ public sealed partial class SentryTarget : TargetWithContext
     public bool InitializeSdk
     {
         get => false;
-        set => throw new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
+        set
+        {
+            if (value)
+            {
+                throw new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
+            }
+        }
     }
 
     /// <summary>
