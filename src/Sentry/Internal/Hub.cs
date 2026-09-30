@@ -629,6 +629,7 @@ internal class Hub : IHub, IDisposable
         try
         {
             var clonedScope = CurrentScope.Clone();
+            clonedScope.ScopeSyncEnabled = false;
             configureScope(clonedScope);
 
             // Although we clone a temporary scope for the configureScope action, for the second scope
@@ -722,6 +723,7 @@ internal class Hub : IHub, IDisposable
         try
         {
             var clonedScope = CurrentScope.Clone();
+            clonedScope.ScopeSyncEnabled = false;
             configureScope(clonedScope);
 
             return CaptureFeedback(feedback, out result, clonedScope, hint);

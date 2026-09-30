@@ -129,6 +129,83 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clone_CopiesAllData()
+    {
+        // Arrange
+        var scope = new Scope();
+        scope.ApplyFakeValues();
+        scope.Level = SentryLevel.Warning;
+        scope.Sdk.Name = "sdk";
+        scope.Sdk.Version = "1.0";
+        scope.Sdk.AddPackage("package", "2.0");
+
+        // Act
+        var clone = scope.Clone();
+
+        // Assert
+        clone.ShouldBeEquivalentTo(scope);
+        clone.Sdk.Should().BeEquivalentTo(scope.Sdk);
+    }
+
+    [Fact]
+    public void Clone_ScopeSyncEnabled_ObserverNotCalled()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+        scope.ApplyFakeValues();
+        observer.ClearReceivedCalls();
+
+        // Act
+        _ = scope.Clone();
+
+        // Assert
+        observer.ReceivedCalls().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Clone_BeforeBreadcrumb_NotInvokedAgain()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        options.SetBeforeBreadcrumb(b => new Breadcrumb($"{b.Message} [scrubbed]", "default"));
+        var scope = new Scope(options);
+        scope.AddBreadcrumb(new Breadcrumb("crumb", "default"));
+
+        // Act
+        var clone = scope.Clone();
+
+        // Assert
+        clone.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb [scrubbed]");
+    }
+
+    [Fact]
+    public void Clone_UserChangedOnClone_ObserverNotifiedAndOriginalUnchanged()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+        scope.User = new SentryUser { Id = "original" };
+        var clone = scope.Clone();
+        observer.ClearReceivedCalls();
+
+        // Act
+        clone.User.Id = "changed";
+
+        // Assert
+        observer.Received(1).SetUser(Arg.Is<SentryUser>(u => u.Id == "changed"));
+        scope.User.Id.Should().Be("original");
+    }
+
+    [Fact]
     public void TransactionName_TransactionNotStarted_NameIsSet()
     {
         // Arrange
