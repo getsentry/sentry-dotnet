@@ -345,4 +345,42 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
                 .Environment == expected
         ));
     }
+
+    [Fact]
+    public async Task NotFoundRequest_ByDefault_NoTransactionCaptured()
+    {
+        Configure = o => o.TracesSampleRate = 1;
+        ConfigureApp = app => app.UseSentryTracing();
+
+        Build();
+        _ = await HttpClient.GetAsync("/");
+        _ = await HttpClient.GetAsync("/missing");
+
+        _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e => HasTransaction(e, "GET /")));
+        _ = Worker.DidNotReceive().EnqueueEnvelope(Arg.Is<Envelope>(e => HasTransaction(e, "GET /missing")));
+    }
+
+    [Fact]
+    public async Task NotFoundRequest_TraceIgnoreStatusCodesCleared_TransactionCaptured()
+    {
+        Configure = o =>
+        {
+            o.TracesSampleRate = 1;
+            o.TraceIgnoreStatusCodes.Clear();
+        };
+        ConfigureApp = app => app.UseSentryTracing();
+
+        Build();
+        _ = await HttpClient.GetAsync("/missing");
+
+        _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e => HasTransaction(e, "GET /missing")));
+    }
+
+    private static bool HasTransaction(Envelope envelope, string name) =>
+        envelope.Items
+            .Select(i => i.Payload)
+            .OfType<JsonSerializable>()
+            .Select(i => i.Source)
+            .OfType<SentryTransaction>()
+            .Any(t => t.Name == name);
 }

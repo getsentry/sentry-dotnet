@@ -33,7 +33,7 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
             Path = "/log",
             Handler = context =>
             {
-                context.RequestServices.GetRequiredService<ILogger<AspNetCoreIntegrationTests>>().LogInformation("Hello, World!");
+                context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("App").LogInformation("Hello, World!");
                 return Task.CompletedTask;
             }
         };

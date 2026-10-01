@@ -4,15 +4,8 @@ namespace Sentry.Tests;
 
 public class TraceIgnoreStatusCodeTransactionProcessorTests
 {
-    private static SentryOptions OptionsWithIgnoredCodes(params HttpStatusCodeRange[] ranges)
-    {
-        var options = new SentryOptions();
-        foreach (var range in ranges)
-        {
-            options.TraceIgnoreStatusCodes.Add(range);
-        }
-        return options;
-    }
+    private static SentryOptions OptionsWithIgnoredCodes(params HttpStatusCodeRange[] ranges) =>
+        new() { TraceIgnoreStatusCodes = [.. ranges] };
 
     private static SentryTransaction TransactionWithStatusCode(int statusCode)
     {
@@ -21,11 +14,55 @@ public class TraceIgnoreStatusCodeTransactionProcessorTests
         return transaction;
     }
 
+    [Theory]
+    [InlineData(301)]
+    [InlineData(305)]
+    [InlineData(307)]
+    [InlineData(308)]
+    [InlineData(399)]
+    [InlineData(401)]
+    [InlineData(403)]
+    [InlineData(404)]
+    public void Process_DefaultOptions_DropsIgnoredStatusCode(int statusCode)
+    {
+        // Arrange
+        var processor = new TraceIgnoreStatusCodeTransactionProcessor(new SentryOptions());
+        var transaction = TransactionWithStatusCode(statusCode);
+
+        // Act
+        var result = processor.Process(transaction);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(200)]
+    [InlineData(300)]
+    [InlineData(302)]
+    [InlineData(303)]
+    [InlineData(304)]
+    [InlineData(400)]
+    [InlineData(405)]
+    [InlineData(500)]
+    public void Process_DefaultOptions_ReturnsTransaction(int statusCode)
+    {
+        // Arrange
+        var processor = new TraceIgnoreStatusCodeTransactionProcessor(new SentryOptions());
+        var transaction = TransactionWithStatusCode(statusCode);
+
+        // Act
+        var result = processor.Process(transaction);
+
+        // Assert
+        result.Should().BeSameAs(transaction);
+    }
+
     [Fact]
     public void Process_EmptyIgnoreList_ReturnsTransaction()
     {
         // Arrange
-        var options = new SentryOptions();
+        var options = OptionsWithIgnoredCodes();
         var processor = new TraceIgnoreStatusCodeTransactionProcessor(options);
         var transaction = TransactionWithStatusCode(404);
 
