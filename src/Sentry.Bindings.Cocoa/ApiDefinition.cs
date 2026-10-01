@@ -1355,11 +1355,11 @@ interface SentryObjCOptions
 
     // @property (copy, nonatomic) SentryObjCEvent * _Nullable (^ _Nullable)(SentryObjCEvent * _Nonnull) beforeSend;
     [NullAllowed, Export("beforeSend", ArgumentSemantic.Copy)]
-    Func<SentryObjCEvent, SentryObjCEvent> BeforeSend { get; set; }
+    Func<SentryObjCEvent, SentryObjCEvent?> BeforeSend { get; set; }
 
     // @property (copy, nonatomic) SentryObjCSpan * _Nullable (^ _Nullable)(SentryObjCSpan * _Nonnull) beforeSendSpan;
     [NullAllowed, Export("beforeSendSpan", ArgumentSemantic.Copy)]
-    Func<SentryObjCSpan, SentryObjCSpan> BeforeSendSpan { get; set; }
+    Func<SentryObjCSpan, SentryObjCSpan?> BeforeSendSpan { get; set; }
 
     // @property (nonatomic) BOOL enableLogs;
     [Export("enableLogs")]
@@ -1367,7 +1367,7 @@ interface SentryObjCOptions
 
     // @property (copy, nonatomic) SentryObjCBreadcrumb * _Nullable (^ _Nullable)(SentryObjCBreadcrumb * _Nonnull) beforeBreadcrumb;
     [NullAllowed, Export("beforeBreadcrumb", ArgumentSemantic.Copy)]
-    Func<SentryObjCBreadcrumb, SentryObjCBreadcrumb> BeforeBreadcrumb { get; set; }
+    Func<SentryObjCBreadcrumb, SentryObjCBreadcrumb?> BeforeBreadcrumb { get; set; }
 
     // @property (copy, nonatomic) BOOL (^ _Nullable)(SentryObjCEvent * _Nonnull) beforeCaptureScreenshot;
     [NullAllowed, Export("beforeCaptureScreenshot", ArgumentSemantic.Copy)]
@@ -1455,7 +1455,7 @@ interface SentryObjCOptions
 
     // @property (copy, nonatomic) NSNumber * _Nullable (^ _Nullable)(SentryObjCSamplingContext * _Nonnull) tracesSampler;
     [NullAllowed, Export("tracesSampler", ArgumentSemantic.Copy)]
-    Func<SentryObjCSamplingContext, NSNumber> TracesSampler { get; set; }
+    Func<SentryObjCSamplingContext, Foundation.NSNumber?> TracesSampler { get; set; }
 
     // @property (readonly, nonatomic) BOOL isTracingEnabled;
     [Export("isTracingEnabled")]
