@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Configuration;
 using Sentry.Internal;
 
 #if NETCOREAPP3_1_OR_GREATER
@@ -18,14 +17,7 @@ public class SentryAspNetCoreOptionsSetupTests
         public Dictionary<string, string> Configuration { get; set; } = new();
 
         public SentryAspNetCoreOptionsSetup GetSut()
-        {
-            var config = new ConfigurationBuilder()
-                .AddInMemoryCollection(Configuration)
-                .Build();
-            var loggingConfig = Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>();
-            loggingConfig.Configuration.Returns(config);
-            return new(loggingConfig);
-        }
+            => new(new ConfigurationBuilder().AddInMemoryCollection(Configuration).Build());
     }
 
     private readonly Fixture _fixture = new();

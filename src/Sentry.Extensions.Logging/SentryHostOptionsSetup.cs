@@ -1,6 +1,5 @@
 #if NET6_0_OR_GREATER
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging;
@@ -10,10 +9,10 @@ internal sealed class SentryHostOptionsSetup<TOptions> : IConfigureOptions<TOpti
 {
     private readonly IConfiguration _config;
 
-    public SentryHostOptionsSetup(ILoggerProviderConfiguration<SentryLoggerProvider> config)
+    public SentryHostOptionsSetup(IConfiguration section)
     {
-        ArgumentNullException.ThrowIfNull(config);
-        _config = config.Configuration;
+        ArgumentNullException.ThrowIfNull(section);
+        _config = section;
     }
 
     public void Configure(TOptions options)

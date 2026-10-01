@@ -5,8 +5,6 @@ using Sentry.Samples.GenericHost;
 
 var builder = Host.CreateApplicationBuilder();
 
-builder.Logging.AddConfiguration(builder.Configuration);
-
 // Initialise the Sentry SDK. The logging integration added below only forwards log messages to Sentry.
 using var sentry = SentrySdk.Init(options =>
 {

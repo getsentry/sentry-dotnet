@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +16,7 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
     {
         var services = new ServiceCollection();
         services.AddSingleton<NavigationManager>(new FakeNavigationManager());
-        services.AddLogging(logging => logging.AddSentryBlazor(o =>
+        services.AddLogging(logging => logging.AddSentryBlazor(new ConfigurationBuilder().Build(), o =>
         {
             o.Dsn = ValidDsn;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();

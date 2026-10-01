@@ -25,6 +25,7 @@ public class SentryLoggingOptionsConfigurationBindingTests
     [Theory]
     [InlineData("Sentry:Dsn", "https://key@sentry.io/1")]
     [InlineData("Sentry:InitializeSdk", "true")]
+    [InlineData("Sentry:Release", "1.0.0")]
     public void BindConfiguration_WithSdkSetting_Throws(string key, string value)
     {
         var exception = BindConfiguration(key, value);
@@ -43,7 +44,7 @@ public class SentryLoggingOptionsConfigurationBindingTests
     [Fact]
     public void BindOptionsDirectly_WithLoggingSetting_DoesNotThrow()
     {
-        // The netstandard2.0 path binds onto the options directly, and writes each property's value back.
+        // The configuration binder writes each property's value back, so the tombstones must tolerate their own.
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?> { ["MinimumEventLevel"] = nameof(LogLevel.Warning) })
             .Build();

@@ -22,6 +22,11 @@ public class SentryWebHostBuilderExtensionsTests
 
     public SentryWebHostBuilderExtensionsTests()
     {
+        // Substitutes return an empty string for every key, where configuration returns null for an absent one.
+        var emptySection = Substitute.For<IConfigurationSection>();
+        emptySection[Arg.Any<string>()].Returns((string)null);
+        Configuration.GetSection(Arg.Any<string>()).Returns(emptySection);
+
         var context = new WebHostBuilderContext
         {
             Configuration = Configuration,
@@ -81,11 +86,6 @@ public class SentryWebHostBuilderExtensionsTests
     [Fact]
     public void UseSentry_Logging_AddLoggerProviders()
     {
-#if NET8_0
-        var section = Substitute.For<IConfigurationSection>();
-        section[Arg.Any<string>()].Returns((string)null);
-        Configuration.GetSection("Sentry").Returns(section);
-#endif
         WebHostBuilder.UseSentry((SentryAspNetCoreOptions options) =>
         {
             options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;

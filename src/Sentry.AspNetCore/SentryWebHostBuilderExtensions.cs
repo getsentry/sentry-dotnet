@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
+using Sentry.Extensions.Logging;
 using Sentry.Ben.BlockingDetector;
 
 // ReSharper disable once CheckNamespace
@@ -84,15 +85,12 @@ public static class SentryWebHostBuilderExtensions
             logging.AddConfiguration();
 
             var section = context.Configuration.GetSection("Sentry");
-#if NETSTANDARD2_0
-            _ = logging.Services.Configure<SentryAspNetCoreOptions>(section);
-#else
             _ = logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(_ =>
                 new SentryAspNetCoreOptionsSetup(section)
             );
-#endif
-            _ = logging.Services
-                .AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
+            _ = logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(_ =>
+                new SentryHostLoggingOptionsSetup<SentryAspNetCoreOptions>(context.Configuration)
+            );
             _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
             _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
 
