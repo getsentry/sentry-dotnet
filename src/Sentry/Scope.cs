@@ -144,31 +144,33 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public string? Distribution { get; set; }
 
-    /// <inheritdoc />
-    public string? Environment
+    private string? _environment;
+
+    /// <inheritdoc cref="IEventLike.Environment" />
+    public string Environment
     {
-        get;
-        set
+        get => _environment ?? Options.SettingLocator.GetEnvironment();
+        set => SetEnvironment(value);
+    }
+
+    string? IEventLike.Environment
+    {
+        get => Environment;
+        set => SetEnvironment(value);
+    }
+
+    private void SetEnvironment(string? environment)
+    {
+        if (_environment == environment)
         {
-            if (field == value)
-            {
-                return;
-            }
+            return;
+        }
 
-            if (value is null)
-            {
-                Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
-                field = Options.Environment;
-            }
-            else
-            {
-                field = value;
-            }
+        _environment = environment;
 
-            if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
-            {
-                observer.SetEnvironment(field);
-            }
+        if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
+        {
+            observer.SetEnvironment(Environment);
         }
     }
 
@@ -440,7 +442,7 @@ public class Scope : IEventLike
         User = new();
         Release = default;
         Distribution = default;
-        Environment = default;
+        SetEnvironment(null);
         TransactionName = default;
         Transaction = default;
         Fingerprint = Array.Empty<string>();
@@ -524,7 +526,17 @@ public class Scope : IEventLike
 
         other.Release ??= Release;
         other.Distribution ??= Distribution;
-        other.Environment ??= Environment;
+        if (other is Scope otherScope)
+        {
+            if (otherScope._environment is null)
+            {
+                otherScope.SetEnvironment(_environment);
+            }
+        }
+        else
+        {
+            other.Environment ??= Environment;
+        }
         other.TransactionName ??= TransactionName;
         other.Level ??= Level;
 
