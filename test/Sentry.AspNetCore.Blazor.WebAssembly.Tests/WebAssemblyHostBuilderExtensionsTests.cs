@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Sentry.AspNetCore.Blazor.WebAssembly.Tests;
 
@@ -12,11 +13,16 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
 
     public void Dispose() => SentrySdk.Close();
 
-    private ServiceProvider GetSut(Action<SentryBlazorOptions> configureOptions)
+    private ServiceProvider GetSut(
+        Action<SentryBlazorOptions> configureOptions,
+        params (string Key, string Value)[] settings)
     {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(settings.ToDictionary(s => s.Key, s => s.Value))
+            .Build();
         var services = new ServiceCollection();
         services.AddSingleton<NavigationManager>(new FakeNavigationManager());
-        services.AddLogging(logging => logging.AddSentryBlazor(new ConfigurationBuilder().Build(), o =>
+        services.AddLogging(logging => logging.AddSentryBlazor(configuration, o =>
         {
             o.Dsn = ValidDsn;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
@@ -29,6 +35,38 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
             configureOptions(o);
         }));
         return services.BuildServiceProvider();
+    }
+
+    private SentryBlazorOptions GetOptions(
+        Action<SentryBlazorOptions> configureOptions,
+        params (string Key, string Value)[] settings)
+    {
+        using var provider = GetSut(configureOptions, settings);
+        return provider.GetRequiredService<IOptions<SentryBlazorOptions>>().Value;
+    }
+
+    [Fact]
+    public void AddSentryBlazor_Configuration_DoesNotOverridePlatformDefaults()
+    {
+        var options = GetOptions(_ => { },
+            ("Sentry:DetectStartupTime", nameof(StartupTimeDetectionMode.Best)),
+            ("Sentry:RequestBodyCompressionLevel", nameof(CompressionLevel.Optimal)),
+            ("Sentry:IsGlobalModeEnabled", "false"));
+
+        Assert.Equal(StartupTimeDetectionMode.Fast, options.DetectStartupTime);
+        Assert.Equal(CompressionLevel.NoCompression, options.RequestBodyCompressionLevel);
+        Assert.True(options.IsGlobalModeEnabled);
+    }
+
+    [Fact]
+    public void AddSentryBlazor_Configuration_AppliedAndOverriddenByCallback()
+    {
+        var options = GetOptions(o => o.Release = "from-code",
+            ("Sentry:Release", "from-configuration"),
+            ("Sentry:Environment", "from-configuration"));
+
+        Assert.Equal("from-code", options.Release);
+        Assert.Equal("from-configuration", options.Environment);
     }
 
     [Fact]

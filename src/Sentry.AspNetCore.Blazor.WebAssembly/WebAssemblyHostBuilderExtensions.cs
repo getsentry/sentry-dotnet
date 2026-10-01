@@ -37,6 +37,11 @@ public static class WebAssemblyHostBuilderExtensions
     {
         logging.AddConfiguration();
 
+        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>>(
+            new SentryHostOptionsSetup<SentryBlazorOptions>(configuration.GetSection("Sentry")));
+        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>>(
+            new SentryHostLoggingOptionsSetup<SentryBlazorOptions>(configuration));
+
         logging.Services.Configure<SentryBlazorOptions>(blazorOptions =>
         {
             configureOptions(blazorOptions);
@@ -50,10 +55,6 @@ public static class WebAssemblyHostBuilderExtensions
             blazorOptions.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(blazorOptions));
         });
 
-        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>>(
-            new SentryHostOptionsSetup<SentryBlazorOptions>(configuration.GetSection("Sentry")));
-        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>>(
-            new SentryHostLoggingOptionsSetup<SentryBlazorOptions>(configuration));
         logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>, BlazorWasmOptionsSetup>();
 
         logging.Services.AddSingleton<ILoggerProvider>(c => new SentryLoggerProvider(
