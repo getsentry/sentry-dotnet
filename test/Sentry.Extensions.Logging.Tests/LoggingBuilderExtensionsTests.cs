@@ -11,10 +11,7 @@ public class LoggingBuilderExtensionsTests
     {
         // Arrange
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry(options =>
-        {
-            options.InitializeSdk = false;
-        }));
+        serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry());
         using var serviceProvider = serviceCollection.BuildServiceProvider();
         using var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
@@ -32,10 +29,7 @@ public class LoggingBuilderExtensionsTests
     {
         // Arrange
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry(options =>
-        {
-            options.InitializeSdk = false;
-        }));
+        serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry());
         using var serviceProvider = serviceCollection.BuildServiceProvider();
         using var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 

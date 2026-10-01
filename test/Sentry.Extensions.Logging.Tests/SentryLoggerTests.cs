@@ -9,12 +9,14 @@ public class SentryLoggerTests
         public string CategoryName { get; set; } = "SomeApp";
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public SentryLoggingOptions Options { get; set; } = new();
+        public SentryOptions SentryOptions { get; } = new();
         public Scope Scope { get; } = new(new SentryOptions());
 
         public Fixture()
         {
             _ = Hub.IsEnabled.Returns(true);
             Hub.SubstituteConfigureScope(Scope);
+            SentryClientExtensions.SentryOptionsForTestingOnly = SentryOptions;
         }
 
         public SentryLogger GetSut() => new(CategoryName, Options, new MockClock(), Hub);
@@ -238,14 +240,14 @@ public class SentryLoggerTests
     {
         var exception = new InvalidOperationException("filter failed");
         _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw exception);
-        _fixture.Options.AddDiagnosticLoggerSubstitute();
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
 
         var sut = _fixture.GetSut();
 
         sut.LogCritical("message");
 
         _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
-        _fixture.Options.ReceivedLogError(exception,
+        _fixture.SentryOptions.ReceivedLogError(exception,
             "The {0} log filter callback failed. The log entry will be filtered out.",
             nameof(DelegateLogEntryFilter));
     }
@@ -254,7 +256,7 @@ public class SentryLoggerTests
     public void LogCritical_FilterThrows_DoesNotAddBreadcrumb()
     {
         _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw new InvalidOperationException("filter failed"));
-        _fixture.Options.AddDiagnosticLoggerSubstitute();
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
 
         var sut = _fixture.GetSut();
 

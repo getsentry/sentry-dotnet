@@ -16,7 +16,7 @@ public class SentryStructuredLoggerBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        SentryLoggingOptions options = new()
+        SentryOptions options = new()
         {
             Dsn = DsnSamples.ValidDsn,
         };
@@ -34,7 +34,7 @@ public class SentryStructuredLoggerBenchmarks
         };
 
         _hub = new Hub(options, DisabledHub.Instance);
-        _logger = new SentryStructuredLogger("CategoryName", options, _hub, clock, sdk);
+        _logger = new SentryStructuredLogger("CategoryName", _hub, clock, sdk);
         _logRecord = new LogRecord(LogLevel.Information, new EventId(2025, "EventName"), new InvalidOperationException("exception-message"), "Number={Number}, Text={Text}", 2018, "message");
     }
 

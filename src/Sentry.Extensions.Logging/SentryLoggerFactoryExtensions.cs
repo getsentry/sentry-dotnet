@@ -17,8 +17,8 @@ public static class SentryLoggerFactoryExtensions
     /// Adds the Sentry logging integration.
     /// </summary>
     /// <remarks>
-    /// This method does not need to be called when calling `UseSentry` with ASP.NET Core
-    /// since that integrates with the logging framework automatically.
+    /// This method does not initialize Sentry. Initialize it separately, with <see cref="SentrySdk.Init(Action{SentryOptions})"/>
+    /// or a framework integration such as <c>UseSentry</c>.
     /// </remarks>
     /// <param name="factory">The factory.</param>
     /// <param name="optionsConfiguration">The options configuration.</param>
@@ -30,34 +30,7 @@ public static class SentryLoggerFactoryExtensions
 
         optionsConfiguration?.Invoke(options);
 
-        if (options.DiagnosticLogger == null)
-        {
-            var logger = factory.CreateLogger<ISentryClient>();
-            options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticLevel);
-        }
-
-        IHub hub;
-        if (options.InitializeSdk)
-        {
-            if (SentrySdk.IsEnabled && options.Dsn is null)
-            {
-                options.LogWarning("Not calling Init from {0} because SDK is already enabled and no DSN was provided to the integration", nameof(SentryLoggerFactoryExtensions));
-                hub = HubAdapter.Instance;
-            }
-            else
-            {
-                options.LogDebug("Initializing from {0} and swapping current Hub.", nameof(SentryLoggerFactoryExtensions));
-                hub = SentrySdk.InitHub(options);
-                SentrySdk.UseHub(hub);
-            }
-        }
-        else
-        {
-            // Access to whatever the SentrySdk points to (disabled or initialized via SentrySdk.Init)
-            hub = HubAdapter.Instance;
-        }
-
-        factory.AddProvider(new SentryLoggerProvider(hub, SystemClock.Clock, options));
+        factory.AddProvider(new SentryLoggerProvider(HubAdapter.Instance, SystemClock.Clock, options));
         return factory;
     }
 }

@@ -1,9 +1,13 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore.Blazor.WebAssembly.Internal;
 using Sentry.Extensions.Logging;
+using Sentry.Extensions.Logging.Extensions.DependencyInjection;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace - Discoverability
@@ -22,7 +26,23 @@ public static class WebAssemblyHostBuilderExtensions
     /// <returns></returns>
     public static WebAssemblyHostBuilder UseSentry(this WebAssemblyHostBuilder builder, Action<SentryBlazorOptions> configureOptions)
     {
-        builder.Logging.AddSentry<SentryBlazorOptions>(blazorOptions =>
+        builder.Logging.AddSentryBlazor(builder.Configuration, configureOptions);
+        return builder;
+    }
+
+    internal static ILoggingBuilder AddSentryBlazor(
+        this ILoggingBuilder logging,
+        IConfiguration configuration,
+        Action<SentryBlazorOptions> configureOptions)
+    {
+        logging.AddConfiguration();
+
+        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>>(
+            new SentryHostOptionsSetup<SentryBlazorOptions>(configuration.GetSection("Sentry")));
+        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>>(
+            new SentryHostLoggingOptionsSetup<SentryBlazorOptions>(configuration));
+
+        logging.Services.Configure<SentryBlazorOptions>(blazorOptions =>
         {
             configureOptions(blazorOptions);
 
@@ -35,16 +55,26 @@ public static class WebAssemblyHostBuilderExtensions
             blazorOptions.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(blazorOptions));
         });
 
-        builder.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>, BlazorWasmOptionsSetup>();
+        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>, BlazorWasmOptionsSetup>();
 
-        return builder;
+        logging.Services.AddSingleton<ILoggerProvider>(c => new SentryLoggerProvider(
+            c.GetRequiredService<IHub>(),
+            SystemClock.Clock,
+            c.GetRequiredService<IOptions<SentryBlazorOptions>>().Value.Logging));
+        logging.Services.AddSingleton<ILoggerProvider>(c => new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
+        logging.Services.AddSentry<SentryBlazorOptions>();
+
+        logging.AddFilter<SentryLoggerProvider>(_ => true);
+        logging.AddFilter<SentryStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
+
+        return logging;
     }
 }
 
 /// <summary>
 /// Sentry Blazor Options
 /// </summary>
-public class SentryBlazorOptions : SentryLoggingOptions
+public class SentryBlazorOptions : SentryHostOptions
 {
     // Awesome Blazor specific options go here
 }

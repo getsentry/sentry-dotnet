@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Infrastructure;
-using Sentry.Reflection;
+using Sentry.Internal;
 
 namespace Sentry.Extensions.Logging;
 
@@ -13,15 +13,9 @@ internal class SentryLoggerProvider : ILoggerProvider
 {
     private readonly ISystemClock _clock;
     private readonly SentryLoggingOptions _options;
-    private readonly IDisposable? _scope;
-    private readonly IDisposable? _disposableHub;
+    private readonly UninitializedSdkWarning _uninitializedSdkWarning;
 
     internal IHub Hub { get; }
-
-    internal static readonly SdkVersion NameAndVersion
-        = typeof(SentryLogger).Assembly.GetNameAndVersion();
-
-    private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryLoggerProvider"/>.
@@ -37,37 +31,13 @@ internal class SentryLoggerProvider : ILoggerProvider
     internal SentryLoggerProvider(
         IHub hub,
         ISystemClock clock,
-        SentryLoggingOptions options)
+        SentryLoggingOptions options,
+        UninitializedSdkWarning? uninitializedSdkWarning = null)
     {
-        _disposableHub = hub as IDisposable;
-
         Hub = hub;
         _clock = clock;
         _options = options;
-
-        if (hub.IsEnabled)
-        {
-            _scope = hub.PushScope();
-            hub.ConfigureScope(static s =>
-            {
-                if (s.Sdk is { } sdk)
-                {
-                    sdk.Name = Constants.SdkName;
-                    sdk.Version = NameAndVersion.Version;
-
-                    if (NameAndVersion.Version is { } version)
-                    {
-                        sdk.AddPackage(ProtocolPackageName, version);
-                    }
-                }
-            });
-
-            // Add scope configuration to hub from options
-            foreach (var callback in options.ConfigureScopeCallbacks)
-            {
-                hub.ConfigureScope(callback);
-            }
-        }
+        _uninitializedSdkWarning = uninitializedSdkWarning ?? new UninitializedSdkWarning();
     }
 
     /// <summary>
@@ -75,14 +45,10 @@ internal class SentryLoggerProvider : ILoggerProvider
     /// </summary>
     /// <param name="categoryName">Category name.</param>
     /// <returns>A logger.</returns>
-    public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, Hub);
+    public ILogger CreateLogger(string categoryName)
+        => new SentryLogger(categoryName, _options, _clock, Hub, _uninitializedSdkWarning);
 
-    /// <summary>
-    /// Dispose.
-    /// </summary>
     public void Dispose()
     {
-        _scope?.Dispose();
-        _disposableHub?.Dispose();
     }
 }

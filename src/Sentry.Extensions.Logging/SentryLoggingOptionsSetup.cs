@@ -1,4 +1,3 @@
-#if NET6_0_OR_GREATER
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
@@ -18,23 +17,6 @@ internal sealed class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggin
     public void Configure(SentryLoggingOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-
-        var bindable = new BindableSentryLoggingOptions();
-        _config.Bind(bindable);
-        bindable.ApplyTo(options);
+        SentryLoggingConfiguration.ApplyTo(_config, options);
     }
 }
-#else
-using Microsoft.Extensions.Logging.Configuration;
-using Microsoft.Extensions.Options;
-
-namespace Sentry.Extensions.Logging;
-
-internal sealed class SentryLoggingOptionsSetup : ConfigureFromConfigurationOptions<SentryLoggingOptions>
-{
-    public SentryLoggingOptionsSetup(
-        ILoggerProviderConfiguration<SentryLoggerProvider> providerConfiguration)
-        : base(providerConfiguration.Configuration)
-    { }
-}
-#endif

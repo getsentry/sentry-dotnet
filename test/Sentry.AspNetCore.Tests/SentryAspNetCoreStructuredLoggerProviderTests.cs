@@ -6,21 +6,18 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.AspNetCore.Tests;
 
-public class SentryAspNetCoreStructuredLoggerProviderTests
+public class SentryAspNetCoreStructuredLoggerProviderTests : IDisposable
 {
     private class Fixture
     {
-        public IOptions<SentryAspNetCoreOptions> Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
         public SdkVersion Sdk { get; }
 
         public Fixture()
         {
-            var loggingOptions = new SentryAspNetCoreOptions();
-
-            Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
+            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions();
             Clock = new MockClock();
             Sdk = new SdkVersion
             {
@@ -33,11 +30,13 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
 
         public SentryAspNetCoreStructuredLoggerProvider GetSut()
         {
-            return new SentryAspNetCoreStructuredLoggerProvider(Options.Value, Hub, Clock, Sdk);
+            return new SentryAspNetCoreStructuredLoggerProvider(Hub, Clock, Sdk);
         }
     }
 
     private readonly Fixture _fixture = new();
+
+    public void Dispose() => SentryClientExtensions.SentryOptionsForTestingOnly = null;
 
     [Fact]
     public void Type_CustomAttributes_HasProviderAliasAttribute()
@@ -55,7 +54,6 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
         using var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>()
-            .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
@@ -84,7 +82,6 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
         using var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>()
-            .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 

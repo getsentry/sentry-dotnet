@@ -11,7 +11,7 @@ namespace Sentry.AspNetCore;
 /// An options class for the ASP.NET Core Sentry integration
 /// </summary>
 /// <inheritdoc />
-public class SentryAspNetCoreOptions : SentryLoggingOptions
+public class SentryAspNetCoreOptions : SentryHostOptions
 {
     /// <summary>
     /// Gets or sets a value indicating whether [include System.Diagnostic.Activity data] to events.

@@ -116,10 +116,42 @@ public class SentryStartupTests
                 Assert.Single(c, d => d.ImplementationType == typeof(SentryAspNetCoreLoggerProvider)))};
         yield return new object[] {
             new Action<IServiceCollection>(c =>
-                Assert.Single(c, d => d.ImplementationType == typeof(SentryAspNetCoreOptionsSetup)))};
-        yield return new object[] {
-            new Action<IServiceCollection>(c =>
                 Assert.Single(c, d => d.ImplementationType == typeof(AspNetCoreEventProcessor)))};
+    }
+
+    [Fact]
+    public void ConfigureLogging_SentrySection_BindsSdkSettings()
+    {
+        WebHostBuilderContext.Configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string> { ["Sentry:Environment"] = "production" })
+            .Build();
+
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        using var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        Assert.Equal("production", options.Environment);
+    }
+
+    [Fact]
+    public void ConfigureLogging_LoggingSection_BindsLoggingSettings()
+    {
+        WebHostBuilderContext.Configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                ["Logging:Sentry:MinimumEventLevel"] = "Critical",
+                ["Logging:Sentry:MinimumBreadcrumbLevel"] = "Warning",
+            })
+            .Build();
+
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        using var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        Assert.Equal(LogLevel.Critical, options.MinimumEventLevel);
+        Assert.Equal(LogLevel.Warning, options.MinimumBreadcrumbLevel);
     }
 
     [Fact]
@@ -127,7 +159,7 @@ public class SentryStartupTests
     {
         LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
-            options.InitializeSdk = false;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         });
 
         var sut = new SentryStartup();
@@ -146,7 +178,7 @@ public class SentryStartupTests
     {
         LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
-            options.InitializeSdk = false;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         });
 
         var sut = new SentryStartup();

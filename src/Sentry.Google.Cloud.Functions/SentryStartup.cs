@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
+using Sentry.Extensions.Logging;
 using Sentry.Reflection;
 
 namespace Google.Cloud.Functions.Framework;
@@ -32,6 +33,9 @@ public class SentryStartup : FunctionsStartup
         logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(
             _ => new SentryAspNetCoreOptionsSetup(section)
             );
+        logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(
+            _ => new SentryHostLoggingOptionsSetup<SentryAspNetCoreOptions>(context.Configuration)
+            );
 
         logging.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
@@ -55,7 +59,6 @@ public class SentryStartup : FunctionsStartup
             }
         });
 
-        logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
         logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
         logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
 
