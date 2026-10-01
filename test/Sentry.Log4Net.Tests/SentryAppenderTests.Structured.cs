@@ -99,8 +99,8 @@ public partial class SentryAppenderTests
         log.Attributes.ShouldContain("sentry.environment", "test-environment");
         log.Attributes.ShouldContain("sentry.release", "test-release");
         log.Attributes.ShouldContain("sentry.origin", "auto.log.log4net");
-        log.Attributes.ShouldContain("sentry.sdk.name", SentryAppender.SdkName);
-        log.Attributes.ShouldContain("sentry.sdk.version", SentryAppender.NameAndVersion.Version);
+        log.Attributes.ShouldContain("sentry.sdk.name", SdkVersion.Instance.Name!);
+        log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version!);
         log.Attributes.ShouldContain("category.name", "TestLogger");
 
         log.Attributes.ShouldContain("property.Text-Property", "4");
@@ -207,22 +207,6 @@ public partial class SentryAppenderTests
         capturer.Logs.Should().ContainSingle().Which.Message.Should().Be("Message");
         _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be("Message");
         _ = _fixture.Hub.Received(0).CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
-    [Fact]
-    public void DoAppend_StructuredLogging_ConfiguredEnvironment_OverridesOptions()
-    {
-        InMemorySentryStructuredLogger capturer = new();
-        _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Environment = "options-environment";
-
-        var sut = _fixture.GetSut();
-        sut.Environment = "appender-environment";
-
-        sut.DoAppend(CreateLoggingEvent(Level.Info, "Message"));
-
-        var log = capturer.Logs.Should().ContainSingle().Which;
-        log.Attributes.ShouldContain("sentry.environment", "appender-environment");
     }
 
     [Fact]

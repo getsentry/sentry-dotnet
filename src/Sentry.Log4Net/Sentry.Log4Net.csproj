@@ -18,7 +18,9 @@
   <ItemGroup>
     <Using Include="log4net.Appender" />
     <Using Include="log4net.Core" />
+    <Using Include="log4net.Util" />
     <Using Include="Sentry.Extensibility" />
+    <Using Include="Sentry.Internal" />
     <Using Include="Sentry.Reflection" />
   </ItemGroup>
 

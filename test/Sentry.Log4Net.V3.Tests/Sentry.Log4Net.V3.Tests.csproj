@@ -11,6 +11,8 @@
     <Compile Include="..\Sentry.Log4Net.Tests\SentryAppenderTests.Structured.cs" Link="SentryAppenderTests.Structured.cs">
       <DependentUpon>SentryAppenderTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="..\Sentry.Log4Net.Tests\SentryAppenderUninitializedSdkTests.cs" Link="SentryAppenderUninitializedSdkTests.cs" />
+    <Compile Include="..\Sentry.Log4Net.Tests\SentryAppenderConfigurationBindingTests.cs" Link="SentryAppenderConfigurationBindingTests.cs" />
   </ItemGroup>
 
   <ItemGroup>

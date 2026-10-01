@@ -10,6 +10,17 @@ internal class Program
 
     private static void Main()
     {
+        // Initialise the Sentry SDK. 
+        using var _ = SentrySdk.Init(options =>
+        {
+#if !SENTRY_DSN_DEFINED_IN_ENV
+            // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+            options.Dsn = SamplesShared.Dsn;
+#endif
+            options.Environment = "dev";
+        });
+
         // Set the user running the process the current principal
         // Appender was configured to send the user with the event
         AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
