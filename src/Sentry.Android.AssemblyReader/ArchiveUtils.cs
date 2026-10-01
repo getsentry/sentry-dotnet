@@ -42,6 +42,12 @@ internal static class ArchiveUtils
             inputStream.Position = 0;
             return null;
         }
+#if !NET11_0_OR_GREATER
+        if (magic == ZstandardMagic)
+        {
+            throw new NotSupportedException($"Assembly {assemblyName} is Zstandard compressed, which requires .NET 11 or later");
+        }
+#endif
         reader.ReadUInt32(); // ignore descriptor index, we don't need it
         var decompressedLength = reader.ReadInt32();
         Debug.Assert(inputStream.Position == payloadOffset);
@@ -58,20 +64,14 @@ internal static class ArchiveUtils
 
         var inputBuffer = inputStream is MemorySlice slice ? slice.FullBuffer : inputStream.GetBuffer();
         var offset = inputStream is MemorySlice memorySlice ? memorySlice.Offset + payloadOffset : payloadOffset;
-        int decoded;
-        if (magic == Lz4Magic)
-        {
-            decoded = LZ4Codec.Decode(inputBuffer, offset, inputLength, outputBuffer, 0, decompressedLength);
-        }
-        else
-        {
 #if NET11_0_OR_GREATER
-            decoded = ZstandardDecoder.TryDecompress(inputBuffer.AsSpan(offset, inputLength),
+        var decoded = magic == Lz4Magic
+            ? LZ4Codec.Decode(inputBuffer, offset, inputLength, outputBuffer, 0, decompressedLength)
+            : ZstandardDecoder.TryDecompress(inputBuffer.AsSpan(offset, inputLength),
                 outputBuffer.AsSpan(0, decompressedLength), out var bytesWritten) ? bytesWritten : -1;
 #else
-            throw new NotSupportedException($"Assembly {assemblyName} is Zstandard compressed, which requires .NET 11 or later");
+        var decoded = LZ4Codec.Decode(inputBuffer, offset, inputLength, outputBuffer, 0, decompressedLength);
 #endif
-        }
         if (decoded != decompressedLength)
         {
             throw new Exception($"Failed to decompress {format} data of assembly {assemblyName} - decoded {decoded} instead of expected {decompressedLength} bytes");
