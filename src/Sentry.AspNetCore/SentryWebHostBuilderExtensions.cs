@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
-using Sentry.Extensions.Logging;
 using Sentry.Ben.BlockingDetector;
+using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Hosting;
