@@ -20,13 +20,18 @@ public static class GlobalConfigurationExtensions
     }
 
     /// <summary>
-    /// Uses Sentry
+    /// Adds the Sentry filter that captures check-ins for jobs marked with <see cref="SentryMonitorSlugAttribute"/>.
     /// </summary>
-    /// <param name="configuration"></param>
+    /// <param name="configuration">The Hangfire configuration.</param>
     /// <param name="configureOptions">Configures the Sentry Hangfire integration.</param>
-    /// <returns></returns>
+    /// <returns>The Hangfire configuration.</returns>
     public static IGlobalConfiguration UseSentry(this IGlobalConfiguration configuration, Action<SentryHangfireOptions> configureOptions)
     {
+        if (configureOptions is null)
+        {
+            throw new ArgumentNullException(nameof(configureOptions));
+        }
+
         var options = new SentryHangfireOptions();
         configureOptions(options);
         configuration.UseFilter(new SentryServerFilter(null, null, options));

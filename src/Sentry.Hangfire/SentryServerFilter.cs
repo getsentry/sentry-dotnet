@@ -1,6 +1,7 @@
-using System.Globalization;
 using Hangfire.Server;
+using Hangfire.Storage;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Hangfire;
 
@@ -13,6 +14,8 @@ internal class SentryServerFilter : IServerFilter
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryHangfireOptions _options;
+
+    internal SentryHangfireOptions Options => _options;
 
     public SentryServerFilter() : this(null, null)
     { }
@@ -49,69 +52,43 @@ internal class SentryServerFilter : IServerFilter
 
     private SentryId CaptureInProgressCheckIn(PerformingContext context, string monitorSlug)
     {
-        if (_options.SendRecurringJobSchedule && GetRecurringJobSchedule(context) is { } schedule)
+        Action<SentryMonitorOptions>? configureMonitorOptions = null;
+        if (_options.SendRecurringJobSchedule && GetRecurringJobSchedule(context) is (var crontab, var timeZone))
         {
-            var scheduleRejected = false;
-            try
+            configureMonitorOptions = options =>
             {
-                var checkInId = _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: options =>
-                {
-                    try
-                    {
-                        options.Interval(schedule.Crontab);
-                    }
-                    catch
-                    {
-                        scheduleRejected = true;
-                        throw;
-                    }
-                    options.TimeZone = schedule.TimeZone;
-                });
-
-                if (!scheduleRejected)
-                {
-                    return checkInId;
-                }
-            }
-            catch (Exception e)
-            {
-                _logger?.LogError(e, "Failed to capture a check-in with the monitor config for '{0}'.", monitorSlug);
-            }
-
-            if (scheduleRejected)
-            {
-                _logger?.LogDebug("Sending the check-in for '{0}' without a monitor config. " +
-                                  "Sentry doesn't support the schedule '{1}'.", monitorSlug, schedule.Crontab);
-            }
+                options.Interval(crontab);
+                options.TimeZone = timeZone;
+            };
         }
 
-        return _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress);
+        return _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
     }
 
     private (string Crontab, string TimeZone)? GetRecurringJobSchedule(PerformingContext context)
     {
+        string? recurringJobId = null;
         try
         {
-            var recurringJobId = context.GetJobParameter<string>(RecurringJobIdKey);
+            recurringJobId = context.GetJobParameter<string>(RecurringJobIdKey);
             if (string.IsNullOrEmpty(recurringJobId))
             {
                 return null;
             }
 
-            var recurringJob = context.Connection.GetAllEntriesFromHash($"recurring-job:{recurringJobId}");
-            if (recurringJob is null || !recurringJob.TryGetValue("Cron", out var cron))
+            var recurringJob = context.Connection.GetRecurringJobs([recurringJobId]).SingleOrDefault();
+            if (recurringJob is null || recurringJob.Removed)
             {
+                _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. The job no longer exists.", recurringJobId);
                 return null;
             }
 
-            recurringJob.TryGetValue("TimeZoneId", out var timeZoneId);
-
-            var crontab = ToCrontab(cron);
-            var timeZone = ToIanaTimeZoneId(timeZoneId);
+            var crontab = ToCrontab(recurringJob.Cron);
+            var timeZone = ToIanaTimeZoneId(recurringJob.TimeZoneId);
             if (crontab is null || timeZone is null)
             {
                 _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. Sentry doesn't support " +
-                                  "the cron expression '{1}' with time zone '{2}'.", recurringJobId, cron, timeZoneId);
+                                  "the cron expression '{1}' with time zone '{2}'.", recurringJobId, recurringJob.Cron, recurringJob.TimeZoneId);
                 return null;
             }
 
@@ -119,7 +96,7 @@ internal class SentryServerFilter : IServerFilter
         }
         catch (Exception e)
         {
-            _logger?.LogError(e, "Failed to read the schedule of the recurring job.");
+            _logger?.LogError(e, "Failed to read the schedule of recurring job '{0}'.", recurringJobId);
             return null;
         }
     }
@@ -133,30 +110,46 @@ internal class SentryServerFilter : IServerFilter
         }
 
         var fields = cron!.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-        return fields.Length switch
+        var crontab = fields.Length switch
         {
             5 => string.Join(" ", fields),
             6 when int.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var seconds) && seconds < 60
                 => string.Join(" ", fields, 1, 5),
             _ => null
         };
+
+        return crontab is not null && CrontabValidator.IsValid(crontab) ? crontab : null;
     }
 
     internal static string? ToIanaTimeZoneId(string? timeZoneId)
     {
-        if (string.IsNullOrWhiteSpace(timeZoneId))
+        // Hangfire's default is TimeZoneInfo.Utc, whose ID is "UTC" on every platform
+        if (string.IsNullOrWhiteSpace(timeZoneId) || timeZoneId == "UTC")
         {
             return "UTC";
         }
 
 #if NET6_0_OR_GREATER
-        if (TimeZoneInfo.TryConvertWindowsIdToIanaId(timeZoneId, out var ianaId))
+        TimeZoneInfo timeZone;
+        try
         {
-            return ianaId;
+            timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId!);
         }
-#endif
+        catch (Exception)
+        {
+            return null;
+        }
 
-        return timeZoneId == "UTC" || timeZoneId!.Contains("/") ? timeZoneId : null;
+        if (timeZone.HasIanaId)
+        {
+            return timeZone.Id;
+        }
+
+        return TimeZoneInfo.TryConvertWindowsIdToIanaId(timeZone.Id, out var ianaId) ? ianaId : null;
+#else
+        // .NET Framework can neither look up nor convert IANA IDs, so only pass on IDs that look like one
+        return timeZoneId!.Contains("/") ? timeZoneId : null;
+#endif
     }
 
     public void OnPerformed(PerformedContext context)

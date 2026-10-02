@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Server;
@@ -51,11 +50,15 @@ public class ServerFilterTests
         performingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().NotBeSameAs(firstKey);
     }
 
-    [Fact]
-    public void OnPerforming_RecurringJobAndSendScheduleEnabled_SendsMonitorConfig()
+    [Theory]
+    [InlineData("0 */2 * * *", "Europe/Berlin", "0 */2 * * *", "Europe/Berlin")]
+    [InlineData("30 0 */2 * * *", "UTC", "0 */2 * * *", "UTC")]
+    [InlineData("0 0 * * MON", null, "0 0 * * MON", "UTC")]
+    public void OnPerforming_RecurringJobWithSendScheduleEnabled_SendsMonitorConfig(
+        string cron, string? timeZoneId, string expectedCrontab, string expectedTimeZone)
     {
         // Arrange
-        var fixture = new RecurringJobFixture { Cron = "0 */2 * * *", TimeZoneId = "Europe/Berlin" };
+        var fixture = new RecurringJobFixture { Cron = cron, TimeZoneId = timeZoneId };
         var filter = fixture.GetSut(sendRecurringJobSchedule: true);
 
         // Act
@@ -65,28 +68,28 @@ public class ServerFilterTests
         var monitorConfig = fixture.GetSentMonitorConfig();
         monitorConfig.Should().NotBeNull();
         monitorConfig!.Value.GetProperty("schedule").GetProperty("type").GetString().Should().Be("crontab");
-        monitorConfig.Value.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 */2 * * *");
-        monitorConfig.Value.GetProperty("timezone").GetString().Should().Be("Europe/Berlin");
+        monitorConfig.Value.GetProperty("schedule").GetProperty("value").GetString().Should().Be(expectedCrontab);
+        monitorConfig.Value.GetProperty("timezone").GetString().Should().Be(expectedTimeZone);
         fixture.PerformingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().Be(fixture.CheckInId);
     }
 
     [Fact]
-    public void OnPerforming_SendScheduleDisabled_SendsNoMonitorConfig()
+    public void OnPerforming_SendScheduleDisabled_SendsCheckInWithoutMonitorConfig()
     {
         // Arrange
-        var fixture = new RecurringJobFixture { Cron = "0 */2 * * *" };
+        var fixture = new RecurringJobFixture();
         var filter = fixture.GetSut(sendRecurringJobSchedule: false);
 
         // Act
         filter.OnPerforming(fixture.PerformingContext);
 
         // Assert
-        fixture.Hub.Received(1).CaptureCheckIn(RecurringJobFixture.MonitorSlug, CheckInStatus.InProgress);
-        fixture.ConnectionReceivedNoRecurringJobLookup();
+        fixture.AssertCheckInSentWithoutMonitorConfig();
+        fixture.Connection.DidNotReceive().GetAllEntriesFromHash(Arg.Any<string>());
     }
 
     [Fact]
-    public void OnPerforming_NotRecurringJob_SendsNoMonitorConfig()
+    public void OnPerforming_NotRecurringJob_SendsCheckInWithoutMonitorConfig()
     {
         // Arrange
         var fixture = new RecurringJobFixture { RecurringJobId = null };
@@ -96,22 +99,40 @@ public class ServerFilterTests
         filter.OnPerforming(fixture.PerformingContext);
 
         // Assert
-        fixture.Hub.Received(1).CaptureCheckIn(RecurringJobFixture.MonitorSlug, CheckInStatus.InProgress);
+        fixture.AssertCheckInSentWithoutMonitorConfig();
     }
 
     [Fact]
-    public void OnPerforming_ScheduleRejectedBySentry_SendsCheckInWithoutMonitorConfig()
+    public void OnPerforming_RecurringJobDeleted_SendsCheckInWithoutMonitorConfig()
     {
         // Arrange
-        var fixture = new RecurringJobFixture { Cron = "0 0 L * *" };
+        var fixture = new RecurringJobFixture { RecurringJobExists = false };
         var filter = fixture.GetSut(sendRecurringJobSchedule: true);
 
         // Act
         filter.OnPerforming(fixture.PerformingContext);
 
         // Assert
-        fixture.Hub.Received(1).CaptureCheckIn(RecurringJobFixture.MonitorSlug, CheckInStatus.InProgress);
-        fixture.PerformingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().Be(fixture.CheckInId);
+        fixture.AssertCheckInSentWithoutMonitorConfig();
+    }
+
+    [Theory]
+    [InlineData("0 0 L * *", "UTC")]
+    [InlineData("60 0 * * * *", "UTC")]
+    [InlineData("*/10 * * * * *", "UTC")]
+    [InlineData("0 * * * *", "Not A Time Zone")]
+    public void OnPerforming_ScheduleNotSupportedBySentry_SendsCheckInWithoutMonitorConfig(string cron, string timeZoneId)
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture { Cron = cron, TimeZoneId = timeZoneId };
+        var filter = fixture.GetSut(sendRecurringJobSchedule: true);
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        fixture.AssertCheckInSentWithoutMonitorConfig();
+        fixture.Logger.DidNotReceive().Log(SentryLevel.Error, Arg.Any<string>(), Arg.Any<Exception?>(), Arg.Any<object[]>());
     }
 
     [Fact]
@@ -126,18 +147,20 @@ public class ServerFilterTests
         filter.OnPerforming(fixture.PerformingContext);
 
         // Assert
-        fixture.Hub.Received(1).CaptureCheckIn(RecurringJobFixture.MonitorSlug, CheckInStatus.InProgress);
+        fixture.AssertCheckInSentWithoutMonitorConfig();
     }
 
     [Theory]
     [InlineData("0 */2 * * *", "0 */2 * * *")]
     [InlineData("30 0 */2 * * *", "0 */2 * * *")]
     [InlineData("0  0   * * 1", "0 0 * * 1")]
+    [InlineData("60 0 * * * *", null)]
     [InlineData("*/10 * * * * *", null)]
     [InlineData("0,30 * * * * *", null)]
+    [InlineData("0 0 L * *", null)]
     [InlineData("@daily", null)]
     [InlineData("", null)]
-    public void ToCrontab_ReturnsFiveFieldCrontab(string cron, string? expected)
+    public void ToCrontab_HangfireCron_ReturnsSentryCrontabOrNull(string cron, string? expected)
     {
         SentryServerFilter.ToCrontab(cron).Should().Be(expected);
     }
@@ -145,17 +168,15 @@ public class ServerFilterTests
     [Theory]
     [InlineData(null, "UTC")]
     [InlineData("", "UTC")]
+    [InlineData("UTC", "UTC")]
+    [InlineData("Etc/UTC", "Etc/UTC")]
     [InlineData("Europe/Berlin", "Europe/Berlin")]
+    [InlineData("W. Europe Standard Time", "Europe/Berlin")]
     [InlineData("Not A Time Zone", null)]
-    public void ToIanaTimeZoneId_ReturnsIanaId(string? timeZoneId, string? expected)
+    [InlineData("Not/A_Time_Zone", null)]
+    public void ToIanaTimeZoneId_HangfireTimeZoneId_ReturnsIanaIdOrNull(string? timeZoneId, string? expected)
     {
         SentryServerFilter.ToIanaTimeZoneId(timeZoneId).Should().Be(expected);
-    }
-
-    [Fact]
-    public void ToIanaTimeZoneId_WindowsId_ReturnsIanaId()
-    {
-        SentryServerFilter.ToIanaTimeZoneId("W. Europe Standard Time").Should().Be("Europe/Berlin");
     }
 
     private class RecurringJobFixture
@@ -164,33 +185,36 @@ public class ServerFilterTests
         private const string JobId = "test-id";
 
         public string? RecurringJobId { get; set; } = "test-recurring-job";
+        public bool RecurringJobExists { get; set; } = true;
         public string Cron { get; set; } = "0 * * * *";
         public string? TimeZoneId { get; set; }
 
         public IStorageConnection Connection { get; } = Substitute.For<IStorageConnection>();
         public IHub Hub { get; } = Substitute.For<IHub>();
+        public IDiagnosticLogger Logger { get; } = Substitute.For<IDiagnosticLogger>();
         public SentryId CheckInId { get; } = SentryId.Create();
         public PerformingContext PerformingContext { get; private set; } = null!;
 
-        private Action<SentryMonitorOptions>? _configureMonitorOptions;
-
         public SentryServerFilter GetSut(bool sendRecurringJobSchedule)
         {
+            Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             Connection.GetJobParameter(JobId, SentryServerFilter.SentryMonitorSlugKey)
                 .Returns(SerializationHelper.Serialize(MonitorSlug));
             if (RecurringJobId is not null)
             {
                 Connection.GetJobParameter(JobId, SentryServerFilter.RecurringJobIdKey)
                     .Returns(SerializationHelper.Serialize(RecurringJobId));
-                var recurringJob = new Dictionary<string, string> { ["Cron"] = Cron };
-                if (TimeZoneId is not null)
+                if (RecurringJobExists)
                 {
-                    recurringJob["TimeZoneId"] = TimeZoneId;
+                    var recurringJob = new Dictionary<string, string> { ["Cron"] = Cron };
+                    if (TimeZoneId is not null)
+                    {
+                        recurringJob["TimeZoneId"] = TimeZoneId;
+                    }
+                    Connection.GetAllEntriesFromHash($"recurring-job:{RecurringJobId}").Returns(recurringJob);
                 }
-                Connection.GetAllEntriesFromHash($"recurring-job:{RecurringJobId}").Returns(recurringJob);
             }
 
-            // Mirrors Hub: a throwing callback means the check-in is not sent
             Hub.CaptureCheckIn(
                     Arg.Any<string>(),
                     Arg.Any<CheckInStatus>(),
@@ -198,51 +222,24 @@ public class ServerFilterTests
                     Arg.Any<TimeSpan?>(),
                     Arg.Any<Scope?>(),
                     Arg.Any<Action<SentryMonitorOptions>?>())
-                .Returns(callInfo =>
-                {
-                    var configure = callInfo.ArgAt<Action<SentryMonitorOptions>?>(5);
-                    try
-                    {
-                        configure?.Invoke(new SentryMonitorOptions());
-                    }
-                    catch
-                    {
-                        return SentryId.Empty;
-                    }
-                    _configureMonitorOptions = configure;
-                    return CheckInId;
-                });
+                .Returns(CheckInId);
 
             var backgroundJob = new BackgroundJob(JobId, null, DateTime.Now);
             var performContext = new PerformContext(null, Connection, backgroundJob, Substitute.For<IJobCancellationToken>());
             PerformingContext = new PerformingContext(performContext);
 
-            return new SentryServerFilter(Hub, Substitute.For<IDiagnosticLogger>(),
+            return new SentryServerFilter(Hub, Logger,
                 new SentryHangfireOptions { SendRecurringJobSchedule = sendRecurringJobSchedule });
         }
 
-        public JsonElement? GetSentMonitorConfig()
+        public JsonElement? GetSentMonitorConfig() =>
+            Hub.ReceivedConfigureMonitorOptions(MonitorSlug) is { } configure ? MonitorConfigJson.Render(configure) : null;
+
+        public void AssertCheckInSentWithoutMonitorConfig()
         {
-            if (_configureMonitorOptions is null)
-            {
-                return null;
-            }
-
-            var options = new SentryMonitorOptions();
-            _configureMonitorOptions(options);
-            var checkIn = new SentryCheckIn(MonitorSlug, CheckInStatus.InProgress) { MonitorOptions = options };
-
-            using var stream = new MemoryStream();
-            using (var writer = new Utf8JsonWriter(stream))
-            {
-                checkIn.WriteTo(writer, null);
-            }
-
-            using var document = JsonDocument.Parse(stream.ToArray());
-            return document.RootElement.GetProperty("monitor_config").Clone();
+            Hub.Received(1).CaptureCheckIn(MonitorSlug, CheckInStatus.InProgress);
+            Hub.ReceivedConfigureMonitorOptions(MonitorSlug).Should().BeNull();
+            PerformingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().Be(CheckInId);
         }
-
-        public void ConnectionReceivedNoRecurringJobLookup() =>
-            Connection.DidNotReceive().GetAllEntriesFromHash(Arg.Any<string>());
     }
 }
