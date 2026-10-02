@@ -400,7 +400,10 @@ public static class HubExtensions
     /// <param name="configureMonitorOptions">
     /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
     /// </param>
-    public static void WithMonitor(this IHub hub, string monitorSlug, Action job,
+    public static void WithMonitor(
+        this IHub hub,
+        string monitorSlug,
+        Action job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
         => hub.RunWithMonitor<object?>(monitorSlug, () =>
         {
@@ -410,14 +413,20 @@ public static class HubExtensions
 
     /// <inheritdoc cref="WithMonitor(IHub, string, Action, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
-    public static T WithMonitor<T>(this IHub hub, string monitorSlug, Func<T> job,
+    public static T WithMonitor<T>(
+        this IHub hub,
+        string monitorSlug,
+        Func<T> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
         => hub.RunWithMonitor(monitorSlug, job, configureMonitorOptions);
 
-    private static T RunWithMonitor<T>(this IHub hub, string monitorSlug, Func<T> job,
+    private static T RunWithMonitor<T>(
+        this IHub hub,
+        string monitorSlug,
+        Func<T> job,
         Action<SentryMonitorOptions>? configureMonitorOptions)
     {
-        var checkInId = hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
+        var checkInId = hub.CaptureInProgressCheckIn(monitorSlug, configureMonitorOptions);
         var stopwatch = SentryStopwatch.StartNew();
         try
         {
@@ -452,7 +461,10 @@ public static class HubExtensions
     /// <param name="configureMonitorOptions">
     /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
     /// </param>
-    public static Task WithMonitor(this IHub hub, string monitorSlug, Func<Task> job,
+    public static Task WithMonitor(
+        this IHub hub,
+        string monitorSlug,
+        Func<Task> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
         => hub.RunWithMonitorAsync<object?>(monitorSlug, async () =>
         {
@@ -462,14 +474,20 @@ public static class HubExtensions
 
     /// <inheritdoc cref="WithMonitor(IHub, string, Func{Task}, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
-    public static Task<T> WithMonitor<T>(this IHub hub, string monitorSlug, Func<Task<T>> job,
+    public static Task<T> WithMonitor<T>(
+        this IHub hub,
+        string monitorSlug,
+        Func<Task<T>> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
         => hub.RunWithMonitorAsync(monitorSlug, job, configureMonitorOptions);
 
-    private static async Task<T> RunWithMonitorAsync<T>(this IHub hub, string monitorSlug, Func<Task<T>> job,
+    private static async Task<T> RunWithMonitorAsync<T>(
+        this IHub hub,
+        string monitorSlug,
+        Func<Task<T>> job,
         Action<SentryMonitorOptions>? configureMonitorOptions)
     {
-        var checkInId = hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
+        var checkInId = hub.CaptureInProgressCheckIn(monitorSlug, configureMonitorOptions);
         var stopwatch = SentryStopwatch.StartNew();
         try
         {
@@ -482,6 +500,15 @@ public static class HubExtensions
             hub.CaptureCheckIn(monitorSlug, CheckInStatus.Error, checkInId, stopwatch.Elapsed);
             throw;
         }
+    }
+
+    private static SentryId? CaptureInProgressCheckIn(
+        this IHub hub,
+        string monitorSlug,
+        Action<SentryMonitorOptions>? configureMonitorOptions)
+    {
+        var checkInId = hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
+        return checkInId == SentryId.Empty ? null : checkInId;
     }
 
     internal static ITransactionTracer StartTransaction(

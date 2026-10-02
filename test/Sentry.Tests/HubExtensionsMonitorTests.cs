@@ -7,7 +7,7 @@ public class HubExtensionsMonitorTests
     private const string MonitorSlug = "my-monitor";
 
     private readonly IHub _hub = Substitute.For<IHub>();
-    private readonly SentryId _checkInId = SentryId.Create();
+    private SentryId _checkInId = SentryId.Create();
     private readonly List<CheckInCall> _checkIns = new();
 
     private record CheckInCall(
@@ -65,6 +65,30 @@ public class HubExtensionsMonitorTests
     }
 
     [Fact]
+    public void WithMonitor_Func_Throws_CapturesErrorAndRethrows()
+    {
+        var expected = new InvalidOperationException();
+        Func<int> job = () => throw expected;
+
+        var actual = Assert.Throws<InvalidOperationException>(() => _hub.WithMonitor(MonitorSlug, job));
+
+        Assert.Same(expected, actual);
+        AssertCheckIns(CheckInStatus.Error);
+    }
+
+    [Fact]
+    public void WithMonitor_InProgressCheckInNotCaptured_FinalCheckInGetsNewId()
+    {
+        _checkInId = SentryId.Empty;
+
+        _hub.WithMonitor(MonitorSlug, () => { });
+
+        Assert.Equal(2, _checkIns.Count);
+        Assert.Equal(CheckInStatus.Ok, _checkIns[1].Status);
+        Assert.Null(_checkIns[1].SentryId);
+    }
+
+    [Fact]
     public async Task WithMonitor_Task_Succeeds_CapturesInProgressThenOk()
     {
         var ran = false;
@@ -106,6 +130,34 @@ public class HubExtensionsMonitorTests
 
         Assert.Same(expected, actual);
         AssertCheckIns(CheckInStatus.Error);
+    }
+
+    [Fact]
+    public async Task WithMonitor_TaskOfT_Throws_CapturesErrorAndRethrows()
+    {
+        var expected = new InvalidOperationException();
+
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _hub.WithMonitor<int>(MonitorSlug, async () =>
+            {
+                await Task.Yield();
+                throw expected;
+            }));
+
+        Assert.Same(expected, actual);
+        AssertCheckIns(CheckInStatus.Error);
+    }
+
+    [Fact]
+    public async Task WithMonitor_Task_InProgressCheckInNotCaptured_FinalCheckInGetsNewId()
+    {
+        _checkInId = SentryId.Empty;
+
+        await _hub.WithMonitor(MonitorSlug, () => Task.CompletedTask);
+
+        Assert.Equal(2, _checkIns.Count);
+        Assert.Equal(CheckInStatus.Ok, _checkIns[1].Status);
+        Assert.Null(_checkIns[1].SentryId);
     }
 
     [Fact]

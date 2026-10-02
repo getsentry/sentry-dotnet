@@ -705,14 +705,18 @@ static partial class SentrySdk
     /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
     /// </param>
     [DebuggerStepThrough]
-    public static void WithMonitor(string monitorSlug, Action job,
+    public static void WithMonitor(
+        string monitorSlug,
+        Action job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
         => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
 
     /// <inheritdoc cref="WithMonitor(string, Action, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
     [DebuggerStepThrough]
-    public static T WithMonitor<T>(string monitorSlug, Func<T> job,
+    public static T WithMonitor<T>(
+        string monitorSlug,
+        Func<T> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
         => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
 
@@ -736,14 +740,18 @@ static partial class SentrySdk
     /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
     /// </param>
     [DebuggerStepThrough]
-    public static Task WithMonitor(string monitorSlug, Func<Task> job,
+    public static Task WithMonitor(
+        string monitorSlug,
+        Func<Task> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
         => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
 
     /// <inheritdoc cref="WithMonitor(string, Func{Task}, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
     [DebuggerStepThrough]
-    public static Task<T> WithMonitor<T>(string monitorSlug, Func<Task<T>> job,
+    public static Task<T> WithMonitor<T>(
+        string monitorSlug,
+        Func<Task<T>> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
         => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
 
