@@ -1299,6 +1299,35 @@ public class SentrySdkTests : IDisposable
             Arg.Any<object[]>());
     }
 
+    [Fact]
+    public void WithMonitor_Sync_ForwardsToCurrentHub()
+    {
+        var hub = Substitute.For<IHub>();
+        using var _ = SentrySdk.UseHub(hub);
+
+        var result = SentrySdk.WithMonitor("my-monitor", () => 42);
+
+        result.Should().Be(42);
+        hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.InProgress, Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
+        hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.Ok, Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
+    }
+
+    [Fact]
+    public async Task WithMonitor_Async_ForwardsToCurrentHub()
+    {
+        var hub = Substitute.For<IHub>();
+        using var _ = SentrySdk.UseHub(hub);
+
+        await SentrySdk.WithMonitor("my-monitor", () => Task.CompletedTask);
+
+        hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.InProgress, Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
+        hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.Ok, Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
+    }
+
 #if __IOS__
     [Theory]
     [InlineData(true)]
