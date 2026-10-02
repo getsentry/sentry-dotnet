@@ -314,6 +314,52 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_ConfigureScope_CurrentScopeNotResynced()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.Options.ScopeObserver = observer;
+        _fixture.Options.EnableScopeSync = true;
+        using var hub = _fixture.GetSut();
+        hub.ConfigureScope(s =>
+        {
+            s.AddBreadcrumb("crumb");
+            s.SetTag("tag", "value");
+        });
+        observer.ClearReceivedCalls();
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(), _ => { });
+
+        // Assert
+        observer.ReceivedCalls().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CaptureEvent_ConfigureScope_ChangesNotSynced()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.Options.ScopeObserver = observer;
+        _fixture.Options.EnableScopeSync = true;
+        using var hub = _fixture.GetSut();
+        observer.ClearReceivedCalls();
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(), s =>
+        {
+            s.AddBreadcrumb("crumb");
+            s.SetTag("tag", "value");
+            s.User.Id = "user";
+        });
+
+        // Assert
+        observer.ReceivedCalls().Should().BeEmpty();
+        _fixture.Client.Received(1).CaptureEvent(
+            Arg.Any<SentryEvent>(), Arg.Is<Scope>(s => s.Tags["tag"] == "value"), Arg.Any<SentryHint>());
+    }
+
+    [Fact]
     public void CaptureEvent_Exception_BreadcrumbHintContainsException()
     {
         // Arrange
@@ -2588,6 +2634,24 @@ public partial class HubTests : IDisposable
 
         // Assert
         _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Is<Scope>(s => s.Tags["foo"] == "bar"), Arg.Any<SentryHint>());
+    }
+
+    [Fact]
+    public void CaptureFeedback_ConfigureScope_ChangesNotSynced()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.Options.ScopeObserver = observer;
+        _fixture.Options.EnableScopeSync = true;
+        using var hub = _fixture.GetSut();
+        hub.ConfigureScope(s => s.SetTag("existing", "value"));
+        observer.ClearReceivedCalls();
+
+        // Act
+        hub.CaptureFeedback(new SentryFeedback("Test feedback"), s => s.SetTag("tag", "value"));
+
+        // Assert
+        observer.ReceivedCalls().Should().BeEmpty();
     }
 
     [Theory]
