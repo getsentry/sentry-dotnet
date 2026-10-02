@@ -380,6 +380,110 @@ public static class HubExtensions
         return hub.CaptureEvent(sentryEvent, configureScope);
     }
 
+    /// <summary>
+    /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
+    /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration.
+    /// Exceptions thrown by the job are rethrown.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// hub.WithMonitor("nightly-cleanup", () => Cleanup(), options =>
+    /// {
+    ///     options.Interval("0 3 * * *");
+    ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="hub">The Sentry hub.</param>
+    /// <param name="monitorSlug">The slug of the monitor.</param>
+    /// <param name="job">The job to run.</param>
+    /// <param name="configureMonitorOptions">
+    /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
+    /// </param>
+    public static void WithMonitor(this IHub hub, string monitorSlug, Action job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => hub.RunWithMonitor<object?>(monitorSlug, () =>
+        {
+            job();
+            return null;
+        }, configureMonitorOptions);
+
+    /// <inheritdoc cref="WithMonitor(IHub, string, Action, Action{SentryMonitorOptions}?)"/>
+    /// <returns>The value returned by <paramref name="job"/>.</returns>
+    public static T WithMonitor<T>(this IHub hub, string monitorSlug, Func<T> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => hub.RunWithMonitor(monitorSlug, job, configureMonitorOptions);
+
+    private static T RunWithMonitor<T>(this IHub hub, string monitorSlug, Func<T> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions)
+    {
+        var checkInId = hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
+        var stopwatch = SentryStopwatch.StartNew();
+        try
+        {
+            var result = job();
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Ok, checkInId, stopwatch.Elapsed);
+            return result;
+        }
+        catch
+        {
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Error, checkInId, stopwatch.Elapsed);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
+    /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration
+    /// once the returned task completes. Exceptions thrown by the job are rethrown.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// await hub.WithMonitor("nightly-cleanup", async () => await CleanupAsync(), options =>
+    /// {
+    ///     options.Interval("0 3 * * *");
+    ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="hub">The Sentry hub.</param>
+    /// <param name="monitorSlug">The slug of the monitor.</param>
+    /// <param name="job">The job to run.</param>
+    /// <param name="configureMonitorOptions">
+    /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
+    /// </param>
+    public static Task WithMonitor(this IHub hub, string monitorSlug, Func<Task> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => hub.RunWithMonitorAsync<object?>(monitorSlug, async () =>
+        {
+            await job().ConfigureAwait(false);
+            return null;
+        }, configureMonitorOptions);
+
+    /// <inheritdoc cref="WithMonitor(IHub, string, Func{Task}, Action{SentryMonitorOptions}?)"/>
+    /// <returns>The value returned by <paramref name="job"/>.</returns>
+    public static Task<T> WithMonitor<T>(this IHub hub, string monitorSlug, Func<Task<T>> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => hub.RunWithMonitorAsync(monitorSlug, job, configureMonitorOptions);
+
+    private static async Task<T> RunWithMonitorAsync<T>(this IHub hub, string monitorSlug, Func<Task<T>> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions)
+    {
+        var checkInId = hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
+        var stopwatch = SentryStopwatch.StartNew();
+        try
+        {
+            var result = await job().ConfigureAwait(false);
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Ok, checkInId, stopwatch.Elapsed);
+            return result;
+        }
+        catch
+        {
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Error, checkInId, stopwatch.Elapsed);
+            throw;
+        }
+    }
+
     internal static ITransactionTracer StartTransaction(
         this IHub hub,
         ITransactionContext context,

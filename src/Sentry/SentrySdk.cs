@@ -686,6 +686,68 @@ static partial class SentrySdk
             configureMonitorOptions);
 
     /// <summary>
+    /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
+    /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration.
+    /// Exceptions thrown by the job are rethrown.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// SentrySdk.WithMonitor("nightly-cleanup", () => Cleanup(), options =>
+    /// {
+    ///     options.Interval("0 3 * * *");
+    ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="monitorSlug">The slug of the monitor.</param>
+    /// <param name="job">The job to run.</param>
+    /// <param name="configureMonitorOptions">
+    /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
+    /// </param>
+    [DebuggerStepThrough]
+    public static void WithMonitor(string monitorSlug, Action job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
+
+    /// <inheritdoc cref="WithMonitor(string, Action, Action{SentryMonitorOptions}?)"/>
+    /// <returns>The value returned by <paramref name="job"/>.</returns>
+    [DebuggerStepThrough]
+    public static T WithMonitor<T>(string monitorSlug, Func<T> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
+
+    /// <summary>
+    /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
+    /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration
+    /// once the returned task completes. Exceptions thrown by the job are rethrown.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// await SentrySdk.WithMonitor("nightly-cleanup", async () => await CleanupAsync(), options =>
+    /// {
+    ///     options.Interval("0 3 * * *");
+    ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="monitorSlug">The slug of the monitor.</param>
+    /// <param name="job">The job to run.</param>
+    /// <param name="configureMonitorOptions">
+    /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
+    /// </param>
+    [DebuggerStepThrough]
+    public static Task WithMonitor(string monitorSlug, Func<Task> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
+
+    /// <inheritdoc cref="WithMonitor(string, Func{Task}, Action{SentryMonitorOptions}?)"/>
+    /// <returns>The value returned by <paramref name="job"/>.</returns>
+    [DebuggerStepThrough]
+    public static Task<T> WithMonitor<T>(string monitorSlug, Func<Task<T>> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
+
+    /// <summary>
     /// Starts a transaction if there is not already one active on the scope, otherwise starts a new child span on the
     /// currently active transaction.
     /// </summary>
