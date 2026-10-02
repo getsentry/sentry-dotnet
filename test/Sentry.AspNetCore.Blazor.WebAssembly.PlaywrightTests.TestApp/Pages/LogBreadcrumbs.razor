@@ -1,0 +1,16 @@
+@page "/log-breadcrumbs"
+@inject ILoggerFactory LoggerFactory
+
+<h1 id="page-title">Log Breadcrumbs</h1>
+<button id="btn-log-and-capture" @onclick="LogAndCapture">Log and Capture</button>
+
+@code {
+    private void LogAndCapture()
+    {
+        // The SDK skips categories under its own package names, like this page's, as SDK logs.
+        var logger = LoggerFactory.CreateLogger("TestApp");
+        logger.LogInformation("info-log-breadcrumb");
+        logger.LogWarning("warning-log-breadcrumb");
+        SentrySdk.CaptureMessage("playwright-log-breadcrumbs");
+    }
+}

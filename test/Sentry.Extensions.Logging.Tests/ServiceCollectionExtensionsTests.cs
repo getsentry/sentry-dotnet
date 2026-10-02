@@ -1,11 +1,15 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
 namespace Sentry.Extensions.Logging.Tests;
 
-public class ServiceCollectionExtensionsTests : IDisposable
+[Collection(nameof(SentrySdkCollection))]
+public sealed class ServiceCollectionExtensionsTests : IDisposable
 {
     private class TestHostOptions : SentryHostOptions;
+
+    private readonly IBackgroundWorker _worker = Substitute.For<IBackgroundWorker>();
 
     public void Dispose() => SentrySdk.Close();
 
@@ -21,6 +25,32 @@ public class ServiceCollectionExtensionsTests : IDisposable
             o.ConfigureScope(configureScope);
         });
         services.AddSentry<TestHostOptions>(initializeSdk);
+        return services.BuildServiceProvider();
+    }
+
+    private ServiceProvider BuildServiceProvider(bool hostInitializesSdk)
+    {
+        var services = new ServiceCollection();
+        if (hostInitializesSdk)
+        {
+            services.Configure<TestHostOptions>(o =>
+            {
+                o.Dsn = ValidDsn;
+                o.BackgroundWorker = _worker;
+                o.InitNativeSdks = false;
+            });
+            services.AddSentry<TestHostOptions>(initializeSdk: true);
+        }
+        else
+        {
+            SentrySdk.Init(o =>
+            {
+                o.Dsn = ValidDsn;
+                o.BackgroundWorker = _worker;
+                o.InitNativeSdks = false;
+            });
+        }
+        services.AddLogging(builder => builder.AddSentry());
         return services.BuildServiceProvider();
     }
 
@@ -47,5 +77,46 @@ public class ServiceCollectionExtensionsTests : IDisposable
 
         SentrySdk.IsEnabled.Should().BeFalse();
         configured.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AddSentry_SdkHubReplacedAfterResolution_ResolvedHubUsesNewHub(bool hostInitializesSdk)
+    {
+        using var provider = BuildServiceProvider(hostInitializesSdk);
+        var hub = provider.GetRequiredService<IHub>();
+        var client = provider.GetRequiredService<ISentryClient>();
+
+        var newHub = Substitute.For<IHub>();
+        using var _ = SentrySdk.UseHub(newHub);
+
+        var hubEvent = new SentryEvent();
+        var clientEvent = new SentryEvent();
+        hub.CaptureEvent(hubEvent);
+        client.CaptureEvent(clientEvent);
+
+        newHub.Received(1).CaptureEvent(hubEvent);
+        newHub.Received(1).CaptureEvent(clientEvent);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AddSentry_ServiceProviderDisposed_SdkHubStillCaptures(bool hostInitializesSdk)
+    {
+        var provider = BuildServiceProvider(hostInitializesSdk);
+        _ = provider.GetRequiredService<IHub>();
+        _ = provider.GetRequiredService<ISentryClient>();
+        _ = provider.GetRequiredService<ILoggerFactory>();
+
+        provider.Dispose();
+        SentrySdk.CaptureMessage("after dispose");
+
+        _worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+            e.Items
+                .Select(i => i.Payload).OfType<JsonSerializable>()
+                .Select(i => i.Source).OfType<SentryEvent>()
+                .Any(evt => evt.Message!.Message == "after dispose")));
     }
 }

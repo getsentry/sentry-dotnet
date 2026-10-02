@@ -1,5 +1,36 @@
 # Changelog
 
+## 6.12.0
+
+### Features ✨
+
+- feat(otel): mark span processor based OpenTelemetry setup methods as obsolete by @jamescrosswell in [#5586](https://github.com/getsentry/sentry-dotnet/pull/5586)
+
+### Fixes 🐛
+
+- fix(blazor): logging options set in UseSentry now take effect by @ric-oliv in [#5640](https://github.com/getsentry/sentry-dotnet/pull/5640)
+- fix(log4net): send event properties as log attributes on log4net 3.x by @jamescrosswell in [#5559](https://github.com/getsentry/sentry-dotnet/pull/5559)
+- fix: TraceIgnoreStatusCodes no longer drops outgoing HTTP requests traced with OpenTelemetry by @jamescrosswell in [#5643](https://github.com/getsentry/sentry-dotnet/pull/5643)
+- fix: an exception in BeforeSend or BeforeSendTransaction now drops the item instead of sending it by @jamescrosswell in [#5610](https://github.com/getsentry/sentry-dotnet/pull/5610)
+- fix: telemetry dropped by user callbacks and by validation is now counted in client reports by @jamescrosswell in [#5607](https://github.com/getsentry/sentry-dotnet/pull/5607)
+- fix: exceptions thrown from BeforeBreadcrumb, log filters and BeforeScreenshotCapture no longer reach the application by @jamescrosswell in [#5606](https://github.com/getsentry/sentry-dotnet/pull/5606)
+- fix: transaction processors no longer discard each other's results by @jamescrosswell in [#5621](https://github.com/getsentry/sentry-dotnet/pull/5621)
+- fix: Throw ArgumentException for empty traceId in DynamicSamplingContext by @chiliec in [#5599](https://github.com/getsentry/sentry-dotnet/pull/5599)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.30.0 by @github-actions in [#5656](https://github.com/getsentry/sentry-dotnet/pull/5656)
+- chore(deps): update Cocoa SDK to v9.29.2 by @github-actions in [#5624](https://github.com/getsentry/sentry-dotnet/pull/5624)
+- chore(deps): update Java SDK to v8.58.0 by @github-actions in [#5622](https://github.com/getsentry/sentry-dotnet/pull/5622)
+- chore(deps): update Native SDK to v0.17.1 by @github-actions in [#5625](https://github.com/getsentry/sentry-dotnet/pull/5625)
+- chore(deps): update Native SDK to v0.17.0 by @github-actions in [#5614](https://github.com/getsentry/sentry-dotnet/pull/5614)
+
+### Other
+
+- meta: remove duplicate Blank Issue template by @SatvikMishra08 in [#5601](https://github.com/getsentry/sentry-dotnet/pull/5601)
+
 ## 6.11.1
 
 ### Fixes 🐛
