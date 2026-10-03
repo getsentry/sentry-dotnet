@@ -50,13 +50,15 @@ public class ServerFilterTests
         performingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().NotBeSameAs(firstKey);
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData("0 */2 * * *", "Europe/Berlin", "0 */2 * * *", "Europe/Berlin")]
     [InlineData("30 0 */2 * * *", "UTC", "0 */2 * * *", "UTC")]
     [InlineData("0 0 * * MON", null, "0 0 * * MON", "UTC")]
     public void OnPerforming_RecurringJobWithSendScheduleEnabled_SendsMonitorConfig(
         string cron, string? timeZoneId, string expectedCrontab, string expectedTimeZone)
     {
+        Skip.If(timeZoneId is not (null or "UTC") && !TestEnvironment.HasTimeZone(timeZoneId), "No time zone database");
+
         // Arrange
         var fixture = new RecurringJobFixture { Cron = cron, TimeZoneId = timeZoneId };
         var filter = fixture.GetSut(sendRecurringJobSchedule: true);
@@ -165,7 +167,7 @@ public class ServerFilterTests
         SentryServerFilter.ToCrontab(cron).Should().Be(expected);
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(null, "UTC")]
     [InlineData("", "UTC")]
     [InlineData("UTC", "UTC")]
@@ -176,6 +178,8 @@ public class ServerFilterTests
     [InlineData("Not/A_Time_Zone", null)]
     public void ToIanaTimeZoneId_HangfireTimeZoneId_ReturnsIanaIdOrNull(string? timeZoneId, string? expected)
     {
+        Skip.If(expected is not (null or "UTC") && !TestEnvironment.HasTimeZone(timeZoneId!), "No time zone database");
+
         SentryServerFilter.ToIanaTimeZoneId(timeZoneId).Should().Be(expected);
     }
 

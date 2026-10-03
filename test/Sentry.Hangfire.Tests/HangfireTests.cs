@@ -63,9 +63,11 @@ public class HangfireTests : IClassFixture<HangfireFixture>
         _fixture.Logger.Received(1).Log(SentryLevel.Debug, Arg.Is<string>(message => message.Contains("Skipping creating a check-in for")), null, Arg.Any<Type>(), Arg.Any<MethodInfo>());
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ExecuteRecurringJob_SendScheduleEnabled_CapturesCheckInWithMonitorConfig()
     {
+        Skip.If(!TestEnvironment.HasTimeZone("Europe/Berlin"), "No time zone database");
+
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
 
         await _fixture.TriggerRecurringJob<TestJob>("test-recurring-job-id", job => job.ExecuteRecurringJob(), "30 0 0 1 1 *", timeZone);
