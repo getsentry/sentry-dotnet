@@ -1,5 +1,7 @@
 using Hangfire.Server;
+using Hangfire.Storage;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Hangfire;
 
@@ -7,16 +9,21 @@ internal class SentryServerFilter : IServerFilter
 {
     internal const string SentryMonitorSlugKey = "SentryMonitorSlug";
     internal const string SentryCheckInIdKey = "SentryCheckInIdKey";
+    internal const string RecurringJobIdKey = "RecurringJobId";
 
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
+    private readonly SentryHangfireOptions _options;
+
+    internal SentryHangfireOptions Options => _options;
 
     public SentryServerFilter() : this(null, null)
     { }
 
-    internal SentryServerFilter(IHub? hub, IDiagnosticLogger? logger)
+    internal SentryServerFilter(IHub? hub, IDiagnosticLogger? logger, SentryHangfireOptions? options = null)
     {
         _hub = hub ?? HubAdapter.Instance;
+        _options = options ?? new SentryHangfireOptions();
 #pragma warning disable CS0618 // Type or member is obsolete
         _logger = logger ?? _hub.GetInternalSentryOptions()?.DiagnosticLogger;
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -35,12 +42,114 @@ internal class SentryServerFilter : IServerFilter
             return;
         }
 
-        var checkInId = _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress);
+        var checkInId = CaptureInProgressCheckIn(context, monitorSlug);
 
         // Note that we may be overwriting context.Items[SentryCheckInIdKey] here, which is intentional. If that happens
         // then implicitly OnPerforming was called previously with the same context, but we never made it to OnPerformed
         // This might happen if a Hangfire job failed at least once, with automatic retries configured.
         context.Items[SentryCheckInIdKey] = checkInId;
+    }
+
+    private SentryId CaptureInProgressCheckIn(PerformingContext context, string monitorSlug)
+    {
+        Action<SentryMonitorOptions>? configureMonitorOptions = null;
+        if (_options.SendRecurringJobSchedule && GetRecurringJobSchedule(context) is (var crontab, var timeZone))
+        {
+            configureMonitorOptions = options =>
+            {
+                options.Interval(crontab);
+                options.TimeZone = timeZone;
+            };
+        }
+
+        return _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
+    }
+
+    private (string Crontab, string TimeZone)? GetRecurringJobSchedule(PerformingContext context)
+    {
+        string? recurringJobId = null;
+        try
+        {
+            recurringJobId = context.GetJobParameter<string>(RecurringJobIdKey);
+            if (string.IsNullOrEmpty(recurringJobId))
+            {
+                return null;
+            }
+
+            var recurringJob = context.Connection.GetRecurringJobs([recurringJobId]).SingleOrDefault();
+            if (recurringJob is null || recurringJob.Removed)
+            {
+                _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. The job no longer exists.", recurringJobId);
+                return null;
+            }
+
+            var crontab = ToCrontab(recurringJob.Cron);
+            var timeZone = ToIanaTimeZoneId(recurringJob.TimeZoneId);
+            if (crontab is null || timeZone is null)
+            {
+                _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. Sentry doesn't support " +
+                                  "the cron expression '{1}' with time zone '{2}'.", recurringJobId, recurringJob.Cron, recurringJob.TimeZoneId);
+                return null;
+            }
+
+            return (crontab, timeZone);
+        }
+        catch (Exception e)
+        {
+            _logger?.LogError(e, "Failed to read the schedule of recurring job '{0}'.", recurringJobId);
+            return null;
+        }
+    }
+
+    // Hangfire also accepts a leading seconds field, which Sentry doesn't support.
+    internal static string? ToCrontab(string? cron)
+    {
+        if (string.IsNullOrWhiteSpace(cron))
+        {
+            return null;
+        }
+
+        var fields = cron!.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        var crontab = fields.Length switch
+        {
+            5 => string.Join(" ", fields),
+            6 when int.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var seconds) && seconds < 60
+                => string.Join(" ", fields, 1, 5),
+            _ => null
+        };
+
+        return crontab is not null && CrontabValidator.IsValid(crontab) ? crontab : null;
+    }
+
+    internal static string? ToIanaTimeZoneId(string? timeZoneId)
+    {
+        // Hangfire's default is TimeZoneInfo.Utc, whose ID is "UTC" on every platform
+        if (string.IsNullOrWhiteSpace(timeZoneId) || timeZoneId == "UTC")
+        {
+            return "UTC";
+        }
+
+#if NET6_0_OR_GREATER
+        TimeZoneInfo timeZone;
+        try
+        {
+            timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId!);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+
+        if (timeZone.HasIanaId)
+        {
+            return timeZone.Id;
+        }
+
+        return TimeZoneInfo.TryConvertWindowsIdToIanaId(timeZone.Id, out var ianaId) ? ianaId : null;
+#else
+        // .NET Framework can neither look up nor convert IANA IDs, so only pass on IDs that look like one
+        return timeZoneId!.Contains("/") ? timeZoneId : null;
+#endif
     }
 
     public void OnPerformed(PerformedContext context)
