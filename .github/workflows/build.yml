@@ -19,9 +19,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             rid: linux-x64
-          - os: ubuntu-22.04-arm
+          - os: ubuntu-24.04-arm
             rid: linux-arm64
           - os: ubuntu-latest
             rid: linux-musl-x64
@@ -82,10 +82,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             rid: linux-x64
             slnf: Sentry-CI-Build-Linux.slnf
-          - os: ubuntu-22.04-arm
+          - os: ubuntu-24.04-arm
             rid: linux-arm64
             slnf: Sentry-CI-Build-Linux-NoMobile.slnf
           - os: ubuntu-latest
@@ -443,7 +443,7 @@ jobs:
 #        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-ios18.0 -r ios-arm64
 
   test-solution-filters:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
