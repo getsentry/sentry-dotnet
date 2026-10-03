@@ -108,11 +108,13 @@ public class TriggerScheduleTests
     }
 
 #if NET6_0_OR_GREATER
-    [Theory]
+    [SkippableTheory]
     [InlineData("Europe/Berlin", "Europe/Berlin")]
     [InlineData("W. Europe Standard Time", "Europe/Berlin")]
     public void ToIanaTimeZoneId_SystemTimeZone_ReturnsIanaId(string timeZoneId, string expected)
     {
+        Skip.If(!TestEnvironment.HasTimeZone(timeZoneId), "No time zone database");
+
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
         TriggerSchedule.ToIanaTimeZoneId(timeZone).Should().Be(expected);
