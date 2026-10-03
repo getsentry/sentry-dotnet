@@ -1,0 +1,18 @@
+﻿namespace Sentry.Quartz
+{
+    public class SentryJobListener : Quartz.IJobListener
+    {
+        public const string MonitorSlugKey = "SentryMonitorSlug";
+        public SentryJobListener() { }
+        public SentryJobListener(Sentry.Quartz.SentryQuartzOptions options) { }
+        public string Name { get; }
+        public System.Threading.Tasks.Task JobExecutionVetoed(Quartz.IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task JobToBeExecuted(Quartz.IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task JobWasExecuted(Quartz.IJobExecutionContext context, Quartz.JobExecutionException? jobException, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public class SentryQuartzOptions
+    {
+        public SentryQuartzOptions() { }
+        public bool SendMonitorConfig { get; set; }
+    }
+}
