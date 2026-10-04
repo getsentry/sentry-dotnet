@@ -142,15 +142,13 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public string? Distribution { get; set; }
 
-    private string? _environment;
-
     /// <inheritdoc />
     public string? Environment
     {
-        get => _environment;
+        get;
         set
         {
-            if (_environment == value)
+            if (field == value)
             {
                 return;
             }
@@ -158,14 +156,14 @@ public class Scope : IEventLike
             if (value is null)
             {
                 Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
-                _environment = Options.Environment;
+                field = Options.Environment;
             }
             else
             {
-                _environment = value;
+                field = value;
             }
 
-            ScopeObserver?.SetEnvironment(_environment);
+            ScopeObserver?.SetEnvironment(field);
         }
     }
 
@@ -541,30 +539,30 @@ public class Scope : IEventLike
     /// </summary>
     public Scope Clone()
     {
-        // Copy state directly: the mutators would resync the scope observer and re-run BeforeBreadcrumb and TagFilters
         var clone = new Scope(Options, PropagationContext)
         {
+            ScopeSyncEnabled = false,
             OnEvaluating = OnEvaluating,
             Level = Level,
             Release = Release,
             Distribution = Distribution,
+            Environment = Environment,
             TransactionName = TransactionName,
+            Transaction = Transaction,
             Fingerprint = Fingerprint,
             SessionUpdate = SessionUpdate,
-            _environment = _environment,
-            _user = _user?.Clone(),
         };
 
-        if (clone._user is { } user)
+        if (_user is { } user)
         {
-            user.PropertyChanged = clone.UserChanged;
+            clone.User = user.Clone();
         }
 
-        clone._transaction.Value = Transaction;
         Contexts.CopyTo(clone.Contexts);
         Request.CopyTo(clone.Request);
         Sdk.CopyTo(clone.Sdk);
 
+        // Copied directly so BeforeBreadcrumb and TagFilters don't run again
         foreach (var breadcrumb in _breadcrumbs)
         {
             clone._breadcrumbs.Enqueue(breadcrumb);
@@ -600,6 +598,7 @@ public class Scope : IEventLike
             clone.ExceptionProcessors.Add(processor);
         }
 
+        clone.ScopeSyncEnabled = true;
         return clone;
     }
 
