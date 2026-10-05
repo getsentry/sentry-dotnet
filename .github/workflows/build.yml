@@ -33,9 +33,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             rid: linux-x64
-          - os: ubuntu-22.04-arm
+          - os: ubuntu-24.04-arm
             rid: linux-arm64
           - os: ubuntu-latest
             rid: linux-musl-x64
@@ -96,10 +96,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             rid: linux-x64
             slnf: Sentry-CI-Build-Linux.slnf
-          - os: ubuntu-22.04-arm
+          - os: ubuntu-24.04-arm
             rid: linux-arm64
             slnf: Sentry-CI-Build-Linux-NoMobile.slnf
           - os: ubuntu-latest
@@ -313,14 +313,14 @@ jobs:
         if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         env:
           ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_GLIBC }}
-        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         with:
           path: integration-test
 
       - name: Integration test (musl)
         # TODO: Include linux-musl-x64 once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
         if: ${{ (matrix.rid == 'linux-musl-arm64') }}
-        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         env:
           ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_MUSL }}
         with:
@@ -359,7 +359,7 @@ jobs:
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Test MSBuild
-        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         with:
           path: integration-test/msbuild.Tests.ps1
 
@@ -409,7 +409,7 @@ jobs:
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
           # aot.Tests.ps1 has the Container test, so it needs the same pin.
@@ -460,7 +460,7 @@ jobs:
 #        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-ios26 -r ios-arm64
 
   test-solution-filters:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
