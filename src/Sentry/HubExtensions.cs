@@ -413,6 +413,11 @@ public static class HubExtensions
 
     /// <inheritdoc cref="WithMonitor(IHub, string, Action, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
+    /// <remarks>
+    /// A job that returns a <see cref="ValueTask"/> is awaited before the final check-in is sent. For a job that
+    /// returns a <see cref="ValueTask{TResult}"/>, pass <c>async () => await job()</c> so it binds to the
+    /// <see cref="Task{TResult}"/> overload.
+    /// </remarks>
     public static T WithMonitor<T>(
         this IHub hub,
         string monitorSlug,
@@ -431,6 +436,20 @@ public static class HubExtensions
         try
         {
             var result = job();
+            if (result is ValueTask valueTask)
+            {
+                // A ValueTask job binds to Func<T>; send the final check-in once it completes.
+                return (T)(object)hub.CompleteWithMonitorAsync(monitorSlug, valueTask, checkInId, stopwatch);
+            }
+
+            if (result is Task || IsGenericValueTask(typeof(T)))
+            {
+                hub.GetSentryOptions()?.LogWarning(
+                    "WithMonitor job for monitor '{0}' returned a Task or ValueTask<T> that WithMonitor does not await, " +
+                    "so the check-in is sent before the job completes. Use 'async () => await job()' instead.",
+                    monitorSlug);
+            }
+
             hub.CaptureCheckIn(monitorSlug, CheckInStatus.Ok, checkInId, stopwatch.Elapsed);
             return result;
         }
@@ -440,6 +459,28 @@ public static class HubExtensions
             throw;
         }
     }
+
+    private static async ValueTask CompleteWithMonitorAsync(
+        this IHub hub,
+        string monitorSlug,
+        ValueTask job,
+        SentryId? checkInId,
+        SentryStopwatch stopwatch)
+    {
+        try
+        {
+            await job.ConfigureAwait(false);
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Ok, checkInId, stopwatch.Elapsed);
+        }
+        catch
+        {
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Error, checkInId, stopwatch.Elapsed);
+            throw;
+        }
+    }
+
+    private static bool IsGenericValueTask(Type type) =>
+        type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTask<>);
 
     /// <summary>
     /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an

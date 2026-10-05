@@ -1328,6 +1328,27 @@ public class SentrySdkTests : IDisposable
             Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
     }
 
+    [Fact]
+    public async Task WithMonitor_ValueTask_ForwardsToCurrentHubAndCapturesOkAfterCompletion()
+    {
+        var hub = Substitute.For<IHub>();
+        using var _ = SentrySdk.UseHub(hub);
+        var pending = new TaskCompletionSource<bool>();
+
+        var valueTask = SentrySdk.WithMonitor("my-monitor", () => new ValueTask(pending.Task));
+
+        hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.InProgress, Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
+        hub.DidNotReceive().CaptureCheckIn("my-monitor", CheckInStatus.Ok, Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
+
+        pending.SetResult(true);
+        await valueTask;
+
+        hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.Ok, Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
+    }
+
 #if __IOS__
     [Theory]
     [InlineData(true)]

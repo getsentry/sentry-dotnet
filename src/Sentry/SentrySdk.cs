@@ -713,6 +713,11 @@ static partial class SentrySdk
 
     /// <inheritdoc cref="WithMonitor(string, Action, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
+    /// <remarks>
+    /// A job that returns a <see cref="ValueTask"/> is awaited before the final check-in is sent. For a job that
+    /// returns a <see cref="ValueTask{TResult}"/>, pass <c>async () => await job()</c> so it binds to the
+    /// <see cref="Task{TResult}"/> overload.
+    /// </remarks>
     [DebuggerStepThrough]
     public static T WithMonitor<T>(
         string monitorSlug,
