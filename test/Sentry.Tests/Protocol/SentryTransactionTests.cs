@@ -326,6 +326,27 @@ public class SentryTransactionTests
     }
 
     [Fact]
+    public void FromJson_NumericTimestamps_ParsesUnixSeconds()
+    {
+        var json = """
+            {
+              "transaction": "test",
+              "start_timestamp": 1759435453.1,
+              "timestamp": 1759435453.4,
+              "spans": [{ "start_timestamp": 1759435453.2, "timestamp": 1759435453.3 }]
+            }
+            """;
+
+        var actual = Json.Parse(json, SentryTransaction.FromJson);
+
+        actual.StartTimestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453100));
+        actual.EndTimestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453400));
+        var span = actual.Spans.Single();
+        span.StartTimestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453200));
+        span.EndTimestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453300));
+    }
+
+    [Fact]
     public void StartChild_LevelOne_Works()
     {
         // Arrange

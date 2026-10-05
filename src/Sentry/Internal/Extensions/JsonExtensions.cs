@@ -237,30 +237,11 @@ internal static class JsonExtensions
         return double.Parse(json.ToString()!, CultureInfo.InvariantCulture);
     }
 
-    /// <summary>
-    /// Safety value to deal with native serialization - allows datetimeoffset to come in as a long or string value
-    /// </summary>
-    /// <param name="json"></param>
-    /// <param name="propertyName"></param>
-    /// <returns></returns>
-    public static DateTimeOffset? GetSafeDateTimeOffset(this JsonElement json, string propertyName)
-    {
-        DateTimeOffset? result = null;
-        var dtRaw = json.GetPropertyOrNull(propertyName);
-        if (dtRaw != null)
-        {
-            if (dtRaw.Value.ValueKind == JsonValueKind.Number)
-            {
-                var epoch = Convert.ToInt64(dtRaw.Value.GetDouble());
-                result = DateTimeOffset.FromUnixTimeSeconds(epoch);
-            }
-            else
-            {
-                result = dtRaw.Value.GetDateTimeOffset();
-            }
-        }
-        return result;
-    }
+    // The protocol allows either an RFC 3339 string or (fractional) seconds since the Unix epoch
+    public static DateTimeOffset GetTimestamp(this JsonElement json) =>
+        json.ValueKind == JsonValueKind.Number
+            ? DateTimeOffset.FromUnixTimeSeconds(0).AddTicks((long)(json.GetDecimal() * TimeSpan.TicksPerSecond))
+            : json.GetDateTimeOffset();
 
     public static long? GetHexAsLong(this JsonElement json)
     {
