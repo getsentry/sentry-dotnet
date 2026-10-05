@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Internal.Http;
@@ -141,6 +142,46 @@ public partial class SentryMauiAppBuilderExtensionsTests
         Assert.True(hub.IsEnabled);
         Assert.Equal(ValidDsn, options.Dsn);
         Assert.Equal("test", options.Release);
+    }
+
+    [Fact]
+    public void UseSentry_SetInConfigurationAndCallback_CallbackWins()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string>
+        {
+            ["Sentry:Release"] = "from-configuration"
+        });
+
+        // Act
+        builder.UseSentry(options => options.Release = "from-code");
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.Release.Should().Be("from-code");
+    }
+
+    [Fact]
+    public void UseSentry_SetInConfigurationOnly_ConfigurationApplies()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string>
+        {
+            ["Sentry:Environment"] = "from-configuration"
+        });
+
+        // Act
+        builder.UseSentry(options => options.Release = "from-code");
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.Environment.Should().Be("from-configuration");
     }
 
     [Fact]
@@ -328,6 +369,26 @@ public partial class SentryMauiAppBuilderExtensionsTests
             options.Debug = true;
             options.Dsn = ValidDsn;
         });
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.DiagnosticLogger.Should().BeOfType<ConsoleAndTraceDiagnosticLogger>();
+    }
+
+    [Fact]
+    public void UseSentry_DebugTrueInConfiguration_ConsoleAndTracingDiagnosticsLogger()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string>
+        {
+            ["Sentry:Debug"] = "true"
+        });
+
+        // Act
+        builder.UseSentry(ValidDsn);
 
         using var app = builder.Build();
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;

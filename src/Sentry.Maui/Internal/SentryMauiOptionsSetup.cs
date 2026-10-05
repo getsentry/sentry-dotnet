@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 #if !PLATFORM_NEUTRAL
 using Microsoft.Maui.Networking;
@@ -10,21 +9,9 @@ namespace Sentry.Maui.Internal;
 
 internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
 {
-    private readonly IConfiguration _config;
-
-    public SentryMauiOptionsSetup(IConfiguration config)
-    {
-        ArgumentNullException.ThrowIfNull(config);
-        _config = config.GetSection("Sentry");
-    }
-
     public void Configure(SentryMauiOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-
-        var bindable = new BindableSentryMauiOptions();
-        _config.Bind(bindable);
-        bindable.ApplyTo(options);
 
 #if __ANDROID__ || __IOS__
         options.Native.AttachScreenshot = options.AttachScreenshot;
