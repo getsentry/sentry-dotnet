@@ -162,6 +162,19 @@ public class ServerFilterTests
     [InlineData("0 0 L * *", null)]
     [InlineData("@daily", null)]
     [InlineData("", null)]
+    [InlineData("0 9 * * MON", "0 9 * * MON")]
+    [InlineData("0 9 1-7 * *", "0 9 1-7 * *")]
+    [InlineData("0 9 */2 * MON", "0 9 */2 * MON")]
+    [InlineData("0 9 1-7 * */2", "0 9 1-7 * */2")]
+    [InlineData("0 9 1-7 * MON", null)]
+    [InlineData("0 0 9 15 * 1-5", null)]
+    [InlineData("0 9 * * MON-FRI", "0 9 * * MON-FRI")]
+    [InlineData("0 9 * * 5-1", null)]
+    [InlineData("0 9 * * SAT-SUN", null)]
+    [InlineData("0 9 * * mon-sun", null)]
+    [InlineData("0 22-2 * * *", null)]
+    [InlineData("0 9 * * 1-3,6-0", null)]
+    [InlineData("0 8-18/2 * * *", "0 8-18/2 * * *")]
     public void ToCrontab_HangfireCron_ReturnsSentryCrontabOrNull(string cron, string? expected)
     {
         SentryServerFilter.ToCrontab(cron).Should().Be(expected);

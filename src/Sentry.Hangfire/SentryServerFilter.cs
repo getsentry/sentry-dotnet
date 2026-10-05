@@ -110,15 +110,52 @@ internal class SentryServerFilter : IServerFilter
         }
 
         var fields = cron!.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-        var crontab = fields.Length switch
+        if (fields.Length == 6
+            && int.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var seconds)
+            && seconds < 60)
         {
-            5 => string.Join(" ", fields),
-            6 when int.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var seconds) && seconds < 60
-                => string.Join(" ", fields, 1, 5),
-            _ => null
-        };
+            fields = fields.Skip(1).ToArray();
+        }
 
-        return crontab is not null && CrontabValidator.IsValid(crontab) ? crontab : null;
+        if (fields.Length != 5)
+        {
+            return null;
+        }
+
+        // Hangfire runs a job only on days that match both day fields, while Sentry runs it on days that match
+        // either one unless one of them starts with '*'.
+        if (!fields[2].StartsWith("*") && !fields[4].StartsWith("*"))
+        {
+            return null;
+        }
+
+        var crontab = string.Join(" ", fields);
+        return CrontabValidator.IsValid(crontab) && !HasReversedRange(fields) ? crontab : null;
+    }
+
+    private static readonly string[] DayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+    // Sentry rejects ranges whose start is after their end, such as 5-1 or SAT-SUN
+    private static bool HasReversedRange(string[] fields)
+    {
+        foreach (var field in fields)
+        {
+            foreach (var item in field.Split(','))
+            {
+                var range = item.Split('/')[0].Split('-');
+                if (range.Length == 2 && ToNumber(range[0]) > ToNumber(range[1]))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
+        static int ToNumber(string value) =>
+            int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var number)
+                ? number
+                : Array.FindIndex(DayNames, name => string.Equals(name, value, StringComparison.OrdinalIgnoreCase));
     }
 
     internal static string? ToIanaTimeZoneId(string? timeZoneId)
