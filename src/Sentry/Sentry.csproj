@@ -65,6 +65,8 @@
   -->
   <ItemGroup>
     <PackageReference Include="Polyfill" Version="11.4.1" PrivateAssets="all" />
+    <!-- Unused, and its TValue lacks the DynamicallyAccessedMembers annotation ConditionalWeakTable requires (IL2091) -->
+    <Compile Remove="$(NuGetPackageRoot)polyfill/*/contentFiles/cs/*/Polyfill_ConditionalWeakTable.cs" />
   </ItemGroup>
 
   <!--
