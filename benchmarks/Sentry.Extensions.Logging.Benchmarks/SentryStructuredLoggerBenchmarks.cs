@@ -27,14 +27,8 @@ public class SentryStructuredLoggerBenchmarks
         });
 
         MockClock clock = new(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
-        SdkVersion sdk = new()
-        {
-            Name = "SDK Name",
-            Version = "SDK Version",
-        };
-
         _hub = new Hub(options, DisabledHub.Instance);
-        _logger = new SentryStructuredLogger("CategoryName", _hub, clock, sdk);
+        _logger = new SentryStructuredLogger("CategoryName", _hub, clock);
         _logRecord = new LogRecord(LogLevel.Information, new EventId(2025, "EventName"), new InvalidOperationException("exception-message"), "Number={Number}, Text={Text}", 2018, "message");
     }
 

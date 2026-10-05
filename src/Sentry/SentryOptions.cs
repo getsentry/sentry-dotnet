@@ -1427,6 +1427,28 @@ public class SentryOptions
 
     internal SettingLocator SettingLocator { get; set; }
 
+    internal ScopeDefaults ScopeDefaults
+    {
+        get => field ??= new ScopeDefaults(this);
+        set;
+    }
+
+    internal SdkVersion Sdk { get; } = new()
+    {
+        Name = SdkVersion.Instance.Name,
+        Version = SdkVersion.Instance.Version
+    };
+
+    internal void SetSdk(string name, SdkVersion package)
+    {
+        Sdk.Name = name;
+        Sdk.Version = package.Version;
+        if (package.Version is { } version)
+        {
+            Sdk.AddPackage("nuget:" + package.Name, version);
+        }
+    }
+
     /// <summary>
     /// Controls whether the native SDKs (Android, Cocoa, etc.) will be initialized (when applicable).
     /// Should be set <c>false</c> (disabled) only when testing, and then only if the test initializes the managed SDK.

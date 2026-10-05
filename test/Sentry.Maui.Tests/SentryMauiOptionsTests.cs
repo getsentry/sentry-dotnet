@@ -10,6 +10,13 @@ public class SentryMauiOptionsTests
     };
 
     [Fact]
+    public void Sdk_Default()
+    {
+        var options = GetSut();
+        Assert.Equal(Sentry.Maui.Internal.Constants.SdkName, options.ScopeDefaults.Sdk.Name);
+    }
+
+    [Fact]
     public void IsEnvironmentUser_Default()
     {
         var options = GetSut();

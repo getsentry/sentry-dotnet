@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 using Sentry.Maui.Internal;
+using Sentry.Reflection;
 
 namespace Sentry.Maui;
 
@@ -21,6 +22,7 @@ public class SentryMauiOptions : SentryHostOptions
         AutoSessionTracking = true;
         DetectStartupTime = StartupTimeDetectionMode.Fast;
         IsEnvironmentUser = false;
+        SetSdk(Constants.SdkName, typeof(SentryMauiOptions).Assembly.GetNameAndVersion());
 #if !PLATFORM_NEUTRAL
         CacheDirectoryPath = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
 #endif

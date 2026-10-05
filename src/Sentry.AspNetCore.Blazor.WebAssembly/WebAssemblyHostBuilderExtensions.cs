@@ -9,6 +9,7 @@ using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Reflection;
 
 // ReSharper disable once CheckNamespace - Discoverability
 namespace Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -76,5 +77,13 @@ public static class WebAssemblyHostBuilderExtensions
 /// </summary>
 public class SentryBlazorOptions : SentryHostOptions
 {
-    // Awesome Blazor specific options go here
+    internal const string SdkName = "sentry.dotnet.aspnetcore.blazor.webassembly";
+
+    /// <summary>
+    /// Creates a new instance of <see cref="SentryBlazorOptions"/>.
+    /// </summary>
+    public SentryBlazorOptions()
+    {
+        SetSdk(SdkName, typeof(SentryBlazorOptions).Assembly.GetNameAndVersion());
+    }
 }

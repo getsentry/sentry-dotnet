@@ -12,25 +12,19 @@ public class SentryAspNetCoreStructuredLoggerProviderTests : IDisposable
     {
         public IHub Hub { get; }
         public MockClock Clock { get; }
-        public SdkVersion Sdk { get; }
 
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
-            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions();
+            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryAspNetCoreOptions();
             Clock = new MockClock();
-            Sdk = new SdkVersion
-            {
-                Name = "SDK Name",
-                Version = "SDK Version",
-            };
 
             Hub.IsEnabled.Returns(true);
         }
 
         public SentryAspNetCoreStructuredLoggerProvider GetSut()
         {
-            return new SentryAspNetCoreStructuredLoggerProvider(Hub, Clock, Sdk);
+            return new SentryAspNetCoreStructuredLoggerProvider(Hub, Clock);
         }
     }
 

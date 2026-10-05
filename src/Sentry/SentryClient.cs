@@ -315,7 +315,7 @@ public class SentryClient : ISentryClient, IDisposable
             checkIn.MonitorOptions = monitorOptions;
         }
 
-        _enricher.Apply(checkIn);
+        _enricher.Apply(checkIn, scope);
 
         return CaptureEnvelope(Envelope.FromCheckIn(checkIn))
             ? checkIn.Id

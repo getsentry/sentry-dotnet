@@ -25,9 +25,7 @@ public static partial class SentrySdk
 
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
-        // Set default release and distribution
-        options.Release ??= GetDefaultReleaseString();
-        options.Distribution ??= GetDefaultDistributionString();
+        var defaults = options.ScopeDefaults;
 
         // Make sure we capture managed exceptions from the Android environment
         AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
@@ -47,17 +45,17 @@ public static partial class SentrySdk
             o.AttachStacktrace = options.AttachStacktrace;
             o.Debug = options.Debug;
             o.DiagnosticLevel = options.DiagnosticLevel.ToJavaSentryLevel();
-            o.Dist = options.Distribution;
+            o.Dist = defaults.Distribution;
             o.Dsn = options.Dsn;
             // Hardcode to false because .NET SDK manages sessions itself
             o.EnableAutoSessionTracking = false;
-            o.Environment = options.Environment;
+            o.Environment = defaults.Environment;
             o.FlushTimeoutMillis = (long)options.InitCacheFlushTimeout.TotalMilliseconds;
             o.MaxAttachmentSize = options.MaxAttachmentSize;
             o.MaxBreadcrumbs = options.MaxBreadcrumbs;
             o.MaxCacheItems = options.MaxCacheItems;
             o.MaxQueueSize = options.MaxQueueItems;
-            o.Release = options.Release;
+            o.Release = defaults.Release;
             o.SampleRate = options.SampleRate.HasValue ? (JavaDouble)Convert.ToDouble(options.SampleRate.Value) : null;
             o.SendClientReports = options.SendClientReports;
             o.SendDefaultPii = options.SendDefaultPii;
@@ -274,7 +272,7 @@ public static partial class SentrySdk
         }
     }
 
-    private static string? GetDefaultReleaseString()
+    internal static string? GetDefaultReleaseString()
     {
         var packageName = AppContext.PackageName;
         if (packageName == null)
@@ -288,7 +286,7 @@ public static partial class SentrySdk
         return packageInfo == null ? null : $"{packageName}@{packageInfo.VersionName}+{packageInfo.GetVersionCode()}";
     }
 
-    private static string? GetDefaultDistributionString() => GetAndroidPackageVersionCode()?.ToString();
+    internal static string? GetDefaultDistributionString() => GetAndroidPackageVersionCode()?.ToString();
 
     private static long? GetAndroidPackageVersionCode()
     {

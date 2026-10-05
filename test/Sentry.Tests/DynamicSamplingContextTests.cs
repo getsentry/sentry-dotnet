@@ -579,6 +579,18 @@ public class DynamicSamplingContextTests
     }
 
     [Fact]
+    public void CreateFromPropagationContext_ScopeOverridesEnvironment_UsesScopeEnvironment()
+    {
+        var options = new SentryOptions { Dsn = "https://a@sentry.io/1", Environment = "default" };
+        var propagationContext = new SentryPropagationContext(SentryId.Create(), SpanId.Create());
+        var scope = new Scope(options) { Environment = "override" };
+
+        var dsc = propagationContext.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession, scope);
+
+        Assert.Equal("override", Assert.Contains("environment", dsc.Items));
+    }
+
+    [Fact]
     public void CreateFromPropagationContext_TraceId_Empty_Throws()
     {
         var options = new SentryOptions { Dsn = "https://a@sentry.io/1" };

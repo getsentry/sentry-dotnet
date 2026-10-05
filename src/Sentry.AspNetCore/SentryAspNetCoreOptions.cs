@@ -108,6 +108,7 @@ public class SentryAspNetCoreOptions : SentryHostOptions
     {
         // Don't report Environment.UserName as the user.
         IsEnvironmentUser = false;
+        SetSdk(Constants.SdkName, SentryMiddleware.NameAndVersion);
     }
 
     internal void SetEnvironment(IWebHostEnvironment hostingEnvironment)

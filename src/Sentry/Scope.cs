@@ -139,12 +139,6 @@ public class Scope : IEventLike
     }
 
     /// <inheritdoc />
-    public string? Release { get; set; }
-
-    /// <inheritdoc />
-    public string? Distribution { get; set; }
-
-    /// <inheritdoc />
     public string? Environment
     {
         get;
@@ -155,19 +149,11 @@ public class Scope : IEventLike
                 return;
             }
 
-            if (value is null)
-            {
-                Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
-                field = Options.Environment;
-            }
-            else
-            {
-                field = value;
-            }
+            field = value;
 
             if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
             {
-                observer.SetEnvironment(field);
+                observer.SetEnvironment(value ?? Options.ScopeDefaults.Environment);
             }
         }
     }
@@ -438,8 +424,6 @@ public class Scope : IEventLike
         Request = new();
         Contexts.Clear();
         User = new();
-        Release = default;
-        Distribution = default;
         Environment = default;
         TransactionName = default;
         Transaction = default;
@@ -522,13 +506,11 @@ public class Scope : IEventLike
         Request.CopyTo(other.Request);
         User.CopyTo(other.User);
 
-        other.Release ??= Release;
-        other.Distribution ??= Distribution;
         other.Environment ??= Environment;
         other.TransactionName ??= TransactionName;
         other.Level ??= Level;
 
-        if (Sdk.Name is not null && Sdk.Version is not null)
+        if (other.Sdk.Name is null && other.Sdk.Version is null)
         {
             other.Sdk.Name = Sdk.Name;
             other.Sdk.Version = Sdk.Version;

@@ -161,11 +161,9 @@ namespace Sentry
     {
         System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         Sentry.SentryContexts Contexts { get; set; }
-        string? Distribution { get; set; }
         string? Environment { get; set; }
         System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         Sentry.SentryLevel? Level { get; set; }
-        string? Release { get; set; }
         Sentry.SentryRequest Request { get; set; }
         Sentry.SdkVersion Sdk { get; }
         string? TransactionName { get; set; }
@@ -306,7 +304,9 @@ namespace Sentry
     }
     public interface ITransactionData : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
+        string? Distribution { get; set; }
         string? Platform { get; set; }
+        string? Release { get; set; }
     }
     public interface ITransactionRecorder : Sentry.ISpanRecorder
     {
@@ -393,12 +393,10 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment> Attachments { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.SentryContexts Contexts { get; set; }
-        public string? Distribution { get; set; }
         public string? Environment { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public Sentry.SentryLevel? Level { get; set; }
-        public string? Release { get; set; }
         public Sentry.SentryRequest Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.ISpan? Span { get; set; }

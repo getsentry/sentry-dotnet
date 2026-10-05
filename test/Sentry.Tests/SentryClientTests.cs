@@ -1967,6 +1967,22 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureCheckIn_ScopeOverridesEnvironment_CheckInHasScopeEnvironment()
+    {
+        _fixture.SentryOptions.Environment = "default";
+        var scope = new Scope(_fixture.SentryOptions) { Environment = "override" };
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        sut.CaptureCheckIn("my-monitor", CheckInStatus.InProgress, scope: scope);
+
+        var actualCheckIn = (SentryCheckIn)(envelope.Items[0].Payload as JsonSerializable)?.Source;
+        Assert.NotNull(actualCheckIn);
+        Assert.Equal("override", actualCheckIn.Environment);
+    }
+
+    [Fact]
     public void CaptureCheckIn_DurationProvided_CheckInHasDuration()
     {
         Envelope envelope = null;

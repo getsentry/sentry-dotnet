@@ -44,11 +44,7 @@ public class SentryMetricTests
             Environment = "my-environment",
             Release = "my-release",
         };
-        var sdk = new SdkVersion
-        {
-            Name = "Sentry.Test.SDK",
-            Version = "1.2.3-test+Sentry",
-        };
+        var scope = new Scope(options) { Sdk = { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" } };
 
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1)
         {
@@ -56,7 +52,7 @@ public class SentryMetricTests
             Unit = "test_unit",
         };
         metric.SetAttribute("attribute", "value");
-        metric.Attributes.SetDefaultAttributes(options, sdk);
+        metric.Attributes.SetDefaultAttributes(options, scope);
 
         metric.Timestamp.Should().Be(Timestamp);
         metric.TraceId.Should().Be(TraceId);
@@ -69,20 +65,18 @@ public class SentryMetricTests
         metric.Attributes.ShouldContain("attribute", "value");
         metric.Attributes.ShouldContain("sentry.environment", options.Environment);
         metric.Attributes.ShouldContain("sentry.release", options.Release);
-        metric.Attributes.ShouldContain("sentry.sdk.name", sdk.Name);
-        metric.Attributes.ShouldContain("sentry.sdk.version", sdk.Version);
+        metric.Attributes.ShouldContain("sentry.sdk.name", scope.Sdk.Name);
+        metric.Attributes.ShouldContain("sentry.sdk.version", scope.Sdk.Version);
         metric.Attributes.ShouldNotContain<object>("not-found");
     }
 
     [Fact]
-    public void SetDefaultAttributes_EmptySdk_UsesSdkInstance()
+    public void SetDefaultAttributes_EmptyScopeSdk_UsesScopeDefaults()
     {
         var options = new SentryOptions();
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        // A console app does not populate the scope's Sdk, so the metric path receives an empty SdkVersion (Name and Version null).
-        // The metric must still carry the SDK name and version (see #5352).
-        metric.Attributes.SetDefaultAttributes(options, new SdkVersion());
+        metric.Attributes.SetDefaultAttributes(options, new Scope(options));
 
         SdkVersion.Instance.Version.Should().NotBeNullOrWhiteSpace();
         metric.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
@@ -97,7 +91,7 @@ public class SentryMetricTests
 
         // An integration sets the name but its version can be null. The fallback must not relabel it
         // with the default SDK name; only a fully unset SDK gets the default (see #5483).
-        metric.Attributes.SetDefaultAttributes(options, new SdkVersion { Name = "sentry.dotnet.serilog" });
+        metric.Attributes.SetDefaultAttributes(options, new Scope(options) { Sdk = { Name = "sentry.dotnet.serilog" } });
 
         metric.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet.serilog");
         metric.Attributes.ShouldNotContain<string>("sentry.sdk.version");
@@ -113,7 +107,7 @@ public class SentryMetricTests
         };
 
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
-        metric.Attributes.SetDefaultAttributes(options, new SdkVersion());
+        metric.Attributes.SetDefaultAttributes(options, null);
 
         var envelope = Envelope.FromMetric(new TraceMetric([metric]));
 
@@ -199,7 +193,7 @@ public class SentryMetricTests
         metric.SetAttribute("boolean-attribute", true);
         metric.SetAttribute("integer-attribute", 3);
         metric.SetAttribute("double-attribute", 4.4);
-        metric.Attributes.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
+        metric.Attributes.SetDefaultAttributes(options, new Scope(options) { Sdk = { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" } });
 
         var envelope = EnvelopeItem.FromMetric(new TraceMetric([metric]));
 

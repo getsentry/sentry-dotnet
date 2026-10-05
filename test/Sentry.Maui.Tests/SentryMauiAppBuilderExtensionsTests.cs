@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Internal.Http;
 using Sentry.Maui.Internal;
+using Sentry.Reflection;
 using MauiConstants = Sentry.Maui.Internal.Constants;
 
 namespace Sentry.Maui.Tests;
@@ -187,7 +188,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
         // Assert
         Assert.NotNull(@event);
         Assert.Equal(MauiConstants.SdkName, @event.Sdk.Name);
-        Assert.Equal(MauiConstants.SdkVersion, @event.Sdk.Version);
+        Assert.Equal(typeof(SentryMauiOptions).Assembly.GetNameAndVersion().Version, @event.Sdk.Version);
     }
 
     [Fact]

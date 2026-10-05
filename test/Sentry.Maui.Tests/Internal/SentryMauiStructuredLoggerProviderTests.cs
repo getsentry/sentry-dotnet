@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Maui.Internal;
+using Sentry.Reflection;
 
 namespace Sentry.Maui.Tests.Internal;
 
@@ -12,25 +13,19 @@ public class SentryMauiStructuredLoggerProviderTests : IDisposable
     {
         public IHub Hub { get; }
         public MockClock Clock { get; }
-        public SdkVersion Sdk { get; }
 
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
-            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions();
+            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryMauiOptions();
             Clock = new MockClock();
-            Sdk = new SdkVersion
-            {
-                Name = "SDK Name",
-                Version = "SDK Version",
-            };
 
             Hub.IsEnabled.Returns(true);
         }
 
         public SentryMauiStructuredLoggerProvider GetSut()
         {
-            return new SentryMauiStructuredLoggerProvider(Hub, Clock, Sdk);
+            return new SentryMauiStructuredLoggerProvider(Hub, Clock);
         }
     }
 
@@ -96,7 +91,7 @@ public class SentryMauiStructuredLoggerProviderTests : IDisposable
         name.Should().Be(Sentry.Maui.Internal.Constants.SdkName);
 
         capturedLog.TryGetAttribute("sentry.sdk.version", out object? version).Should().BeTrue();
-        version.Should().Be(Sentry.Maui.Internal.Constants.SdkVersion);
+        version.Should().Be(typeof(SentryMauiOptions).Assembly.GetNameAndVersion().Version);
 
         capturedLog.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
         origin.Should().Be("auto.log.extensions_logging");

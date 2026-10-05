@@ -70,6 +70,17 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
     }
 
     [Fact]
+    public void UseSentry_CapturedEvent_HasBlazorWebAssemblySdk()
+    {
+        using var provider = GetSut(_ => { });
+        var logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger("test_category");
+
+        logger.LogError("message");
+
+        _events.Should().ContainSingle().Which.Sdk.Name.Should().Be(SentryBlazorOptions.SdkName);
+    }
+
+    [Fact]
     public void UseSentry_MinimumEventLevel_AppliesToLogger()
     {
         using var provider = GetSut(o => o.MinimumEventLevel = LogLevel.Critical);

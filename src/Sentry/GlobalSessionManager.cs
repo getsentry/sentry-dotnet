@@ -13,6 +13,7 @@ internal class GlobalSessionManager : ISessionManager
     private readonly ISystemClock _clock;
     private readonly Func<string, PersistedSessionUpdate> _persistedSessionProvider;
     private readonly SentryOptions _options;
+    private readonly Func<Scope?>? _getCurrentScope;
 
     private readonly string? _persistenceDirectoryPath;
 
@@ -27,9 +28,11 @@ internal class GlobalSessionManager : ISessionManager
     public GlobalSessionManager(
         SentryOptions options,
         ISystemClock? clock = null,
-        Func<string, PersistedSessionUpdate>? persistedSessionProvider = null)
+        Func<string, PersistedSessionUpdate>? persistedSessionProvider = null,
+        Func<Scope?>? getCurrentScope = null)
     {
         _options = options;
+        _getCurrentScope = getCurrentScope;
         _clock = clock ?? SystemClock.Clock;
         _persistedSessionProvider = persistedSessionProvider
                                     ?? (filePath => Json.Load(_options.FileSystem, filePath, PersistedSessionUpdate.FromJson));
@@ -211,8 +214,8 @@ internal class GlobalSessionManager : ISessionManager
 
     public SessionUpdate? StartSession()
     {
-        // Extract release
-        var release = _options.SettingLocator.GetRelease();
+        var defaults = _options.ScopeDefaults;
+        var release = defaults.Release;
         if (string.IsNullOrWhiteSpace(release))
         {
             // Release health without release is just health (useless)
@@ -221,8 +224,7 @@ internal class GlobalSessionManager : ISessionManager
             return null;
         }
 
-        // Extract other parameters
-        var environment = _options.SettingLocator.GetEnvironment();
+        var environment = defaults.GetEnvironment(_getCurrentScope?.Invoke());
         var distinctId = _options.InstallationId;
 
         // Create new session
