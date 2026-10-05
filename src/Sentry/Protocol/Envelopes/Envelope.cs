@@ -231,9 +231,9 @@ public sealed class Envelope : ISerializable, IDisposable
     /// </summary>
     public static Envelope FromEvent(
         SentryEvent @event,
-        IDiagnosticLogger? logger = null,
         IReadOnlyCollection<SentryAttachment>? attachments = null,
-        SessionUpdate? sessionUpdate = null)
+        SessionUpdate? sessionUpdate = null,
+        IDiagnosticLogger? logger = null)
     {
         var eventId = @event.EventId;
         var header = CreateHeader(eventId, @event.DynamicSamplingContext);
@@ -336,9 +336,9 @@ public sealed class Envelope : ISerializable, IDisposable
     /// </summary>
     public static Envelope FromFeedback(
         SentryEvent @event,
-        IDiagnosticLogger? logger = null,
         IReadOnlyCollection<SentryAttachment>? attachments = null,
-        SessionUpdate? sessionUpdate = null)
+        SessionUpdate? sessionUpdate = null,
+        IDiagnosticLogger? logger = null)
     {
         if (@event.Contexts.Feedback == null)
         {
@@ -381,8 +381,8 @@ public sealed class Envelope : ISerializable, IDisposable
     /// </summary>
     public static Envelope FromTransaction(
         SentryTransaction transaction,
-        IDiagnosticLogger? logger = null,
-        IReadOnlyCollection<SentryAttachment>? attachments = null)
+        IReadOnlyCollection<SentryAttachment>? attachments = null,
+        IDiagnosticLogger? logger = null)
     {
         var eventId = transaction.EventId;
         var header = CreateHeader(eventId, transaction.DynamicSamplingContext);

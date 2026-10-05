@@ -134,7 +134,7 @@ public class SentryClient : ISentryClient, IDisposable
         processedEvent = feedbackEvent;
 
         var attachments = hint.Attachments.ToList();
-        var envelope = Envelope.FromFeedback(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+        var envelope = Envelope.FromFeedback(processedEvent, attachments, scope.SessionUpdate, _options.DiagnosticLogger);
         if (CaptureEnvelope(envelope))
         {
             result = CaptureFeedbackResult.Success;
@@ -247,7 +247,7 @@ public class SentryClient : ISentryClient, IDisposable
         // Keep null entries so the null-attachment guard in Envelope.FromTransaction handles them
         // (consistent with the event/feedback capture paths); dereferencing them here would throw.
         var attachments = hint.Attachments.Where(a => a is null || a.AddToTransactions).ToList();
-        CaptureEnvelope(Envelope.FromTransaction(processedTransaction, _options.DiagnosticLogger, attachments));
+        CaptureEnvelope(Envelope.FromTransaction(processedTransaction, attachments, _options.DiagnosticLogger));
     }
 
     private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint, int spanCount)
@@ -426,7 +426,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         var attachments = hint.Attachments.ToList();
-        var envelope = Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+        var envelope = Envelope.FromEvent(processedEvent, attachments, scope.SessionUpdate, _options.DiagnosticLogger);
         if (CaptureEnvelope(envelope))
         {
 #if SENTRY_UNITY
