@@ -79,4 +79,8 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp' And '$(MSBuildProjectName)' != 'Sentry' And $(MSBuildProjectName.StartsWith('Sentry.'))">
+    <Using Include="Polyfills" />
+  </ItemGroup>
+
 </Project>

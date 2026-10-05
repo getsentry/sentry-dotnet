@@ -24,8 +24,11 @@
     https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.33.2" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="11.4.1" PrivateAssets="all" />
   </ItemGroup>
+  <PropertyGroup>
+    <PolyfillNoWarnIncorrectVersion>true</PolyfillNoWarnIncorrectVersion>
+  </PropertyGroup>
 
   <ItemGroup>
     <Using Remove="System.Text.Json" />
