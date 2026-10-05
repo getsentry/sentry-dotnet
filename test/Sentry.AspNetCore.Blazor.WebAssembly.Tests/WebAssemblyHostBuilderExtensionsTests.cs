@@ -94,7 +94,7 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
     {
         var logs = LogInformation(o => o.EnableLogs = true);
 
-        logs.Should().ContainSingle(log => log.Message == "message");
+        logs.Should().ContainSingle().Which.Message.Should().Be("message");
     }
 
     private List<SentryLog> LogInformation(Action<SentryBlazorOptions> configureOptions)

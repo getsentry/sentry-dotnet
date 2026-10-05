@@ -421,7 +421,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         Build();
         ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>().LogWarning("test");
 
-        logs.Should().ContainSingle(log => log.Message == "test");
+        logs.Should().ContainSingle().Which.Message.Should().Be("test");
     }
 
     [Fact]
@@ -439,7 +439,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         Build();
         ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>().LogWarning("test");
 
-        logs.Should().ContainSingle(log => log.Message == "test");
+        logs.Should().ContainSingle().Which.Message.Should().Be("test");
     }
 
     private List<SentryLog> CaptureLogs(Action<SentryAspNetCoreOptions> configure = null)
