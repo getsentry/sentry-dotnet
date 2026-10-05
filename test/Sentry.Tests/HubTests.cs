@@ -71,6 +71,23 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void Ctor_NonGlobalModeWithScopeSync_SyncsTraceToObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.Options.ScopeObserver = observer;
+        _fixture.Options.EnableScopeSync = true;
+        _fixture.Options.IsGlobalModeEnabled = false;
+
+        // Act
+        using var hub = _fixture.GetSut();
+
+        // Assert
+        var propagationContext = hub.ScopeManager.GetCurrent().Key.PropagationContext;
+        observer.Received(1).SetTrace(propagationContext.TraceId, propagationContext.SpanId);
+    }
+
+    [Fact]
     public void PushAndLockScope_DoesNotAffectOuterScope()
     {
         // Arrange

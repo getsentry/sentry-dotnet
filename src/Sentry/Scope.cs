@@ -403,8 +403,11 @@ public class Scope : IEventLike
     internal void SetPropagationContext(SentryPropagationContext propagationContext)
     {
         PropagationContext = propagationContext;
-        ScopeObserver?.SetTrace(propagationContext.TraceId, propagationContext.SpanId);
+        SyncPropagationContext();
     }
+
+    internal void SyncPropagationContext() =>
+        ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
 
     /// <summary>
     /// Resets all the properties and collections within the scope to their default values.
