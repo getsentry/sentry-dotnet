@@ -441,6 +441,166 @@ public class HubExtensionsMonitorTests
         Assert.Equal(6, _checkIns.Count);
     }
 
+    [Fact]
+    public void WithMonitor_NullJob_ThrowsWithoutCheckIn()
+    {
+        Assert.Throws<ArgumentNullException>("job", () => _hub.WithMonitor(MonitorSlug, (Action)null!));
+        Assert.Throws<ArgumentNullException>("job", () => _hub.WithMonitor(MonitorSlug, (Func<int>)null!));
+        Assert.Throws<ArgumentNullException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, (Func<Task>)null!); });
+        Assert.Throws<ArgumentNullException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, (Func<Task<int>>)null!); });
+
+        Assert.Empty(_checkIns);
+    }
+
+    [Fact]
+    public void WithMonitor_NullOrEmptySlug_ThrowsWithoutCheckIn()
+    {
+        Assert.Throws<ArgumentNullException>("monitorSlug", () => _hub.WithMonitor(null!, () => { }));
+        Assert.Throws<ArgumentException>("monitorSlug", () => _hub.WithMonitor(" ", () => 1));
+        Assert.Throws<ArgumentException>("monitorSlug", () => { _ = _hub.WithMonitor("", () => Task.CompletedTask); });
+
+        Assert.Empty(_checkIns);
+    }
+
+    [Fact]
+    public void WithMonitor_TwoRuns_EachRunHasItsOwnTrace()
+    {
+        var fixture = new TraceFixture();
+        var parentTraceId = fixture.ScopeTraceId();
+
+        fixture.Hub.WithMonitor(MonitorSlug, () => { });
+        fixture.Hub.WithMonitor(MonitorSlug, () => { });
+
+        Assert.Equal(4, fixture.CheckInTraceIds.Count);
+        Assert.Equal(fixture.CheckInTraceIds[0], fixture.CheckInTraceIds[1]);
+        Assert.Equal(fixture.CheckInTraceIds[2], fixture.CheckInTraceIds[3]);
+        Assert.NotEqual(fixture.CheckInTraceIds[0], fixture.CheckInTraceIds[2]);
+        Assert.DoesNotContain(parentTraceId, fixture.CheckInTraceIds);
+        Assert.Equal(parentTraceId, fixture.ScopeTraceId());
+    }
+
+    [Fact]
+    public void WithMonitor_ExceptionCapturedInJob_SharesTheRunsTrace()
+    {
+        var fixture = new TraceFixture();
+
+        fixture.Hub.WithMonitor(MonitorSlug, () => { fixture.Hub.CaptureException(new InvalidOperationException()); });
+
+        var eventTraceId = Assert.Single(fixture.EventTraceIds);
+        Assert.All(fixture.CheckInTraceIds, id => Assert.Equal(eventTraceId, id));
+    }
+
+    [Fact]
+    public async Task WithMonitor_Task_ExceptionCapturedAfterAwait_SharesTheRunsTrace()
+    {
+        var fixture = new TraceFixture();
+        var parentTraceId = fixture.ScopeTraceId();
+
+        await fixture.Hub.WithMonitor(MonitorSlug, async () =>
+        {
+            await Task.Yield();
+            fixture.Hub.CaptureException(new InvalidOperationException());
+        });
+
+        var eventTraceId = Assert.Single(fixture.EventTraceIds);
+        Assert.NotEqual(parentTraceId, eventTraceId);
+        Assert.Equal(2, fixture.CheckInTraceIds.Count);
+        Assert.All(fixture.CheckInTraceIds, id => Assert.Equal(eventTraceId, id));
+        Assert.Equal(parentTraceId, fixture.ScopeTraceId());
+    }
+
+    [Fact]
+    public async Task WithMonitor_ValueTask_ScopeStaysCurrentUntilCompletion()
+    {
+        var fixture = new TraceFixture();
+        var parentTraceId = fixture.ScopeTraceId();
+
+        var job = fixture.Hub.WithMonitor(MonitorSlug, CaptureAfterPending);
+        Assert.Equal(typeof(ValueTask), StaticType(job));
+
+        // The caller's scope is restored while the job is still running
+        Assert.Equal(parentTraceId, fixture.ScopeTraceId());
+
+        _pending.SetResult(true);
+        await job;
+
+        var eventTraceId = Assert.Single(fixture.EventTraceIds);
+        Assert.NotEqual(parentTraceId, eventTraceId);
+        Assert.Equal(2, fixture.CheckInTraceIds.Count);
+        Assert.All(fixture.CheckInTraceIds, id => Assert.Equal(eventTraceId, id));
+
+        async ValueTask CaptureAfterPending()
+        {
+            await _pending.Task;
+            fixture.Hub.CaptureException(new InvalidOperationException());
+        }
+    }
+
+    [Fact]
+    public async Task WithMonitor_ActiveTransaction_UsesItsTrace()
+    {
+        var fixture = new TraceFixture();
+        var transaction = fixture.Hub.StartTransaction("name", "op");
+        fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        fixture.Hub.WithMonitor(MonitorSlug, () => { });
+        await fixture.Hub.WithMonitor(MonitorSlug, () => Task.CompletedTask);
+
+        Assert.Equal(4, fixture.CheckInTraceIds.Count);
+        Assert.All(fixture.CheckInTraceIds, id => Assert.Equal(transaction.TraceId, id));
+    }
+
+    [Fact]
+    public void WithMonitor_GlobalMode_KeepsTheScopesTrace()
+    {
+        var fixture = new TraceFixture(globalMode: true);
+        var parentTraceId = fixture.ScopeTraceId();
+
+        fixture.Hub.WithMonitor(MonitorSlug, () => { });
+
+        Assert.All(fixture.CheckInTraceIds, id => Assert.Equal(parentTraceId, id));
+        Assert.Equal(parentTraceId, fixture.ScopeTraceId());
+    }
+
+    private sealed class TraceFixture
+    {
+        private readonly ISentryClient _client = Substitute.For<ISentryClient>();
+
+        public Hub Hub { get; }
+        public List<SentryId> CheckInTraceIds { get; } = new();
+        public List<SentryId> EventTraceIds { get; } = new();
+
+        public TraceFixture(bool globalMode = false)
+        {
+            // Mirrors SentryClient.CaptureCheckIn, which reads the trace from the scope when the check-in is captured
+            _client.CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>(), Arg.Any<SentryId?>(),
+                    Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>())
+                .Returns(ci =>
+                {
+                    var scope = ci.ArgAt<Scope>(4);
+                    CheckInTraceIds.Add(scope.Span?.TraceId ?? scope.PropagationContext.TraceId);
+                    return SentryId.Create();
+                });
+            _client.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>(), Arg.Any<SentryHint>())
+                .Returns(ci =>
+                {
+                    EventTraceIds.Add(ci.ArgAt<SentryEvent>(0).Contexts.Trace.TraceId);
+                    return SentryId.Create();
+                });
+
+            var options = new SentryOptions
+            {
+                Dsn = ValidDsn,
+                AutoSessionTracking = false,
+                TracesSampleRate = 1.0,
+                IsGlobalModeEnabled = globalMode
+            };
+            Hub = new Hub(options, _client);
+        }
+
+        public SentryId ScopeTraceId() => Hub.ScopeManager.GetCurrent().Key.PropagationContext.TraceId;
+    }
+
     private readonly TaskCompletionSource<bool> _pending = new();
 
     private Task PendingTask() => _pending.Task;

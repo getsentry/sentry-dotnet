@@ -385,6 +385,10 @@ public static class HubExtensions
     /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration.
     /// Exceptions thrown by the job are rethrown.
     /// </summary>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// </remarks>
     /// <example>
     /// <code>
     /// hub.WithMonitor("nightly-cleanup", () => Cleanup(), options =>
@@ -405,15 +409,20 @@ public static class HubExtensions
         string monitorSlug,
         Action job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
-        => hub.RunWithMonitor<object?>(monitorSlug, () =>
+    {
+        ValidateWithMonitorArguments(monitorSlug, job);
+        hub.RunWithMonitor<object?>(monitorSlug, () =>
         {
             job();
             return null;
         }, configureMonitorOptions);
+    }
 
     /// <inheritdoc cref="WithMonitor(IHub, string, Action, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
     /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
     /// A job that returns a <see cref="ValueTask"/> is awaited before the final check-in is sent. For a job that
     /// returns a <see cref="ValueTask{TResult}"/>, pass <c>async () => await job()</c> so it binds to the
     /// <see cref="Task{TResult}"/> overload.
@@ -423,7 +432,10 @@ public static class HubExtensions
         string monitorSlug,
         Func<T> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
-        => hub.RunWithMonitor(monitorSlug, job, configureMonitorOptions);
+    {
+        ValidateWithMonitorArguments(monitorSlug, job);
+        return hub.RunWithMonitor(monitorSlug, job, configureMonitorOptions);
+    }
 
     private static T RunWithMonitor<T>(
         this IHub hub,
@@ -431,6 +443,8 @@ public static class HubExtensions
         Func<T> job,
         Action<SentryMonitorOptions>? configureMonitorOptions)
     {
+        // A ValueTask job's continuations keep the execution context, and so this scope, after it is disposed here
+        using var runScope = hub.PushMonitorRunScope();
         var checkInId = hub.CaptureInProgressCheckIn(monitorSlug, configureMonitorOptions);
         var stopwatch = SentryStopwatch.StartNew();
         try
@@ -487,6 +501,10 @@ public static class HubExtensions
     /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration
     /// once the returned task completes. Exceptions thrown by the job are rethrown.
     /// </summary>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// </remarks>
     /// <example>
     /// <code>
     /// await hub.WithMonitor("nightly-cleanup", async () => await CleanupAsync(), options =>
@@ -507,11 +525,14 @@ public static class HubExtensions
         string monitorSlug,
         Func<Task> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
-        => hub.RunWithMonitorAsync<object?>(monitorSlug, async () =>
+    {
+        ValidateWithMonitorArguments(monitorSlug, job);
+        return hub.RunWithMonitorAsync<object?>(monitorSlug, async () =>
         {
             await job().ConfigureAwait(false);
             return null;
         }, configureMonitorOptions);
+    }
 
     /// <inheritdoc cref="WithMonitor(IHub, string, Func{Task}, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
@@ -520,7 +541,10 @@ public static class HubExtensions
         string monitorSlug,
         Func<Task<T>> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
-        => hub.RunWithMonitorAsync(monitorSlug, job, configureMonitorOptions);
+    {
+        ValidateWithMonitorArguments(monitorSlug, job);
+        return hub.RunWithMonitorAsync(monitorSlug, job, configureMonitorOptions);
+    }
 
     private static async Task<T> RunWithMonitorAsync<T>(
         this IHub hub,
@@ -528,6 +552,7 @@ public static class HubExtensions
         Func<Task<T>> job,
         Action<SentryMonitorOptions>? configureMonitorOptions)
     {
+        using var runScope = hub.PushMonitorRunScope();
         var checkInId = hub.CaptureInProgressCheckIn(monitorSlug, configureMonitorOptions);
         var stopwatch = SentryStopwatch.StartNew();
         try
@@ -541,6 +566,39 @@ public static class HubExtensions
             hub.CaptureCheckIn(monitorSlug, CheckInStatus.Error, checkInId, stopwatch.Elapsed);
             throw;
         }
+    }
+
+    private static void ValidateWithMonitorArguments(string monitorSlug, Delegate job)
+    {
+        if (monitorSlug is null)
+        {
+            throw new ArgumentNullException(nameof(monitorSlug));
+        }
+
+        if (string.IsNullOrWhiteSpace(monitorSlug))
+        {
+            throw new ArgumentException("The monitor slug must not be empty.", nameof(monitorSlug));
+        }
+
+        if (job is null)
+        {
+            throw new ArgumentNullException(nameof(job));
+        }
+    }
+
+    // Like sentry-java's CheckInUtils: each run gets its own scope and, unless a span is active, its own trace
+    private static IDisposable PushMonitorRunScope(this IHub hub)
+    {
+        var parentScope = hub.GetScope();
+        var runScope = hub.PushScope();
+
+        // PushScope doesn't push in global mode or when the scope is locked, so don't reset the shared scope's trace
+        if (hub.GetScope() is { } scope && !ReferenceEquals(scope, parentScope) && scope.Span is null)
+        {
+            scope.SetPropagationContext(new SentryPropagationContext());
+        }
+
+        return runScope;
     }
 
     private static SentryId? CaptureInProgressCheckIn(

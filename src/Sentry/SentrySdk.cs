@@ -690,6 +690,10 @@ static partial class SentrySdk
     /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration.
     /// Exceptions thrown by the job are rethrown.
     /// </summary>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// </remarks>
     /// <example>
     /// <code>
     /// SentrySdk.WithMonitor("nightly-cleanup", () => Cleanup(), options =>
@@ -714,6 +718,8 @@ static partial class SentrySdk
     /// <inheritdoc cref="WithMonitor(string, Action, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
     /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
     /// A job that returns a <see cref="ValueTask"/> is awaited before the final check-in is sent. For a job that
     /// returns a <see cref="ValueTask{TResult}"/>, pass <c>async () => await job()</c> so it binds to the
     /// <see cref="Task{TResult}"/> overload.
@@ -730,6 +736,10 @@ static partial class SentrySdk
     /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration
     /// once the returned task completes. Exceptions thrown by the job are rethrown.
     /// </summary>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// </remarks>
     /// <example>
     /// <code>
     /// await SentrySdk.WithMonitor("nightly-cleanup", async () => await CleanupAsync(), options =>
