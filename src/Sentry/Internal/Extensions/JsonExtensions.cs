@@ -202,6 +202,14 @@ internal static class JsonExtensions
         return null;
     }
 
+    public static JsonElement? GetValuesArrayOrNull(this JsonElement json, string name)
+    {
+        var property = json.GetPropertyOrNull(name);
+        return property?.ValueKind == JsonValueKind.Object
+            ? property.Value.GetPropertyOrNull("values")
+            : property;
+    }
+
     public static object? GetDynamicOrNull(this JsonElement json) => json.ValueKind switch
     {
         JsonValueKind.True => true,

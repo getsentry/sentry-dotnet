@@ -729,4 +729,22 @@ public class SentryTransactionTests
         // Assert
         transaction.Spans.Count.Should().Be(4);
     }
+
+    [Theory]
+    [InlineData("""[{"message": "first"}, {"message": "second"}]""")]
+    [InlineData("""{"values": [{"message": "first"}, {"message": "second"}]}""")]
+    public void FromJson_Breadcrumbs_AcceptsArrayOrValuesObject(string breadcrumbs)
+    {
+        var json = $$"""
+            {
+              "transaction": "name",
+              "start_timestamp": "2020-01-01T00:00:00+00:00",
+              "breadcrumbs": {{breadcrumbs}}
+            }
+            """;
+
+        var transaction = Json.Parse(json, SentryTransaction.FromJson);
+
+        transaction.Breadcrumbs.Select(b => b.Message).Should().Equal("first", "second");
+    }
 }

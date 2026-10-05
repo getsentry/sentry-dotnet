@@ -436,7 +436,7 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
         var fingerprint = json.GetPropertyOrNull("fingerprint")?
             .EnumerateArray().Select(j => j.GetString()!).ToArray();
-        var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?
+        var breadcrumbs = json.GetValuesArrayOrNull("breadcrumbs")?
             .EnumerateArray().Select(Breadcrumb.FromJson).ToList() ?? new();
         var extra = json.GetPropertyOrNull("extra")?
             .GetDictionaryOrNull() ?? new();
