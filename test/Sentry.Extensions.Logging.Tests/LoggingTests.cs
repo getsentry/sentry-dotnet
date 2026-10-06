@@ -181,6 +181,7 @@ public class LoggingTests
             o.Dsn = ValidDsn;
             o.BackgroundWorker = worker;
             o.InitNativeSdks = false;
+            o.AutoSessionTracking = false;
         });
 
         var serviceCollection = new ServiceCollection();

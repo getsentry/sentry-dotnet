@@ -85,6 +85,17 @@ public class SentryStartupTests
     }
 
     [Fact]
+    public void ConfigureLogging_SentryAspNetCoreOptions_SdkIsGoogleCloudFunction()
+    {
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
+        Assert.Equal("sentry.dotnet.google-cloud-function", option.Value.ScopeDefaults.Sdk.Name);
+    }
+
+    [Fact]
     public void ConfigureLogging_SentryAspNetCoreOptions_FlushOnCompletedRequestTrue()
     {
         var sut = new SentryStartup();

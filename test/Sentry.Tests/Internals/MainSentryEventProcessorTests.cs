@@ -243,7 +243,7 @@ public class MainSentryEventProcessorTests
 
         _ = sut.Process(evt);
 
-        Assert.Equal(sut.Release, evt.Release);
+        Assert.Equal(_fixture.SentryOptions.ScopeDefaults.Release, evt.Release);
     }
 
     [Fact]
@@ -267,7 +267,7 @@ public class MainSentryEventProcessorTests
 
         _ = sut.Process(evt);
 
-        Assert.Equal(sut.Distribution, evt.Distribution);
+        Assert.Equal(_fixture.SentryOptions.ScopeDefaults.Distribution, evt.Distribution);
     }
 
     [Theory]
