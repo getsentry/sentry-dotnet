@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\src\Sentry.Quartz\Sentry.Quartz.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Quartz4\Sentry.Quartz4.csproj" />
   </ItemGroup>
 
 </Project>

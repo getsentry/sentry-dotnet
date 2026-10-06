@@ -13,4 +13,20 @@ public static class TestEnvironment
             return isGitHubActions?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
         }
     }
+
+    /// <summary>
+    /// Some containers (e.g. Alpine) ship without a time zone database.
+    /// </summary>
+    public static bool HasTimeZone(string id)
+    {
+        try
+        {
+            _ = TimeZoneInfo.FindSystemTimeZoneById(id);
+            return true;
+        }
+        catch (Exception e) when (e is TimeZoneNotFoundException or InvalidTimeZoneException)
+        {
+            return false;
+        }
+    }
 }

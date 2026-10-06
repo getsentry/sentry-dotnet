@@ -19,32 +19,31 @@ public static class Program
 
         builder.Services.AddQuartz(quartz =>
         {
-            quartz.AddSentryScope();
-            quartz.AddSentryMetrics();
-            quartz.AddSentryCronJobs(options =>
+            // Runs each job in its own scope and captures its exceptions. Jobs with [SentryCronMonitorSlug] also send
+            // check-ins, with the trigger's schedule as the monitor config.
+            quartz.AddSentry(options =>
             {
-                options.EnableUpsertCronMonitor = builder.Environment.IsProduction();
-                options.ConfigureSentryMonitorOptions = (jobDetail, options) =>
+                options.ConfigureMonitorOptions = (jobDetail, monitorOptions) =>
                 {
                     if (jobDetail.Key.Name == nameof(SecondJob))
                     {
-                        options.FailureIssueThreshold = 10;
-                        options.RecoveryThreshold = 10;
+                        monitorOptions.FailureIssueThreshold = 10;
+                        monitorOptions.RecoveryThreshold = 10;
                     }
                 };
             });
 
             var jobKey1 = new JobKey(nameof(FirstJob));
             quartz.AddJob<FirstJob>(opts => opts.WithIdentity(jobKey1));
-            quartz.AddTrigger<FirstJob>(opts => opts.ForJob(jobKey1).WithIdentity($"{nameof(FirstJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
+            quartz.AddTrigger<FirstJob>(opts => opts.ForJob(jobKey1).WithIdentity($"{nameof(FirstJob)}-trigger").WithCronSchedule("0 * * ? * *"));
 
             var jobKey2 = new JobKey(nameof(SecondJob));
             quartz.AddJob<SecondJob>(opts => opts.WithIdentity(jobKey2));
-            quartz.AddTrigger<SecondJob>(opts => opts.ForJob(jobKey2).WithIdentity($"{nameof(SecondJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
+            quartz.AddTrigger<SecondJob>(opts => opts.ForJob(jobKey2).WithIdentity($"{nameof(SecondJob)}-trigger").WithCronSchedule("0 * * ? * *"));
 
             var jobKey3 = new JobKey(nameof(ThirdJob));
             quartz.AddJob<ThirdJob>(opts => opts.WithIdentity(jobKey3));
-            quartz.AddTrigger<ThirdJob>(opts => opts.ForJob(jobKey3).WithIdentity($"{nameof(ThirdJob)}-trigger").WithCronSchedule("*/10 * * ? * *"));
+            quartz.AddTrigger<ThirdJob>(opts => opts.ForJob(jobKey3).WithIdentity($"{nameof(ThirdJob)}-trigger").WithCronSchedule("0 * * ? * *"));
 
         }).AddQuartzHostedService();
 
@@ -92,7 +91,8 @@ public class SecondJob : IJob
     }
 }
 
-[SentryCronMonitorSlug("RecurringBackgroundJob")]
+// Uses the slug of the job key: "thirdjob"
+[SentryCronMonitorSlug]
 public class ThirdJob : IJob
 {
     public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
