@@ -561,12 +561,12 @@ internal class Hub : IHub, IDisposable
         evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession, scope);
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, IExternalPropagationContext propagationContext)
+    private void ApplyTraceContextToEvent(SentryEvent evt, IExternalPropagationContext propagationContext, Scope scope)
     {
         evt.Contexts.Trace.TraceId = propagationContext.TraceId ?? default;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId ?? default;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        evt.DynamicSamplingContext = propagationContext.GetDynamicSamplingContext(_options, _replaySession);
+        evt.DynamicSamplingContext = propagationContext.GetDynamicSamplingContext(_options, _replaySession, scope);
     }
 
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
@@ -667,7 +667,7 @@ internal class Hub : IHub, IDisposable
             // propagation context
             if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null } externalPropagationContext)
             {
-                ApplyTraceContextToEvent(evt, externalPropagationContext);
+                ApplyTraceContextToEvent(evt, externalPropagationContext, scope);
             }
             else if ((GetLinkedSpan(evt) ?? scope.Span) is { } span)
             {

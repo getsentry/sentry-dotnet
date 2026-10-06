@@ -155,12 +155,12 @@ internal class OtelPropagationContext : IExternalPropagationContext
         return BaggageHeader.Create(items);
     }
 
-    public DynamicSamplingContext? GetDynamicSamplingContext(SentryOptions options, IReplaySession replaySession)
+    public DynamicSamplingContext? GetDynamicSamplingContext(SentryOptions options, IReplaySession replaySession, Scope? scope = null)
     {
         if (DynamicSamplingContext is not { } dsc)
         {
             options.LogDebug("Creating Dynamic Sampling Context from the External Propagation Context.");
-            dsc = this.CreateDynamicSamplingContext(options, replaySession);
+            dsc = this.CreateDynamicSamplingContext(options, replaySession, scope);
             DynamicSamplingContext = dsc;
         }
 

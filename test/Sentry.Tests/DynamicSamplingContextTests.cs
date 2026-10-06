@@ -662,4 +662,22 @@ public class DynamicSamplingContextTests
         Assert.NotNull(dsc);
         Assert.DoesNotContain("org_id", dsc.Items);
     }
+
+    [Fact]
+    public void CreateFromExternalPropagationContext_ScopeOverridesEnvironment_UsesScopeEnvironment()
+    {
+        var options = new SentryOptions { Dsn = ValidDsn, Environment = "default" };
+
+        var propagationContext = Substitute.For<IExternalPropagationContext>();
+        propagationContext.TraceId.Returns(SentryId.Create());
+        propagationContext.IsSampled.Returns(true);
+        propagationContext.SampleRate.Returns(1.0);
+        propagationContext.SampleRand.Returns(0.5);
+        var scope = new Scope(options) { Environment = "override" };
+
+        var dsc = propagationContext.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession, scope);
+
+        Assert.NotNull(dsc);
+        Assert.Equal("override", Assert.Contains("environment", dsc.Items));
+    }
 }

@@ -290,6 +290,6 @@ internal static class DynamicSamplingContextExtensions
     public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession, scope);
 
-    public static DynamicSamplingContext? CreateDynamicSamplingContext(this IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
-        => DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, replaySession);
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
+        => DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, replaySession, scope);
 }

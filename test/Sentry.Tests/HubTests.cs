@@ -1808,7 +1808,7 @@ public partial class HubTests : IDisposable
             {"sentry-public_key", "49d0f7386ad645858ae85020e393bef3"},
             {"sentry-sample_rate", "1.0"}
         }).CreateDynamicSamplingContext(_fixture.ReplaySession);
-        externalContext.GetDynamicSamplingContext(Arg.Any<SentryOptions>(), Arg.Any<IReplaySession>())
+        externalContext.GetDynamicSamplingContext(Arg.Any<SentryOptions>(), Arg.Any<IReplaySession>(), Arg.Any<Scope>())
             .Returns(dynamicSamplingContext);
 
         _fixture.Options.ExternalPropagationContext = externalContext;
