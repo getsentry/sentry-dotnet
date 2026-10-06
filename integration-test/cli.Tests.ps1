@@ -40,6 +40,63 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
     }
 }
 
+# The dummy Sentry server doesn't implement the releases API, so these tests record the CLI arguments instead.
+Describe 'Console apps (<framework>) - release creation' -ForEach @(
+    @{ framework = $latestFramework }
+) {
+    BeforeAll {
+        ResetLocalPackages
+        DotnetNew 'console' 'release-app' $framework
+        (Get-Content release-app/release-app.csproj) -replace '</Project>', @'
+  <PropertyGroup>
+    <InformationalVersion>1.2.3+abcdef</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
+  </ItemGroup>
+</Project>
+'@ | Set-Content release-app/release-app.csproj
+
+        $cliLog = Join-Path $PSScriptRoot 'release-app' 'sentry-cli.log'
+        if ($IsWindows)
+        {
+            $cliStub = Join-Path $PSScriptRoot 'release-app' 'sentry-cli.cmd'
+            "@echo %* >> `"$cliLog`"" | Set-Content $cliStub
+        }
+        else
+        {
+            $cliStub = Join-Path $PSScriptRoot 'release-app' 'sentry-cli.sh'
+            "#!/bin/sh`necho `"`$*`" >> `"$cliLog`"" | Set-Content $cliStub
+            chmod +x $cliStub
+        }
+
+        function BuildWithSentryCLIStub([string[]] $properties)
+        {
+            Remove-Item $cliLog -ErrorAction SilentlyContinue
+            dotnet build release-app -c Release --nologo --framework $framework /p:SentryCLI=$cliStub @properties | ForEach-Object { Write-Host "  $_" }
+            $LASTEXITCODE | Should -Be 0
+            @(Get-Content $cliLog -ErrorAction SilentlyContinue)
+        }
+    }
+
+    It "creates a release named after the informational version" {
+        BuildWithSentryCLIStub '/p:SentryCreateRelease=true' |
+            Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
+    }
+
+    It "creates a release when MSBuild can't load the type of another assembly attribute" {
+        BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:UserSecretsId=sentry-test' |
+            Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
+    }
+
+    It "creates a release and sets commits when only SentrySetCommits is enabled" {
+        $calls = BuildWithSentryCLIStub '/p:SentrySetCommits=true'
+        $calls | Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
+        $calls | Should -AnyElementMatch '^releases set-commits --auto release-app@1\.2\.3\+abcdef\s*$'
+    }
+}
+
 Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
