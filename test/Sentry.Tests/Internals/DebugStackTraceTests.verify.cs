@@ -112,6 +112,23 @@ public class DebugStackTraceTests
         Assert.Null(stackFrame.Module);
     }
 
+    [Theory]
+    [InlineData("<Unknown>", "Foo.dll")]
+    [InlineData("/data/app/Foo.dll", "/data/app/Foo.dll")]
+    public void GetManagedModuleDebugImage_AssemblyReader_ReadsByLocationOrScopeName(string fullyQualifiedName, string expectedName)
+    {
+        string? requestedName = null;
+        _fixture.SentryOptions.AssemblyReader = name =>
+        {
+            requestedName = name;
+            return null;
+        };
+
+        DebugStackTrace.GetManagedModuleDebugImage(new StubModule(fullyQualifiedName, "Foo.dll"), _fixture.SentryOptions);
+
+        requestedName.Should().Be(expectedName);
+    }
+
     [Fact]
     public void MergeDebugImages_Empty()
     {
@@ -264,6 +281,14 @@ public class DebugStackTraceTests
             });
         }
     }
+    private class StubModule(string fullyQualifiedName, string scopeName) : Module
+    {
+        public override string FullyQualifiedName => fullyQualifiedName;
+        public override string Name => fullyQualifiedName;
+        public override string ScopeName => scopeName;
+        public override Guid ModuleVersionId { get; } = Guid.NewGuid();
+    }
+
     internal class StubNativeAOTStackFrame : IStackFrame
     {
         internal string? Function;

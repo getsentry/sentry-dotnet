@@ -43,8 +43,7 @@
       <_TestAPK Include="3" Properties="_Aot=False;_Store=True;_Compressed=False" />
       <_TestAPK Include="4" Properties="_Aot=False;_Store=True;_Compressed=True" />
       <!-- Mono AOT variants are net10-only: CoreCLR is the only supported runtime for MAUI mobile
-           apps from .NET 11 on. Every reader test also skips on assembly store v4 there (#5454),
-           so there would be nothing to read even if an AOT APK could be produced. -->
+           apps from .NET 11 on. -->
       <_TestAPK Include="5" Properties="_Aot=True;_Store=False;_Compressed=False" Condition="'$(TargetFramework)' == 'net10.0-android'" />
       <_TestAPK Include="6" Properties="_Aot=True;_Store=False;_Compressed=True" Condition="'$(TargetFramework)' == 'net10.0-android'" />
       <_TestAPK Include="7" Properties="_Aot=True;_Store=True;_Compressed=False" Condition="'$(TargetFramework)' == 'net10.0-android'" />
