@@ -245,6 +245,28 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    public void PushScope_ScopeSyncEnabled_OnlyChangesToPushedScopeAreSynced()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.SentryOptions.ScopeObserver = observer;
+        _fixture.SentryOptions.EnableScopeSync = true;
+        var sut = _fixture.GetSut();
+        sut.ConfigureScope(s => s.SetTag("existing", "value"));
+        observer.ClearReceivedCalls();
+
+        // Act
+        using (sut.PushScope())
+        {
+            sut.ConfigureScope(s => s.SetTag("new", "value"));
+        }
+
+        // Assert
+        observer.ReceivedCalls().Should().ContainSingle();
+        observer.Received(1).SetTag("new", "value");
+    }
+
+    [Fact]
     public async Task AsyncTasks_IsolatedScopes()
     {
         var sut = _fixture.GetSut();
