@@ -442,6 +442,23 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         logs.Should().ContainSingle().Which.Message.Should().Be("test");
     }
 
+    [Fact]
+    public void LogWarning_ExplicitLoggingAddSentry_NoLogSent()
+    {
+        var logs = CaptureLogs();
+        var configureWebHost = ConfigureWebHost;
+        ConfigureWebHost = builder =>
+        {
+            builder.ConfigureLogging(logging => logging.AddSentry());
+            configureWebHost(builder);
+        };
+
+        Build();
+        ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>().LogWarning("test");
+
+        logs.Should().BeEmpty();
+    }
+
     private List<SentryLog> CaptureLogs(Action<SentryAspNetCoreOptions> configure = null)
     {
         var logs = new List<SentryLog>();

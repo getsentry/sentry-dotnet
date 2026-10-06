@@ -35,6 +35,19 @@ public class SentryMauiOptions : SentryHostOptions
     }
 
     /// <summary>
+    /// Whether the <see cref="ILogger"/> integration that <c>UseSentry</c> adds sends log entries to Sentry as structured logs.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see langword="false"/>, including when the app also calls <c>AddSentry()</c> on its
+    /// <see cref="ILoggingBuilder"/>.
+    /// </remarks>
+    public bool EnableLogs
+    {
+        get => LogsEnabled;
+        set => LogsEnabled = value;
+    }
+
+    /// <summary>
     /// Gets or sets whether elements that implement <see cref="IText"/>
     /// (such as <see cref="Button"/>, <see cref="Label"/>, <see cref="Entry"/>, and others)
     /// will have their text included on breadcrumbs.

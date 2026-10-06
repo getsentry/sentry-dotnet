@@ -24,15 +24,7 @@ public abstract class SentryHostOptions : SentryOptions
         set => Logging.MinimumEventLevel = value;
     }
 
-    /// <summary>
-    /// Whether the <see cref="ILogger"/> integration that this host adds sends log entries to Sentry as structured logs.
-    /// </summary>
-    /// <remarks>
-    /// Defaults to <see langword="false"/>, including when the app also calls <c>AddSentry()</c> on its
-    /// <see cref="ILoggingBuilder"/>. Logs sent with <see cref="SentrySdk.Logger"/>, or by the Serilog, NLog and
-    /// log4net integrations, don't depend on this option.
-    /// </remarks>
-    public bool EnableLogs { get; set; }
+    internal bool LogsEnabled { get; set; }
 
     /// <summary>
     /// Add a callback to configure the scope upon SDK initialization

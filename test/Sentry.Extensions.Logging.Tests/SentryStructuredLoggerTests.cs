@@ -272,7 +272,7 @@ public class SentryStructuredLoggerTests : IDisposable
     [InlineData(true, true)]
     public void IsEnabled_HostOptions_ReturnsEnableLogs(bool enableLogs, bool expectedIsEnabled)
     {
-        using var hub = new Hub(new HostOptions { Dsn = ValidDsn, EnableLogs = enableLogs }, Substitute.For<ISentryClient>());
+        using var hub = new Hub(new HostOptions { Dsn = ValidDsn, LogsEnabled = enableLogs }, Substitute.For<ISentryClient>());
         var logger = new SentryStructuredLogger(_fixture.CategoryName, hub, _fixture.Clock, _fixture.Sdk);
 
         logger.IsEnabled(LogLevel.Information).Should().Be(expectedIsEnabled);

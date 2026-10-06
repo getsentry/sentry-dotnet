@@ -84,6 +84,17 @@ public class SentryMauiStructuredLoggerProviderTests : IDisposable
     }
 
     [Fact]
+    public void CreateLogger_EnableLogs_IsEnabled()
+    {
+        using var hub = new Hub(new SentryMauiOptions { Dsn = ValidDsn, EnableLogs = true }, Substitute.For<ISentryClient>());
+        var provider = new SentryMauiStructuredLoggerProvider(hub);
+
+        var logger = provider.CreateLogger("CategoryName");
+
+        logger.IsEnabled(LogLevel.Critical).Should().BeTrue();
+    }
+
+    [Fact]
     public void CreateLogger_DependencyInjection_CanLog()
     {
         SentryLog? capturedLog = null;

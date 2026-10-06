@@ -76,5 +76,16 @@ public static class WebAssemblyHostBuilderExtensions
 /// </summary>
 public class SentryBlazorOptions : SentryHostOptions
 {
-    // Awesome Blazor specific options go here
+    /// <summary>
+    /// Whether the <see cref="ILogger"/> integration that <c>UseSentry</c> adds sends log entries to Sentry as structured logs.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see langword="false"/>, including when the app also calls <c>AddSentry()</c> on its
+    /// <see cref="ILoggingBuilder"/>.
+    /// </remarks>
+    public bool EnableLogs
+    {
+        get => LogsEnabled;
+        set => LogsEnabled = value;
+    }
 }
