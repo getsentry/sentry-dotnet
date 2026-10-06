@@ -169,6 +169,22 @@ public partial class SentryEventTests
     }
 
     [Fact]
+    public void FromJson_NumericTimestamps_ParsesUnixSeconds()
+    {
+        var json = """
+            {
+              "timestamp": 1759435453.5,
+              "breadcrumbs": [{ "timestamp": 1759435453.123, "message": "test" }]
+            }
+            """;
+
+        var actual = Json.Parse(json, SentryEvent.FromJson);
+
+        actual.Timestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453500));
+        actual.Breadcrumbs.Single().Timestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453123));
+    }
+
+    [Fact]
     public void GetExceptionType_NoException_ReturnsNone()
     {
         var evt = new SentryEvent();

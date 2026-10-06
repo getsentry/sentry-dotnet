@@ -65,6 +65,14 @@ public class BreadcrumbTests
     }
 
     [Fact]
+    public void FromJson_NumericTimestamp_ParsesUnixSeconds()
+    {
+        var actual = Json.Parse("""{"timestamp":1759435453.123,"message":"test"}""", Breadcrumb.FromJson);
+
+        actual.Timestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453123));
+    }
+
+    [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
         var sut = new Breadcrumb(

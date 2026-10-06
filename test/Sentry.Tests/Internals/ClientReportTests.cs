@@ -56,4 +56,14 @@ public class ClientReportTests
         var clientReport = ClientReport.FromJson(element);
         clientReport.Should().BeEquivalentTo(_testClientReport);
     }
+
+    [Fact]
+    public void Deserializes_NumericTimestamp()
+    {
+        var element = JsonDocument.Parse("""{"timestamp":1759435453.123,"discarded_events":[]}""").RootElement;
+
+        var clientReport = ClientReport.FromJson(element);
+
+        clientReport.Timestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453123));
+    }
 }
