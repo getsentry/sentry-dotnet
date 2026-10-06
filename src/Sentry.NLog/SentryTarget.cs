@@ -137,11 +137,17 @@ public sealed partial class SentryTarget : TargetWithContext
         "The Sentry target always sends logs. This option is ignored and will be removed in a future major version. " +
         "To drop logs, use SetBeforeSendLog on the options passed to SentrySdk.Init and return null.";
 
+    internal const string EnableLogsFalseIgnored =
+        "The Sentry target always sends logs, so enableLogs=\"false\" no longer turns them off. " +
+        "Remove enableLogs from the target configuration. " +
+        "To drop logs, use SetBeforeSendLog on the options passed to SentrySdk.Init and return null.";
+
     /// <summary>
     /// Logs are always generated and sent.
     /// </summary>
     /// <remarks>
-    /// This option no longer has any effect. The getter always returns <see langword="true"/> and the setter is ignored.
+    /// This option no longer has any effect. The getter always returns <see langword="true"/>.
+    /// Setting it to <see langword="false"/> only writes a warning to standard error.
     /// To filter or drop logs, use <see cref="SentryOptions.SetBeforeSendLog(Func{SentryLog, SentryLog})"/> and return <see langword="null"/>.
     /// </remarks>
     [Obsolete(ObsoleteEnableLogs)]
@@ -150,7 +156,10 @@ public sealed partial class SentryTarget : TargetWithContext
         get => true;
         set
         {
-            // Logs are always enabled. This option is deliberately ignored.
+            if (!value)
+            {
+                _uninitializedSdkWarning.WriteToStandardError("Sentry: " + EnableLogsFalseIgnored);
+            }
         }
     }
 
