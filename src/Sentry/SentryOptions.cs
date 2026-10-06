@@ -1876,18 +1876,6 @@ public class SentryOptions
     }
 
     /// <summary>
-    /// Applies the default tags to an event without resetting existing tags.
-    /// </summary>
-    /// <param name="hasTags">The event to apply the tags to.</param>
-    public void ApplyDefaultTags(IHasTags hasTags)
-    {
-        foreach (var defaultTag in DefaultTags.Where(t => !hasTags.Tags.TryGetValue(t.Key, out _)))
-        {
-            hasTags.SetTag(defaultTag.Key, defaultTag.Value);
-        }
-    }
-
-    /// <summary>
     /// Disables the strategy to detect duplicate events.
     /// </summary>
     /// <remarks>

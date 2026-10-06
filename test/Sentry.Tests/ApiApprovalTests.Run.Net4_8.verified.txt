@@ -890,7 +890,6 @@ namespace Sentry
         public void AddTransactionProcessor(Sentry.Extensibility.ISentryTransactionProcessor processor) { }
         public void AddTransactionProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor>> processorProvider) { }
         public void AddTransactionProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
-        public void ApplyDefaultTags(Sentry.IHasTags hasTags) { }
         public void DisableAppDomainProcessExitFlush() { }
         public void DisableAppDomainUnhandledExceptionCapture() { }
         public void DisableDuplicateEventDetection() { }
