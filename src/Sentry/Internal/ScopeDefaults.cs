@@ -29,9 +29,9 @@ internal sealed class ScopeDefaults
 
     public SentryContexts Contexts { get; }
 
-    public string GetEnvironment(Scope? scope) => scope?.Environment ?? Environment;
+    public string GetEffectiveEnvironment(Scope? scope) => scope?.Environment ?? Environment;
 
-    public SdkVersion GetSdk(Scope? scope) => scope?.Sdk is { Name: not null } sdk ? sdk : Sdk;
+    public SdkVersion GetEffectiveSdk(Scope? scope) => scope?.Sdk is { Name: not null } sdk ? sdk : Sdk;
 
     public void Apply(IEventLike item)
     {
@@ -84,7 +84,7 @@ internal sealed class ScopeDefaults
     public void Apply(SentryCheckIn checkIn, Scope? scope)
     {
         checkIn.Release ??= Release;
-        checkIn.Environment ??= GetEnvironment(scope);
+        checkIn.Environment ??= GetEffectiveEnvironment(scope);
     }
 
     private static string? ResolveRelease(SentryOptions options)

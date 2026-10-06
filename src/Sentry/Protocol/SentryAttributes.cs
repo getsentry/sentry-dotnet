@@ -101,14 +101,14 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
     internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion? sdk = null)
     {
         var defaults = options.ScopeDefaults;
-        SetAttribute("sentry.environment", defaults.GetEnvironment(scope));
+        SetAttribute("sentry.environment", defaults.GetEffectiveEnvironment(scope));
 
         if (defaults.Release is { } release)
         {
             SetAttribute("sentry.release", release);
         }
 
-        sdk ??= defaults.GetSdk(scope);
+        sdk ??= defaults.GetEffectiveSdk(scope);
         if (sdk.Name is { } name)
         {
             SetAttribute("sentry.sdk.name", name);

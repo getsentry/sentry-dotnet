@@ -73,25 +73,25 @@ public class ScopeDefaultsTests
     }
 
     [Fact]
-    public void GetEnvironment_ScopeOverrides_UsesScope()
+    public void GetEffectiveEnvironment_ScopeOverrides_UsesScope()
     {
         var options = new SentryOptions { Environment = "default" };
         var sut = new ScopeDefaults(options);
 
-        sut.GetEnvironment(new Scope(options) { Environment = "override" }).Should().Be("override");
-        sut.GetEnvironment(new Scope(options)).Should().Be("default");
-        sut.GetEnvironment(null).Should().Be("default");
+        sut.GetEffectiveEnvironment(new Scope(options) { Environment = "override" }).Should().Be("override");
+        sut.GetEffectiveEnvironment(new Scope(options)).Should().Be("default");
+        sut.GetEffectiveEnvironment(null).Should().Be("default");
     }
 
     [Fact]
-    public void GetSdk_ScopeHasSdkName_UsesScope()
+    public void GetEffectiveSdk_ScopeHasSdkName_UsesScope()
     {
         var options = new SentryOptions();
         var sut = new ScopeDefaults(options);
         var scope = new Scope(options) { Sdk = { Name = "scope-sdk" } };
 
-        sut.GetSdk(scope).Should().BeSameAs(scope.Sdk);
-        sut.GetSdk(new Scope(options)).Should().BeSameAs(sut.Sdk);
+        sut.GetEffectiveSdk(scope).Should().BeSameAs(scope.Sdk);
+        sut.GetEffectiveSdk(new Scope(options)).Should().BeSameAs(sut.Sdk);
     }
 
     [Fact]

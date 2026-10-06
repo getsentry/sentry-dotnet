@@ -224,7 +224,7 @@ internal class GlobalSessionManager : ISessionManager
             return null;
         }
 
-        var environment = defaults.GetEnvironment(_getCurrentScope?.Invoke());
+        var environment = defaults.GetEffectiveEnvironment(_getCurrentScope?.Invoke());
         var distinctId = _options.InstallationId;
 
         // Create new session

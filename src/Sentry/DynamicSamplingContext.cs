@@ -194,7 +194,7 @@ internal class DynamicSamplingContext
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
 
         var release = options.ScopeDefaults.Release;
-        var environment = options.ScopeDefaults.GetEnvironment(scope);
+        var environment = options.ScopeDefaults.GetEffectiveEnvironment(scope);
 
         return new DynamicSamplingContext(traceId,
             publicKey,
@@ -219,7 +219,7 @@ internal class DynamicSamplingContext
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
 
         var release = options.ScopeDefaults.Release;
-        var environment = options.ScopeDefaults.GetEnvironment(scope);
+        var environment = options.ScopeDefaults.GetEffectiveEnvironment(scope);
 
         return new DynamicSamplingContext(traceId,
             publicKey,
@@ -238,7 +238,7 @@ internal class DynamicSamplingContext
         var traceId = propagationContext.TraceId;
         var publicKey = options.ParsedDsn.PublicKey;
         var release = options.ScopeDefaults.Release;
-        var environment = options.ScopeDefaults.GetEnvironment(scope);
+        var environment = options.ScopeDefaults.GetEffectiveEnvironment(scope);
 
         return new DynamicSamplingContext(
             traceId,
@@ -260,7 +260,7 @@ internal class DynamicSamplingContext
         }
         var publicKey = options.ParsedDsn.PublicKey;
         var release = options.ScopeDefaults.Release;
-        var environment = options.ScopeDefaults.GetEnvironment(scope);
+        var environment = options.ScopeDefaults.GetEffectiveEnvironment(scope);
 
         return new DynamicSamplingContext(
             traceId,
