@@ -146,7 +146,7 @@ public class ScopeDefaultsTests
         @event.Sdk.Name.Should().Be("event-sdk");
         @event.Tags["key"].Should().Be("event-value");
         @event.Contexts.Runtime.Name.Should().Be("event-runtime");
-        @event.Contexts.Runtime.Version.Should().Be(sut.Contexts.Runtime.Version);
+        @event.Contexts.Runtime.Version.Should().BeNull();
     }
 
     [Fact]

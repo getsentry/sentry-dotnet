@@ -68,7 +68,17 @@ internal sealed class ScopeDefaults
             }
         }
 
-        Contexts.CopyTo(item.Contexts);
+        foreach (var (key, value) in Contexts)
+        {
+            if (value is Protocol.Device device)
+            {
+                item.Contexts.Device.BootTime ??= device.BootTime;
+            }
+            else if (!item.Contexts.ContainsKey(key) && value is ICloneable<object> context)
+            {
+                item.Contexts[key] = context.Clone();
+            }
+        }
     }
 
     public void Apply(SentryCheckIn checkIn, Scope? scope)
