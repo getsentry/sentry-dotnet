@@ -144,8 +144,10 @@ public class SentryTargetConfigurationBindingTests
     }
 
     private static SentryTarget GetTarget(List<string> standardError) =>
-        new(new SentryNLogOptions(), () => Substitute.For<IHub>(), new MockClock(),
-            new UninitializedSdkWarning { WriteToStandardError = standardError.Add });
+        new(new SentryNLogOptions(), () => Substitute.For<IHub>(), new MockClock())
+        {
+            WriteToStandardError = standardError.Add
+        };
 
     private static void Set(SentryTarget target, string property, object value) =>
         Record.Exception(() => typeof(SentryTarget).GetProperty(property)!.SetValue(target, value));

@@ -13,6 +13,8 @@ public sealed partial class SentryTarget : TargetWithContext
     private readonly UninitializedSdkWarning _uninitializedSdkWarning;
     private bool _reportedUnsupportedSdkSetting;
 
+    internal Action<string> WriteToStandardError { get; set; } = Console.Error.WriteLine;
+
     internal static readonly string AdditionalGroupingKeyProperty = "AdditionalGroupingKey";
 
     internal const string UninitializedSdkMessage =
@@ -158,7 +160,7 @@ public sealed partial class SentryTarget : TargetWithContext
         {
             if (!value)
             {
-                _uninitializedSdkWarning.WriteToStandardError("Sentry: " + EnableLogsFalseIgnored);
+                WriteToStandardError("Sentry: " + EnableLogsFalseIgnored);
             }
         }
     }
@@ -207,7 +209,7 @@ public sealed partial class SentryTarget : TargetWithContext
         if (!_reportedUnsupportedSdkSetting)
         {
             _reportedUnsupportedSdkSetting = true;
-            _uninitializedSdkWarning.WriteToStandardError("Sentry: " + ConfigurationExtensions.ObsoleteDsnOverload);
+            WriteToStandardError("Sentry: " + ConfigurationExtensions.ObsoleteDsnOverload);
         }
 
         return new NotSupportedException(ConfigurationExtensions.ObsoleteDsnOverload);
