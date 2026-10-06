@@ -18,8 +18,6 @@ namespace Google.Cloud.Functions.Framework;
 /// </summary>
 public class SentryStartup : FunctionsStartup
 {
-    private const string SdkName = "sentry.dotnet.google-cloud-function";
-
     private static readonly SdkVersion NameAndVersion = typeof(SentryStartup).Assembly.GetNameAndVersion();
 
     /// <summary>
@@ -44,7 +42,7 @@ public class SentryStartup : FunctionsStartup
             // Make sure all events are flushed out
             options.FlushBeforeRequestCompleted = true;
 
-            options.SetSdk(SdkName, NameAndVersion);
+            options.SetSdk(Sentry.Google.Cloud.Functions.Constants.SdkName, NameAndVersion);
 
             // K_SERVICE is where the name of the FAAS is stored.
             // It will return null if GCP Function is running locally.

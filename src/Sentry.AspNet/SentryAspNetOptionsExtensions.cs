@@ -36,7 +36,7 @@ public static class SentryAspNetOptionsExtensions
 
         options.DiagnosticLogger ??= new TraceDiagnosticLogger(options.DiagnosticLevel);
         options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
-        options.SetSdk("sentry.dotnet.aspnet", typeof(SentryAspNetOptionsExtensions).Assembly.GetNameAndVersion());
+        options.SetSdk(Constants.SdkName, typeof(SentryAspNetOptionsExtensions).Assembly.GetNameAndVersion());
         options.AddEventProcessor(eventProcessor);
         options.AddDiagnosticSourceIntegration();
         options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));

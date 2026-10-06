@@ -77,7 +77,7 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
 
         logger.LogError("message");
 
-        _events.Should().ContainSingle().Which.Sdk.Name.Should().Be(SentryBlazorOptions.SdkName);
+        _events.Should().ContainSingle().Which.Sdk.Name.Should().Be(Constants.SdkName);
     }
 
     [Fact]

@@ -10,8 +10,6 @@ namespace Sentry.AspNetCore.Grpc;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryBuilderExtensions
 {
-    private const string SdkName = "sentry.dotnet.aspnetcore.grpc";
-
     private static readonly SdkVersion NameAndVersion = typeof(SentryGrpcInterceptor).Assembly.GetNameAndVersion();
 
     /// <summary>
@@ -22,7 +20,7 @@ public static class SentryBuilderExtensions
     {
         _ = builder.Services
             .AddSingleton<IProtobufRequestPayloadExtractor, DefaultProtobufRequestPayloadExtractor>()
-            .Configure<SentryAspNetCoreOptions>(options => options.SetSdk(SdkName, NameAndVersion));
+            .Configure<SentryAspNetCoreOptions>(options => options.SetSdk(Constants.SdkName, NameAndVersion));
 
         _ = builder.Services.AddGrpc(options =>
         {

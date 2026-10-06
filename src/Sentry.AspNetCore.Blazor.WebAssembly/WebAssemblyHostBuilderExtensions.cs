@@ -77,13 +77,11 @@ public static class WebAssemblyHostBuilderExtensions
 /// </summary>
 public class SentryBlazorOptions : SentryHostOptions
 {
-    internal const string SdkName = "sentry.dotnet.aspnetcore.blazor.webassembly";
-
     /// <summary>
     /// Creates a new instance of <see cref="SentryBlazorOptions"/>.
     /// </summary>
     public SentryBlazorOptions()
     {
-        SetSdk(SdkName, typeof(SentryBlazorOptions).Assembly.GetNameAndVersion());
+        SetSdk(Sentry.AspNetCore.Blazor.WebAssembly.Constants.SdkName, typeof(SentryBlazorOptions).Assembly.GetNameAndVersion());
     }
 }
