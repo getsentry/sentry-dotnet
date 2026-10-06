@@ -393,7 +393,7 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
         var environment = json.GetPropertyOrNull("environment")?.GetString();
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
         var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()).ToArray();
-        var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
+        var breadcrumbs = json.GetValuesArrayOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
         var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull();
         var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
         var level = SafeLevelFromJson(json);

@@ -256,4 +256,16 @@ public partial class SentryEventTests
 
         Assert.Equal(SentryEvent.ExceptionType.UnhandledNonTerminal, evt.GetExceptionType());
     }
+
+    [Theory]
+    [InlineData("""[{"message": "first"}, {"message": "second"}]""")]
+    [InlineData("""{"values": [{"message": "first"}, {"message": "second"}]}""")]
+    public void FromJson_Breadcrumbs_AcceptsArrayOrValuesObject(string breadcrumbs)
+    {
+        var json = $$"""{"breadcrumbs": {{breadcrumbs}}}""";
+
+        var evt = Json.Parse(json, SentryEvent.FromJson);
+
+        evt.Breadcrumbs.Select(b => b.Message).Should().Equal("first", "second");
+    }
 }
