@@ -44,11 +44,10 @@ public static class GlobalConfigurationExtensions
     /// <param name="configuration"></param>
     /// <param name="hub"></param>
     /// <param name="logger"></param>
-    /// <param name="options"></param>
     /// <returns></returns>
-    internal static IGlobalConfiguration UseSentry(this IGlobalConfiguration configuration, IHub hub, IDiagnosticLogger logger, SentryHangfireOptions? options = null)
+    internal static IGlobalConfiguration UseSentry(this IGlobalConfiguration configuration, IHub hub, IDiagnosticLogger logger)
     {
-        configuration.UseFilter(new SentryServerFilter(hub, logger, options));
+        configuration.UseFilter(new SentryServerFilter(hub, logger));
         return configuration;
     }
 }

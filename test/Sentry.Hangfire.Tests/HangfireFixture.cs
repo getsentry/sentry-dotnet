@@ -21,7 +21,7 @@ public class HangfireFixture : IDisposable
 
         GlobalConfiguration.Configuration
             .UseMemoryStorage()
-            .UseSentry(Hub, Logger, new SentryHangfireOptions { SendRecurringJobSchedule = true });
+            .UseSentry(Hub, Logger);
         _server = new BackgroundJobServer();
         _monitoringApi = JobStorage.Current.GetMonitoringApi();
     }

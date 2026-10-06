@@ -7,7 +7,8 @@ public class SentryHangfireOptions
 {
     /// <summary>
     /// When enabled, the in-progress check-in of a recurring job includes the job's cron expression and time zone
-    /// as the monitor config, so Sentry creates the monitor or updates its schedule. Defaults to <c>false</c>.
+    /// as the monitor config, so Sentry creates the monitor or updates its schedule. Defaults to <c>true</c>.
+    /// Set to <c>false</c> to manage the monitor's schedule in Sentry instead.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -20,5 +21,5 @@ public class SentryHangfireOptions
     /// converted, so only <c>UTC</c> and IANA IDs are sent.
     /// </para>
     /// </remarks>
-    public bool SendRecurringJobSchedule { get; set; }
+    public bool SendRecurringJobSchedule { get; set; } = true;
 }

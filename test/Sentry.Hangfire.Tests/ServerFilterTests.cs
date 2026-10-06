@@ -76,6 +76,23 @@ public class ServerFilterTests
     }
 
     [Fact]
+    public void OnPerforming_DefaultOptions_SendsMonitorConfig()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture();
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        var monitorConfig = fixture.GetSentMonitorConfig();
+        monitorConfig.Should().NotBeNull();
+        monitorConfig!.Value.GetProperty("schedule").GetProperty("value").GetString().Should().Be(fixture.Cron);
+        monitorConfig.Value.GetProperty("timezone").GetString().Should().Be("UTC");
+    }
+
+    [Fact]
     public void OnPerforming_SendScheduleDisabled_SendsCheckInWithoutMonitorConfig()
     {
         // Arrange
@@ -212,7 +229,7 @@ public class ServerFilterTests
         public SentryId CheckInId { get; } = SentryId.Create();
         public PerformingContext PerformingContext { get; private set; } = null!;
 
-        public SentryServerFilter GetSut(bool sendRecurringJobSchedule)
+        public SentryServerFilter GetSut(bool? sendRecurringJobSchedule = null)
         {
             Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             Connection.GetJobParameter(JobId, SentryServerFilter.SentryMonitorSlugKey)
@@ -245,8 +262,12 @@ public class ServerFilterTests
             var performContext = new PerformContext(null, Connection, backgroundJob, Substitute.For<IJobCancellationToken>());
             PerformingContext = new PerformingContext(performContext);
 
-            return new SentryServerFilter(Hub, Logger,
-                new SentryHangfireOptions { SendRecurringJobSchedule = sendRecurringJobSchedule });
+            var options = new SentryHangfireOptions();
+            if (sendRecurringJobSchedule is { } send)
+            {
+                options.SendRecurringJobSchedule = send;
+            }
+            return new SentryServerFilter(Hub, Logger, options);
         }
 
         public JsonElement? GetSentMonitorConfig() =>

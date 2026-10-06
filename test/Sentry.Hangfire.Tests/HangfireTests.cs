@@ -87,14 +87,14 @@ public class HangfireTests : IClassFixture<HangfireFixture>
         var configuration = Substitute.For<IGlobalConfiguration>();
         var existingFilters = SentryFilters().ToList();
 
-        configuration.UseSentry(options => options.SendRecurringJobSchedule = true);
+        configuration.UseSentry(options => options.SendRecurringJobSchedule = false);
 
         var addedFilters = SentryFilters().Except(existingFilters).ToList();
         foreach (var filter in addedFilters)
         {
             GlobalJobFilters.Filters.Remove(filter);
         }
-        addedFilters.Should().ContainSingle().Which.Options.SendRecurringJobSchedule.Should().BeTrue();
+        addedFilters.Should().ContainSingle().Which.Options.SendRecurringJobSchedule.Should().BeFalse();
 
         static IEnumerable<SentryServerFilter> SentryFilters() =>
             GlobalJobFilters.Filters.Select(filter => filter.Instance).OfType<SentryServerFilter>();
