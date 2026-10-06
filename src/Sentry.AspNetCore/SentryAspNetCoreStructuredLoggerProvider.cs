@@ -11,21 +11,12 @@ namespace Sentry.AspNetCore;
 internal sealed class SentryAspNetCoreStructuredLoggerProvider : SentryStructuredLoggerProvider
 {
     public SentryAspNetCoreStructuredLoggerProvider(IHub hub)
-        : this(hub, SystemClock.Clock, CreateSdkVersion())
+        : this(hub, SystemClock.Clock)
     {
     }
 
-    internal SentryAspNetCoreStructuredLoggerProvider(IHub hub, ISystemClock clock, SdkVersion sdk)
-        : base(hub, clock, sdk)
+    internal SentryAspNetCoreStructuredLoggerProvider(IHub hub, ISystemClock clock)
+        : base(hub, clock)
     {
-    }
-
-    private static SdkVersion CreateSdkVersion()
-    {
-        return new SdkVersion
-        {
-            Name = Constants.SdkName,
-            Version = SentryMiddleware.NameAndVersion.Version,
-        };
     }
 }

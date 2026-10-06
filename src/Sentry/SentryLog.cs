@@ -150,8 +150,7 @@ public sealed partial class SentryLog
     internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion? sdk = null)
     {
         // Core Attributes
-        sdk ??= scope?.Sdk ?? SdkVersion.Instance;
-        Attributes.SetDefaultAttributes(options, sdk);
+        Attributes.SetDefaultAttributes(options, scope, sdk);
 
         // Server Attributes
         if (!string.IsNullOrEmpty(options.ServerName))

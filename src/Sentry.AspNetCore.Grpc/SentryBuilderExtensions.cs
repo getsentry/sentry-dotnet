@@ -10,6 +10,8 @@ namespace Sentry.AspNetCore.Grpc;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryBuilderExtensions
 {
+    private static readonly SdkVersion NameAndVersion = typeof(SentryGrpcInterceptor).Assembly.GetNameAndVersion();
+
     /// <summary>
     /// Adds gRPC integration to Sentry
     /// </summary>
@@ -18,7 +20,7 @@ public static class SentryBuilderExtensions
     {
         _ = builder.Services
             .AddSingleton<IProtobufRequestPayloadExtractor, DefaultProtobufRequestPayloadExtractor>()
-            .AddSingleton<ISentryEventProcessor, SentryGrpcEventProcessor>();
+            .Configure<SentryAspNetCoreOptions>(options => options.SetSdk(Constants.SdkName, NameAndVersion));
 
         _ = builder.Services.AddGrpc(options =>
         {
@@ -26,28 +28,5 @@ public static class SentryBuilderExtensions
         });
 
         return builder;
-    }
-
-    private class SentryGrpcEventProcessor : ISentryEventProcessor
-    {
-        private static readonly SdkVersion NameAndVersion
-            = typeof(SentryGrpcInterceptor).Assembly.GetNameAndVersion();
-
-        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
-        private const string SdkName = "sentry.dotnet.aspnetcore.grpc";
-
-        public SentryEvent Process(SentryEvent @event)
-        {
-            // Take over the SDK name since this wraps ASP.NET Core
-            @event.Sdk.Name = SdkName;
-            @event.Sdk.Version = NameAndVersion.Version;
-
-            if (NameAndVersion.Version != null)
-            {
-                @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-            }
-
-            return @event;
-        }
     }
 }

@@ -11,21 +11,12 @@ namespace Sentry.Maui.Internal;
 internal sealed class SentryMauiStructuredLoggerProvider : SentryStructuredLoggerProvider
 {
     public SentryMauiStructuredLoggerProvider(IHub hub)
-        : this(hub, SystemClock.Clock, CreateSdkVersion())
+        : this(hub, SystemClock.Clock)
     {
     }
 
-    internal SentryMauiStructuredLoggerProvider(IHub hub, ISystemClock clock, SdkVersion sdk)
-        : base(hub, clock, sdk)
+    internal SentryMauiStructuredLoggerProvider(IHub hub, ISystemClock clock)
+        : base(hub, clock)
     {
-    }
-
-    private static SdkVersion CreateSdkVersion()
-    {
-        return new SdkVersion
-        {
-            Name = Constants.SdkName,
-            Version = Constants.SdkVersion,
-        };
     }
 }

@@ -55,6 +55,21 @@ public class GlobalSessionManagerTests
     }
 
     [Fact]
+    public void StartSession_ScopeOverridesEnvironment_UsesScopeEnvironment()
+    {
+        // Arrange
+        _fixture.Options.Environment = "default";
+        var scope = new Scope(_fixture.Options) { Environment = "override" };
+        var sut = new GlobalSessionManager(_fixture.Options, _fixture.Clock, getCurrentScope: () => scope);
+
+        // Act
+        var sessionUpdate = sut.StartSession();
+
+        // Assert
+        sessionUpdate?.Environment.Should().Be("override");
+    }
+
+    [Fact]
     public void StartSession_CacheDirectoryProvided_InstallationIdFileCreated()
     {
         // Arrange

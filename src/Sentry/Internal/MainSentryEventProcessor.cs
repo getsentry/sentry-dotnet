@@ -18,10 +18,6 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
     private readonly SentryOptions _options;
     internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
-    internal string? Release => _options.SettingLocator.GetRelease();
-
-    internal string? Distribution => _options.Distribution;
-
     public MainSentryEventProcessor(
         SentryOptions options,
         Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
@@ -80,8 +76,6 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         }
 
         @event.Level ??= SentryLevel.Error;
-        @event.Release ??= Release;
-        @event.Distribution ??= Distribution;
 
         // If there's no current thread on the event and there is no exception with a stack trace, get the current stack trace
         if (@event.Exception?.StackTrace is null && @event.SentryThreads?.Any(t => t.Current == true) != true)

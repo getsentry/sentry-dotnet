@@ -752,18 +752,17 @@ public class ScopeTests
     }
 
     [Fact]
-    public void SetEnvironment_Null_EnvironmentSetToOptionEnvironment()
+    public void SetEnvironment_Null_ClearsOverride()
     {
         // Arrange
-        const string optionsEnvironment = "production";
-        var scope = new Scope(new SentryOptions { Environment = optionsEnvironment });
-        scope.Environment = "staging"; // Override before resetting
+        var scope = new Scope(new SentryOptions { Environment = "production" });
+        scope.Environment = "staging";
 
         // Act
         scope.Environment = null;
 
         // Assert
-        scope.Environment.Should().Be(optionsEnvironment);
+        scope.Environment.Should().BeNull();
     }
 
     [Fact]
@@ -1004,8 +1003,6 @@ public static class ScopeTestExtensions
         scope.Request = new() { Data = $"{salt} request" };
         scope.Contexts.Add($"{salt} context", "{}");
         scope.User = new SentryUser() { Username = $"{salt} username" };
-        scope.Release = $"{salt} release";
-        scope.Distribution = $"{salt} distribution";
         scope.Environment = $"{salt} environment";
         scope.TransactionName = $"{salt} transaction";
         scope.Transaction = Substitute.For<ITransactionTracer>();
@@ -1022,8 +1019,6 @@ public static class ScopeTestExtensions
         source.Request.Should().BeEquivalentTo(target.Request);
         source.Contexts.Should().BeEquivalentTo(target.Contexts);
         source.User.Should().BeEquivalentTo(target.User);
-        source.Release.Should().Be(target.Release);
-        source.Distribution.Should().Be(target.Distribution);
         source.Environment.Should().Be(target.Environment);
         source.TransactionName.Should().Be(target.TransactionName);
         source.Transaction.Should().Be(target.Transaction);

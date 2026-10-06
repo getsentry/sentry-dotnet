@@ -13,7 +13,6 @@ public class SentryStructuredLoggerTests : IDisposable
         public SentryOptions Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
-        public SdkVersion Sdk { get; }
 
         public Queue<SentryLog> CapturedLogs { get; } = new();
         public InMemoryDiagnosticLogger DiagnosticLogger { get; } = new();
@@ -27,18 +26,13 @@ public class SentryStructuredLoggerTests : IDisposable
                 Environment = "my-environment",
                 Release = "my-release",
             };
+            Options.SetSdk("SDK Name", new SdkVersion { Name = "SDK Package", Version = "SDK Version" });
             SentryClientExtensions.SentryOptionsForTestingOnly = Options;
 
             CategoryName = nameof(CategoryName);
             Hub = Substitute.For<IHub>();
             Hub.SubstituteConfigureScope(new Scope(Options));
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
-            Sdk = new SdkVersion
-            {
-                Name = "SDK Name",
-                Version = "SDK Version",
-            };
-
             var logger = Substitute.For<Sentry.SentryStructuredLogger>();
             logger.CaptureLog(Arg.Do<SentryLog>(log => CapturedLogs.Enqueue(log)));
             Hub.Logger.Returns(logger);
@@ -58,7 +52,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
         public SentryStructuredLogger GetSut()
         {
-            return new SentryStructuredLogger(CategoryName, Hub, Clock, Sdk);
+            return new SentryStructuredLogger(CategoryName, Hub, Clock);
         }
     }
 
