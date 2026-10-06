@@ -5,7 +5,6 @@
     <PackageTags>$(PackageTags);Quartz;Crons</PackageTags>
     <!-- Quartz 4.x only targets net10.0 -->
     <TargetFrameworks>net10.0</TargetFrameworks>
-    <RootNamespace>Sentry.Quartz</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(EnableAot)' == 'true'">
@@ -18,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Sentry.Quartz4.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Quartz.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>
