@@ -91,4 +91,48 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
 
         _events.Should().ContainSingle().Which.Message!.Message.Should().Be("at the configured level");
     }
+
+    [Fact]
+    public void UseSentry_Default_DoesNotSendLogs()
+    {
+        var logs = LogInformation(_ => { });
+
+        logs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void UseSentry_EnableLogs_SendsLogs()
+    {
+        var logs = LogInformation(o => o.EnableLogs = true);
+
+        logs.Should().ContainSingle().Which.Message.Should().Be("message");
+    }
+
+    [Fact]
+    public void UseSentry_EnableLogsInConfiguration_SendsLogs()
+    {
+        var logs = LogInformation(_ => { }, ("Sentry:EnableLogs", "true"));
+
+        logs.Should().ContainSingle().Which.Message.Should().Be("message");
+    }
+
+    private List<SentryLog> LogInformation(
+        Action<SentryBlazorOptions> configureOptions,
+        params (string Key, string Value)[] settings)
+    {
+        var logs = new List<SentryLog>();
+        using var provider = GetSut(o =>
+        {
+            o.SetBeforeSendLog(log =>
+            {
+                logs.Add(log);
+                return null;
+            });
+            configureOptions(o);
+        }, settings);
+
+        provider.GetRequiredService<ILoggerFactory>().CreateLogger("test_category").LogInformation("message");
+
+        return logs;
+    }
 }

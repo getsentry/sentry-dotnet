@@ -21,7 +21,6 @@ internal partial class BindableSentryOptions
     public string? Distribution { get; set; }
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
-    public bool? EnableLogs { get; set; }
     public bool? EnableMetrics { get; set; }
     public int? MaxQueueItems { get; set; }
     public int? MaxCacheItems { get; set; }
@@ -76,7 +75,6 @@ internal partial class BindableSentryOptions
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
 #pragma warning disable CS0618 // Bound so existing configuration keys still resolve; the values are ignored.
-        options.EnableLogs = EnableLogs ?? options.EnableLogs;
         options.EnableMetrics = EnableMetrics ?? options.EnableMetrics;
 #pragma warning restore CS0618
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;

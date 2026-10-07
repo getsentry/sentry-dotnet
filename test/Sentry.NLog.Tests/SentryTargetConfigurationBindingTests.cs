@@ -40,6 +40,14 @@ public class SentryTargetConfigurationBindingTests
     }
 
     [Theory]
+    [InlineData("true")]
+    [InlineData("false")]
+    public void LoadConfiguration_WithEnableLogs_DoesNotThrow(string value)
+    {
+        Assert.Null(LoadConfiguration($"enableLogs='{value}'"));
+    }
+
+    [Theory]
     [InlineData(2)]
     [InlineData(3)]
     public void AddSentry_DsnOverload_InvokedByName_Throws(int parameterCount)

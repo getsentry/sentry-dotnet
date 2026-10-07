@@ -16,7 +16,7 @@ public class SentryAspNetCoreStructuredLoggerProviderTests : IDisposable
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
-            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryAspNetCoreOptions();
+            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryAspNetCoreOptions { EnableLogs = true };
             Clock = new MockClock();
 
             Hub.IsEnabled.Returns(true);
@@ -64,6 +64,17 @@ public class SentryAspNetCoreStructuredLoggerProviderTests : IDisposable
         var logger = provider.CreateLogger("CategoryName");
 
         logger.Should().BeOfType<Sentry.Extensions.Logging.SentryStructuredLogger>();
+    }
+
+    [Fact]
+    public void CreateLogger_DefaultOptions_IsNotEnabled()
+    {
+        using var hub = new Hub(new SentryAspNetCoreOptions { Dsn = ValidDsn }, Substitute.For<ISentryClient>());
+        var provider = new SentryAspNetCoreStructuredLoggerProvider(hub);
+
+        var logger = provider.CreateLogger("CategoryName");
+
+        logger.IsEnabled(LogLevel.Critical).Should().BeFalse();
     }
 
     [Fact]

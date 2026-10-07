@@ -7,11 +7,13 @@ internal class BindableSentryHostOptions : BindableSentryOptions
 {
     public LogLevel? MinimumBreadcrumbLevel { get; set; }
     public LogLevel? MinimumEventLevel { get; set; }
+    public bool? EnableLogs { get; set; }
 
     public void ApplyTo(SentryHostOptions options)
     {
         base.ApplyTo(options);
         options.MinimumBreadcrumbLevel = MinimumBreadcrumbLevel ?? options.MinimumBreadcrumbLevel;
         options.MinimumEventLevel = MinimumEventLevel ?? options.MinimumEventLevel;
+        options.LogsEnabled = EnableLogs ?? options.LogsEnabled;
     }
 }

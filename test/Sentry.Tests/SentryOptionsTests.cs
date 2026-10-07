@@ -21,20 +21,6 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
-    public void EnableLogs_IsObsoleteAndAlwaysEnabled()
-    {
-        var sut = new SentryOptions();
-
-#pragma warning disable CS0618 // Type or member is obsolete
-        sut.EnableLogs.Should().BeTrue();
-
-        sut.EnableLogs = false;
-
-        sut.EnableLogs.Should().BeTrue();
-#pragma warning restore CS0618
-    }
-
-    [Fact]
     public void RequestBodyCompressionLevel_ByDefault_Optimal()
     {
         var sut = new SentryOptions();

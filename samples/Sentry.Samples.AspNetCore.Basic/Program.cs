@@ -19,6 +19,11 @@ builder.WebHost.UseSentry(options =>
     // Configure the minimum Log Level of Breadcrumbs and Events
     options.MinimumBreadcrumbLevel = LogLevel.Information;
     options.MinimumEventLevel = LogLevel.Error;
+
+    // Also send ILogger entries to Sentry as structured logs. This is off by default.
+    // Logs sent with SentrySdk.Logger don't need this option.
+    // Configure the minimum level of structured logs in "appsettings.json" and "appsettings.{HostEnvironment}.json"
+    options.EnableLogs = true;
 });
 
 var app = builder.Build();

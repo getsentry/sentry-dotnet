@@ -24,6 +24,8 @@ public abstract class SentryHostOptions : SentryOptions
         set => Logging.MinimumEventLevel = value;
     }
 
+    internal bool LogsEnabled { get; set; }
+
     /// <summary>
     /// Add a callback to configure the scope upon SDK initialization
     /// </summary>

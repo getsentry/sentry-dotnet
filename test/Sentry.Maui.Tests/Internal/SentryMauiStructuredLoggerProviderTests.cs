@@ -17,7 +17,7 @@ public class SentryMauiStructuredLoggerProviderTests : IDisposable
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
-            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryMauiOptions();
+            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryMauiOptions { EnableLogs = true };
             Clock = new MockClock();
 
             Hub.IsEnabled.Returns(true);
@@ -65,6 +65,28 @@ public class SentryMauiStructuredLoggerProviderTests : IDisposable
         var logger = provider.CreateLogger("CategoryName");
 
         logger.Should().BeOfType<Sentry.Extensions.Logging.SentryStructuredLogger>();
+    }
+
+    [Fact]
+    public void CreateLogger_DefaultOptions_IsNotEnabled()
+    {
+        using var hub = new Hub(new SentryMauiOptions { Dsn = ValidDsn }, Substitute.For<ISentryClient>());
+        var provider = new SentryMauiStructuredLoggerProvider(hub);
+
+        var logger = provider.CreateLogger("CategoryName");
+
+        logger.IsEnabled(LogLevel.Critical).Should().BeFalse();
+    }
+
+    [Fact]
+    public void CreateLogger_EnableLogs_IsEnabled()
+    {
+        using var hub = new Hub(new SentryMauiOptions { Dsn = ValidDsn, EnableLogs = true }, Substitute.For<ISentryClient>());
+        var provider = new SentryMauiStructuredLoggerProvider(hub);
+
+        var logger = provider.CreateLogger("CategoryName");
+
+        logger.IsEnabled(LogLevel.Critical).Should().BeTrue();
     }
 
     [Fact]

@@ -133,6 +133,10 @@ public sealed partial class SentryTarget : TargetWithContext
         set => Options.MinimumBreadcrumbLevel = LogLevel.FromString(value);
     }
 
+    internal const string ObsoleteEnableLogs =
+        "The Sentry target always sends logs. This option is ignored and will be removed in a future major version. " +
+        "To drop logs, use SetBeforeSendLog on the options passed to SentrySdk.Init and return null.";
+
     /// <summary>
     /// Logs are always generated and sent.
     /// </summary>
@@ -140,7 +144,7 @@ public sealed partial class SentryTarget : TargetWithContext
     /// This option no longer has any effect. The getter always returns <see langword="true"/> and the setter is ignored.
     /// To filter or drop logs, use <see cref="SentryOptions.SetBeforeSendLog(Func{SentryLog, SentryLog})"/> and return <see langword="null"/>.
     /// </remarks>
-    [Obsolete(SentryOptions.ObsoleteEnableLogs)]
+    [Obsolete(ObsoleteEnableLogs)]
     public bool EnableLogs
     {
         get => true;

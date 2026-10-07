@@ -14,6 +14,19 @@ namespace Sentry.AspNetCore;
 public class SentryAspNetCoreOptions : SentryHostOptions
 {
     /// <summary>
+    /// Whether the <see cref="Microsoft.Extensions.Logging.ILogger"/> integration that <c>UseSentry</c> adds sends log entries to Sentry as structured logs.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see langword="false"/>, including when the app also calls <c>AddSentry()</c> on its
+    /// <see cref="Microsoft.Extensions.Logging.ILoggingBuilder"/>.
+    /// </remarks>
+    public bool EnableLogs
+    {
+        get => LogsEnabled;
+        set => LogsEnabled = value;
+    }
+
+    /// <summary>
     /// Gets or sets a value indicating whether [include System.Diagnostic.Activity data] to events.
     /// </summary>
     /// <value>
