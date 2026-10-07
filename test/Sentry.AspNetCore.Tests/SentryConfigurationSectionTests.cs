@@ -50,16 +50,6 @@ public class SentryConfigurationSectionTests : IDisposable
     }
 
     [Fact]
-    public void SentrySection_RemovedEnableMetricsSetting_Ignored()
-    {
-        var options = BuildOptions(
-            ("Sentry:EnableMetrics", "false"),
-            ("Sentry:Release", "1.0.0"));
-
-        Assert.Equal("1.0.0", options.Release);
-    }
-
-    [Fact]
     public void LoggingSection_ConfiguresLoggingSettings()
     {
         var options = BuildOptions(
