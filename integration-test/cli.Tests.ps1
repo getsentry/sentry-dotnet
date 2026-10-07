@@ -71,11 +71,23 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
             chmod +x $cliStub
         }
 
-        function BuildWithSentryCLIStub([string[]] $properties)
+        function BuildWithSentryCLIStub([string[]] $properties, [string] $extraSource)
         {
             Remove-Item $cliLog -ErrorAction SilentlyContinue
-            $output = dotnet build release-app -c Release --nologo --framework $framework /p:SentryCLI=$cliStub @properties | ForEach-Object { Write-Host "  $_"; $_ }
-            $LASTEXITCODE | Should -Be 0
+            $extraSourcePath = Join-Path $PSScriptRoot 'release-app' 'Extra.cs'
+            if ($extraSource)
+            {
+                $extraSource | Set-Content $extraSourcePath
+            }
+            try
+            {
+                $output = dotnet build release-app -c Release --nologo --framework $framework /p:SentryCLI=$cliStub @properties | ForEach-Object { Write-Host "  $_"; $_ }
+                $LASTEXITCODE | Should -Be 0
+            }
+            finally
+            {
+                Remove-Item $extraSourcePath -ErrorAction SilentlyContinue
+            }
             [pscustomobject]@{
                 Output   = $output
                 CliCalls = @(Get-Content $cliLog -ErrorAction SilentlyContinue)
@@ -99,22 +111,27 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
         $result.Output | Should -Not -AnyElementMatch 'may report .* at runtime'
     }
 
-    It "creates a release named after the assembly version when the app reads its own informational version" {
-        $versionReader = Join-Path $PSScriptRoot 'release-app' 'AppVersion.cs'
-        'public static class AppVersion { public static string? Get() => System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(typeof(AppVersion).Assembly)?.InformationalVersion; }' |
-            Set-Content $versionReader
-        try
-        {
-            $result = BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:GenerateAssemblyInformationalVersionAttribute=false', '/p:FileVersion=7.7.7.7'
-        }
-        finally
-        {
-            Remove-Item $versionReader
-        }
-        $result.CliCalls | Should -AnyElementMatch '^releases new release-app@1\.0\.0\.0\s*$'
+    It "creates a release named after a hand-written informational version that matches the file version" {
+        $result = BuildWithSentryCLIStub @('/p:SentryCreateRelease=true', '/p:GenerateAssemblyInformationalVersionAttribute=false', '/p:FileVersion=7.7.7.7') `
+            -extraSource '[assembly: System.Reflection.AssemblyInformationalVersion("7.7.7.7")]'
+        $result.CliCalls | Should -AnyElementMatch '^releases new release-app@7\.7\.7\.7\s*$'
         if ($IsWindows)
         {
-            $result.Output | Should -AnyElementMatch 'may report 7\.7\.7\.7 at runtime'
+            $result.Output | Should -AnyElementMatch 'may report 1\.0\.0\.0 at runtime'
+        }
+    }
+
+    It "warns on Windows when the app reads an informational version it doesn't have" {
+        $result = BuildWithSentryCLIStub @('/p:SentryCreateRelease=true', '/p:GenerateAssemblyInformationalVersionAttribute=false', '/p:FileVersion=7.7.7.7') `
+            -extraSource 'public static class AppVersion { public static string? Get() => System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(typeof(AppVersion).Assembly)?.InformationalVersion; }'
+        if ($IsWindows)
+        {
+            $result.CliCalls | Should -AnyElementMatch '^releases new release-app@7\.7\.7\.7\s*$'
+            $result.Output | Should -AnyElementMatch 'may report 1\.0\.0\.0 at runtime'
+        }
+        else
+        {
+            $result.CliCalls | Should -AnyElementMatch '^releases new release-app@1\.0\.0\.0\s*$'
         }
     }
 

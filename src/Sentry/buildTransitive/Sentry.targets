@@ -338,9 +338,12 @@
     {
       if (Encoding.ASCII.GetString(File.ReadAllBytes(path)).Contains("AssemblyInformationalVersionAttribute\0"))
       {
-        Log.LogWarning($"Using {assemblyVersion} for the Sentry release, but {name} may report {version} at runtime. Set SENTRY_RELEASE to choose the release explicitly.");
+        Log.LogWarning($"Using {version} for the Sentry release, but {name} may report {assemblyVersion} at runtime. Set SENTRY_RELEASE to choose the release explicitly.");
       }
-      version = null;
+      else
+      {
+        version = null;
+      }
     }
     if (string.IsNullOrWhiteSpace(version))
     {
