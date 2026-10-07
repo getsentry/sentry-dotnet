@@ -1,10 +1,11 @@
 using Sentry.Android.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.JavaSdk.Android.Core;
 
 namespace Sentry.Android;
 
-internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable
+internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable, ISdkProcessor
 {
     private readonly JavaSdk.IEventProcessor? _androidProcessor;
     private readonly JavaSdk.Hint _hint = new();

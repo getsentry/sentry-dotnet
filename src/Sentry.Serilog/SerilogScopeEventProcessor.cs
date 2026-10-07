@@ -5,7 +5,7 @@ namespace Sentry.Serilog;
 /// <summary>
 /// Sentry event processor that applies properties from the Serilog scope to Sentry events.
 /// </summary>
-internal class SerilogScopeEventProcessor : ISentryEventProcessor
+internal class SerilogScopeEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     private readonly SentryOptions _options;
 

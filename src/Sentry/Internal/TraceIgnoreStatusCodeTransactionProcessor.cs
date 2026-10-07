@@ -3,7 +3,7 @@ using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.Internal;
 
-internal class TraceIgnoreStatusCodeTransactionProcessor : ISentryTransactionProcessor
+internal class TraceIgnoreStatusCodeTransactionProcessor : ISentryTransactionProcessor, ISdkProcessor
 {
     private const string IncomingRequestOperation = "http.server";
 

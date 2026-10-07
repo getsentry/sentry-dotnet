@@ -3,7 +3,7 @@ using Sentry.Reflection;
 
 namespace Sentry.Internal;
 
-internal class MainSentryEventProcessor : ISentryEventProcessor
+internal class MainSentryEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     internal const string CultureInfoKey = "Current Culture";
     internal const string CurrentUiCultureKey = "Current UI Culture";
