@@ -309,12 +309,14 @@
   <UsingTask TaskName="SentryGetApplicationVersion" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <AssemblyPath Required="true" />
+      <HasGeneratedInformationalVersion ParameterType="System.Boolean" />
       <Release Output="true" />
     </ParameterGroup>
     <Task>
       <Using Namespace="System"/>
       <Using Namespace="System.Diagnostics"/>
       <Using Namespace="System.Reflection"/>
+      <Using Namespace="System.Runtime.InteropServices"/>
       <Code Type="Fragment" Language="cs">
         <![CDATA[
   try
@@ -331,9 +333,13 @@
     var versionInfo = FileVersionInfo.GetVersionInfo(path);
     string? version = versionInfo.ProductVersion;
     // On Windows, ProductVersion falls back to the file version when there's no informational version attribute
-    if (version == versionInfo.FileVersion && version != assemblyVersion
-        && !Encoding.ASCII.GetString(File.ReadAllBytes(path)).Contains("AssemblyInformationalVersionAttribute\0"))
+    if (!HasGeneratedInformationalVersion && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        && version == versionInfo.FileVersion && version != assemblyVersion)
     {
+      if (Encoding.ASCII.GetString(File.ReadAllBytes(path)).Contains("AssemblyInformationalVersionAttribute\0"))
+      {
+        Log.LogWarning($"Using {assemblyVersion} for the Sentry release, but {name} may report {version} at runtime. Set SENTRY_RELEASE to choose the release explicitly.");
+      }
       version = null;
     }
     if (string.IsNullOrWhiteSpace(version))
@@ -369,7 +375,11 @@
 
     <Message Importance="High" Text="Getting Sentry Release..." />
 
-    <SentryGetApplicationVersion Condition="'$(_SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
+    <PropertyGroup>
+      <_SentryHasGeneratedInformationalVersion Condition="'$(UsingMicrosoftNETSdk)' == 'true' And '$(GenerateAssemblyInfo)' != 'false' And '$(GenerateAssemblyInformationalVersionAttribute)' != 'false'">true</_SentryHasGeneratedInformationalVersion>
+    </PropertyGroup>
+
+    <SentryGetApplicationVersion Condition="'$(_SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" HasGeneratedInformationalVersion="$(_SentryHasGeneratedInformationalVersion)">
       <Output TaskParameter="Release" PropertyName="_SentryRelease" />
     </SentryGetApplicationVersion>
 

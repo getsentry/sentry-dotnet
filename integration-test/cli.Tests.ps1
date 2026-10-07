@@ -74,34 +74,57 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
         function BuildWithSentryCLIStub([string[]] $properties)
         {
             Remove-Item $cliLog -ErrorAction SilentlyContinue
-            dotnet build release-app -c Release --nologo --framework $framework /p:SentryCLI=$cliStub @properties | ForEach-Object { Write-Host "  $_" }
+            $output = dotnet build release-app -c Release --nologo --framework $framework /p:SentryCLI=$cliStub @properties | ForEach-Object { Write-Host "  $_"; $_ }
             $LASTEXITCODE | Should -Be 0
-            @(Get-Content $cliLog -ErrorAction SilentlyContinue)
+            [pscustomobject]@{
+                Output   = $output
+                CliCalls = @(Get-Content $cliLog -ErrorAction SilentlyContinue)
+            }
         }
     }
 
     It "creates a release named after the informational version" {
-        BuildWithSentryCLIStub '/p:SentryCreateRelease=true' |
+        (BuildWithSentryCLIStub '/p:SentryCreateRelease=true').CliCalls |
             Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
     }
 
     It "creates a release when MSBuild can't load the type of another assembly attribute" {
-        BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:UserSecretsId=sentry-test' |
+        (BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:UserSecretsId=sentry-test').CliCalls |
             Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
     }
 
     It "creates a release named after the assembly version when there's no informational version" {
-        BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:GenerateAssemblyInformationalVersionAttribute=false', '/p:FileVersion=7.7.7.7' |
-            Should -AnyElementMatch '^releases new release-app@1\.0\.0\.0\s*$'
+        $result = BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:GenerateAssemblyInformationalVersionAttribute=false', '/p:FileVersion=7.7.7.7'
+        $result.CliCalls | Should -AnyElementMatch '^releases new release-app@1\.0\.0\.0\s*$'
+        $result.Output | Should -Not -AnyElementMatch 'may report .* at runtime'
+    }
+
+    It "creates a release named after the assembly version when the app reads its own informational version" {
+        $versionReader = Join-Path $PSScriptRoot 'release-app' 'AppVersion.cs'
+        'public static class AppVersion { public static string? Get() => System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(typeof(AppVersion).Assembly)?.InformationalVersion; }' |
+            Set-Content $versionReader
+        try
+        {
+            $result = BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:GenerateAssemblyInformationalVersionAttribute=false', '/p:FileVersion=7.7.7.7'
+        }
+        finally
+        {
+            Remove-Item $versionReader
+        }
+        $result.CliCalls | Should -AnyElementMatch '^releases new release-app@1\.0\.0\.0\s*$'
+        if ($IsWindows)
+        {
+            $result.Output | Should -AnyElementMatch 'may report 7\.7\.7\.7 at runtime'
+        }
     }
 
     It "creates a release named after an informational version that matches the file version" {
-        BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:InformationalVersion=7.7.7.7', '/p:FileVersion=7.7.7.7' |
+        (BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:InformationalVersion=7.7.7.7', '/p:FileVersion=7.7.7.7').CliCalls |
             Should -AnyElementMatch '^releases new release-app@7\.7\.7\.7\s*$'
     }
 
     It "creates a release and sets commits when only SentrySetCommits is enabled" {
-        $calls = BuildWithSentryCLIStub '/p:SentrySetCommits=true'
+        $calls = (BuildWithSentryCLIStub '/p:SentrySetCommits=true').CliCalls
         $calls | Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
         $calls | Should -AnyElementMatch '^releases set-commits --auto release-app@1\.2\.3\+abcdef\s*$'
     }
