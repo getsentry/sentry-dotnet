@@ -1,4 +1,5 @@
 namespace Sentry.Internal;
 
-// Must not be applied to processors that run user code, such as DelegateEventProcessor.
+// Marker interface for SDK processors. 
+// Must not be applied to processors that run user code (e.g. DelegateEventProcessor)
 internal interface ISdkProcessor;
