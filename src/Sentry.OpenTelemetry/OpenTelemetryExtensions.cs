@@ -49,6 +49,16 @@ internal static class OpenTelemetryExtensions
             OtelSemanticConventions.AttributeHttpUrl // Fallback pre-1.5.0
         );
 
+    public static bool HasDbSystemAttribute(this IDictionary<string, object?> attributes) =>
+        attributes.ContainsKey(OtelSemanticConventions.AttributeDbSystemName)
+        || attributes.ContainsKey(OtelSemanticConventions.AttributeDbSystem); // Fallback pre-1.30.0
+
+    public static string? DbQueryTextAttribute(this IDictionary<string, object?> attributes) =>
+        attributes.GetFirstMatchingAttribute<string>(
+            OtelSemanticConventions.AttributeDbQueryText,
+            OtelSemanticConventions.AttributeDbStatement // Fallback pre-1.26.0
+        );
+
     public static short? HttpResponseStatusCodeAttribute(this IDictionary<string, object?> attributes)
     {
         var statusCode = attributes.GetFirstMatchingAttribute<int?>(

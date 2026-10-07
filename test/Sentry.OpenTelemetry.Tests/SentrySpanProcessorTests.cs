@@ -1052,6 +1052,49 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         source.Should().Be(TransactionNameSource.Route);
     }
 
+    [Theory]
+    [InlineData(OtelSemanticConventions.AttributeDbSystemName, OtelSemanticConventions.AttributeDbQueryText)]
+    [InlineData(OtelSemanticConventions.AttributeDbSystem, OtelSemanticConventions.AttributeDbStatement)]
+    public void ParseOtelSpanDescription_DbWithQuery_UsesQuery(string systemAttribute, string queryAttribute)
+    {
+        // Arrange
+        var data = Tracer.StartActivity("postgresql", ActivityKind.Client)!;
+        var attributes = new Dictionary<string, object>()
+        {
+            [systemAttribute] = "postgresql",
+            [queryAttribute] = "SELECT * FROM users WHERE id = $1",
+        };
+
+        // Act
+        var (operation, description, source) = SentrySpanProcessor.ParseOtelSpanDescription(data, attributes);
+
+        // Assert
+        operation.Should().Be("db");
+        description.Should().Be("SELECT * FROM users WHERE id = $1");
+        source.Should().Be(TransactionNameSource.Task);
+    }
+
+    [Theory]
+    [InlineData(OtelSemanticConventions.AttributeDbSystemName)]
+    [InlineData(OtelSemanticConventions.AttributeDbSystem)]
+    public void ParseOtelSpanDescription_DbWithoutQuery_UsesDisplayName(string systemAttribute)
+    {
+        // Arrange
+        var data = Tracer.StartActivity("CONNECT customers", ActivityKind.Client)!;
+        var attributes = new Dictionary<string, object>()
+        {
+            [systemAttribute] = "postgresql",
+        };
+
+        // Act
+        var (operation, description, source) = SentrySpanProcessor.ParseOtelSpanDescription(data, attributes);
+
+        // Assert
+        operation.Should().Be("db");
+        description.Should().Be("CONNECT customers");
+        source.Should().Be(TransactionNameSource.Task);
+    }
+
     [Fact]
     public void OnStart_WithExistingTransactionOnScope_DoesNotOverwriteExistingTransaction()
     {

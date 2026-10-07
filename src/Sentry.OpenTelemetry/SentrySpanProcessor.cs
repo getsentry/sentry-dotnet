@@ -429,12 +429,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // DB span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/database/
-        if (attributes.ContainsKey(OtelSemanticConventions.AttributeDbSystem))
+        if (attributes.HasDbSystemAttribute())
         {
-            if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeDbStatement, out string dbStatement))
+            if (attributes.DbQueryTextAttribute() is { } dbQueryText)
             {
                 // We have a database statement.  Use it.
-                return ("db", dbStatement, TransactionNameSource.Task);
+                return ("db", dbQueryText, TransactionNameSource.Task);
             }
 
             // Some other type of DB span.  Pass it through with the original name.

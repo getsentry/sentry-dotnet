@@ -130,4 +130,9 @@ internal static class OtelSemanticConventions
     public const string AttributeUrlScheme = "url.scheme"; // replaces: "http.scheme" (AttributeHttpScheme)
     public const string AttributeUrlQuery = "url.query";
     public const string AttributeUserAgentOriginal = "user_agent.original"; // replaces: "http.user_agent" (AttributeHttpUserAgent)
+
+    // v1.33.0
+    // https://github.com/open-telemetry/semantic-conventions/blob/v1.33.0/docs/database/database-spans.md
+    public const string AttributeDbQueryText = "db.query.text"; // replaces: "db.statement" (AttributeDbStatement)
+    public const string AttributeDbSystemName = "db.system.name"; // replaces: "db.system" (AttributeDbSystem)
 }
