@@ -40,6 +40,7 @@ Describe 'MSBuild app' {
             AddPackageReference msbuild-app Sentry
             Push-Location msbuild-app
             @'
+using System;
 using System.Runtime.InteropServices;
 using Sentry;
 
@@ -50,6 +51,7 @@ SentrySdk.Init(options =>
 });
 
 SentrySdk.CaptureMessage($"Hello from MSBuild app");
+SentrySdk.Flush(TimeSpan.FromSeconds(30));
 '@ | Out-File Program.cs
             Write-Host "::endgroup::"
 
