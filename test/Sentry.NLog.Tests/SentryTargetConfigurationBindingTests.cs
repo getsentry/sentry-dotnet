@@ -123,9 +123,31 @@ public class SentryTargetConfigurationBindingTests
         Assert.Single(standardError);
     }
 
+    [Fact]
+    public void EnableLogs_WhenSetToFalse_WritesMessageToStandardError()
+    {
+        var standardError = new List<string>();
+
+        Set(GetTarget(standardError), "EnableLogs", false);
+
+        Assert.Contains(SentryTarget.EnableLogsFalseIgnored, Assert.Single(standardError));
+    }
+
+    [Fact]
+    public void EnableLogs_WhenSetToTrue_WritesNothing()
+    {
+        var standardError = new List<string>();
+
+        Set(GetTarget(standardError), "EnableLogs", true);
+
+        Assert.Empty(standardError);
+    }
+
     private static SentryTarget GetTarget(List<string> standardError) =>
-        new(new SentryNLogOptions(), () => Substitute.For<IHub>(), new MockClock(),
-            new UninitializedSdkWarning { WriteToStandardError = standardError.Add });
+        new(new SentryNLogOptions(), () => Substitute.For<IHub>(), new MockClock())
+        {
+            WriteToStandardError = standardError.Add
+        };
 
     private static void Set(SentryTarget target, string property, object value) =>
         Record.Exception(() => typeof(SentryTarget).GetProperty(property)!.SetValue(target, value));
