@@ -823,9 +823,6 @@ namespace Sentry
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableBackpressureHandling { get; set; }
-        [System.Obsolete("Metrics are always enabled. This option is ignored and will be removed in version" +
-            " 7.0.0. To drop metrics, use SetBeforeSendMetric and return null.")]
-        public bool EnableMetrics { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
