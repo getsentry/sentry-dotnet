@@ -264,6 +264,19 @@ public partial class SentryTargetTests
     }
 
     [Fact]
+    public void Log_Event_ListsNLogPackage()
+    {
+        var logger = _fixture.GetLogger();
+
+        logger.Error(DefaultMessage);
+
+        var expectedVersion = typeof(SentryTarget).Assembly.GetNameAndVersion().Version;
+        _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Packages.Any(p =>
+                p.Name == "nuget:Sentry.NLog" && p.Version == expectedVersion)));
+    }
+
+    [Fact]
     public void Log_HubAccessorReturnsNull_DoesNotThrow()
     {
         _fixture.HubAccessor = () => null;

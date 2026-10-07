@@ -155,6 +155,22 @@ public partial class SentrySinkTests
     }
 
     [Fact]
+    public void Emit_Event_ListsSerilogPackage()
+    {
+        var sut = _fixture.GetSut();
+
+        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>());
+
+        sut.Emit(evt);
+
+        var expectedVersion = typeof(SentrySink).Assembly.GetNameAndVersion().Version;
+        _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Packages.Any(p =>
+                p.Name == "nuget:Sentry.Serilog" && p.Version == expectedVersion)));
+    }
+
+    [Fact]
     public void Emit_HubAccessorReturnsNull_DoesNotThrow()
     {
         _fixture.HubAccessor = () => null;

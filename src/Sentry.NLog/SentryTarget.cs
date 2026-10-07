@@ -6,6 +6,8 @@ namespace Sentry.NLog;
 [Target("Sentry")]
 public sealed partial class SentryTarget : TargetWithContext
 {
+    private static readonly SentryPackage? Package = typeof(SentryTarget).Assembly.GetNuGetPackage();
+
     // For testing:
     internal Func<IHub> HubAccessor { get; }
 
@@ -409,6 +411,11 @@ public sealed partial class SentryTarget : TargetWithContext
             Level = logEvent.Level.ToSentryLevel(),
             User = GetUser(logEvent) ?? new SentryUser(),
         };
+
+        if (Package is not null)
+        {
+            evt.Sdk.AddPackage(Package);
+        }
 
         if (Tags.Count > 0 || IncludeEventPropertiesAsTags && logEvent.HasProperties)
         {

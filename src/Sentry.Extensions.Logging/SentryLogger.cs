@@ -2,11 +2,14 @@ using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Reflection;
 
 namespace Sentry.Extensions.Logging;
 
 internal sealed class SentryLogger : ILogger
 {
+    private static readonly SentryPackage? Package = typeof(SentryLogger).Assembly.GetNuGetPackage();
+
     private readonly IHub _hub;
     private readonly ISystemClock _clock;
     private readonly SentryLoggingOptions _options;
@@ -128,6 +131,11 @@ internal sealed class SentryLogger : ILogger
             Message = message,
             Level = logLevel.ToSentryLevel(),
         };
+
+        if (Package is not null)
+        {
+            @event.Sdk.AddPackage(Package);
+        }
 
         if (state is IEnumerable<KeyValuePair<string, object>> pairs)
         {

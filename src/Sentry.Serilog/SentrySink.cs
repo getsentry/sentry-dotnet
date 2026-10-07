@@ -8,6 +8,8 @@ namespace Sentry.Serilog;
 /// <inheritdoc cref="ILogEventSink" />
 internal sealed partial class SentrySink : ILogEventSink
 {
+    private static readonly SentryPackage? Package = typeof(SentrySink).Assembly.GetNuGetPackage();
+
     private readonly SentrySerilogOptions _options;
 
     private readonly Func<IHub> _hubAccessor;
@@ -111,6 +113,11 @@ internal sealed partial class SentrySink : ILogEventSink
                 },
                 Level = logEvent.Level.ToSentryLevel()
             };
+
+            if (Package is not null)
+            {
+                evt.Sdk.AddPackage(Package);
+            }
 
             evt.SetExtras(GetLoggingEventProperties(logEvent));
 

@@ -7,6 +7,8 @@ namespace Sentry.Log4Net;
 /// </summary>
 public partial class SentryAppender : AppenderSkeleton
 {
+    private static readonly SentryPackage? Package = typeof(SentryAppender).Assembly.GetNuGetPackage();
+
     private readonly IHub _hub;
     private readonly UninitializedSdkWarning _uninitializedSdkWarning;
 
@@ -117,6 +119,11 @@ public partial class SentryAppender : AppenderSkeleton
             Logger = loggingEvent.LoggerName,
             Level = loggingEvent.ToSentryLevel()
         };
+
+        if (Package is not null)
+        {
+            evt.Sdk.AddPackage(Package);
+        }
 
         if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
         {

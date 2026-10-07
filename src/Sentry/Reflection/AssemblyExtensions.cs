@@ -24,6 +24,11 @@ public static class AssemblyExtensions
         };
     }
 
+    internal static SentryPackage? GetNuGetPackage(this Assembly assembly)
+        => assembly.GetVersion() is { } version
+            ? new SentryPackage("nuget:" + assembly.GetName().Name, version)
+            : null;
+
     internal static string? GetVersion(this Assembly assembly)
     {
         try

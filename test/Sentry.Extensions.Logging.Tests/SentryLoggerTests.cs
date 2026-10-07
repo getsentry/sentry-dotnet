@@ -301,6 +301,19 @@ public class SentryLoggerTests
             .CaptureEvent(Arg.Any<SentryEvent>());
     }
 
+    [Fact]
+    public void LogError_Event_ListsExtensionsLoggingPackage()
+    {
+        var sut = _fixture.GetSut();
+
+        sut.LogError("message");
+
+        var expectedVersion = typeof(SentryLogger).Assembly.GetNameAndVersion().Version;
+        _ = _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Packages.Any(p =>
+                p.Name == "nuget:Sentry.Extensions.Logging" && p.Version == expectedVersion)));
+    }
+
     [Theory]
     [InlineData("Sentry")]
     [InlineData("Sentry.ISentryClient")]
