@@ -309,37 +309,46 @@
   <UsingTask TaskName="SentryGetApplicationVersion" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <AssemblyPath Required="true" />
+      <HasGeneratedInformationalVersion ParameterType="System.Boolean" />
       <Release Output="true" />
     </ParameterGroup>
     <Task>
       <Using Namespace="System"/>
+      <Using Namespace="System.Diagnostics"/>
       <Using Namespace="System.Reflection"/>
+      <Using Namespace="System.Runtime.InteropServices"/>
       <Code Type="Fragment" Language="cs">
         <![CDATA[
   try
   {
 #nullable enable
-    Log.LogMessage($"Loading assembly: {AssemblyPath}");
     var path = Path.GetFullPath(AssemblyPath);
-    var assembly = Assembly.LoadFile(path);
-
-    Log.LogMessage($"Getting assembly name...");
-    var assemblyName = assembly.GetName();
+    Log.LogMessage($"Reading version information from: {path}");
+    var assemblyName = AssemblyName.GetAssemblyName(path);
     var name = assemblyName.Name;
+    var assemblyVersion = assemblyName.Version?.ToString();
     Log.LogMessage($"Assembly name: {name}");
 
-    Log.LogMessage($"Reading AssemblyInformationalVersionAttribute...");
-    string? version = null;
-    try
+    // Unlike reflection, this doesn't need to load the types of the assembly's other attributes, see #3536
+    var versionInfo = FileVersionInfo.GetVersionInfo(path);
+    string? version = versionInfo.ProductVersion;
+    // On Windows, ProductVersion falls back to the file version when there's no informational version attribute
+    if (!HasGeneratedInformationalVersion && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        && version == versionInfo.FileVersion && version != assemblyVersion)
     {
-      var infoVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-      version = infoVersionAttribute?.InformationalVersion;
+      if (Encoding.ASCII.GetString(File.ReadAllBytes(path)).Contains("AssemblyInformationalVersionAttribute\0"))
+      {
+        Log.LogWarning($"Using {version} for the Sentry release, but {name} may report {assemblyVersion} at runtime. Set SENTRY_RELEASE to choose the release explicitly.");
+      }
+      else
+      {
+        version = null;
+      }
     }
-    catch
+    if (string.IsNullOrWhiteSpace(version))
     {
-      Log.LogMessage($"Failed to read informational version attribute");
+      version = assemblyVersion;
     }
-    version ??= assemblyName.Version?.ToString();
     Log.LogMessage($"Version: {version}");
 
     Log.LogMessage($"Compiling release information...");
@@ -365,16 +374,20 @@
     <_SentryRelease Condition="'$(_SentryRelease)' == '' And '$(SENTRY_RELEASE)' != ''">$(SENTRY_RELEASE)</_SentryRelease>
   </PropertyGroup>
 
-  <Target Name="_GetSentryRelease" AfterTargets="DispatchToInnerBuilds;AfterBuild" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true'">
+  <Target Name="_GetSentryRelease" AfterTargets="PrepareSentryCLI" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true' And '$(SentryCLI)' != ''">
 
     <Message Importance="High" Text="Getting Sentry Release..." />
 
-    <SentryGetApplicationVersion Condition="'$(_SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
+    <PropertyGroup>
+      <_SentryHasGeneratedInformationalVersion Condition="'$(UsingMicrosoftNETSdk)' == 'true' And '$(GenerateAssemblyInfo)' != 'false' And '$(GenerateAssemblyInformationalVersionAttribute)' != 'false'">true</_SentryHasGeneratedInformationalVersion>
+    </PropertyGroup>
+
+    <SentryGetApplicationVersion Condition="'$(_SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" HasGeneratedInformationalVersion="$(_SentryHasGeneratedInformationalVersion)">
       <Output TaskParameter="Release" PropertyName="_SentryRelease" />
     </SentryGetApplicationVersion>
 
     <Exec ConsoleToMSBuild="true"  Condition="'$(_SentryRelease)' == ''"
-          Command="sentry-cli releases propose-version"
+          Command="$(SentryCLIBaseCommand) releases propose-version"
           IgnoreExitCode="$(SentryAllowFailure)"
           ContinueOnError="$(SentryAllowFailure)">
       <Output TaskParameter="ConsoleOutput" PropertyName="_SentryRelease"/>
