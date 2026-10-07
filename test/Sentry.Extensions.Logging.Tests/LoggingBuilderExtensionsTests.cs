@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging.Tests;
@@ -22,6 +23,19 @@ public class LoggingBuilderExtensionsTests
         providers.Should().HaveCount(2);
         providers[0].Should().BeOfType<SentryLoggerProvider>();
         providers[1].Should().BeOfType<SentryStructuredLoggerProvider>();
+    }
+
+    [Fact]
+    public void AddSentry_HostLoggerProvidersRegistered_AddsNullLoggerProviders()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton<HostLoggerProvidersMarker>();
+        serviceCollection.AddLogging(builder => builder.AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Should().HaveCount(2).And.AllBeOfType<NullLoggerProvider>();
     }
 
     [Fact]

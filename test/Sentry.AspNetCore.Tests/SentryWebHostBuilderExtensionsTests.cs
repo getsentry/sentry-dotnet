@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 
@@ -97,6 +98,25 @@ public class SentryWebHostBuilderExtensionsTests
         providers.Should().HaveCount(2);
         providers[0].Should().BeOfType<SentryAspNetCoreLoggerProvider>();
         providers[1].Should().BeOfType<SentryAspNetCoreStructuredLoggerProvider>();
+    }
+
+    [Fact]
+    public void UseSentry_WithLoggingAddSentry_LoggingAddSentryProvidersDisabled()
+    {
+        Services.AddLogging(logging => logging.AddSentry());
+        WebHostBuilder.UseSentry((SentryAspNetCoreOptions options) =>
+        {
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
+        });
+        using var serviceProvider = Services.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Select(p => p.GetType()).Should().Equal(
+            typeof(NullLoggerProvider),
+            typeof(NullLoggerProvider),
+            typeof(SentryAspNetCoreLoggerProvider),
+            typeof(SentryAspNetCoreStructuredLoggerProvider));
     }
 
     [Fact]

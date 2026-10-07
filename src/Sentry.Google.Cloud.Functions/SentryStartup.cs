@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry;
@@ -63,6 +64,7 @@ public class SentryStartup : FunctionsStartup
 
         logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
         logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
+        logging.Services.TryAddSingleton<HostLoggerProvidersMarker>();
 
         // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
         logging.AddFilter<SentryAspNetCoreLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>

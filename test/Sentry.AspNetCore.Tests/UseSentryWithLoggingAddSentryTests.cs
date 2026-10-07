@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sentry.Extensions.Logging;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -11,9 +12,13 @@ namespace Sentry.AspNetCore.Tests;
 [Collection(nameof(SentrySdkCollection))]
 public class UseSentryWithLoggingAddSentryTests : IDisposable
 {
+    private readonly List<SentryEvent> _events = new();
+    private readonly List<SentryLog> _logs = new();
+    private readonly InMemoryDiagnosticLogger _diagnosticLogger = new();
+
     public void Dispose() => SentrySdk.Close();
 
-    private static IHub BuildHub(bool useSentryFirst)
+    private WebApplication Build(bool useSentryFirst, bool enableLogs = false)
     {
         var builder = WebApplication.CreateBuilder();
 
@@ -23,6 +28,19 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
             options.BackgroundWorker = Substitute.For<IBackgroundWorker>();
             options.AutoSessionTracking = false;
             options.InitNativeSdks = false;
+            options.Debug = true;
+            options.DiagnosticLogger = _diagnosticLogger;
+            options.EnableLogs = enableLogs;
+            options.SetBeforeSend((e, _) =>
+            {
+                _events.Add(e);
+                return null;
+            });
+            options.SetBeforeSendLog(log =>
+            {
+                _logs.Add(log);
+                return null;
+            });
         });
 
         if (useSentryFirst)
@@ -36,14 +54,60 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
             UseSentry();
         }
 
-        using var app = builder.Build();
-        return app.Services.GetRequiredService<IHub>();
+        return builder.Build();
     }
+
+    private static ILogger CreateLogger(WebApplication app)
+        => app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("test_category");
 
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public void UseSentry_WithLoggingAddSentry_InitializesSdk(bool useSentryFirst)
-        => Assert.True(BuildHub(useSentryFirst).IsEnabled);
+    {
+        using var app = Build(useSentryFirst);
+
+        Assert.True(app.Services.GetRequiredService<IHub>().IsEnabled);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void UseSentry_WithLoggingAddSentry_CapturesEventAndBreadcrumbOnce(bool useSentryFirst)
+    {
+        using var app = Build(useSentryFirst);
+        var logger = CreateLogger(app);
+
+        logger.LogInformation("breadcrumb");
+        logger.LogError("event");
+
+        _events.Should().ContainSingle()
+            .Which.Breadcrumbs.Should().ContainSingle(b => b.Message == "breadcrumb");
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void UseSentry_WithLoggingAddSentryAndEnableLogs_SendsLogOnce(bool useSentryFirst)
+    {
+        using var app = Build(useSentryFirst, enableLogs: true);
+
+        CreateLogger(app).LogWarning("log");
+
+        _logs.Should().ContainSingle();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void UseSentry_WithLoggingAddSentry_WarnsCallIsRedundant(bool useSentryFirst)
+    {
+        using var app = Build(useSentryFirst);
+
+        _ = app.Services.GetRequiredService<ILoggerFactory>();
+
+        _diagnosticLogger.Entries.Should().ContainSingle(e =>
+            e.Level == SentryLevel.Warning && e.Message == SentryLoggingOptions.RedundantWithHostIntegration);
+    }
 }
 #endif
