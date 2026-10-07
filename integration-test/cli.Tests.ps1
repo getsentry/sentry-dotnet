@@ -90,6 +90,16 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
             Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
     }
 
+    It "creates a release named after the assembly version when there's no informational version" {
+        BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:GenerateAssemblyInformationalVersionAttribute=false', '/p:FileVersion=7.7.7.7' |
+            Should -AnyElementMatch '^releases new release-app@1\.0\.0\.0\s*$'
+    }
+
+    It "creates a release named after an informational version that matches the file version" {
+        BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:InformationalVersion=7.7.7.7', '/p:FileVersion=7.7.7.7' |
+            Should -AnyElementMatch '^releases new release-app@7\.7\.7\.7\s*$'
+    }
+
     It "creates a release and sets commits when only SentrySetCommits is enabled" {
         $calls = BuildWithSentryCLIStub '/p:SentrySetCommits=true'
         $calls | Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'

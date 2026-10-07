@@ -324,13 +324,21 @@
     Log.LogMessage($"Reading version information from: {path}");
     var assemblyName = AssemblyName.GetAssemblyName(path);
     var name = assemblyName.Name;
+    var assemblyVersion = assemblyName.Version?.ToString();
     Log.LogMessage($"Assembly name: {name}");
 
     // Unlike reflection, this doesn't need to load the types of the assembly's other attributes, see #3536
-    var version = FileVersionInfo.GetVersionInfo(path).ProductVersion;
+    var versionInfo = FileVersionInfo.GetVersionInfo(path);
+    string? version = versionInfo.ProductVersion;
+    // On Windows, ProductVersion falls back to the file version when there's no informational version attribute
+    if (version == versionInfo.FileVersion && version != assemblyVersion
+        && !Encoding.ASCII.GetString(File.ReadAllBytes(path)).Contains("AssemblyInformationalVersionAttribute\0"))
+    {
+      version = null;
+    }
     if (string.IsNullOrWhiteSpace(version))
     {
-      version = assemblyName.Version?.ToString();
+      version = assemblyVersion;
     }
     Log.LogMessage($"Version: {version}");
 
@@ -357,7 +365,7 @@
     <_SentryRelease Condition="'$(_SentryRelease)' == '' And '$(SENTRY_RELEASE)' != ''">$(SENTRY_RELEASE)</_SentryRelease>
   </PropertyGroup>
 
-  <Target Name="_GetSentryRelease" AfterTargets="PrepareSentryCLI" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true'">
+  <Target Name="_GetSentryRelease" AfterTargets="PrepareSentryCLI" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true' And '$(SentryCLI)' != ''">
 
     <Message Importance="High" Text="Getting Sentry Release..." />
 
@@ -365,7 +373,7 @@
       <Output TaskParameter="Release" PropertyName="_SentryRelease" />
     </SentryGetApplicationVersion>
 
-    <Exec ConsoleToMSBuild="true"  Condition="'$(_SentryRelease)' == '' And '$(SentryCLI)' != ''"
+    <Exec ConsoleToMSBuild="true"  Condition="'$(_SentryRelease)' == ''"
           Command="$(SentryCLIBaseCommand) releases propose-version"
           IgnoreExitCode="$(SentryAllowFailure)"
           ContinueOnError="$(SentryAllowFailure)">
