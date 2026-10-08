@@ -152,6 +152,10 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, string name, string operation, string? description) { }
         public static void UnlockScope(this Sentry.IHub hub) { }
+        public static void WithMonitor(this Sentry.IHub hub, string monitorSlug, System.Action job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static System.Threading.Tasks.Task WithMonitor(this Sentry.IHub hub, string monitorSlug, System.Func<System.Threading.Tasks.Task> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static System.Threading.Tasks.Task<T> WithMonitor<T>(this Sentry.IHub hub, string monitorSlug, System.Func<System.Threading.Tasks.Task<T>> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static T WithMonitor<T>(this Sentry.IHub hub, string monitorSlug, System.Func<T> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
     }
     public interface IAttachmentContent
     {
@@ -1017,6 +1021,10 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
         public static void UnsetTag(string key) { }
+        public static void WithMonitor(string monitorSlug, System.Action job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static System.Threading.Tasks.Task WithMonitor(string monitorSlug, System.Func<System.Threading.Tasks.Task> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static System.Threading.Tasks.Task<T> WithMonitor<T>(string monitorSlug, System.Func<System.Threading.Tasks.Task<T>> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static T WithMonitor<T>(string monitorSlug, System.Func<T> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
     }
     public class SentrySession : Sentry.ISentrySession
     {
