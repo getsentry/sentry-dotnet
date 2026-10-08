@@ -81,6 +81,19 @@ public partial class SentryAppenderTests : IDisposable
     }
 
     [Fact]
+    public void Append_Event_ListsLog4NetPackage()
+    {
+        var sut = _fixture.GetSut();
+
+        sut.DoAppend(new LoggingEvent(new LoggingEventData()));
+
+        var expectedVersion = typeof(SentryAppender).Assembly.GetNameAndVersion().Version;
+        _ = _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Packages.Any(p =>
+                p.Name == "nuget:Sentry.Log4Net" && p.Version == expectedVersion)));
+    }
+
+    [Fact]
     public void Append_NullEvent_NoOp()
     {
         var sut = _fixture.GetSut();
