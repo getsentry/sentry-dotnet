@@ -15,9 +15,6 @@ internal sealed class JobMonitor
     private readonly IDiagnosticLogger? _logger;
 
     // The job each slug was first used by: its key, or its type when it has no identity
-    private readonly ConcurrentDictionary<string, string> _slugOwners = new();
-    private readonly ConcurrentDictionary<string, byte> _sharedSlugs = new();
-    private readonly ConcurrentDictionary<Type, byte> _jobTypesWithoutIdentity = new();
 
     public JobMonitor(SentryQuartzOptions options, IHub hub, IDiagnosticLogger? logger = null)
     {
@@ -100,6 +97,8 @@ internal sealed class JobMonitor
             }
             catch (Exception e)
             {
+                // Don't send whatever the callback set before it threw
+                monitorOptions = new SentryMonitorOptions();
                 Logger?.LogError(e, "ConfigureMonitorOptions threw for job '{0}'.", context.JobDetail.Key);
             }
         }
@@ -153,20 +152,11 @@ internal sealed class JobMonitor
             return null;
         }
 
-        if (fromJobType && _jobTypesWithoutIdentity.TryAdd(jobType, 0))
+        if (fromJobType)
         {
-            Logger?.LogWarning("Job `{0}` has no identity, so its monitor slug is `{1}`. Give the job an identity " +
-                               "(WithIdentity(...)) or set a slug ([SentryCronMonitorSlug(\"…\")]) to keep the monitor stable.",
+            Logger?.LogDebug("Job `{0}` has no identity, so its monitor slug is `{1}`. Give the job an identity " +
+                             "(WithIdentity(...)) or set a slug ([SentryCronMonitorSlug(\"…\")]) to keep the monitor stable.",
                 jobType.FullName, monitorSlug);
-        }
-
-        var key = context.JobDetail.Key;
-        var owner = HasIdentity(key) ? key.ToString() : jobType.FullName ?? jobType.Name;
-        var firstOwner = _slugOwners.GetOrAdd(monitorSlug, owner);
-        if (firstOwner != owner && _sharedSlugs.TryAdd(monitorSlug, 0))
-        {
-            Logger?.LogWarning("Jobs '{0}' and '{1}' both use the monitor slug '{2}', so their check-ins go to the same " +
-                               "monitor. Give each job its own identity or slug.", firstOwner, owner, monitorSlug);
         }
 
         return monitorSlug;

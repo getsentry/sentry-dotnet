@@ -218,6 +218,26 @@ public class JobMonitorTests
     }
 
     [Fact]
+    public async Task StartAsync_ConfigureMonitorOptionsThrowsAfterSettingSchedule_SendsTriggerSchedule()
+    {
+        // Arrange
+        _fixture.Options.ConfigureMonitorOptions = (_, options) =>
+        {
+            options.Interval(1, SentryMonitorInterval.Day);
+            options.FailureIssueThreshold = 3;
+            throw new InvalidOperationException("Callback failed");
+        };
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        var monitorConfig = MonitorConfigJson.Render(_fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail")!);
+        monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 12 * * *");
+        monitorConfig.TryGetProperty("failure_issue_threshold", out _).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task StartAsync_InProgressCheckInNotCaptured_KeepsItsId()
     {
         // Arrange
@@ -322,7 +342,7 @@ public class JobMonitorTests
     }
 
     [Fact]
-    public async Task StartAsync_JobWithoutIdentity_UsesClassNameAndWarnsOnce()
+    public async Task StartAsync_JobWithoutIdentity_UsesClassNameAndLogs()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -338,47 +358,11 @@ public class JobMonitorTests
         // Assert
         firstCheckIn!.MonitorSlug.Should().Be("monitoredjob");
         secondCheckIn!.MonitorSlug.Should().Be("monitoredjob");
-        var warning = _fixture.Logger.Entries.Should().ContainSingle(e => e.Level == SentryLevel.Warning).Subject;
-        string.Format(warning.Message, warning.Args).Should().Be(
+        var entries = _fixture.Logger.Entries.Where(e => e.Message.Contains("has no identity")).ToList();
+        entries.Should().HaveCount(2).And.OnlyContain(e => e.Level == SentryLevel.Debug);
+        string.Format(entries[0].Message, entries[0].Args).Should().Be(
             $"Job `{typeof(MonitoredJob).FullName}` has no identity, so its monitor slug is `monitoredjob`. Give the job " +
             "an identity (WithIdentity(...)) or set a slug ([SentryCronMonitorSlug(\"…\")]) to keep the monitor stable.");
-    }
-
-    [Fact]
-    public async Task StartAsync_TwoJobsWithSameSlug_WarnsOnce()
-    {
-        // Arrange
-        var sut = _fixture.GetSut();
-        var contexts = new List<IJobExecutionContext>();
-        foreach (var group in new[] { "a", "b", "b" })
-        {
-            _fixture.JobDetail = JobBuilder.Create<CustomSlugJob>().WithIdentity("Job", group).Build();
-            contexts.Add(_fixture.GetContext());
-        }
-
-        // Act
-        foreach (var context in contexts)
-        {
-            await sut.StartAsync(context, CancellationToken.None);
-        }
-
-        // Assert
-        var warning = _fixture.Logger.Entries.Should().ContainSingle(e => e.Level == SentryLevel.Warning).Subject;
-        warning.Args.Should().Equal("a.Job", "b.Job", "custom-slug");
-    }
-
-    [Fact]
-    public async Task StartAsync_SameJobAgain_DoesNotWarn()
-    {
-        // Arrange
-        var sut = _fixture.GetSut();
-
-        // Act
-        await sut.StartAsync(_fixture.GetContext(), CancellationToken.None);
-        await sut.StartAsync(_fixture.GetContext(), CancellationToken.None);
-
-        // Assert
-        _fixture.Logger.Entries.Should().NotContain(e => e.Level == SentryLevel.Warning);
     }
 
     [Fact]
