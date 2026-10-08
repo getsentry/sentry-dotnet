@@ -26,9 +26,16 @@ public class HangfireFixture : IDisposable
         _monitoringApi = JobStorage.Current.GetMonitoringApi();
     }
 
-    public Task Enqueue<T>(Expression<Action<T>> methodCall)
+    public Task Enqueue<T>(Expression<Action<T>> methodCall) => WaitForJob(BackgroundJob.Enqueue(methodCall));
+
+    public Task TriggerRecurringJob<T>(string recurringJobId, Expression<Action<T>> methodCall, string cron, TimeZoneInfo timeZone)
     {
-        var jobId = BackgroundJob.Enqueue(methodCall);
+        RecurringJob.AddOrUpdate(recurringJobId, methodCall, cron, new RecurringJobOptions { TimeZone = timeZone });
+        return WaitForJob(RecurringJob.TriggerJob(recurringJobId));
+    }
+
+    private Task WaitForJob(string jobId)
+    {
         var checkJobState = Task.Run(() =>
         {
             while (true)
