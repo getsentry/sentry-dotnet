@@ -16,6 +16,11 @@ public class SentryLoggingOptions
         "supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and " +
         "remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.";
 
+    internal const string RedundantWithHostIntegration =
+        "Logging.AddSentry() is redundant because the host integration, such as UseSentry, already adds Sentry's " +
+        "logger providers. Its providers are disabled and its options ignored: remove the call and configure " +
+        "logging through the host's Sentry options.";
+
     /// <summary>
     /// Not supported. The logging integration no longer initializes the SDK.
     /// </summary>

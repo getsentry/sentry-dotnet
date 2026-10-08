@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sentry.Internal.Http;
 using Sentry.Maui.Internal;
@@ -435,6 +436,27 @@ public partial class SentryMauiAppBuilderExtensionsTests
         providers.Should().HaveCount(2);
         providers[0].Should().BeOfType<SentryMauiLoggerProvider>();
         providers[1].Should().BeOfType<SentryMauiStructuredLoggerProvider>();
+    }
+
+    [Fact]
+    public void UseSentry_WithLoggingAddSentry_LoggingAddSentryProvidersDisabled()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.Logging.AddSentry();
+        builder.UseSentry();
+
+        using var serviceProvider = builder.Services.BuildServiceProvider();
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        // Assert
+        providers.Select(p => p.GetType()).Should().Equal(
+            typeof(NullLoggerProvider),
+            typeof(NullLoggerProvider),
+            typeof(SentryMauiLoggerProvider),
+            typeof(SentryMauiStructuredLoggerProvider));
     }
 
     [Fact]

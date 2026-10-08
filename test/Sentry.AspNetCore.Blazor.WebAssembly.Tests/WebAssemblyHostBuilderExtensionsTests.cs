@@ -10,6 +10,7 @@ namespace Sentry.AspNetCore.Blazor.WebAssembly.Tests;
 public class WebAssemblyHostBuilderExtensionsTests : IDisposable
 {
     private readonly List<SentryEvent> _events = new();
+    private bool _alsoCallLoggingAddSentry;
 
     public void Dispose() => SentrySdk.Close();
 
@@ -34,6 +35,10 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
             });
             configureOptions(o);
         }));
+        if (_alsoCallLoggingAddSentry)
+        {
+            services.AddLogging(logging => logging.AddSentry());
+        }
         return services.BuildServiceProvider();
     }
 
@@ -114,6 +119,28 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
         var logs = LogInformation(_ => { }, ("Sentry:EnableLogs", "true"));
 
         logs.Should().ContainSingle().Which.Message.Should().Be("message");
+    }
+
+    [Fact]
+    public void UseSentry_WithLoggingAddSentry_CapturesEventOnce()
+    {
+        _alsoCallLoggingAddSentry = true;
+        using var provider = GetSut(_ => { });
+        var logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger("test_category");
+
+        logger.LogError("message");
+
+        _events.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void UseSentry_WithLoggingAddSentryAndEnableLogs_SendsLogOnce()
+    {
+        _alsoCallLoggingAddSentry = true;
+
+        var logs = LogInformation(o => o.EnableLogs = true);
+
+        logs.Should().ContainSingle();
     }
 
     private List<SentryLog> LogInformation(

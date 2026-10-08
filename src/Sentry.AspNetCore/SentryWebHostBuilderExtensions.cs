@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
@@ -93,6 +94,7 @@ public static class SentryWebHostBuilderExtensions
             );
             _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
             _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
+            logging.Services.TryAddSingleton<HostLoggerProvidersMarker>();
 
             // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
             _ = logging.AddFilter<SentryAspNetCoreLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
