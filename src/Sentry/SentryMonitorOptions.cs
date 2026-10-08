@@ -74,6 +74,8 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
     private int? _interval;
     private SentryMonitorInterval? _unit;
 
+    internal bool HasSchedule => _type is not SentryMonitorScheduleType.None;
+
 #if NET9_0_OR_GREATER
     [GeneratedRegex(ValidCrontabPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
     private static partial Regex ValidCrontab { get; }
