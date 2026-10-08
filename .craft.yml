@@ -91,3 +91,7 @@ targets:
         name: Sentry.Quartz
         packageUrl: https://www.nuget.org/packages/Sentry.Quartz
         mainDocsUrl: https://docs.sentry.io/platforms/dotnet/crons/quartz/
+      nuget:Sentry.Quartz3:
+        name: Sentry.Quartz3
+        packageUrl: https://www.nuget.org/packages/Sentry.Quartz3
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/crons/quartz/

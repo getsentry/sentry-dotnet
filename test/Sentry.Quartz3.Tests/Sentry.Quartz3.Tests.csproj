@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(CurrentTfms)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Sentry.Quartz.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <!-- The tests of the core shared with Sentry.Quartz -->
+  <ItemGroup>
+    <Compile Include="..\Sentry.Quartz.Tests\Core\**\*.cs" Link="Core\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Quartz3\Sentry.Quartz3.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Quartz" />
+  </ItemGroup>
+
+</Project>
