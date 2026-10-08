@@ -38,7 +38,7 @@ public class SentryCronJobMiddlewareTests
 
         // Assert
         _hub.ReceivedConfigureMonitorOptions("cleanup").Should().NotBeNull();
-        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Ok, _checkInId, Arg.Any<TimeSpan?>());
+        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Ok, _hub.ReceivedInProgressCheckInId("cleanup"), Arg.Any<TimeSpan?>());
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class SentryCronJobMiddlewareTests
 
         // Assert
         (await act.Should().ThrowAsync<InvalidOperationException>()).Which.Should().BeSameAs(exception);
-        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Error, _checkInId, Arg.Any<TimeSpan?>());
+        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Error, _hub.ReceivedInProgressCheckInId("cleanup"), Arg.Any<TimeSpan?>());
     }
 
     [Fact]
@@ -65,7 +65,22 @@ public class SentryCronJobMiddlewareTests
         await GetSut().Invoke(MiddlewareTestHelpers.CreateContext<MonitoredJob>(cancelled), MiddlewareTestHelpers.Next(), cancelled);
 
         // Assert
-        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Error, _checkInId, Arg.Any<TimeSpan?>());
+        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Error, _hub.ReceivedInProgressCheckInId("cleanup"), Arg.Any<TimeSpan?>());
+    }
+
+    [Fact]
+    public async Task Invoke_InProgressCheckInNotCaptured_FinishesWithSameNonEmptyId()
+    {
+        // Arrange
+        _hub.CaptureCheckIn(default!, default, default, default, default, default).ReturnsForAnyArgs(SentryId.Empty);
+
+        // Act
+        await GetSut().Invoke(MiddlewareTestHelpers.CreateContext<MonitoredJob>(), MiddlewareTestHelpers.Next(), CancellationToken.None);
+
+        // Assert
+        var checkInId = _hub.ReceivedInProgressCheckInId("cleanup");
+        checkInId.Should().NotBeNull().And.NotBe(SentryId.Empty);
+        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Ok, checkInId, Arg.Any<TimeSpan?>());
     }
 
     [Fact]

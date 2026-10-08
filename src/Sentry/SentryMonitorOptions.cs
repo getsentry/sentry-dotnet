@@ -183,6 +183,21 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
 
     internal SentryMonitorOptions() { }
 
+    // For integrations that configure the options before capturing the check-in
+    internal void CopyTo(SentryMonitorOptions target)
+    {
+        target._type = _type;
+        target._crontab = _crontab;
+        target._interval = _interval;
+        target._unit = _unit;
+        target.CheckInMargin = CheckInMargin;
+        target.MaxRuntime = MaxRuntime;
+        target._failureIssueThreshold = _failureIssueThreshold;
+        target._recoveryThreshold = _recoveryThreshold;
+        target.TimeZone = TimeZone;
+        target.Owner = Owner;
+    }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {

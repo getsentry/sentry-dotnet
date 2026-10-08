@@ -33,8 +33,14 @@ public class SentryQuartzOptions
     /// Configures the monitor config of a job, for example its thresholds or <see cref="SentryMonitorOptions.MaxRuntime"/>.
     /// </summary>
     /// <remarks>
-    /// Called whenever a monitor config is sent, before the trigger's schedule is applied. A schedule or time zone set
-    /// here is used instead of the trigger's.
+    /// <para>
+    /// Called with the context of each run before its in-progress check-in, while <see cref="SendMonitorConfig"/> is
+    /// enabled. A schedule set here is sent instead of the trigger's, and a time zone set here instead of the
+    /// trigger's. Exceptions thrown here are logged.
+    /// </para>
+    /// <para>
+    /// The monitor config is only sent when it has a schedule, from the trigger or set here.
+    /// </para>
     /// </remarks>
-    public Action<IJobDetail, SentryMonitorOptions>? ConfigureMonitorOptions { get; set; }
+    public Action<IJobExecutionContext, SentryMonitorOptions>? ConfigureMonitorOptions { get; set; }
 }

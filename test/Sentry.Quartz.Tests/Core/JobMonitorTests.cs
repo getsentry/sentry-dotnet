@@ -6,7 +6,8 @@ public class JobMonitorTests
     {
         public IHub Hub { get; } = Substitute.For<IHub>();
         public IScheduler Scheduler { get; } = Substitute.For<IScheduler>();
-        public SentryId CheckInId { get; } = SentryId.Create();
+        public InMemoryDiagnosticLogger Logger { get; } = new();
+        public SentryId CheckInId { get; set; } = SentryId.Create();
         public SentryQuartzOptions Options { get; } = new();
         public int TriggerCount { get; set; } = 1;
 
@@ -21,7 +22,7 @@ public class JobMonitorTests
         public JobMonitor GetSut()
         {
             Hub.CaptureCheckIn(default!, default, default, default, default, default).ReturnsForAnyArgs(CheckInId);
-            return new JobMonitor(Options, Hub);
+            return new JobMonitor(Options, Hub, Logger);
         }
 
         public IJobExecutionContext GetContext()
@@ -55,7 +56,8 @@ public class JobMonitorTests
 
         // Assert
         checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
-        checkIn.Id.Should().Be(_fixture.CheckInId);
+        checkIn.Id.Should().NotBe(SentryId.Empty);
+        _fixture.Hub.ReceivedInProgressCheckInId("reports-dailyemail").Should().Be(checkIn.Id);
         var monitorConfig = MonitorConfigJson.Render(_fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail")!);
         monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 12 * * *");
         monitorConfig.GetProperty("timezone").GetString().Should().Be("UTC");
@@ -167,10 +169,10 @@ public class JobMonitorTests
     public async Task StartAsync_ConfigureMonitorOptions_RunsBeforeTriggerSchedule()
     {
         // Arrange
-        IJobDetail? receivedJobDetail = null;
-        _fixture.Options.ConfigureMonitorOptions = (jobDetail, options) =>
+        IJobExecutionContext? receivedContext = null;
+        _fixture.Options.ConfigureMonitorOptions = (context, options) =>
         {
-            receivedJobDetail = jobDetail;
+            receivedContext = context;
             options.FailureIssueThreshold = 3;
             options.TimeZone = "Europe/Vienna";
         };
@@ -180,7 +182,7 @@ public class JobMonitorTests
 
         // Assert
         var monitorConfig = MonitorConfigJson.Render(_fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail")!);
-        receivedJobDetail.Should().BeSameAs(_fixture.JobDetail);
+        receivedContext!.JobDetail.Should().BeSameAs(_fixture.JobDetail);
         monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 12 * * *");
         monitorConfig.GetProperty("timezone").GetString().Should().Be("Europe/Vienna");
         monitorConfig.GetProperty("failure_issue_threshold").GetInt32().Should().Be(3);
@@ -213,6 +215,185 @@ public class JobMonitorTests
         // Assert
         var monitorConfig = MonitorConfigJson.Render(_fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail")!);
         monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 12 * * *");
+    }
+
+    [Fact]
+    public async Task StartAsync_InProgressCheckInNotCaptured_KeepsItsId()
+    {
+        // Arrange
+        _fixture.CheckInId = SentryId.Empty;
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.Id.Should().NotBe(SentryId.Empty);
+        _fixture.Hub.ReceivedInProgressCheckInId("reports-dailyemail").Should().Be(checkIn.Id);
+    }
+
+    [Fact]
+    public async Task StartAsync_InProgressCheckInThrows_StillReturnsCheckIn()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        _fixture.Hub.CaptureCheckIn(default!, default, default, default, default, default)
+            .ThrowsForAnyArgs(new InvalidOperationException("Hub failed"));
+
+        // Act
+        var checkIn = await sut.StartAsync(_fixture.GetContext(), CancellationToken.None);
+
+        // Assert
+        checkIn!.Id.Should().NotBe(SentryId.Empty);
+    }
+
+    [Fact]
+    public async Task StartAsync_ConfigureMonitorOptionsWithUnconvertibleTrigger_RunsCallback()
+    {
+        // Arrange
+        _fixture.Trigger = TriggerBuilder.Create()
+            .WithCronSchedule("0 0 12 L * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
+            .Build();
+        var called = false;
+        _fixture.Options.ConfigureMonitorOptions = (_, _) => called = true;
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        called.Should().BeTrue();
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_ConfigureMonitorOptionsSetsScheduleForUnconvertibleTrigger_SendsThatSchedule()
+    {
+        // Arrange
+        _fixture.Trigger = TriggerBuilder.Create()
+            .WithCronSchedule("0 0 12 L * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
+            .Build();
+        _fixture.Options.ConfigureMonitorOptions = (_, options) =>
+        {
+            options.Interval("0 12 28-31 * *");
+            options.TimeZone = "Europe/Vienna";
+        };
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        var monitorConfig = MonitorConfigJson.Render(_fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail")!);
+        monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 12 28-31 * *");
+        monitorConfig.GetProperty("timezone").GetString().Should().Be("Europe/Vienna");
+    }
+
+    [Fact]
+    public async Task StartAsync_ConfigureMonitorOptionsWithoutAnySchedule_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        _fixture.Trigger = TriggerBuilder.Create()
+            .WithCronSchedule("0 0 12 L * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
+            .Build();
+        _fixture.Options.ConfigureMonitorOptions = (_, options) =>
+        {
+            options.FailureIssueThreshold = 3;
+            options.RecoveryThreshold = 2;
+        };
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_SendMonitorConfigDisabled_DoesNotRunCallback()
+    {
+        // Arrange
+        _fixture.Options.SendMonitorConfig = false;
+        var called = false;
+        _fixture.Options.ConfigureMonitorOptions = (_, _) => called = true;
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        called.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task StartAsync_JobWithoutIdentity_UsesClassNameAndWarnsOnce()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        _fixture.JobDetail = JobBuilder.Create<MonitoredJob>().Build();
+        var first = _fixture.GetContext();
+        _fixture.JobDetail = JobBuilder.Create<MonitoredJob>().Build();
+        var second = _fixture.GetContext();
+
+        // Act
+        var firstCheckIn = await sut.StartAsync(first, CancellationToken.None);
+        var secondCheckIn = await sut.StartAsync(second, CancellationToken.None);
+
+        // Assert
+        firstCheckIn!.MonitorSlug.Should().Be("monitoredjob");
+        secondCheckIn!.MonitorSlug.Should().Be("monitoredjob");
+        var warning = _fixture.Logger.Entries.Should().ContainSingle(e => e.Level == SentryLevel.Warning).Subject;
+        string.Format(warning.Message, warning.Args).Should().Be(
+            $"Job `{typeof(MonitoredJob).FullName}` has no identity, so its monitor slug is `monitoredjob`. Give the job " +
+            "an identity (WithIdentity(...)) or set a slug ([SentryCronMonitorSlug(\"…\")]) to keep the monitor stable.");
+    }
+
+    [Fact]
+    public async Task StartAsync_TwoJobsWithSameSlug_WarnsOnce()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        var contexts = new List<IJobExecutionContext>();
+        foreach (var group in new[] { "a", "b", "b" })
+        {
+            _fixture.JobDetail = JobBuilder.Create<CustomSlugJob>().WithIdentity("Job", group).Build();
+            contexts.Add(_fixture.GetContext());
+        }
+
+        // Act
+        foreach (var context in contexts)
+        {
+            await sut.StartAsync(context, CancellationToken.None);
+        }
+
+        // Assert
+        var warning = _fixture.Logger.Entries.Should().ContainSingle(e => e.Level == SentryLevel.Warning).Subject;
+        warning.Args.Should().Equal("a.Job", "b.Job", "custom-slug");
+    }
+
+    [Fact]
+    public async Task StartAsync_SameJobAgain_DoesNotWarn()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+
+        // Act
+        await sut.StartAsync(_fixture.GetContext(), CancellationToken.None);
+        await sut.StartAsync(_fixture.GetContext(), CancellationToken.None);
+
+        // Assert
+        _fixture.Logger.Entries.Should().NotContain(e => e.Level == SentryLevel.Warning);
+    }
+
+    [Fact]
+    public void Finish_HubThrows_DoesNotThrow()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        _fixture.Hub.CaptureCheckIn(default!, default, default, default, default, default)
+            .ThrowsForAnyArgs(new InvalidOperationException("Hub failed"));
+
+        // Act
+        var act = () => sut.Finish(new JobCheckIn("reports-dailyemail", SentryId.Create()), failed: false, TimeSpan.Zero);
+
+        // Assert
+        act.Should().NotThrow();
     }
 
     [Fact]
@@ -250,6 +431,9 @@ public class JobMonitorTests
     [InlineData(typeof(MonitoredJob), "Cleanup", "DEFAULT", " ", "cleanup")]
     [InlineData(typeof(CustomSlugJob), "Cleanup", "DEFAULT", null, "custom-slug")]
     [InlineData(typeof(CustomSlugJob), "Cleanup", "DEFAULT", "data-map-slug", "data-map-slug")]
+    [InlineData(typeof(MonitoredJob), "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "DEFAULT", null, "monitoredjob")]
+    [InlineData(typeof(MonitoredJob), "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "reports", null, "monitoredjob")]
+    [InlineData(typeof(CustomSlugJob), "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "DEFAULT", null, "custom-slug")]
     public void GetMonitorSlug_Job_ReturnsSlug(
         Type jobType,
         string name,

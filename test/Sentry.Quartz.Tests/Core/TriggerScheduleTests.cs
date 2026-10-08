@@ -43,7 +43,6 @@ public class TriggerScheduleTests
     [InlineData("0 0 22-2 * * ?")]
     [InlineData("0 0 5-5 * * ?")]
     [InlineData("0 0 12 ? * 7/2")]
-    [InlineData("0 0 12 * * *")]
     [InlineData("0 0 12 ? * ?")]
     [InlineData("0 60 12 * * ?")]
     [InlineData("0 0 12 ? * 0")]

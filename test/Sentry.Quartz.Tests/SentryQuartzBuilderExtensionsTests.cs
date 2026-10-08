@@ -40,11 +40,11 @@ public class SentryQuartzBuilderExtensionsTests
         var monitorConfig = MonitorConfigJson.Render(_hub.ReceivedConfigureMonitorOptions("cleanup")!);
         monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("* * * * *");
         monitorConfig.GetProperty("timezone").GetString().Should().Be("UTC");
-        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Ok, _checkInId, Arg.Any<TimeSpan?>());
+        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Ok, _hub.ReceivedInProgressCheckInId("cleanup"), Arg.Any<TimeSpan?>());
     }
 
     [Fact]
-    public async Task AddSentry_SimpleTriggerJobFails_CapturesCheckInsWithIntervalAndException()
+    public async Task AddSentry_SimpleTriggerJobFails_CapturesCheckInsWithIntervalButNotException()
     {
         // Act
         var status = await RunUntilCheckInCompletes<FailingJob>("Sync", "billing", trigger => trigger
@@ -56,7 +56,7 @@ public class SentryQuartzBuilderExtensionsTests
         var monitorConfig = MonitorConfigJson.Render(_hub.ReceivedConfigureMonitorOptions("billing-sync")!);
         monitorConfig.GetProperty("schedule").GetProperty("value").GetInt32().Should().Be(15);
         monitorConfig.GetProperty("schedule").GetProperty("unit").GetString().Should().Be("minute");
-        _hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception is InvalidOperationException));
+        _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]

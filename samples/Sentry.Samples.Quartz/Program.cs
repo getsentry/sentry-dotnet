@@ -19,13 +19,13 @@ public static class Program
 
         builder.Services.AddQuartz(quartz =>
         {
-            // Runs each job in its own scope and captures its exceptions. Jobs with [SentryCronMonitorSlug] also send
-            // check-ins, with the trigger's schedule as the monitor config.
+            // Runs each job in its own scope. Jobs with [SentryCronMonitorSlug] also send check-ins, with the
+            // trigger's schedule as the monitor config. Exceptions reach Sentry through Quartz's error log.
             quartz.AddSentry(options =>
             {
-                options.ConfigureMonitorOptions = (jobDetail, monitorOptions) =>
+                options.ConfigureMonitorOptions = (context, monitorOptions) =>
                 {
-                    if (jobDetail.Key.Name == nameof(SecondJob))
+                    if (context.JobDetail.Key.Name == nameof(SecondJob))
                     {
                         monitorOptions.FailureIssueThreshold = 10;
                         monitorOptions.RecoveryThreshold = 10;

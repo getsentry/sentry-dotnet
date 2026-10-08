@@ -90,6 +90,52 @@ public class SentryMonitorOptionsTests
         options.Interval(crontab);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CopyTo_ConfiguredOptions_CopiesEverything(bool crontab)
+    {
+        // Arrange
+        var options = new SentryMonitorOptions
+        {
+            CheckInMargin = TimeSpan.FromMinutes(1),
+            MaxRuntime = TimeSpan.FromMinutes(2),
+            FailureIssueThreshold = 3,
+            RecoveryThreshold = 4,
+            TimeZone = "Europe/Vienna",
+            Owner = "team:crons"
+        };
+        if (crontab)
+        {
+            options.Interval("0 12 * * *");
+        }
+        else
+        {
+            options.Interval(5, SentryMonitorInterval.Hour);
+        }
+
+        var target = new SentryMonitorOptions();
+
+        // Act
+        options.CopyTo(target);
+
+        // Assert
+        ToJson(target).Should().Be(ToJson(options));
+    }
+
+    private static string ToJson(SentryMonitorOptions options)
+    {
+        using var stream = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(stream))
+        {
+            writer.WriteStartObject();
+            options.WriteTo(writer, null);
+            writer.WriteEndObject();
+        }
+
+        return Encoding.UTF8.GetString(stream.ToArray());
+    }
+
     [Fact]
     public void Interval_SetMoreThanOnce_Throws()
     {

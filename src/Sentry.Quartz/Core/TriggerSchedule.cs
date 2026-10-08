@@ -37,7 +37,7 @@ internal static class TriggerSchedule
         }
     }
 
-    // Quartz has a seconds field, an optional year field, '?' for the unused day field, and numbers days of the week
+    // Quartz has a seconds field, an optional year field, '?' for an unused day field, and numbers days of the week
     // 1 (SUN) to 7 (SAT). Only expressions whose fields mean the same in Sentry's crontab are converted.
     internal static string? ToCrontab(string? cronExpression)
     {
@@ -49,22 +49,58 @@ internal static class TriggerSchedule
         var fields = cronExpression!.ToUpperInvariant().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
         if (fields.Length is < 6 or > 7
             || !TryParseNumber(fields[0], 0, 59, out _)
-            || (fields.Length == 7 && fields[6] != "*")
-            || (fields[3] == "?") == (fields[5] == "?"))
+            || (fields.Length == 7 && fields[6] != "*"))
         {
             return null;
         }
 
+        var dayOfMonth = fields[3];
+        var dayOfWeek = fields[5];
+        if (QuartzApi.UnionsDayFields
+                ? dayOfMonth == "?" && dayOfWeek == "?"
+                : (dayOfMonth == "?") == (dayOfWeek == "?"))
+        {
+            return null;
+        }
+
+        // Quartz 4 runs on either day when both day fields restrict. Sentry does too, but only when neither field
+        // starts with '*', so a '*' with a step is spelled out as a range there.
+        var bothDaysRestrict = !IsAnyDay(dayOfMonth) && !IsAnyDay(dayOfWeek);
         string?[] crontab =
         [
             ToCrontabField(fields[1], 0, 59),
             ToCrontabField(fields[2], 0, 23),
-            fields[3] == "?" ? "*" : ToCrontabField(fields[3], 1, 31),
+            ToDayField(dayOfMonth, 1, 31, null, 0, bothDaysRestrict),
             ToCrontabField(fields[4], 1, 12, MonthNames),
-            fields[5] == "?" ? "*" : ToCrontabField(fields[5], 1, 7, DayNames, offset: -1)
+            ToDayField(dayOfWeek, 1, 7, DayNames, -1, bothDaysRestrict)
         ];
 
         return crontab.Any(field => field is null) ? null : string.Join(" ", crontab);
+    }
+
+    private static bool IsAnyDay(string field) => field is "*" or "?";
+
+    private static string? ToDayField(
+        string field,
+        int min,
+        int max,
+        string[]? names,
+        int offset,
+        bool spellOutStars)
+    {
+        if (IsAnyDay(field))
+        {
+            return "*";
+        }
+
+        var crontabField = ToCrontabField(field, min, max, names, offset, spellOutStars);
+        if (crontabField is null)
+        {
+            return null;
+        }
+
+        // Quartz reads a day field that lists '*' as any day, like a lone '*'
+        return field.Split(',').Contains("*") ? "*" : crontabField;
     }
 
     private static string? ToCrontabField(
@@ -72,12 +108,13 @@ internal static class TriggerSchedule
         int min,
         int max,
         string[]? names = null,
-        int offset = 0)
+        int offset = 0,
+        bool spellOutStar = false)
     {
         var terms = field.Split(',');
         for (var i = 0; i < terms.Length; i++)
         {
-            if (ToCrontabTerm(terms[i], min, max, names, offset) is not { } term)
+            if (ToCrontabTerm(terms[i], min, max, names, offset, spellOutStar) is not { } term)
             {
                 return null;
             }
@@ -93,7 +130,8 @@ internal static class TriggerSchedule
         int min,
         int max,
         string[]? names,
-        int offset)
+        int offset,
+        bool spellOutStar)
     {
         string? step = null;
         var slash = term.IndexOf('/');
@@ -110,7 +148,9 @@ internal static class TriggerSchedule
 
         if (term == "*")
         {
-            return "*" + step;
+            return spellOutStar && step is not null
+                ? Format(min + offset) + "-" + Format(max + offset) + step
+                : "*" + step;
         }
 
         var dash = term.IndexOf('-');

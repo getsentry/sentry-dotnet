@@ -42,7 +42,7 @@ public class SentryScopeMiddlewareTests
     }
 
     [Fact]
-    public async Task Invoke_JobThrows_CapturesExceptionInJobScopeAndRethrows()
+    public async Task Invoke_JobThrows_RethrowsWithoutCapturing()
     {
         // Arrange
         var exception = new InvalidOperationException("Job failed");
@@ -53,25 +53,28 @@ public class SentryScopeMiddlewareTests
 
         // Assert
         (await act.Should().ThrowAsync<InvalidOperationException>()).Which.Should().BeSameAs(exception);
-        _events.Should().Equal("push", "capture", "dispose");
-        _hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == exception));
-        exception.Data[Mechanism.MechanismKey].Should().Be(SentryScopeMiddleware.MechanismType);
-        exception.Data[Mechanism.HandledKey].Should().Be(false);
-        exception.Data[Mechanism.TerminalKey].Should().Be(false);
+        _events.Should().Equal("push", "dispose");
+        _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
-    public async Task Invoke_JobCancelled_DoesNotCaptureException()
+    public async Task Invoke_GlobalMode_RunsJobWithoutTouchingScope()
     {
         // Arrange
-        var cancelled = new CancellationToken(canceled: true);
-        var sut = new SentryScopeMiddleware(_hub);
+        var traceId = _scope.PropagationContext.TraceId;
+        var sut = new SentryScopeMiddleware(_hub, new SentryOptions { IsGlobalModeEnabled = true });
 
         // Act
-        var act = () => sut.Invoke(MiddlewareTestHelpers.CreateContext<NoOpJob>(cancelled), MiddlewareTestHelpers.Next(new OperationCanceledException(cancelled)), cancelled).AsTask();
+        await sut.Invoke(MiddlewareTestHelpers.CreateContext<NoOpJob>(), (_, _) =>
+        {
+            _events.Add("next");
+            return default;
+        }, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<OperationCanceledException>();
-        _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _events.Should().Equal("next");
+        _hub.DidNotReceiveWithAnyArgs().ConfigureScope(default(Action<Scope, IJobExecutionContext>)!, default!);
+        _scope.Tags.Should().NotContainKey(SentryScopeMiddleware.JobTag);
+        _scope.PropagationContext.TraceId.Should().Be(traceId);
     }
 }

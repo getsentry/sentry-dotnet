@@ -15,12 +15,14 @@ public static class SentryQuartzBuilderExtensions
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Each job runs in its own Sentry scope and trace, tagged with the job's key, and exceptions it throws are
-        /// captured in that scope.
+        /// Each job runs in its own Sentry scope and trace, tagged with the job's key, unless global mode is enabled.
+        /// Exceptions that jobs throw are not captured here: Quartz logs them, and Sentry's logging integration
+        /// captures that log entry.
         /// </para>
         /// <para>
         /// Jobs with <see cref="SentryCronMonitorSlugAttribute"/> also send a check-in each time they run, with the
-        /// schedule of the trigger that fired them as the monitor config. See <see cref="SentryQuartzOptions.SendMonitorConfig"/>.
+        /// schedule of the trigger that fired them as the monitor config. A job that throws or is cancelled sends an
+        /// error check-in. See <see cref="SentryQuartzOptions.SendMonitorConfig"/>.
         /// </para>
         /// </remarks>
         /// <param name="configure">Configures the options.</param>

@@ -13,6 +13,10 @@ namespace Sentry.Quartz;
 /// <c>reports-dailyemail</c>, and <c>DEFAULT.Cleanup</c> becomes <c>cleanup</c>. Set <see cref="JobDataKey"/> in the
 /// job's or trigger's <c>JobDataMap</c> to use a different slug for that job or trigger.
 /// </para>
+/// <para>
+/// Quartz names a job built without an identity with a new GUID each time, so such a job uses the name of its class
+/// instead, and a warning is logged. Give the job an identity or a monitor slug to keep its monitor stable.
+/// </para>
 /// </remarks>
 /// <param name="monitorSlug">The monitor slug. Defaults to the slug of the job's key.</param>
 [AttributeUsage(AttributeTargets.Class)]
