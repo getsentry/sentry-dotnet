@@ -79,15 +79,13 @@ public class HubExtensionsMonitorTests
     }
 
     [Fact]
-    public void WithMonitor_InProgressCheckInNotCaptured_FinalCheckInGetsNewId()
+    public void WithMonitor_InProgressCheckInNotCaptured_FinalCheckInKeepsId()
     {
         _checkInId = SentryId.Empty;
 
         _hub.WithMonitor(MonitorSlug, () => { });
 
-        Assert.Equal(2, _checkIns.Count);
-        Assert.Equal(CheckInStatus.Ok, _checkIns[1].Status);
-        Assert.Null(_checkIns[1].SentryId);
+        AssertCheckIns(CheckInStatus.Ok);
     }
 
     [Fact]
@@ -151,15 +149,13 @@ public class HubExtensionsMonitorTests
     }
 
     [Fact]
-    public async Task WithMonitor_Task_InProgressCheckInNotCaptured_FinalCheckInGetsNewId()
+    public async Task WithMonitor_Task_InProgressCheckInNotCaptured_FinalCheckInKeepsId()
     {
         _checkInId = SentryId.Empty;
 
         await _hub.WithMonitor(MonitorSlug, () => Task.CompletedTask);
 
-        Assert.Equal(2, _checkIns.Count);
-        Assert.Equal(CheckInStatus.Ok, _checkIns[1].Status);
-        Assert.Null(_checkIns[1].SentryId);
+        AssertCheckIns(CheckInStatus.Ok);
     }
 
     [Fact]
@@ -656,13 +652,14 @@ public class HubExtensionsMonitorTests
             first =>
             {
                 Assert.Equal(CheckInStatus.InProgress, first.Status);
-                Assert.Null(first.SentryId);
+                Assert.NotNull(first.SentryId);
+                Assert.NotEqual(SentryId.Empty, first.SentryId);
                 Assert.Null(first.Duration);
             },
             second =>
             {
                 Assert.Equal(finalStatus, second.Status);
-                Assert.Equal(_checkInId, second.SentryId);
+                Assert.Equal(_checkIns[0].SentryId, second.SentryId);
                 Assert.NotNull(second.Duration);
                 Assert.True(second.Duration >= TimeSpan.Zero);
             });

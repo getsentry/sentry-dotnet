@@ -478,7 +478,7 @@ public static class HubExtensions
         this IHub hub,
         string monitorSlug,
         ValueTask job,
-        SentryId? checkInId,
+        SentryId checkInId,
         SentryStopwatch stopwatch)
     {
         try
@@ -601,13 +601,15 @@ public static class HubExtensions
         return runScope;
     }
 
-    private static SentryId? CaptureInProgressCheckIn(
+    // Created here, so the final check-in has the same ID even when this one isn't sent
+    private static SentryId CaptureInProgressCheckIn(
         this IHub hub,
         string monitorSlug,
         Action<SentryMonitorOptions>? configureMonitorOptions)
     {
-        var checkInId = hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
-        return checkInId == SentryId.Empty ? null : checkInId;
+        var checkInId = SentryId.Create();
+        hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, checkInId, configureMonitorOptions: configureMonitorOptions);
+        return checkInId;
     }
 
     internal static ITransactionTracer StartTransaction(
