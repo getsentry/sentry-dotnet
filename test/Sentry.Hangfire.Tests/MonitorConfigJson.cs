@@ -19,10 +19,14 @@ internal static class MonitorConfigJson
     }
 
     public static Action<SentryMonitorOptions>? ReceivedConfigureMonitorOptions(this IHub hub, string monitorSlug) =>
+        hub.ReceivedInProgressCheckIn(monitorSlug)[5] as Action<SentryMonitorOptions>;
+
+    public static SentryId? ReceivedInProgressCheckInId(this IHub hub, string monitorSlug) =>
+        (SentryId?)hub.ReceivedInProgressCheckIn(monitorSlug)[2];
+
+    private static object?[] ReceivedInProgressCheckIn(this IHub hub, string monitorSlug) =>
         hub.ReceivedCalls()
             .Where(call => call.GetMethodInfo().Name == nameof(IHub.CaptureCheckIn))
             .Select(call => call.GetArguments())
-            .Where(args => (string?)args[0] == monitorSlug && (CheckInStatus?)args[1] == CheckInStatus.InProgress)
-            .Select(args => args[5] as Action<SentryMonitorOptions>)
-            .Single();
+            .Single(args => (string?)args[0] == monitorSlug && (CheckInStatus?)args[1] == CheckInStatus.InProgress);
 }

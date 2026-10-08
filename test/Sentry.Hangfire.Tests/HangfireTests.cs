@@ -14,28 +14,24 @@ public class HangfireTests : IClassFixture<HangfireFixture>
     [Fact]
     public async Task ExecuteJobWithAttribute_CapturesCheckInInProgressAndOkWithDuration()
     {
-        var sentryId = SentryId.Create();
-        _fixture.Hub.CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>()).Returns(sentryId);
-
         await _fixture.Enqueue<TestJob>(job => job.ExecuteJobWithAttribute());
 
         _fixture.Hub.Received(1).CaptureCheckIn(
             Arg.Is<string>("test-job"),
             Arg.Is<CheckInStatus>(status => status == CheckInStatus.InProgress),
             Arg.Any<SentryId?>());
+        var checkInId = _fixture.Hub.ReceivedInProgressCheckInId("test-job");
+        checkInId.Should().NotBeNull().And.NotBe(SentryId.Empty);
         _fixture.Hub.Received(1).CaptureCheckIn(
             Arg.Is<string>("test-job"),
             Arg.Is<CheckInStatus>(status => status == CheckInStatus.Ok),
-            Arg.Is<SentryId?>(id => id == sentryId),
+            checkInId,
             Arg.Is<TimeSpan?>(duration => duration != null), Arg.Any<Scope>());
     }
 
     [Fact]
     public async Task ExecuteJobWithException_CapturesCheckInInProgressAndErrorWithDuration()
     {
-        var sentryId = SentryId.Create();
-        _fixture.Hub.CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>()).Returns(sentryId);
-
         await _fixture.Enqueue<TestJob>(job => job.ExecuteJobWithException());
 
         await Task.Delay(1000);
@@ -44,10 +40,12 @@ public class HangfireTests : IClassFixture<HangfireFixture>
             Arg.Is<string>("test-job-with-exception"),
             Arg.Is<CheckInStatus>(status => status == CheckInStatus.InProgress),
             Arg.Any<SentryId?>());
+        var checkInId = _fixture.Hub.ReceivedInProgressCheckInId("test-job-with-exception");
+        checkInId.Should().NotBeNull().And.NotBe(SentryId.Empty);
         _fixture.Hub.Received(1).CaptureCheckIn(
             Arg.Is<string>("test-job-with-exception"),
             Arg.Is<CheckInStatus>(status => status == CheckInStatus.Error),
-            Arg.Is<SentryId?>(id => id == sentryId),
+            checkInId,
             Arg.Is<TimeSpan?>(duration => duration != null), Arg.Any<Scope>());
     }
 

@@ -62,7 +62,10 @@ internal class SentryServerFilter : IServerFilter
             };
         }
 
-        return _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, configureMonitorOptions: configureMonitorOptions);
+        // Created here, so the final check-in has the same ID even when this one isn't sent
+        var checkInId = SentryId.Create();
+        _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, checkInId, configureMonitorOptions: configureMonitorOptions);
+        return checkInId;
     }
 
     private (string Crontab, string TimeZone)? GetRecurringJobSchedule(PerformingContext context)

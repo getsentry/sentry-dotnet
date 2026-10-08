@@ -30,7 +30,6 @@ public class ServerFilterTests
         var performingContext = new PerformingContext(performContext);
 
         var hub = Substitute.For<IHub>();
-        hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress).Returns(SentryId.Create());
 
         var logger = Substitute.For<IDiagnosticLogger>();
         var filter = new SentryServerFilter(hub, logger);
@@ -47,7 +46,25 @@ public class ServerFilterTests
 
         // Assert
         performContext.Items.ContainsKey(SentryServerFilter.SentryCheckInIdKey).Should().BeTrue();
-        performingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().NotBeSameAs(firstKey);
+        performingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().NotBe(firstKey);
+    }
+
+    [Fact]
+    public void OnPerformed_InProgressCheckInNotCaptured_FinishesWithSameNonEmptyId()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture { CheckInId = SentryId.Empty };
+        var filter = fixture.GetSut();
+        filter.OnPerforming(fixture.PerformingContext);
+        var performedContext = new PerformedContext(fixture.PerformingContext, null, false, null);
+
+        // Act
+        filter.OnPerformed(performedContext);
+
+        // Assert
+        var checkInId = fixture.Hub.ReceivedInProgressCheckInId(RecurringJobFixture.MonitorSlug);
+        checkInId.Should().NotBeNull().And.NotBe(SentryId.Empty);
+        fixture.Hub.Received(1).CaptureCheckIn(RecurringJobFixture.MonitorSlug, CheckInStatus.Ok, checkInId, Arg.Any<TimeSpan?>());
     }
 
     [SkippableTheory]
@@ -72,7 +89,7 @@ public class ServerFilterTests
         monitorConfig!.Value.GetProperty("schedule").GetProperty("type").GetString().Should().Be("crontab");
         monitorConfig.Value.GetProperty("schedule").GetProperty("value").GetString().Should().Be(expectedCrontab);
         monitorConfig.Value.GetProperty("timezone").GetString().Should().Be(expectedTimeZone);
-        fixture.PerformingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().Be(fixture.CheckInId);
+        fixture.PerformingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().Be(fixture.Hub.ReceivedInProgressCheckInId(RecurringJobFixture.MonitorSlug));
     }
 
     [Fact]
@@ -226,7 +243,7 @@ public class ServerFilterTests
         public IStorageConnection Connection { get; } = Substitute.For<IStorageConnection>();
         public IHub Hub { get; } = Substitute.For<IHub>();
         public IDiagnosticLogger Logger { get; } = Substitute.For<IDiagnosticLogger>();
-        public SentryId CheckInId { get; } = SentryId.Create();
+        public SentryId CheckInId { get; set; } = SentryId.Create();
         public PerformingContext PerformingContext { get; private set; } = null!;
 
         public SentryServerFilter GetSut(bool? sendRecurringJobSchedule = null)
@@ -275,9 +292,9 @@ public class ServerFilterTests
 
         public void AssertCheckInSentWithoutMonitorConfig()
         {
-            Hub.Received(1).CaptureCheckIn(MonitorSlug, CheckInStatus.InProgress);
+            Hub.Received(1).CaptureCheckIn(MonitorSlug, CheckInStatus.InProgress, Arg.Any<SentryId?>());
             Hub.ReceivedConfigureMonitorOptions(MonitorSlug).Should().BeNull();
-            PerformingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().Be(CheckInId);
+            PerformingContext.Items[SentryServerFilter.SentryCheckInIdKey].Should().Be(Hub.ReceivedInProgressCheckInId(MonitorSlug));
         }
     }
 }
