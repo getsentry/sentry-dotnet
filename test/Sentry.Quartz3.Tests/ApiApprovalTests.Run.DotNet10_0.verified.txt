@@ -20,7 +20,7 @@
     public class SentryQuartzOptions
     {
         public SentryQuartzOptions() { }
-        public System.Action<Quartz.IJobDetail, Sentry.SentryMonitorOptions>? ConfigureMonitorOptions { get; set; }
+        public System.Action<Quartz.IJobExecutionContext, Sentry.SentryMonitorOptions>? ConfigureMonitorOptions { get; set; }
         public bool SendMonitorConfig { get; set; }
     }
 }

@@ -48,8 +48,44 @@ public class SentryJobListenerTests
 
         // Assert
         _hub.ReceivedConfigureMonitorOptions("cleanup").Should().NotBeNull();
-        _hub.Received(1).CaptureCheckIn("cleanup", expected, _checkInId, _jobRunTime);
+        _hub.Received(1).CaptureCheckIn("cleanup", expected, _hub.ReceivedInProgressCheckInId("cleanup"), _jobRunTime);
         _hub.ReceivedWithAnyArgs(2).CaptureCheckIn(default!, default);
+    }
+
+    [Fact]
+    public async Task JobToBeExecuted_ConfigureMonitorOptions_ReceivesListenerContext()
+    {
+        // Arrange
+        IJobExecutionContext? receivedContext = null;
+        var sut = new SentryJobListener(new SentryQuartzOptions
+        {
+            ConfigureMonitorOptions = (context, _) => receivedContext = context
+        }, _hub);
+        var context = GetContext<MonitoredJob>();
+
+        // Act
+        await sut.JobToBeExecuted(context);
+
+        // Assert
+        receivedContext.Should().BeSameAs(context);
+    }
+
+    [Fact]
+    public async Task JobWasExecuted_InProgressCheckInNotCaptured_FinishesWithSameNonEmptyId()
+    {
+        // Arrange
+        _hub.CaptureCheckIn(default!, default, default, default, default, default).ReturnsForAnyArgs(SentryId.Empty);
+        var sut = GetSut();
+        var context = GetContext<MonitoredJob>();
+        await sut.JobToBeExecuted(context);
+
+        // Act
+        await sut.JobWasExecuted(context, null);
+
+        // Assert
+        var checkInId = _hub.ReceivedInProgressCheckInId("cleanup");
+        checkInId.Should().NotBeNull().And.NotBe(SentryId.Empty);
+        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Ok, checkInId, _jobRunTime);
     }
 
     [Fact]
