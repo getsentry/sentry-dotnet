@@ -71,14 +71,14 @@ public class ServerFilterTests
     [InlineData("0 */2 * * *", "Europe/Berlin", "0 */2 * * *", "Europe/Berlin")]
     [InlineData("30 0 */2 * * *", "UTC", "0 */2 * * *", "UTC")]
     [InlineData("0 0 * * MON", null, "0 0 * * MON", "UTC")]
-    public void OnPerforming_RecurringJobWithSendScheduleEnabled_SendsMonitorConfig(
+    public void OnPerforming_RecurringJobWithSendMonitorConfigEnabled_SendsMonitorConfig(
         string cron, string? timeZoneId, string expectedCrontab, string expectedTimeZone)
     {
         Skip.If(timeZoneId is not (null or "UTC") && !TestEnvironment.HasTimeZone(timeZoneId), "No time zone database");
 
         // Arrange
         var fixture = new RecurringJobFixture { Cron = cron, TimeZoneId = timeZoneId };
-        var filter = fixture.GetSut(sendRecurringJobSchedule: true);
+        var filter = fixture.GetSut(sendMonitorConfig: true);
 
         // Act
         filter.OnPerforming(fixture.PerformingContext);
@@ -110,11 +110,11 @@ public class ServerFilterTests
     }
 
     [Fact]
-    public void OnPerforming_SendScheduleDisabled_SendsCheckInWithoutMonitorConfig()
+    public void OnPerforming_SendMonitorConfigDisabled_SendsCheckInWithoutMonitorConfig()
     {
         // Arrange
         var fixture = new RecurringJobFixture();
-        var filter = fixture.GetSut(sendRecurringJobSchedule: false);
+        var filter = fixture.GetSut(sendMonitorConfig: false);
 
         // Act
         filter.OnPerforming(fixture.PerformingContext);
@@ -129,7 +129,7 @@ public class ServerFilterTests
     {
         // Arrange
         var fixture = new RecurringJobFixture { RecurringJobId = null };
-        var filter = fixture.GetSut(sendRecurringJobSchedule: true);
+        var filter = fixture.GetSut(sendMonitorConfig: true);
 
         // Act
         filter.OnPerforming(fixture.PerformingContext);
@@ -143,7 +143,7 @@ public class ServerFilterTests
     {
         // Arrange
         var fixture = new RecurringJobFixture { RecurringJobExists = false };
-        var filter = fixture.GetSut(sendRecurringJobSchedule: true);
+        var filter = fixture.GetSut(sendMonitorConfig: true);
 
         // Act
         filter.OnPerforming(fixture.PerformingContext);
@@ -161,7 +161,7 @@ public class ServerFilterTests
     {
         // Arrange
         var fixture = new RecurringJobFixture { Cron = cron, TimeZoneId = timeZoneId };
-        var filter = fixture.GetSut(sendRecurringJobSchedule: true);
+        var filter = fixture.GetSut(sendMonitorConfig: true);
 
         // Act
         filter.OnPerforming(fixture.PerformingContext);
@@ -176,7 +176,7 @@ public class ServerFilterTests
     {
         // Arrange
         var fixture = new RecurringJobFixture();
-        var filter = fixture.GetSut(sendRecurringJobSchedule: true);
+        var filter = fixture.GetSut(sendMonitorConfig: true);
         fixture.Connection.GetAllEntriesFromHash(Arg.Any<string>()).Throws(new InvalidOperationException());
 
         // Act
@@ -246,7 +246,7 @@ public class ServerFilterTests
         public SentryId CheckInId { get; set; } = SentryId.Create();
         public PerformingContext PerformingContext { get; private set; } = null!;
 
-        public SentryServerFilter GetSut(bool? sendRecurringJobSchedule = null)
+        public SentryServerFilter GetSut(bool? sendMonitorConfig = null)
         {
             Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             Connection.GetJobParameter(JobId, SentryServerFilter.SentryMonitorSlugKey)
@@ -280,9 +280,9 @@ public class ServerFilterTests
             PerformingContext = new PerformingContext(performContext);
 
             var options = new SentryHangfireOptions();
-            if (sendRecurringJobSchedule is { } send)
+            if (sendMonitorConfig is { } send)
             {
-                options.SendRecurringJobSchedule = send;
+                options.SendMonitorConfig = send;
             }
             return new SentryServerFilter(Hub, Logger, options);
         }

@@ -53,7 +53,7 @@ internal class SentryServerFilter : IServerFilter
     private SentryId CaptureInProgressCheckIn(PerformingContext context, string monitorSlug)
     {
         Action<SentryMonitorOptions>? configureMonitorOptions = null;
-        if (_options.SendRecurringJobSchedule && GetRecurringJobSchedule(context) is (var crontab, var timeZone))
+        if (_options.SendMonitorConfig && GetRecurringJobSchedule(context) is (var crontab, var timeZone))
         {
             configureMonitorOptions = options =>
             {

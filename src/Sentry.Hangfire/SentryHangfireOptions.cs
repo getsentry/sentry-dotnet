@@ -21,5 +21,5 @@ public class SentryHangfireOptions
     /// converted, so only <c>UTC</c> and IANA IDs are sent.
     /// </para>
     /// </remarks>
-    public bool SendRecurringJobSchedule { get; set; } = true;
+    public bool SendMonitorConfig { get; set; } = true;
 }

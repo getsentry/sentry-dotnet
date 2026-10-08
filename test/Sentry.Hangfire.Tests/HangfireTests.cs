@@ -62,7 +62,7 @@ public class HangfireTests : IClassFixture<HangfireFixture>
     }
 
     [SkippableFact]
-    public async Task ExecuteRecurringJob_SendScheduleEnabled_CapturesCheckInWithMonitorConfig()
+    public async Task ExecuteRecurringJob_SendMonitorConfigEnabled_CapturesCheckInWithMonitorConfig()
     {
         Skip.If(!TestEnvironment.HasTimeZone("Europe/Berlin"), "No time zone database");
 
@@ -85,14 +85,14 @@ public class HangfireTests : IClassFixture<HangfireFixture>
         var configuration = Substitute.For<IGlobalConfiguration>();
         var existingFilters = SentryFilters().ToList();
 
-        configuration.UseSentry(options => options.SendRecurringJobSchedule = false);
+        configuration.UseSentry(options => options.SendMonitorConfig = false);
 
         var addedFilters = SentryFilters().Except(existingFilters).ToList();
         foreach (var filter in addedFilters)
         {
             GlobalJobFilters.Filters.Remove(filter);
         }
-        addedFilters.Should().ContainSingle().Which.Options.SendRecurringJobSchedule.Should().BeFalse();
+        addedFilters.Should().ContainSingle().Which.Options.SendMonitorConfig.Should().BeFalse();
 
         static IEnumerable<SentryServerFilter> SentryFilters() =>
             GlobalJobFilters.Filters.Select(filter => filter.Instance).OfType<SentryServerFilter>();
