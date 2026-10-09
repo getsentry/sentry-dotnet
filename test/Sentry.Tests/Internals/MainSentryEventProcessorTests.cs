@@ -36,6 +36,23 @@ public class MainSentryEventProcessorTests
     }
 
     [Fact]
+    public void Process_StackTraceFactoryThrows_StillEnrichesEvent()
+    {
+        var factoryException = new InvalidOperationException("factory failed");
+        _fixture.SentryStackTraceFactory.Create(Arg.Any<Exception>()).Throws(factoryException);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+
+        _ = sut.Process(evt);
+
+        evt.SentryThreads.Should().BeNullOrEmpty();
+        evt.Sdk.Name.Should().Be(Sentry.Internal.Constants.SdkName);
+        evt.Environment.Should().NotBeNull();
+        _fixture.SentryOptions.ReceivedLogError(factoryException, "Stack trace factory {0} threw an exception. The stack trace will be omitted.");
+    }
+
+    [Fact]
     public void EnsureThreadPoolInfoExists()
     {
         var evt = new SentryEvent();
