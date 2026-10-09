@@ -544,6 +544,23 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_ExceptionFilterThrowsForInnerException_DropsEventAndRecordsDiscard()
+    {
+        var filter = Substitute.For<IExceptionFilter>();
+        filter.Filter(Arg.Is<Exception>(e => e is InvalidOperationException)).Throws(new ArgumentException("filter failed"));
+        _fixture.SentryOptions.AddExceptionFilter(filter);
+
+        var id = _fixture.GetSut().CaptureException(new AggregateException(new InvalidOperationException()));
+
+        id.Should().Be(SentryId.Empty);
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+        _fixture.ClientReportRecorder.DidNotReceive()
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, Arg.Any<DataCategory>(), Arg.Any<int>());
+    }
+
+    [Fact]
     public void CaptureEvent_BeforeSend_GetsHint()
     {
         SentryHint received = null;
@@ -1895,6 +1912,30 @@ public partial class SentryClientTests : IDisposable
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Transaction);
         var expectedDroppedSpanCount = transaction.Spans.Count + 1;
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Span, expectedDroppedSpanCount);
+    }
+
+    [Fact]
+    public void CaptureTransaction_DelegateTransactionProcessorThrows_DropsTransactionAndRecordsDiscard()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddTransactionProcessor(_ => throw new InvalidOperationException());
+
+        var tracer = new TransactionTracer(Substitute.For<IHub>(), "test name", "test operation")
+        {
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+        var transaction = new SentryTransaction(tracer) { IsSampled = true };
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, transaction.Spans.Count + 1);
     }
 
     [Fact]

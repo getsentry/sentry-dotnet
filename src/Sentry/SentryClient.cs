@@ -335,14 +335,9 @@ public class SentryClient : ISentryClient, IDisposable
 
     private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
-        IReadOnlyCollection<Exception>? filteredExceptions;
-        try
+        var filteredExceptions = ApplyExceptionFilters(@event.Exception, out var filterThrew);
+        if (filterThrew)
         {
-            filteredExceptions = ApplyExceptionFilters(@event.Exception);
-        }
-        catch (Exception)
-        {
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
             return SentryId.Empty;
         }
 
@@ -462,8 +457,9 @@ public class SentryClient : ISentryClient, IDisposable
         return SentryId.Empty;
     }
 
-    private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
+    private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception, out bool filterThrew)
     {
+        filterThrew = false;
         var filters = _options.ExceptionFilters;
         if (exception == null || filters == null || filters.Count == 0)
         {
@@ -471,38 +467,43 @@ public class SentryClient : ISentryClient, IDisposable
             return null;
         }
 
-        if (filters.Any(f => InvokeExceptionFilter(f, exception)))
+        foreach (var filter in filters)
         {
-            // The event should be filtered based on the given exception
-            return new[] { exception };
+            try
+            {
+                if (filter.Filter(exception))
+                {
+                    // The event should be filtered based on the given exception
+                    return new[] { exception };
+                }
+            }
+            catch (Exception e)
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+                _options.LogError(e, "Exception filter {0} threw an exception. The event will be dropped.", filter.GetType().Name);
+                filterThrew = true;
+                return null;
+            }
         }
 
         if (exception is AggregateException aggregate)
         {
             // Flatten the tree of aggregates such that all the inner exceptions are non-aggregates.
             var innerExceptions = aggregate.Flatten().InnerExceptions;
-            if (innerExceptions.All(e => ApplyExceptionFilters(e) != null))
+            foreach (var innerException in innerExceptions)
             {
-                // All inner exceptions matched a filter, so the event should be filtered.
-                return innerExceptions;
+                if (ApplyExceptionFilters(innerException, out filterThrew) == null)
+                {
+                    return null;
+                }
             }
+
+            // All inner exceptions matched a filter, so the event should be filtered.
+            return innerExceptions;
         }
 
         // The event should not be filtered.
         return null;
-    }
-
-    private bool InvokeExceptionFilter(IExceptionFilter filter, Exception exception)
-    {
-        try
-        {
-            return filter.Filter(exception);
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Exception filter {0} threw an exception. The event will be dropped.", filter.GetType().Name);
-            throw;
-        }
     }
 
     /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
