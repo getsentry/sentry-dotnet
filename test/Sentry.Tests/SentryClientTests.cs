@@ -227,6 +227,46 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_ExceptionProcessorThrows_DropsEventAndRecordsDiscard()
+    {
+        var exception = new InvalidOperationException("processor failed");
+        var processor = Substitute.For<ISentryEventExceptionProcessor>();
+        processor.When(p => p.Process(Arg.Any<Exception>(), Arg.Any<SentryEvent>())).Throw(exception);
+        _fixture.SentryOptions.AddExceptionProcessor(processor);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+
+        var id = _fixture.GetSut().CaptureEvent(new SentryEvent(new Exception()));
+
+        id.Should().Be(SentryId.Empty);
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+        _fixture.SentryOptions.ReceivedLogError(exception, "Exception processor {0} threw an exception. The event will be dropped.");
+    }
+
+    [Fact]
+    public void CaptureEvent_SdkExceptionProcessorThrows_SendsEventWithoutDiscard()
+    {
+        var exception = new InvalidOperationException("processor failed");
+        var sdkProcessor = Substitute.For<ISentryEventExceptionProcessor, ISdkProcessor>();
+        sdkProcessor.When(p => p.Process(Arg.Any<Exception>(), Arg.Any<SentryEvent>())).Throw(exception);
+        var nextProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+        _fixture.SentryOptions.AddExceptionProcessor(sdkProcessor);
+        _fixture.SentryOptions.AddExceptionProcessor(nextProcessor);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+        var evt = new SentryEvent(new Exception());
+
+        var id = _fixture.GetSut().CaptureEvent(evt);
+
+        id.Should().Be(evt.EventId);
+        nextProcessor.Received(1).Process(evt.Exception!, evt);
+        _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.DidNotReceive()
+            .RecordDiscardedEvent(Arg.Any<DiscardReason>(), Arg.Any<DataCategory>(), Arg.Any<int>());
+        _fixture.SentryOptions.ReceivedLogError(exception, "Exception processor {0} threw an exception. Continuing with the remaining processors.");
+    }
+
+    [Fact]
     public void CaptureEvent_NullEventWithScope_EmptyGuid()
     {
         var sut = _fixture.GetSut();
@@ -435,6 +475,42 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_DelegateEventProcessorThrows_DropsEventAndRecordsDiscard()
+    {
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddEventProcessor(_ => throw new InvalidOperationException());
+
+        var id = _fixture.GetSut().CaptureEvent(new SentryEvent(), scope);
+
+        id.Should().Be(SentryId.Empty);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+    }
+
+    [Fact]
+    public void CaptureEvent_SdkEventProcessorThrows_SendsEventWithoutDiscard()
+    {
+        var exception = new InvalidOperationException("processor failed");
+        var sdkProcessor = Substitute.For<ISentryEventProcessor, ISdkProcessor>();
+        sdkProcessor.Process(Arg.Any<SentryEvent>()).Throws(exception);
+        var nextProcessor = Substitute.For<ISentryEventProcessor>();
+        nextProcessor.Process(Arg.Any<SentryEvent>()).Returns(c => c.Arg<SentryEvent>());
+        _fixture.SentryOptions.AddEventProcessor(sdkProcessor);
+        _fixture.SentryOptions.AddEventProcessor(nextProcessor);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+        var evt = new SentryEvent();
+
+        var id = _fixture.GetSut().CaptureEvent(evt);
+
+        id.Should().Be(evt.EventId);
+        nextProcessor.Received(1).Process(evt);
+        _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.DidNotReceive()
+            .RecordDiscardedEvent(Arg.Any<DiscardReason>(), Arg.Any<DataCategory>(), Arg.Any<int>());
+        _fixture.SentryOptions.ReceivedLogError(exception, "Event processor {0} threw an exception. Continuing with the remaining processors.");
+    }
+
+    [Fact]
     public void CaptureEvent_ExceptionFilter_RecordsDiscard()
     {
         var filter = Substitute.For<IExceptionFilter>();
@@ -447,6 +523,41 @@ public partial class SentryClientTests : IDisposable
 
         _fixture.ClientReportRecorder.Received(1)
             .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+    }
+
+    [Fact]
+    public void CaptureEvent_ExceptionFilterThrows_DropsEventAndRecordsDiscard()
+    {
+        var exception = new InvalidOperationException("filter failed");
+        var filter = Substitute.For<IExceptionFilter>();
+        filter.Filter(Arg.Any<Exception>()).Throws(exception);
+        _fixture.SentryOptions.AddExceptionFilter(filter);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+
+        var id = _fixture.GetSut().CaptureException(new Exception());
+
+        id.Should().Be(SentryId.Empty);
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+        _fixture.SentryOptions.ReceivedLogError(exception, "Exception filter {0} threw an exception. The event will be dropped.");
+    }
+
+    [Fact]
+    public void CaptureEvent_ExceptionFilterThrowsForInnerException_DropsEventAndRecordsDiscard()
+    {
+        var filter = Substitute.For<IExceptionFilter>();
+        filter.Filter(Arg.Is<Exception>(e => e is InvalidOperationException)).Throws(new ArgumentException("filter failed"));
+        _fixture.SentryOptions.AddExceptionFilter(filter);
+
+        var id = _fixture.GetSut().CaptureException(new AggregateException(new InvalidOperationException()));
+
+        id.Should().Be(SentryId.Empty);
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+        _fixture.ClientReportRecorder.DidNotReceive()
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, Arg.Any<DataCategory>(), Arg.Any<int>());
     }
 
     [Fact]
@@ -1801,6 +1912,56 @@ public partial class SentryClientTests : IDisposable
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Transaction);
         var expectedDroppedSpanCount = transaction.Spans.Count + 1;
         _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Span, expectedDroppedSpanCount);
+    }
+
+    [Fact]
+    public void CaptureTransaction_DelegateTransactionProcessorThrows_DropsTransactionAndRecordsDiscard()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddTransactionProcessor(_ => throw new InvalidOperationException());
+
+        var tracer = new TransactionTracer(Substitute.For<IHub>(), "test name", "test operation")
+        {
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+        var transaction = new SentryTransaction(tracer) { IsSampled = true };
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, transaction.Spans.Count + 1);
+    }
+
+    [Fact]
+    public void CaptureTransaction_SdkTransactionProcessorThrows_SendsTransactionWithoutDiscard()
+    {
+        // Arrange
+        var exception = new InvalidOperationException("processor failed");
+        var sdkProcessor = Substitute.For<ISentryTransactionProcessor, ISdkProcessor>();
+        sdkProcessor.Process(Arg.Any<SentryTransaction>()).Throws(exception);
+        _fixture.SentryOptions.AddTransactionProcessor(sdkProcessor);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+
+        var tracer = new TransactionTracer(Substitute.For<IHub>(), "test name", "test operation")
+        {
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+        var transaction = new SentryTransaction(tracer) { IsSampled = true };
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction);
+
+        // Assert
+        _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        _fixture.ClientReportRecorder.DidNotReceive()
+            .RecordDiscardedEvent(Arg.Any<DiscardReason>(), Arg.Any<DataCategory>(), Arg.Any<int>());
+        _fixture.SentryOptions.ReceivedLogError(exception, "Transaction processor {0} threw an exception. Continuing with the remaining processors.");
     }
 
     [Fact]

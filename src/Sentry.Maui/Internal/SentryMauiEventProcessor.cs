@@ -1,8 +1,9 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Maui.Internal;
 
-internal class SentryMauiEventProcessor : ISentryEventProcessor
+internal class SentryMauiEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     public static bool? InForeground { get; set; }
 

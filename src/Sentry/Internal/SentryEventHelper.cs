@@ -21,6 +21,10 @@ internal static class SentryEventHelper
             {
                 processedEvent = processor.DoProcessEvent(processedEvent, effectiveHint);
             }
+            catch (Exception e) when (processor is ISdkProcessor)
+            {
+                options.LogError(e, "Event processor {0} threw an exception. Continuing with the remaining processors.", processor.GetType().Name);
+            }
             catch (Exception e)
             {
                 options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, dataCategory);

@@ -216,6 +216,10 @@ public class SentryClient : ISentryClient, IDisposable
             {
                 processedTransaction = processor.DoProcessTransaction(processedTransaction, hint);
             }
+            catch (Exception e) when (processor is ISdkProcessor)
+            {
+                _options.LogError(e, "Transaction processor {0} threw an exception. Continuing with the remaining processors.", processor.GetType().Name);
+            }
             catch (Exception e)
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
@@ -331,7 +335,12 @@ public class SentryClient : ISentryClient, IDisposable
 
     private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
-        var filteredExceptions = ApplyExceptionFilters(@event.Exception);
+        var filteredExceptions = ApplyExceptionFilters(@event.Exception, out var filterThrew);
+        if (filterThrew)
+        {
+            return SentryId.Empty;
+        }
+
         if (filteredExceptions?.Count > 0)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -363,9 +372,20 @@ public class SentryClient : ISentryClient, IDisposable
             // after the SDK is initialized. Useful for example once a DI container is up
             foreach (var processor in scope.GetAllExceptionProcessors())
             {
-                processor.Process(@event.Exception, @event);
-
-                // NOTE: Exception processors can't drop events, but exception filters (above) can.
+                try
+                {
+                    processor.Process(@event.Exception, @event);
+                }
+                catch (Exception e) when (processor is ISdkProcessor)
+                {
+                    _options.LogError(e, "Exception processor {0} threw an exception. Continuing with the remaining processors.", processor.GetType().Name);
+                }
+                catch (Exception e)
+                {
+                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+                    _options.LogError(e, "Exception processor {0} threw an exception. The event will be dropped.", processor.GetType().Name);
+                    return SentryId.Empty;
+                }
             }
         }
 
@@ -437,8 +457,9 @@ public class SentryClient : ISentryClient, IDisposable
         return SentryId.Empty;
     }
 
-    private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
+    private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception, out bool filterThrew)
     {
+        filterThrew = false;
         var filters = _options.ExceptionFilters;
         if (exception == null || filters == null || filters.Count == 0)
         {
@@ -446,21 +467,39 @@ public class SentryClient : ISentryClient, IDisposable
             return null;
         }
 
-        if (filters.Any(f => f.Filter(exception)))
+        foreach (var filter in filters)
         {
-            // The event should be filtered based on the given exception
-            return new[] { exception };
+            try
+            {
+                if (filter.Filter(exception))
+                {
+                    // The event should be filtered based on the given exception
+                    return new[] { exception };
+                }
+            }
+            catch (Exception e)
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+                _options.LogError(e, "Exception filter {0} threw an exception. The event will be dropped.", filter.GetType().Name);
+                filterThrew = true;
+                return null;
+            }
         }
 
         if (exception is AggregateException aggregate)
         {
             // Flatten the tree of aggregates such that all the inner exceptions are non-aggregates.
             var innerExceptions = aggregate.Flatten().InnerExceptions;
-            if (innerExceptions.All(e => ApplyExceptionFilters(e) != null))
+            foreach (var innerException in innerExceptions)
             {
-                // All inner exceptions matched a filter, so the event should be filtered.
-                return innerExceptions;
+                if (ApplyExceptionFilters(innerException, out filterThrew) == null)
+                {
+                    return null;
+                }
             }
+
+            // All inner exceptions matched a filter, so the event should be filtered.
+            return innerExceptions;
         }
 
         // The event should not be filtered.
