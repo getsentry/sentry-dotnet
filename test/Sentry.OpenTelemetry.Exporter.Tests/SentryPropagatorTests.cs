@@ -169,4 +169,30 @@ public class SentryPropagatorTests
             outContext.Baggage.GetBaggage("sentry-sample_rate").Should().Be("1.0");
         }
     }
+
+    [Fact]
+    public void Extract_WithEmptyTraceId_From_SentryTraceHeader()
+    {
+        // Arrange
+        var carrier = new Dictionary<string, string>()
+        {
+            { "sentry-trace", "00000000000000000000000000000000-1000000000000000-1" }
+        };
+
+        var sut = new SentryPropagator();
+        var contextIn = new PropagationContext();
+
+        // Act
+        var outContext = sut.Extract(contextIn, carrier, _getter);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            $"{outContext.ActivityContext.TraceId}".Should().Be("00000000000000000000000000000000");
+            $"{outContext.ActivityContext.SpanId}".Should().Be("1000000000000000");
+            outContext.ActivityContext.TraceFlags.Should().Be(ActivityTraceFlags.Recorded);
+            outContext.ActivityContext.TraceState.Should().BeNull();
+            outContext.ActivityContext.IsRemote.Should().Be(true);
+        }
+    }
 }
