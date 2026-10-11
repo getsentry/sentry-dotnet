@@ -44,6 +44,7 @@ public class SentryStartup : FunctionsStartup
             options.FlushBeforeRequestCompleted = true;
 
             options.SetSdk(Sentry.Google.Cloud.Functions.Constants.SdkName, NameAndVersion);
+            options.SetEnvironment(context.HostingEnvironment.EnvironmentName);
 
             // K_SERVICE is where the name of the FAAS is stored.
             // It will return null if GCP Function is running locally.

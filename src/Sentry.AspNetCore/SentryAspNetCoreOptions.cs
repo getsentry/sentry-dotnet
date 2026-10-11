@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 
@@ -90,16 +88,6 @@ public class SentryAspNetCoreOptions : SentryHostOptions
     public bool PreferTransactionNameProvider { get; set; }
 
     /// <summary>
-    /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />
-    /// is adjusted when setting the Sentry environment. Defaults to true.
-    /// </summary>
-    /// <remarks>
-    /// The default .NET Core environment names include Production, Development and Staging (note Pascal casing), whereas Sentry prefers
-    /// to have its environment setting be all lower case.
-    /// </remarks>
-    public bool AdjustStandardEnvironmentNameCasing { get; set; } = true;
-
-    /// <summary>
     /// <para>
     /// When true (by default) Sentry automatically registers its tracing middleware immediately after
     /// `EndpointRoutingApplicationBuilderExtensions.UseRouting`.
@@ -122,52 +110,5 @@ public class SentryAspNetCoreOptions : SentryHostOptions
         // Don't report Environment.UserName as the user.
         IsEnvironmentUser = false;
         SetSdk(Constants.SdkName, SentryMiddleware.NameAndVersion);
-    }
-
-    internal void SetEnvironment(IWebHostEnvironment hostingEnvironment)
-    {
-        // Set environment from AspNetCore hosting environment name, if not set already
-        // Note: The SettingLocator will take care of the default behavior and assignment, which takes precedence.
-        //       We only need to do anything here if nothing was found by the locator.
-        if (SettingLocator.GetEnvironment(useDefaultIfNotFound: false) is not null)
-        {
-            return;
-        }
-
-        if (AdjustStandardEnvironmentNameCasing)
-        {
-            // NOTE: Sentry prefers to have its environment setting to be all lower case.
-            //       .NET Core sets the ENV variable to 'Production' (upper case P),
-            //       'Development' (upper case D) or 'Staging' (upper case S) which conflicts with
-            //       the Sentry recommendation. As such, we'll be kind and override those values,
-            //       here ... if applicable.
-            // Assumption: The Hosting Environment is always set.
-            //             If not set by a developer, then the framework will auto set it.
-            //             Alternatively, developers might set this to a CUSTOM value, which we
-            //             need to respect (especially the case-sensitivity).
-            //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
-
-            if (hostingEnvironment.IsProduction())
-            {
-                Environment = Internal.Constants.ProductionEnvironmentSetting;
-            }
-            else if (hostingEnvironment.IsStaging())
-            {
-                Environment = Internal.Constants.StagingEnvironmentSetting;
-            }
-            else if (hostingEnvironment.IsDevelopment())
-            {
-                Environment = Internal.Constants.DevelopmentEnvironmentSetting;
-            }
-            else
-            {
-                // Use the value set by the developer.
-                Environment = hostingEnvironment.EnvironmentName;
-            }
-        }
-        else
-        {
-            Environment = hostingEnvironment.EnvironmentName;
-        }
     }
 }

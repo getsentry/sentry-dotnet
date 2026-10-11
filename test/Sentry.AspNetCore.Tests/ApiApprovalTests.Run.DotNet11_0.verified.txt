@@ -42,7 +42,6 @@ namespace Sentry.AspNetCore
     public class SentryAspNetCoreOptions : Sentry.Extensions.Logging.SentryHostOptions
     {
         public SentryAspNetCoreOptions() { }
-        public bool AdjustStandardEnvironmentNameCasing { get; set; }
         public bool AutoRegisterTracing { get; set; }
         public bool CaptureBlockingCalls { get; set; }
         public bool EnableLogs { get; set; }

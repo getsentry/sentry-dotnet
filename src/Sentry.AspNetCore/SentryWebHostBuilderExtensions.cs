@@ -55,7 +55,7 @@ public static class SentryWebHostBuilderExtensions
             sentryBuilder.AddSentryOptions(options =>
             {
                 configureOptions?.Invoke(context, options);
-                options.SetEnvironment(context.HostingEnvironment);
+                options.SetEnvironment(context.HostingEnvironment.EnvironmentName);
             });
         });
 
