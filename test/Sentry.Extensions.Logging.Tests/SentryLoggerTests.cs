@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Sentry.Extensions.Logging.Tests;
 
+[Collection(nameof(SentrySdkCollection))]
 public class SentryLoggerTests
 {
     private class Fixture
