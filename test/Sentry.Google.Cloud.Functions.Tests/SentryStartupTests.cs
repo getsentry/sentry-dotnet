@@ -147,6 +147,20 @@ public class SentryStartupTests
     }
 
     [Fact]
+    public void ConfigureLogging_NoEnvironmentConfigured_UsesHostingEnvironment()
+    {
+        HostingEnvironment.EnvironmentName = "Staging";
+        LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(o => o.FakeSettings());
+
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        using var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        Assert.Equal("staging", options.Environment);
+    }
+
+    [Fact]
     public void ConfigureLogging_LoggingSection_BindsLoggingSettings()
     {
         WebHostBuilderContext.Configuration = new ConfigurationBuilder()

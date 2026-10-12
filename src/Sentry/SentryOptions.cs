@@ -443,7 +443,7 @@ public class SentryOptions
     /// <remarks>
     /// This value can also be set via environment variable: SENTRY_ENVIRONMENT
     /// In some cases you don't need to set this manually since integrations, when possible, automatically fill this value.
-    /// For ASP.NET Core which can read from IHostingEnvironment
+    /// ASP.NET Core, Blazor WebAssembly and Google Cloud Functions read it from the host environment.
     /// </remarks>
     /// <example>
     /// Production, Staging

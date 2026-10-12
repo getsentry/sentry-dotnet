@@ -27,6 +27,35 @@ public abstract class SentryHostOptions : SentryOptions
     internal bool LogsEnabled { get; set; }
 
     /// <summary>
+    /// Controls whether the casing of the standard (Production, Development and Staging) host environment name
+    /// is adjusted when setting the Sentry environment. Defaults to true.
+    /// </summary>
+    /// <remarks>
+    /// The default .NET environment names include Production, Development and Staging (note Pascal casing), whereas Sentry prefers
+    /// to have its environment setting be all lower case. Has no effect in MAUI, which has no host environment.
+    /// </remarks>
+    public bool AdjustStandardEnvironmentNameCasing { get; set; } = true;
+
+    private static readonly string[] StandardEnvironmentNames =
+    {
+        Internal.Constants.ProductionEnvironmentSetting,
+        Internal.Constants.StagingEnvironmentSetting,
+        Internal.Constants.DevelopmentEnvironmentSetting
+    };
+
+    internal void SetEnvironment(string hostEnvironmentName)
+    {
+        if (SettingLocator.GetEnvironment(useDefaultIfNotFound: false) is not null)
+        {
+            return;
+        }
+
+        Environment = AdjustStandardEnvironmentNameCasing
+            ? StandardEnvironmentNames.FirstOrDefault(name => name.Equals(hostEnvironmentName, StringComparison.OrdinalIgnoreCase)) ?? hostEnvironmentName
+            : hostEnvironmentName;
+    }
+
+    /// <summary>
     /// Add a callback to configure the scope upon SDK initialization
     /// </summary>
     /// <param name="action">The function to invoke when initializing the SDK</param>

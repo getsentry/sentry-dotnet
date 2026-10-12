@@ -11,6 +11,7 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
 {
     private readonly List<SentryEvent> _events = new();
     private bool _alsoCallLoggingAddSentry;
+    private string _hostEnvironmentName = "Production";
 
     public void Dispose() => SentrySdk.Close();
 
@@ -23,7 +24,7 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
             .Build();
         var services = new ServiceCollection();
         services.AddSingleton<NavigationManager>(new FakeNavigationManager());
-        services.AddLogging(logging => logging.AddSentryBlazor(configuration, o =>
+        services.AddLogging(logging => logging.AddSentryBlazor(configuration, _hostEnvironmentName, o =>
         {
             o.Dsn = ValidDsn;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
@@ -72,6 +73,29 @@ public class WebAssemblyHostBuilderExtensionsTests : IDisposable
 
         Assert.Equal("from-code", options.Release);
         Assert.Equal("from-configuration", options.Environment);
+    }
+
+    [Theory]
+    [InlineData("Staging", "staging")]
+    [InlineData("Preview", "Preview")]
+    public void AddSentryBlazor_NoEnvironmentConfigured_UsesHostEnvironment(string hostEnvironmentName, string expectedEnvironment)
+    {
+        _hostEnvironmentName = hostEnvironmentName;
+
+        var options = GetOptions(o => o.FakeSettings());
+
+        Assert.Equal(expectedEnvironment, options.Environment);
+    }
+
+    [Fact]
+    public void AddSentryBlazor_AdjustStandardEnvironmentNameCasingInConfiguration_KeepsHostEnvironmentCasing()
+    {
+        _hostEnvironmentName = "Staging";
+
+        var options = GetOptions(o => o.FakeSettings(),
+            ("Sentry:AdjustStandardEnvironmentNameCasing", "false"));
+
+        Assert.Equal("Staging", options.Environment);
     }
 
     [Fact]

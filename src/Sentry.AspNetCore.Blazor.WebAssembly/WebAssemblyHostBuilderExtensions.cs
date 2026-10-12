@@ -28,13 +28,14 @@ public static class WebAssemblyHostBuilderExtensions
     /// <returns></returns>
     public static WebAssemblyHostBuilder UseSentry(this WebAssemblyHostBuilder builder, Action<SentryBlazorOptions> configureOptions)
     {
-        builder.Logging.AddSentryBlazor(builder.Configuration, configureOptions);
+        builder.Logging.AddSentryBlazor(builder.Configuration, builder.HostEnvironment.Environment, configureOptions);
         return builder;
     }
 
     internal static ILoggingBuilder AddSentryBlazor(
         this ILoggingBuilder logging,
         IConfiguration configuration,
+        string hostEnvironmentName,
         Action<SentryBlazorOptions> configureOptions)
     {
         logging.AddConfiguration();
@@ -47,6 +48,7 @@ public static class WebAssemblyHostBuilderExtensions
         logging.Services.Configure<SentryBlazorOptions>(blazorOptions =>
         {
             configureOptions(blazorOptions);
+            blazorOptions.SetEnvironment(hostEnvironmentName);
 
             // System.PlatformNotSupportedException: System.Diagnostics.Process is not supported on this platform.
             blazorOptions.DetectStartupTime = StartupTimeDetectionMode.Fast;

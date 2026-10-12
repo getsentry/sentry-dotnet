@@ -2,6 +2,7 @@ using Microsoft.Extensions.Http;
 
 namespace Sentry.Extensions.Logging.Tests;
 
+[Collection(nameof(SentrySdkCollection))]
 public class SentryHttpMessageHandlerBuilderFilterTests
 {
     [SkippableFact]

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging.Tests;
 
+[Collection(nameof(SentrySdkCollection))]
 public class SentryStructuredLoggerTests : IDisposable
 {
     private class Fixture

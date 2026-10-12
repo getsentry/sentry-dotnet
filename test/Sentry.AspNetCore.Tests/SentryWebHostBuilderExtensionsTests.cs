@@ -85,6 +85,32 @@ public class SentryWebHostBuilderExtensionsTests
     }
 
     [Fact]
+    public void UseSentry_SentryBuilderCallback_UsesHostingEnvironment()
+    {
+        HostingEnvironment.EnvironmentName = "Staging";
+
+        WebHostBuilder.UseSentry((ISentryBuilder sentryBuilder) =>
+            sentryBuilder.AddSentryOptions(options => options.FakeSettings()));
+        using var serviceProvider = Services.BuildServiceProvider();
+
+        var options = serviceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        options.Environment.Should().Be("staging");
+    }
+
+    [Fact]
+    public void UseSentry_SentryBuilderCallbackSetsEnvironment_KeepsEnvironment()
+    {
+        HostingEnvironment.EnvironmentName = "Staging";
+
+        WebHostBuilder.UseSentry((ISentryBuilder sentryBuilder) =>
+            sentryBuilder.AddSentryOptions(options => options.Environment = "from-code"));
+        using var serviceProvider = Services.BuildServiceProvider();
+
+        var options = serviceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        options.Environment.Should().Be("from-code");
+    }
+
+    [Fact]
     public void UseSentry_Logging_AddLoggerProviders()
     {
         WebHostBuilder.UseSentry((SentryAspNetCoreOptions options) =>
