@@ -71,7 +71,23 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
             chmod +x $cliStub
         }
 
-        function BuildWithSentryCLIStub([string[]] $properties, [string] $extraSource)
+        function NewSentryCLIStubFailingInfo([string] $cliError)
+        {
+            if ($IsWindows)
+            {
+                $stub = Join-Path $PSScriptRoot 'release-app' 'sentry-cli-failing.cmd'
+                "@echo %* >> `"$cliLog`"`n@if `"%1`"==`"info`" (echo $cliError 1>&2 & exit 1)" | Set-Content $stub
+            }
+            else
+            {
+                $stub = Join-Path $PSScriptRoot 'release-app' 'sentry-cli-failing.sh'
+                "#!/bin/sh`necho `"`$*`" >> `"$cliLog`"`nif [ `"`$1`" = info ]; then echo '$cliError' >&2; exit 1; fi" | Set-Content $stub
+                chmod +x $stub
+            }
+            $stub
+        }
+
+        function BuildWithSentryCLIStub([string[]] $properties, [string] $extraSource, [string] $stub = $cliStub)
         {
             Remove-Item $cliLog -ErrorAction SilentlyContinue
             $extraSourcePath = Join-Path $PSScriptRoot 'release-app' 'Extra.cs'
@@ -79,13 +95,16 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
             {
                 $extraSource | Set-Content $extraSourcePath
             }
+            # Not /p:SentryCLI, because the targets can't clear a global property when the CLI isn't configured
+            $env:SentryCLI = $stub
             try
             {
-                $output = dotnet build release-app -c Release --nologo --framework $framework /p:SentryCLI=$cliStub @properties | ForEach-Object { Write-Host "  $_"; $_ }
+                $output = dotnet build release-app -c Release --nologo --framework $framework @properties | ForEach-Object { Write-Host "  $_"; $_ }
                 $LASTEXITCODE | Should -Be 0
             }
             finally
             {
+                Remove-Item env:SentryCLI
                 Remove-Item $extraSourcePath -ErrorAction SilentlyContinue
             }
             [pscustomobject]@{
@@ -144,6 +163,16 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
         $calls = (BuildWithSentryCLIStub '/p:SentrySetCommits=true').CliCalls
         $calls | Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
         $calls | Should -AnyElementMatch '^releases set-commits --auto release-app@1\.2\.3\+abcdef\s*$'
+    }
+
+    It "skips uploads and release creation without failing the build when <reason>" -ForEach @(
+        @{ reason = 'there is no auth token'; cliError = 'error: Auth token is required for this request.'; expected = 'The Sentry CLI is not fully configured' }
+        @{ reason = 'the Sentry API request fails'; cliError = 'error: API request failed'; expected = 'warning : Sentry API request failed' }
+    ) {
+        $result = BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:SentryUploadSymbols=true' -stub (NewSentryCLIStubFailingInfo $cliError)
+        $result.Output | Should -AnyElementMatch $expected
+        $result.CliCalls | Should -HaveCount 1
+        $result.CliCalls | Should -AnyElementMatch '^info\b'
     }
 }
 

@@ -137,7 +137,8 @@
       <_SentryCLICommand>$(SentryCLIBaseCommand) info</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryOrg)' != '' And '$(SentryProject)' != ''">$(_SentryCLICommand) --no-defaults</_SentryCLICommand>
     </PropertyGroup>
-    <Exec Condition="'$(SentryCLI)' != ''" Command="$(_SentryCLICommand)" IgnoreExitCode="true" ConsoleToMsBuild="true" StandardOutputImportance="Low">
+    <Exec Condition="'$(SentryCLI)' != ''" Command="$(_SentryCLICommand)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true"
+      ConsoleToMsBuild="true" StandardOutputImportance="Low" StandardErrorImportance="Normal">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       <Output TaskParameter="ConsoleOutput" PropertyName="_SentryCLIOutput" />
     </Exec>
@@ -146,10 +147,10 @@
       <_SentryCLIRequestFailed Condition="$(_SentryCLIOutput.Contains('API request failed'))">true</_SentryCLIRequestFailed>
     </PropertyGroup>
     <Warning Condition="'$(_SentryCLIRequestFailed)' != ''"
-      Text="Sentry API request failed.  Either the authentication info is invalid, or the Sentry server could not be reached." />
+      Text="Sentry API request failed.  Either the authentication info is invalid, or the Sentry server could not be reached.  Skipping Sentry uploads and release creation." />
 
     <Message Importance="High" Condition="'$(_SentryCLIExitCode)' != '0' And '$(_SentryCLIRequestFailed)' == ''"
-      Text="The Sentry CLI is not fully configured with authentication, organization, and project." />
+      Text="The Sentry CLI is not fully configured with authentication, organization, and project.  Skipping Sentry uploads and release creation." />
     <PropertyGroup Condition="'$(_SentryCLIExitCode)' != '0'">
       <SentryCLI />
     </PropertyGroup>
