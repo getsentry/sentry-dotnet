@@ -20,7 +20,7 @@ public static class SentryQuartzBuilderExtensions
         /// captures that log entry.
         /// </para>
         /// <para>
-        /// Jobs with <see cref="SentryCronMonitorSlugAttribute"/> also send a check-in each time they run, with the
+        /// Jobs with <see cref="SentryMonitorSlugAttribute"/> also send a check-in each time they run, with the
         /// schedule of the trigger that fired them as the monitor config. A job that throws or is cancelled sends an
         /// error check-in. See <see cref="SentryQuartzOptions.SendMonitorConfig"/>.
         /// </para>

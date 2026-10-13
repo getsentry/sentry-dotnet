@@ -44,7 +44,7 @@ public class SentryQuartzBuilderExtensionsTests
     }
 
     [Fact]
-    public async Task AddSentry_SimpleTriggerJobFails_CapturesCheckInsWithIntervalButNotException()
+    public async Task AddSentry_SimpleTriggerJobFails_CapturesCheckInsWithIntervalAndException()
     {
         // Act
         var status = await RunUntilCheckInCompletes<FailingJob>("Sync", "billing", trigger => trigger
@@ -56,7 +56,7 @@ public class SentryQuartzBuilderExtensionsTests
         var monitorConfig = MonitorConfigJson.Render(_hub.ReceivedConfigureMonitorOptions("billing-sync")!);
         monitorConfig.GetProperty("schedule").GetProperty("value").GetInt32().Should().Be(15);
         monitorConfig.GetProperty("schedule").GetProperty("unit").GetString().Should().Be("minute");
-        _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception is InvalidOperationException));
     }
 
     [Fact]

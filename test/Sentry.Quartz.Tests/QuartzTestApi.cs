@@ -29,16 +29,16 @@ internal class NoOpJob : IJob
     public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken = default) => default;
 }
 
-[SentryCronMonitorSlug]
+[SentryMonitorSlug]
 internal class MonitoredJob : NoOpJob;
 
-[SentryCronMonitorSlug("custom-slug")]
+[SentryMonitorSlug("custom-slug")]
 internal class CustomSlugJob : NoOpJob;
 
-[SentryCronMonitorSlug(SendMonitorConfig = false)]
+[SentryMonitorSlug(SendMonitorConfig = false)]
 internal class NoMonitorConfigJob : NoOpJob;
 
-[SentryCronMonitorSlug]
+[SentryMonitorSlug]
 internal class FailingJob : IJob
 {
     public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken = default) =>

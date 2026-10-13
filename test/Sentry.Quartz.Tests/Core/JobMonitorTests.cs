@@ -139,7 +139,7 @@ public class JobMonitorTests
         _fixture.TriggerCount = 2;
         _fixture.Trigger = TriggerBuilder.Create()
             .WithCronSchedule("0 0 12 * * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
-            .UsingJobData(SentryCronMonitorSlugAttribute.JobDataKey, "daily-email-noon")
+            .UsingJobData(SentryMonitorSlugAttribute.JobDataKey, "daily-email-noon")
             .Build();
 
         // Act
@@ -362,7 +362,7 @@ public class JobMonitorTests
         entries.Should().HaveCount(2).And.OnlyContain(e => e.Level == SentryLevel.Debug);
         string.Format(entries[0].Message, entries[0].Args).Should().Be(
             $"Job `{typeof(MonitoredJob).FullName}` has no identity, so its monitor slug is `monitoredjob`. Give the job " +
-            "an identity (WithIdentity(...)) or set a slug ([SentryCronMonitorSlug(\"…\")]) to keep the monitor stable.");
+            "an identity (WithIdentity(...)) or set a slug ([SentryMonitorSlug(\"…\")]) to keep the monitor stable.");
     }
 
     [Fact]
@@ -428,10 +428,10 @@ public class JobMonitorTests
         var jobBuilder = JobBuilder.Create().OfType(jobType).WithIdentity(name, group);
         if (dataMapSlug is not null)
         {
-            jobBuilder.UsingJobData(SentryCronMonitorSlugAttribute.JobDataKey, dataMapSlug);
+            jobBuilder.UsingJobData(SentryMonitorSlugAttribute.JobDataKey, dataMapSlug);
         }
         _fixture.JobDetail = jobBuilder.Build();
-        var attribute = jobType.GetCustomAttribute<SentryCronMonitorSlugAttribute>()!;
+        var attribute = jobType.GetCustomAttribute<SentryMonitorSlugAttribute>()!;
 
         JobMonitor.GetMonitorSlug(_fixture.GetContext(), attribute).Should().Be(expected);
     }

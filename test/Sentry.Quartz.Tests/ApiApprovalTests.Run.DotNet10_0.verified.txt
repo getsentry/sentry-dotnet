@@ -1,10 +1,10 @@
 ﻿namespace Sentry.Quartz
 {
     [System.AttributeUsage(System.AttributeTargets.Class)]
-    public sealed class SentryCronMonitorSlugAttribute : System.Attribute
+    public sealed class SentryMonitorSlugAttribute : System.Attribute
     {
         public const string JobDataKey = "SentryMonitorSlug";
-        public SentryCronMonitorSlugAttribute(string? monitorSlug = null) { }
+        public SentryMonitorSlugAttribute(string? monitorSlug = null) { }
         public string? MonitorSlug { get; }
         public bool SendMonitorConfig { get; set; }
     }

@@ -20,7 +20,7 @@ namespace Sentry.Quartz;
 /// </remarks>
 /// <param name="monitorSlug">The monitor slug. Defaults to the slug of the job's key.</param>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class SentryCronMonitorSlugAttribute(string? monitorSlug = null) : Attribute
+public sealed class SentryMonitorSlugAttribute(string? monitorSlug = null) : Attribute
 {
     /// <summary>
     /// The <c>JobDataMap</c> key whose value overrides the monitor slug.
