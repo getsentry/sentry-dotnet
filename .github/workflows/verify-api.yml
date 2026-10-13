@@ -118,7 +118,7 @@ jobs:
   accept-api-changes:
     name: Accept and Commit API Changes
     needs: run-api-tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: write
@@ -171,6 +171,8 @@ jobs:
       - name: Commit Accepted API Changes
         if: steps.detect.outputs.has_changes == 'true'
         shell: bash
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           git config --global user.name 'Sentry Github Bot'
           git config --global user.email 'bot+github-bot@sentry.io'
@@ -179,7 +181,7 @@ jobs:
           # Push from detached HEAD to the PR branch. Fails non-fast-forward
           # if the contributor pushed since we snapshotted head.sha — workflow
           # fails red, re-run regenerates against the new head.
-          git push origin "HEAD:refs/heads/${{ github.event.pull_request.head.ref }}"
+          git push origin "HEAD:refs/heads/$PR_HEAD_REF"
 
       - name: Label Public API PR
         if: steps.detect.outputs.has_changes == 'true'

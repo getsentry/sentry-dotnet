@@ -4,7 +4,7 @@ using Sentry.Reflection;
 
 namespace Sentry.AspNet.Internal;
 
-internal class SystemWebRequestEventProcessor : ISentryEventProcessor
+internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     private static readonly SdkVersion SdkVersion =
         typeof(SystemWebRequestEventProcessor).Assembly.GetNameAndVersion();

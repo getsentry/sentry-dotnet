@@ -376,7 +376,7 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
     {
         var modules = json.GetPropertyOrNull("modules")?.GetStringDictionaryOrNull();
         var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-        var timestamp = json.GetSafeDateTimeOffset("timestamp"); // Native sentryevents are serialized to epoch timestamps
+        var timestamp = json.GetPropertyOrNull("timestamp")?.GetTimestamp();
         var message = json.GetPropertyOrNull("logentry")?.Pipe(SentryMessage.FromJson);
         var logger = json.GetPropertyOrNull("logger")?.GetString();
         var platform = json.GetPropertyOrNull("platform")?.GetString();
@@ -393,7 +393,7 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
         var environment = json.GetPropertyOrNull("environment")?.GetString();
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
         var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()).ToArray();
-        var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
+        var breadcrumbs = json.GetValuesArrayOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
         var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull();
         var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
         var level = SafeLevelFromJson(json);

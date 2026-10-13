@@ -4,7 +4,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
-internal class MainExceptionProcessor : ISentryEventExceptionProcessor
+internal class MainExceptionProcessor : ISentryEventExceptionProcessor, ISdkProcessor
 {
     private const string ExceptionDataKeyPrefix = "sentry:";
     internal const string ExceptionDataTagKey = ExceptionDataKeyPrefix + "tag:";
@@ -155,7 +155,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             sentryEx.Mechanism = mechanism;
         }
 
-        sentryEx.Stacktrace ??= SentryStackTraceFactoryAccessor().Create(exception);
+        sentryEx.Stacktrace ??= SentryStackTraceFactoryAccessor().TryCreate(_options, exception);
         return sentryEx;
     }
 
