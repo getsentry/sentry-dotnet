@@ -23,6 +23,7 @@
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry.Quartz\\Sentry.Quartz.csproj",
+      "src\\Sentry.Quartz3\\Sentry.Quartz3.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj"
     ]
