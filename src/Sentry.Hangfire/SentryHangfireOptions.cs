@@ -12,8 +12,9 @@ public class SentryHangfireOptions
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The monitor slug still comes from <see cref="SentryMonitorSlugAttribute"/>. If several recurring jobs run the
-    /// same method, they share one monitor, and each run overwrites the monitor's schedule with its own job's.
+    /// The monitor slug still comes from <see cref="SentryMonitorSlugAttribute"/>. When several recurring jobs use the
+    /// same monitor slug with different cron expressions or time zones, for example one recurring job per region that
+    /// runs the same method, no monitor config is sent for them. Give each its own monitor slug to send it.
     /// </para>
     /// <para>
     /// Schedules that Sentry can't represent are not sent. This includes crons that use seconds other than a fixed

@@ -1,6 +1,8 @@
+using Hangfire.Common;
 using Hangfire.Server;
 using Hangfire.Storage;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 
 namespace Sentry.Hangfire;
@@ -11,19 +13,27 @@ internal class SentryServerFilter : IServerFilter
     internal const string SentryCheckInIdKey = "SentryCheckInIdKey";
     internal const string RecurringJobIdKey = "RecurringJobId";
 
+    // How long the slugs of all recurring jobs are reused before they're read from storage again
+    internal static readonly TimeSpan RecurringJobSlugsTtl = TimeSpan.FromMinutes(1);
+
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryHangfireOptions _options;
+    private readonly ISystemClock _clock;
+    private readonly object _recurringJobSlugsLock = new();
+    private RecurringJobSlugs? _recurringJobSlugs;
 
     internal SentryHangfireOptions Options => _options;
 
     public SentryServerFilter() : this(null, null)
     { }
 
-    internal SentryServerFilter(IHub? hub, IDiagnosticLogger? logger, SentryHangfireOptions? options = null)
+    internal SentryServerFilter(IHub? hub, IDiagnosticLogger? logger, SentryHangfireOptions? options = null,
+        ISystemClock? clock = null)
     {
         _hub = hub ?? HubAdapter.Instance;
         _options = options ?? new SentryHangfireOptions();
+        _clock = clock ?? SystemClock.Clock;
 #pragma warning disable CS0618 // Type or member is obsolete
         _logger = logger ?? _hub.GetInternalSentryOptions()?.DiagnosticLogger;
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -53,7 +63,7 @@ internal class SentryServerFilter : IServerFilter
     private SentryId CaptureInProgressCheckIn(PerformingContext context, string monitorSlug)
     {
         Action<SentryMonitorOptions>? configureMonitorOptions = null;
-        if (_options.SendMonitorConfig && GetRecurringJobSchedule(context) is (var crontab, var timeZone))
+        if (_options.SendMonitorConfig && GetRecurringJobSchedule(context, monitorSlug) is (var crontab, var timeZone))
         {
             configureMonitorOptions = options =>
             {
@@ -68,7 +78,7 @@ internal class SentryServerFilter : IServerFilter
         return checkInId;
     }
 
-    private (string Crontab, string TimeZone)? GetRecurringJobSchedule(PerformingContext context)
+    private (string Crontab, string TimeZone)? GetRecurringJobSchedule(PerformingContext context, string monitorSlug)
     {
         string? recurringJobId = null;
         try
@@ -95,6 +105,16 @@ internal class SentryServerFilter : IServerFilter
                 return null;
             }
 
+            var conflicting = GetRecurringJobSlugs(context.Connection, recurringJobId!)
+                .WithDifferentSchedule(monitorSlug, recurringJob.Cron, recurringJob.TimeZoneId);
+            if (conflicting.Count > 0)
+            {
+                _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. Recurring jobs '{1}' use the same " +
+                                  "monitor slug '{2}' with a different schedule. Give each its own monitor slug.",
+                    recurringJobId, string.Join("', '", conflicting), monitorSlug);
+                return null;
+            }
+
             return (crontab, timeZone);
         }
         catch (Exception e)
@@ -102,6 +122,87 @@ internal class SentryServerFilter : IServerFilter
             _logger?.LogError(e, "Failed to read the schedule of recurring job '{0}'.", recurringJobId);
             return null;
         }
+    }
+
+    // Reading every recurring job takes one storage query per job, so the result is reused for a minute.
+    private RecurringJobSlugs GetRecurringJobSlugs(IStorageConnection connection, string recurringJobId)
+    {
+        lock (_recurringJobSlugsLock)
+        {
+            var now = _clock.GetUtcNow();
+            if (_recurringJobSlugs is not { } slugs || slugs.ReadAt + RecurringJobSlugsTtl <= now
+                || !slugs.Contains(recurringJobId))
+            {
+                slugs = RecurringJobSlugs.Read(connection, now);
+                _recurringJobSlugs = slugs;
+            }
+
+            return slugs;
+        }
+    }
+
+    private sealed class RecurringJobSlugs
+    {
+        private readonly Dictionary<string, List<(string Id, string? Cron, string TimeZoneId)>> _jobsBySlug;
+        private readonly HashSet<string> _ids;
+
+        public DateTimeOffset ReadAt { get; }
+
+        private RecurringJobSlugs(DateTimeOffset readAt,
+            Dictionary<string, List<(string Id, string? Cron, string TimeZoneId)>> jobsBySlug, HashSet<string> ids)
+        {
+            ReadAt = readAt;
+            _jobsBySlug = jobsBySlug;
+            _ids = ids;
+        }
+
+        public static RecurringJobSlugs Read(IStorageConnection connection, DateTimeOffset readAt)
+        {
+            var jobsBySlug = new Dictionary<string, List<(string Id, string? Cron, string TimeZoneId)>>();
+            var ids = new HashSet<string>();
+            foreach (var recurringJob in connection.GetRecurringJobs())
+            {
+                ids.Add(recurringJob.Id);
+                if (recurringJob.Removed || recurringJob.Job is null || GetMonitorSlug(recurringJob.Job) is not { } slug)
+                {
+                    continue;
+                }
+
+                if (!jobsBySlug.TryGetValue(slug, out var jobs))
+                {
+                    jobs = new List<(string Id, string? Cron, string TimeZoneId)>();
+                    jobsBySlug[slug] = jobs;
+                }
+                jobs.Add((recurringJob.Id, recurringJob.Cron, NormalizeTimeZoneId(recurringJob.TimeZoneId)));
+            }
+
+            return new RecurringJobSlugs(readAt, jobsBySlug, ids);
+        }
+
+        public bool Contains(string recurringJobId) => _ids.Contains(recurringJobId);
+
+        public List<string> WithDifferentSchedule(string monitorSlug, string? cron, string? timeZoneId)
+        {
+            if (!_jobsBySlug.TryGetValue(monitorSlug, out var jobs))
+            {
+                return new List<string>();
+            }
+
+            var normalizedTimeZoneId = NormalizeTimeZoneId(timeZoneId);
+            return jobs
+                .Where(job => job.Cron != cron || job.TimeZoneId != normalizedTimeZoneId)
+                .Select(job => job.Id)
+                .ToList();
+        }
+
+        private static string? GetMonitorSlug(Job job) =>
+            JobFilterProviders.Providers.GetFilters(job)
+                .Select(filter => filter.Instance)
+                .OfType<SentryMonitorSlugAttribute>()
+                .LastOrDefault()?.MonitorSlug;
+
+        private static string NormalizeTimeZoneId(string? timeZoneId) =>
+            string.IsNullOrEmpty(timeZoneId) ? "UTC" : timeZoneId!;
     }
 
     // Hangfire also accepts a leading seconds field, which Sentry doesn't support.
