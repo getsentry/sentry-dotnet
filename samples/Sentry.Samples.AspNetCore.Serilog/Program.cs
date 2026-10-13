@@ -32,9 +32,9 @@ public class Program
         // or coded explicitly, via parameter like:
         // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
 #if !SENTRY_DSN_DEFINED_IN_ENV
-        builder.WebHost.UseSentry(SamplesShared.Dsn);
+        builder.UseSentry(SamplesShared.Dsn);
 #else
-        builder.WebHost.UseSentry(EnvironmentVariables.Dsn);
+        builder.UseSentry(EnvironmentVariables.Dsn);
 #endif
 
         // The App:
