@@ -212,9 +212,12 @@ public class HubExtensionsMonitorTests
     public void WithMonitor_JobReturnsTask_ThrowsWithoutCheckIn()
     {
         var ran = false;
-        ValueTask ValueTaskJob() { ran = true; return default; }
-        ValueTask<int> ValueTaskOfTJob() { ran = true; return new ValueTask<int>(1); }
-        Task TaskJob() { ran = true; return Task.CompletedTask; }
+        ValueTask ValueTaskJob()
+        { ran = true; return default; }
+        ValueTask<int> ValueTaskOfTJob()
+        { ran = true; return new ValueTask<int>(1); }
+        Task TaskJob()
+        { ran = true; return Task.CompletedTask; }
 
         Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, () => ValueTaskJob()); });
         Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, ValueTaskJob); });
