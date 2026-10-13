@@ -720,10 +720,9 @@ static partial class SentrySdk
     /// <remarks>
     /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
     /// and any events captured while it runs.
-    /// A job that returns a <see cref="ValueTask"/> is awaited before the final check-in is sent. For a job that
-    /// returns a <see cref="ValueTask{TResult}"/>, pass <c>async () => await job()</c> so it binds to the
-    /// <see cref="Task{TResult}"/> overload.
+    /// For a job that returns a task, use <c>WithMonitorAsync</c>.
     /// </remarks>
+    /// <exception cref="ArgumentException"><typeparamref name="T"/> is a <see cref="Task"/> or <see cref="ValueTask"/> type.</exception>
     [DebuggerStepThrough]
     public static T WithMonitor<T>(
         string monitorSlug,
@@ -742,7 +741,7 @@ static partial class SentrySdk
     /// </remarks>
     /// <example>
     /// <code>
-    /// await SentrySdk.WithMonitor("nightly-cleanup", async () => await CleanupAsync(), options =>
+    /// await SentrySdk.WithMonitorAsync("nightly-cleanup", async () => await CleanupAsync(), options =>
     /// {
     ///     options.Interval("0 3 * * *");
     ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
@@ -755,20 +754,20 @@ static partial class SentrySdk
     /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
     /// </param>
     [DebuggerStepThrough]
-    public static Task WithMonitor(
+    public static Task WithMonitorAsync(
         string monitorSlug,
         Func<Task> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
-        => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
+        => CurrentHub.WithMonitorAsync(monitorSlug, job, configureMonitorOptions);
 
-    /// <inheritdoc cref="WithMonitor(string, Func{Task}, Action{SentryMonitorOptions}?)"/>
+    /// <inheritdoc cref="WithMonitorAsync(string, Func{Task}, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
     [DebuggerStepThrough]
-    public static Task<T> WithMonitor<T>(
+    public static Task<T> WithMonitorAsync<T>(
         string monitorSlug,
         Func<Task<T>> job,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
-        => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
+        => CurrentHub.WithMonitorAsync(monitorSlug, job, configureMonitorOptions);
 
     /// <summary>
     /// Starts a transaction if there is not already one active on the scope, otherwise starts a new child span on the

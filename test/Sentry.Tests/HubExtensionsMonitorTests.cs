@@ -1,7 +1,5 @@
 #nullable enable
 
-using System.Threading.Tasks.Sources;
-
 namespace Sentry.Tests;
 
 public class HubExtensionsMonitorTests
@@ -93,7 +91,7 @@ public class HubExtensionsMonitorTests
     {
         var ran = false;
 
-        await _hub.WithMonitor(MonitorSlug, async () =>
+        await _hub.WithMonitorAsync(MonitorSlug, async () =>
         {
             await Task.Yield();
             ran = true;
@@ -106,7 +104,7 @@ public class HubExtensionsMonitorTests
     [Fact]
     public async Task WithMonitor_TaskOfT_Succeeds_ReturnsResult()
     {
-        var result = await _hub.WithMonitor(MonitorSlug, async () =>
+        var result = await _hub.WithMonitorAsync(MonitorSlug, async () =>
         {
             await Task.Yield();
             return "done";
@@ -122,7 +120,7 @@ public class HubExtensionsMonitorTests
         var expected = new InvalidOperationException();
 
         var actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _hub.WithMonitor(MonitorSlug, async () =>
+            _hub.WithMonitorAsync(MonitorSlug, async () =>
             {
                 await Task.Yield();
                 throw expected;
@@ -138,7 +136,7 @@ public class HubExtensionsMonitorTests
         var expected = new InvalidOperationException();
 
         var actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _hub.WithMonitor<int>(MonitorSlug, async () =>
+            _hub.WithMonitorAsync<int>(MonitorSlug, async () =>
             {
                 await Task.Yield();
                 throw expected;
@@ -153,7 +151,7 @@ public class HubExtensionsMonitorTests
     {
         _checkInId = SentryId.Empty;
 
-        await _hub.WithMonitor(MonitorSlug, () => Task.CompletedTask);
+        await _hub.WithMonitorAsync(MonitorSlug, () => Task.CompletedTask);
 
         AssertCheckIns(CheckInStatus.Ok);
     }
@@ -163,7 +161,7 @@ public class HubExtensionsMonitorTests
     {
         var tcs = new TaskCompletionSource<bool>();
 
-        var task = _hub.WithMonitor(MonitorSlug, () => (Task)tcs.Task);
+        var task = _hub.WithMonitorAsync(MonitorSlug, () => (Task)tcs.Task);
 
         Assert.Single(_checkIns);
         Assert.Equal(CheckInStatus.InProgress, _checkIns[0].Status);
@@ -191,7 +189,7 @@ public class HubExtensionsMonitorTests
     {
         Action<SentryMonitorOptions> configure = options => options.Interval("* * * * *");
 
-        await _hub.WithMonitor(MonitorSlug, () => Task.CompletedTask, configure);
+        await _hub.WithMonitorAsync(MonitorSlug, () => Task.CompletedTask, configure);
 
         Assert.Equal(2, _checkIns.Count);
         Assert.Same(configure, _checkIns[0].ConfigureMonitorOptions);
@@ -203,7 +201,7 @@ public class HubExtensionsMonitorTests
     {
         var delay = TimeSpan.FromMilliseconds(50);
 
-        await _hub.WithMonitor(MonitorSlug, () => Task.Delay(delay));
+        await _hub.WithMonitorAsync(MonitorSlug, () => Task.Delay(delay));
 
         var duration = _checkIns[1].Duration;
         Assert.NotNull(duration);
@@ -211,118 +209,21 @@ public class HubExtensionsMonitorTests
     }
 
     [Fact]
-    public async Task WithMonitor_ValueTask_Succeeds_CapturesOkAfterCompletion()
+    public void WithMonitor_JobReturnsTask_ThrowsWithoutCheckIn()
     {
-        var delay = TimeSpan.FromMilliseconds(50);
+        var ran = false;
+        ValueTask ValueTaskJob() { ran = true; return default; }
+        ValueTask<int> ValueTaskOfTJob() { ran = true; return new ValueTask<int>(1); }
+        Task TaskJob() { ran = true; return Task.CompletedTask; }
 
-        var valueTask = _hub.WithMonitor(MonitorSlug, () => PendingValueTask());
+        Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, () => ValueTaskJob()); });
+        Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, ValueTaskJob); });
+        Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, () => ValueTaskOfTJob()); });
+        Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor<Task>(MonitorSlug, () => TaskJob()); });
+        Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, () => Task.FromResult(1)); });
 
-        Assert.Single(_checkIns);
-        await Task.Delay(delay);
-        _pending.SetResult(true);
-        await valueTask;
-
-        AssertCheckIns(CheckInStatus.Ok);
-        Assert.True(_checkIns[1].Duration >= delay - TimeSpan.FromMilliseconds(10), $"Duration was {_checkIns[1].Duration}");
-    }
-
-    [Fact]
-    public void WithMonitor_ValueTask_ThrowsBeforeReturning_CapturesErrorAndRethrows()
-    {
-        var expected = new InvalidOperationException();
-        Func<ValueTask> job = () => throw expected;
-
-        var actual = Assert.Throws<InvalidOperationException>(() => _hub.WithMonitor(MonitorSlug, job));
-
-        Assert.Same(expected, actual);
-        AssertCheckIns(CheckInStatus.Error);
-    }
-
-    [Fact]
-    public async Task WithMonitor_ValueTask_ThrowsBeforeAwait_CapturesErrorAndRethrowsOnAwait()
-    {
-        var expected = new InvalidOperationException();
-#pragma warning disable CS1998 // Async method lacks 'await' operators
-        async ValueTask Job() => throw expected;
-#pragma warning restore CS1998
-
-        var valueTask = _hub.WithMonitor(MonitorSlug, Job);
-        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => valueTask.AsTask());
-
-        Assert.Same(expected, actual);
-        AssertCheckIns(CheckInStatus.Error);
-    }
-
-    [Fact]
-    public async Task WithMonitor_ValueTask_ThrowsAfterAwait_CapturesErrorAndRethrowsOnAwait()
-    {
-        var expected = new InvalidOperationException();
-        async ValueTask Job()
-        {
-            await Task.Yield();
-            throw expected;
-        }
-
-        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _hub.WithMonitor(MonitorSlug, () => Job()).AsTask());
-
-        Assert.Same(expected, actual);
-        AssertCheckIns(CheckInStatus.Error);
-    }
-
-    [Fact]
-    public async Task WithMonitor_ValueTask_AwaitsSourceExactlyOnce()
-    {
-        var source = new CountingValueTaskSource();
-
-        await _hub.WithMonitor(MonitorSlug, () => new ValueTask(source, 0));
-
-        Assert.Equal(1, source.GetResultCalls);
-        AssertCheckIns(CheckInStatus.Ok);
-    }
-
-    [Fact]
-    public async Task WithMonitor_ValueTaskOfT_LogsWarningAndCapturesOkImmediately()
-    {
-        var logger = new InMemoryDiagnosticLogger();
-        var previous = SentryClientExtensions.SentryOptionsForTestingOnly;
-        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions { Debug = true, DiagnosticLogger = logger };
-        try
-        {
-            var valueTask = _hub.WithMonitor(MonitorSlug, () => PendingValueTaskOfInt());
-
-            // Existing behaviour: the job is not awaited, so ok is sent before it completes.
-            AssertCheckIns(CheckInStatus.Ok);
-            Assert.Contains(logger.Entries, e =>
-                e.Level == SentryLevel.Warning && e.Message.Contains("async () => await job()") &&
-                e.Args.Contains(MonitorSlug));
-
-            _pending.SetResult(true);
-            Assert.Equal(1, await valueTask);
-        }
-        finally
-        {
-            SentryClientExtensions.SentryOptionsForTestingOnly = previous;
-        }
-    }
-
-    [Fact]
-    public void WithMonitor_TaskWithExplicitFuncOfT_LogsWarningAndCapturesOkImmediately()
-    {
-        var logger = new InMemoryDiagnosticLogger();
-        var previous = SentryClientExtensions.SentryOptionsForTestingOnly;
-        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions { Debug = true, DiagnosticLogger = logger };
-        try
-        {
-            _hub.WithMonitor<Task>(MonitorSlug, () => PendingTask());
-
-            AssertCheckIns(CheckInStatus.Ok);
-            Assert.Contains(logger.Entries, e => e.Level == SentryLevel.Warning && e.Args.Contains(MonitorSlug));
-        }
-        finally
-        {
-            SentryClientExtensions.SentryOptionsForTestingOnly = previous;
-        }
+        Assert.False(ran);
+        Assert.Empty(_checkIns);
     }
 
     // Pins which overload each job shape binds to. Jobs that bind to an async-aware path send ok only after the job
@@ -330,7 +231,7 @@ public class HubExtensionsMonitorTests
     [Fact]
     public async Task WithMonitor_Binding_AsyncLambda_UsesTaskOverload()
     {
-        var task = _hub.WithMonitor(MonitorSlug, async () => { await PendingTask(); });
+        var task = _hub.WithMonitorAsync(MonitorSlug, async () => { await PendingTask(); });
 
         Assert.Equal(typeof(Task), StaticType(task));
         await AssertOkSentAfterCompletion(task);
@@ -339,7 +240,7 @@ public class HubExtensionsMonitorTests
     [Fact]
     public async Task WithMonitor_Binding_AsyncLambdaWithResult_UsesTaskOfTOverload()
     {
-        var task = _hub.WithMonitor(MonitorSlug, async () => await PendingValueTaskOfInt());
+        var task = _hub.WithMonitorAsync(MonitorSlug, async () => await PendingValueTaskOfInt());
 
         Assert.Equal(typeof(Task<int>), StaticType(task));
         await AssertOkSentAfterCompletion(task);
@@ -348,7 +249,7 @@ public class HubExtensionsMonitorTests
     [Fact]
     public async Task WithMonitor_Binding_AsyncLambdaAwaitingValueTask_UsesTaskOverload()
     {
-        var task = _hub.WithMonitor(MonitorSlug, async () => await PendingValueTask());
+        var task = _hub.WithMonitorAsync(MonitorSlug, async () => await PendingValueTask());
 
         Assert.Equal(typeof(Task), StaticType(task));
         await AssertOkSentAfterCompletion(task);
@@ -357,7 +258,7 @@ public class HubExtensionsMonitorTests
     [Fact]
     public async Task WithMonitor_Binding_TaskExpressionLambda_UsesTaskOverload()
     {
-        var task = _hub.WithMonitor(MonitorSlug, () => PendingTask());
+        var task = _hub.WithMonitorAsync(MonitorSlug, () => PendingTask());
 
         Assert.Equal(typeof(Task), StaticType(task));
         await AssertOkSentAfterCompletion(task);
@@ -366,7 +267,7 @@ public class HubExtensionsMonitorTests
     [Fact]
     public async Task WithMonitor_Binding_TaskMethodGroup_UsesTaskOverload()
     {
-        var task = _hub.WithMonitor(MonitorSlug, PendingTask);
+        var task = _hub.WithMonitorAsync(MonitorSlug, PendingTask);
 
         Assert.Equal(typeof(Task), StaticType(task));
         await AssertOkSentAfterCompletion(task);
@@ -375,47 +276,34 @@ public class HubExtensionsMonitorTests
     [Fact]
     public async Task WithMonitor_Binding_TaskOfTMethodGroup_UsesTaskOfTOverload()
     {
-        var task = _hub.WithMonitor(MonitorSlug, PendingTaskOfInt);
+        var task = _hub.WithMonitorAsync(MonitorSlug, PendingTaskOfInt);
 
         Assert.Equal(typeof(Task<int>), StaticType(task));
         await AssertOkSentAfterCompletion(task);
     }
 
     [Fact]
-    public async Task WithMonitor_Binding_ValueTaskExpressionLambda_UsesFuncOfTAndAwaits()
+    public void WithMonitor_Binding_AsyncLambda_UsesFuncOfTAndThrows()
     {
-        // Binds to Func<T> (T = ValueTask), not Action: a value-returning lambda prefers the delegate with a return type.
-        var valueTask = _hub.WithMonitor(MonitorSlug, () => PendingValueTask());
+        // Binds to Func<T> with T = Task, so the guard catches it.
+        Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, async () => await PendingTask()); });
+        Assert.Throws<ArgumentException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, async () => { await PendingTask(); }); });
 
-        Assert.Equal(typeof(ValueTask), StaticType(valueTask));
-        await AssertOkSentAfterCompletion(valueTask.AsTask());
+        Assert.Empty(_checkIns);
     }
 
     [Fact]
-    public async Task WithMonitor_Binding_NewValueTaskLambda_UsesFuncOfTAndAwaits()
+    public void WithMonitor_Binding_LambdasThatOnlyThrow_UseAction()
     {
-        var valueTask = _hub.WithMonitor(MonitorSlug, () => new ValueTask(_pending.Task));
+        // With a Func<Task> overload under the same name, these bound to it and the exception was lost in the task.
+        Assert.Throws<InvalidOperationException>(() =>
+            _hub.WithMonitor(MonitorSlug, () => throw new InvalidOperationException()));
+        Assert.Throws<InvalidOperationException>(() =>
+            _hub.WithMonitor(MonitorSlug, () => { DoNothing(); throw new InvalidOperationException(); }));
 
-        Assert.Equal(typeof(ValueTask), StaticType(valueTask));
-        await AssertOkSentAfterCompletion(valueTask.AsTask());
-    }
-
-    [Fact]
-    public async Task WithMonitor_Binding_ValueTaskMethodGroup_UsesFuncOfTAndAwaits()
-    {
-        var valueTask = _hub.WithMonitor(MonitorSlug, PendingValueTask);
-
-        Assert.Equal(typeof(ValueTask), StaticType(valueTask));
-        await AssertOkSentAfterCompletion(valueTask.AsTask());
-    }
-
-    [Fact]
-    public void WithMonitor_Binding_ValueTaskOfTExpressionLambda_UsesFuncOfT()
-    {
-        var valueTask = _hub.WithMonitor(MonitorSlug, () => PendingValueTaskOfInt());
-
-        Assert.Equal(typeof(ValueTask<int>), StaticType(valueTask));
-        AssertCheckIns(CheckInStatus.Ok);
+        Assert.Equal(4, _checkIns.Count);
+        Assert.Equal(CheckInStatus.Error, _checkIns[1].Status);
+        Assert.Equal(CheckInStatus.Error, _checkIns[3].Status);
     }
 
     [Fact]
@@ -442,8 +330,8 @@ public class HubExtensionsMonitorTests
     {
         Assert.Throws<ArgumentNullException>("job", () => _hub.WithMonitor(MonitorSlug, (Action)null!));
         Assert.Throws<ArgumentNullException>("job", () => _hub.WithMonitor(MonitorSlug, (Func<int>)null!));
-        Assert.Throws<ArgumentNullException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, (Func<Task>)null!); });
-        Assert.Throws<ArgumentNullException>("job", () => { _ = _hub.WithMonitor(MonitorSlug, (Func<Task<int>>)null!); });
+        Assert.Throws<ArgumentNullException>("job", () => { _ = _hub.WithMonitorAsync(MonitorSlug, (Func<Task>)null!); });
+        Assert.Throws<ArgumentNullException>("job", () => { _ = _hub.WithMonitorAsync(MonitorSlug, (Func<Task<int>>)null!); });
 
         Assert.Empty(_checkIns);
     }
@@ -453,7 +341,7 @@ public class HubExtensionsMonitorTests
     {
         Assert.Throws<ArgumentNullException>("monitorSlug", () => _hub.WithMonitor(null!, () => { }));
         Assert.Throws<ArgumentException>("monitorSlug", () => _hub.WithMonitor(" ", () => 1));
-        Assert.Throws<ArgumentException>("monitorSlug", () => { _ = _hub.WithMonitor("", () => Task.CompletedTask); });
+        Assert.Throws<ArgumentException>("monitorSlug", () => { _ = _hub.WithMonitorAsync("", () => Task.CompletedTask); });
 
         Assert.Empty(_checkIns);
     }
@@ -492,7 +380,7 @@ public class HubExtensionsMonitorTests
         var fixture = new TraceFixture();
         var parentTraceId = fixture.ScopeTraceId();
 
-        await fixture.Hub.WithMonitor(MonitorSlug, async () =>
+        await fixture.Hub.WithMonitorAsync(MonitorSlug, async () =>
         {
             await Task.Yield();
             fixture.Hub.CaptureException(new InvalidOperationException());
@@ -506,33 +394,6 @@ public class HubExtensionsMonitorTests
     }
 
     [Fact]
-    public async Task WithMonitor_ValueTask_ScopeStaysCurrentUntilCompletion()
-    {
-        var fixture = new TraceFixture();
-        var parentTraceId = fixture.ScopeTraceId();
-
-        var job = fixture.Hub.WithMonitor(MonitorSlug, CaptureAfterPending);
-        Assert.Equal(typeof(ValueTask), StaticType(job));
-
-        // The caller's scope is restored while the job is still running
-        Assert.Equal(parentTraceId, fixture.ScopeTraceId());
-
-        _pending.SetResult(true);
-        await job;
-
-        var eventTraceId = Assert.Single(fixture.EventTraceIds);
-        Assert.NotEqual(parentTraceId, eventTraceId);
-        Assert.Equal(2, fixture.CheckInTraceIds.Count);
-        Assert.All(fixture.CheckInTraceIds, id => Assert.Equal(eventTraceId, id));
-
-        async ValueTask CaptureAfterPending()
-        {
-            await _pending.Task;
-            fixture.Hub.CaptureException(new InvalidOperationException());
-        }
-    }
-
-    [Fact]
     public async Task WithMonitor_ActiveTransaction_UsesItsTrace()
     {
         var fixture = new TraceFixture();
@@ -540,7 +401,7 @@ public class HubExtensionsMonitorTests
         fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         fixture.Hub.WithMonitor(MonitorSlug, () => { });
-        await fixture.Hub.WithMonitor(MonitorSlug, () => Task.CompletedTask);
+        await fixture.Hub.WithMonitorAsync(MonitorSlug, () => Task.CompletedTask);
 
         Assert.Equal(4, fixture.CheckInTraceIds.Count);
         Assert.All(fixture.CheckInTraceIds, id => Assert.Equal(transaction.TraceId, id));
@@ -632,18 +493,6 @@ public class HubExtensionsMonitorTests
         await job;
 
         AssertCheckIns(CheckInStatus.Ok);
-    }
-
-    private sealed class CountingValueTaskSource : IValueTaskSource
-    {
-        public int GetResultCalls { get; private set; }
-
-        public ValueTaskSourceStatus GetStatus(short token) => ValueTaskSourceStatus.Succeeded;
-
-        public void OnCompleted(Action<object?> continuation, object? state, short token,
-            ValueTaskSourceOnCompletedFlags flags) => continuation(state);
-
-        public void GetResult(short token) => GetResultCalls++;
     }
 
     private void AssertCheckIns(CheckInStatus finalStatus)

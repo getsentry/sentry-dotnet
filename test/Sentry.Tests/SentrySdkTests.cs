@@ -1320,7 +1320,7 @@ public class SentrySdkTests : IDisposable
         var hub = Substitute.For<IHub>();
         using var _ = SentrySdk.UseHub(hub);
 
-        await SentrySdk.WithMonitor("my-monitor", () => Task.CompletedTask);
+        await SentrySdk.WithMonitorAsync("my-monitor", () => Task.CompletedTask);
 
         hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.InProgress, Arg.Any<SentryId?>(),
             Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
@@ -1329,23 +1329,14 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public async Task WithMonitor_ValueTask_ForwardsToCurrentHubAndCapturesOkAfterCompletion()
+    public void WithMonitor_ValueTask_ThrowsWithoutCheckIn()
     {
         var hub = Substitute.For<IHub>();
-        using var _ = SentrySdk.UseHub(hub);
-        var pending = new TaskCompletionSource<bool>();
+        using var hubScope = SentrySdk.UseHub(hub);
 
-        var valueTask = SentrySdk.WithMonitor("my-monitor", () => new ValueTask(pending.Task));
+        Assert.Throws<ArgumentException>("job", () => { _ = SentrySdk.WithMonitor("my-monitor", () => new ValueTask()); });
 
-        hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.InProgress, Arg.Any<SentryId?>(),
-            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
-        hub.DidNotReceive().CaptureCheckIn("my-monitor", CheckInStatus.Ok, Arg.Any<SentryId?>(),
-            Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
-
-        pending.SetResult(true);
-        await valueTask;
-
-        hub.Received(1).CaptureCheckIn("my-monitor", CheckInStatus.Ok, Arg.Any<SentryId?>(),
+        hub.DidNotReceive().CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>(), Arg.Any<SentryId?>(),
             Arg.Any<TimeSpan?>(), Arg.Any<Scope>(), Arg.Any<Action<SentryMonitorOptions>>());
     }
 

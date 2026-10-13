@@ -423,10 +423,9 @@ public static class HubExtensions
     /// <remarks>
     /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
     /// and any events captured while it runs.
-    /// A job that returns a <see cref="ValueTask"/> is awaited before the final check-in is sent. For a job that
-    /// returns a <see cref="ValueTask{TResult}"/>, pass <c>async () => await job()</c> so it binds to the
-    /// <see cref="Task{TResult}"/> overload.
+    /// For a job that returns a task, use <c>WithMonitorAsync</c>.
     /// </remarks>
+    /// <exception cref="ArgumentException"><typeparamref name="T"/> is a <see cref="Task"/> or <see cref="ValueTask"/> type.</exception>
     public static T WithMonitor<T>(
         this IHub hub,
         string monitorSlug,
@@ -434,6 +433,13 @@ public static class HubExtensions
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
     {
         ValidateWithMonitorArguments(monitorSlug, job);
+        if (IsAwaitable(typeof(T)))
+        {
+            throw new ArgumentException(
+                "The job returns a task, so WithMonitor would send the check-in before it completes. " +
+                "Use WithMonitorAsync instead.", nameof(job));
+        }
+
         return hub.RunWithMonitor(monitorSlug, job, configureMonitorOptions);
     }
 
@@ -443,27 +449,12 @@ public static class HubExtensions
         Func<T> job,
         Action<SentryMonitorOptions>? configureMonitorOptions)
     {
-        // A ValueTask job's continuations keep the execution context, and so this scope, after it is disposed here
         using var runScope = hub.PushMonitorRunScope();
         var checkInId = hub.CaptureInProgressCheckIn(monitorSlug, configureMonitorOptions);
         var stopwatch = SentryStopwatch.StartNew();
         try
         {
             var result = job();
-            if (result is ValueTask valueTask)
-            {
-                // A ValueTask job binds to Func<T>; send the final check-in once it completes.
-                return (T)(object)hub.CompleteWithMonitorAsync(monitorSlug, valueTask, checkInId, stopwatch);
-            }
-
-            if (result is Task || IsGenericValueTask(typeof(T)))
-            {
-                hub.GetSentryOptions()?.LogWarning(
-                    "WithMonitor job for monitor '{0}' returned a Task or ValueTask<T> that WithMonitor does not await, " +
-                    "so the check-in is sent before the job completes. Use 'async () => await job()' instead.",
-                    monitorSlug);
-            }
-
             hub.CaptureCheckIn(monitorSlug, CheckInStatus.Ok, checkInId, stopwatch.Elapsed);
             return result;
         }
@@ -474,27 +465,9 @@ public static class HubExtensions
         }
     }
 
-    private static async ValueTask CompleteWithMonitorAsync(
-        this IHub hub,
-        string monitorSlug,
-        ValueTask job,
-        SentryId checkInId,
-        SentryStopwatch stopwatch)
-    {
-        try
-        {
-            await job.ConfigureAwait(false);
-            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Ok, checkInId, stopwatch.Elapsed);
-        }
-        catch
-        {
-            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Error, checkInId, stopwatch.Elapsed);
-            throw;
-        }
-    }
-
-    private static bool IsGenericValueTask(Type type) =>
-        type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTask<>);
+    private static bool IsAwaitable(Type type) =>
+        typeof(Task).IsAssignableFrom(type) || type == typeof(ValueTask) ||
+        (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTask<>));
 
     /// <summary>
     /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
@@ -507,7 +480,7 @@ public static class HubExtensions
     /// </remarks>
     /// <example>
     /// <code>
-    /// await hub.WithMonitor("nightly-cleanup", async () => await CleanupAsync(), options =>
+    /// await hub.WithMonitorAsync("nightly-cleanup", async () => await CleanupAsync(), options =>
     /// {
     ///     options.Interval("0 3 * * *");
     ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
@@ -520,7 +493,7 @@ public static class HubExtensions
     /// <param name="configureMonitorOptions">
     /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
     /// </param>
-    public static Task WithMonitor(
+    public static Task WithMonitorAsync(
         this IHub hub,
         string monitorSlug,
         Func<Task> job,
@@ -534,9 +507,9 @@ public static class HubExtensions
         }, configureMonitorOptions);
     }
 
-    /// <inheritdoc cref="WithMonitor(IHub, string, Func{Task}, Action{SentryMonitorOptions}?)"/>
+    /// <inheritdoc cref="WithMonitorAsync(IHub, string, Func{Task}, Action{SentryMonitorOptions}?)"/>
     /// <returns>The value returned by <paramref name="job"/>.</returns>
-    public static Task<T> WithMonitor<T>(
+    public static Task<T> WithMonitorAsync<T>(
         this IHub hub,
         string monitorSlug,
         Func<Task<T>> job,
