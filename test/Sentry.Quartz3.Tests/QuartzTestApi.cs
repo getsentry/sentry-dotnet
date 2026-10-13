@@ -22,16 +22,16 @@ internal class NoOpJob : IJob
     public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
 }
 
-[SentryCronMonitorSlug]
+[SentryMonitorSlug]
 internal class MonitoredJob : NoOpJob;
 
-[SentryCronMonitorSlug("custom-slug")]
+[SentryMonitorSlug("custom-slug")]
 internal class CustomSlugJob : NoOpJob;
 
-[SentryCronMonitorSlug(SendMonitorConfig = false)]
+[SentryMonitorSlug(SendMonitorConfig = false)]
 internal class NoMonitorConfigJob : NoOpJob;
 
-[SentryCronMonitorSlug]
+[SentryMonitorSlug]
 internal class FailingJob : IJob
 {
     public Task Execute(IJobExecutionContext context) => throw new InvalidOperationException("Job failed");

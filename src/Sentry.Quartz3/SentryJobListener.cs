@@ -5,7 +5,7 @@ namespace Sentry.Quartz;
 
 /// <summary>
 /// A Quartz.NET job listener that sends a Sentry check-in each time a job with
-/// <see cref="SentryCronMonitorSlugAttribute"/> runs.
+/// <see cref="SentryMonitorSlugAttribute"/> runs.
 /// </summary>
 public class SentryJobListener : IJobListener
 {
