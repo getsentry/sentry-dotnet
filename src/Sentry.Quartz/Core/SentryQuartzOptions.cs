@@ -8,7 +8,7 @@ namespace Sentry.Quartz;
 public class SentryQuartzOptions
 {
     /// <summary>
-    /// When enabled, the in-progress check-in of each job with <see cref="SentryCronMonitorSlugAttribute"/> includes
+    /// When enabled, the in-progress check-in of each job with <see cref="SentryMonitorSlugAttribute"/> includes
     /// the schedule of the trigger that fired the job as the monitor config, so Sentry creates the monitor or updates
     /// its schedule. Defaults to <c>true</c>.
     /// </summary>
@@ -24,7 +24,7 @@ public class SentryQuartzOptions
     /// converted, so only <c>UTC</c> and IANA IDs are sent.
     /// </para>
     /// <para>
-    /// To turn this off for one job, set <see cref="SentryCronMonitorSlugAttribute.SendMonitorConfig"/>.
+    /// To turn this off for one job, set <see cref="SentryMonitorSlugAttribute.SendMonitorConfig"/>.
     /// </para>
     /// </remarks>
     public bool SendMonitorConfig { get; set; } = true;

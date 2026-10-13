@@ -3,12 +3,12 @@ using Sentry.Extensibility;
 
 namespace Sentry.Quartz;
 
-// Captures the check-ins of jobs with SentryCronMonitorSlugAttribute
+// Captures the check-ins of jobs with SentryMonitorSlugAttribute
 internal sealed class JobMonitor
 {
     private const int MaxSlugLength = 50;
 
-    private static readonly ConcurrentDictionary<Type, SentryCronMonitorSlugAttribute?> Attributes = new();
+    private static readonly ConcurrentDictionary<Type, SentryMonitorSlugAttribute?> Attributes = new();
 
     private readonly SentryQuartzOptions _options;
     private readonly IHub _hub;
@@ -33,7 +33,7 @@ internal sealed class JobMonitor
         try
         {
             var jobType = QuartzApi.GetJobType(context.JobDetail);
-            var attribute = Attributes.GetOrAdd(jobType, type => type.GetCustomAttribute<SentryCronMonitorSlugAttribute>());
+            var attribute = Attributes.GetOrAdd(jobType, type => type.GetCustomAttribute<SentryMonitorSlugAttribute>());
             if (attribute is null)
             {
                 return null;
@@ -43,7 +43,7 @@ internal sealed class JobMonitor
             if (monitorSlug is null)
             {
                 Logger?.LogDebug("Skipping the check-in for job '{0}'. Its name has no characters a monitor slug can use. " +
-                                 "Set a monitor slug in its SentryCronMonitorSlug attribute.", context.JobDetail.Key);
+                                 "Set a monitor slug in its SentryMonitorSlug attribute.", context.JobDetail.Key);
                 return null;
             }
 
@@ -126,12 +126,12 @@ internal sealed class JobMonitor
                 return null;
             }
 
-            if (!trigger.JobDataMap.ContainsKey(SentryCronMonitorSlugAttribute.JobDataKey)
+            if (!trigger.JobDataMap.ContainsKey(SentryMonitorSlugAttribute.JobDataKey)
                 && await QuartzApi.HasSeveralTriggersAsync(context, cancellationToken).ConfigureAwait(false))
             {
                 Logger?.LogDebug("Not sending the schedule of trigger '{0}'. Job '{1}' has more than one trigger. " +
                                  "Set '{2}' in each trigger's data map to give each its own monitor.",
-                    trigger.Key, context.JobDetail.Key, SentryCronMonitorSlugAttribute.JobDataKey);
+                    trigger.Key, context.JobDetail.Key, SentryMonitorSlugAttribute.JobDataKey);
                 return null;
             }
 
@@ -144,7 +144,7 @@ internal sealed class JobMonitor
         }
     }
 
-    private string? ResolveMonitorSlug(IJobExecutionContext context, Type jobType, SentryCronMonitorSlugAttribute attribute)
+    private string? ResolveMonitorSlug(IJobExecutionContext context, Type jobType, SentryMonitorSlugAttribute attribute)
     {
         var monitorSlug = GetMonitorSlug(context, attribute, out var fromJobType);
         if (monitorSlug is null)
@@ -155,23 +155,23 @@ internal sealed class JobMonitor
         if (fromJobType)
         {
             Logger?.LogDebug("Job `{0}` has no identity, so its monitor slug is `{1}`. Give the job an identity " +
-                             "(WithIdentity(...)) or set a slug ([SentryCronMonitorSlug(\"…\")]) to keep the monitor stable.",
+                             "(WithIdentity(...)) or set a slug ([SentryMonitorSlug(\"…\")]) to keep the monitor stable.",
                 jobType.FullName, monitorSlug);
         }
 
         return monitorSlug;
     }
 
-    internal static string? GetMonitorSlug(IJobExecutionContext context, SentryCronMonitorSlugAttribute attribute) =>
+    internal static string? GetMonitorSlug(IJobExecutionContext context, SentryMonitorSlugAttribute attribute) =>
         GetMonitorSlug(context, attribute, out _);
 
     private static string? GetMonitorSlug(
         IJobExecutionContext context,
-        SentryCronMonitorSlugAttribute attribute,
+        SentryMonitorSlugAttribute attribute,
         out bool fromJobType)
     {
         fromJobType = false;
-        if (context.MergedJobDataMap.TryGetValue(SentryCronMonitorSlugAttribute.JobDataKey, out var value)
+        if (context.MergedJobDataMap.TryGetValue(SentryMonitorSlugAttribute.JobDataKey, out var value)
             && value is string dataMapSlug
             && !string.IsNullOrWhiteSpace(dataMapSlug))
         {

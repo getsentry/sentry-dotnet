@@ -19,7 +19,7 @@ public static class Program
 
         builder.Services.AddQuartz(quartz =>
         {
-            // Runs each job in its own scope. Jobs with [SentryCronMonitorSlug] also send check-ins, with the
+            // Runs each job in its own scope. Jobs with [SentryMonitorSlug] also send check-ins, with the
             // trigger's schedule as the monitor config. Exceptions reach Sentry through Quartz's error log.
             quartz.AddSentry(options =>
             {
@@ -63,7 +63,7 @@ public static class Program
     }
 }
 
-[SentryCronMonitorSlug("first-job")]
+[SentryMonitorSlug("first-job")]
 public class FirstJob : IJob
 {
     public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
@@ -74,7 +74,7 @@ public class FirstJob : IJob
     }
 }
 
-[SentryCronMonitorSlug("job-that-throws")]
+[SentryMonitorSlug("job-that-throws")]
 public class SecondJob : IJob
 {
     private static readonly Random _random = new Random();
@@ -92,7 +92,7 @@ public class SecondJob : IJob
 }
 
 // Uses the slug of the job key: "thirdjob"
-[SentryCronMonitorSlug]
+[SentryMonitorSlug]
 public class ThirdJob : IJob
 {
     public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
