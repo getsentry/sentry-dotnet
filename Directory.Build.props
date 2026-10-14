@@ -40,9 +40,9 @@
     <CurrentTfms>net8.0;net9.0;net10.0;net11.0</CurrentTfms>
     <LatestAndroidTfm>net11.0-android37.0</LatestAndroidTfm>
     <PreviousAndroidTfm>net10.0-android36.0</PreviousAndroidTfm>
-    <LatestIosTfm>net11.0-ios26.5</LatestIosTfm>
+    <LatestIosTfm>net11.0-ios27.0</LatestIosTfm>
     <PreviousIosTfm>net10.0-ios26</PreviousIosTfm>
-    <LatestMacCatalystTfm>net11.0-maccatalyst26.5</LatestMacCatalystTfm>
+    <LatestMacCatalystTfm>net11.0-maccatalyst27.0</LatestMacCatalystTfm>
     <PreviousMacCatalystTfm>net10.0-maccatalyst26</PreviousMacCatalystTfm>
     <LatestWindowsTfm>net11.0-windows10.0.19041.0</LatestWindowsTfm>
     <PreviousWindowsTfm>net10.0-windows10.0.19041.0</PreviousWindowsTfm>

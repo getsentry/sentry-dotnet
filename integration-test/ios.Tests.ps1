@@ -20,8 +20,8 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
     # UseMonoRuntime property was removed. Mono on iOS is therefore covered only by net10.0, which
     # this job can't build alongside net11.0 because of the Xcode pinning noted above. See
     # https://devblogs.microsoft.com/dotnet/coreclr-progress-and-mono-timeline-dotnet-maui/
-    @{ tfm = "net11.0-ios26.5"; configuration = "Release"; runtime = "coreclr" }
-    @{ tfm = "net11.0-ios26.5"; configuration = "Debug";   runtime = "coreclr" }
+    @{ tfm = "net11.0-ios27.0"; configuration = "Release"; runtime = "coreclr" }
+    @{ tfm = "net11.0-ios27.0"; configuration = "Debug";   runtime = "coreclr" }
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1

@@ -18,7 +18,7 @@ jobs:
     name: Format Code
     # Run on 'macos' because Linux is missing the `ios` workload: https://github.com/dotnet/runtime/issues/85505
     # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

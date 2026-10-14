@@ -51,7 +51,7 @@ on:
 
 jobs:
   ios-tests:
-    runs-on: macos-26
+    runs-on: xcode-27
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1

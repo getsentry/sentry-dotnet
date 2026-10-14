@@ -38,12 +38,12 @@ runs:
         sudo apt-get update
         sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
 
-    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md#xcode
+    # See https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md#xcode
     # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_26.6.app
+      run: sudo xcode-select --switch /Applications/Xcode_27.app
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21
