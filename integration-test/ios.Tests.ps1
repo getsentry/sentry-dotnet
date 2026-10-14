@@ -126,6 +126,7 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"nsexception`""
+        $result.Envelopes() | Should -AnyElementMatch "`"in_foreground`":true"
         $result.Envelopes() | Should -HaveCount 1
     }
 
