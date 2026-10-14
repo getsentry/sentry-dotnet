@@ -1,4 +1,3 @@
-#if NET6_0_OR_GREATER
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -24,4 +23,3 @@ internal sealed class SentryHostOptionsSetup<TOptions> : IConfigureOptions<TOpti
         bindable.ApplyTo(options);
     }
 }
-#endif
