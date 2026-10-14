@@ -27,7 +27,7 @@ public class Program
         // Add the Sentry integration.
         // Most options can be defined via binding configuration (including `appsettings.json` as we do here)
         // or coded explicitly, in the options callback below (as we do with the DSN and Serilog log context)
-        builder.WebHost.UseSentry(o =>
+        builder.UseSentry(o =>
         {
 #if !SENTRY_DSN_DEFINED_IN_ENV
             o.Dsn = SamplesShared.Dsn;

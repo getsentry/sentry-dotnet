@@ -1116,7 +1116,7 @@ public class SentryOptions
     /// The default value is <c>false</c>. Set to <c>true</c> to enable W3C Trace Context propagation
     /// for interoperability with services that support OpenTelemetry standards.
     /// </remarks>
-    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
+    /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/options/#PropagateTraceparent"/>
     public bool PropagateTraceparent { get; set; }
 
     /// <summary>

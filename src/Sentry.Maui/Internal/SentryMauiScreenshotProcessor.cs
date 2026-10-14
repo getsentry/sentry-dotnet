@@ -1,8 +1,9 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Maui.Internal;
 
-internal class SentryMauiScreenshotProcessor : ISentryEventProcessorWithHint
+internal class SentryMauiScreenshotProcessor : ISentryEventProcessorWithHint, ISdkProcessor
 {
     private readonly SentryMauiOptions _options;
 

@@ -62,6 +62,20 @@ public sealed class SdkVersion : ISentryJsonSerializable
     internal void AddPackage(SentryPackage package)
         => InternalPackages.Add(package);
 
+    internal void CopyTo(SdkVersion other)
+    {
+        if (Name is not null && Version is not null)
+        {
+            other.Name = Name;
+            other.Version = Version;
+        }
+
+        foreach (var package in InternalPackages)
+        {
+            other.AddPackage(package);
+        }
+    }
+
     /// <summary>
     /// Add an integration used in the SDK.
     /// </summary>

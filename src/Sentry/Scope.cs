@@ -17,6 +17,11 @@ public class Scope : IEventLike
 
     internal bool Locked { get; set; }
 
+    internal bool ScopeSyncEnabled { get; set; } = true;
+
+    private IScopeObserver? ScopeObserver =>
+        ScopeSyncEnabled && Options.EnableScopeSync ? Options.ScopeObserver : null;
+
     private readonly Lock _lastEventIdSync = new();
     private SentryId _lastEventId;
 
@@ -105,14 +110,7 @@ public class Scope : IEventLike
     }
 
     // Internal for testing.
-    internal Action<SentryUser?> UserChanged => user =>
-    {
-        if (Options.EnableScopeSync &&
-            Options.ScopeObserver is { } observer)
-        {
-            observer.SetUser(user);
-        }
-    };
+    internal Action<SentryUser?> UserChanged => user => ScopeObserver?.SetUser(user);
 
     private SentryUser? _user;
 
@@ -151,10 +149,7 @@ public class Scope : IEventLike
 
             field = value;
 
-            if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
-            {
-                observer.SetEnvironment(value ?? Options.ScopeDefaults.Environment);
-            }
+            ScopeObserver?.SetEnvironment(value ?? Options.ScopeDefaults.Environment);
         }
     }
 
@@ -234,17 +229,17 @@ public class Scope : IEventLike
             {
                 _transaction.Value = value;
 
-                if (Options.EnableScopeSync)
+                if (ScopeObserver is { } observer)
                 {
                     if (_transaction.Value != null)
                     {
                         // If there is a transaction set we propagate the trace to the native layer
-                        Options.ScopeObserver?.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
+                        observer.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
                     }
                     else
                     {
                         // If the transaction is being removed from the scope, reset and sync the trace as well
-                        Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                        observer.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
                     }
                 }
             }
@@ -353,20 +348,14 @@ public class Scope : IEventLike
         }
 
         _breadcrumbs.Enqueue(breadcrumb);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
-        }
+        ScopeObserver?.AddBreadcrumb(breadcrumb);
     }
 
     /// <inheritdoc />
     public void SetExtra(string key, object? value)
     {
         _extra[key] = value;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetExtra(key, value);
-        }
+        ScopeObserver?.SetExtra(key, value);
     }
 
     /// <inheritdoc />
@@ -378,20 +367,14 @@ public class Scope : IEventLike
         }
 
         _tags[key] = value;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetTag(key, value);
-        }
+        ScopeObserver?.SetTag(key, value);
     }
 
     /// <inheritdoc />
     public void UnsetTag(string key)
     {
         _tags.TryRemove(key, out _);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.UnsetTag(key);
-        }
+        ScopeObserver?.UnsetTag(key);
     }
 
     /// <summary>
@@ -400,20 +383,17 @@ public class Scope : IEventLike
     public void AddAttachment(SentryAttachment attachment)
     {
         _attachments.Add(attachment);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.AddAttachment(attachment);
-        }
+        ScopeObserver?.AddAttachment(attachment);
     }
 
     internal void SetPropagationContext(SentryPropagationContext propagationContext)
     {
         PropagationContext = propagationContext;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetTrace(propagationContext.TraceId, propagationContext.SpanId);
-        }
+        SyncPropagationContext();
     }
+
+    internal void SyncPropagationContext() =>
+        ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
 
     /// <summary>
     /// Resets all the properties and collections within the scope to their default values.
@@ -441,10 +421,7 @@ public class Scope : IEventLike
     public void ClearAttachments()
     {
         _attachments.Clear();
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.ClearAttachments();
-        }
+        ScopeObserver?.ClearAttachments();
     }
 
     /// <summary>
@@ -558,10 +535,45 @@ public class Scope : IEventLike
     {
         var clone = new Scope(Options, PropagationContext)
         {
-            OnEvaluating = OnEvaluating
+            ScopeSyncEnabled = false,
+            OnEvaluating = OnEvaluating,
+            Level = Level,
+            Environment = Environment,
+            TransactionName = TransactionName,
+            Transaction = Transaction,
+            Fingerprint = Fingerprint,
+            SessionUpdate = SessionUpdate,
         };
 
-        Apply(clone);
+        if (_user is { } user)
+        {
+            clone.User = user.Clone();
+        }
+
+        Contexts.CopyTo(clone.Contexts);
+        Request.CopyTo(clone.Request);
+        Sdk.CopyTo(clone.Sdk);
+
+        // Copied directly so BeforeBreadcrumb and TagFilters don't run again
+        foreach (var breadcrumb in _breadcrumbs)
+        {
+            clone._breadcrumbs.Enqueue(breadcrumb);
+        }
+
+        foreach (var (key, value) in _extra)
+        {
+            clone._extra[key] = value;
+        }
+
+        foreach (var (key, value) in _tags)
+        {
+            clone._tags[key] = value;
+        }
+
+        foreach (var attachment in _attachments)
+        {
+            clone._attachments.Add(attachment);
+        }
 
         foreach (var processor in EventProcessors)
         {
@@ -578,6 +590,7 @@ public class Scope : IEventLike
             clone.ExceptionProcessors.Add(processor);
         }
 
+        clone.ScopeSyncEnabled = true;
         return clone;
     }
 

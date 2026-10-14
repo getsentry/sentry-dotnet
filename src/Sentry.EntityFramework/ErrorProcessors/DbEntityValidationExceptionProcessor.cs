@@ -1,9 +1,11 @@
+using Sentry.Internal;
+
 namespace Sentry.EntityFramework.ErrorProcessors;
 
 /// <summary>
 /// Exception processor for <see cref="DbEntityValidationException"/>.
 /// </summary>
-public class DbEntityValidationExceptionProcessor : SentryEventExceptionProcessor<DbEntityValidationException>
+public class DbEntityValidationExceptionProcessor : SentryEventExceptionProcessor<DbEntityValidationException>, ISdkProcessor
 {
     /// <summary>
     /// Extracts details from <see cref="DbEntityValidationException"/> into the <see cref="SentryEvent"/>.
