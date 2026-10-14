@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // configuration system, which includes anything defined on the ConfigurationBuilder ('appsettings.json', environment
 // variables etc.)
 // See: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-8.0
-builder.WebHost.UseSentry(options =>
+builder.UseSentry(options =>
     {
 #if !SENTRY_DSN_DEFINED_IN_ENV
         // A DSN is required. You can set here in code, via the SENTRY_DSN environment variable or in your

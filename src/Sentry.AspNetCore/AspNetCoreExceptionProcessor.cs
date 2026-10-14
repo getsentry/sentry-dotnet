@@ -1,9 +1,10 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry.AspNetCore;
 
-internal class AspNetCoreExceptionProcessor : ISentryEventExceptionProcessor
+internal class AspNetCoreExceptionProcessor : ISentryEventExceptionProcessor, ISdkProcessor
 {
     public void Process(Exception exception, SentryEvent @event)
     {

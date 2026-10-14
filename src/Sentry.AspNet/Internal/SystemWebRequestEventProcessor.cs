@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry.AspNet.Internal;
 
-internal class SystemWebRequestEventProcessor : ISentryEventProcessor
+internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     private readonly SentryOptions _options;
     internal IRequestPayloadExtractor PayloadExtractor { get; }

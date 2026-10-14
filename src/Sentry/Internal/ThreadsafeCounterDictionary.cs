@@ -24,13 +24,13 @@ internal class ThreadsafeCounterDictionary<TKey> : IReadOnlyDictionary<TKey, int
     /// </summary>
     /// <param name="key">The key of the counter to increment.</param>
     /// <param name="quantity">The amount to add to the counter.</param>
-    public void Add(TKey key, int quantity) => _items.GetOrAdd(key, new CounterItem()).Add(quantity);
+    public void Add(TKey key, int quantity) => _items.GetOrAdd(key, static _ => new CounterItem()).Add(quantity);
 
     /// <summary>
     /// Atomically increments a counter based on the key provided, creating the counter if necessary.
     /// </summary>
     /// <param name="key">The key of the counter to increment.</param>
-    public void Increment(TKey key) => _items.GetOrAdd(key, new CounterItem()).Increment();
+    public void Increment(TKey key) => _items.GetOrAdd(key, static _ => new CounterItem()).Increment();
 
     /// <summary>
     /// Gets a single counter's value while atomically resetting it to zero.

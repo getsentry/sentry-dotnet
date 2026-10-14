@@ -1,9 +1,10 @@
 using Sentry.Cocoa.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Cocoa;
 
-internal class CocoaEventProcessor : ISentryEventProcessor, IDisposable
+internal class CocoaEventProcessor : ISentryEventProcessor, IDisposable, ISdkProcessor
 {
     public SentryEvent Process(SentryEvent @event)
     {

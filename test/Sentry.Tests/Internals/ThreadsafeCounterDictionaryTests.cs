@@ -275,4 +275,23 @@ public class ThreadsafeCounterDictionaryTests
         const int expectedGrandTotal = numCounters * numThreadsPerCounter * numIterationsPerThread;
         Assert.Equal(expectedGrandTotal, grandTotal);
     }
+
+#if NET5_0_OR_GREATER && !__MOBILE__
+    [Fact]
+    public void AddAndIncrement_ExistingCounter_DoNotAllocate()
+    {
+        var key = DiscardReason.CallbackError.WithCategory(DataCategory.LogItem);
+        var counters = new ThreadsafeCounterDictionary<DiscardReasonWithCategory>();
+        counters.Add(key, 1);
+        counters.Increment(key);
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        counters.Add(key, 1);
+        counters.Increment(key);
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+        Assert.Equal(0, allocated);
+        Assert.Equal(4, counters[key]);
+    }
+#endif
 }

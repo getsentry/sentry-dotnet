@@ -20,9 +20,11 @@ jobs:
     # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
     runs-on: xcode-27
     steps:
+      # PR head, not the merge ref: the submodule working trees must match the branch we commit to
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           submodules: recursive
 
       - name: Setup Environment
