@@ -158,6 +158,7 @@
     <Project Path="src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" />
     <Project Path="src/Sentry.EntityFramework/Sentry.EntityFramework.csproj" />
     <Project Path="src/Sentry.Extensions.AI/Sentry.Extensions.AI.csproj" />
+    <Project Path="src/Sentry.Extensions.Hosting/Sentry.Extensions.Hosting.csproj" />
     <Project Path="src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj" />
     <Project Path="src/Sentry.Google.Cloud.Functions/Sentry.Google.Cloud.Functions.csproj" />
     <Project Path="src/Sentry.Hangfire/Sentry.Hangfire.csproj" />
