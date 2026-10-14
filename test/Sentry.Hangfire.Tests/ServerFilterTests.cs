@@ -302,6 +302,30 @@ public class ServerFilterTests
     }
 
     [Fact]
+    public void OnPerforming_CronChangedWithinTtl_SendsNewCron()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture { Cron = "0 2 * * *", Job = ReportJob("eu") };
+        var filter = fixture.GetSut();
+        filter.OnPerforming(fixture.PerformingContext);
+        fixture.Connection.GetAllEntriesFromHash($"recurring-job:{fixture.RecurringJobId}")
+            .Returns(new Dictionary<string, string>
+            {
+                ["Cron"] = "0 8 * * *",
+                ["Job"] = InvocationData.SerializeJob(fixture.Job).SerializePayload()
+            });
+        fixture.Hub.ClearReceivedCalls();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        var monitorConfig = fixture.GetSentMonitorConfig();
+        monitorConfig.Should().NotBeNull();
+        monitorConfig!.Value.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 8 * * *");
+    }
+
+    [Fact]
     public void OnPerforming_ReadingAllRecurringJobsThrows_SendsCheckInWithoutMonitorConfig()
     {
         // Arrange

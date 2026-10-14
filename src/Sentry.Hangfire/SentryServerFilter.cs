@@ -106,7 +106,7 @@ internal class SentryServerFilter : IServerFilter
             }
 
             var conflicting = GetRecurringJobSlugs(context.Connection, recurringJobId!)
-                .WithDifferentSchedule(monitorSlug, recurringJob.Cron, recurringJob.TimeZoneId);
+                .WithDifferentSchedule(monitorSlug, recurringJobId!, recurringJob.Cron, recurringJob.TimeZoneId);
             if (conflicting.Count > 0)
             {
                 _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. Recurring jobs '{1}' use the same " +
@@ -181,7 +181,7 @@ internal class SentryServerFilter : IServerFilter
 
         public bool Contains(string recurringJobId) => _ids.Contains(recurringJobId);
 
-        public List<string> WithDifferentSchedule(string monitorSlug, string? cron, string? timeZoneId)
+        public List<string> WithDifferentSchedule(string monitorSlug, string recurringJobId, string? cron, string? timeZoneId)
         {
             if (!_jobsBySlug.TryGetValue(monitorSlug, out var jobs))
             {
@@ -190,7 +190,7 @@ internal class SentryServerFilter : IServerFilter
 
             var normalizedTimeZoneId = NormalizeTimeZoneId(timeZoneId);
             return jobs
-                .Where(job => job.Cron != cron || job.TimeZoneId != normalizedTimeZoneId)
+                .Where(job => job.Id != recurringJobId && (job.Cron != cron || job.TimeZoneId != normalizedTimeZoneId))
                 .Select(job => job.Id)
                 .ToList();
         }
