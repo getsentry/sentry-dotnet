@@ -112,6 +112,7 @@ public static class SentryHostBuilderExtensions
         logging.Services.AddSingleton<ILoggerProvider>(c => new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
         logging.Services.TryAddSingleton<HostLoggerProvidersMarker>();
         logging.Services.AddSentry<SentryGenericHostOptions>();
+        logging.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SentryHostedService>());
 
         logging.AddFilter<SentryLoggerProvider>(_ => true);
         logging.AddFilter<SentryStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
