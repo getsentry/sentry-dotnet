@@ -110,7 +110,7 @@ internal static class StreamExtensions
     {
         try
         {
-            return stream.Length;
+            return stream.CanSeek ? stream.Length : null;
         }
         catch
         {
