@@ -215,29 +215,37 @@
 
     <PropertyGroup>
       <SentryCLIUploadItems>$(SentryCLIUploadDirectory)</SentryCLIUploadItems>
-      <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)linked')">$(SentryCLIUploadItems) $(IntermediateOutputPath)linked/*.pdb</SentryCLIUploadItems>
       <SentryCLIUploadItems Condition="'@(AndroidNativeSymbolFilesExceptDll)' != ''">$(SentryCLIUploadItems) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')</SentryCLIUploadItems>
+      <!-- The trimmer rewrites assemblies, so the PDBs in the output directory may not match the ones that ship -->
+      <_SentryCLIUploadTrimmedPdbs Condition="Exists('$(IntermediateOutputPath)linked')">$(IntermediateOutputPath)linked/*.pdb</_SentryCLIUploadTrimmedPdbs>
+      <_SentryCLIUploadTrimmedPdbs Condition="Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(IntermediateOutputPath)postprocessed-assemblies/*.pdb</_SentryCLIUploadTrimmedPdbs>
+      <_SentryCLIIncludeSources Condition="'$(SentryUploadSources)' == 'true'">--include-sources</_SentryCLIIncludeSources>
     </PropertyGroup>
+    <ItemGroup>
+      <_SentryCLIUploadSymbolType Include="@(SentryCLIUploadSymbolType)" />
+      <_SentryCLIUploadSymbolType Remove="pdb;portablepdb" Condition="'$(_SentryCLIUploadTrimmedPdbs)' != ''" />
+      <!-- The inner build for each RID uploads its own trimmed PDBs -->
+      <_SentryCLIUploadSymbolType Remove="pdb;portablepdb" Condition="'$(RuntimeIdentifiers)' != '' and '$(RuntimeIdentifier)' == '' and ('$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+    </ItemGroup>
 
-    <!-- if (UploadSymbols && UploadSources) { -->
+    <!-- if (UploadSymbols) { -->
       <Message Importance="High"
         Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
-        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadItems)" />
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadItems) $(_SentryCLIUploadTrimmedPdbs)" />
+      <Message Importance="High"
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadItems) $(_SentryCLIUploadTrimmedPdbs)" />
       <Exec
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
-        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') --include-sources $(SentryCLIUploadItems)"
+        Condition="'$(SentryUploadSymbols)' == 'true'"
+        Command="$(SentryCLIDebugFilesUploadCommand) @(_SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(_SentryCLIIncludeSources) $(SentryCLIUploadItems)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
-    <!-- } else if (UploadSymbols && !UploadSources) { -->
-      <Message Importance="High"
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
-        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadItems)" />
       <Exec
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
-        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(SentryCLIUploadItems)"
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(_SentryCLIUploadTrimmedPdbs)' != ''"
+        Command="$(SentryCLIDebugFilesUploadCommand) -t pdb -t portablepdb $(_SentryCLIIncludeSources) $(_SentryCLIUploadTrimmedPdbs)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
-        <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+        <Output TaskParameter="ExitCode" PropertyName="_SentryCLITrimmedPdbsExitCode" />
       </Exec>
     <!-- } else if (!UploadSymbols && UploadSources) { -->
       <PropertyGroup>
@@ -262,7 +270,7 @@
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
     <!-- } -->
-    <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload debug files." />
+    <Warning Condition="'$(_SentryCLIExitCode)' != '0' or ('$(_SentryCLITrimmedPdbsExitCode)' != '' and '$(_SentryCLITrimmedPdbsExitCode)' != '0')" Text="Sentry CLI could not upload debug files." />
   </Target>
 
   <!-- Only for the application assembly: https://github.com/getsentry/sentry-dotnet/pull/4647 -->
