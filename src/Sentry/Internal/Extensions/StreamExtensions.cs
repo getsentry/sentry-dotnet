@@ -108,6 +108,11 @@ internal static class StreamExtensions
 
     public static long? TryGetLength(this Stream stream)
     {
+        if (!stream.CanSeek)
+        {
+            return null;
+        }
+
         try
         {
             return stream.Length;
