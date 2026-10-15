@@ -216,16 +216,16 @@
     <PropertyGroup>
       <SentryCLIUploadItems>$(SentryCLIUploadDirectory)</SentryCLIUploadItems>
       <SentryCLIUploadItems Condition="'@(AndroidNativeSymbolFilesExceptDll)' != ''">$(SentryCLIUploadItems) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')</SentryCLIUploadItems>
-      <!-- The trimmer rewrites assemblies, so the PDBs in the output directory may not match the ones that ship -->
       <_SentryCLIUploadTrimmedPdbs Condition="Exists('$(IntermediateOutputPath)linked')">$(IntermediateOutputPath)linked/*.pdb</_SentryCLIUploadTrimmedPdbs>
       <_SentryCLIUploadTrimmedPdbs Condition="Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(IntermediateOutputPath)postprocessed-assemblies/*.pdb</_SentryCLIUploadTrimmedPdbs>
       <_SentryCLIIncludeSources Condition="'$(SentryUploadSources)' == 'true'">--include-sources</_SentryCLIIncludeSources>
     </PropertyGroup>
     <ItemGroup>
       <_SentryCLIUploadSymbolType Include="@(SentryCLIUploadSymbolType)" />
-      <_SentryCLIUploadSymbolType Remove="pdb;portablepdb" Condition="'$(_SentryCLIUploadTrimmedPdbs)' != ''" />
-      <!-- The inner build for each RID uploads its own trimmed PDBs -->
-      <_SentryCLIUploadSymbolType Remove="pdb;portablepdb" Condition="'$(RuntimeIdentifiers)' != '' and '$(RuntimeIdentifier)' == '' and ('$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+    </ItemGroup>
+    <!-- Apple apps ship the trimmer's assemblies, whose PDBs each RID's own build uploads, so skip the pre-trim ones -->
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'maccatalyst'">
+      <_SentryCLIUploadSymbolType Remove="pdb;portablepdb" Condition="'$(_SentryCLIUploadTrimmedPdbs)' != '' or ('$(RuntimeIdentifiers)' != '' and '$(RuntimeIdentifier)' == '')" />
     </ItemGroup>
 
     <!-- if (UploadSymbols) { -->

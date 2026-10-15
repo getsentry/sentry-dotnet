@@ -38,6 +38,22 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'console-app' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
+
+    It "uploads symbols when an earlier trimmed publish left a linked directory" {
+        RunDotnetWithSentryCLI 'build' 'console-app' $False $False $framework | Out-Null
+        $linked = "./console-app/obj/Release/$framework/linked"
+        New-Item -ItemType Directory $linked -Force | Out-Null
+        Copy-Item "./console-app/bin/Release/$framework/console-app.pdb" $linked
+        try
+        {
+            $result = RunDotnetWithSentryCLI 'build' 'console-app' $True $False $framework
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('console-app.pdb')
+        }
+        finally
+        {
+            Remove-Item $linked -Recurse -Force
+        }
+    }
 }
 
 # The dummy Sentry server doesn't implement the releases API, so these tests record the CLI arguments instead.
