@@ -190,6 +190,7 @@
     <Project Path="test/Sentry.DiagnosticSource.Tests/Sentry.DiagnosticSource.Tests.csproj" />
     <Project Path="test/Sentry.EntityFramework.Tests/Sentry.EntityFramework.Tests.csproj" />
     <Project Path="test/Sentry.Extensions.AI.Tests/Sentry.Extensions.AI.Tests.csproj" />
+    <Project Path="test/Sentry.Extensions.Hosting.Tests/Sentry.Extensions.Hosting.Tests.csproj" />
     <Project Path="test/Sentry.Extensions.Logging.Tests/Sentry.Extensions.Logging.Tests.csproj" />
     <Project Path="test/Sentry.Google.Cloud.Functions.Tests/Sentry.Google.Cloud.Functions.Tests.csproj" />
     <Project Path="test/Sentry.Hangfire.Tests/Sentry.Hangfire.Tests.csproj" />

@@ -67,6 +67,7 @@
       "test\\Sentry.DiagnosticSource.Tests\\Sentry.DiagnosticSource.Tests.csproj",
       "test\\Sentry.EntityFramework.Tests\\Sentry.EntityFramework.Tests.csproj",
       "test\\Sentry.Extensions.AI.Tests\\Sentry.Extensions.AI.Tests.csproj",
+      "test\\Sentry.Extensions.Hosting.Tests\\Sentry.Extensions.Hosting.Tests.csproj",
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
       "test\\Sentry.Google.Cloud.Functions.Tests\\Sentry.Google.Cloud.Functions.Tests.csproj",
       "test\\Sentry.Hangfire.Tests\\Sentry.Hangfire.Tests.csproj",
