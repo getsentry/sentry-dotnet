@@ -86,6 +86,19 @@ public class StreamExtensionsTests
         result.Should().BeNull();
     }
 
+    [Fact]
+    public void TryGetLength_NullStream_ReturnsNull()
+    {
+        // Arrange
+        Stream stream = null;
+
+        // Act
+        var result = stream.TryGetLength();
+
+        // Assert
+        result.Should().BeNull();
+    }
+
     private class NonSeekableMemoryStream(byte[] buffer) : MemoryStream(buffer)
     {
         public override bool CanSeek => false;
