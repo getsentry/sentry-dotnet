@@ -24,14 +24,15 @@ public static class ServiceCollectionExtensions
     internal static IServiceCollection AddSentry<TOptions>(this IServiceCollection services, bool initializeSdk)
         where TOptions : SentryHostOptions, new()
     {
-        services.TryAddSingleton<SentryOptions>(
-            c => c.GetRequiredService<IOptions<TOptions>>().Value);
+        // Replaces rather than TryAdd, so the integration registered last owns the options and the hub accessor:
+        // the logging integration registers a non-initializing accessor, and a generic host UseSentry can run
+        // before the ASP.NET Core or MAUI one.
+        services.RemoveAll<SentryOptions>();
+        services.AddSingleton<SentryOptions>(c => c.GetRequiredService<IOptions<TOptions>>().Value);
 
+        services.RemoveAll<Func<IHub>>();
         if (initializeSdk)
         {
-            // Replaces rather than TryAdd: the logging integration registers a non-initializing accessor, and
-            // whichever is registered first would otherwise win. Initializing has to take precedence.
-            services.RemoveAll<Func<IHub>>();
             services.AddSingleton<Func<IHub>>(c =>
             {
                 var options = c.GetRequiredService<IOptions<TOptions>>().Value;
