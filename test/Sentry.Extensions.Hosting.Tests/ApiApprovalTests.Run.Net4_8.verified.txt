@@ -1,0 +1,18 @@
+﻿namespace Microsoft.Extensions.Hosting
+{
+    public static class SentryHostBuilderExtensions
+    {
+        public static Microsoft.Extensions.Hosting.IHostBuilder UseSentry(this Microsoft.Extensions.Hosting.IHostBuilder builder) { }
+        public static Microsoft.Extensions.Hosting.IHostBuilder UseSentry(this Microsoft.Extensions.Hosting.IHostBuilder builder, System.Action<Sentry.Extensions.Hosting.SentryGenericHostOptions>? configureOptions) { }
+        public static Microsoft.Extensions.Hosting.IHostBuilder UseSentry(this Microsoft.Extensions.Hosting.IHostBuilder builder, System.Action<Microsoft.Extensions.Hosting.HostBuilderContext, Sentry.Extensions.Hosting.SentryGenericHostOptions>? configureOptions) { }
+        public static Microsoft.Extensions.Hosting.IHostBuilder UseSentry(this Microsoft.Extensions.Hosting.IHostBuilder builder, string dsn) { }
+    }
+}
+namespace Sentry.Extensions.Hosting
+{
+    public class SentryGenericHostOptions : Sentry.Extensions.Logging.SentryHostOptions
+    {
+        public SentryGenericHostOptions() { }
+        public bool EnableLogs { get; set; }
+    }
+}
