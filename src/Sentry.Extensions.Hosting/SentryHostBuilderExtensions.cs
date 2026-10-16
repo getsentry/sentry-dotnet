@@ -2,9 +2,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry;
+using Sentry.Extensibility;
 using Sentry.Extensions.Hosting;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
@@ -19,6 +21,10 @@ namespace Microsoft.Extensions.Hosting;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryHostBuilderExtensions
 {
+    private const string RedundantWithAspNetCoreIntegration =
+        "This UseSentry is redundant because the app also uses UseSentry from Sentry.AspNetCore. Its logger " +
+        "providers are disabled and its options ignored: in a web app, call UseSentry from Sentry.AspNetCore only.";
+
 #if NET8_0_OR_GREATER
     /// <summary>
     /// Uses Sentry integration.
@@ -86,37 +92,55 @@ public static class SentryHostBuilderExtensions
                 context.HostingEnvironment.EnvironmentName,
                 options => configureOptions?.Invoke(context, options))));
 
-    private static ILoggingBuilder AddSentryGenericHost(
+    private static void AddSentryGenericHost(
         this ILoggingBuilder logging,
         IConfiguration configuration,
         string hostEnvironmentName,
         Action<SentryGenericHostOptions>? configureOptions)
     {
+        var services = logging.Services;
+        if (HasAspNetCoreIntegration(services))
+        {
+            return;
+        }
+
         logging.AddConfiguration();
 
-        logging.Services.AddSingleton<IConfigureOptions<SentryGenericHostOptions>>(
+        services.AddSingleton<IConfigureOptions<SentryGenericHostOptions>>(
             new SentryHostOptionsSetup<SentryGenericHostOptions>(configuration.GetSection("Sentry")));
-        logging.Services.AddSingleton<IConfigureOptions<SentryGenericHostOptions>>(
+        services.AddSingleton<IConfigureOptions<SentryGenericHostOptions>>(
             new SentryHostLoggingOptionsSetup<SentryGenericHostOptions>(configuration));
 
-        logging.Services.Configure<SentryGenericHostOptions>(options =>
+        services.Configure<SentryGenericHostOptions>(options =>
         {
             configureOptions?.Invoke(options);
             options.SetEnvironment(hostEnvironmentName);
         });
 
-        logging.Services.AddSingleton<ILoggerProvider>(c => new SentryLoggerProvider(
-            c.GetRequiredService<IHub>(),
-            SystemClock.Clock,
-            c.GetRequiredService<IOptions<SentryGenericHostOptions>>().Value.Logging));
-        logging.Services.AddSingleton<ILoggerProvider>(c => new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
-        logging.Services.TryAddSingleton<HostLoggerProvidersMarker>();
-        logging.Services.AddSentry<SentryGenericHostOptions>();
-        logging.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SentryHostedService>());
+        services.AddSingleton<ILoggerProvider>(c =>
+        {
+            if (!HasAspNetCoreIntegration(services))
+            {
+                return new SentryLoggerProvider(
+                    c.GetRequiredService<IHub>(),
+                    SystemClock.Clock,
+                    c.GetRequiredService<IOptions<SentryGenericHostOptions>>().Value.Logging);
+            }
+
+            c.GetRequiredService<IHub>().GetSentryOptions()?.LogWarning(RedundantWithAspNetCoreIntegration);
+            return NullLoggerProvider.Instance;
+        });
+        services.AddSingleton<ILoggerProvider>(c => HasAspNetCoreIntegration(services)
+            ? NullLoggerProvider.Instance
+            : new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
+        services.TryAddSingleton<HostLoggerProvidersMarker>();
+        services.AddSentry<SentryGenericHostOptions>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SentryHostedService>());
 
         logging.AddFilter<SentryLoggerProvider>(_ => true);
         logging.AddFilter<SentryStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
-
-        return logging;
     }
+
+    private static bool HasAspNetCoreIntegration(IServiceCollection services)
+        => services.Any(d => d.ServiceType == typeof(HostIntegrationMarker));
 }
