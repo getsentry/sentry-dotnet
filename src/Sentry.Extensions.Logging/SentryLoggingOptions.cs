@@ -13,8 +13,10 @@ public class SentryLoggingOptions
 {
     internal const string ObsoleteSdkInitialization =
         "The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be " +
-        "supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and " +
-        "remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration.";
+        "supplied to it. Initialize Sentry with UseSentry from Sentry.Extensions.Hosting (worker and other generic " +
+        "host apps), Sentry.AspNetCore or Sentry.Maui, or with SentrySdk.Init. Then remove 'Dsn', 'InitializeSdk' " +
+        "and any other core SDK settings from the logging configuration; UseSentry reads them from the 'Sentry' " +
+        "section.";
 
     internal const string RedundantWithHostIntegration =
         "Logging.AddSentry() is redundant because the host integration, such as UseSentry, already adds Sentry's " +
