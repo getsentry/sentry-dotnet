@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Extensions.Hosting\Sentry.Extensions.Hosting.csproj" />
     <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
