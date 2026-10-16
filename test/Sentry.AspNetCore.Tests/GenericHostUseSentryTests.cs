@@ -84,6 +84,20 @@ public class GenericHostUseSentryTests : IDisposable
     }
 
     [Fact]
+    public async Task GenericUseSentryThenAspNetCoreUseSentry_SdkDisabled_Starts()
+    {
+        var builder = CreateBuilder();
+        UseGenericSentry(builder);
+        builder.UseSentry((SentryAspNetCoreOptions options) => options.Dsn = SentryConstants.DisableSdkDsnValue);
+        await using var app = builder.Build();
+
+        var start = () => app.StartAsync();
+
+        await start.Should().NotThrowAsync();
+        await app.StopAsync();
+    }
+
+    [Fact]
     public async Task ServiceDefaultsSnippet_WebApplicationBuilder_UsesAspNetCoreIntegration()
     {
         var builder = CreateBuilder();

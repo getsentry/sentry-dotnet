@@ -119,14 +119,20 @@ public class GenericHostUseSentryTests : IDisposable
     }
 
     [Fact]
-    public void GenericUseSentry_WithoutMauiUseSentry_HostedServicesCanBeResolved()
+    public async Task GenericUseSentry_WithoutMauiUseSentry_HostedServicesCanBeStarted()
     {
         var builder = CreateBuilder();
         UseGenericSentry(builder);
         using var app = builder.Build();
 
-        var resolve = () => app.Services.GetServices<IHostedService>().ToList();
+        var start = async () =>
+        {
+            foreach (var service in app.Services.GetServices<IHostedService>())
+            {
+                await service.StartAsync(CancellationToken.None);
+            }
+        };
 
-        resolve.Should().NotThrow();
+        await start.Should().NotThrowAsync();
     }
 }
