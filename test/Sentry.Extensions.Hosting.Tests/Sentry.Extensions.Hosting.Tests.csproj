@@ -5,6 +5,10 @@
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Extensions.Hosting\Sentry.Extensions.Hosting.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
