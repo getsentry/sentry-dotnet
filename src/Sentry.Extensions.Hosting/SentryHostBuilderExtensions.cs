@@ -104,6 +104,23 @@ public static class SentryHostBuilderExtensions
             return;
         }
 
+        if (!services.Any(IsGenericHostOptionsSetup))
+        {
+            logging.AddSentryGenericHostServices(configuration, hostEnvironmentName);
+        }
+
+        if (configureOptions is not null)
+        {
+            services.Configure(configureOptions);
+        }
+    }
+
+    private static void AddSentryGenericHostServices(
+        this ILoggingBuilder logging,
+        IConfiguration configuration,
+        string hostEnvironmentName)
+    {
+        var services = logging.Services;
         logging.AddConfiguration();
 
         services.AddSingleton<IConfigureOptions<SentryGenericHostOptions>>(
@@ -111,11 +128,7 @@ public static class SentryHostBuilderExtensions
         services.AddSingleton<IConfigureOptions<SentryGenericHostOptions>>(
             new SentryHostLoggingOptionsSetup<SentryGenericHostOptions>(configuration));
 
-        services.Configure<SentryGenericHostOptions>(options =>
-        {
-            configureOptions?.Invoke(options);
-            options.SetEnvironment(hostEnvironmentName);
-        });
+        services.PostConfigure<SentryGenericHostOptions>(options => options.SetEnvironment(hostEnvironmentName));
 
         services.AddSingleton<ILoggerProvider>(c =>
         {
@@ -143,4 +156,8 @@ public static class SentryHostBuilderExtensions
 
     private static bool HasHostIntegration(IServiceCollection services)
         => services.Any(d => d.ServiceType == typeof(HostIntegrationMarker));
+
+    private static bool IsGenericHostOptionsSetup(ServiceDescriptor descriptor)
+        => descriptor.ServiceType == typeof(IConfigureOptions<SentryGenericHostOptions>)
+            && descriptor.ImplementationInstance is SentryHostOptionsSetup<SentryGenericHostOptions>;
 }
