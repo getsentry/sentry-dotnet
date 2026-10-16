@@ -46,7 +46,7 @@ public static class ServiceCollectionExtensions
         return services.AddSentryHub();
     }
 
-    internal static IServiceCollection AddSentryHub(this IServiceCollection services)
+    private static IServiceCollection AddSentryHub(this IServiceCollection services)
     {
         // Must not capture a hub instance: https://github.com/getsentry/sentry-dotnet/issues/103
         services.TryAddTransient<ISentryClient>(c => c.GetRequiredService<IHub>());
