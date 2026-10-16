@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
 using Sentry.OpenTelemetry.Exporter;
@@ -14,18 +13,17 @@ var dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
 var dsn = SamplesShared.Dsn;
 #endif
 
-// Initialise the Sentry SDK. The logging integration added below only forwards log messages to Sentry.
-using var sentry = SentrySdk.Init(options =>
-{
-    options.Dsn = dsn;
-    options.TracesSampleRate = 1.0;
-    options.UseOtlp(); // <-- Configure Sentry to use open telemetry
-    options.DisableSentryHttpMessageHandler = true; // So Sentry doesn't also create spans for outbound HTTP requests
-    options.Debug = true;
-});
-
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
+    // Initializes Sentry when the host starts, closes it when the host shuts down, and sends log messages to Sentry.
+    .UseSentry(options =>
+    {
+        options.Dsn = dsn;
+        options.TracesSampleRate = 1.0;
+        options.UseOtlp(); // <-- Configure Sentry to use open telemetry
+        options.DisableSentryHttpMessageHandler = true; // So Sentry doesn't also create spans for outbound HTTP requests
+        options.Debug = true;
+    })
     .ConfigureServices(services =>
     {
         services.AddOpenTelemetry().WithTracing(builder =>
@@ -35,7 +33,6 @@ var host = new HostBuilder()
                 .AddHttpClientInstrumentation(); // From OpenTelemetry.Instrumentation.Http... adds automatic tracing for outgoing HTTP requests
         });
     })
-    .ConfigureLogging(logging => logging.AddSentry())
     .Build();
 
 await host.RunAsync();

@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Extensions.Hosting\Sentry.Extensions.Hosting.csproj" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
   </ItemGroup>
 </Project>
