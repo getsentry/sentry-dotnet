@@ -25,6 +25,9 @@ public static class SentryHostBuilderExtensions
         "This UseSentry is redundant because the app also uses UseSentry from Sentry.AspNetCore or Sentry.Maui. Its " +
         "logger providers are disabled and its options ignored: call UseSentry from that package only.";
 
+    private const string WebApplicationBuilder = "Microsoft.AspNetCore.Builder.WebApplicationBuilder";
+    private const string WebApplicationHostBuilder = "Microsoft.AspNetCore.Builder.ConfigureHostBuilder";
+
 #if NET8_0_OR_GREATER
     /// <summary>
     /// Uses Sentry integration.
@@ -50,7 +53,11 @@ public static class SentryHostBuilderExtensions
         this IHostApplicationBuilder builder,
         Action<SentryGenericHostOptions>? configureOptions)
     {
-        builder.Logging.AddSentryGenericHost(builder.Configuration, builder.Environment.EnvironmentName, configureOptions);
+        builder.Logging.AddSentryGenericHost(
+            builder.Configuration,
+            builder.Environment.EnvironmentName,
+            configureOptions,
+            IsWebApp(builder));
         return builder;
     }
 #endif
@@ -86,17 +93,22 @@ public static class SentryHostBuilderExtensions
     public static IHostBuilder UseSentry(
         this IHostBuilder builder,
         Action<HostBuilderContext, SentryGenericHostOptions>? configureOptions)
-        => builder.ConfigureServices((context, services) => services.AddLogging(logging =>
+    {
+        var isWebApp = IsWebApp(builder);
+        return builder.ConfigureServices((context, services) => services.AddLogging(logging =>
             logging.AddSentryGenericHost(
                 context.Configuration,
                 context.HostingEnvironment.EnvironmentName,
-                options => configureOptions?.Invoke(context, options))));
+                options => configureOptions?.Invoke(context, options),
+                isWebApp)));
+    }
 
     private static void AddSentryGenericHost(
         this ILoggingBuilder logging,
         IConfiguration configuration,
         string hostEnvironmentName,
-        Action<SentryGenericHostOptions>? configureOptions)
+        Action<SentryGenericHostOptions>? configureOptions,
+        bool isWebApp)
     {
         var services = logging.Services;
         if (HasHostIntegration(services))
@@ -106,7 +118,7 @@ public static class SentryHostBuilderExtensions
 
         if (!services.Any(IsGenericHostOptionsSetup))
         {
-            logging.AddSentryGenericHostServices(configuration, hostEnvironmentName);
+            logging.AddSentryGenericHostServices(configuration, hostEnvironmentName, isWebApp);
         }
 
         if (configureOptions is not null)
@@ -118,7 +130,8 @@ public static class SentryHostBuilderExtensions
     private static void AddSentryGenericHostServices(
         this ILoggingBuilder logging,
         IConfiguration configuration,
-        string hostEnvironmentName)
+        string hostEnvironmentName,
+        bool isWebApp)
     {
         var services = logging.Services;
         logging.AddConfiguration();
@@ -148,11 +161,16 @@ public static class SentryHostBuilderExtensions
             : new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
         services.TryAddSingleton<HostLoggerProvidersMarker>();
         services.AddSentry<SentryGenericHostOptions>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SentryHostedService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SentryHostedService>(c =>
+            new SentryHostedService(c, isWebApp && !HasHostIntegration(services))));
 
         logging.AddFilter<SentryLoggerProvider>(_ => true);
         logging.AddFilter<SentryStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
+        logging.AddFilter<SentryStructuredLoggerProvider>("Sentry.Extensions.Hosting", LogLevel.None);
     }
+
+    private static bool IsWebApp(object builder)
+        => builder.GetType().FullName is WebApplicationBuilder or WebApplicationHostBuilder;
 
     private static bool HasHostIntegration(IServiceCollection services)
         => services.Any(d => d.ServiceType == typeof(HostIntegrationMarker));

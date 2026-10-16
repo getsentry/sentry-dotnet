@@ -50,6 +50,21 @@ public sealed class SentryHostedServiceTests : IDisposable
     }
 
     [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public async Task StartAsync_WorkerHost_LogsNoWarning(BuilderKind kind)
+    {
+        var logs = new CapturingLoggerProvider();
+        var testHost = new TestHost()
+            .UseSentry(Capture)
+            .ConfigureServices(services => services.AddSingleton<ILoggerProvider>(logs));
+        using var host = testHost.Build(kind);
+
+        await host.StartAsync();
+
+        logs.Entries.Should().NotContain(entry => entry.Category == typeof(SentryHostedService).FullName);
+        await host.StopAsync();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
     public async Task StartAsync_LoggerProvidersCleared_SdkRunsBeforeAppHostedServiceStarts(BuilderKind kind)
     {
         var appService = new SdkStateAtStart();
