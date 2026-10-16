@@ -15,14 +15,14 @@ internal sealed class SentryHostedService : IHostedService
         "in namespace Microsoft.Extensions.Hosting, where ServiceDefaults is declared, web.UseSentry() still picks " +
         "this one.";
 
-    private readonly IHostApplicationLifetime _lifetime;
+    private readonly IHostApplicationLifetime? _lifetime;
     private readonly ILogger<SentryHostedService> _logger;
     private readonly bool _isWebAppWithoutAspNetCoreIntegration;
 
     public SentryHostedService(IServiceProvider services, bool isWebAppWithoutAspNetCoreIntegration)
     {
         _ = services.GetRequiredService<Func<IHub>>();
-        _lifetime = services.GetRequiredService<IHostApplicationLifetime>();
+        _lifetime = services.GetService<IHostApplicationLifetime>();
         _logger = services.GetRequiredService<ILogger<SentryHostedService>>();
         _isWebAppWithoutAspNetCoreIntegration = isWebAppWithoutAspNetCoreIntegration;
     }
@@ -34,7 +34,7 @@ internal sealed class SentryHostedService : IHostedService
             _logger.LogWarning(MissingAspNetCoreIntegration);
         }
 
-        _lifetime.ApplicationStopped.Register(SentrySdk.Close);
+        _lifetime?.ApplicationStopped.Register(SentrySdk.Close);
         return Task.CompletedTask;
     }
 

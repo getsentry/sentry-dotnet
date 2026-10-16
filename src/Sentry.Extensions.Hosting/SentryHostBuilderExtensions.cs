@@ -25,8 +25,25 @@ public static class SentryHostBuilderExtensions
         "This UseSentry is redundant because the app also uses UseSentry from Sentry.AspNetCore or Sentry.Maui. Its " +
         "logger providers are disabled and its options ignored: call UseSentry from that package only.";
 
+    private const string MissingMauiIntegration =
+        "Sentry: this is a MAUI app, but UseSentry from Sentry.Extensions.Hosting doesn't include the MAUI " +
+        "integration: Sentry starts only when the app first uses a logger or IHub, and there are no navigation or UI " +
+        "breadcrumbs. Call UseSentry from Sentry.Maui instead. In a helper that takes any IHostApplicationBuilder, " +
+        "such as Aspire's AddServiceDefaults, use: if (builder is MauiAppBuilder maui) " +
+        "SentryMauiAppBuilderExtensions.UseSentry(maui); else builder.UseSentry(); Call it as a static method: " +
+        "in namespace Microsoft.Extensions.Hosting, where ServiceDefaults is declared, maui.UseSentry() still " +
+        "picks this one.";
+
     private const string WebApplicationBuilder = "Microsoft.AspNetCore.Builder.WebApplicationBuilder";
     private const string WebApplicationHostBuilder = "Microsoft.AspNetCore.Builder.ConfigureHostBuilder";
+    private const string MauiAppBuilder = "Microsoft.Maui.Hosting.MauiAppBuilder";
+
+    private enum App
+    {
+        Other,
+        Web,
+        Maui,
+    }
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -57,7 +74,7 @@ public static class SentryHostBuilderExtensions
             builder.Configuration,
             builder.Environment.EnvironmentName,
             configureOptions,
-            IsWebApp(builder));
+            DetectApp(builder));
         return builder;
     }
 #endif
@@ -94,13 +111,13 @@ public static class SentryHostBuilderExtensions
         this IHostBuilder builder,
         Action<HostBuilderContext, SentryGenericHostOptions>? configureOptions)
     {
-        var isWebApp = IsWebApp(builder);
+        var app = DetectApp(builder);
         return builder.ConfigureServices((context, services) => services.AddLogging(logging =>
             logging.AddSentryGenericHost(
                 context.Configuration,
                 context.HostingEnvironment.EnvironmentName,
                 options => configureOptions?.Invoke(context, options),
-                isWebApp)));
+                app)));
     }
 
     private static void AddSentryGenericHost(
@@ -108,7 +125,7 @@ public static class SentryHostBuilderExtensions
         IConfiguration configuration,
         string hostEnvironmentName,
         Action<SentryGenericHostOptions>? configureOptions,
-        bool isWebApp)
+        App app)
     {
         var services = logging.Services;
         if (HasHostIntegration(services))
@@ -118,7 +135,7 @@ public static class SentryHostBuilderExtensions
 
         if (!services.Any(IsGenericHostOptionsSetup))
         {
-            logging.AddSentryGenericHostServices(configuration, hostEnvironmentName, isWebApp);
+            logging.AddSentryGenericHostServices(configuration, hostEnvironmentName, app);
         }
 
         if (configureOptions is not null)
@@ -131,7 +148,7 @@ public static class SentryHostBuilderExtensions
         this ILoggingBuilder logging,
         IConfiguration configuration,
         string hostEnvironmentName,
-        bool isWebApp)
+        App app)
     {
         var services = logging.Services;
         logging.AddConfiguration();
@@ -147,6 +164,11 @@ public static class SentryHostBuilderExtensions
         {
             if (!HasHostIntegration(services))
             {
+                if (app == App.Maui)
+                {
+                    Console.Error.WriteLine(MissingMauiIntegration);
+                }
+
                 return new SentryLoggerProvider(
                     c.GetRequiredService<IHub>(),
                     SystemClock.Clock,
@@ -162,15 +184,19 @@ public static class SentryHostBuilderExtensions
         services.TryAddSingleton<HostLoggerProvidersMarker>();
         services.AddSentry<SentryGenericHostOptions>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SentryHostedService>(c =>
-            new SentryHostedService(c, isWebApp && !HasHostIntegration(services))));
+            new SentryHostedService(c, app == App.Web && !HasHostIntegration(services))));
 
         logging.AddFilter<SentryLoggerProvider>(_ => true);
         logging.AddFilter<SentryStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
         logging.AddFilter<SentryStructuredLoggerProvider>("Sentry.Extensions.Hosting", LogLevel.None);
     }
 
-    private static bool IsWebApp(object builder)
-        => builder.GetType().FullName is WebApplicationBuilder or WebApplicationHostBuilder;
+    private static App DetectApp(object builder) => builder.GetType().FullName switch
+    {
+        WebApplicationBuilder or WebApplicationHostBuilder => App.Web,
+        MauiAppBuilder => App.Maui,
+        _ => App.Other,
+    };
 
     private static bool HasHostIntegration(IServiceCollection services)
         => services.Any(d => d.ServiceType == typeof(HostIntegrationMarker));

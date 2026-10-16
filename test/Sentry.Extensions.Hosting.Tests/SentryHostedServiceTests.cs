@@ -56,12 +56,22 @@ public sealed class SentryHostedServiceTests : IDisposable
         var testHost = new TestHost()
             .UseSentry(Capture)
             .ConfigureServices(services => services.AddSingleton<ILoggerProvider>(logs));
-        using var host = testHost.Build(kind);
-
-        await host.StartAsync();
+        var originalStandardError = Console.Error;
+        using var standardError = new StringWriter();
+        Console.SetError(standardError);
+        try
+        {
+            using var host = testHost.Build(kind);
+            await host.StartAsync();
+            await host.StopAsync();
+        }
+        finally
+        {
+            Console.SetError(originalStandardError);
+        }
 
         logs.Entries.Should().NotContain(entry => entry.Category == typeof(SentryHostedService).FullName);
-        await host.StopAsync();
+        standardError.ToString().Should().NotContain("Sentry:");
     }
 
     [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
