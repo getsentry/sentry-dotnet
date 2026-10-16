@@ -38,6 +38,22 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'console-app' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
+
+    It "uploads symbols when an earlier trimmed publish left a linked directory" {
+        RunDotnetWithSentryCLI 'build' 'console-app' $False $False $framework | Out-Null
+        $linked = "./console-app/obj/Release/$framework/linked"
+        New-Item -ItemType Directory $linked -Force | Out-Null
+        Copy-Item "./console-app/bin/Release/$framework/console-app.pdb" $linked
+        try
+        {
+            $result = RunDotnetWithSentryCLI 'build' 'console-app' $True $False $framework
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('console-app.pdb')
+        }
+        finally
+        {
+            Remove-Item $linked -Recurse -Force
+        }
+    }
 }
 
 # The dummy Sentry server doesn't implement the releases API, so these tests record the CLI arguments instead.
@@ -287,6 +303,31 @@ Describe 'MAUI (<framework>)' -ForEach @(
         }
 
         AddPackageReference $name 'Sentry.Maui'
+
+        # Match on the PDB GUID: IL stripping rewrites the stamp in the bundle's CodeView entries
+        function UploadedPdbsNotInAppBundle($result, [string] $targetFramework)
+        {
+            $shippedGuids = Get-ChildItem "$name/bin/Release/$targetFramework" -Recurse -Directory -Filter "$name.app" `
+            | Get-ChildItem -Recurse -Filter '*.dll' `
+            | ForEach-Object {
+                $reader = [System.Reflection.PortableExecutable.PEReader]::new([System.IO.File]::OpenRead($_.FullName))
+                try
+                {
+                    $reader.ReadDebugDirectory() | Where-Object Type -EQ CodeView | ForEach-Object {
+                        "$($reader.ReadCodeViewDebugDirectoryData($_).Guid)"
+                    }
+                }
+                finally
+                {
+                    $reader.Dispose()
+                }
+            }
+            $result.ScriptOutput `
+            | Select-String 'json body: (\{.*"debug_id".*\})$' `
+            | ForEach-Object { ($_.Matches[0].Groups[1].Value | ConvertFrom-Json -AsHashtable).Values } `
+            | Where-Object { $_.name -like '*.pdb' -and $shippedGuids -notcontains $_.debug_id.Substring(0, 36) } `
+            | ForEach-Object { $_.name }
+        }
     }
 
     It "uploads symbols and sources for an Android build" {
@@ -329,8 +370,34 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'Microsoft.Maui.pdb',
             'SentryObjC'
         )
+        UploadedPdbsNotInAppBundle $result "$framework-ios$iosTpv" | Should -BeNullOrEmpty
         # The specific number of debug information files seems to change with different SDK - so we just check for non-zero
         $nonZeroNumberRegex = '[1-9][0-9]*';
         $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
+    }
+
+    It "uploads symbols and sources for a Mac Catalyst build" -Skip:(!$IsMacOS) {
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-maccatalyst$iosTpv"
+        Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'libmonosgen-2.0.dylib',
+            'libSystem.Globalization.Native.dylib',
+            'libSystem.IO.Compression.Native.dylib',
+            'libSystem.Native.dylib',
+            'libSystem.Net.Security.Native.dylib',
+            'libSystem.Security.Cryptography.Native.Apple.dylib',
+            'libxamarin-dotnet-debug.dylib',
+            'libxamarin-dotnet.dylib',
+            'maui-app',
+            'maui-app.pdb',
+            'Microsoft.MacCatalyst.pdb',
+            'Microsoft.Maui.Controls.pdb',
+            'Microsoft.Maui.Controls.Xaml.pdb',
+            'Microsoft.Maui.Essentials.pdb',
+            'Microsoft.Maui.Graphics.pdb',
+            'Microsoft.Maui.pdb',
+            'SentryObjC'
+        )
+        UploadedPdbsNotInAppBundle $result "$framework-maccatalyst$iosTpv" | Should -BeNullOrEmpty
     }
 }
