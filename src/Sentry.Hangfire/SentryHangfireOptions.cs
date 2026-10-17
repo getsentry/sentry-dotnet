@@ -23,4 +23,43 @@ public class SentryHangfireOptions
     /// </para>
     /// </remarks>
     public bool SendMonitorConfig { get; set; } = true;
+
+    /// <summary>
+    /// When enabled, every recurring job sends check-ins, not only jobs marked with
+    /// <see cref="SentryMonitorSlugAttribute"/>. The monitor slug is the recurring job ID, lowercased, with characters
+    /// other than letters, digits, <c>-</c> and <c>_</c> replaced by <c>-</c>, and cut to 50 characters.
+    /// Defaults to <c>false</c>.
+    /// </summary>
+    /// <remarks>
+    /// Jobs marked with <see cref="SentryMonitorSlugAttribute"/> keep their monitor slug.
+    /// Use <see cref="ExcludedRecurringJobs"/> to leave out some recurring jobs.
+    /// </remarks>
+    public bool MonitorAllRecurringJobs { get; set; }
+
+    /// <summary>
+    /// IDs of recurring jobs that <see cref="MonitorAllRecurringJobs"/> doesn't send check-ins for. IDs must match
+    /// exactly.
+    /// </summary>
+    /// <remarks>
+    /// Jobs marked with <see cref="SentryMonitorSlugAttribute"/> still send check-ins.
+    /// </remarks>
+    public ICollection<string> ExcludedRecurringJobs { get; set; } = new List<string>();
+
+    internal string? GetRecurringJobSlug(string recurringJobId)
+    {
+        if (!MonitorAllRecurringJobs || ExcludedRecurringJobs.Contains(recurringJobId))
+        {
+            return null;
+        }
+
+        var slug = InvalidSlugCharacters.Replace(recurringJobId.ToLowerInvariant(), "-").Trim('-');
+        if (slug.Length > MaxSlugLength)
+        {
+            slug = slug.Substring(0, MaxSlugLength).TrimEnd('-');
+        }
+        return slug.Length > 0 ? slug : null;
+    }
+
+    private const int MaxSlugLength = 50;
+    private static readonly Regex InvalidSlugCharacters = new("[^a-z0-9_-]+", RegexOptions.Compiled);
 }
