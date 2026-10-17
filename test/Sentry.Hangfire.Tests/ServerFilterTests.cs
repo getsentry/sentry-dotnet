@@ -241,6 +241,7 @@ public class ServerFilterTests
         var fixture = new RecurringJobFixture
         {
             Slug = SlugOnClassJob.Slug,
+            AttributeSlug = SlugOnClassJob.Slug,
             Cron = "0 2 * * *",
             Job = Job.FromExpression<SlugOnClassJob>(job => job.First())
         };
@@ -340,6 +341,167 @@ public class ServerFilterTests
         fixture.AssertCheckInSentWithoutMonitorConfig();
     }
 
+    [Fact]
+    public void OnPerforming_MonitorAllRecurringJobs_UsesSlugifiedRecurringJobId()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture
+        {
+            RecurringJobId = "Reports.Nightly Run",
+            AttributeSlug = null,
+            Slug = "reports-nightly-run",
+            Options = { MonitorAllRecurringJobs = true }
+        };
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+        filter.OnPerformed(new PerformedContext(fixture.PerformingContext, null, false, null));
+
+        // Assert
+        fixture.GetSentMonitorConfig()!.Value.GetProperty("schedule").GetProperty("value").GetString().Should().Be(fixture.Cron);
+        var checkInId = fixture.Hub.ReceivedInProgressCheckInId("reports-nightly-run");
+        fixture.Hub.Received(1).CaptureCheckIn("reports-nightly-run", CheckInStatus.Ok, checkInId, Arg.Any<TimeSpan?>());
+    }
+
+    [Fact]
+    public void OnPerforming_MonitorAllRecurringJobsWithAttribute_KeepsAttributeSlug()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture { Options = { MonitorAllRecurringJobs = true } };
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        fixture.GetSentMonitorConfig().Should().NotBeNull();
+        fixture.Hub.DidNotReceive().CaptureCheckIn("test-recurring-job", Arg.Any<CheckInStatus>(), Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope?>(), Arg.Any<Action<SentryMonitorOptions>?>());
+    }
+
+    [Theory]
+    [InlineData(false, new string[0])]
+    [InlineData(true, new[] { "test-recurring-job" })]
+    public void OnPerforming_RecurringJobNotMonitored_DoesNotCaptureCheckIn(bool monitorAll, string[] excluded)
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture { AttributeSlug = null };
+        fixture.Options.MonitorAllRecurringJobs = monitorAll;
+        foreach (var id in excluded)
+        {
+            fixture.Options.ExcludedRecurringJobs.Add(id);
+        }
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+        filter.OnPerformed(new PerformedContext(fixture.PerformingContext, null, false, null));
+
+        // Assert
+        fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+        fixture.PerformingContext.Items.Should().NotContainKey(SentryServerFilter.SentryCheckInIdKey);
+    }
+
+    [Fact]
+    public void OnPerforming_ExcludedRecurringJobWithAttribute_CapturesCheckIn()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture
+        {
+            Options = { MonitorAllRecurringJobs = true, ExcludedRecurringJobs = { "test-recurring-job" } }
+        };
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        fixture.GetSentMonitorConfig().Should().NotBeNull();
+    }
+
+    [Fact]
+    public void OnPerforming_MonitorAllRecurringJobsIdsShareSlugWithDifferentCron_SendsCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture
+        {
+            RecurringJobId = "Cleanup",
+            AttributeSlug = null,
+            Slug = "cleanup",
+            Cron = "0 2 * * *",
+            Job = Job.FromExpression<PlainJob>(job => job.Run()),
+            Options = { MonitorAllRecurringJobs = true }
+        };
+        fixture.OtherRecurringJobs.Add(("cleanup", "0 8 * * *", null, Job.FromExpression<PlainJob>(job => job.Run())));
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        fixture.AssertCheckInSentWithoutMonitorConfig();
+    }
+
+    [Fact]
+    public void OnPerforming_MonitorAllRecurringJobsExcludedIdWithSameSlug_SendsMonitorConfig()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture
+        {
+            RecurringJobId = "Cleanup",
+            AttributeSlug = null,
+            Slug = "cleanup",
+            Cron = "0 2 * * *",
+            Job = Job.FromExpression<PlainJob>(job => job.Run()),
+            Options = { MonitorAllRecurringJobs = true, ExcludedRecurringJobs = { "cleanup" } }
+        };
+        fixture.OtherRecurringJobs.Add(("cleanup", "0 8 * * *", null, Job.FromExpression<PlainJob>(job => job.Run())));
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        fixture.GetSentMonitorConfig().Should().NotBeNull();
+    }
+
+    [Theory]
+    [InlineData("nightly", "nightly")]
+    [InlineData("Reports.Nightly Run", "reports-nightly-run")]
+    [InlineData("  --Send_Emails!!  ", "send_emails")]
+    [InlineData("Ünïcode job", "n-code-job")]
+    [InlineData("!!!", null)]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+    public void GetRecurringJobSlug_RecurringJobId_ReturnsSlug(string recurringJobId, string? expected)
+    {
+        var options = new SentryHangfireOptions { MonitorAllRecurringJobs = true };
+
+        options.GetRecurringJobSlug(recurringJobId).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("nightly", true)]
+    [InlineData("Nightly", false)]
+    [InlineData("nightly-2", false)]
+    public void GetRecurringJobSlug_ExcludedRecurringJobs_MatchesIdExactly(string recurringJobId, bool excluded)
+    {
+        var options = new SentryHangfireOptions
+        {
+            MonitorAllRecurringJobs = true,
+            ExcludedRecurringJobs = { "nightly" }
+        };
+
+        (options.GetRecurringJobSlug(recurringJobId) is null).Should().Be(excluded);
+    }
+
+    public class PlainJob
+    {
+        public void Run()
+        { }
+    }
+
     private static Job ReportJob(string region) => Job.FromExpression<SharedSlugJob>(job => job.Run(region));
 
     [Theory]
@@ -425,12 +587,17 @@ public class ServerFilterTests
         public SentryId CheckInId { get; set; } = SentryId.Create();
         public PerformingContext PerformingContext { get; private set; } = null!;
 
+        public SentryHangfireOptions Options { get; set; } = new();
+
         public SentryServerFilter GetSut(bool? sendMonitorConfig = null)
         {
             Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             Clock.GetUtcNow().Returns(Now);
-            Connection.GetJobParameter(JobId, SentryServerFilter.SentryMonitorSlugKey)
-                .Returns(SerializationHelper.Serialize(Slug));
+            if (AttributeSlug is not null)
+            {
+                Connection.GetJobParameter(JobId, SentryServerFilter.SentryMonitorSlugKey)
+                    .Returns(SerializationHelper.Serialize(AttributeSlug));
+            }
             var recurringJobIds = new HashSet<string>(OtherRecurringJobs.Select(job => job.Id));
             if (RecurringJobId is not null)
             {
@@ -458,19 +625,21 @@ public class ServerFilterTests
                     Arg.Any<Action<SentryMonitorOptions>?>())
                 .Returns(CheckInId);
 
-            var backgroundJob = new BackgroundJob(JobId, null, DateTime.Now);
+            var backgroundJob = new BackgroundJob(JobId, Job ?? Job.FromExpression<PlainJob>(job => job.Run()), DateTime.Now);
             var performContext = new PerformContext(null, Connection, backgroundJob, Substitute.For<IJobCancellationToken>());
             PerformingContext = new PerformingContext(performContext);
 
-            var options = new SentryHangfireOptions();
             if (sendMonitorConfig is { } send)
             {
-                options.SendMonitorConfig = send;
+                Options.SendMonitorConfig = send;
             }
-            return new SentryServerFilter(Hub, Logger, options, Clock);
+            return new SentryServerFilter(Hub, Logger, Options, Clock);
         }
 
         public string Slug { get; set; } = MonitorSlug;
+
+        // The slug the job was created with; null for a job without SentryMonitorSlugAttribute
+        public string? AttributeSlug { get; set; } = MonitorSlug;
 
         private static Dictionary<string, string> RecurringJobHash(string cron, string? timeZoneId, Job? job)
         {

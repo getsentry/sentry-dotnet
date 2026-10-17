@@ -7,6 +7,8 @@ namespace Sentry.Hangfire.Tests;
 
 public class HangfireFixture : IDisposable
 {
+    public const string ExcludedRecurringJobId = "Excluded Recurring Job";
+
     public IHub Hub { get; set; } = Substitute.For<IHub>();
     public IDiagnosticLogger Logger { get; }
     private readonly BackgroundJobServer _server;
@@ -21,7 +23,11 @@ public class HangfireFixture : IDisposable
 
         GlobalConfiguration.Configuration
             .UseMemoryStorage()
-            .UseSentry(Hub, Logger);
+            .UseSentry(Hub, Logger, new SentryHangfireOptions
+            {
+                MonitorAllRecurringJobs = true,
+                ExcludedRecurringJobs = { ExcludedRecurringJobId }
+            });
         _server = new BackgroundJobServer();
         _monitoringApi = JobStorage.Current.GetMonitoringApi();
     }
