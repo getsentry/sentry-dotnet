@@ -19,6 +19,8 @@
     {
         public SentryQuartzOptions() { }
         public System.Action<Quartz.IJobExecutionContext, Sentry.SentryMonitorOptions>? ConfigureMonitorOptions { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> ExcludedJobs { get; set; }
+        public bool MonitorAllJobs { get; set; }
         public bool SendMonitorConfig { get; set; }
     }
 }

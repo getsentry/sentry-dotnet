@@ -5,7 +5,7 @@ namespace Sentry.Quartz;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Jobs without this attribute are not monitored.
+/// Jobs without this attribute are not monitored, unless <see cref="SentryQuartzOptions.MonitorAllJobs"/> is enabled.
 /// </para>
 /// <para>
 /// When no monitor slug is given, the slug is the job's key, lowercased with every run of other characters replaced
