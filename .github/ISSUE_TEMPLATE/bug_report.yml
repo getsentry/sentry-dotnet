@@ -29,6 +29,7 @@ body:
         - Sentry.NLog
         - Sentry.OpenTelemetry
         - Sentry.Profiling
+        - Sentry.Quartz
         - Sentry.Serilog
         - Other
     validations:

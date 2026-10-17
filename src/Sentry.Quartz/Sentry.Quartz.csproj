@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Official Quartz.NET 4.x integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <PackageTags>$(PackageTags);Quartz;Crons</PackageTags>
+    <!-- Quartz 4.x only targets net10.0 -->
+    <TargetFrameworks>net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnableAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+    <PackageReference Include="Quartz" Version="[4.0.0,5.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Quartz.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
+</Project>

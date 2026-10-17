@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Quartz 4.x only targets net10.0 -->
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Sentry.Quartz builds against the lowest 4.x; test against the latest -->
+    <PackageReference Include="Quartz" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
+    <ProjectReference Include="..\..\src\Sentry.Quartz\Sentry.Quartz.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Quartz" />
+  </ItemGroup>
+
+</Project>
