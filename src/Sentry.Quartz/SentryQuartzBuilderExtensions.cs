@@ -22,7 +22,8 @@ public static class SentryQuartzBuilderExtensions
         /// <para>
         /// Jobs with <see cref="SentryMonitorSlugAttribute"/> also send a check-in each time they run, with the
         /// schedule of the trigger that fired them as the monitor config. A job that throws or is cancelled sends an
-        /// error check-in. See <see cref="SentryQuartzOptions.SendMonitorConfig"/>.
+        /// error check-in. See <see cref="SentryQuartzOptions.SendMonitorConfig"/>. To monitor every scheduled job,
+        /// enable <see cref="SentryQuartzOptions.MonitorAllJobs"/>.
         /// </para>
         /// </remarks>
         /// <param name="configure">Configures the options.</param>

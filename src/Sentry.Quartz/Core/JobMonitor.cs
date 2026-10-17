@@ -3,12 +3,13 @@ using Sentry.Extensibility;
 
 namespace Sentry.Quartz;
 
-// Captures the check-ins of jobs with SentryMonitorSlugAttribute
+// Captures the check-ins of jobs with SentryMonitorSlugAttribute, or of every scheduled job with MonitorAllJobs
 internal sealed class JobMonitor
 {
     private const int MaxSlugLength = 50;
 
     private static readonly ConcurrentDictionary<Type, SentryMonitorSlugAttribute?> Attributes = new();
+    private static readonly SentryMonitorSlugAttribute DefaultAttribute = new();
 
     private readonly SentryQuartzOptions _options;
     private readonly IHub _hub;
@@ -33,7 +34,8 @@ internal sealed class JobMonitor
         try
         {
             var jobType = QuartzApi.GetJobType(context.JobDetail);
-            var attribute = Attributes.GetOrAdd(jobType, type => type.GetCustomAttribute<SentryMonitorSlugAttribute>());
+            var attribute = Attributes.GetOrAdd(jobType, type => type.GetCustomAttribute<SentryMonitorSlugAttribute>())
+                            ?? (IsMonitoredByDefault(context) ? DefaultAttribute : null);
             if (attribute is null)
             {
                 return null;
@@ -142,6 +144,45 @@ internal sealed class JobMonitor
             Logger?.LogError(e, "Failed to read the schedule of trigger '{0}'.", trigger.Key);
             return null;
         }
+    }
+
+    private bool IsMonitoredByDefault(IJobExecutionContext context)
+    {
+        if (!_options.MonitorAllJobs)
+        {
+            return false;
+        }
+
+        // Only jobs that run on a schedule, and whose key stays the same across restarts
+        var key = context.JobDetail.Key;
+        if (context.Trigger is not (ICronTrigger or ISimpleTrigger { RepeatCount: not 0 }) || !HasIdentity(key))
+        {
+            return false;
+        }
+
+        if (IsExcluded(key))
+        {
+            Logger?.LogDebug("Skipping the check-in for job '{0}'. It matches ExcludedJobs.", key);
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool IsExcluded(JobKey key)
+    {
+        var fullKey = key.ToString();
+        foreach (var pattern in _options.ExcludedJobs)
+        {
+            if (pattern._regex is { } regex
+                    ? regex.IsMatch(fullKey) || regex.IsMatch(key.Name)
+                    : pattern._string == fullKey || pattern._string == key.Name)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private string? ResolveMonitorSlug(IJobExecutionContext context, Type jobType, SentryMonitorSlugAttribute attribute)
