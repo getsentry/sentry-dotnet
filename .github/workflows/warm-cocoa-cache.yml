@@ -9,6 +9,14 @@ on:
       - version*
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+# A run that starts while another one builds would miss the cache and build it a second time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   cocoa:
     name: Cocoa SDK
