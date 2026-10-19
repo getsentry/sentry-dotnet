@@ -67,7 +67,7 @@ public partial class App : Application
 
         if (HasTestArg("OnActivated"))
         {
-            throw new ApplicationException("This exception was thrown deliberately from AppDelegate.OnActivated.");
+            throw new ApplicationException("This exception was thrown deliberately from SceneDelegate.OnActivated.");
         }
     }
 
