@@ -21,6 +21,8 @@
     <SentryProGuardUUID Condition="'$(SentryProGuardUUID)' == ''">$([System.Guid]::NewGuid())</SentryProGuardUUID>
     <SentryAllowFailure Condition="'$(SENTRY_ALLOW_FAILURE)' == 'true'">true</SentryAllowFailure>
     <SentryAllowFailure Condition="'$(SentryAllowFailure)' == ''">false</SentryAllowFailure>
+    <!-- From .NET 11 the SDK's Native AOT publish skips Build and runs _PublishOptimizedBuildAlternative instead -->
+    <_SentryAfterBuildTargets>Build;_PublishOptimizedBuildAlternative</_SentryAfterBuildTargets>
   </PropertyGroup>
 
   <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
@@ -52,7 +54,7 @@
     </WriteCodeFragment>
   </Target>
 
-  <Target Name="CheckSentryCLI" AfterTargets="Build" Condition="'$(InnerTargets)' == ''">
+  <Target Name="CheckSentryCLI" AfterTargets="$(_SentryAfterBuildTargets)" Condition="'$(InnerTargets)' == ''">
     <PropertyGroup>
       <!-- Set defaults for the Sentry properties. -->
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == ''">false</SentryUploadSymbols>
@@ -406,7 +408,7 @@
   </Target>
 
   <!-- Set release information after the build -->
-  <Target Name="_CreateSentryRelease" AfterTargets="Build" DependsOnTargets="_GetSentryRelease"
+  <Target Name="_CreateSentryRelease" AfterTargets="$(_SentryAfterBuildTargets)" DependsOnTargets="_GetSentryRelease"
           Condition="'$(SentryCLI)' != '' and '$(SentryCreateRelease)' == 'true' and '$(_SentryRelease)' != ''">
     <Message Importance="High" Text="Creating Sentry Release: $(_SentryRelease)" />
     <Exec
@@ -417,7 +419,7 @@
   </Target>
 
   <!-- Send commit details to Sentry -->
-  <Target Name="_SentrySetCommits" AfterTargets="Build" DependsOnTargets="_CreateSentryRelease"
+  <Target Name="_SentrySetCommits" AfterTargets="$(_SentryAfterBuildTargets)" DependsOnTargets="_CreateSentryRelease"
           Condition="'$(SentryCLI)' != '' and '$(SentrySetCommits)' == 'true' and '$(_SentryRelease)' != ''">
     <Message Importance="High" Text="Setting Sentry commits" />
     <Exec
