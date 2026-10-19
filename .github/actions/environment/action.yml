@@ -30,12 +30,9 @@ runs:
       shell: bash
       run: sudo ./scripts/install-libssl1.sh
 
-    # See https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md#xcode
-    # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
-      shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_27.app
+      uses: ./.github/actions/xcode
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21
