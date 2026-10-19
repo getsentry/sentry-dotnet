@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Reflection;
 
 namespace Sentry.AspNetCore.Grpc;
@@ -28,7 +29,7 @@ public static class SentryBuilderExtensions
         return builder;
     }
 
-    private class SentryGrpcEventProcessor : ISentryEventProcessor
+    private class SentryGrpcEventProcessor : ISentryEventProcessor, ISdkProcessor
     {
         private static readonly SdkVersion NameAndVersion
             = typeof(SentryGrpcInterceptor).Assembly.GetNameAndVersion();

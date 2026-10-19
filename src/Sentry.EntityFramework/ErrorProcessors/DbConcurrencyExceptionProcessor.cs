@@ -1,9 +1,11 @@
+using Sentry.Internal;
+
 namespace Sentry.EntityFramework.ErrorProcessors;
 
 /// <summary>
 /// Exception processor for Entity Framework <see cref="DBConcurrencyException"/>.
 /// </summary>
-public class DbConcurrencyExceptionProcessor : SentryEventExceptionProcessor<DBConcurrencyException>
+public class DbConcurrencyExceptionProcessor : SentryEventExceptionProcessor<DBConcurrencyException>, ISdkProcessor
 {
     /// <summary>
     /// Extracts RowCount and RowError from <see cref="DBConcurrencyException"/>.

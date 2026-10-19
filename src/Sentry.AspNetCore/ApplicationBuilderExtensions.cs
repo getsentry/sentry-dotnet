@@ -44,6 +44,8 @@ internal static class ApplicationBuilderExtensions
         var lifetime = app.ApplicationServices.GetService<IHostApplicationLifetime>();
         lifetime?.ApplicationStopped.Register(SentrySdk.Close);
 
+        _ = app.ApplicationServices.GetService<Func<IHub>>();
+
         return app.UseMiddleware<SentryMiddleware>();
     }
 }
