@@ -28,8 +28,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Pin Xcode
-        uses: ./.github/actions/xcode
+      # Must select the same Xcode as .github/actions/environment, which the jobs that restore this cache run.
+      # Setup Environment itself would add minutes of installs that building the Cocoa SDK doesn't need.
+      - name: Pin the Xcode Version
+        run: sudo xcode-select --switch /Applications/Xcode_27.app
 
       # The key must match the one in build.yml and device-tests-ios.yml
       - name: Get Xcode version
