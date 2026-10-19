@@ -30,14 +30,6 @@ runs:
       shell: bash
       run: sudo ./scripts/install-libssl1.sh
 
-    - name: Install Linux ARM 32-bit dependencies
-      if: ${{ matrix.rid == 'linux-arm' }}
-      shell: bash
-      run: |
-        sudo dpkg --add-architecture armhf
-        sudo apt-get update
-        sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
-
     # See https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md#xcode
     # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
