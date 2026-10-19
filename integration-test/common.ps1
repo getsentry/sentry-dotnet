@@ -35,12 +35,13 @@ BeforeAll {
     {
         if (-not $script:SentryPackageVersion)
         {
-            $version = dotnet msbuild "$PSScriptRoot/../src/Sentry/Sentry.csproj" -p:Configuration=Release -getProperty:Version | Select-Object -Last 1
+            $output = dotnet msbuild "$PSScriptRoot/../src/Sentry/Sentry.csproj" -p:Configuration=Release -getProperty:Version 2>&1 | ForEach-Object { "$_".Trim() }
+            $version = $output | Where-Object { $_ -match '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$' } | Select-Object -Last 1
             if ($LASTEXITCODE -ne 0 -or -not $version)
             {
-                throw "Could not evaluate the Sentry package version"
+                throw "Could not evaluate the Sentry package version (exit code $LASTEXITCODE):`n$($output -join "`n")"
             }
-            $script:SentryPackageVersion = $version.Trim()
+            $script:SentryPackageVersion = $version
             Write-Host "Sentry package version: $script:SentryPackageVersion"
         }
         return $script:SentryPackageVersion
