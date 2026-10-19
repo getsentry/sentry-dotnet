@@ -25,7 +25,7 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 
 #### Initializing Sentry
 
-- Serilog's `WriteTo.Sentry(...)`, NLog's Sentry target, log4net's `SentryAppender` and `Logging.AddSentry(...)` no longer initialize the SDK. Initialize Sentry first with `SentrySdk.Init`, or `UseSentry` in ASP.NET Core, MAUI, Blazor WebAssembly and generic host apps, and move `Dsn`, `Release`, `Environment` and other SDK settings there. A DSN still set on one of these integrations fails with a message explaining what to change.
+- Serilog's `WriteTo.Sentry(...)`, NLog's Sentry target, log4net's `SentryAppender` and `Logging.AddSentry(...)` no longer initialize the SDK. Initialize Sentry first with `SentrySdk.Init`, or `UseSentry` in ASP.NET Core, MAUI, Blazor WebAssembly and generic host apps, and move `Dsn`, `Release`, `Environment` and other SDK settings there. A DSN still set on one of these integrations fails with a message explaining what to change (to prevent SDK users being blind-sided by this change).
 - `Logging:Sentry` in `appsettings.json` now only sets log levels: `MinimumEventLevel`, `MinimumBreadcrumbLevel` and the `LogLevel` rules. Move any other key to the `Sentry` section; the app fails at startup until you do.
 - `SentryLoggingOptions`, `SentrySerilogOptions` and `SentryNLogOptions` no longer derive from `SentryOptions`. Serilog's `ApplySerilogScopeToEvents()` is renamed `UseSerilog()`.
 - NLog flushes Sentry using `SentryOptions.FlushTimeout`, which defaults to 2 seconds. The NLog target used to wait up to 15.
@@ -40,7 +40,7 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 - `SentryOptions.ScopeObserver`, `EnableScopeSync` and `CrashedLastRun` are now internal.
 - On iOS and Mac Catalyst, `SentryOptions.Native.EnableAppHangTrackingV2` is removed; use `EnableAppHangTracking`. `SentryOptions.Native.AddInAppExclude(string)`, which had no effect, is removed too.
 - `Envelope.FromEvent`, `Envelope.FromFeedback` and `Envelope.FromTransaction` take the `IDiagnosticLogger` as their last parameter.
-- The OTLP exporter no longer sets a global OpenTelemetry propagator, and its `defaultTextMapPropagator` parameter is removed. Set `PropagateTraceparent`, or configure an OpenTelemetry propagator yourself. `Sentry.OpenTelemetry` and `Sentry.OpenTelemetry.Exporter` now require OpenTelemetry 1.12.0 or later.
+- The OTLP exporter no longer sets a global OpenTelemetry propagator, and its `defaultTextMapPropagator` parameter is removed. The propagator should be configured via the OpenTelemetry SDK instead. `Sentry.OpenTelemetry` and `Sentry.OpenTelemetry.Exporter` now require OpenTelemetry 1.12.0 or later.
 
 #### Changes in behavior
 
