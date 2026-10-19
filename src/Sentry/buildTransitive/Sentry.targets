@@ -227,6 +227,7 @@
       <SentryCLIUploadItems>$(SentryCLIUploadDirectory)</SentryCLIUploadItems>
       <!--
         .NET 11 Apple SDKs ship the assemblies in "postprocessed-assemblies", which can differ from the trimmer's "linked" output.
+        When postprocessed-assemblies/ exists, it holds the assemblies that ship, and linked/ is just an intermediate step. The two steps below add postprocessed-assemblies/*.pdb if that directory exists and fall back to linked/ otherwise
       -->
       <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)linked') And !Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(SentryCLIUploadItems) $(IntermediateOutputPath)linked/*.pdb</SentryCLIUploadItems>
       <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(SentryCLIUploadItems) $(IntermediateOutputPath)postprocessed-assemblies/*.pdb</SentryCLIUploadItems>
