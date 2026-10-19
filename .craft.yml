@@ -43,6 +43,11 @@ targets:
         name: Sentry.Extensions.AI
         packageUrl: https://www.nuget.org/packages/Sentry.Extensions.AI
         mainDocsUrl: https://docs.sentry.io/platforms/dotnet/tracing/instrumentation/ai-agents-module/
+      nuget:Sentry.Extensions.Hosting:
+        name: Sentry.Extensions.Hosting
+        sdkName: sentry.dotnet.extensions.hosting
+        packageUrl: https://www.nuget.org/packages/Sentry.Extensions.Hosting
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/
       nuget:Sentry.Extensions.Logging:
         name: Sentry.Extensions.Logging
         packageUrl: https://www.nuget.org/packages/Sentry.Extensions.Logging

@@ -66,6 +66,7 @@ public class SentryStartup : FunctionsStartup
         logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
         logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
         logging.Services.TryAddSingleton<HostLoggerProvidersMarker>();
+        logging.Services.TryAddSingleton<HostIntegrationMarker>();
 
         // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
         logging.AddFilter<SentryAspNetCoreLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>

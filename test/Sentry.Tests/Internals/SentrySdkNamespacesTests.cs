@@ -8,6 +8,7 @@ public class SentrySdkNamespacesTests
     [InlineData("Sentry.AspNetCore")]
     [InlineData("Sentry.AspNetCore.SentryMiddleware")]
     [InlineData("Sentry.AspNetCore.RequestDecompression.RequestDecompressionMiddleware")]
+    [InlineData("Sentry.Extensions.Hosting.SentryHostedService")]
     [InlineData("Sentry.Extensions.Logging.MelDiagnosticLogger")]
     [InlineData("Sentry.Serilog.SentrySink")]
     [InlineData("Sentry.Maui.SentryMauiOptions")]
