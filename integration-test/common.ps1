@@ -33,54 +33,17 @@ BeforeAll {
 
     function GetSentryPackageVersion()
     {
-        # Read version directly from Directory.Build.props
-        $propsFile = Join-Path $PSScriptRoot '..\Directory.Build.props'
-
-        if (-not (Test-Path $propsFile)) {
-            throw "Directory.Build.props not found at $propsFile"
-        }
-
-        # Parse the props file using PowerShell XML parsing
-        Write-Host "Parsing props file as XML..."
-        [xml]$propsXml = Get-Content $propsFile
-
-        # Look for VersionPrefix and VersionSuffix in PropertyGroup elements
-        $versionPrefix = ""
-        $versionSuffix = ""
-
-        foreach ($propGroup in $propsXml.Project.PropertyGroup) {
-            if ($propGroup.PSObject.Properties["VersionPrefix"]) {
-                $versionPrefix = $propGroup.VersionPrefix
-                Write-Host "Found VersionPrefix: '$versionPrefix'"
+        if (-not $script:SentryPackageVersion)
+        {
+            $version = dotnet msbuild "$PSScriptRoot/../src/Sentry/Sentry.csproj" -p:Configuration=Release -getProperty:Version | Select-Object -Last 1
+            if ($LASTEXITCODE -ne 0 -or -not $version)
+            {
+                throw "Could not evaluate the Sentry package version"
             }
-
-            # For VersionSuffix, we need to be careful about conditions
-            # Only use VersionSuffix if it's not in a conditional PropertyGroup
-            # or if it's explicitly set (not the 'dev' fallback for non-Release)
-            if ($propGroup.PSObject.Properties["VersionSuffix"]) {
-                $condition = $null
-                if ($propGroup.PSObject.Properties["Condition"]) {
-                    $condition = $propGroup.Condition
-                    Write-Host "Ignoring VersionSuffix: '$($propGroup.VersionSuffix)' with condition: '$condition'"
-                    # Skip conditional VersionSuffix as we're building in Release mode
-                }
-                else {
-                    # No condition - this is the explicit VersionSuffix we want
-                    $versionSuffix = $propGroup.VersionSuffix
-                    Write-Host "Found VersionSuffix: '$versionSuffix'"
-                }
-            }
+            $script:SentryPackageVersion = $version.Trim()
+            Write-Host "Sentry package version: $script:SentryPackageVersion"
         }
-
-        if (-not $versionPrefix) {
-            throw "Could not find VersionPrefix in $propsFile"
-        }
-
-        # Combine prefix and suffix
-        $fullVersion = if ($versionSuffix) { "$versionPrefix-$versionSuffix" } else { $versionPrefix }
-        Write-Host "Full Version: '$fullVersion'"
-
-        return $fullVersion
+        return $script:SentryPackageVersion
     }
 
     function RegisterLocalPackage([string] $name)
