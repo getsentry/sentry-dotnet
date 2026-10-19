@@ -224,6 +224,22 @@ jobs:
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
+      # The Cocoa SDK is built from the submodule by the Sentry.Bindings.Cocoa project, which takes ~15 minutes
+      # on a hosted runner. build-sentry-cocoa.sh skips the build when the restored stamp matches.
+      # Release builds always build it from source, because it ships in the Sentry.Bindings.Cocoa package.
+      - name: Get Xcode version
+        id: xcode
+        if: runner.os == 'macOS'
+        run: echo "version=$(xcodebuild -version | tr -cs '[:alnum:].' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Cocoa SDK
+        id: cache-cocoa
+        if: runner.os == 'macOS' && !startsWith(github.ref_name, 'release/')
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: sentry-cocoa-${{ steps.xcode.outputs.version }}-${{ hashFiles('scripts/build-sentry-cocoa.sh', 'scripts/sentry-cocoa.xcconfig') }}-${{ hashFiles('.git/modules/modules/sentry-cocoa/HEAD') }}
+
       - name: Build Native Dependencies
         if: ${{ !matrix.container && !env.NO_MOBILE }}
         uses: ./.github/actions/buildnative
@@ -234,6 +250,14 @@ jobs:
       - name: Build
         id: build
         run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
+
+      # Only a completed Cocoa build writes the stamp, so a failed one is never cached.
+      - name: Save Cocoa SDK
+        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-primary-key != '' && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
 
       - name: Upload build logs
         if: ${{ always() }}

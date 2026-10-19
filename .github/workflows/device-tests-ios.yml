@@ -70,8 +70,27 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      # See build.yml
+      - name: Get Xcode version
+        id: xcode
+        run: echo "version=$(xcodebuild -version | tr -cs '[:alnum:].' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Cocoa SDK
+        id: cache-cocoa
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: sentry-cocoa-${{ steps.xcode.outputs.version }}-${{ hashFiles('scripts/build-sentry-cocoa.sh', 'scripts/sentry-cocoa.xcconfig') }}-${{ hashFiles('.git/modules/modules/sentry-cocoa/HEAD') }}
+
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
+
+      - name: Save Cocoa SDK
+        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
 
       - name: Run Tests
         id: first-test-run
