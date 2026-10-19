@@ -123,10 +123,18 @@ public static class SentryMauiAppBuilderExtensions
                     SentryMauiEventProcessor.InForeground = false;
                 });
 
+                // Apps using the UIScene lifecycle (required by Xcode 27) get the Scene* events instead
                 lifecycle.OnActivated(application => SentryMauiEventProcessor.InForeground = true);
+                lifecycle.SceneOnActivated(scene => SentryMauiEventProcessor.InForeground = true);
 
                 lifecycle.DidEnterBackground(application => SentryMauiEventProcessor.InForeground = false);
+                lifecycle.SceneDidEnterBackground(scene => SentryMauiEventProcessor.InForeground = AnyOtherSceneIsActive(scene));
                 lifecycle.OnResignActivation(application => SentryMauiEventProcessor.InForeground = false);
+                lifecycle.SceneOnResignActivation(scene => SentryMauiEventProcessor.InForeground = AnyOtherSceneIsActive(scene));
+
+                static bool AnyOtherSceneIsActive(UIKit.UIScene scene) =>
+                    UIKit.UIApplication.SharedApplication.ConnectedScenes.ToArray()
+                        .Any(s => s != scene && s.ActivationState == UIKit.UISceneActivationState.ForegroundActive);
             });
 #elif ANDROID
             events.AddAndroid(lifecycle =>

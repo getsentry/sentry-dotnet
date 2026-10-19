@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Sentry's internals aren't visible here because this assembly isn't strong-named -->
+    <Compile Include="..\Sentry\Internal\CrontabValidator.cs" Link="Internal\CrontabValidator.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Sentry.Hangfire.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
