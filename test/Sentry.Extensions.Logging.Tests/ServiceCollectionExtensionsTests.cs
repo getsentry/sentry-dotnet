@@ -28,29 +28,18 @@ public sealed class ServiceCollectionExtensionsTests : IDisposable
         return services.BuildServiceProvider();
     }
 
-    private ServiceProvider BuildServiceProvider(bool hostInitializesSdk)
+    private ServiceProvider BuildServiceProvider(Action<IServiceCollection> configureServices = null)
     {
         var services = new ServiceCollection();
-        if (hostInitializesSdk)
+        services.Configure<TestHostOptions>(o =>
         {
-            services.Configure<TestHostOptions>(o =>
-            {
-                o.Dsn = ValidDsn;
-                o.BackgroundWorker = _worker;
-                o.InitNativeSdks = false;
-            });
-            services.AddSentry<TestHostOptions>(initializeSdk: true);
-        }
-        else
-        {
-            SentrySdk.Init(o =>
-            {
-                o.Dsn = ValidDsn;
-                o.BackgroundWorker = _worker;
-                o.InitNativeSdks = false;
-            });
-        }
+            o.Dsn = ValidDsn;
+            o.BackgroundWorker = _worker;
+            o.InitNativeSdks = false;
+        });
+        services.AddSentry<TestHostOptions>(initializeSdk: true);
         services.AddLogging(builder => builder.AddSentry());
+        configureServices?.Invoke(services);
         return services.BuildServiceProvider();
     }
 
@@ -79,12 +68,10 @@ public sealed class ServiceCollectionExtensionsTests : IDisposable
         configured.Should().BeFalse();
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void AddSentry_SdkHubReplacedAfterResolution_ResolvedHubUsesNewHub(bool hostInitializesSdk)
+    [Fact]
+    public void AddSentry_SdkHubReplacedAfterResolution_ResolvedHubUsesNewHub()
     {
-        using var provider = BuildServiceProvider(hostInitializesSdk);
+        using var provider = BuildServiceProvider();
         var hub = provider.GetRequiredService<IHub>();
         var client = provider.GetRequiredService<ISentryClient>();
 
@@ -100,12 +87,10 @@ public sealed class ServiceCollectionExtensionsTests : IDisposable
         newHub.Received(1).CaptureEvent(clientEvent);
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void AddSentry_ServiceProviderDisposed_SdkHubStillCaptures(bool hostInitializesSdk)
+    [Fact]
+    public void AddSentry_ServiceProviderDisposed_SdkHubStillCaptures()
     {
-        var provider = BuildServiceProvider(hostInitializesSdk);
+        var provider = BuildServiceProvider();
         _ = provider.GetRequiredService<IHub>();
         _ = provider.GetRequiredService<ISentryClient>();
         _ = provider.GetRequiredService<ILoggerFactory>();
@@ -118,5 +103,15 @@ public sealed class ServiceCollectionExtensionsTests : IDisposable
                 .Select(i => i.Payload).OfType<JsonSerializable>()
                 .Select(i => i.Source).OfType<SentryEvent>()
                 .Any(evt => evt.Message!.Message == "after dispose")));
+    }
+
+    [Fact]
+    public void AddSentry_WithLoggingAddSentry_AddsOneSentryHttpMessageHandler()
+    {
+        using var provider = BuildServiceProvider(services => services.AddHttpClient("test"));
+
+        var client = provider.GetRequiredService<IHttpClientFactory>().CreateClient("test");
+
+        client.GetMessageHandlers().OfType<SentryHttpMessageHandler>().Should().ContainSingle();
     }
 }

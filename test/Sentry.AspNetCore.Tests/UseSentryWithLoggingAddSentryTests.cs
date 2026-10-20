@@ -18,13 +18,13 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
 
     public void Dispose() => SentrySdk.Close();
 
-    private WebApplication Build(bool useSentryFirst, bool enableLogs = false)
+    private WebApplication Build(bool useSentryFirst, bool enableLogs = false, string dsn = ValidDsn)
     {
         var builder = WebApplication.CreateBuilder();
 
         void UseSentry() => builder.WebHost.UseSentry((SentryAspNetCoreOptions options) =>
         {
-            options.Dsn = ValidDsn;
+            options.Dsn = dsn;
             options.BackgroundWorker = Substitute.For<IBackgroundWorker>();
             options.AutoSessionTracking = false;
             options.InitNativeSdks = false;
@@ -108,6 +108,18 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
 
         _diagnosticLogger.Entries.Should().ContainSingle(e =>
             e.Level == SentryLevel.Warning && e.Message == SentryLoggingOptions.RedundantWithHostIntegration);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void UseSentry_WithLoggingAddSentryAndSdkDisabled_CreatesLogger(bool useSentryFirst)
+    {
+        using var app = Build(useSentryFirst, dsn: SentryConstants.DisableSdkDsnValue);
+
+        var createLogger = () => CreateLogger(app);
+
+        createLogger.Should().NotThrow();
     }
 }
 #endif

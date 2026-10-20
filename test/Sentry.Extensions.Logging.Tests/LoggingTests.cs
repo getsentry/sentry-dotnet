@@ -96,8 +96,7 @@ public class LoggingTests
         var logger = loggerFactory.CreateLogger(CategoryName);
         logger.Log(logLevel, message);
 
-        var hub = serviceProvider.GetRequiredService<IHub>();
-        hub.CaptureEvent(new SentryEvent());
+        SentrySdk.CaptureEvent(new SentryEvent());
 
         // Assert
         worker.Received(1).EnqueueEnvelope(
@@ -151,8 +150,7 @@ public class LoggingTests
         var logger = loggerFactory.CreateLogger(CategoryName);
         logger.Log(logLevel, message);
 
-        var hub = serviceProvider.GetRequiredService<IHub>();
-        hub.Logger.Flush();
+        SentrySdk.Logger.Flush();
 
         // Assert
         worker.Received(1).EnqueueEnvelope(
@@ -199,8 +197,7 @@ public class LoggingTests
         logger.Log(LogLevel.Information, "test breadcrumb");
         logger.Log(LogLevel.Warning, "test event");
 
-        var hub = serviceProvider.GetRequiredService<IHub>();
-        hub.Logger.Flush();
+        SentrySdk.Logger.Flush();
 
         // Assert
         Assert.Collection(envelopes,
