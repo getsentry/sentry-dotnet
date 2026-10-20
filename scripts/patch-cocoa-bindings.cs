@@ -46,6 +46,8 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveBaseType("INSCopying")
     // Fix property-to-method conversions
     .PropertyToMethod("Sentry*", "Serialize")
+    // Scope serialization is an SDK implementation detail, not a binding dependency.
+    .RemoveMethod("SentryObjCScope", "Serialize")
     .PropertyToMethod("SentryObjCSpan", "ToTraceHeader")
     .PropertyToMethod("SentryObjCTraceContext", "ToBaggage")
     .PropertyToMethod("SentryObjCInternalScopeApi", "CreateScope")
