@@ -17,6 +17,8 @@
       See https://learn.microsoft.com/dotnet/core/tools/sdk-errors/netsdk1100
     -->
     <EnableWindowsTargeting Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</EnableWindowsTargeting>
+    <!-- PRI expansion runs makepri.exe, which only runs on Windows -->
+    <AppxGeneratePriEnabled Condition="$([MSBuild]::IsOSPlatform('OSX'))">false</AppxGeneratePriEnabled>
 
     <!-- We'll need to package this only for builds including mobile targets. -->
     <IsPackable Condition="'$(NO_MOBILE)' == 'true'">false</IsPackable>

@@ -225,34 +225,37 @@
 
     <PropertyGroup>
       <SentryCLIUploadItems>$(SentryCLIUploadDirectory)</SentryCLIUploadItems>
-      <!--
-        .NET 11 Apple SDKs ship the assemblies in "postprocessed-assemblies", which can differ from the trimmer's "linked" output.
-        When postprocessed-assemblies/ exists, it holds the assemblies that ship, and linked/ is just an intermediate step. The two steps below add postprocessed-assemblies/*.pdb if that directory exists and fall back to linked/ otherwise
-      -->
-      <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)linked') And !Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(SentryCLIUploadItems) $(IntermediateOutputPath)linked/*.pdb</SentryCLIUploadItems>
-      <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(SentryCLIUploadItems) $(IntermediateOutputPath)postprocessed-assemblies/*.pdb</SentryCLIUploadItems>
       <SentryCLIUploadItems Condition="'@(AndroidNativeSymbolFilesExceptDll)' != ''">$(SentryCLIUploadItems) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')</SentryCLIUploadItems>
+      <_SentryCLIUploadTrimmedPdbs Condition="Exists('$(IntermediateOutputPath)linked')">$(IntermediateOutputPath)linked/*.pdb</_SentryCLIUploadTrimmedPdbs>
+      <_SentryCLIUploadTrimmedPdbs Condition="Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(IntermediateOutputPath)postprocessed-assemblies/*.pdb</_SentryCLIUploadTrimmedPdbs>
+      <_SentryCLIIncludeSources Condition="'$(SentryUploadSources)' == 'true'">--include-sources</_SentryCLIIncludeSources>
     </PropertyGroup>
+    <ItemGroup>
+      <_SentryCLIUploadSymbolType Include="@(SentryCLIUploadSymbolType)" />
+    </ItemGroup>
+    <!-- Apple apps ship the trimmer's assemblies, whose PDBs each RID's own build uploads, so skip the pre-trim ones -->
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'maccatalyst'">
+      <_SentryCLIUploadSymbolType Remove="pdb;portablepdb" Condition="'$(_SentryCLIUploadTrimmedPdbs)' != '' or ('$(RuntimeIdentifiers)' != '' and '$(RuntimeIdentifier)' == '')" />
+    </ItemGroup>
 
-    <!-- if (UploadSymbols && UploadSources) { -->
+    <!-- if (UploadSymbols) { -->
       <Message Importance="High"
         Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
-        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadItems)" />
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadItems) $(_SentryCLIUploadTrimmedPdbs)" />
+      <Message Importance="High"
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadItems) $(_SentryCLIUploadTrimmedPdbs)" />
       <Exec
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
-        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') --include-sources $(SentryCLIUploadItems)"
+        Condition="'$(SentryUploadSymbols)' == 'true'"
+        Command="$(SentryCLIDebugFilesUploadCommand) @(_SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(_SentryCLIIncludeSources) $(SentryCLIUploadItems)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
-    <!-- } else if (UploadSymbols && !UploadSources) { -->
-      <Message Importance="High"
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
-        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadItems)" />
       <Exec
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
-        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(SentryCLIUploadItems)"
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(_SentryCLIUploadTrimmedPdbs)' != ''"
+        Command="$(SentryCLIDebugFilesUploadCommand) -t pdb -t portablepdb $(_SentryCLIIncludeSources) $(_SentryCLIUploadTrimmedPdbs)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
-        <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+        <Output TaskParameter="ExitCode" PropertyName="_SentryCLITrimmedPdbsExitCode" />
       </Exec>
     <!-- } else if (!UploadSymbols && UploadSources) { -->
       <PropertyGroup>
@@ -277,7 +280,7 @@
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
     <!-- } -->
-    <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload debug files." />
+    <Warning Condition="'$(_SentryCLIExitCode)' != '0' or ('$(_SentryCLITrimmedPdbsExitCode)' != '' and '$(_SentryCLITrimmedPdbsExitCode)' != '0')" Text="Sentry CLI could not upload debug files." />
   </Target>
 
   <!-- Only for the application assembly: https://github.com/getsentry/sentry-dotnet/pull/4647 -->
