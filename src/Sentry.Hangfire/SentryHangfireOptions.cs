@@ -26,8 +26,8 @@ public class SentryHangfireOptions
 
     /// <summary>
     /// When enabled, every recurring job sends check-ins, not only jobs marked with
-    /// <see cref="SentryMonitorSlugAttribute"/>. The monitor slug is the recurring job ID, lowercased, with characters
-    /// other than letters, digits, <c>-</c> and <c>_</c> replaced by <c>-</c>, and cut to 50 characters.
+    /// <see cref="SentryMonitorSlugAttribute"/>. The monitor slug is the recurring job ID, lowercased, with every run of
+    /// characters other than letters, digits and <c>_</c> replaced by <c>-</c>, and cut to 50 characters.
     /// Defaults to <c>false</c>.
     /// </summary>
     /// <remarks>
@@ -52,14 +52,14 @@ public class SentryHangfireOptions
             return null;
         }
 
-        var slug = InvalidSlugCharacters.Replace(recurringJobId.ToLowerInvariant(), "-").Trim('-');
+        var slug = InvalidSlugCharacters.Replace(recurringJobId.ToLowerInvariant(), "-").Trim('-', '_');
         if (slug.Length > MaxSlugLength)
         {
-            slug = slug.Substring(0, MaxSlugLength).TrimEnd('-');
+            slug = slug.Substring(0, MaxSlugLength).Trim('-', '_');
         }
         return slug.Length > 0 ? slug : null;
     }
 
     private const int MaxSlugLength = 50;
-    private static readonly Regex InvalidSlugCharacters = new("[^a-z0-9_-]+", RegexOptions.Compiled);
+    private static readonly Regex InvalidSlugCharacters = new("[^a-z0-9_]+", RegexOptions.Compiled);
 }

@@ -472,6 +472,8 @@ public class ServerFilterTests
     [InlineData("  --Send_Emails!!  ", "send_emails")]
     [InlineData("Ünïcode job", "n-code-job")]
     [InlineData("!!!", null)]
+    [InlineData("Reports - Nightly", "reports-nightly")]
+    [InlineData("__private_job__", "private_job")]
     [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
     [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
     public void GetRecurringJobSlug_RecurringJobId_ReturnsSlug(string recurringJobId, string? expected)
