@@ -35,11 +35,24 @@ BeforeAll {
     {
         if (-not $script:SentryPackageVersion)
         {
-            $output = dotnet msbuild "$PSScriptRoot/../src/Sentry/Sentry.csproj" -p:Configuration=Release -getProperty:Version 2>&1 | ForEach-Object { "$_".Trim() }
-            $version = $output | Where-Object { $_ -match '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$' } | Select-Object -Last 1
-            if ($LASTEXITCODE -ne 0 -or -not $version)
+            if (Test-Path env:CI)
             {
-                throw "Could not evaluate the Sentry package version (exit code $LASTEXITCODE):`n$($output -join "`n")"
+                # The publishing build runs these tests in a sparse checkout holding only the built packages
+                $package = Get-ChildItem "$PSScriptRoot/../src/Sentry/bin/Release/Sentry.*.nupkg" -File | Select-Object -First 1
+                if (-not $package)
+                {
+                    throw "No Sentry package found in src/Sentry/bin/Release"
+                }
+                $version = $package.Name -replace '^Sentry\.(.+)\.nupkg$', '$1'
+            }
+            else
+            {
+                $output = dotnet msbuild "$PSScriptRoot/../src/Sentry/Sentry.csproj" -p:Configuration=Release -getProperty:Version 2>&1 | ForEach-Object { "$_".Trim() }
+                $version = $output | Where-Object { $_ -match '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$' } | Select-Object -Last 1
+                if ($LASTEXITCODE -ne 0 -or -not $version)
+                {
+                    throw "Could not evaluate the Sentry package version (exit code $LASTEXITCODE):`n$($output -join "`n")"
+                }
             }
             $script:SentryPackageVersion = $version
             Write-Host "Sentry package version: $script:SentryPackageVersion"
