@@ -71,16 +71,16 @@ jobs:
         uses: ./.github/actions/environment
 
       # See build.yml
-      - name: Get Xcode version
-        id: xcode
-        run: echo "version=$(xcodebuild -version | tr -cs '[:alnum:].' '-')" >> "$GITHUB_OUTPUT"
+      - name: Get Cocoa SDK cache key
+        id: cocoa-key
+        uses: ./.github/actions/cocoa-cache-key
 
       - name: Restore Cocoa SDK
         id: cache-cocoa
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: modules/sentry-cocoa/Carthage
-          key: sentry-cocoa-${{ steps.xcode.outputs.version }}-${{ hashFiles('scripts/build-sentry-cocoa.sh', 'scripts/sentry-cocoa.xcconfig') }}-${{ hashFiles('.git/modules/modules/sentry-cocoa/HEAD') }}
+          key: ${{ steps.cocoa-key.outputs.key }}
 
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build

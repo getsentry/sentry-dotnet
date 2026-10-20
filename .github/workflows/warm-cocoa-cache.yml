@@ -28,22 +28,20 @@ jobs:
         with:
           submodules: recursive
 
-      # Must select the same Xcode as .github/actions/environment, which the jobs that restore this cache run.
-      # Setup Environment itself would add minutes of installs that building the Cocoa SDK doesn't need.
+      # The same Xcode as Setup Environment, without the installs that building the Cocoa SDK doesn't need
       - name: Pin the Xcode Version
-        run: sudo xcode-select --switch /Applications/Xcode_27.app
+        uses: ./.github/actions/pin-xcode
 
-      # The key must match the one in build.yml and device-tests-ios.yml
-      - name: Get Xcode version
-        id: xcode
-        run: echo "version=$(xcodebuild -version | tr -cs '[:alnum:].' '-')" >> "$GITHUB_OUTPUT"
+      - name: Get Cocoa SDK cache key
+        id: cocoa-key
+        uses: ./.github/actions/cocoa-cache-key
 
       - name: Look up Cocoa SDK
         id: cache-cocoa
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: modules/sentry-cocoa/Carthage
-          key: sentry-cocoa-${{ steps.xcode.outputs.version }}-${{ hashFiles('scripts/build-sentry-cocoa.sh', 'scripts/sentry-cocoa.xcconfig') }}-${{ hashFiles('.git/modules/modules/sentry-cocoa/HEAD') }}
+          key: ${{ steps.cocoa-key.outputs.key }}
           lookup-only: true
 
       - name: Build Cocoa SDK
