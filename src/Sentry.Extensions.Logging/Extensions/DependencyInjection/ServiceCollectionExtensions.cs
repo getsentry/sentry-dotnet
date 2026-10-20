@@ -25,8 +25,7 @@ public static class ServiceCollectionExtensions
         where TOptions : SentryHostOptions, new()
     {
         // Replaces rather than TryAdd, so the integration registered last owns the options and the hub accessor:
-        // the logging integration registers a non-initializing accessor, and a generic host UseSentry can run
-        // before the ASP.NET Core or MAUI one.
+        // a generic host UseSentry can run before the ASP.NET Core or MAUI one.
         services.RemoveAll<SentryOptions>();
         services.AddSingleton<SentryOptions>(c => c.GetRequiredService<IOptions<TOptions>>().Value);
 
@@ -47,7 +46,7 @@ public static class ServiceCollectionExtensions
         return services.AddSentryHub();
     }
 
-    internal static IServiceCollection AddSentryHub(this IServiceCollection services)
+    private static IServiceCollection AddSentryHub(this IServiceCollection services)
     {
         // Must not capture a hub instance: https://github.com/getsentry/sentry-dotnet/issues/103
         services.TryAddTransient<ISentryClient>(c => c.GetRequiredService<IHub>());

@@ -1,11 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
-using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 // Ensures 'AddSentry' can be found without: 'using Sentry;'
@@ -60,16 +60,16 @@ public static class LoggingBuilderExtensions
         {
             if (c.GetService<HostLoggerProvidersMarker>() is null)
             {
-                return new SentryLoggerProvider(c.GetRequiredService<IOptions<SentryLoggingOptions>>(), c.GetRequiredService<IHub>());
+                return new SentryLoggerProvider(c.GetRequiredService<IOptions<SentryLoggingOptions>>(), HubAdapter.Instance);
             }
 
-            c.GetRequiredService<IHub>().GetSentryOptions()?.LogWarning(SentryLoggingOptions.RedundantWithHostIntegration);
+            c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.RedundantWithHostIntegration);
             return NullLoggerProvider.Instance;
         });
         builder.Services.AddSingleton<ILoggerProvider>(c => c.GetService<HostLoggerProvidersMarker>() is null
-            ? new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>())
+            ? new SentryStructuredLoggerProvider(HubAdapter.Instance)
             : NullLoggerProvider.Instance);
-        builder.Services.AddSentryHub();
+        builder.Services.AddSingleton<IHttpMessageHandlerBuilderFilter>(new SentryHttpMessageHandlerBuilderFilter(() => HubAdapter.Instance));
 
         // All logs should flow to the SentryLogger, regardless of level.
         // Filtering of events is handled in SentryLogger, using SentryLoggingOptions.MinimumEventLevel
