@@ -9,7 +9,9 @@ public class JobMonitorTests
         public InMemoryDiagnosticLogger Logger { get; } = new();
         public SentryId CheckInId { get; set; } = SentryId.Create();
         public SentryQuartzOptions Options { get; } = new();
-        public int TriggerCount { get; set; } = 1;
+        public ISystemClock Clock { get; } = Substitute.For<ISystemClock>();
+        public DateTimeOffset Now { get; } = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        public List<(IJobDetail Job, ITrigger Trigger)> OtherTriggers { get; } = [];
 
         public IJobDetail JobDetail { get; set; } = JobBuilder.Create<MonitoredJob>()
             .WithIdentity("DailyEmail", "reports")
@@ -22,18 +24,24 @@ public class JobMonitorTests
         public JobMonitor GetSut()
         {
             Hub.CaptureCheckIn(default!, default, default, default, default, default).ReturnsForAnyArgs(CheckInId);
-            return new JobMonitor(Options, Hub, Logger);
+            Clock.GetUtcNow().Returns(Now);
+            return new JobMonitor(Options, Hub, Logger, Clock);
         }
 
         public IJobExecutionContext GetContext()
         {
+            if (!JobDetail.Key.Equals(Trigger.JobKey))
+            {
+                Trigger = Trigger.GetTriggerBuilder().ForJob(JobDetail).Build();
+            }
+
             var mergedJobDataMap = new JobDataMap();
             foreach (var entry in JobDetail.JobDataMap.Concat(Trigger.JobDataMap))
             {
                 mergedJobDataMap[entry.Key] = entry.Value;
             }
 
-            Scheduler.ReturnsTriggers(JobDetail.Key, Enumerable.Repeat(Trigger, TriggerCount).ToList());
+            Scheduler.ReturnsTriggers([(JobDetail, Trigger), .. OtherTriggers]);
 
             var context = Substitute.For<IJobExecutionContext>();
             context.JobDetail.Returns(JobDetail);
@@ -120,34 +128,215 @@ public class JobMonitorTests
     }
 
     [Fact]
-    public async Task StartAsync_JobHasSeveralTriggers_CapturesCheckInWithoutMonitorConfig()
+    public async Task StartAsync_JobHasTriggersWithDifferentSchedules_CapturesCheckInWithoutMonitorConfig()
     {
         // Arrange
-        _fixture.TriggerCount = 2;
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 18 * * ?", _fixture.JobDetail)));
 
         // Act
         await _fixture.StartAsync();
 
         // Assert
         _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+        _fixture.Logger.Entries.Should().Contain(e => e.Message.Contains("with a different schedule"));
+    }
+
+    [Fact]
+    public async Task StartAsync_JobHasTriggersWithSameSchedule_CapturesCheckInWithMonitorConfig()
+    {
+        // Arrange
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 12 * * ?", _fixture.JobDetail)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_JobsShareSlugWithDifferentSchedules_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        _fixture.JobDetail = JobBuilder.Create<CustomSlugJob>().WithIdentity("eu", "reports").Build();
+        var other = JobBuilder.Create<CustomSlugJob>().WithIdentity("us", "reports").Build();
+        _fixture.OtherTriggers.Add((other, CronTrigger("0 0 18 * * ?", other)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("custom-slug").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_JobsShareSlugWithDifferentTimeZones_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        _fixture.JobDetail = JobBuilder.Create<CustomSlugJob>().WithIdentity("eu", "reports").Build();
+        var other = JobBuilder.Create<CustomSlugJob>().WithIdentity("us", "reports").Build();
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById("America/New_York");
+        _fixture.OtherTriggers.Add((other, CronTrigger("0 0 12 * * ?", other, timeZone)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("custom-slug").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_JobsShareSlugWithSameConvertedSchedule_CapturesCheckInWithMonitorConfig()
+    {
+        // Arrange
+        _fixture.JobDetail = JobBuilder.Create<CustomSlugJob>().WithIdentity("eu", "reports").Build();
+        var other = JobBuilder.Create<CustomSlugJob>().WithIdentity("us", "reports").Build();
+        _fixture.OtherTriggers.Add((other, CronTrigger("0 0 12 ? * *", other)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("custom-slug").Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_IdentitylessJobsWithDifferentSchedules_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        _fixture.JobDetail = JobBuilder.Create<MonitoredJob>().Build();
+        var other = JobBuilder.Create<MonitoredJob>().Build();
+        _fixture.OtherTriggers.Add((other, CronTrigger("0 0 18 * * ?", other)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("monitoredjob").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_OtherTriggerSetsItsOwnSlug_CapturesCheckInWithMonitorConfig()
+    {
+        // Arrange
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 18 * * ?", _fixture.JobDetail,
+            monitorSlug: "daily-email-evening")));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_OtherJobWithoutAttributeSharesSlug_CapturesCheckInWithMonitorConfig()
+    {
+        // Arrange
+        var other = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "Reports").Build();
+        _fixture.OtherTriggers.Add((other, CronTrigger("0 0 18 * * ?", other)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_OtherTriggerScheduleSentryCantRepresent_CapturesCheckInWithMonitorConfig()
+    {
+        // Arrange
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 12 L * ?", _fixture.JobDetail)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().NotBeNull();
     }
 
     [Fact]
     public async Task StartAsync_TriggerSetsMonitorSlug_CapturesCheckInWithThatTriggersMonitorConfig()
     {
         // Arrange
-        _fixture.TriggerCount = 2;
-        _fixture.Trigger = TriggerBuilder.Create()
-            .WithCronSchedule("0 0 12 * * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
-            .UsingJobData(SentryMonitorSlugAttribute.JobDataKey, "daily-email-noon")
-            .Build();
+        _fixture.Trigger = CronTrigger("0 0 12 * * ?", monitorSlug: "daily-email-noon");
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 18 * * ?", _fixture.JobDetail)));
 
         // Act
         await _fixture.StartAsync();
 
         // Assert
         _fixture.Hub.ReceivedConfigureMonitorOptions("daily-email-noon").Should().NotBeNull();
-        _fixture.Scheduler.DidNotLookUpTriggers();
+    }
+
+    [Fact]
+    public async Task StartAsync_WithinTtl_LooksUpTriggersOnce()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        var context = _fixture.GetContext();
+
+        // Act
+        await sut.StartAsync(context, CancellationToken.None);
+        _fixture.Clock.GetUtcNow().Returns(_fixture.Now + JobMonitor.TriggerSchedulesTtl - TimeSpan.FromSeconds(1));
+        await sut.StartAsync(context, CancellationToken.None);
+
+        // Assert
+        _fixture.Scheduler.LookedUpTriggers(1);
+    }
+
+    [Fact]
+    public async Task StartAsync_AfterTtl_LooksUpTriggersAgain()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        var context = _fixture.GetContext();
+
+        // Act
+        await sut.StartAsync(context, CancellationToken.None);
+        _fixture.Clock.GetUtcNow().Returns(_fixture.Now + JobMonitor.TriggerSchedulesTtl);
+        await sut.StartAsync(context, CancellationToken.None);
+
+        // Assert
+        _fixture.Scheduler.LookedUpTriggers(2);
+    }
+
+    [Fact]
+    public async Task StartAsync_ConflictingTriggerAddedAfterTtl_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        await sut.StartAsync(_fixture.GetContext(), CancellationToken.None);
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 18 * * ?", _fixture.JobDetail)));
+        var context = _fixture.GetContext();
+        _fixture.Hub.ClearReceivedCalls();
+
+        // Act
+        await sut.StartAsync(context, CancellationToken.None);
+        var withinTtl = _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail");
+        _fixture.Hub.ClearReceivedCalls();
+        _fixture.Clock.GetUtcNow().Returns(_fixture.Now + JobMonitor.TriggerSchedulesTtl);
+        await sut.StartAsync(context, CancellationToken.None);
+
+        // Assert
+        withinTtl.Should().NotBeNull();
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_TriggerNotInLookup_LooksUpTriggersAgain()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        await sut.StartAsync(_fixture.GetContext(), CancellationToken.None);
+        _fixture.Trigger = CronTrigger("0 0 12 * * ?");
+
+        // Act
+        await sut.StartAsync(_fixture.GetContext(), CancellationToken.None);
+
+        // Assert
+        _fixture.Scheduler.LookedUpTriggers(2);
     }
 
     [Fact]
@@ -447,5 +636,26 @@ public class JobMonitorTests
     public void ToSlug_Value_ReturnsSlugSentryLeavesUnchanged(string value, string? expected)
     {
         JobMonitor.ToSlug(value).Should().Be(expected);
+    }
+
+    private static ITrigger CronTrigger(
+        string cronExpression,
+        IJobDetail? job = null,
+        TimeZoneInfo? timeZone = null,
+        string? monitorSlug = null)
+    {
+        var builder = TriggerBuilder.Create()
+            .WithCronSchedule(cronExpression, schedule => schedule.InTimeZone(timeZone ?? TimeZoneInfo.Utc));
+        if (job is not null)
+        {
+            builder.ForJob(job);
+        }
+
+        if (monitorSlug is not null)
+        {
+            builder.UsingJobData(SentryMonitorSlugAttribute.JobDataKey, monitorSlug);
+        }
+
+        return builder.Build();
     }
 }

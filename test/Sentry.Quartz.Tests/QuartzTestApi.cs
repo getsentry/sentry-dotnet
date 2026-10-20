@@ -6,14 +6,20 @@ internal static class QuartzTestApi
     public static TriggerBuilder<TJob> WithCalendar<TJob>(this TriggerBuilder<TJob> builder, string calendarName) where TJob : IJob =>
         builder.WithCalendarName(calendarName);
 
-    public static void ReturnsTriggers(this IScheduler scheduler, JobKey jobKey, IReadOnlyList<ITrigger> triggers)
+    public static void ReturnsTriggers(this IScheduler scheduler, IReadOnlyList<(IJobDetail Job, ITrigger Trigger)> triggers)
     {
         var headers = triggers
-            .Select(t => new TriggerHeader(t.Key, jobKey, null, "CRON", TriggerState.Normal, t.StartTimeUtc,
-                null, null, null, null, t.Priority, null, null, 0))
+            .Select(t => new TriggerHeader(t.Trigger.Key, t.Job.Key, null, "CRON", TriggerState.Normal,
+                t.Trigger.StartTimeUtc, null, null, null, null, t.Trigger.Priority, null, null, 0))
             .ToList();
-        scheduler.QueryTriggers(Arg.Is<TriggerQuery>(q => q.Job == jobKey), Arg.Any<CancellationToken>())
+        scheduler.QueryTriggers(Arg.Any<TriggerQuery>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResult<TriggerHeader>(headers, HasMore: false));
+        scheduler.GetJobDetails(Arg.Any<IReadOnlyCollection<JobKey>>(), Arg.Any<CancellationToken>())
+            .Returns(call => triggers.Select(t => t.Job).DistinctBy(job => job.Key)
+                .Where(job => call.Arg<IReadOnlyCollection<JobKey>>().Contains(job.Key)).ToList());
+        scheduler.GetTriggers(Arg.Any<IReadOnlyCollection<TriggerKey>>(), Arg.Any<CancellationToken>())
+            .Returns(call => triggers.Select(t => t.Trigger)
+                .Where(trigger => call.Arg<IReadOnlyCollection<TriggerKey>>().Contains(trigger.Key)).ToList());
     }
 
     public static void TriggerLookupThrows(this IScheduler scheduler, Exception exception) =>
@@ -22,6 +28,9 @@ internal static class QuartzTestApi
 
     public static void DidNotLookUpTriggers(this IScheduler scheduler) =>
         _ = scheduler.DidNotReceiveWithAnyArgs().QueryTriggers(default!, default);
+
+    public static void LookedUpTriggers(this IScheduler scheduler, int count) =>
+        _ = scheduler.ReceivedWithAnyArgs(count).QueryTriggers(default!, default);
 }
 
 internal class NoOpJob : IJob

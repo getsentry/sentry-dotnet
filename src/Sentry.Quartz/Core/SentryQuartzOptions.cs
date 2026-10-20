@@ -16,8 +16,13 @@ public class SentryQuartzOptions
     /// <para>
     /// Only cron triggers and simple triggers that repeat forever at a whole number of minutes, hours or days are
     /// sent. Cron expressions are sent when Sentry can represent them exactly: a fixed seconds value, no year, and no
-    /// <c>L</c>, <c>W</c> or <c>#</c>. Triggers with a calendar, and jobs with more than one trigger that share a
-    /// monitor, are not sent.
+    /// <c>L</c>, <c>W</c> or <c>#</c>. Triggers with a calendar are not sent.
+    /// </para>
+    /// <para>
+    /// When several triggers use the same monitor slug with different schedules, for example two triggers of one job,
+    /// or jobs that share a slug through <see cref="SentryMonitorSlugAttribute"/>, no schedule is sent for them. Give
+    /// each its own monitor slug, for example with <see cref="SentryMonitorSlugAttribute.JobDataKey"/> in each
+    /// trigger's <c>JobDataMap</c>, to send it.
     /// </para>
     /// <para>
     /// Time zones that can't be converted to an IANA ID are not sent. On .NET Framework, Windows time zone IDs can't be
