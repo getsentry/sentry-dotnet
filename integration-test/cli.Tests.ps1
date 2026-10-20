@@ -389,16 +389,22 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-maccatalyst$iosTpv"
         Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-            'libmonosgen-2.0.dylib',
+            'libclrjit.dylib',
+            'libcoreclr.dylib',
+            'libmscordaccore.dylib',
+            'libmscordbi.dylib',
             'libSystem.Globalization.Native.dylib',
             'libSystem.IO.Compression.Native.dylib',
             'libSystem.Native.dylib',
             'libSystem.Net.Security.Native.dylib',
             'libSystem.Security.Cryptography.Native.Apple.dylib',
+            'libxamarin-dotnet-coreclr-debug.dylib',
+            'libxamarin-dotnet-coreclr.dylib',
             'libxamarin-dotnet-debug.dylib',
             'libxamarin-dotnet.dylib',
             'maui-app',
             'maui-app.pdb',
+            'maui-app.r2r.dylib',
             'Microsoft.MacCatalyst.pdb',
             'Microsoft.Maui.Controls.pdb',
             'Microsoft.Maui.Controls.Xaml.pdb',
