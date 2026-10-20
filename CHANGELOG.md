@@ -29,6 +29,7 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 - `Logging:Sentry` in `appsettings.json` now only sets log levels: `MinimumEventLevel`, `MinimumBreadcrumbLevel` and the `LogLevel` rules. Move any other key to the `Sentry` section; the app fails at startup until you do.
 - `SentryLoggingOptions`, `SentrySerilogOptions` and `SentryNLogOptions` no longer derive from `SentryOptions`. Serilog's `ApplySerilogScopeToEvents()` is renamed `UseSerilog()`.
 - NLog flushes Sentry using `SentryOptions.FlushTimeout`, which defaults to 2 seconds. The NLog target used to wait up to 15.
+- `Logging.AddSentry()` no longer registers `IHub`, `ISentryClient` or `Func<IHub>` in the service collection; `UseSentry` does. An app that initializes Sentry with `SentrySdk.Init` and injects them now fails when they're resolved. Switch to `UseSentry`, or register `HubAdapter.Instance` for each type yourself.
 - In an app that calls both `UseSentry` and `Logging.AddSentry()`, the `Logging.AddSentry()` call now does nothing. Move its settings to the host's options, such as `SentryAspNetCoreOptions`, and remove the call.
 - In MAUI, options set in the `UseSentry` callback now override `appsettings.json`, as they do in ASP.NET Core.
 
@@ -52,6 +53,7 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 
 ### Breaking Changes 🛠
 
+- `builder.Logging.AddSentry()` no longer registers `IHub`, `ISentryClient` or `Func<IHub>` in the service collection. `UseSentry` registers them; apps that initialize Sentry with `SentrySdk.Init` and inject them now register them themselves by @jamescrosswell in [#5740](https://github.com/getsentry/sentry-dotnet/pull/5740)
 - fix(maui)!: options set in UseSentry now take precedence over appsettings.json by @jamescrosswell in [#5658](https://github.com/getsentry/sentry-dotnet/pull/5658)
 - The `Microsoft.Extensions.Logging` integration no longer initializes the SDK. Sentry must now be initialized separately from the logging integration (using `SentrySdk.Init` or `UseSentry`) by @jamescrosswell in [#5595](https://github.com/getsentry/sentry-dotnet/pull/5595)
 - Sentry's logging configuration section (`Logging:Sentry`) now only configures the logging integration. Core SDK settings there, such as `Dsn`, no longer have any effect and fail at startup with migration guidance: move them to the `Sentry` section, or pass them where Sentry is initialized by @jamescrosswell in [#5595](https://github.com/getsentry/sentry-dotnet/pull/5595)
