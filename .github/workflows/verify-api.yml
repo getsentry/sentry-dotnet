@@ -25,7 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS covers all non-Windows TFMs (net8.0 - net11.0, netstandard, iOS, MacCatalyst, Android)
+          # macOS covers the net8.0 - net11.0 verified files, including projects the Windows filter excludes
           - os: xcode-27
             rid: macos
             slnf: Sentry-CI-Build-macOS.slnf
@@ -67,19 +67,30 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
-      - name: Restore .NET Dependencies
+      # API approval tests only run on .NET and .NET Framework TFMs (ApiExtensions is #if !__MOBILE__),
+      # so we build just the test projects that have them, from this leg's filter, without mobile TFMs.
+      # .generated.NoMobile.slnx sets NO_MOBILE (see Directory.Build.props).
+      - name: Create API Approval Tests Solution Filter
+        shell: pwsh
         run: |
-          dotnet workload restore
-          dotnet restore ${{ matrix.slnf }} --nologo
+          $testDirs = git ls-files 'test/*/ApiApprovalTests.verify.cs' | ForEach-Object { $_ -replace '/[^/]+$', '' }
+          $filter = Get-Content ${{ matrix.slnf }} | ConvertFrom-Json
+          $filter.solution.path = '.generated.NoMobile.slnx'
+          $filter.solution.projects = @($filter.solution.projects | Where-Object { $testDirs -contains (($_ -replace '\\', '/') -replace '/[^/]+$', '') })
+          $filter | ConvertTo-Json -Depth 5 | Set-Content ApiApprovalTests.slnf
+          Get-Content ApiApprovalTests.slnf
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore ApiApprovalTests.slnf --nologo
 
       - name: Build
-        run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal
+        run: dotnet build ApiApprovalTests.slnf -c Release --no-restore --nologo -v:minimal
 
       # API approval tests fail when the public API surface changes. We swallow the failure
       # here and rely on the produced *.received.txt files to detect and accept the change.
       - name: Run API Approval Tests
         continue-on-error: true
-        run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo --filter "FullyQualifiedName~ApiApprovalTests"
+        run: dotnet test ApiApprovalTests.slnf -c Release --no-build --nologo --filter "FullyQualifiedName~ApiApprovalTests"
 
       # upload-artifact strips the longest common parent from wildcard paths,
       # which would flatten test/Sentry.Tests/... to Sentry.Tests/... on restore

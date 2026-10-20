@@ -224,6 +224,22 @@ jobs:
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
+      # The Cocoa SDK is built from the submodule by the Sentry.Bindings.Cocoa project, which takes ~15 minutes
+      # on a hosted runner. build-sentry-cocoa.sh skips the build when the restored stamp matches.
+      # Release builds always build it from source, because it ships in the Sentry.Bindings.Cocoa package.
+      - name: Get Cocoa SDK cache key
+        id: cocoa-key
+        if: runner.os == 'macOS'
+        uses: ./.github/actions/cocoa-cache-key
+
+      - name: Restore Cocoa SDK
+        id: cache-cocoa
+        if: runner.os == 'macOS' && !startsWith(github.ref_name, 'release/')
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cocoa-key.outputs.key }}
+
       - name: Build Native Dependencies
         if: ${{ !matrix.container && !env.NO_MOBILE }}
         uses: ./.github/actions/buildnative
@@ -234,6 +250,14 @@ jobs:
       - name: Build
         id: build
         run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
+
+      # Only a completed Cocoa build writes the stamp, so a failed one is never cached.
+      - name: Save Cocoa SDK
+        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-primary-key != '' && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
 
       - name: Upload build logs
         if: ${{ always() }}
@@ -379,6 +403,9 @@ jobs:
     needs: build-sentry
     name: Unsupported AOT (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
 
     strategy:
       fail-fast: false
@@ -389,18 +416,24 @@ jobs:
           - os: windows-2025-vs2026
             rid: win-x86
 
+    # This job is on the critical path, after the whole build-sentry matrix. aot.Tests.ps1 only publishes a
+    # console app against the packages from the macOS build, so it needs the .NET SDK but not the full
+    # Setup Environment (Java, Android SDK, Mono, workloads).
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Linux ARM 32-bit dependencies
+        if: ${{ matrix.rid == 'linux-arm' }}
+        run: |
+          sudo dpkg --add-architecture armhf
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          submodules: recursive
-
-      - name: Setup Environment
-        uses: ./.github/actions/environment
-
-      - name: Build Native Dependencies
-        if: ${{ !env.NO_MOBILE }}
-        uses: ./.github/actions/buildnative
+          global-json-file: global.json
 
       - name: Fetch NuGet Packages
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
