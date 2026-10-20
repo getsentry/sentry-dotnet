@@ -14,8 +14,6 @@ internal sealed class JobMonitor
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
 
-    // The job each slug was first used by: its key, or its type when it has no identity
-
     public JobMonitor(SentryQuartzOptions options, IHub hub, IDiagnosticLogger? logger = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
