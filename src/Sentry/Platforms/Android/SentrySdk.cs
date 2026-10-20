@@ -60,7 +60,9 @@ public static partial class SentrySdk
             o.Release = options.Release;
             o.SampleRate = options.SampleRate.HasValue ? (JavaDouble)Convert.ToDouble(options.SampleRate.Value) : null;
             o.SendClientReports = options.SendClientReports;
+#pragma warning disable CS0618
             o.SendDefaultPii = options.SendDefaultPii;
+#pragma warning restore CS0618
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;

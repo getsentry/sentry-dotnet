@@ -1,9 +1,10 @@
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Reflection;
 
 namespace Sentry.Internal;
 
-internal class MainSentryEventProcessor : ISentryEventProcessor
+internal class MainSentryEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     internal const string CultureInfoKey = "Current Culture";
     internal const string CurrentUiCultureKey = "Current UI Culture";
@@ -87,7 +88,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         if (@event.Exception?.StackTrace is null && @event.SentryThreads?.Any(t => t.Current == true) != true)
         {
             var stackTrace = @event.SentryExceptions?.FirstOrDefault()?.Stacktrace
-                            ?? SentryStackTraceFactoryAccessor().Create();
+                            ?? SentryStackTraceFactoryAccessor().TryCreate(_options);
             if (stackTrace != null)
             {
                 var currentThread = Thread.CurrentThread;

@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry.OpenTelemetry;
 
-internal class OpenTelemetryTransactionProcessor : ISentryTransactionProcessor
+internal class OpenTelemetryTransactionProcessor : ISentryTransactionProcessor, ISdkProcessor
 {
     public SentryTransaction Process(SentryTransaction transaction)
     {

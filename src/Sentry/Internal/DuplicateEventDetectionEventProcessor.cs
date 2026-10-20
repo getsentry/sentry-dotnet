@@ -2,7 +2,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Internal;
 
-internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
+internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     private readonly SentryOptions _options;
     private readonly ConditionalWeakTable<object, object?> _capturedObjects = new();

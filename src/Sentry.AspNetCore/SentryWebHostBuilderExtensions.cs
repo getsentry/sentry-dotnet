@@ -76,9 +76,6 @@ public static class SentryWebHostBuilderExtensions
         this IWebHostBuilder builder,
         Action<WebHostBuilderContext, ISentryBuilder>? configureSentry)
     {
-        // The earliest we can hook the SDK initialization code with the framework
-        // Initialization happens at a later time depending if the default MEL backend is enabled or not.
-        // In case the logging backend was replaced, init happens later, at the StartupFilter
         _ = builder.ConfigureLogging((context, logging) =>
         {
             logging.AddConfiguration();

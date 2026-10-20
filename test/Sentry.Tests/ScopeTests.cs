@@ -129,6 +129,134 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clone_CopiesAllData()
+    {
+        // Arrange
+        var scope = new Scope();
+        scope.ApplyFakeValues();
+        scope.Level = SentryLevel.Warning;
+        scope.Sdk.Name = "sdk";
+        scope.Sdk.Version = "1.0";
+        scope.Sdk.AddPackage("package", "2.0");
+        scope.SessionUpdate = new SessionUpdate(Substitute.For<ISentrySession>(), false, default, 0, null);
+        var eventProcessor = Substitute.For<ISentryEventProcessor>();
+        var transactionProcessor = Substitute.For<ISentryTransactionProcessor>();
+        var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+        scope.AddEventProcessor(eventProcessor);
+        scope.AddTransactionProcessor(transactionProcessor);
+        scope.AddExceptionProcessor(exceptionProcessor);
+        var evaluated = false;
+        scope.OnEvaluating += (_, _) => evaluated = true;
+
+        // Act
+        var clone = scope.Clone();
+        clone.Evaluate();
+
+        // Assert
+        clone.ShouldBeEquivalentTo(scope);
+        clone.Sdk.Should().BeEquivalentTo(scope.Sdk);
+        clone.SessionUpdate.Should().BeSameAs(scope.SessionUpdate);
+        clone.GetAllEventProcessors().Should().Contain(eventProcessor);
+        clone.GetAllTransactionProcessors().Should().Contain(transactionProcessor);
+        clone.GetAllExceptionProcessors().Should().Contain(exceptionProcessor);
+        evaluated.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Clone_NoTransaction_CopiesTransactionName()
+    {
+        // Arrange
+        var scope = new Scope { TransactionName = "transaction" };
+
+        // Act
+        var clone = scope.Clone();
+
+        // Assert
+        clone.TransactionName.Should().Be("transaction");
+    }
+
+    [Fact]
+    public void Clone_EveryFieldHandled()
+    {
+        string[] copied =
+        [
+            "Options", "OnEvaluating", "Level", "_request", "_contexts", "_user", "Release", "Distribution",
+            "Environment", "_fallbackTransactionName", "_transaction", "PropagationContext", "SessionUpdate", "Sdk",
+            "Fingerprint", "_breadcrumbs", "_extra", "_tags", "_attachments", "_lazyEventProcessors",
+            "_lazyTransactionProcessors", "_lazyExceptionProcessors",
+        ];
+        string[] notCopied =
+        [
+            "ScopeSyncEnabled", "Locked", "_lastEventIdSync", "_lastEventId", "_evaluationSync", "_hasEvaluated",
+            "_span", "_transactionLock",
+        ];
+
+        var fields = typeof(Scope)
+            .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            .Select(f => f.Name.TrimStart('<').Split('>')[0]);
+
+        fields.Should().BeEquivalentTo(copied.Concat(notCopied));
+    }
+
+    [Fact]
+    public void Clone_ScopeSyncEnabled_ObserverNotCalled()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+        scope.ApplyFakeValues();
+        observer.ClearReceivedCalls();
+
+        // Act
+        _ = scope.Clone();
+
+        // Assert
+        observer.ReceivedCalls().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Clone_BeforeBreadcrumb_NotInvokedAgain()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        options.SetBeforeBreadcrumb(b => new Breadcrumb($"{b.Message} [scrubbed]", "default"));
+        var scope = new Scope(options);
+        scope.AddBreadcrumb(new Breadcrumb("crumb", "default"));
+
+        // Act
+        var clone = scope.Clone();
+
+        // Assert
+        clone.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb [scrubbed]");
+    }
+
+    [Fact]
+    public void Clone_UserChangedOnClone_ObserverNotifiedAndOriginalUnchanged()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = true
+        });
+        scope.User = new SentryUser { Id = "original" };
+        var clone = scope.Clone();
+        observer.ClearReceivedCalls();
+
+        // Act
+        clone.User.Id = "changed";
+
+        // Assert
+        observer.Received(1).SetUser(Arg.Is<SentryUser>(u => u.Id == "changed"));
+        scope.User.Id.Should().Be("original");
+    }
+
+    [Fact]
     public void TransactionName_TransactionNotStarted_NameIsSet()
     {
         // Arrange
