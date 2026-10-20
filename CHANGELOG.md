@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 7.0.0-rc.2
 
 Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a single place to be initialized. It contains breaking changes, so read the upgrade notes below before you upgrade.
 
