@@ -88,7 +88,7 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
     /// <example>
     /// wifi, ethernet, cellular
     /// </example>
-    public string? ConnectionType { get; set; }
+    internal string? ConnectionType { get; set; }
 
     /// <summary>
     /// The generation of the cellular network technology, if the connection is cellular.
@@ -96,7 +96,7 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
     /// <example>
     /// 2g, 3g, 4g, 5g
     /// </example>
-    public string? ConnectionEffectiveType { get; set; }
+    internal string? ConnectionEffectiveType { get; set; }
 
     /// <summary>
     /// This can be a string portrait or landscape to define the orientation of a device.

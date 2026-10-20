@@ -1870,8 +1870,6 @@ namespace Sentry.Protocol
         public string? BatteryStatus { get; set; }
         public System.DateTimeOffset? BootTime { get; set; }
         public string? Brand { get; set; }
-        public string? ConnectionEffectiveType { get; set; }
-        public string? ConnectionType { get; set; }
         public string? CpuDescription { get; set; }
         public string? DeviceType { get; set; }
         public string? DeviceUniqueIdentifier { get; set; }

@@ -131,6 +131,28 @@ public class DeviceTests
     }
 
     [Fact]
+    public void UpdateFrom_EmptyTarget_CopiesConnection()
+    {
+        var sut = new Device();
+
+        sut.UpdateFrom(new Device { ConnectionType = "cellular", ConnectionEffectiveType = "5g" });
+
+        sut.ConnectionType.Should().Be("cellular");
+        sut.ConnectionEffectiveType.Should().Be("5g");
+    }
+
+    [Fact]
+    public void UpdateFrom_TargetHasConnection_KeepsConnection()
+    {
+        var sut = new Device { ConnectionType = "wifi", ConnectionEffectiveType = "4g" };
+
+        sut.UpdateFrom(new Device { ConnectionType = "cellular", ConnectionEffectiveType = "5g" });
+
+        sut.ConnectionType.Should().Be("wifi");
+        sut.ConnectionEffectiveType.Should().Be("4g");
+    }
+
+    [Fact]
     public void WriteTo_FromJson_Symmetric()
     {
         // Arrange
