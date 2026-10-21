@@ -1,4 +1,5 @@
 using Quartz;
+using Quartz.Impl.Matchers;
 
 namespace Sentry.Quartz;
 
@@ -10,9 +11,30 @@ internal static class QuartzApi
 
     public static Type GetJobType(IJobDetail jobDetail) => jobDetail.JobType;
 
-    public static async Task<bool> HasSeveralTriggersAsync(IJobExecutionContext context, CancellationToken cancellationToken)
+    // Returns the triggers of every job that matches the predicate. Quartz 3 has no bulk lookups, so this reads each
+    // job, and the triggers of each matching one.
+    public static async Task<List<(IJobDetail Job, ITrigger Trigger)>> GetTriggersAsync(
+        IScheduler scheduler,
+        Func<IJobDetail, bool> predicate,
+        CancellationToken cancellationToken)
     {
-        var triggers = await context.Scheduler.GetTriggersOfJob(context.JobDetail.Key, cancellationToken).ConfigureAwait(false);
-        return triggers.Count > 1;
+        var result = new List<(IJobDetail Job, ITrigger Trigger)>();
+        var jobKeys = await scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken).ConfigureAwait(false);
+        foreach (var jobKey in jobKeys)
+        {
+            // Null when the job was deleted after its key was read
+            var job = await scheduler.GetJobDetail(jobKey, cancellationToken).ConfigureAwait(false);
+            if (job is null || !predicate(job))
+            {
+                continue;
+            }
+
+            foreach (var trigger in await scheduler.GetTriggersOfJob(jobKey, cancellationToken).ConfigureAwait(false))
+            {
+                result.Add((job, trigger));
+            }
+        }
+
+        return result;
     }
 }

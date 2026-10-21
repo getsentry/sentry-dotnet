@@ -21,7 +21,7 @@ public class SentryJobListenerTests
         var jobDetail = JobBuilder.Create<TJob>().WithIdentity("Cleanup").Build();
         var trigger = TriggerBuilder.Create().ForJob(jobDetail).WithSimpleSchedule(s => s.WithIntervalInHours(1).RepeatForever()).Build();
         var scheduler = Substitute.For<IScheduler>();
-        scheduler.ReturnsTriggers(jobDetail.Key, [trigger]);
+        scheduler.ReturnsTriggers([(jobDetail, trigger)]);
 
         var context = Substitute.For<IJobExecutionContext>();
         context.JobDetail.Returns(jobDetail);
