@@ -121,13 +121,13 @@ public class TriggerScheduleTests
 #endif
 
     [Fact]
-    public void ToMonitorConfig_CronTrigger_ReturnsCrontabAndTimeZone()
+    public void ToSchedule_CronTrigger_ReturnsCrontabAndTimeZone()
     {
         var trigger = TriggerBuilder.Create()
             .WithCronSchedule("0 30 6 ? * MON-FRI", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
             .Build();
 
-        var monitorConfig = MonitorConfigJson.Render(TriggerSchedule.ToMonitorConfig(trigger)!);
+        var monitorConfig = MonitorConfigJson.Render(TriggerSchedule.ToSchedule(trigger)!.Apply);
 
         monitorConfig.GetProperty("schedule").GetProperty("type").GetString().Should().Be("crontab");
         monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("30 6 * * 1-5");
@@ -135,13 +135,13 @@ public class TriggerScheduleTests
     }
 
     [Fact]
-    public void ToMonitorConfig_SimpleTrigger_ReturnsInterval()
+    public void ToSchedule_SimpleTrigger_ReturnsInterval()
     {
         var trigger = TriggerBuilder.Create()
             .WithSimpleSchedule(schedule => schedule.WithInterval(TimeSpan.FromHours(2)).RepeatForever())
             .Build();
 
-        var monitorConfig = MonitorConfigJson.Render(TriggerSchedule.ToMonitorConfig(trigger)!);
+        var monitorConfig = MonitorConfigJson.Render(TriggerSchedule.ToSchedule(trigger)!.Apply);
 
         monitorConfig.GetProperty("schedule").GetProperty("type").GetString().Should().Be("interval");
         monitorConfig.GetProperty("schedule").GetProperty("value").GetInt32().Should().Be(2);
@@ -149,23 +149,23 @@ public class TriggerScheduleTests
     }
 
     [Fact]
-    public void ToMonitorConfig_TriggerWithCalendar_ReturnsNull()
+    public void ToSchedule_TriggerWithCalendar_ReturnsNull()
     {
         var trigger = TriggerBuilder.Create()
             .WithCronSchedule("0 0 12 * * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
             .WithCalendar("holidays")
             .Build();
 
-        TriggerSchedule.ToMonitorConfig(trigger).Should().BeNull();
+        TriggerSchedule.ToSchedule(trigger).Should().BeNull();
     }
 
     [Fact]
-    public void ToMonitorConfig_CalendarIntervalTrigger_ReturnsNull()
+    public void ToSchedule_CalendarIntervalTrigger_ReturnsNull()
     {
         var trigger = TriggerBuilder.Create()
             .WithCalendarIntervalSchedule(schedule => schedule.WithInterval(1, IntervalUnit.Day))
             .Build();
 
-        TriggerSchedule.ToMonitorConfig(trigger).Should().BeNull();
+        TriggerSchedule.ToSchedule(trigger).Should().BeNull();
     }
 }

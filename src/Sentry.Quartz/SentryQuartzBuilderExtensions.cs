@@ -16,8 +16,7 @@ public static class SentryQuartzBuilderExtensions
         /// <remarks>
         /// <para>
         /// Each job runs in its own Sentry scope and trace, tagged with the job's key, unless global mode is enabled.
-        /// Exceptions that jobs throw are not captured here: Quartz logs them, and Sentry's logging integration
-        /// captures that log entry.
+        /// Exceptions that jobs throw are captured.
         /// </para>
         /// <para>
         /// Jobs with <see cref="SentryMonitorSlugAttribute"/> also send a check-in each time they run, with the

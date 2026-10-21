@@ -38,6 +38,22 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'console-app' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
+
+    It "uploads symbols when an earlier trimmed publish left a linked directory" {
+        RunDotnetWithSentryCLI 'build' 'console-app' $False $False $framework | Out-Null
+        $linked = "./console-app/obj/Release/$framework/linked"
+        New-Item -ItemType Directory $linked -Force | Out-Null
+        Copy-Item "./console-app/bin/Release/$framework/console-app.pdb" $linked
+        try
+        {
+            $result = RunDotnetWithSentryCLI 'build' 'console-app' $True $False $framework
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('console-app.pdb')
+        }
+        finally
+        {
+            Remove-Item $linked -Recurse -Force
+        }
+    }
 }
 
 # The dummy Sentry server doesn't implement the releases API, so these tests record the CLI arguments instead.
@@ -71,7 +87,23 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
             chmod +x $cliStub
         }
 
-        function BuildWithSentryCLIStub([string[]] $properties, [string] $extraSource)
+        function NewSentryCLIStubFailingInfo([string] $cliError)
+        {
+            if ($IsWindows)
+            {
+                $stub = Join-Path $PSScriptRoot 'release-app' 'sentry-cli-failing.cmd'
+                "@echo %* >> `"$cliLog`"`n@if `"%1`"==`"info`" (echo $cliError 1>&2 & exit 1)" | Set-Content $stub
+            }
+            else
+            {
+                $stub = Join-Path $PSScriptRoot 'release-app' 'sentry-cli-failing.sh'
+                "#!/bin/sh`necho `"`$*`" >> `"$cliLog`"`nif [ `"`$1`" = info ]; then echo '$cliError' >&2; exit 1; fi" | Set-Content $stub
+                chmod +x $stub
+            }
+            $stub
+        }
+
+        function BuildWithSentryCLIStub([string[]] $properties, [string] $extraSource, [string] $stub = $cliStub)
         {
             Remove-Item $cliLog -ErrorAction SilentlyContinue
             $extraSourcePath = Join-Path $PSScriptRoot 'release-app' 'Extra.cs'
@@ -79,13 +111,16 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
             {
                 $extraSource | Set-Content $extraSourcePath
             }
+            # Not /p:SentryCLI, because the targets can't clear a global property when the CLI isn't configured
+            $env:SentryCLI = $stub
             try
             {
-                $output = dotnet build release-app -c Release --nologo --framework $framework /p:SentryCLI=$cliStub @properties | ForEach-Object { Write-Host "  $_"; $_ }
+                $output = dotnet build release-app -c Release --nologo --framework $framework @properties | ForEach-Object { Write-Host "  $_"; $_ }
                 $LASTEXITCODE | Should -Be 0
             }
             finally
             {
+                Remove-Item env:SentryCLI
                 Remove-Item $extraSourcePath -ErrorAction SilentlyContinue
             }
             [pscustomobject]@{
@@ -144,6 +179,16 @@ Describe 'Console apps (<framework>) - release creation' -ForEach @(
         $calls = (BuildWithSentryCLIStub '/p:SentrySetCommits=true').CliCalls
         $calls | Should -AnyElementMatch '^releases new release-app@1\.2\.3\+abcdef\s*$'
         $calls | Should -AnyElementMatch '^releases set-commits --auto release-app@1\.2\.3\+abcdef\s*$'
+    }
+
+    It "skips uploads and release creation without failing the build when <reason>" -ForEach @(
+        @{ reason = 'there is no auth token'; cliError = 'error: Auth token is required for this request.'; expected = 'The Sentry CLI is not fully configured' }
+        @{ reason = 'the Sentry API request fails'; cliError = 'error: API request failed'; expected = 'warning : Sentry API request failed' }
+    ) {
+        $result = BuildWithSentryCLIStub '/p:SentryCreateRelease=true', '/p:SentryUploadSymbols=true' -stub (NewSentryCLIStubFailingInfo $cliError)
+        $result.Output | Should -AnyElementMatch $expected
+        $result.CliCalls | Should -HaveCount 1
+        $result.CliCalls | Should -AnyElementMatch '^info\b'
     }
 }
 
@@ -258,6 +303,31 @@ Describe 'MAUI (<framework>)' -ForEach @(
         }
 
         AddPackageReference $name 'Sentry.Maui'
+
+        # Match on the PDB GUID: IL stripping rewrites the stamp in the bundle's CodeView entries
+        function UploadedPdbsNotInAppBundle($result, [string] $targetFramework)
+        {
+            $shippedGuids = Get-ChildItem "$name/bin/Release/$targetFramework" -Recurse -Directory -Filter "$name.app" `
+            | Get-ChildItem -Recurse -Filter '*.dll' `
+            | ForEach-Object {
+                $reader = [System.Reflection.PortableExecutable.PEReader]::new([System.IO.File]::OpenRead($_.FullName))
+                try
+                {
+                    $reader.ReadDebugDirectory() | Where-Object Type -EQ CodeView | ForEach-Object {
+                        "$($reader.ReadCodeViewDebugDirectoryData($_).Guid)"
+                    }
+                }
+                finally
+                {
+                    $reader.Dispose()
+                }
+            }
+            $result.ScriptOutput `
+            | Select-String 'json body: (\{.*"debug_id".*\})$' `
+            | ForEach-Object { ($_.Matches[0].Groups[1].Value | ConvertFrom-Json -AsHashtable).Values } `
+            | Where-Object { $_.name -like '*.pdb' -and $shippedGuids -notcontains $_.debug_id.Substring(0, 36) } `
+            | ForEach-Object { $_.name }
+        }
     }
 
     It "uploads symbols and sources for an Android build" {
@@ -300,8 +370,34 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'Microsoft.Maui.pdb',
             'SentryObjC'
         )
+        UploadedPdbsNotInAppBundle $result "$framework-ios$iosTpv" | Should -BeNullOrEmpty
         # The specific number of debug information files seems to change with different SDK - so we just check for non-zero
         $nonZeroNumberRegex = '[1-9][0-9]*';
         $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
+    }
+
+    It "uploads symbols and sources for a Mac Catalyst build" -Skip:(!$IsMacOS) {
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-maccatalyst$iosTpv"
+        Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'libmonosgen-2.0.dylib',
+            'libSystem.Globalization.Native.dylib',
+            'libSystem.IO.Compression.Native.dylib',
+            'libSystem.Native.dylib',
+            'libSystem.Net.Security.Native.dylib',
+            'libSystem.Security.Cryptography.Native.Apple.dylib',
+            'libxamarin-dotnet-debug.dylib',
+            'libxamarin-dotnet.dylib',
+            'maui-app',
+            'maui-app.pdb',
+            'Microsoft.MacCatalyst.pdb',
+            'Microsoft.Maui.Controls.pdb',
+            'Microsoft.Maui.Controls.Xaml.pdb',
+            'Microsoft.Maui.Essentials.pdb',
+            'Microsoft.Maui.Graphics.pdb',
+            'Microsoft.Maui.pdb',
+            'SentryObjC'
+        )
+        UploadedPdbsNotInAppBundle $result "$framework-maccatalyst$iosTpv" | Should -BeNullOrEmpty
     }
 }

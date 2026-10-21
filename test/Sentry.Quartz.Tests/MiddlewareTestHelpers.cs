@@ -10,7 +10,7 @@ internal static class MiddlewareTestHelpers
             .WithCronSchedule("0 0 12 * * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
             .Build();
         var scheduler = Substitute.For<IScheduler>();
-        scheduler.ReturnsTriggers(jobDetail.Key, [trigger]);
+        scheduler.ReturnsTriggers([(jobDetail, trigger)]);
 
         var context = Substitute.For<IJobExecutionContext>();
         context.JobDetail.Returns(jobDetail);

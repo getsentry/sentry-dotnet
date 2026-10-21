@@ -32,7 +32,7 @@ builder.Services.AddOpenTelemetry()
     });
 #endif
 
-builder.WebHost.UseSentry(options =>
+builder.UseSentry(options =>
 {
     options.Dsn = dsn;
 #if NET10_0_OR_GREATER

@@ -104,6 +104,9 @@
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='ISpan']/method[@name='startChild' and count(parameter)=3 and parameter[3][@type='io.sentry.SentryDate']]" />
 
+  <!-- Same issue (CS0538) for the empty marker interface SentryEventProcessor, which inherits EventProcessor's default methods. -->
+  <remove-node path="/api/package[@name='io.sentry.internal.eventprocessor']/interface[@name='SentryEventProcessor']" />
+
   <!-- Remove problematic deprecated methods in the IScopes interface -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='IScopes']/method[@deprecated]" />
 

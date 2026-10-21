@@ -1,5 +1,30 @@
 # Changelog
 
+## 6.12.1
+
+### Fixes 🐛
+
+- fix: builds no longer fail when symbol upload or release creation is enabled but no Sentry auth token is available by @jamescrosswell in [#5705](https://github.com/getsentry/sentry-dotnet/pull/5705)
+- fix: count exception filter and exception processor failures as callback_error, and stop dropping events when an SDK processor fails by @jamescrosswell in [#5688](https://github.com/getsentry/sentry-dotnet/pull/5688)
+- fix: SentryCreateRelease uses the assembly's informational version and no longer requires UseSentryCLI by @jamescrosswell in [#5679](https://github.com/getsentry/sentry-dotnet/pull/5679)
+- fix: accept breadcrumbs as {"values": [...]} when deserializing events and transactions by @jamescrosswell in [#5673](https://github.com/getsentry/sentry-dotnet/pull/5673)
+- fix: capturing with a configureScope callback no longer re-runs BeforeBreadcrumb or re-syncs the scope to native SDKs by @jamescrosswell in [#5653](https://github.com/getsentry/sentry-dotnet/pull/5653)
+- fix: accept Unix epoch timestamps when deserializing breadcrumbs, transactions, spans and client reports by @jamescrosswell in [#5672](https://github.com/getsentry/sentry-dotnet/pull/5672)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Java SDK to v8.60.0 by @github-actions in [#5696](https://github.com/getsentry/sentry-dotnet/pull/5696)
+- chore(deps): update Cocoa SDK to v9.30.1 by @github-actions in [#5697](https://github.com/getsentry/sentry-dotnet/pull/5697)
+- chore(deps): update Native SDK to v0.17.2 by @github-actions in [#5680](https://github.com/getsentry/sentry-dotnet/pull/5680)
+- chore(deps): update Java SDK to v8.59.0 by @github-actions in [#5661](https://github.com/getsentry/sentry-dotnet/pull/5661)
+
+### Other
+
+- perf: counting discarded telemetry for client reports no longer allocates by @jamescrosswell in [#5687](https://github.com/getsentry/sentry-dotnet/pull/5687)
+- ci: upgrade ubuntu 20.04/22.04 runners to 24.04 by @joshuarli in [#5667](https://github.com/getsentry/sentry-dotnet/pull/5667)
+
 ## 6.12.0
 
 ### Features ✨
