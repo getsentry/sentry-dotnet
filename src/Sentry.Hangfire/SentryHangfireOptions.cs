@@ -1,4 +1,4 @@
-using System.Text;
+using Sentry.Internal;
 
 namespace Sentry.Hangfire;
 
@@ -54,7 +54,7 @@ public class SentryHangfireOptions
             return null;
         }
 
-        return ToSlug(recurringJobId);
+        return MonitorSlug.From(recurringJobId);
     }
 
     private bool IsExcluded(string recurringJobId)
@@ -69,52 +69,4 @@ public class SentryHangfireOptions
 
         return false;
     }
-
-    // Matches Sentry's slugify_monitor_slug, so the slug is the one Sentry shows
-    internal static string? ToSlug(string value)
-    {
-        string normalized;
-        try
-        {
-            normalized = value.Normalize(NormalizationForm.FormKD);
-        }
-        catch (PlatformNotSupportedException)
-        {
-            // Invariant globalization mode can't normalize non-ASCII text
-            normalized = value;
-        }
-
-        var slug = new StringBuilder(normalized.Length);
-        var inSeparator = false;
-        foreach (var c in normalized)
-        {
-            if (c is '-' or ' ' or >= '\t' and <= '\r' or >= '\x1c' and <= '\x1f')
-            {
-                if (!inSeparator)
-                {
-                    slug.Append('-');
-                    inSeparator = true;
-                }
-            }
-            else if (c is >= 'a' and <= 'z' or >= '0' and <= '9' or '_')
-            {
-                slug.Append(c);
-                inSeparator = false;
-            }
-            else if (c is >= 'A' and <= 'Z')
-            {
-                slug.Append(char.ToLowerInvariant(c));
-                inSeparator = false;
-            }
-        }
-
-        var result = slug.ToString().Trim('-', '_');
-        if (result.Length > MaxSlugLength)
-        {
-            result = result.Substring(0, MaxSlugLength).TrimEnd('-');
-        }
-        return result.Length > 0 ? result : null;
-    }
-
-    private const int MaxSlugLength = 50;
 }
