@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Sentry.Hangfire;
 
 /// <summary>
@@ -26,9 +28,9 @@ public class SentryHangfireOptions
 
     /// <summary>
     /// When enabled, every recurring job sends check-ins, not only jobs marked with
-    /// <see cref="SentryMonitorSlugAttribute"/>. The monitor slug is the recurring job ID, lowercased, with every run of
-    /// characters other than letters, digits and <c>_</c> replaced by <c>-</c>, and cut to 50 characters.
-    /// Defaults to <c>false</c>.
+    /// <see cref="SentryMonitorSlugAttribute"/>. The monitor slug is the recurring job ID, normalized the way Sentry
+    /// normalizes monitor slugs: lowercased, accents removed, spaces and dashes turned into <c>-</c>, other characters
+    /// dropped, and cut to 50 characters. Defaults to <c>false</c>.
     /// </summary>
     /// <remarks>
     /// Jobs marked with <see cref="SentryMonitorSlugAttribute"/> keep their monitor slug.
@@ -37,29 +39,82 @@ public class SentryHangfireOptions
     public bool MonitorAllRecurringJobs { get; set; }
 
     /// <summary>
-    /// IDs of recurring jobs that <see cref="MonitorAllRecurringJobs"/> doesn't send check-ins for. IDs must match
-    /// exactly.
+    /// Recurring jobs that <see cref="MonitorAllRecurringJobs"/> doesn't send check-ins for. A string matches a
+    /// recurring job whose ID is equal to it, and a regular expression a recurring job whose ID it matches.
     /// </summary>
     /// <remarks>
     /// Jobs marked with <see cref="SentryMonitorSlugAttribute"/> still send check-ins.
     /// </remarks>
-    public ICollection<string> ExcludedRecurringJobs { get; set; } = new List<string>();
+    public IList<StringOrRegex> ExcludedRecurringJobs { get; set; } = new List<StringOrRegex>();
 
     internal string? GetRecurringJobSlug(string recurringJobId)
     {
-        if (!MonitorAllRecurringJobs || ExcludedRecurringJobs.Contains(recurringJobId))
+        if (!MonitorAllRecurringJobs || IsExcluded(recurringJobId))
         {
             return null;
         }
 
-        var slug = InvalidSlugCharacters.Replace(recurringJobId.ToLowerInvariant(), "-").Trim('-', '_');
-        if (slug.Length > MaxSlugLength)
+        return ToSlug(recurringJobId);
+    }
+
+    private bool IsExcluded(string recurringJobId)
+    {
+        foreach (var pattern in ExcludedRecurringJobs)
         {
-            slug = slug.Substring(0, MaxSlugLength).Trim('-', '_');
+            if (pattern.Regex is { } regex ? regex.IsMatch(recurringJobId) : pattern.ToString() == recurringJobId)
+            {
+                return true;
+            }
         }
-        return slug.Length > 0 ? slug : null;
+
+        return false;
+    }
+
+    // Matches Sentry's slugify_monitor_slug, so the slug is the one Sentry shows
+    internal static string? ToSlug(string value)
+    {
+        string normalized;
+        try
+        {
+            normalized = value.Normalize(NormalizationForm.FormKD);
+        }
+        catch (PlatformNotSupportedException)
+        {
+            // Invariant globalization mode can't normalize non-ASCII text
+            normalized = value;
+        }
+
+        var slug = new StringBuilder(normalized.Length);
+        var inSeparator = false;
+        foreach (var c in normalized)
+        {
+            if (c is '-' or ' ' or >= '\t' and <= '\r' or >= '\x1c' and <= '\x1f')
+            {
+                if (!inSeparator)
+                {
+                    slug.Append('-');
+                    inSeparator = true;
+                }
+            }
+            else if (c is >= 'a' and <= 'z' or >= '0' and <= '9' or '_')
+            {
+                slug.Append(c);
+                inSeparator = false;
+            }
+            else if (c is >= 'A' and <= 'Z')
+            {
+                slug.Append(char.ToLowerInvariant(c));
+                inSeparator = false;
+            }
+        }
+
+        var result = slug.ToString().Trim('-', '_');
+        if (result.Length > MaxSlugLength)
+        {
+            result = result.Substring(0, MaxSlugLength).TrimEnd('-');
+        }
+        return result.Length > 0 ? result : null;
     }
 
     private const int MaxSlugLength = 50;
-    private static readonly Regex InvalidSlugCharacters = new("[^a-z0-9_]+", RegexOptions.Compiled);
 }

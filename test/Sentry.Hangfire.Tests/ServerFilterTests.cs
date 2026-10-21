@@ -347,7 +347,7 @@ public class ServerFilterTests
         // Arrange
         var fixture = new RecurringJobFixture
         {
-            RecurringJobId = "Reports.Nightly Run",
+            RecurringJobId = "Reports: Nightly Run",
             AttributeSlug = null,
             Slug = "reports-nightly-run",
             Options = { MonitorAllRecurringJobs = true }
@@ -468,13 +468,18 @@ public class ServerFilterTests
 
     [Theory]
     [InlineData("nightly", "nightly")]
-    [InlineData("Reports.Nightly Run", "reports-nightly-run")]
+    [InlineData("Reports.Nightly Run", "reportsnightly-run")]
     [InlineData("  --Send_Emails!!  ", "send_emails")]
-    [InlineData("Ünïcode job", "n-code-job")]
+    [InlineData("Café Crème", "cafe-creme")]
+    [InlineData("ﬁle", "file")]
+    [InlineData("日本語", null)]
     [InlineData("!!!", null)]
     [InlineData("Reports - Nightly", "reports-nightly")]
+    [InlineData("a - ! - b", "a-b")]
+    [InlineData("a\tb\nc", "a-b-c")]
     [InlineData("__private_job__", "private_job")]
-    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_")]
     [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
     public void GetRecurringJobSlug_RecurringJobId_ReturnsSlug(string recurringJobId, string? expected)
     {
@@ -487,12 +492,27 @@ public class ServerFilterTests
     [InlineData("nightly", true)]
     [InlineData("Nightly", false)]
     [InlineData("nightly-2", false)]
-    public void GetRecurringJobSlug_ExcludedRecurringJobs_MatchesIdExactly(string recurringJobId, bool excluded)
+    public void GetRecurringJobSlug_ExcludedString_MatchesIdExactly(string recurringJobId, bool excluded)
     {
         var options = new SentryHangfireOptions
         {
             MonitorAllRecurringJobs = true,
             ExcludedRecurringJobs = { "nightly" }
+        };
+
+        (options.GetRecurringJobSlug(recurringJobId) is null).Should().Be(excluded);
+    }
+
+    [Theory]
+    [InlineData("cleanup-eu", true)]
+    [InlineData("Cleanup-US", true)]
+    [InlineData("nightly-cleanup", false)]
+    public void GetRecurringJobSlug_ExcludedRegex_MatchesId(string recurringJobId, bool excluded)
+    {
+        var options = new SentryHangfireOptions
+        {
+            MonitorAllRecurringJobs = true,
+            ExcludedRecurringJobs = { new Regex("^cleanup-", RegexOptions.IgnoreCase) }
         };
 
         (options.GetRecurringJobSlug(recurringJobId) is null).Should().Be(excluded);
