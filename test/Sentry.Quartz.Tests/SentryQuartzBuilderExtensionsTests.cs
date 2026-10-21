@@ -138,6 +138,21 @@ public class SentryQuartzBuilderExtensionsTests
     }
 
     [Fact]
+    public void AddSentry_UnrelatedOptions_StillResolve()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.Configure<UnrelatedOptions>(options => options.Value = 1);
+        services.AddQuartz(quartz => quartz.AddSentry(new SentryQuartzOptions(), _hub));
+
+        // Act
+        using var provider = services.BuildServiceProvider();
+
+        // Assert
+        provider.GetRequiredService<IOptions<UnrelatedOptions>>().Value.Value.Should().Be(1);
+    }
+
+    [Fact]
     public async Task AddSentry_JobWithoutAttribute_CapturesNoCheckIns()
     {
         // Arrange
@@ -204,6 +219,11 @@ public class SentryQuartzBuilderExtensionsTests
 
         var provider = services.BuildServiceProvider();
         return await provider.GetRequiredService<ISchedulerFactory>().GetScheduler();
+    }
+
+    private sealed class UnrelatedOptions
+    {
+        public int Value { get; set; }
     }
 
     private sealed class UnmonitoredSignallingJob : IJob
