@@ -9,14 +9,14 @@ namespace Sentry.Quartz;
 // Open generic, so it applies to whichever SentryLoggingOptions the logging integration uses, such as
 // SentryAspNetCoreOptions.
 internal sealed class QuartzErrorLogFilterSetup<TOptions> : IConfigureOptions<TOptions>
-    where TOptions : SentryLoggingOptions
+    where TOptions : class
 {
     // SchedulerErrorForFire in https://github.com/quartznet/quartznet/blob/v4.0.0/src/Quartz/Core/CoreLog.cs
     internal const string Category = "Quartz.Core.ErrorLogger";
     internal const int EventId = 1081;
 
     public void Configure(TOptions options) =>
-        options.AddLogEntryFilter((category, _, eventId, exception) =>
+        (options as SentryLoggingOptions)?.AddLogEntryFilter((category, _, eventId, exception) =>
             eventId.Id == EventId
             && string.Equals(category, Category, StringComparison.Ordinal)
             && exception is JobExecutionProcessException { InnerException: { } jobException }
