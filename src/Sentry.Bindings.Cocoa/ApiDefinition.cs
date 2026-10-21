@@ -1099,10 +1099,6 @@ interface SentryObjCScope
     [NullAllowed, Export("span", ArgumentSemantic.Strong)]
     SentryObjCSpan Span { get; set; }
 
-    // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
-    [Export("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
-
     // -(void)clear;
     [Export("clear")]
     void Clear();
