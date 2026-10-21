@@ -444,7 +444,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.Disappearing), SystemType, LifecycleCategory);
 
     private void OnPageOnNavigatedTo(object? sender, NavigatedToEventArgs e) =>
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedTo), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.GetPreviousPage(), "PreviousPage"));
+        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedTo), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.PreviousPage, "PreviousPage"));
 
     private void OnPageOnSizeChanged(object? sender, EventArgs _) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.SizeChanged), SystemType, RenderingCategory);

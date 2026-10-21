@@ -3,9 +3,7 @@
  * Updated from https://github.com/dotnet/android/blob/64018e13e53cec7246e54866b520d3284de344e0/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.Classes.cs
  *     - Adding support for AssemblyStore v3 format that shipped in .NET 10 (https://github.com/dotnet/android/pull/10249)
  * Updated from https://github.com/dotnet/android/blob/f1aecf9e6ae80fe3f3992ec1f52ef953dac7c06b/.github/skills/read-assembly-store/src/AssemblyStore/StoreReader_V2.Classes.cs
- *     - Adding support for AssemblyStore v4 format (CoreCLR), which only ever shipped in .NET 11 previews
- * Reviewed against https://github.com/dotnet/android/commit/8f7c4d4fa53c6682f2c4f2d2caf08e9fb4d8cd60
- *     - v4 was reverted before .NET 11 GA (dotnet/android#12780); CoreCLR emits v3 again
+ *     - Adding the 32-bit and 64-bit name hash index entry sizes
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
@@ -15,6 +13,8 @@ internal partial class StoreReader
 {
     private sealed class Header
     {
+        public const uint NativeSize = 5 * sizeof(uint);
+
         public readonly uint magic;
         public readonly uint version;
         public readonly uint entry_count;
@@ -23,18 +23,13 @@ internal partial class StoreReader
         // Index size in bytes
         public readonly uint index_size;
 
-        public readonly ulong content_id;
-
-        public uint NativeSize => 5 * sizeof(uint) + ((version & ASSEMBLY_STORE_FORMAT_NUMBER_MASK) >= 4 ? sizeof(ulong) : 0u);
-
-        public Header(uint magic, uint version, uint entry_count, uint index_entry_count, uint index_size, ulong content_id)
+        public Header(uint magic, uint version, uint entry_count, uint index_entry_count, uint index_size)
         {
             this.magic = magic;
             this.version = version;
             this.entry_count = entry_count;
             this.index_entry_count = index_entry_count;
             this.index_size = index_size;
-            this.content_id = content_id;
         }
     }
 
