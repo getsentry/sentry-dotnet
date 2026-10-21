@@ -44,10 +44,9 @@ var nodes = tree.GetCompilationUnitRoot()
     .WithAttribute("*Sentry*", "Internal")
     // Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
     .RemoveBaseType("INSCopying")
+    // Unused, and gated out of the public API for Cocoa v10 (getsentry/sentry-cocoa#9403).
+    .RemoveProperty("SentryObjCScope", "Serialize")
     // Fix property-to-method conversions
-    .PropertyToMethod("Sentry*", "Serialize")
-    // Scope serialization is an SDK implementation detail, not a binding dependency.
-    .RemoveMethod("SentryObjCScope", "Serialize")
     .PropertyToMethod("SentryObjCSpan", "ToTraceHeader")
     .PropertyToMethod("SentryObjCTraceContext", "ToBaggage")
     .PropertyToMethod("SentryObjCInternalScopeApi", "CreateScope")
