@@ -8,9 +8,6 @@ public class StoreReaderTests
     [InlineData(0x80000003u | 0x00010000u, true, sizeof(ulong))] // v3, 64-bit, arm64 (MonoVM)
     [InlineData(0x80000003u | 0x00010000u, true, sizeof(uint))] // v3, 64-bit, arm64 (CoreCLR)
     [InlineData(0x00000003u | 0x00020000u, false, sizeof(uint))] // v3, 32-bit, arm
-    [InlineData(0x80000004u | 0x00030000u, true, sizeof(ulong))] // v4, 64-bit, x86_64 (MonoVM, .NET 11 previews)
-    [InlineData(0x80000004u | 0x00030000u, true, sizeof(uint))] // v4, 64-bit, x86_64 (CoreCLR, .NET 11 previews)
-    [InlineData(0x00000004u | 0x00040000u, false, sizeof(uint))] // v4, 32-bit, x86 (.NET 11 previews)
     public void Create_SupportedVersion_ReadsStore(uint version, bool is64Bit, int nameHashSize)
     {
         // Arrange
@@ -27,6 +24,7 @@ public class StoreReaderTests
 
     [Theory]
     [InlineData(0x80000005u | 0x00010000u)] // v5
+    [InlineData(0x80000004u | 0x00010000u)] // v4 (.NET 11 previews only)
     [InlineData(0x80000002u | 0x00010000u)] // v2
     public void Create_UnsupportedVersion_ReturnsNull(uint version)
     {
@@ -49,7 +47,7 @@ public class StoreReaderTests
         using var stream = new MemoryStream();
         using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
         {
-            WriteHeader(writer, 0x80000004u | 0x00010000u, indexEntryCount, indexSize);
+            WriteHeader(writer, 0x80000003u | 0x00010000u, indexEntryCount, indexSize);
             writer.Write(new byte[indexSize]);
         }
         stream.Position = 0;
@@ -103,17 +101,12 @@ public class StoreReaderTests
     private static void WriteHeader(BinaryWriter writer, uint version, uint indexEntryCount, uint indexSize)
     {
         const uint entryCount = 1;
-        const ulong contentId = 0x0123456789ABCDEF;
 
         writer.Write(Utils.AssemblyStoreMagic);
         writer.Write(version);
         writer.Write(entryCount);
         writer.Write(indexEntryCount);
         writer.Write(indexSize);
-        if ((version & StoreReader.ASSEMBLY_STORE_FORMAT_NUMBER_MASK) >= 4)
-        {
-            writer.Write(contentId);
-        }
     }
 
     [Fact]
