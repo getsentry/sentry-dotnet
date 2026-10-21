@@ -14,7 +14,7 @@ internal static class QuartzTestApi
         scheduler.GetJobKeys(Arg.Any<GroupMatcher<JobKey>>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<JobKey>>(jobs.Select(job => job.Key).ToList()));
         scheduler.GetJobDetail(Arg.Any<JobKey>(), Arg.Any<CancellationToken>())
-            .Returns(call => Task.FromResult(jobs.FirstOrDefault(job => job.Key.Equals(call.Arg<JobKey>()))));
+            .Returns(call => Task.FromResult(jobs.First(job => job.Key.Equals(call.Arg<JobKey>()))));
         scheduler.GetTriggersOfJob(Arg.Any<JobKey>(), Arg.Any<CancellationToken>())
             .Returns(call => Task.FromResult<IReadOnlyCollection<ITrigger>>(triggers
                 .Where(t => t.Job.Key.Equals(call.Arg<JobKey>())).Select(t => t.Trigger).ToList()));
