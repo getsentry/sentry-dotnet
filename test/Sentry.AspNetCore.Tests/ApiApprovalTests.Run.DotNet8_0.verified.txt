@@ -4,6 +4,13 @@
     {
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseSentryTracing(this Microsoft.AspNetCore.Builder.IApplicationBuilder builder) { }
     }
+    public static class SentryWebApplicationBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.WebApplicationBuilder UseSentry(this Microsoft.AspNetCore.Builder.WebApplicationBuilder builder) { }
+        public static Microsoft.AspNetCore.Builder.WebApplicationBuilder UseSentry(this Microsoft.AspNetCore.Builder.WebApplicationBuilder builder, System.Action<Sentry.AspNetCore.ISentryBuilder>? configureSentry) { }
+        public static Microsoft.AspNetCore.Builder.WebApplicationBuilder UseSentry(this Microsoft.AspNetCore.Builder.WebApplicationBuilder builder, System.Action<Sentry.AspNetCore.SentryAspNetCoreOptions>? configureOptions) { }
+        public static Microsoft.AspNetCore.Builder.WebApplicationBuilder UseSentry(this Microsoft.AspNetCore.Builder.WebApplicationBuilder builder, string dsn) { }
+    }
 }
 namespace Microsoft.AspNetCore.Hosting
 {

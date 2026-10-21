@@ -48,7 +48,7 @@ public static class Program
                     .AddSentryOtlpExporter(dsn) // <-- Ensure telemetry is sent to Sentry
                 );
 
-        builder.WebHost.UseSentry(options =>
+        builder.UseSentry(options =>
         {
             options.Dsn = dsn;
 

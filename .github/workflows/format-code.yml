@@ -18,11 +18,13 @@ jobs:
     name: Format Code
     # Run on 'macos' because Linux is missing the `ios` workload: https://github.com/dotnet/runtime/issues/85505
     # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
+      # PR head, not the merge ref: the submodule working trees must match the branch we commit to
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           submodules: recursive
 
       - name: Setup Environment
@@ -45,7 +47,7 @@ jobs:
 
       - name: Upload Format Report
         if: ${{ always() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           archive: false
           path: ./dotnet-format-report/

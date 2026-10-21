@@ -15,7 +15,7 @@ namespace Sentry.Quartz;
 /// </para>
 /// <para>
 /// Quartz names a job built without an identity with a new GUID each time, so such a job uses the name of its class
-/// instead, and a warning is logged. Give the job an identity or a monitor slug to keep its monitor stable.
+/// instead. Give the job an identity or a monitor slug to keep its monitor stable.
 /// </para>
 /// </remarks>
 /// <param name="monitorSlug">The monitor slug. Defaults to the slug of the job's key.</param>

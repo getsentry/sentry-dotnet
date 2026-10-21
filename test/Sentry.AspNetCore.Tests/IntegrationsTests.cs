@@ -163,6 +163,41 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
     [Fact]
     public async Task WebHost_SdkStartedViaStartupFilter_DisableSdkOnShutdown()
     {
+        var factory = ReplaceLoggerFactory();
+
+        Build();
+
+        // Make sure custom factory was used instead of default one
+        _ = factory.Received().CreateLogger(Arg.Any<string>());
+
+        Assert.True(SentrySdk.IsEnabled);
+
+        await TestServer.Host.StopAsync();
+        Assert.False(SentrySdk.IsEnabled);
+    }
+
+    [Fact]
+    public void WebHost_LoggerFactoryReplacedInitializeSdkFalse_SdkDisabled()
+    {
+        Configure = o => o.InitializeSdk = false;
+        _ = ReplaceLoggerFactory();
+
+        Build();
+
+        Assert.False(SentrySdk.IsEnabled);
+    }
+
+    [Fact]
+    public void WebHost_LoggerFactoryReplacedInvalidDsn_StartThrows()
+    {
+        Configure = o => o.Dsn = "invalid dsn";
+        _ = ReplaceLoggerFactory();
+
+        Assert.Throws<UriFormatException>(() => Build());
+    }
+
+    private ILoggerFactory ReplaceLoggerFactory()
+    {
         var logger = Substitute.For<ILogger>();
         var factory = Substitute.For<ILoggerFactory>();
         _ = factory.CreateLogger(Arg.Any<string>()).Returns(logger);
@@ -178,17 +213,6 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
                 collection.AddSingleton(factory));
         };
 
-        Build();
-
-        // Make sure custom factory was used instead of default one
-        _ = factory.Received().CreateLogger(Arg.Any<string>());
-
-        // Invoke request to make sure Sentry is initialized
-        await HttpClient.GetAsync("/");
-
-        Assert.True(SentrySdk.IsEnabled);
-
-        await TestServer.Host.StopAsync();
-        Assert.False(SentrySdk.IsEnabled);
+        return factory;
     }
 }

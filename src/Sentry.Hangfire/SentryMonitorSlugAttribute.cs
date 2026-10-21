@@ -11,6 +11,8 @@ public class SentryMonitorSlugAttribute(string monitorSlug) : JobFilterAttribute
 {
     private readonly string? _monitorSlug = monitorSlug;
 
+    internal string? MonitorSlug => _monitorSlug;
+
     /// <inheritdoc />
     public void OnCreating(CreatingContext context)
     {

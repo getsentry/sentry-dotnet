@@ -8,7 +8,8 @@ internal static class TriggerSchedule
     private static readonly string[] MonthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     private static readonly string[] DayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-    public static Action<SentryMonitorOptions>? ToMonitorConfig(ITrigger trigger)
+    // Returns null when Sentry can't represent the trigger's schedule
+    public static MonitorSchedule? ToSchedule(ITrigger trigger)
     {
         if (trigger.CalendarName is not null)
         {
@@ -20,18 +21,9 @@ internal static class TriggerSchedule
             case ICronTrigger cronTrigger:
                 var crontab = ToCrontab(cronTrigger.CronExpressionString);
                 var timeZone = ToIanaTimeZoneId(cronTrigger.TimeZone);
-                if (crontab is null || timeZone is null)
-                {
-                    return null;
-                }
-
-                return options =>
-                {
-                    options.Interval(crontab);
-                    options.TimeZone ??= timeZone;
-                };
+                return crontab is null || timeZone is null ? null : new MonitorSchedule(crontab, timeZone, 0, default);
             case ISimpleTrigger simpleTrigger when ToInterval(simpleTrigger) is (var interval, var unit):
-                return options => options.Interval(interval, unit);
+                return new MonitorSchedule(null, null, interval, unit);
             default:
                 return null;
         }
@@ -263,5 +255,21 @@ internal static class TriggerSchedule
         // .NET Framework can't convert Windows IDs, so only pass on IDs that look like an IANA ID
         return timeZone.Id.Contains("/") ? timeZone.Id : null;
 #endif
+    }
+}
+
+// The schedule sent as a trigger's monitor config
+internal sealed record MonitorSchedule(string? Crontab, string? TimeZone, int Interval, SentryMonitorInterval Unit)
+{
+    public void Apply(SentryMonitorOptions options)
+    {
+        if (Crontab is null)
+        {
+            options.Interval(Interval, Unit);
+            return;
+        }
+
+        options.Interval(Crontab);
+        options.TimeZone ??= TimeZone;
     }
 }

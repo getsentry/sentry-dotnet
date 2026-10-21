@@ -35,6 +35,9 @@ public class DeviceTests
             Architecture = "x64",
             BatteryLevel = 99,
             IsCharging = true,
+            IsOnline = true,
+            ConnectionType = "cellular",
+            ConnectionEffectiveType = "5g",
             BootTime = DateTimeOffset.MaxValue,
             ExternalFreeStorage = 100_000_000_000_000, // 100 TB
             ExternalStorageSize = 1_000_000_000_000_000, // 1 PB
@@ -84,6 +87,9 @@ public class DeviceTests
               "arch": "x64",
               "battery_level": 99,
               "charging": true,
+              "online": true,
+              "connection_type": "cellular",
+              "connection_effective_type": "5g",
               "orientation": "portrait",
               "simulator": false,
               "memory_size": 500000000000,
@@ -122,6 +128,28 @@ public class DeviceTests
         var clone = sut.Clone();
 
         AssertAreEqual(sut, clone);
+    }
+
+    [Fact]
+    public void UpdateFrom_EmptyTarget_CopiesConnection()
+    {
+        var sut = new Device();
+
+        sut.UpdateFrom(new Device { ConnectionType = "cellular", ConnectionEffectiveType = "5g" });
+
+        sut.ConnectionType.Should().Be("cellular");
+        sut.ConnectionEffectiveType.Should().Be("5g");
+    }
+
+    [Fact]
+    public void UpdateFrom_TargetHasConnection_KeepsConnection()
+    {
+        var sut = new Device { ConnectionType = "wifi", ConnectionEffectiveType = "4g" };
+
+        sut.UpdateFrom(new Device { ConnectionType = "cellular", ConnectionEffectiveType = "5g" });
+
+        sut.ConnectionType.Should().Be("wifi");
+        sut.ConnectionEffectiveType.Should().Be("4g");
     }
 
     [Fact]
@@ -208,6 +236,8 @@ public class DeviceTests
         yield return new object[] { (new Device { BatteryLevel = 1.5f }, """{"type":"device","battery_level":1.5}""") };
         yield return new object[] { (new Device { IsCharging = true }, """{"type":"device","charging":true}""") };
         yield return new object[] { (new Device { IsOnline = true }, """{"type":"device","online":true}""") };
+        yield return new object[] { (new Device { ConnectionType = "wifi" }, """{"type":"device","connection_type":"wifi"}""") };
+        yield return new object[] { (new Device { ConnectionEffectiveType = "4g" }, """{"type":"device","connection_effective_type":"4g"}""") };
         yield return new object[] { (new Device { Simulator = false }, """{"type":"device","simulator":false}""") };
         yield return new object[] { (new Device { MemorySize = 1 }, """{"type":"device","memory_size":1}""") };
         yield return new object[] { (new Device { FreeMemory = 1 }, """{"type":"device","free_memory":1}""") };
@@ -266,6 +296,8 @@ public class DeviceTests
             BootTime = DateTimeOffset.UtcNow,
             Timezone = TimeZoneInfo.Utc,
             IsOnline = false,
+            ConnectionType = "cellular",
+            ConnectionEffectiveType = "4g",
             ProcessorCount = 8,
             CpuDescription = "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz",
             ProcessorFrequency = 2500,
@@ -291,6 +323,8 @@ public class DeviceTests
             actual.BatteryLevel.Should().BeApproximately(expected.BatteryLevel, Delta);
             actual.IsCharging.Should().Be(expected.IsCharging);
             actual.IsOnline.Should().Be(expected.IsOnline);
+            actual.ConnectionType.Should().Be(expected.ConnectionType);
+            actual.ConnectionEffectiveType.Should().Be(expected.ConnectionEffectiveType);
             actual.BootTime.Should().Be(expected.BootTime);
             actual.ExternalFreeStorage.Should().Be(expected.ExternalFreeStorage);
             actual.ExternalStorageSize.Should().Be(expected.ExternalStorageSize);

@@ -1,6 +1,6 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseSentry(options =>
+builder.UseSentry(options =>
 {
 #if !SENTRY_DSN_DEFINED_IN_ENV
     // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.

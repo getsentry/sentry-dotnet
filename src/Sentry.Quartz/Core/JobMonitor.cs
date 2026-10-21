@@ -1,5 +1,6 @@
 using Quartz;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 
 namespace Sentry.Quartz;
 
@@ -8,19 +9,24 @@ internal sealed class JobMonitor
 {
     private const int MaxSlugLength = 50;
 
+    // How long the schedules of all monitored triggers are reused before they're read from the scheduler again
+    internal static readonly TimeSpan TriggerSchedulesTtl = TimeSpan.FromMinutes(1);
+
     private static readonly ConcurrentDictionary<Type, SentryMonitorSlugAttribute?> Attributes = new();
 
     private readonly SentryQuartzOptions _options;
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
+    private readonly ISystemClock _clock;
+    private readonly SemaphoreSlim _triggerSchedulesLock = new(1, 1);
+    private TriggerSchedules? _triggerSchedules;
 
-    // The job each slug was first used by: its key, or its type when it has no identity
-
-    public JobMonitor(SentryQuartzOptions options, IHub hub, IDiagnosticLogger? logger = null)
+    public JobMonitor(SentryQuartzOptions options, IHub hub, IDiagnosticLogger? logger = null, ISystemClock? clock = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _hub = hub;
         _logger = logger;
+        _clock = clock ?? SystemClock.Clock;
     }
 
     internal IDiagnosticLogger? Logger => _logger ?? _hub.GetSentryOptions()?.DiagnosticLogger;
@@ -33,7 +39,7 @@ internal sealed class JobMonitor
         try
         {
             var jobType = QuartzApi.GetJobType(context.JobDetail);
-            var attribute = Attributes.GetOrAdd(jobType, type => type.GetCustomAttribute<SentryMonitorSlugAttribute>());
+            var attribute = GetAttribute(jobType);
             if (attribute is null)
             {
                 return null;
@@ -48,7 +54,7 @@ internal sealed class JobMonitor
             }
 
             configureMonitorOptions = _options.SendMonitorConfig && attribute.SendMonitorConfig
-                ? await GetMonitorConfigAsync(context, cancellationToken).ConfigureAwait(false)
+                ? await GetMonitorConfigAsync(context, monitorSlug, cancellationToken).ConfigureAwait(false)
                 : null;
         }
         catch (Exception e)
@@ -86,6 +92,7 @@ internal sealed class JobMonitor
     // Returns null when there's no schedule to send
     private async Task<Action<SentryMonitorOptions>?> GetMonitorConfigAsync(
         IJobExecutionContext context,
+        string monitorSlug,
         CancellationToken cancellationToken)
     {
         var monitorOptions = new SentryMonitorOptions();
@@ -104,34 +111,37 @@ internal sealed class JobMonitor
         }
 
         if (!monitorOptions.HasSchedule
-            && await GetTriggerScheduleAsync(context, cancellationToken).ConfigureAwait(false) is { } schedule)
+            && await GetTriggerScheduleAsync(context, monitorSlug, cancellationToken).ConfigureAwait(false) is { } schedule)
         {
-            schedule(monitorOptions);
+            schedule.Apply(monitorOptions);
         }
 
         return monitorOptions.HasSchedule ? monitorOptions.CopyTo : null;
     }
 
-    private async Task<Action<SentryMonitorOptions>?> GetTriggerScheduleAsync(
+    private async Task<MonitorSchedule?> GetTriggerScheduleAsync(
         IJobExecutionContext context,
+        string monitorSlug,
         CancellationToken cancellationToken)
     {
         var trigger = context.Trigger;
         try
         {
-            var schedule = TriggerSchedule.ToMonitorConfig(trigger);
+            var schedule = TriggerSchedule.ToSchedule(trigger);
             if (schedule is null)
             {
                 Logger?.LogDebug("Not sending the schedule of trigger '{0}'. Sentry can't represent it.", trigger.Key);
                 return null;
             }
 
-            if (!trigger.JobDataMap.ContainsKey(SentryMonitorSlugAttribute.JobDataKey)
-                && await QuartzApi.HasSeveralTriggersAsync(context, cancellationToken).ConfigureAwait(false))
+            var triggerSchedules = await GetTriggerSchedulesAsync(context.Scheduler, trigger.Key, cancellationToken)
+                .ConfigureAwait(false);
+            var conflicting = triggerSchedules.WithDifferentSchedule(monitorSlug, trigger.Key, schedule);
+            if (conflicting.Count > 0)
             {
-                Logger?.LogDebug("Not sending the schedule of trigger '{0}'. Job '{1}' has more than one trigger. " +
-                                 "Set '{2}' in each trigger's data map to give each its own monitor.",
-                    trigger.Key, context.JobDetail.Key, SentryMonitorSlugAttribute.JobDataKey);
+                Logger?.LogDebug("Not sending the schedule of trigger '{0}'. Triggers '{1}' use the same monitor slug " +
+                                 "'{2}' with a different schedule. Give each its own monitor slug.",
+                    trigger.Key, string.Join("', '", conflicting), monitorSlug);
                 return null;
             }
 
@@ -143,6 +153,100 @@ internal sealed class JobMonitor
             return null;
         }
     }
+
+    // Reading every trigger takes several scheduler queries, so the result is reused for a minute.
+    private async Task<TriggerSchedules> GetTriggerSchedulesAsync(
+        IScheduler scheduler,
+        TriggerKey triggerKey,
+        CancellationToken cancellationToken)
+    {
+        await _triggerSchedulesLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var now = _clock.GetUtcNow();
+            if (_triggerSchedules is not { } schedules || schedules.ReadAt + TriggerSchedulesTtl <= now
+                || schedules.Scheduler != scheduler || !schedules.Contains(triggerKey))
+            {
+                schedules = await TriggerSchedules.ReadAsync(scheduler, now, cancellationToken).ConfigureAwait(false);
+                _triggerSchedules = schedules;
+            }
+
+            return schedules;
+        }
+        finally
+        {
+            _triggerSchedulesLock.Release();
+        }
+    }
+
+    private sealed class TriggerSchedules
+    {
+        private readonly Dictionary<string, List<(TriggerKey Key, MonitorSchedule Schedule)>> _triggersBySlug;
+        private readonly HashSet<TriggerKey> _keys;
+
+        public IScheduler Scheduler { get; }
+
+        public DateTimeOffset ReadAt { get; }
+
+        private TriggerSchedules(IScheduler scheduler, DateTimeOffset readAt,
+            Dictionary<string, List<(TriggerKey Key, MonitorSchedule Schedule)>> triggersBySlug, HashSet<TriggerKey> keys)
+        {
+            Scheduler = scheduler;
+            ReadAt = readAt;
+            _triggersBySlug = triggersBySlug;
+            _keys = keys;
+        }
+
+        public static async Task<TriggerSchedules> ReadAsync(IScheduler scheduler, DateTimeOffset readAt,
+            CancellationToken cancellationToken)
+        {
+            var triggersBySlug = new Dictionary<string, List<(TriggerKey Key, MonitorSchedule Schedule)>>();
+            var keys = new HashSet<TriggerKey>();
+            var triggers = await QuartzApi.GetTriggersAsync(scheduler, IsMonitored, cancellationToken).ConfigureAwait(false);
+            foreach (var (job, trigger) in triggers)
+            {
+                keys.Add(trigger.Key);
+
+                // Triggers whose schedule isn't sent don't change the monitor
+                var attribute = GetAttribute(QuartzApi.GetJobType(job))!;
+                if (!attribute.SendMonitorConfig
+                    || TriggerSchedule.ToSchedule(trigger) is not { } schedule
+                    || GetMonitorSlug(job, trigger, attribute) is not { } slug)
+                {
+                    continue;
+                }
+
+                if (!triggersBySlug.TryGetValue(slug, out var slugTriggers))
+                {
+                    slugTriggers = new List<(TriggerKey Key, MonitorSchedule Schedule)>();
+                    triggersBySlug[slug] = slugTriggers;
+                }
+                slugTriggers.Add((trigger.Key, schedule));
+            }
+
+            return new TriggerSchedules(scheduler, readAt, triggersBySlug, keys);
+        }
+
+        public bool Contains(TriggerKey triggerKey) => _keys.Contains(triggerKey);
+
+        public List<TriggerKey> WithDifferentSchedule(string monitorSlug, TriggerKey triggerKey, MonitorSchedule schedule)
+        {
+            if (!_triggersBySlug.TryGetValue(monitorSlug, out var triggers))
+            {
+                return new List<TriggerKey>();
+            }
+
+            return triggers
+                .Where(trigger => !trigger.Key.Equals(triggerKey) && trigger.Schedule != schedule)
+                .Select(trigger => trigger.Key)
+                .ToList();
+        }
+
+        private static bool IsMonitored(IJobDetail job) => GetAttribute(QuartzApi.GetJobType(job)) is not null;
+    }
+
+    private static SentryMonitorSlugAttribute? GetAttribute(Type jobType) =>
+        Attributes.GetOrAdd(jobType, type => type.GetCustomAttribute<SentryMonitorSlugAttribute>());
 
     private string? ResolveMonitorSlug(IJobExecutionContext context, Type jobType, SentryMonitorSlugAttribute attribute)
     {
@@ -170,10 +274,29 @@ internal sealed class JobMonitor
         SentryMonitorSlugAttribute attribute,
         out bool fromJobType)
     {
+        context.MergedJobDataMap.TryGetValue(SentryMonitorSlugAttribute.JobDataKey, out var dataMapSlug);
+        return GetMonitorSlug(context.JobDetail, dataMapSlug, attribute, out fromJobType);
+    }
+
+    // The slug of a run of the job by the trigger, as its merged JobDataMap would give
+    private static string? GetMonitorSlug(IJobDetail job, ITrigger trigger, SentryMonitorSlugAttribute attribute)
+    {
+        if (!trigger.JobDataMap.TryGetValue(SentryMonitorSlugAttribute.JobDataKey, out var dataMapSlug))
+        {
+            job.JobDataMap.TryGetValue(SentryMonitorSlugAttribute.JobDataKey, out dataMapSlug);
+        }
+
+        return GetMonitorSlug(job, dataMapSlug, attribute, out _);
+    }
+
+    private static string? GetMonitorSlug(
+        IJobDetail job,
+        object? dataMapValue,
+        SentryMonitorSlugAttribute attribute,
+        out bool fromJobType)
+    {
         fromJobType = false;
-        if (context.MergedJobDataMap.TryGetValue(SentryMonitorSlugAttribute.JobDataKey, out var value)
-            && value is string dataMapSlug
-            && !string.IsNullOrWhiteSpace(dataMapSlug))
+        if (dataMapValue is string dataMapSlug && !string.IsNullOrWhiteSpace(dataMapSlug))
         {
             return dataMapSlug;
         }
@@ -183,14 +306,14 @@ internal sealed class JobMonitor
             return attribute.MonitorSlug;
         }
 
-        var key = context.JobDetail.Key;
+        var key = job.Key;
         if (HasIdentity(key))
         {
             return ToSlug(key.Group == JobKey.DefaultGroup ? key.Name : key.Group + "." + key.Name);
         }
 
         fromJobType = true;
-        return ToSlug(QuartzApi.GetJobType(context.JobDetail).Name);
+        return ToSlug(QuartzApi.GetJobType(job).Name);
     }
 
     // Quartz names a job built without an identity with a new GUID
