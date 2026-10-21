@@ -11,6 +11,7 @@ on:
       - 'src/Sentry/**'
       - 'src/Sentry.Extensions.Logging/**'
       - 'src/Sentry.Compiler.Extensions/**'
+      - 'src/Sentry.Analyzers/**'
       # Mobile-specific packages
       - 'src/Sentry.Maui/**'
       - 'src/Sentry.Maui.CommunityToolkit.Mvvm/**'
@@ -25,6 +26,7 @@ on:
       - 'test/Sentry.Maui.CommunityToolkit.Mvvm.Tests/**'
       - 'test/Sentry.Android.AssemblyReader.Tests/**'
       - 'test/Sentry.Testing/**'
+      - 'test/Sentry.Testing.CrashableApp/**'
       - 'test/AndroidTestApp/**'
       # Integration tests
       - 'integration-test/android.Tests.ps1'
@@ -41,6 +43,9 @@ on:
       - 'global.json'
       - 'Directory.Build.props'
       - 'Directory.Build.targets'
+      - 'src/Directory.Build.*'
+      - 'test/Directory.Build.*'
+      - '.editorconfig'
       - 'nuget.config'
       # Scripts and CI
       - 'scripts/device-test.ps1'
