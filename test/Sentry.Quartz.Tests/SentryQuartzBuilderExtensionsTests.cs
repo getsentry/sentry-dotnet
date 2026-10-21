@@ -117,7 +117,6 @@ public class SentryQuartzBuilderExtensionsTests
         // Assert
         provider.GetServices<IConfigureOptions<SentryLoggingOptions>>().Should().ContainSingle();
         provider.GetServices<IConfigureOptions<SentryAspNetCoreOptions>>().Should().ContainSingle();
-        provider.GetServices<IConfigureOptions<SentryQuartzOptions>>().Should().BeEmpty();
     }
 
     [Fact]

@@ -6,8 +6,7 @@ namespace Sentry.Quartz;
 
 // Quartz's ErrorLogger logs each exception a job throws again, wrapped in a JobExecutionProcessException.
 // SentryScopeMiddleware already captured it, and the default DeduplicateMode doesn't look at inner exceptions.
-// Open generic, so it applies to whichever SentryLoggingOptions the logging integration uses, such as
-// SentryAspNetCoreOptions.
+// Registered for every options type, and only acts on SentryLoggingOptions, such as SentryAspNetCoreOptions.
 internal sealed class QuartzErrorLogFilterSetup<TOptions> : IConfigureOptions<TOptions>
     where TOptions : class
 {
