@@ -11,6 +11,7 @@
     <PackageReference Include="Quartz" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
     <ProjectReference Include="..\..\src\Sentry.Quartz\Sentry.Quartz.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 

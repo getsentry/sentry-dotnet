@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Quartz;
 using Sentry.Extensibility;
 
@@ -16,7 +19,8 @@ public static class SentryQuartzBuilderExtensions
         /// <remarks>
         /// <para>
         /// Each job runs in its own Sentry scope and trace, tagged with the job's key, unless global mode is enabled.
-        /// Exceptions that jobs throw are captured.
+        /// Exceptions that jobs throw are captured, and Sentry's logging integration skips Quartz's error log entry for
+        /// the same exception.
         /// </para>
         /// <para>
         /// Jobs with <see cref="SentryMonitorSlugAttribute"/> also send a check-in each time they run, with the
@@ -38,6 +42,8 @@ public static class SentryQuartzBuilderExtensions
             // Middleware runs outermost first, so check-ins are captured in the job's scope and trace
             builder.AddJobMiddleware(new SentryScopeMiddleware(hub));
             builder.AddJobMiddleware(new SentryCronJobMiddleware(new JobMonitor(options, hub, logger)));
+            builder.Services.TryAddEnumerable(
+                ServiceDescriptor.Singleton(typeof(IConfigureOptions<>), typeof(QuartzErrorLogFilterSetup<>)));
             return builder;
         }
     }

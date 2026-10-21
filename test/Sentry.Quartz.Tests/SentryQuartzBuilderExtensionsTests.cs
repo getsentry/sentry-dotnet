@@ -1,5 +1,9 @@
 using System.Collections.Specialized;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sentry.AspNetCore;
+using Sentry.Extensions.Logging;
 
 namespace Sentry.Quartz.Tests;
 
@@ -60,6 +64,63 @@ public class SentryQuartzBuilderExtensionsTests
     }
 
     [Fact]
+    public async Task AddSentry_MonitoredJob_CapturesCheckInsInJobScope()
+    {
+        // Arrange
+        var jobScope = Substitute.For<IDisposable>();
+        _hub.PushScope().Returns(jobScope);
+
+        // Act
+        await RunUntilCheckInCompletes<MonitoredJob>("Cleanup", null, trigger => trigger
+            .StartNow()
+            .WithSimpleSchedule(schedule => schedule.WithInterval(TimeSpan.FromMinutes(15)).RepeatForever()));
+
+        // Assert
+        Received.InOrder(() =>
+        {
+            _hub.PushScope();
+            _hub.CaptureCheckIn("cleanup", CheckInStatus.InProgress, Arg.Any<SentryId?>(), Arg.Any<TimeSpan?>(), Arg.Any<Scope?>(), Arg.Any<Action<SentryMonitorOptions>?>());
+            _hub.CaptureCheckIn("cleanup", CheckInStatus.Ok, Arg.Any<SentryId?>(), Arg.Any<TimeSpan?>(), Arg.Any<Scope?>(), Arg.Any<Action<SentryMonitorOptions>?>());
+            jobScope.Dispose();
+        });
+    }
+
+    [Fact]
+    public async Task AddSentry_JobFailsWithLoggingIntegration_CapturesExceptionOnce()
+    {
+        // Act
+        await RunUntilCheckInCompletes<FailingJob>("Sync", "billing", trigger => trigger.StartNow(), services => services
+            .AddSingleton(_hub)
+            .AddLogging(logging => logging.AddSentry(options => options.InitializeSdk = false)));
+
+        // Assert
+        // Quartz also logs the job's own exception, which Sentry drops as the same exception instance
+        var exceptions = _hub.ReceivedCalls()
+            .Where(call => call.GetMethodInfo().Name == nameof(IHub.CaptureEvent))
+            .Select(call => ((SentryEvent)call.GetArguments()[0]!).Exception)
+            .ToList();
+        exceptions.Should().NotBeEmpty();
+        exceptions.Should().AllSatisfy(exception => exception.Should().BeOfType<InvalidOperationException>()
+            .And.BeSameAs(exceptions[0]));
+    }
+
+    [Fact]
+    public void AddSentry_LoggingOptionsOfAnyType_GetLogEntryFilter()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddQuartz(quartz => quartz.AddSentry(new SentryQuartzOptions(), _hub));
+
+        // Act
+        using var provider = services.BuildServiceProvider();
+
+        // Assert
+        provider.GetServices<IConfigureOptions<SentryLoggingOptions>>().Should().ContainSingle();
+        provider.GetServices<IConfigureOptions<SentryAspNetCoreOptions>>().Should().ContainSingle();
+        provider.GetServices<IConfigureOptions<SentryQuartzOptions>>().Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task AddSentry_JobWithoutAttribute_CapturesNoCheckIns()
     {
         // Arrange
@@ -86,9 +147,10 @@ public class SentryQuartzBuilderExtensionsTests
     private async Task<CheckInStatus> RunUntilCheckInCompletes<TJob>(
         string name,
         string? group,
-        Action<ITriggerConfigurator<TJob>> configureTrigger) where TJob : IJob
+        Action<ITriggerConfigurator<TJob>> configureTrigger,
+        Action<IServiceCollection>? configureServices = null) where TJob : IJob
     {
-        var scheduler = await BuildScheduler<TJob>(name, group, configureTrigger);
+        var scheduler = await BuildScheduler<TJob>(name, group, configureTrigger, configureServices);
         await scheduler.Start();
         try
         {
@@ -105,9 +167,11 @@ public class SentryQuartzBuilderExtensionsTests
     private async Task<IScheduler> BuildScheduler<TJob>(
         string name,
         string? group,
-        Action<ITriggerConfigurator<TJob>> configureTrigger) where TJob : IJob
+        Action<ITriggerConfigurator<TJob>> configureTrigger,
+        Action<IServiceCollection>? configureServices = null) where TJob : IJob
     {
         var services = new ServiceCollection();
+        configureServices?.Invoke(services);
         var properties = new NameValueCollection { ["quartz.scheduler.instanceName"] = Guid.NewGuid().ToString() };
         services.AddQuartz(properties, quartz =>
         {

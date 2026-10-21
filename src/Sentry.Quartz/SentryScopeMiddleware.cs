@@ -8,6 +8,11 @@ internal sealed class SentryScopeMiddleware(IHub hub, SentryOptions? options = n
     internal const string JobTag = "quartz.job";
     internal const string MechanismType = "Quartz";
 
+    // The exceptions captured here, so the log entry Quartz writes for them can be dropped
+    private static readonly ConditionalWeakTable<Exception, object?> CapturedExceptions = new();
+
+    internal static bool WasCaptured(Exception exception) => CapturedExceptions.TryGetValue(exception, out _);
+
     public async ValueTask Invoke(IJobExecutionContext context, JobExecutionDelegate next, CancellationToken cancellationToken)
     {
         // Jobs share the one scope in global mode, so leave it alone
@@ -37,6 +42,7 @@ internal sealed class SentryScopeMiddleware(IHub hub, SentryOptions? options = n
         {
             e.SetSentryMechanism(MechanismType, handled: false, terminal: false);
             hub.CaptureException(e);
+            CapturedExceptions.AddOrUpdate(e, null);
             throw;
         }
     }
