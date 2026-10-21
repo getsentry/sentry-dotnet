@@ -242,7 +242,18 @@ internal sealed class JobMonitor
                 .ToList();
         }
 
-        private static bool IsMonitored(IJobDetail job) => GetAttribute(QuartzApi.GetJobType(job)) is not null;
+        // Jobs whose type can't be resolved, such as a deleted job class still in a persistent store, are skipped
+        private static bool IsMonitored(IJobDetail job)
+        {
+            try
+            {
+                return GetAttribute(QuartzApi.GetJobType(job)) is not null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 
     private static SentryMonitorSlugAttribute? GetAttribute(Type jobType) =>
