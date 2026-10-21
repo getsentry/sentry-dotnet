@@ -4,5 +4,8 @@
     "workloadVersion": "11.0.100-rc.2.26509.2",
     "rollForward": "disable",
     "allowPrerelease": false
+  },
+  "msbuild-sdks": {
+    "Azure.Functions.Sdk": "1.0.1"
   }
 }
