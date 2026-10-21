@@ -60,6 +60,28 @@ public class SentryQuartzBuilderExtensionsTests
     }
 
     [Fact]
+    public async Task AddSentry_MonitoredJob_CapturesCheckInsInJobScope()
+    {
+        // Arrange
+        var jobScope = Substitute.For<IDisposable>();
+        _hub.PushScope().Returns(jobScope);
+
+        // Act
+        await RunUntilCheckInCompletes<MonitoredJob>("Cleanup", null, trigger => trigger
+            .StartNow()
+            .WithSimpleSchedule(schedule => schedule.WithInterval(TimeSpan.FromMinutes(15)).RepeatForever()));
+
+        // Assert
+        Received.InOrder(() =>
+        {
+            _hub.PushScope();
+            _hub.CaptureCheckIn("cleanup", CheckInStatus.InProgress, Arg.Any<SentryId?>(), Arg.Any<TimeSpan?>(), Arg.Any<Scope?>(), Arg.Any<Action<SentryMonitorOptions>?>());
+            _hub.CaptureCheckIn("cleanup", CheckInStatus.Ok, Arg.Any<SentryId?>(), Arg.Any<TimeSpan?>(), Arg.Any<Scope?>(), Arg.Any<Action<SentryMonitorOptions>?>());
+            jobScope.Dispose();
+        });
+    }
+
+    [Fact]
     public async Task AddSentry_JobWithoutAttribute_CapturesNoCheckIns()
     {
         // Arrange
