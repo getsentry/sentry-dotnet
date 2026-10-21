@@ -13,8 +13,11 @@ internal static class QuartzTestApi
         var jobs = triggers.Select(t => t.Job).GroupBy(job => job.Key).Select(group => group.First()).ToList();
         scheduler.GetJobKeys(Arg.Any<GroupMatcher<JobKey>>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<JobKey>>(jobs.Select(job => job.Key).ToList()));
+        // Quartz 3 annotates GetJobDetail as nullable on some target frameworks only
+#nullable disable
         scheduler.GetJobDetail(Arg.Any<JobKey>(), Arg.Any<CancellationToken>())
             .Returns(call => Task.FromResult(jobs.First(job => job.Key.Equals(call.Arg<JobKey>()))));
+#nullable restore
         scheduler.GetTriggersOfJob(Arg.Any<JobKey>(), Arg.Any<CancellationToken>())
             .Returns(call => Task.FromResult<IReadOnlyCollection<ITrigger>>(triggers
                 .Where(t => t.Job.Key.Equals(call.Arg<JobKey>())).Select(t => t.Trigger).ToList()));
