@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <PackageReference Include="Quartz" Version="[4.0.0,5.0.0)" />
   </ItemGroup>
 
