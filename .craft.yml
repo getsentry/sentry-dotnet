@@ -3,6 +3,15 @@ changelogPolicy: auto
 preReleaseCommand: bash scripts/bump-version.sh
 targets:
   - name: nuget
+    # Craft reads Sentry.slnx and the project files to find our packages, and publishes each one as
+    # its own target in dependency order, so a retried release only pushes the packages that failed.
+    # It doesn't evaluate MSBuild: the test apps with their own Directory.Build.props look packable
+    # to it, so they're excluded by name. A package that the filters miss is silently not published:
+    # run `craft targets` after adding a package or a test app and check the list.
+    workspaces: true
+    solutionPath: Sentry.slnx
+    includeWorkspaces: '/^Sentry/'
+    excludeWorkspaces: '/(TrimTest|CrashableApp)$/'
   - name: github
   - name: registry
     # Every package carries name/packageUrl/mainDocsUrl so craft can create the registry entry
