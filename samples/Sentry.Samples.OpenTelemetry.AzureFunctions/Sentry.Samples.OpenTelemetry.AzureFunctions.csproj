@@ -1,4 +1,6 @@
 <Project Sdk="Azure.Functions.Sdk">
+    <!-- This repository pins the Azure.Functions.Sdk version under "msbuild-sdks" in its root global.json.
+         If you copy this project, add that entry to your own global.json, or the build fails with MSB4236. -->
     <PropertyGroup>
         <TargetFramework>net11.0</TargetFramework>
     </PropertyGroup>
