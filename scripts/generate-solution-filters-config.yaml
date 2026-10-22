@@ -91,6 +91,7 @@ filterConfigs:
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
+        - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*.AspNet.Tests.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
