@@ -1,4 +1,4 @@
-minVersion: 2.26.3
+minVersion: 3.0.0
 changelogPolicy: auto
 preReleaseCommand: bash scripts/bump-version.sh
 targets:
