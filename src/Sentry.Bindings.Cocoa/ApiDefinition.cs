@@ -1271,6 +1271,7 @@ interface SentryObjCTraceContext
 [Internal]
 interface SentryObjCExperimentalOptions
 {
+
     // @property (nonatomic) BOOL enableUnhandledCPPExceptionsV2;
     [Export("enableUnhandledCPPExceptionsV2")]
     bool EnableUnhandledCPPExceptionsV2 { get; set; }
@@ -1805,6 +1806,14 @@ interface SentryObjCInternalSdkApi
 [Internal]
 interface SentryObjCInternalSerializerApi
 {
+    // -(NSDictionary<NSString *,id> * _Nonnull)serializeScope:(SentryObjCScope * _Nonnull)scope;
+    [Export("serializeScope:")]
+    NSDictionary<NSString, NSObject> SerializeScope(SentryObjCScope scope);
+
+    // -(NSDictionary<NSString *,id> * _Nonnull)serializeDebugMeta:(SentryObjCDebugMeta * _Nonnull)debugMeta;
+    [Export("serializeDebugMeta:")]
+    NSDictionary<NSString, NSObject> SerializeDebugMeta(SentryObjCDebugMeta debugMeta);
+
     // -(NSDictionary<NSString *,id> * _Nonnull)serializeEvent:(SentryObjCEvent * _Nonnull)event;
     [Export("serializeEvent:")]
     NSDictionary<NSString, NSObject> SerializeEvent(SentryObjCEvent @event);
