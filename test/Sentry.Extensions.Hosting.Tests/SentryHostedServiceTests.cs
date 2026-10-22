@@ -74,14 +74,18 @@ public sealed class SentryHostedServiceTests : IDisposable
         standardError.ToString().Should().NotContain("Sentry:");
     }
 
+    private static void RemoveSdkInitializer(IServiceCollection services)
+        => services.Remove(services.Single(d => d.ImplementationType == typeof(SentrySdkInitializer)));
+
     [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
-    public async Task StartAsync_LoggerProvidersCleared_SdkRunsBeforeAppHostedServiceStarts(BuilderKind kind)
+    public async Task StartAsync_SdkNotStartedDuringBuild_SdkRunsBeforeAppHostedServiceStarts(BuilderKind kind)
     {
         var appService = new SdkStateAtStart();
         var testHost = new TestHost()
             .ConfigureServices(services => services.AddSingleton<IHostedService>(appService))
             .UseSentry(Capture)
-            .ClearLoggerProviders();
+            .ClearLoggerProviders()
+            .ConfigureServices(RemoveSdkInitializer);
         using var host = testHost.Build(kind);
         SentrySdk.IsEnabled.Should().BeFalse();
 
@@ -93,7 +97,7 @@ public sealed class SentryHostedServiceTests : IDisposable
 
 #if NET8_0_OR_GREATER
     [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
-    public async Task StartAsync_ServicesStartConcurrently_SdkRunsBeforeAppHostedServiceStarts(BuilderKind kind)
+    public async Task StartAsync_SdkNotStartedDuringBuildAndServicesStartConcurrently_SdkRunsBeforeAppHostedServiceStarts(BuilderKind kind)
     {
         var appService = new SdkStateAtStart();
         var testHost = new TestHost()
@@ -103,7 +107,8 @@ public sealed class SentryHostedServiceTests : IDisposable
                 services.AddSingleton<IHostedService>(appService);
             })
             .UseSentry(Capture)
-            .ClearLoggerProviders();
+            .ClearLoggerProviders()
+            .ConfigureServices(RemoveSdkInitializer);
         using var host = testHost.Build(kind);
         SentrySdk.IsEnabled.Should().BeFalse();
 
