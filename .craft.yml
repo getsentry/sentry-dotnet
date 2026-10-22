@@ -1,6 +1,8 @@
-minVersion: 2.26.3
-changelogPolicy: auto
-preReleaseCommand: bash scripts/bump-version.sh
+minVersion: 3.0.0
+changelog:
+  policy: auto
+versioning:
+  policy: auto
 targets:
   - name: nuget
     # Craft reads Sentry.slnx and the project files to find our packages, and publishes each one as
