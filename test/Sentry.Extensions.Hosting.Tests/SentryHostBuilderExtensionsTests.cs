@@ -287,6 +287,39 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
     }
 
     [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void LoggingAddSentry_AfterClearProviders_SendsErrorAndLogOnce(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(Capture)
+            .ClearLoggerProviders()
+            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()));
+        using var host = testHost.Build(kind);
+
+        LogError(host, "one logged error");
+
+        _events.Should().ContainSingle();
+        _logs.Should().ContainSingle();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void LoggingAddSentry_AfterClearProviders_UsesHostOptions(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(options =>
+            {
+                Capture(options);
+                options.MinimumEventLevel = LogLevel.Warning;
+            })
+            .ClearLoggerProviders()
+            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()));
+        using var host = testHost.Build(kind);
+
+        host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MyApp.Worker").LogWarning("one logged warning");
+
+        _events.Should().ContainSingle();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
     public void UseSentry_CapturedEvent_ReportsHostingSdk(BuilderKind kind)
     {
         using var host = new TestHost().UseSentry(Capture).Build(kind);

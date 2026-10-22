@@ -160,28 +160,29 @@ public static class SentryHostBuilderExtensions
 
         services.PostConfigure<SentryGenericHostOptions>(options => options.SetEnvironment(hostEnvironmentName));
 
-        services.AddSingleton<ILoggerProvider>(c =>
-        {
-            if (!HasHostIntegration(services))
+        HostLoggerProviders.Add(
+            services,
+            events: c =>
             {
-                if (app == App.Maui)
+                if (!HasHostIntegration(services))
                 {
-                    Console.Error.WriteLine(MissingMauiIntegration);
+                    if (app == App.Maui)
+                    {
+                        Console.Error.WriteLine(MissingMauiIntegration);
+                    }
+
+                    return new SentryLoggerProvider(
+                        c.GetRequiredService<IHub>(),
+                        SystemClock.Clock,
+                        c.GetRequiredService<IOptions<SentryGenericHostOptions>>().Value.Logging);
                 }
 
-                return new SentryLoggerProvider(
-                    c.GetRequiredService<IHub>(),
-                    SystemClock.Clock,
-                    c.GetRequiredService<IOptions<SentryGenericHostOptions>>().Value.Logging);
-            }
-
-            c.GetRequiredService<IHub>().GetSentryOptions()?.LogWarning(RedundantWithHostIntegration);
-            return NullLoggerProvider.Instance;
-        });
-        services.AddSingleton<ILoggerProvider>(c => HasHostIntegration(services)
-            ? NullLoggerProvider.Instance
-            : new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
-        services.TryAddSingleton<HostLoggerProvidersMarker>();
+                c.GetRequiredService<IHub>().GetSentryOptions()?.LogWarning(RedundantWithHostIntegration);
+                return NullLoggerProvider.Instance;
+            },
+            structuredLogs: c => HasHostIntegration(services)
+                ? NullLoggerProvider.Instance
+                : new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
         services.AddSentry<SentryGenericHostOptions>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<HostOptions>, SentrySdkInitializer>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SentryHostedService>(c =>

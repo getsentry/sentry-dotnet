@@ -63,9 +63,11 @@ public class SentryStartup : FunctionsStartup
             }
         });
 
-        logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
-        logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
-        logging.Services.TryAddSingleton<HostLoggerProvidersMarker>();
+        HostLoggerProviders.Add(
+            logging.Services,
+            events: c => new SentryAspNetCoreLoggerProvider(
+                c.GetRequiredService<IOptions<SentryAspNetCoreOptions>>(), c.GetRequiredService<IHub>()),
+            structuredLogs: c => new SentryAspNetCoreStructuredLoggerProvider(c.GetRequiredService<IHub>()));
         logging.Services.TryAddSingleton<HostIntegrationMarker>();
 
         // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
