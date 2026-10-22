@@ -122,6 +122,13 @@ internal enum SentryObjCRedactRegionType : long
 }
 
 [Native]
+internal enum SentryObjCMetricKitHangReportingMode : long
+{
+    Legacy = 0,
+    FlamegraphAttachment = 1
+}
+
+[Native]
 internal enum SentryObjCSwizzleMode : long
 {
     Always = 0,
