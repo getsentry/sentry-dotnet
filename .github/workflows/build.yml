@@ -333,7 +333,7 @@ jobs:
           sudo dpkg --add-architecture armhf
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
-          # Prints the machine a 32-bit ARM process sees: armv8l when the arm64 kernel runs it, armv7l under QEMU
+          # Prints the machine a 32-bit ARM process sees: aarch64 when the arm64 kernel runs it, armv7l under QEMU
           printf '#include <stdio.h>\n#include <sys/utsname.h>\nint main(void) { struct utsname u; uname(&u); puts(u.machine); return 0; }\n' \
             | arm-linux-gnueabihf-gcc -x c -o "$RUNNER_TEMP/uname-armhf" -
           grep -m1 'CPU part' /proc/cpuinfo || true
