@@ -193,7 +193,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         await using (payloadBuffer.ConfigureAwait(false))
 #endif
         {
-            if (dropEmptyAttachment && IsEmptyAttachment(payloadBuffer, logger))
+            if (dropEmptyAttachment && IsEmptyAttachmentOfUnknownLength(payloadBuffer, logger))
             {
                 return false;
             }
@@ -224,7 +224,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
 
         using var payloadBuffer = BufferPayload(logger);
 
-        if (dropEmptyAttachment && IsEmptyAttachment(payloadBuffer, logger))
+        if (dropEmptyAttachment && IsEmptyAttachmentOfUnknownLength(payloadBuffer, logger))
         {
             return false;
         }
@@ -240,9 +240,9 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         return true;
     }
 
-    private bool IsEmptyAttachment(MemoryStream payloadBuffer, IDiagnosticLogger? logger)
+    private bool IsEmptyAttachmentOfUnknownLength(MemoryStream payloadBuffer, IDiagnosticLogger? logger)
     {
-        if (payloadBuffer.Length != 0 || TryGetType() != TypeValueAttachment)
+        if (payloadBuffer.Length != 0 || TryGetLength() is not null || TryGetType() != TypeValueAttachment)
         {
             return false;
         }
