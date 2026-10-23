@@ -54,26 +54,28 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
     }
 
     private void UseSentry(WebApplicationBuilder builder, bool enableLogs = false, string dsn = ValidDsn)
-        => builder.WebHost.UseTestServer().UseSentry((SentryAspNetCoreOptions options) =>
+        => builder.WebHost.UseTestServer().UseSentry((SentryAspNetCoreOptions options) => Configure(options, enableLogs, dsn));
+
+    private void Configure(SentryAspNetCoreOptions options, bool enableLogs = false, string dsn = ValidDsn)
+    {
+        options.Dsn = dsn;
+        options.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        options.AutoSessionTracking = false;
+        options.InitNativeSdks = false;
+        options.Debug = true;
+        options.DiagnosticLogger = _diagnosticLogger;
+        options.EnableLogs = enableLogs;
+        options.SetBeforeSend((e, _) =>
         {
-            options.Dsn = dsn;
-            options.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            options.AutoSessionTracking = false;
-            options.InitNativeSdks = false;
-            options.Debug = true;
-            options.DiagnosticLogger = _diagnosticLogger;
-            options.EnableLogs = enableLogs;
-            options.SetBeforeSend((e, _) =>
-            {
-                _events.Add(e);
-                return null;
-            });
-            options.SetBeforeSendLog(log =>
-            {
-                _logs.Add(log);
-                return null;
-            });
+            _events.Add(e);
+            return null;
         });
+        options.SetBeforeSendLog(log =>
+        {
+            _logs.Add(log);
+            return null;
+        });
+    }
 
     private static ILogger CreateLogger(WebApplication app)
         => app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("test_category");
@@ -208,6 +210,18 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
             e.Level == SentryLevel.Warning && e.Message == SentryLoggingOptions.OptionsIgnoredWithHostIntegration);
     }
 
+    [Fact]
+    public void WebHostBuilderUseSentry_ClearProvidersInStartupThenLoggingAddSentry_CapturesEventOnce()
+    {
+        using var server = new TestServer(new WebHostBuilder()
+            .UseSentry((SentryAspNetCoreOptions options) => Configure(options))
+            .UseStartup<ClearProvidersThenLoggingAddSentryStartup>());
+
+        server.Services.GetRequiredService<ILoggerFactory>().CreateLogger("test_category").LogError("event");
+
+        _events.Should().ContainSingle();
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -218,6 +232,16 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
         var createLogger = () => CreateLogger(app);
 
         createLogger.Should().NotThrow();
+    }
+
+    private sealed class ClearProvidersThenLoggingAddSentryStartup
+    {
+        public void ConfigureServices(IServiceCollection services)
+            => services.AddLogging(logging => logging.ClearProviders().AddSentry());
+
+        public void Configure(IApplicationBuilder app)
+        {
+        }
     }
 }
 #endif

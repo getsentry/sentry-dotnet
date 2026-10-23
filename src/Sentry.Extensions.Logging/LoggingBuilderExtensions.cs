@@ -60,6 +60,7 @@ public static class LoggingBuilderExtensions
             builder.Services.Configure(optionsConfiguration);
         }
 
+        var services = builder.Services;
         builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
         builder.Services.AddSingleton<ILoggerProvider>(c =>
         {
@@ -68,7 +69,7 @@ public static class LoggingBuilderExtensions
                 return new SentryLoggerProvider(c.GetRequiredService<IOptions<SentryLoggingOptions>>(), HubAdapter.Instance);
             }
 
-            if (HostLoggerProviders.AreRegistered(c))
+            if (HostLoggerProviders.AreRegistered(c, services))
             {
                 c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.RedundantWithHostIntegration);
                 return NullLoggerProvider.Instance;
@@ -83,7 +84,7 @@ public static class LoggingBuilderExtensions
         });
         builder.Services.AddSingleton<ILoggerProvider>(c =>
             !HostLoggerProviders.WereAdded(c) ? new SentryStructuredLoggerProvider(HubAdapter.Instance)
-            : HostLoggerProviders.AreRegistered(c) ? NullLoggerProvider.Instance
+            : HostLoggerProviders.AreRegistered(c, services) ? NullLoggerProvider.Instance
             : HostLoggerProviders.CreateStructuredLogs(c));
         builder.Services.AddSingleton<IHttpMessageHandlerBuilderFilter>(new SentryHttpMessageHandlerBuilderFilter(() => HubAdapter.Instance));
 
