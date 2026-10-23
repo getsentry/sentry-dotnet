@@ -124,7 +124,7 @@ BeforeAll {
             Write-Host "::group::${action}ing $project"
             try
             {
-                dotnet $action $project -flp:logfile=build.log `
+                dotnet $action $project `
                     -c Release `
                     --nologo `
                     --framework $TargetFramework `
