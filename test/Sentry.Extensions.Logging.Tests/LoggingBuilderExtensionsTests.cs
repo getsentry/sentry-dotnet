@@ -75,6 +75,62 @@ public sealed class LoggingBuilderExtensionsTests : IDisposable
     }
 
     [Fact]
+    public void AddSentry_CalledTwice_AddsLoggerProvidersOnce()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder => builder.AddSentry().AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Select(provider => provider.GetType()).Should().Equal(
+            typeof(SentryLoggerProvider), typeof(SentryStructuredLoggerProvider));
+    }
+
+    [Fact]
+    public void AddSentry_CalledAgainAfterClearProviders_AddsLoggerProvidersAgain()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder => builder.AddSentry().ClearProviders().AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Select(provider => provider.GetType()).Should().Equal(
+            typeof(SentryLoggerProvider), typeof(SentryStructuredLoggerProvider));
+    }
+
+    [Fact]
+    public void AddSentry_CalledTwiceAfterHostLoggerProvidersCleared_AddsHostLoggerProvidersBackOnce()
+    {
+        var serviceCollection = new ServiceCollection();
+        var events = Substitute.For<ILoggerProvider>();
+        var structuredLogs = Substitute.For<ILoggerProvider>();
+        HostLoggerProviders.Add(serviceCollection, _ => events, _ => structuredLogs);
+        serviceCollection.AddLogging(builder => builder.ClearProviders().AddSentry().AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Should().Equal(events, structuredLogs);
+    }
+
+    [Fact]
+    public void AddSentry_CalledTwiceWithOptions_AppliesBothOptions()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder => builder
+            .AddSentry(options => options.MinimumEventLevel = LogLevel.Critical)
+            .AddSentry(options => options.MinimumBreadcrumbLevel = LogLevel.Warning));
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var options = serviceProvider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
+
+        options.MinimumEventLevel.Should().Be(LogLevel.Critical);
+        options.MinimumBreadcrumbLevel.Should().Be(LogLevel.Warning);
+    }
+
+    [Fact]
     public void AddSentry_LoggingBuilder_AddLoggerFilterRules()
     {
         // Arrange

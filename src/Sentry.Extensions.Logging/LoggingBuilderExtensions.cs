@@ -62,30 +62,32 @@ public static class LoggingBuilderExtensions
 
         var services = builder.Services;
         builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
-        builder.Services.AddSingleton<ILoggerProvider>(c =>
-        {
-            if (!HostLoggerProviders.WereAdded(c))
+        AddSentryLoggerProviders.TryAdd(
+            builder.Services,
+            events: c =>
             {
-                return new SentryLoggerProvider(c.GetRequiredService<IOptions<SentryLoggingOptions>>(), HubAdapter.Instance);
-            }
+                if (!HostLoggerProviders.WereAdded(c))
+                {
+                    return new SentryLoggerProvider(c.GetRequiredService<IOptions<SentryLoggingOptions>>(), HubAdapter.Instance);
+                }
 
-            if (HostLoggerProviders.AreRegistered(c, services))
-            {
-                c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.RedundantWithHostIntegration);
-                return NullLoggerProvider.Instance;
-            }
+                if (HostLoggerProviders.AreRegistered(c, services))
+                {
+                    c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.RedundantWithHostIntegration);
+                    return NullLoggerProvider.Instance;
+                }
 
-            if (optionsConfiguration != null)
-            {
-                c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.OptionsIgnoredWithHostIntegration);
-            }
+                if (optionsConfiguration != null)
+                {
+                    c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.OptionsIgnoredWithHostIntegration);
+                }
 
-            return HostLoggerProviders.CreateEvents(c);
-        });
-        builder.Services.AddSingleton<ILoggerProvider>(c =>
-            !HostLoggerProviders.WereAdded(c) ? new SentryStructuredLoggerProvider(HubAdapter.Instance)
-            : HostLoggerProviders.AreRegistered(c, services) ? NullLoggerProvider.Instance
-            : HostLoggerProviders.CreateStructuredLogs(c));
+                return HostLoggerProviders.CreateEvents(c);
+            },
+            structuredLogs: c =>
+                !HostLoggerProviders.WereAdded(c) ? new SentryStructuredLoggerProvider(HubAdapter.Instance)
+                : HostLoggerProviders.AreRegistered(c, services) ? NullLoggerProvider.Instance
+                : HostLoggerProviders.CreateStructuredLogs(c));
         builder.Services.AddSingleton<IHttpMessageHandlerBuilderFilter>(new SentryHttpMessageHandlerBuilderFilter(() => HubAdapter.Instance));
 
         // All logs should flow to the SentryLogger, regardless of level.

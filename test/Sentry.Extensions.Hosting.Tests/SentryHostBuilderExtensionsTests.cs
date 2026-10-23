@@ -302,6 +302,21 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
     }
 
     [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void LoggingAddSentryTwice_AfterClearProviders_SendsErrorAndLogOnce(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(Capture)
+            .ClearLoggerProviders()
+            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry().AddSentry()));
+        using var host = testHost.Build(kind);
+
+        LogError(host, "one logged error");
+
+        _events.Should().ContainSingle();
+        _logs.Should().ContainSingle();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
     public void LoggingAddSentry_AfterClearProviders_UsesHostOptions(BuilderKind kind)
     {
         var testHost = new TestHost()
