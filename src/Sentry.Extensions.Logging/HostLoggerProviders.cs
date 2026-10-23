@@ -40,14 +40,13 @@ internal sealed class HostLoggerProviders
 
     public static bool WereAdded(IServiceProvider provider) => provider.GetService<HostLoggerProviders>() is not null;
 
-    public static bool AreRegistered(IServiceProvider provider)
-        => provider.GetServices<HostLoggerProviders>().Any(providers =>
-            providers._services.Contains(providers._events) || providers._services.Contains(providers._structuredLogs));
+    public static bool AreRegistered(IServiceProvider provider, IServiceCollection services)
+        => provider.GetServices<HostLoggerProviders>().Any(providers => providers.AreIn(services));
 
     public static void WarnIfRemoved(IServiceProvider provider)
     {
         if (WereAdded(provider)
-            && !AreRegistered(provider)
+            && !provider.GetServices<HostLoggerProviders>().Any(providers => providers.AreIn(providers._services))
             && !provider.GetServices<ILoggerProvider>().Any(created => created is SentryLoggerProvider))
         {
             provider.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.HostLoggerProvidersRemoved);
@@ -67,4 +66,6 @@ internal sealed class HostLoggerProviders
         => provider.GetServices<HostLoggerProviders>()
             .Select(providers => (ILoggerProvider)select(providers).ImplementationFactory!(provider))
             .FirstOrDefault(created => created is not NullLoggerProvider) ?? NullLoggerProvider.Instance;
+
+    private bool AreIn(IServiceCollection services) => services.Contains(_events) || services.Contains(_structuredLogs);
 }
