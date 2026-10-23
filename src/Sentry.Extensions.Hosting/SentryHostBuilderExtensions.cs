@@ -183,6 +183,7 @@ public static class SentryHostBuilderExtensions
             : new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
         services.TryAddSingleton<HostLoggerProvidersMarker>();
         services.AddSentry<SentryGenericHostOptions>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<HostOptions>, SentrySdkInitializer>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, SentryHostedService>(c =>
             new SentryHostedService(c, app == App.Web && !HasHostIntegration(services))));
 

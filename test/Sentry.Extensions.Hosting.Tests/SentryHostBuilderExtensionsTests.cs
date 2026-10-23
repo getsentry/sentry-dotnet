@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 
@@ -295,6 +296,30 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
         var sdk = _events.Should().ContainSingle().Which.Sdk;
         sdk.Name.Should().Be("sentry.dotnet.extensions.hosting");
         sdk.Packages.Should().Contain(package => package.Name == "nuget:Sentry.Extensions.Hosting");
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void UseSentry_LoggerProvidersClearedAfterwards_CapturesBeforeHostStarts(BuilderKind kind)
+    {
+        var testHost = new TestHost().UseSentry(Capture).ClearLoggerProviders();
+        using var host = testHost.Build(kind);
+
+        SentrySdk.CaptureMessage("captured before the host starts");
+
+        _events.Should().ContainSingle(e => e.Message!.Message == "captured before the host starts");
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void UseSentry_LoggerFactoryReplaced_CapturesBeforeHostStarts(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(Capture)
+            .ConfigureServices(services => services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance));
+        using var host = testHost.Build(kind);
+
+        SentrySdk.CaptureMessage("captured before the host starts");
+
+        _events.Should().ContainSingle(e => e.Message!.Message == "captured before the host starts");
     }
 
     [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
