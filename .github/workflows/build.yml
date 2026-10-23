@@ -269,16 +269,27 @@ jobs:
           echo "Disk usage after cleanup:"
           df -h
 
+      # The publishing build's sparse checkout below removes the test outputs, so it runs the tests and uploads
+      # their results first. The other legs run the tests in the background, next to packing and the integration
+      # tests, and upload the results after waiting for them.
       - name: Test
+        if: env.CI_PUBLISHING_BUILD == 'true'
+        run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
+
+      - name: Test
+        id: background-test
+        if: env.CI_PUBLISHING_BUILD != 'true'
+        background: true
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
 
       - name: Upload code coverage
+        if: env.CI_PUBLISHING_BUILD == 'true'
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build and test outputs
-        if: failure()
+        if: failure() && env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.rid }}-verify-test-results
@@ -324,6 +335,22 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         with:
           path: integration-test
+
+      - name: Wait for the tests
+        wait-all:
+
+      - name: Upload code coverage
+        if: ${{ !cancelled() && steps.background-test.outcome == 'success' }}
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload build and test outputs
+        if: failure() && env.CI_PUBLISHING_BUILD != 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ matrix.rid }}-verify-test-results
+          path: "**/*.received.*"
 
 #      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
 #      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
