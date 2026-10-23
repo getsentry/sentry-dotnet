@@ -29,9 +29,9 @@ public class SentryLoggingOptions
 
     internal const string HostLoggerProvidersRemoved =
         "Sentry's logger providers were removed after UseSentry added them, for example by ClearProviders(), so log " +
-        "entries from ILogger don't reach Sentry. Call builder.Logging.AddSentry() after ClearProviders() to add them " +
-        "back. If you send logs to Sentry through another integration, such as NLog, Serilog or log4net, you can " +
-        "ignore this.";
+        "entries from ILogger don't reach Sentry. Call AddSentry() on the logging builder after ClearProviders(), " +
+        "for example builder.Logging.AddSentry(), to add them back. If you send logs to Sentry through another " +
+        "integration, such as NLog, Serilog or log4net, you can ignore this.";
 
     /// <summary>
     /// Not supported. The logging integration no longer initializes the SDK.
