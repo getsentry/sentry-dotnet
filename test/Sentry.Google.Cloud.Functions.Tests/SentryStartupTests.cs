@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
+using Sentry.Extensions.Logging;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 
@@ -125,7 +126,7 @@ public class SentryStartupTests
                 Assert.Single(c, d => d.ServiceType == typeof(IHub)))};
         yield return new object[] {
             new Action<IServiceCollection>(c =>
-                Assert.Single(c, d => d.ImplementationType == typeof(SentryAspNetCoreLoggerProvider)))};
+                Assert.Single(c, d => d.ServiceType == typeof(HostLoggerProviders)))};
         yield return new object[] {
             new Action<IServiceCollection>(c =>
                 Assert.Single(c, d => d.ImplementationType == typeof(AspNetCoreEventProcessor)))};

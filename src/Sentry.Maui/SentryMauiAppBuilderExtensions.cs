@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
+using Sentry;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
@@ -52,9 +53,11 @@ public static class SentryMauiAppBuilderExtensions
         }
 
         services.AddLogging();
-        services.AddSingleton<ILoggerProvider, SentryMauiLoggerProvider>();
-        services.AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>();
-        services.TryAddSingleton<HostLoggerProvidersMarker>();
+        HostLoggerProviders.Add(
+            services,
+            events: c => new SentryMauiLoggerProvider(
+                c.GetRequiredService<IOptions<SentryMauiOptions>>(), c.GetRequiredService<IHub>()),
+            structuredLogs: c => new SentryMauiStructuredLoggerProvider(c.GetRequiredService<IHub>()));
         services.TryAddSingleton<HostIntegrationMarker>();
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();

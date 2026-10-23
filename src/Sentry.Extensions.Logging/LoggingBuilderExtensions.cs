@@ -21,7 +21,9 @@ public static class LoggingBuilderExtensions
     /// Adds the Sentry logging integration.
     /// </summary>
     /// <remarks>
-    /// Has no effect in an app that calls <c>UseSentry</c>, which already adds the logging integration.
+    /// In an app that calls <c>UseSentry</c>, which already adds the logging integration, this has no effect unless the
+    /// app removed Sentry's logger providers, for example with <c>ClearProviders()</c>. It then adds back the providers
+    /// that <c>UseSentry</c> added, which use the host's Sentry options.
     /// </remarks>
     /// <param name="builder">The builder.</param>
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder)
@@ -42,7 +44,10 @@ public static class LoggingBuilderExtensions
     /// Adds the Sentry logging integration.
     /// </summary>
     /// <remarks>
-    /// Has no effect in an app that calls <c>UseSentry</c>, which already adds the logging integration.
+    /// In an app that calls <c>UseSentry</c>, which already adds the logging integration, this has no effect unless the
+    /// app removed Sentry's logger providers, for example with <c>ClearProviders()</c>. It then adds back the providers
+    /// that <c>UseSentry</c> added, which use the host's Sentry options, so <paramref name="optionsConfiguration"/> is
+    /// ignored.
     /// </remarks>
     /// <param name="builder">The builder.</param>
     /// <param name="optionsConfiguration">The options configuration.</param>
@@ -55,20 +60,32 @@ public static class LoggingBuilderExtensions
             builder.Services.Configure(optionsConfiguration);
         }
 
+        var services = builder.Services;
         builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
         builder.Services.AddSingleton<ILoggerProvider>(c =>
         {
-            if (c.GetService<HostLoggerProvidersMarker>() is null)
+            if (!HostLoggerProviders.WereAdded(c))
             {
                 return new SentryLoggerProvider(c.GetRequiredService<IOptions<SentryLoggingOptions>>(), HubAdapter.Instance);
             }
 
-            c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.RedundantWithHostIntegration);
-            return NullLoggerProvider.Instance;
+            if (HostLoggerProviders.AreRegistered(c, services))
+            {
+                c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.RedundantWithHostIntegration);
+                return NullLoggerProvider.Instance;
+            }
+
+            if (optionsConfiguration != null)
+            {
+                c.GetService<IHub>()?.GetSentryOptions()?.LogWarning(SentryLoggingOptions.OptionsIgnoredWithHostIntegration);
+            }
+
+            return HostLoggerProviders.CreateEvents(c);
         });
-        builder.Services.AddSingleton<ILoggerProvider>(c => c.GetService<HostLoggerProvidersMarker>() is null
-            ? new SentryStructuredLoggerProvider(HubAdapter.Instance)
-            : NullLoggerProvider.Instance);
+        builder.Services.AddSingleton<ILoggerProvider>(c =>
+            !HostLoggerProviders.WereAdded(c) ? new SentryStructuredLoggerProvider(HubAdapter.Instance)
+            : HostLoggerProviders.AreRegistered(c, services) ? NullLoggerProvider.Instance
+            : HostLoggerProviders.CreateStructuredLogs(c));
         builder.Services.AddSingleton<IHttpMessageHandlerBuilderFilter>(new SentryHttpMessageHandlerBuilderFilter(() => HubAdapter.Instance));
 
         // All logs should flow to the SentryLogger, regardless of level.

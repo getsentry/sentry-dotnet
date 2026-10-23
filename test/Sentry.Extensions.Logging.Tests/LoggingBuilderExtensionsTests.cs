@@ -32,13 +32,46 @@ public sealed class LoggingBuilderExtensionsTests : IDisposable
     public void AddSentry_HostLoggerProvidersRegistered_AddsNullLoggerProviders()
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSingleton<HostLoggerProvidersMarker>();
+        var events = Substitute.For<ILoggerProvider>();
+        var structuredLogs = Substitute.For<ILoggerProvider>();
+        HostLoggerProviders.Add(serviceCollection, _ => events, _ => structuredLogs);
         serviceCollection.AddLogging(builder => builder.AddSentry());
         using var serviceProvider = serviceCollection.BuildServiceProvider();
 
         var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
 
-        providers.Should().HaveCount(2).And.AllBeOfType<NullLoggerProvider>();
+        providers.Should().Equal(events, structuredLogs, NullLoggerProvider.Instance, NullLoggerProvider.Instance);
+    }
+
+    [Fact]
+    public void AddSentry_HostLoggerProvidersCleared_AddsHostLoggerProvidersBack()
+    {
+        var serviceCollection = new ServiceCollection();
+        var events = Substitute.For<ILoggerProvider>();
+        var structuredLogs = Substitute.For<ILoggerProvider>();
+        HostLoggerProviders.Add(serviceCollection, _ => events, _ => structuredLogs);
+        serviceCollection.AddLogging(builder => builder.ClearProviders().AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Should().Equal(events, structuredLogs);
+    }
+
+    [Fact]
+    public void AddSentry_HostLoggerProvidersThatStandDownCleared_AddsBackTheOtherHostLoggerProviders()
+    {
+        var serviceCollection = new ServiceCollection();
+        var events = Substitute.For<ILoggerProvider>();
+        var structuredLogs = Substitute.For<ILoggerProvider>();
+        HostLoggerProviders.Add(serviceCollection, _ => NullLoggerProvider.Instance, _ => NullLoggerProvider.Instance);
+        HostLoggerProviders.Add(serviceCollection, _ => events, _ => structuredLogs);
+        serviceCollection.AddLogging(builder => builder.ClearProviders().AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Should().Equal(events, structuredLogs);
     }
 
     [Fact]

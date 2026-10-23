@@ -265,7 +265,7 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
     {
         var testHost = new TestHost()
             .UseSentry(Capture)
-            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()));
+            .LoggingAddSentry();
         using var host = testHost.Build(kind);
 
         LogError(host, "one logged error");
@@ -277,11 +277,44 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
     public void LoggingAddSentry_BeforeUseSentry_DoesNotSendErrorsTwice(BuilderKind kind)
     {
         var testHost = new TestHost()
-            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()))
+            .LoggingAddSentry()
             .UseSentry(Capture);
         using var host = testHost.Build(kind);
 
         LogError(host, "one logged error");
+
+        _events.Should().ContainSingle();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void LoggingAddSentry_AfterClearProviders_SendsErrorAndLogOnce(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(Capture)
+            .ClearLoggerProviders()
+            .LoggingAddSentry();
+        using var host = testHost.Build(kind);
+
+        LogError(host, "one logged error");
+
+        _events.Should().ContainSingle();
+        _logs.Should().ContainSingle();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void LoggingAddSentry_AfterClearProviders_UsesHostOptions(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(options =>
+            {
+                Capture(options);
+                options.MinimumEventLevel = LogLevel.Warning;
+            })
+            .ClearLoggerProviders()
+            .LoggingAddSentry();
+        using var host = testHost.Build(kind);
+
+        host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MyApp.Worker").LogWarning("one logged warning");
 
         _events.Should().ContainSingle();
     }

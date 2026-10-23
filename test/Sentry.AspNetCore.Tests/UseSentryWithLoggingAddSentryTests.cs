@@ -22,7 +22,33 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
     {
         var builder = WebApplication.CreateBuilder();
 
-        void UseSentry() => builder.WebHost.UseSentry((SentryAspNetCoreOptions options) =>
+        if (useSentryFirst)
+        {
+            UseSentry(builder, enableLogs, dsn);
+            builder.Logging.AddSentry();
+        }
+        else
+        {
+            builder.Logging.AddSentry();
+            UseSentry(builder, enableLogs, dsn);
+        }
+
+        return builder.Build();
+    }
+
+    private WebApplication BuildWithProvidersCleared(Action<SentryLoggingOptions> configureLogging = null)
+    {
+        var builder = WebApplication.CreateBuilder();
+
+        UseSentry(builder);
+        builder.Logging.ClearProviders();
+        builder.Logging.AddSentry(configureLogging);
+
+        return builder.Build();
+    }
+
+    private void UseSentry(WebApplicationBuilder builder, bool enableLogs = false, string dsn = ValidDsn)
+        => builder.WebHost.UseSentry((SentryAspNetCoreOptions options) =>
         {
             options.Dsn = dsn;
             options.BackgroundWorker = Substitute.For<IBackgroundWorker>();
@@ -42,20 +68,6 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
                 return null;
             });
         });
-
-        if (useSentryFirst)
-        {
-            UseSentry();
-            builder.Logging.AddSentry();
-        }
-        else
-        {
-            builder.Logging.AddSentry();
-            UseSentry();
-        }
-
-        return builder.Build();
-    }
 
     private static ILogger CreateLogger(WebApplication app)
         => app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("test_category");
@@ -108,6 +120,56 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
 
         _diagnosticLogger.Entries.Should().ContainSingle(e =>
             e.Level == SentryLevel.Warning && e.Message == SentryLoggingOptions.RedundantWithHostIntegration);
+    }
+
+    [Fact]
+    public void UseSentry_ClearProvidersThenLoggingAddSentry_CapturesEventAndBreadcrumbOnce()
+    {
+        using var app = BuildWithProvidersCleared();
+        var logger = CreateLogger(app);
+
+        logger.LogInformation("breadcrumb");
+        logger.LogError("event");
+
+        _events.Should().ContainSingle()
+            .Which.Breadcrumbs.Should().ContainSingle(b => b.Message == "breadcrumb");
+    }
+
+    [Fact]
+    public void UseSentry_ClearProvidersThenLoggingAddSentry_IgnoresErrorsLoggedByExceptionHandler()
+    {
+        using var app = BuildWithProvidersCleared();
+        _ = app.Services.GetRequiredService<IHub>();
+        var exceptionHandlerLogger = app.Services.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware");
+
+        exceptionHandlerLogger.LogError(new InvalidOperationException(), "handled by UseExceptionHandler");
+        CreateLogger(app).LogError("logged by the app");
+
+        _events.Should().ContainSingle().Which.Message!.Formatted.Should().Be("logged by the app");
+    }
+
+    [Fact]
+    public void UseSentry_ClearProvidersThenLoggingAddSentry_DoesNotWarn()
+    {
+        using var app = BuildWithProvidersCleared();
+
+        _ = app.Services.GetRequiredService<ILoggerFactory>();
+
+        _diagnosticLogger.Entries.Should().NotContain(e =>
+            e.Message == SentryLoggingOptions.RedundantWithHostIntegration
+            || e.Message == SentryLoggingOptions.OptionsIgnoredWithHostIntegration);
+    }
+
+    [Fact]
+    public void UseSentry_ClearProvidersThenLoggingAddSentryWithOptions_WarnsOptionsAreIgnored()
+    {
+        using var app = BuildWithProvidersCleared(options => options.MinimumEventLevel = LogLevel.Warning);
+
+        _ = app.Services.GetRequiredService<ILoggerFactory>();
+
+        _diagnosticLogger.Entries.Should().ContainSingle(e =>
+            e.Level == SentryLevel.Warning && e.Message == SentryLoggingOptions.OptionsIgnoredWithHostIntegration);
     }
 
     [Theory]

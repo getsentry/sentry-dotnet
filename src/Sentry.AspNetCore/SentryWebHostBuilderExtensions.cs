@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
+using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Ben.BlockingDetector;
 using Sentry.Extensions.Logging;
@@ -83,9 +84,11 @@ public static class SentryWebHostBuilderExtensions
             _ = logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(_ =>
                 new SentryHostLoggingOptionsSetup<SentryAspNetCoreOptions>(context.Configuration)
             );
-            _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
-            _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
-            logging.Services.TryAddSingleton<HostLoggerProvidersMarker>();
+            HostLoggerProviders.Add(
+                logging.Services,
+                events: c => new SentryAspNetCoreLoggerProvider(
+                    c.GetRequiredService<IOptions<SentryAspNetCoreOptions>>(), c.GetRequiredService<IHub>()),
+                structuredLogs: c => new SentryAspNetCoreStructuredLoggerProvider(c.GetRequiredService<IHub>()));
             logging.Services.TryAddSingleton<HostIntegrationMarker>();
 
             // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"

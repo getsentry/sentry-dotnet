@@ -58,6 +58,9 @@ internal sealed class TestHost
     public TestHost ClearLoggerProviders()
         => ConfigureServices(services => services.AddLogging(logging => logging.ClearProviders()));
 
+    public TestHost LoggingAddSentry()
+        => ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()));
+
     public IHost Build(BuilderKind kind)
     {
         if (kind == BuilderKind.HostBuilder)
