@@ -270,16 +270,10 @@ jobs:
           df -h
 
       # The publishing build's sparse checkout below removes the test outputs, so it runs the tests and uploads
-      # their results first. The other legs run the tests in the background, next to packing and the integration
-      # tests, and upload the results after waiting for them.
+      # their results first. The other legs run the tests in the background, next to the integration tests, and
+      # upload the results after waiting for them.
       - name: Test
         if: env.CI_PUBLISHING_BUILD == 'true'
-        run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
-
-      - name: Test
-        id: background-test
-        if: env.CI_PUBLISHING_BUILD != 'true'
-        background: true
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
 
       - name: Upload code coverage
@@ -297,6 +291,14 @@ jobs:
 
       - name: Create NuGet Packages
         run: dotnet pack ${{ matrix.slnf }} -c Release --no-build --nologo
+
+      # After packing, because every solution build runs before.Sentry.sln.targets' `git submodule update`, and two
+      # at once fail on git's config lock
+      - name: Test
+        id: background-test
+        if: env.CI_PUBLISHING_BUILD != 'true'
+        background: true
+        run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
 
       - name: Archive NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
