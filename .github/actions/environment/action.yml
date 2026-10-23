@@ -93,8 +93,11 @@ runs:
         dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
-        dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
-          --temp-dir "${{ runner.temp }}" \
-          --skip-sign-check
-        # Restore the Android test app explicitly to ensure runtime packs are available
-        dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true
+        # The Windows solution filters exclude the Android test app and the tests that build it
+        if [[ "$RUNNER_OS" != "Windows" ]]; then
+          dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
+            --temp-dir "${{ runner.temp }}" \
+            --skip-sign-check
+          # Restore the Android test app explicitly to ensure runtime packs are available
+          dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true
+        fi
