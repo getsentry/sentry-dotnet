@@ -265,7 +265,7 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
     {
         var testHost = new TestHost()
             .UseSentry(Capture)
-            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()));
+            .LoggingAddSentry();
         using var host = testHost.Build(kind);
 
         LogError(host, "one logged error");
@@ -277,7 +277,7 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
     public void LoggingAddSentry_BeforeUseSentry_DoesNotSendErrorsTwice(BuilderKind kind)
     {
         var testHost = new TestHost()
-            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()))
+            .LoggingAddSentry()
             .UseSentry(Capture);
         using var host = testHost.Build(kind);
 
@@ -292,7 +292,7 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
         var testHost = new TestHost()
             .UseSentry(Capture)
             .ClearLoggerProviders()
-            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()));
+            .LoggingAddSentry();
         using var host = testHost.Build(kind);
 
         LogError(host, "one logged error");
@@ -311,7 +311,7 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
                 options.MinimumEventLevel = LogLevel.Warning;
             })
             .ClearLoggerProviders()
-            .ConfigureServices(services => services.AddLogging(logging => logging.AddSentry()));
+            .LoggingAddSentry();
         using var host = testHost.Build(kind);
 
         host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MyApp.Worker").LogWarning("one logged warning");
