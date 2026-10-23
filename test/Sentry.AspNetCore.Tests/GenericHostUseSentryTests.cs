@@ -83,6 +83,39 @@ public class GenericHostUseSentryTests : IDisposable
         await app.StopAsync();
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GenericUseSentryWithAspNetCoreUseSentry_ClearProvidersThenLoggingAddSentry_SendsErrorAndLogOnce(bool genericFirst)
+    {
+        var builder = CreateBuilder();
+        Action<SentryAspNetCoreOptions> configureOptions = options =>
+        {
+            DoNotSend(options);
+            options.EnableLogs = true;
+        };
+        if (genericFirst)
+        {
+            UseGenericSentry(builder);
+            builder.UseSentry(configureOptions);
+        }
+        else
+        {
+            builder.UseSentry(configureOptions);
+            UseGenericSentry(builder);
+        }
+        builder.Logging.ClearProviders();
+        builder.Logging.AddSentry();
+        await using var app = builder.Build();
+        await app.StartAsync();
+
+        app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MyApp.Endpoint").LogError("one logged error");
+
+        _events.Should().ContainSingle().Which.Sdk.Name.Should().Be(Constants.SdkName);
+        _logs.Should().ContainSingle(log => log.Message == "one logged error");
+        await app.StopAsync();
+    }
+
     [Fact]
     public async Task GenericUseSentryThenAspNetCoreUseSentry_SdkDisabled_Starts()
     {
