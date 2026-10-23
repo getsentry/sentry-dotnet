@@ -143,6 +143,17 @@ jobs:
         if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
+      # The Windows images keep .NET under Program Files, where workloads install as MSI packages, and the NuGet
+      # cache in the user profile on C:. Next to the workspace, workloads install as plain files, and on the x64
+      # runners the workspace is on D:.
+      - name: Install .NET and NuGet packages next to the workspace
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $root = Split-Path $env:GITHUB_WORKSPACE
+          "DOTNET_INSTALL_DIR=$root\.dotnet" >> $env:GITHUB_ENV
+          "NUGET_PACKAGES=$root\.nuget\packages" >> $env:GITHUB_ENV
+
       - name: Setup Environment
         uses: ./.github/actions/environment
 
