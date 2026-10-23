@@ -424,6 +424,27 @@ public partial class AttachmentSerializationTests
             .Which.TryGetType().Should().Be(EnvelopeItem.TypeValueEvent);
     }
 
+    [Fact]
+    public async Task Serialization_EmptyAttachmentOfKnownLengthAfterRoundTrip_KeepsAttachment()
+    {
+        // Arrange
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(new MemoryStream()),
+            "empty.log",
+            "text/plain");
+        using var envelope = Envelope.FromAttachment(SentryId.Create(), attachment, _testOutputLogger);
+        using var cached = new MemoryStream(Encoding.UTF8.GetBytes(
+            await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock)));
+        using var deserialized = await Envelope.DeserializeAsync(cached);
+
+        // Act
+        var serialized = await deserialized.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        // Assert
+        serialized.Should().Contain("empty.log");
+    }
+
     private Envelope CreateEventEnvelopeWithEmptyNonSeekableAttachment()
     {
         var attachment = new SentryAttachment(

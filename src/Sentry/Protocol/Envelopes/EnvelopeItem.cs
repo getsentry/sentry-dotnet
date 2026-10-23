@@ -242,7 +242,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
 
     private bool IsEmptyAttachmentOfUnknownLength(MemoryStream payloadBuffer, IDiagnosticLogger? logger)
     {
-        if (payloadBuffer.Length != 0 || TryGetLength() is not null || TryGetType() != TypeValueAttachment)
+        if (payloadBuffer.Length != 0 || TryGetLength() is not null || Payload is not BufferedStreamSerializable)
         {
             return false;
         }
