@@ -95,8 +95,9 @@ jobs:
     needs: [build]
     name: Run Android API-${{ matrix.api-level }} Test (${{ matrix.tfm }})
 
-    # Requires a "larger runner", for nested virtualization support
-    runs-on: ubuntu-latest-4-cores
+    # Standard Linux runners support hardware-accelerated emulators since 2024, with the KVM step below:
+    # https://github.blog/changelog/2024-04-02-github-actions-hardware-accelerated-android-virtualization-now-available/
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -115,6 +116,9 @@ jobs:
       ANDROID_EMULATOR_DISK_SIZE: 4096M
       ANDROID_EMULATOR_OPTIONS: -no-snapshot-save -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
     steps:
+      - name: Show disk space
+        run: df -h /
+
       # See https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
       - name: Enable KVM group perms
         run: |
@@ -208,3 +212,7 @@ jobs:
           path: |
             test_output
             integration-test/mobile-app/test_output
+
+      - name: Show disk space
+        if: always()
+        run: df -h /
