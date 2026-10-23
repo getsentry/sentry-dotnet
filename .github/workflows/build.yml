@@ -357,12 +357,11 @@ jobs:
           sudo dpkg --add-architecture armhf
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
+          # Prints the machine a 32-bit ARM process sees: armv8l when the arm64 kernel runs it, armv7l under QEMU
+          printf '#include <stdio.h>\n#include <sys/utsname.h>\nint main(void) { struct utsname u; uname(&u); puts(u.machine); return 0; }\n' \
+            | arm-linux-gnueabihf-gcc -x c -o "$RUNNER_TEMP/uname-armhf" -
           grep -m1 'CPU part' /proc/cpuinfo || true
-          if /lib/ld-linux-armhf.so.3 --version > /dev/null 2>&1; then
-            echo "This host runs 32-bit ARM binaries natively"
-          else
-            echo "This host can't run 32-bit ARM binaries natively"
-          fi
+          "$RUNNER_TEMP/uname-armhf" || echo "This host can't run 32-bit ARM binaries natively"
 
       # Some arm64 hosts can't run 32-bit ARM binaries ("Exec format error"), so QEMU runs them on every host
       - name: Set up QEMU for 32-bit ARM
@@ -375,7 +374,7 @@ jobs:
         if: matrix.rid == 'linux-arm64'
         run: |
           grep -q '^enabled' /proc/sys/fs/binfmt_misc/qemu-arm
-          /lib/ld-linux-armhf.so.3 --version | head -1
+          test "$("$RUNNER_TEMP/uname-armhf")" = armv7l
 
       - name: Test AOT on an unsupported runtime
         if: matrix.rid == 'linux-arm64' || matrix.rid == 'win-x64'
