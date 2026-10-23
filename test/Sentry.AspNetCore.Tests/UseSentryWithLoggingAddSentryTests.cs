@@ -1,6 +1,7 @@
 #if NET6_0_OR_GREATER
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
@@ -36,41 +37,52 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
         return builder.Build();
     }
 
-    private WebApplication BuildWithProvidersCleared(Action<SentryLoggingOptions> configureLogging = null)
+    private WebApplication BuildWithProvidersCleared(
+        Action<SentryLoggingOptions> configureLogging = null,
+        bool loggingAddSentry = true)
     {
         var builder = WebApplication.CreateBuilder();
 
         UseSentry(builder);
         builder.Logging.ClearProviders();
-        builder.Logging.AddSentry(configureLogging);
+        if (loggingAddSentry)
+        {
+            builder.Logging.AddSentry(configureLogging);
+        }
 
         return builder.Build();
     }
 
     private void UseSentry(WebApplicationBuilder builder, bool enableLogs = false, string dsn = ValidDsn)
-        => builder.WebHost.UseSentry((SentryAspNetCoreOptions options) =>
+        => builder.WebHost.UseTestServer().UseSentry((SentryAspNetCoreOptions options) => Configure(options, enableLogs, dsn));
+
+    private void Configure(SentryAspNetCoreOptions options, bool enableLogs = false, string dsn = ValidDsn)
+    {
+        options.Dsn = dsn;
+        options.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        options.AutoSessionTracking = false;
+        options.InitNativeSdks = false;
+        options.Debug = true;
+        options.DiagnosticLogger = _diagnosticLogger;
+        options.EnableLogs = enableLogs;
+        options.SetBeforeSend((e, _) =>
         {
-            options.Dsn = dsn;
-            options.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            options.AutoSessionTracking = false;
-            options.InitNativeSdks = false;
-            options.Debug = true;
-            options.DiagnosticLogger = _diagnosticLogger;
-            options.EnableLogs = enableLogs;
-            options.SetBeforeSend((e, _) =>
-            {
-                _events.Add(e);
-                return null;
-            });
-            options.SetBeforeSendLog(log =>
-            {
-                _logs.Add(log);
-                return null;
-            });
+            _events.Add(e);
+            return null;
         });
+        options.SetBeforeSendLog(log =>
+        {
+            _logs.Add(log);
+            return null;
+        });
+    }
 
     private static ILogger CreateLogger(WebApplication app)
         => app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("test_category");
+
+    private IEnumerable<InMemoryDiagnosticLogger.Entry> LoggerProvidersRemovedWarnings()
+        => _diagnosticLogger.Entries.Where(entry =>
+            entry.Level == SentryLevel.Warning && entry.Message == SentryLoggingOptions.HostLoggerProvidersRemoved);
 
     [Theory]
     [InlineData(true)]
@@ -150,15 +162,41 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
     }
 
     [Fact]
-    public void UseSentry_ClearProvidersThenLoggingAddSentry_DoesNotWarn()
+    public async Task UseSentry_ClearProvidersThenLoggingAddSentry_DoesNotWarn()
     {
-        using var app = BuildWithProvidersCleared();
+        await using var app = BuildWithProvidersCleared();
 
-        _ = app.Services.GetRequiredService<ILoggerFactory>();
+        await app.StartAsync();
 
         _diagnosticLogger.Entries.Should().NotContain(e =>
             e.Message == SentryLoggingOptions.RedundantWithHostIntegration
-            || e.Message == SentryLoggingOptions.OptionsIgnoredWithHostIntegration);
+            || e.Message == SentryLoggingOptions.OptionsIgnoredWithHostIntegration
+            || e.Message == SentryLoggingOptions.HostLoggerProvidersRemoved);
+        await app.StopAsync();
+    }
+
+    [Fact]
+    public async Task UseSentry_ClearProvidersWithoutLoggingAddSentry_WarnsLoggerProvidersRemoved()
+    {
+        await using var app = BuildWithProvidersCleared(loggingAddSentry: false);
+
+        await app.StartAsync();
+
+        LoggerProvidersRemovedWarnings().Should().ContainSingle();
+        await app.StopAsync();
+    }
+
+    [Fact]
+    public async Task UseSentry_LoggerProvidersKept_DoesNotWarnLoggerProvidersRemoved()
+    {
+        var builder = WebApplication.CreateBuilder();
+        UseSentry(builder);
+        await using var app = builder.Build();
+
+        await app.StartAsync();
+
+        LoggerProvidersRemovedWarnings().Should().BeEmpty();
+        await app.StopAsync();
     }
 
     [Fact]
@@ -172,6 +210,18 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
             e.Level == SentryLevel.Warning && e.Message == SentryLoggingOptions.OptionsIgnoredWithHostIntegration);
     }
 
+    [Fact]
+    public void WebHostBuilderUseSentry_ClearProvidersInStartupThenLoggingAddSentry_CapturesEventOnce()
+    {
+        using var server = new TestServer(new WebHostBuilder()
+            .UseSentry((SentryAspNetCoreOptions options) => Configure(options))
+            .UseStartup<ClearProvidersThenLoggingAddSentryStartup>());
+
+        server.Services.GetRequiredService<ILoggerFactory>().CreateLogger("test_category").LogError("event");
+
+        _events.Should().ContainSingle();
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -182,6 +232,16 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
         var createLogger = () => CreateLogger(app);
 
         createLogger.Should().NotThrow();
+    }
+
+    private sealed class ClearProvidersThenLoggingAddSentryStartup
+    {
+        public void ConfigureServices(IServiceCollection services)
+            => services.AddLogging(logging => logging.ClearProviders().AddSentry());
+
+        public void Configure(IApplicationBuilder app)
+        {
+        }
     }
 }
 #endif
