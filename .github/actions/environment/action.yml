@@ -53,23 +53,6 @@ runs:
         packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
 
-    - name: Install Mono (macOS)
-      if: runner.os == 'macOS'
-      shell: bash
-      # Attempt to install Mono, allowing it to fail silently
-      # Then ensure mono is correctly linked, overwriting any conflicting symlinks
-      run: |
-        brew install mono || true
-        brew link --overwrite mono
-
-    - name: Install Mono (Ubuntu)
-      if: ${{ runner.os == 'Linux' && !matrix.container }}
-      shell: bash
-      run: |
-        sudo apt install -y mono-devel
-        # restore perms for actions/setup-dotnet
-        sudo chmod -R a+rw /usr/share/dotnet
-
     - name: Install .NET SDK
       uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
