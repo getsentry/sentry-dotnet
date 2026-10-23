@@ -361,7 +361,7 @@ public class EnvelopeTests
     }
 
     [Fact]
-    public async Task Serialization_EnvelopeWithTwoEmptyItems_Success()
+    public async Task Serialization_EnvelopeWithTwoEmptyAttachments_DropsAttachments()
     {
         // Arrange
         using var envelope = new Envelope(
@@ -393,16 +393,12 @@ public class EnvelopeTests
         // Assert
         output.Should().Be("""
             {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
-            {"type":"attachment","length":0}
-
-            {"type":"attachment","length":0}
-
 
             """);
     }
 
     [Fact]
-    public void Serialization_EnvelopeWithTwoEmptyItems_Success_Synchronous()
+    public void Serialization_EnvelopeWithTwoEmptyAttachments_DropsAttachments_Synchronous()
     {
         // Arrange
         using var envelope = new Envelope(
@@ -434,10 +430,6 @@ public class EnvelopeTests
         // Assert
         output.Should().Be("""
             {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
-            {"type":"attachment","length":0}
-
-            {"type":"attachment","length":0}
-
 
             """);
     }

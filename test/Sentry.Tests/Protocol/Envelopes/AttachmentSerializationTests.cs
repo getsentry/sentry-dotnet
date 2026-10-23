@@ -389,4 +389,49 @@ public partial class AttachmentSerializationTests
             .Should()
             .Be(0);
     }
+
+    [Fact]
+    public async Task Serialization_EmptyNonSeekableStreamAttachment_DropsAttachment()
+    {
+        // Arrange
+        using var envelope = CreateEventEnvelopeWithEmptyNonSeekableAttachment();
+
+        // Act
+        var serialized = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        // Assert
+        serialized.Should().NotContain("empty.jpg");
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(serialized));
+        using var deserialized = await Envelope.DeserializeAsync(stream);
+        deserialized.Items.Should().ContainSingle()
+            .Which.TryGetType().Should().Be(EnvelopeItem.TypeValueEvent);
+    }
+
+    [Fact]
+    public async Task Serialization_EmptyNonSeekableStreamAttachmentSynchronously_DropsAttachment()
+    {
+        // Arrange
+        using var envelope = CreateEventEnvelopeWithEmptyNonSeekableAttachment();
+
+        // Act
+        var serialized = envelope.SerializeToString(_testOutputLogger, _fakeClock);
+
+        // Assert
+        serialized.Should().NotContain("empty.jpg");
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(serialized));
+        using var deserialized = await Envelope.DeserializeAsync(stream);
+        deserialized.Items.Should().ContainSingle()
+            .Which.TryGetType().Should().Be(EnvelopeItem.TypeValueEvent);
+    }
+
+    private Envelope CreateEventEnvelopeWithEmptyNonSeekableAttachment()
+    {
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(new NonSeekableReadStream(new MemoryStream())),
+            "empty.jpg",
+            "image/jpeg");
+
+        return Envelope.FromEvent(new SentryEvent(), _testOutputLogger, [attachment]);
+    }
 }

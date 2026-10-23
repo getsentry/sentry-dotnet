@@ -155,8 +155,10 @@ public sealed class Envelope : ISerializable, IDisposable
         {
             try
             {
-                await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-                await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
+                if (await item.SerializeAsync(stream, logger, dropEmptyAttachment: true, cancellationToken).ConfigureAwait(false))
+                {
+                    await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
             catch (Exception e)
             {
@@ -180,8 +182,10 @@ public sealed class Envelope : ISerializable, IDisposable
         {
             try
             {
-                item.Serialize(stream, logger);
-                stream.WriteNewline();
+                if (item.Serialize(stream, logger, dropEmptyAttachment: true))
+                {
+                    stream.WriteNewline();
+                }
             }
             catch (Exception e)
             {
