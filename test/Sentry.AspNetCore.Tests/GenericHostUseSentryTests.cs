@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Hosting;
+using Sentry.Extensions.Logging;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -113,6 +114,38 @@ public class GenericHostUseSentryTests : IDisposable
 
         _events.Should().ContainSingle().Which.Sdk.Name.Should().Be(Constants.SdkName);
         _logs.Should().ContainSingle(log => log.Message == "one logged error");
+        await app.StopAsync();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GenericUseSentryWithAspNetCoreUseSentry_ClearProviders_WarnsOnce(bool genericFirst)
+    {
+        var diagnosticLogger = new InMemoryDiagnosticLogger();
+        var builder = CreateBuilder();
+        Action<SentryAspNetCoreOptions> configureOptions = options =>
+        {
+            DoNotSend(options);
+            options.Debug = true;
+            options.DiagnosticLogger = diagnosticLogger;
+        };
+        if (genericFirst)
+        {
+            UseGenericSentry(builder);
+            builder.UseSentry(configureOptions);
+        }
+        else
+        {
+            builder.UseSentry(configureOptions);
+            UseGenericSentry(builder);
+        }
+        builder.Logging.ClearProviders();
+        await using var app = builder.Build();
+        await app.StartAsync();
+
+        diagnosticLogger.Entries.Should().ContainSingle(entry =>
+            entry.Message == SentryLoggingOptions.HostLoggerProvidersRemoved);
         await app.StopAsync();
     }
 
