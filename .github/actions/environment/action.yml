@@ -1,5 +1,10 @@
 name: Setup Environment
 description: Sets env vars and installs dependencies
+inputs:
+  solution-filter:
+    description: The solution filter the job builds, so only the workloads its projects need are installed. Without one, every project in Sentry.slnx counts.
+    required: false
+    default: ''
 runs:
   using: composite
 
@@ -39,14 +44,14 @@ runs:
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21
-      if: ${{ !matrix.container }}
+      if: ${{ !matrix.container && env.NO_MOBILE != 'true' }}
       uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
       with:
         distribution: temurin
         java-version: '21'
 
     - name: Setup Android SDK
-      if: ${{ !matrix.container }}
+      if: ${{ !matrix.container && env.NO_MOBILE != 'true' }}
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
@@ -73,11 +78,25 @@ runs:
       run: |
         set -euo pipefail
         pwd
-        dotnet workload restore \
-          --temp-dir "${{ runner.temp }}" \
-          --skip-sign-check
-        dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
-          --temp-dir "${{ runner.temp }}" \
-          --skip-sign-check
-        # Restore the Android test app explicitly to ensure runtime packs are available
-        dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true
+        filter="${{ inputs.solution-filter }}"
+        if [[ -n "$filter" ]]; then
+          # dotnet workload restore doesn't accept a solution filter, but it accepts the projects in one
+          projects=$(grep -o '"[^"]*\.csproj"' "$filter" | tr -d '"' | sed 's#\\\\#/#g' || true)
+          if [[ -z "$projects" ]]; then
+            echo "::error::Found no projects in $filter, so there are no workloads to restore"
+            exit 1
+          fi
+          echo "$projects" | xargs dotnet workload restore --temp-dir "${{ runner.temp }}" --skip-sign-check
+        else
+          dotnet workload restore \
+            --temp-dir "${{ runner.temp }}" \
+            --skip-sign-check
+        fi
+        # Sentry.Android.AssemblyReader.Tests builds the Android test app
+        if [[ -z "$filter" ]] || grep -q 'Sentry.Android.AssemblyReader.Tests' "$filter"; then
+          dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
+            --temp-dir "${{ runner.temp }}" \
+            --skip-sign-check
+          # Restore the Android test app explicitly to ensure runtime packs are available
+          dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true
+        fi
