@@ -339,6 +339,8 @@ jobs:
         # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
         if: ${{ (matrix.rid != 'linux-musl-x64') }}
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        env:
+          SKIP_MAUI_TESTS: ${{ runner.os == 'macOS' }}
         with:
           path: integration-test
 
@@ -403,6 +405,76 @@ jobs:
 #          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
 #        with:
 #          path: integration-test
+
+  # The MAUI cases build three Release apps, which takes 8-10 minutes on macOS, so they run next to the macOS leg
+  # against packages built here. CI_PUBLISHING_BUILD only adds desktop native libraries, which MAUI apps don't use.
+  maui-integration-test:
+    needs: build-sentry-native
+    name: MAUI integration test (macos)
+    runs-on: xcode-27
+    env:
+      MAUI_PACKAGES: Sentry.Maui Sentry Sentry.Extensions.Logging Sentry.Bindings.Android Sentry.Bindings.Cocoa Sentry.Android.AssemblyReader
+
+    steps:
+      - name: Cancel Previous Runs
+        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
+        uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Download sentry-native (macos)
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Get Cocoa SDK cache key
+        id: cocoa-key
+        uses: ./.github/actions/cocoa-cache-key
+
+      - name: Restore Cocoa SDK
+        id: cache-cocoa
+        if: ${{ !startsWith(github.ref_name, 'release/') }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cocoa-key.outputs.key }}
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Build
+        run: |
+          for project in $MAUI_PACKAGES; do
+            dotnet build "src/$project" -c Release --nologo -v:minimal
+          done
+
+      - name: Save Cocoa SDK
+        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-primary-key != '' && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
+
+      # Like the build legs, pack the build outputs. Packing Sentry.Maui while building it on macOS fails with NU5026,
+      # looking for the Windows target's .pri file, which isn't generated on macOS.
+      - name: Create NuGet Packages
+        run: |
+          for project in $MAUI_PACKAGES; do
+            dotnet pack "src/$project" -c Release --no-build --nologo
+          done
+
+      - name: Integration test
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        with:
+          path: integration-test/cli-maui.Tests.ps1
 
   ms-build:
     needs: build-sentry-native
