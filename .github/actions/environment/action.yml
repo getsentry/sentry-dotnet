@@ -92,8 +92,8 @@ runs:
             --temp-dir "${{ runner.temp }}" \
             --skip-sign-check
         fi
-        # Sentry.Android.AssemblyReader.Tests builds the Android test app
-        if [[ -z "$filter" ]] || grep -q 'Sentry.Android.AssemblyReader.Tests' "$filter"; then
+        # Sentry.Android.AssemblyReader.Tests builds the Android test app. The Windows solution filters exclude both.
+        if [[ "$RUNNER_OS" != "Windows" ]] && { [[ -z "$filter" ]] || grep -q 'Sentry.Android.AssemblyReader.Tests' "$filter"; }; then
           dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
             --temp-dir "${{ runner.temp }}" \
             --skip-sign-check

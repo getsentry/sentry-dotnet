@@ -143,6 +143,10 @@ jobs:
         if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
+      - name: Install .NET and NuGet packages on a fast drive
+        if: runner.os == 'Windows'
+        uses: ./.github/actions/windows-dotnet-drive
+
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
@@ -346,6 +350,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+
+      - name: Install .NET and NuGet packages on a fast drive
+        uses: ./.github/actions/windows-dotnet-drive
 
       - name: Download sentry-native (win-x64)
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
