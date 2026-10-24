@@ -39,6 +39,13 @@ groupConfigs:
     - "**/*Ios*.csproj"
     - "**/*MacCatalyst*.csproj"
     - "**/*Maui*.csproj"
+  # The build workflow builds these in its own job, off the critical path
+  appSamples:
+    - "**/Sentry.Samples.Android.csproj"
+    - "**/Sentry.Samples.Ios.csproj"
+    - "**/Sentry.Samples.MacCatalyst.csproj"
+    - "**/Sentry.Samples.MacOS.csproj"
+    - "**/Sentry.Samples.Maui.csproj"
 
 filterConfigs:
 
@@ -48,6 +55,7 @@ filterConfigs:
         - "allProjects"
     exclude:
       groups:
+        - "appSamples"
         - "macOnly"
         - "windowsOnly"
         - "artefacts"
@@ -85,6 +93,7 @@ filterConfigs:
         - "modules/perfview/**/FastSerialization.csproj"
     exclude:
       groups:
+        - "appSamples"
         - "artefacts"
         - "trimTests"
         - "playwrightTests"
@@ -103,6 +112,7 @@ filterConfigs:
         - "modules/perfview/**/FastSerialization.csproj"
     exclude:
       groups:
+        - "appSamples"
         - "macOnly"
         - "artefacts"
         - "trimTests"
@@ -125,6 +135,7 @@ filterConfigs:
         - "modules/perfview/**/FastSerialization.csproj"
     exclude:
       groups:
+        - "appSamples"
         - "macOnly"
         - "artefacts"
         - "trimTests"
@@ -141,6 +152,18 @@ filterConfigs:
         - "**/*Sentry.DiagnosticSource.IntegrationTests.csproj"
         - "**/*Sentry.DiagnosticSource.Tests.csproj"
         - "**/*Sentry.EntityFramework.Tests.csproj"
+
+  - outputPath: Sentry-CI-Build-Samples-macOS.slnf
+    include:
+      groups:
+        - "appSamples"
+
+  # The app samples the Linux build leg built before they moved to their own job
+  - outputPath: Sentry-CI-Build-Samples-Linux.slnf
+    include:
+      patterns:
+        - "**/Sentry.Samples.Android.csproj"
+        - "**/Sentry.Samples.Maui.csproj"
 
   - outputPath: Sentry-CI-CodeQL.slnf
     include:
