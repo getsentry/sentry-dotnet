@@ -22,6 +22,7 @@
       "src\\Sentry.Hangfire\\Sentry.Hangfire.csproj",
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
       "src\\Sentry.Quartz\\Sentry.Quartz.csproj",
+      "src\\Sentry.Quartz3\\Sentry.Quartz3.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.Analyzers.Tests\\Sentry.Analyzers.Tests.csproj",
