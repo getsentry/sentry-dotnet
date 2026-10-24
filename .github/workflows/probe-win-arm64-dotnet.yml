@@ -1,0 +1,86 @@
+# Throwaway: measures where .NET and the NuGet packages should live on the win-arm64 runner. Do not merge.
+name: probe win-arm64 dotnet location
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: win-arm64 ${{ matrix.variant }} (${{ matrix.attempt }})
+    runs-on: windows-11-arm
+
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [next-to-workspace, dev-drive-all, dev-drive-nuget-temp]
+        attempt: [1, 2]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          fetch-depth: 2
+
+      - name: Place .NET, NuGet and TEMP
+        shell: pwsh
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          $workspaceParent = Split-Path $env:GITHUB_WORKSPACE
+          $dotnetRoot = $workspaceParent
+          $nugetRoot = $workspaceParent
+          if ($env:VARIANT -ne 'next-to-workspace')
+          {
+              'create vdisk file="C:\devdrive.vhdx" maximum=81920 type=expandable', 'select vdisk file="C:\devdrive.vhdx"', 'attach vdisk', 'convert gpt', 'create partition primary' |
+                  Set-Content "$env:RUNNER_TEMP\diskpart.txt"
+              diskpart /s "$env:RUNNER_TEMP\diskpart.txt" | Out-Host
+              if ($LASTEXITCODE -ne 0) { throw "diskpart failed with exit code $LASTEXITCODE" }
+              $partition = Get-DiskImage -ImagePath 'C:\devdrive.vhdx' | Get-Disk | Get-Partition | Where-Object Type -eq 'Basic'
+              $partition | Format-Volume -DevDrive -Confirm:$false -Force | Out-Host
+              $partition | Add-PartitionAccessPath -AccessPath 'X:\'
+              fsutil devdrv enable /disallowAv
+              fsutil devdrv trust X:
+              $nugetRoot = 'X:'
+              if ($env:VARIANT -eq 'dev-drive-all') { $dotnetRoot = 'X:' }
+              New-Item -ItemType Directory X:\tmp | Out-Null
+              "TEMP=X:\tmp" >> $env:GITHUB_ENV
+              "TMP=X:\tmp" >> $env:GITHUB_ENV
+          }
+          "DOTNET_INSTALL_DIR=$dotnetRoot\.dotnet" >> $env:GITHUB_ENV
+          "NUGET_PACKAGES=$nugetRoot\.nuget\packages" >> $env:GITHUB_ENV
+          "dotnet: $dotnetRoot, nuget: $nugetRoot"
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Download sentry-native (win-arm64)
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-win-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore Sentry-CI-Build-Windows-arm64.slnf --nologo
+
+      - name: Build
+        run: dotnet build Sentry-CI-Build-Windows-arm64.slnf -c Release --no-restore --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true
+
+      - name: Test
+        run: dotnet test Sentry-CI-Build-Windows-arm64.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
+
+      - name: Create NuGet Packages
+        run: dotnet pack Sentry-CI-Build-Windows-arm64.slnf -c Release --no-build --nologo
+
+      - name: Integration test
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        with:
+          path: integration-test
