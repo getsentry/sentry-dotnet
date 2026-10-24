@@ -1,0 +1,119 @@
+# Throwaway: measures why the win-arm64 leg's I/O-heavy steps are 2-5x slower than win-x64's. Do not merge.
+name: probe win-arm64 disk
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: win-arm64 ${{ matrix.variant }} (${{ matrix.attempt }})
+    runs-on: windows-11-arm
+
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [baseline, realtime-off, dev-drive-caches, dev-drive-all]
+        attempt: [1, 2]
+
+    steps:
+      - name: Show the machine
+        shell: pwsh
+        run: |
+          Get-CimInstance Win32_Processor | Format-List Name, NumberOfCores, NumberOfLogicalProcessors
+          "RAM: {0:N1} GB" -f ((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
+          Get-PhysicalDisk | Format-Table FriendlyName, MediaType, BusType, @{ n = 'GB'; e = { [int]($_.Size / 1GB) } }
+          Get-Volume | Where-Object DriveLetter | Format-Table DriveLetter, FileSystem, @{ n = 'FreeGB'; e = { [int]($_.SizeRemaining / 1GB) } }
+          Get-MpComputerStatus | Format-List AMRunningMode, AntivirusEnabled, RealTimeProtectionEnabled, IsTamperProtected, OnAccessProtectionEnabled
+          Get-MpPreference | Format-List DisableRealtimeMonitoring, ExclusionPath, ExclusionProcess
+          "GITHUB_WORKSPACE=$env:GITHUB_WORKSPACE RUNNER_TEMP=$env:RUNNER_TEMP TEMP=$env:TEMP"
+
+      - name: Turn off Defender real-time scanning
+        if: matrix.variant == 'realtime-off'
+        shell: pwsh
+        run: |
+          Set-MpPreference -DisableRealtimeMonitoring $true
+          Get-MpComputerStatus | Format-List RealTimeProtectionEnabled, OnAccessProtectionEnabled
+
+      - name: Create Dev Drives
+        if: startsWith(matrix.variant, 'dev-drive')
+        shell: pwsh
+        working-directory: ${{ runner.temp }}
+        run: |
+          # A volume root has a System Volume Information folder that actions/checkout can't delete, so for
+          # dev-drive-all the drive is mounted at the workspace's parent and the workspace is a folder on it.
+          $all = '${{ matrix.variant }}' -eq 'dev-drive-all'
+          $parent = Split-Path $env:GITHUB_WORKSPACE
+          if ($all)
+          {
+              Get-ChildItem -Force $parent
+              Remove-Item $env:GITHUB_WORKSPACE
+          }
+
+          "create vdisk file=`"C:\devdrive.vhdx`" maximum=81920 type=expandable", 'select vdisk file="C:\devdrive.vhdx"', 'attach vdisk', 'convert gpt', 'create partition primary' |
+              Set-Content "$env:RUNNER_TEMP\diskpart.txt"
+          diskpart /s "$env:RUNNER_TEMP\diskpart.txt" | Out-Host
+          $partition = Get-DiskImage -ImagePath 'C:\devdrive.vhdx' | Get-Disk | Get-Partition | Where-Object Type -eq 'Basic'
+          try { $partition | Format-Volume -DevDrive -Confirm:$false -Force | Out-Host }
+          catch { Write-Warning "Dev Drive format failed, using plain ReFS: $_"; $partition | Format-Volume -FileSystem ReFS -Confirm:$false -Force | Out-Host }
+          $partition | Add-PartitionAccessPath -AccessPath 'X:\'
+          fsutil devdrv enable /disallowAv
+          fsutil devdrv trust X:
+          fsutil devdrv query X:
+
+          $root = 'X:'
+          if ($all)
+          {
+              $partition | Add-PartitionAccessPath -AccessPath "$parent\"
+              New-Item -ItemType Directory $env:GITHUB_WORKSPACE | Out-Null
+              $root = $parent
+          }
+          New-Item -ItemType Directory "$root\tmp" | Out-Null
+          "DOTNET_INSTALL_DIR=$root\.dotnet" >> $env:GITHUB_ENV
+          "NUGET_PACKAGES=$root\.nuget\packages" >> $env:GITHUB_ENV
+          "TEMP=$root\tmp" >> $env:GITHUB_ENV
+          "TMP=$root\tmp" >> $env:GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          fetch-depth: 2
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Download sentry-native (win-arm64)
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-win-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore Sentry-CI-Build-Windows-arm64.slnf --nologo
+
+      - name: Build
+        run: dotnet build Sentry-CI-Build-Windows-arm64.slnf -c Release --no-restore --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true
+
+      - name: Test
+        run: dotnet test Sentry-CI-Build-Windows-arm64.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
+
+      - name: Create NuGet Packages
+        run: dotnet pack Sentry-CI-Build-Windows-arm64.slnf -c Release --no-build --nologo
+
+      - name: Integration test
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        with:
+          path: integration-test
+
+      - name: Show the disks
+        if: always()
+        shell: pwsh
+        run: Get-Volume | Format-Table DriveLetter, FileSystem, @{ n = 'SizeGB'; e = { [int]($_.Size / 1GB) } }, @{ n = 'FreeGB'; e = { [int]($_.SizeRemaining / 1GB) } }
