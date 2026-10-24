@@ -108,6 +108,52 @@ jobs:
         timeout-minutes: 40
         run: pwsh scripts/device-test.ps1 ios -Run -Verbose
 
+      - name: Upload results
+        if: success() || failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: device-test-ios-results
+          path: test_output
+
+  # The integration tests build and run their own app, so they run next to the device tests instead of after them
+  ios-integration-tests:
+    runs-on: xcode-27
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+      NO_ANDROID: true
+      NO_MACCATALYST: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Get Cocoa SDK cache key
+        id: cocoa-key
+        uses: ./.github/actions/cocoa-cache-key
+
+      - name: Restore Cocoa SDK
+        id: cache-cocoa
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cocoa-key.outputs.key }}
+
+      # ios.Tests.ps1 skips every case unless a simulator is already booted. In the ios-tests job, xharness boots it.
+      - name: Boot the iOS Simulator
+        timeout-minutes: 10
+        shell: pwsh
+        run: |
+          . ./scripts/device-test-utils.ps1
+          $udid = Get-IosSimulatorUdid -Verbose
+          if (-not $udid) { throw 'No iOS simulator found' }
+          xcrun simctl bootstatus $udid -b
+          if ($LASTEXITCODE -ne 0) { throw "Couldn't boot simulator $udid" }
+
       - name: Run Integration Tests
         id: first-integration-test-run
         continue-on-error: true
@@ -123,11 +169,16 @@ jobs:
         with:
           path: integration-test/ios.Tests.ps1
 
+      - name: Save Cocoa SDK
+        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
+
       - name: Upload results
         if: success() || failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: device-test-ios-results
-          path: |
-            test_output
-            integration-test/mobile-app/test_output
+          name: device-test-ios-integration-results
+          path: integration-test/mobile-app/test_output
