@@ -344,6 +344,8 @@ jobs:
     needs: build-sentry-native
     name: MAUI integration test (macos)
     runs-on: xcode-27
+    env:
+      MAUI_PACKAGES: Sentry.Maui Sentry Sentry.Extensions.Logging Sentry.Bindings.Android Sentry.Bindings.Cocoa Sentry.Android.AssemblyReader
 
     steps:
       - name: Cancel Previous Runs
@@ -380,10 +382,10 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
-      - name: Create NuGet Packages
+      - name: Build
         run: |
-          for project in Sentry.Maui Sentry Sentry.Extensions.Logging Sentry.Bindings.Android Sentry.Bindings.Cocoa Sentry.Android.AssemblyReader; do
-            dotnet pack "src/$project" -c Release --nologo -v:minimal
+          for project in $MAUI_PACKAGES; do
+            dotnet build "src/$project" -c Release --nologo -v:minimal
           done
 
       - name: Save Cocoa SDK
@@ -392,6 +394,14 @@ jobs:
         with:
           path: modules/sentry-cocoa/Carthage
           key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
+
+      # Like the build legs, pack the build outputs. Packing Sentry.Maui while building it on macOS fails with NU5026,
+      # looking for the Windows target's .pri file, which isn't generated on macOS.
+      - name: Create NuGet Packages
+        run: |
+          for project in $MAUI_PACKAGES; do
+            dotnet pack "src/$project" -c Release --no-build --nologo
+          done
 
       - name: Integration test
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
