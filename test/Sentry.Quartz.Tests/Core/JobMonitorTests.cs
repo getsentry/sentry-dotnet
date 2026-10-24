@@ -557,6 +557,227 @@ public class JobMonitorTests
     }
 
     [Fact]
+    public async Task StartAsync_MonitorAllJobsWithoutAttribute_CapturesCheckInWithMonitorConfig()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
+        var monitorConfig = MonitorConfigJson.Render(_fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail")!);
+        monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 12 * * *");
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsDefaultGroup_UsesJobName()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("Nightly Cleanup").Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("nightly-cleanup");
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsRepeatingSimpleTrigger_CapturesCheckIn()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+        _fixture.Trigger = TriggerBuilder.Create()
+            .WithSimpleSchedule(schedule => schedule.WithInterval(TimeSpan.FromMinutes(15)).RepeatForever())
+            .Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsOneOffTrigger_CapturesNothing()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+        _fixture.Trigger = TriggerBuilder.Create().StartNow().Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn.Should().BeNull();
+        _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsWithoutIdentity_CapturesNothing()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData("DailyEmail")]
+    [InlineData("reports.DailyEmail")]
+    public async Task StartAsync_MonitorAllJobsExcludedByString_CapturesNothing(string excluded)
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.Options.ExcludedJobs.Add(excluded);
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn.Should().BeNull();
+        _fixture.Logger.Entries.Should().Contain(e => e.Message.Contains("ExcludedJobs"));
+    }
+
+    [Theory]
+    [InlineData("Daily")]
+    [InlineData("reports")]
+    [InlineData("reports.DailyEmail.Other")]
+    public async Task StartAsync_MonitorAllJobsStringOnlyPartlyMatches_CapturesCheckIn(string excluded)
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.Options.ExcludedJobs.Add(excluded);
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsExcludedByRegex_CapturesNothing()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.Options.ExcludedJobs.Add(new Regex("^reports\\."));
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_ExcludedJobWithAttribute_CapturesCheckIn()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.Options.ExcludedJobs.Add("reports.DailyEmail");
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsDataMapSlug_UsesThatSlug()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports")
+            .UsingJobData(SentryMonitorSlugAttribute.JobDataKey, "daily-email").Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("daily-email");
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsJobHasTriggersWithDifferentSchedules_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 18 * * ?", _fixture.JobDetail)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsOtherJobWithoutAttributeSharesSlug_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        var other = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "Reports").Build();
+        _fixture.OtherTriggers.Add((other, CronTrigger("0 0 18 * * ?", other)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsExcludedJobSharesSlug_CapturesCheckInWithMonitorConfig()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.Options.ExcludedJobs.Add("Reports.DailyEmail");
+        var other = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "Reports").Build();
+        _fixture.OtherTriggers.Add((other, CronTrigger("0 0 18 * * ?", other)));
+
+        // Act
+        await _fixture.StartAsync();
+
+        // Assert
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsWithinTtl_LooksUpTriggersOnce()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+        var sut = _fixture.GetSut();
+        var context = _fixture.GetContext();
+
+        // Act
+        await sut.StartAsync(context, CancellationToken.None);
+        await sut.StartAsync(context, CancellationToken.None);
+
+        // Assert
+        _fixture.Scheduler.LookedUpTriggers(1);
+    }
+
+    [Fact]
     public void Finish_HubThrows_DoesNotThrow()
     {
         // Arrange

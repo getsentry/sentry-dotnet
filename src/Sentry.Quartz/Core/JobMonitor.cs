@@ -4,7 +4,7 @@ using Sentry.Infrastructure;
 
 namespace Sentry.Quartz;
 
-// Captures the check-ins of jobs with SentryMonitorSlugAttribute
+// Captures the check-ins of jobs with SentryMonitorSlugAttribute, or of every scheduled job with MonitorAllJobs
 internal sealed class JobMonitor
 {
     private const int MaxSlugLength = 50;
@@ -13,6 +13,7 @@ internal sealed class JobMonitor
     internal static readonly TimeSpan TriggerSchedulesTtl = TimeSpan.FromMinutes(1);
 
     private static readonly ConcurrentDictionary<Type, SentryMonitorSlugAttribute?> Attributes = new();
+    private static readonly SentryMonitorSlugAttribute DefaultAttribute = new();
 
     private readonly SentryQuartzOptions _options;
     private readonly IHub _hub;
@@ -39,7 +40,8 @@ internal sealed class JobMonitor
         try
         {
             var jobType = QuartzApi.GetJobType(context.JobDetail);
-            var attribute = GetAttribute(jobType);
+            var attribute = GetAttribute(jobType)
+                            ?? (IsMonitoredByDefault(context) ? DefaultAttribute : null);
             if (attribute is null)
             {
                 return null;
@@ -154,6 +156,52 @@ internal sealed class JobMonitor
         }
     }
 
+    private bool IsMonitoredByDefault(IJobExecutionContext context)
+    {
+        if (!_options.MonitorAllJobs)
+        {
+            return false;
+        }
+
+        // Only jobs that run on a schedule, and whose key stays the same across restarts
+        var key = context.JobDetail.Key;
+        if (!RunsOnSchedule(context.Trigger) || !HasIdentity(key))
+        {
+            return false;
+        }
+
+        if (IsExcluded(key))
+        {
+            Logger?.LogDebug("Skipping the check-in for job '{0}'. It matches ExcludedJobs.", key);
+            return false;
+        }
+
+        return true;
+    }
+
+    // Whether MonitorAllJobs covers the job's scheduled runs
+    private bool IsMonitoredByDefault(IJobDetail job) =>
+        _options.MonitorAllJobs && HasIdentity(job.Key) && !IsExcluded(job.Key);
+
+    private static bool RunsOnSchedule(ITrigger trigger) =>
+        trigger is ICronTrigger or ISimpleTrigger { RepeatCount: not 0 };
+
+    private bool IsExcluded(JobKey key)
+    {
+        var fullKey = key.ToString();
+        foreach (var pattern in _options.ExcludedJobs)
+        {
+            if (pattern._regex is { } regex
+                    ? regex.IsMatch(fullKey) || regex.IsMatch(key.Name)
+                    : pattern._string == fullKey || pattern._string == key.Name)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // Reading every trigger takes several scheduler queries, so the result is reused for a minute.
     private async Task<TriggerSchedules> GetTriggerSchedulesAsync(
         IScheduler scheduler,
@@ -167,7 +215,7 @@ internal sealed class JobMonitor
             if (_triggerSchedules is not { } schedules || schedules.ReadAt + TriggerSchedulesTtl <= now
                 || schedules.Scheduler != scheduler || !schedules.Contains(triggerKey))
             {
-                schedules = await TriggerSchedules.ReadAsync(scheduler, now, cancellationToken).ConfigureAwait(false);
+                schedules = await TriggerSchedules.ReadAsync(this, scheduler, now, cancellationToken).ConfigureAwait(false);
                 _triggerSchedules = schedules;
             }
 
@@ -197,19 +245,20 @@ internal sealed class JobMonitor
             _keys = keys;
         }
 
-        public static async Task<TriggerSchedules> ReadAsync(IScheduler scheduler, DateTimeOffset readAt,
-            CancellationToken cancellationToken)
+        public static async Task<TriggerSchedules> ReadAsync(JobMonitor monitor, IScheduler scheduler,
+            DateTimeOffset readAt, CancellationToken cancellationToken)
         {
             var triggersBySlug = new Dictionary<string, List<(TriggerKey Key, MonitorSchedule Schedule)>>();
             var keys = new HashSet<TriggerKey>();
-            var triggers = await QuartzApi.GetTriggersAsync(scheduler, IsMonitored, cancellationToken).ConfigureAwait(false);
+            var triggers = await QuartzApi.GetTriggersAsync(scheduler, monitor.IsMonitored, cancellationToken)
+                .ConfigureAwait(false);
             foreach (var (job, trigger) in triggers)
             {
                 keys.Add(trigger.Key);
 
-                // Triggers whose schedule isn't sent don't change the monitor
-                var attribute = GetAttribute(QuartzApi.GetJobType(job))!;
-                if (!attribute.SendMonitorConfig
+                // Triggers whose runs aren't monitored, or whose schedule isn't sent, don't change the monitor
+                var attribute = GetAttribute(QuartzApi.GetJobType(job)) ?? (RunsOnSchedule(trigger) ? DefaultAttribute : null);
+                if (attribute is not { SendMonitorConfig: true }
                     || TriggerSchedule.ToSchedule(trigger) is not { } schedule
                     || GetMonitorSlug(job, trigger, attribute) is not { } slug)
                 {
@@ -241,18 +290,18 @@ internal sealed class JobMonitor
                 .Select(trigger => trigger.Key)
                 .ToList();
         }
+    }
 
-        // Jobs whose type can't be resolved, such as a deleted job class still in a persistent store, are skipped
-        private static bool IsMonitored(IJobDetail job)
+    // Jobs whose type can't be resolved, such as a deleted job class still in a persistent store, are skipped
+    private bool IsMonitored(IJobDetail job)
+    {
+        try
         {
-            try
-            {
-                return GetAttribute(QuartzApi.GetJobType(job)) is not null;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return GetAttribute(QuartzApi.GetJobType(job)) is not null || IsMonitoredByDefault(job);
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 
