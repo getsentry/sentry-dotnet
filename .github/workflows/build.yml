@@ -342,6 +342,41 @@ jobs:
         with:
           path: integration-test
 
+      # Sentry turns SentryNative off on runtimes that have no native SDK. aot.Tests.ps1 checks that against this
+      # leg's own packages: linux-arm on the linux-arm64 runner, and win-x86 on the win-x64 runner.
+      - name: Install Linux ARM 32-bit dependencies
+        if: matrix.rid == 'linux-arm64'
+        run: |
+          sudo dpkg --add-architecture armhf
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
+          # Prints the machine a 32-bit ARM process sees: aarch64 when the arm64 kernel runs it, armv7l under QEMU
+          printf '#include <stdio.h>\n#include <sys/utsname.h>\nint main(void) { struct utsname u; uname(&u); puts(u.machine); return 0; }\n' \
+            | arm-linux-gnueabihf-gcc -x c -o "$RUNNER_TEMP/uname-armhf" -
+          grep -m1 'CPU part' /proc/cpuinfo || true
+          "$RUNNER_TEMP/uname-armhf" || echo "This host can't run 32-bit ARM binaries natively"
+
+      # Some arm64 hosts can't run 32-bit ARM binaries ("Exec format error"), so QEMU runs them on every host
+      - name: Set up QEMU for 32-bit ARM
+        if: matrix.rid == 'linux-arm64'
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          platforms: arm
+
+      - name: Check that QEMU runs 32-bit ARM binaries
+        if: matrix.rid == 'linux-arm64'
+        run: |
+          grep -q '^enabled' /proc/sys/fs/binfmt_misc/qemu-arm
+          test "$("$RUNNER_TEMP/uname-armhf")" = armv7l
+
+      - name: Test AOT on an unsupported runtime
+        if: matrix.rid == 'linux-arm64' || matrix.rid == 'win-x64'
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        env:
+          RuntimeIdentifier: ${{ matrix.rid == 'linux-arm64' && 'linux-arm' || 'win-x86' }}
+        with:
+          path: integration-test/aot.Tests.ps1
+
       - name: Wait for the tests
         wait-all:
 
@@ -416,57 +451,6 @@ jobs:
           name: ${{ runner.os }}-msbuild-logs
           path: msbuild.binlog
           if-no-files-found: ignore
-
-  # Unsupported Native AOT runtimes should have SentryNative auto-disabled
-  # to avoid native library loading errors on startup.
-  unsupported-aot:
-    needs: build-sentry
-    name: Unsupported AOT (${{ matrix.rid }})
-    runs-on: ${{ matrix.os }}
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_NOLOGO: 1
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-24.04-arm
-            rid: linux-arm
-          - os: windows-latest
-            rid: win-x86
-
-    # This job is on the critical path, after the whole build-sentry matrix. aot.Tests.ps1 only publishes a
-    # console app against the packages from the macOS build, so it needs the .NET SDK but not the full
-    # Setup Environment (Java, Android SDK, Mono, workloads).
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Install Linux ARM 32-bit dependencies
-        if: ${{ matrix.rid == 'linux-arm' }}
-        run: |
-          sudo dpkg --add-architecture armhf
-          sudo apt-get update
-          sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
-
-      - name: Install .NET SDK
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          global-json-file: global.json
-
-      - name: Fetch NuGet Packages
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: ${{ github.sha }}
-          path: src
-
-      - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
-        env:
-          RuntimeIdentifier: ${{ matrix.rid }}
-        with:
-          path: integration-test/aot.Tests.ps1
 
   trim-analysis:
     needs: build-sentry-native
