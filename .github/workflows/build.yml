@@ -143,16 +143,9 @@ jobs:
         if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
-      # The Windows images keep .NET under Program Files, where workloads install as MSI packages, and the NuGet
-      # cache in the user profile on C:. Next to the workspace, workloads install as plain files, and on the x64
-      # runners the workspace is on D:.
-      - name: Install .NET and NuGet packages next to the workspace
+      - name: Install .NET and NuGet packages on a fast drive
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $root = Split-Path $env:GITHUB_WORKSPACE
-          "DOTNET_INSTALL_DIR=$root\.dotnet" >> $env:GITHUB_ENV
-          "NUGET_PACKAGES=$root\.nuget\packages" >> $env:GITHUB_ENV
+        uses: ./.github/actions/windows-dotnet-drive
 
       - name: Setup Environment
         uses: ./.github/actions/environment
@@ -357,6 +350,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+
+      - name: Install .NET and NuGet packages on a fast drive
+        uses: ./.github/actions/windows-dotnet-drive
 
       - name: Download sentry-native (win-x64)
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
