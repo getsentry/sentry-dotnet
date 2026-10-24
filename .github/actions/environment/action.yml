@@ -98,8 +98,12 @@ runs:
         filter="${{ inputs.solution-filter }}"
         if [[ -n "$filter" ]]; then
           # dotnet workload restore doesn't accept a solution filter, but it accepts the projects in one
-          grep -o '"[^"]*\.csproj"' "$filter" | tr -d '"' | sed 's#\\\\#/#g' \
-            | xargs dotnet workload restore --temp-dir "${{ runner.temp }}" --skip-sign-check
+          projects=$(grep -o '"[^"]*\.csproj"' "$filter" | tr -d '"' | sed 's#\\\\#/#g' || true)
+          if [[ -z "$projects" ]]; then
+            echo "::error::Found no projects in $filter, so there are no workloads to restore"
+            exit 1
+          fi
+          echo "$projects" | xargs dotnet workload restore --temp-dir "${{ runner.temp }}" --skip-sign-check
         else
           dotnet workload restore \
             --temp-dir "${{ runner.temp }}" \
