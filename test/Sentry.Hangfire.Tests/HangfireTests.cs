@@ -58,7 +58,8 @@ public class HangfireTests : IClassFixture<HangfireFixture>
         await _fixture.Enqueue<TestJob>(job => job.ExecuteJobWithoutAttribute());
 
         _fixture.Hub.DidNotReceive().CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>(), Arg.Is<SentryId>(id => id == sentryId));
-        _fixture.Logger.Received(1).Log(SentryLevel.Debug, Arg.Is<string>(message => message.Contains("Skipping creating a check-in for")), null, Arg.Any<Type>(), Arg.Any<MethodInfo>());
+        _fixture.Logger.Received(1).Log(SentryLevel.Debug, Arg.Is<string>(message => message.Contains("Skipping creating a check-in for")), null, Arg.Any<Type>(),
+            Arg.Is<MethodInfo>(method => method.Name == nameof(TestJob.ExecuteJobWithoutAttribute)));
     }
 
     [SkippableFact]
@@ -76,6 +77,30 @@ public class HangfireTests : IClassFixture<HangfireFixture>
         monitorConfig.GetProperty("schedule").GetProperty("type").GetString().Should().Be("crontab");
         monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 0 1 1 *");
         monitorConfig.GetProperty("timezone").GetString().Should().Be("Europe/Berlin");
+    }
+
+    [Fact]
+    public async Task ExecuteRecurringJobWithoutAttribute_MonitorAllRecurringJobs_CapturesCheckInsWithJobIdSlug()
+    {
+        await _fixture.TriggerRecurringJob<TestJob>("Nightly Cleanup", job => job.ExecuteRecurringJobWithoutAttribute(),
+            "0 3 * * *", TimeZoneInfo.Utc);
+
+        var checkInId = _fixture.Hub.ReceivedInProgressCheckInId("nightly-cleanup");
+        checkInId.Should().NotBeNull().And.NotBe(SentryId.Empty);
+        var monitorConfig = MonitorConfigJson.Render(_fixture.Hub.ReceivedConfigureMonitorOptions("nightly-cleanup")!);
+        monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("0 3 * * *");
+        _fixture.Hub.Received(1).CaptureCheckIn("nightly-cleanup", CheckInStatus.Ok, checkInId,
+            Arg.Is<TimeSpan?>(duration => duration != null), Arg.Any<Scope>());
+    }
+
+    [Fact]
+    public async Task ExecuteRecurringJobWithoutAttribute_Excluded_DoesNotCaptureCheckIn()
+    {
+        await _fixture.TriggerRecurringJob<TestJob>(HangfireFixture.ExcludedRecurringJobId,
+            job => job.ExecuteRecurringJobWithoutAttribute(), "0 3 * * *", TimeZoneInfo.Utc);
+
+        _fixture.Hub.DidNotReceive().CaptureCheckIn("excluded-recurring-job", Arg.Any<CheckInStatus>(), Arg.Any<SentryId?>(),
+            Arg.Any<TimeSpan?>(), Arg.Any<Scope?>(), Arg.Any<Action<SentryMonitorOptions>?>());
     }
 
     // In this class so it runs serially with the fixture's jobs, which would also pick up the filter it adds
@@ -126,5 +151,8 @@ public class TestJob
 
     [SentryMonitorSlug("test-recurring-job")]
     public void ExecuteRecurringJob()
+    { }
+
+    public void ExecuteRecurringJobWithoutAttribute()
     { }
 }

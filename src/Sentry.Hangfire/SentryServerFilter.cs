@@ -41,7 +41,7 @@ internal class SentryServerFilter : IServerFilter
 
     public void OnPerforming(PerformingContext context)
     {
-        var monitorSlug = context.GetJobParameter<string>(SentryMonitorSlugKey);
+        var monitorSlug = GetMonitorSlug(context);
         if (monitorSlug is null)
         {
             var jobType = context.BackgroundJob.Job.Type;
@@ -58,6 +58,27 @@ internal class SentryServerFilter : IServerFilter
         // then implicitly OnPerforming was called previously with the same context, but we never made it to OnPerformed
         // This might happen if a Hangfire job failed at least once, with automatic retries configured.
         context.Items[SentryCheckInIdKey] = checkInId;
+        context.Items[SentryMonitorSlugKey] = monitorSlug;
+    }
+
+    private string? GetMonitorSlug(PerformContext context)
+    {
+        var monitorSlug = context.GetJobParameter<string>(SentryMonitorSlugKey);
+        if (monitorSlug is not null || !_options.MonitorAllRecurringJobs)
+        {
+            return monitorSlug;
+        }
+
+        try
+        {
+            var recurringJobId = context.GetJobParameter<string>(RecurringJobIdKey);
+            return string.IsNullOrEmpty(recurringJobId) ? null : _options.GetRecurringJobSlug(recurringJobId!);
+        }
+        catch (Exception e)
+        {
+            _logger?.LogError(e, "Failed to read the recurring job ID of job '{0}'.", context.BackgroundJob.Id);
+            return null;
+        }
     }
 
     private SentryId CaptureInProgressCheckIn(PerformingContext context, string monitorSlug)
@@ -133,7 +154,7 @@ internal class SentryServerFilter : IServerFilter
             if (_recurringJobSlugs is not { } slugs || slugs.ReadAt + RecurringJobSlugsTtl <= now
                 || !slugs.Contains(recurringJobId))
             {
-                slugs = RecurringJobSlugs.Read(connection, now);
+                slugs = RecurringJobSlugs.Read(connection, now, _options);
                 _recurringJobSlugs = slugs;
             }
 
@@ -156,14 +177,15 @@ internal class SentryServerFilter : IServerFilter
             _ids = ids;
         }
 
-        public static RecurringJobSlugs Read(IStorageConnection connection, DateTimeOffset readAt)
+        public static RecurringJobSlugs Read(IStorageConnection connection, DateTimeOffset readAt, SentryHangfireOptions options)
         {
             var jobsBySlug = new Dictionary<string, List<(string Id, string? Cron, string TimeZoneId)>>();
             var ids = new HashSet<string>();
             foreach (var recurringJob in connection.GetRecurringJobs())
             {
                 ids.Add(recurringJob.Id);
-                if (recurringJob.Removed || recurringJob.Job is null || GetMonitorSlug(recurringJob.Job) is not { } slug)
+                if (recurringJob.Removed || recurringJob.Job is null
+                    || (GetMonitorSlug(recurringJob.Job) ?? options.GetRecurringJobSlug(recurringJob.Id)) is not { } slug)
                 {
                     continue;
                 }
@@ -295,8 +317,7 @@ internal class SentryServerFilter : IServerFilter
 
     public void OnPerformed(PerformedContext context)
     {
-        var monitorSlug = context.GetJobParameter<string>(SentryMonitorSlugKey);
-        if (monitorSlug is null)
+        if (!context.Items.TryGetValue(SentryMonitorSlugKey, out var monitorSlugObject) || monitorSlugObject is not string monitorSlug)
         {
             return;
         }
