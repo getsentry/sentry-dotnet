@@ -158,6 +158,13 @@ filterConfigs:
       groups:
         - "appSamples"
 
+  # The app samples the Linux build leg built before they moved to their own job
+  - outputPath: Sentry-CI-Build-Samples-Linux.slnf
+    include:
+      patterns:
+        - "**/Sentry.Samples.Android.csproj"
+        - "**/Sentry.Samples.Maui.csproj"
+
   - outputPath: Sentry-CI-CodeQL.slnf
     include:
       groups:
