@@ -145,6 +145,7 @@ jobs:
 
       # ios.Tests.ps1 skips every case unless a simulator is already booted. In the ios-tests job, xharness boots it.
       - name: Boot the iOS Simulator
+        timeout-minutes: 10
         shell: pwsh
         run: |
           . ./scripts/device-test-utils.ps1
