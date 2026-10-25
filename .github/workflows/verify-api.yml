@@ -42,6 +42,10 @@ jobs:
       - name: Remove unused applications
         uses: ./.github/actions/freediskspace
 
+      - name: Install .NET and NuGet packages on a fast drive
+        if: runner.os == 'Windows'
+        uses: ./.github/actions/windows-dotnet-drive
+
       - name: Setup Environment
         uses: ./.github/actions/environment
 
