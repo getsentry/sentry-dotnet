@@ -75,8 +75,11 @@ jobs:
         with:
           submodules: recursive
 
+      # The device test app references Sentry.Android.AssemblyReader.Tests, which builds the Android test app
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj test/AndroidTestApp/AndroidTestApp.csproj
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
@@ -202,6 +205,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: integration-test/net9-maui/Sentry.Maui.Device.IntegrationTestApp.csproj
 
       - name: Checkout github-workflows
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

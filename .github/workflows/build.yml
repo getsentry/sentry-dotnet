@@ -150,7 +150,7 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
-          solution-filter: ${{ matrix.slnf }}
+          projects: ${{ matrix.slnf }}
 
       # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
@@ -537,6 +537,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: Sentry-CI-Build-Windows.slnf samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
@@ -593,6 +595,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: test/Sentry.TrimTest/Sentry.TrimTest.csproj test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
@@ -644,6 +648,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: ${{ matrix.samples }}
 
       - name: Download sentry-native (${{ matrix.rid }})
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
