@@ -416,7 +416,7 @@ jobs:
     name: Integration test (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
     env:
-      PACKAGES: ${{ matrix.packages }}
+      PROJECTS: ${{ matrix.projects }}
 
     strategy:
       fail-fast: false
@@ -424,11 +424,22 @@ jobs:
         include:
           - os: xcode-27
             rid: macos
-            packages: Sentry.Maui Sentry Sentry.Extensions.Logging Sentry.Bindings.Android Sentry.Bindings.Cocoa Sentry.Android.AssemblyReader
+            projects: >-
+              src/Sentry.Maui/Sentry.Maui.csproj
+              src/Sentry/Sentry.csproj
+              src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj
+              src/Sentry.Bindings.Android/Sentry.Bindings.Android.csproj
+              src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj
+              src/Sentry.Android.AssemblyReader/Sentry.Android.AssemblyReader.csproj
             tests: integration-test/cli-maui.Tests.ps1
           - os: windows-11-arm
             rid: win-arm64
-            packages: Sentry.Maui Sentry Sentry.Extensions.Logging Sentry.Bindings.Android Sentry.Android.AssemblyReader
+            projects: >-
+              src/Sentry.Maui/Sentry.Maui.csproj
+              src/Sentry/Sentry.csproj
+              src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj
+              src/Sentry.Bindings.Android/Sentry.Bindings.Android.csproj
+              src/Sentry.Android.AssemblyReader/Sentry.Android.AssemblyReader.csproj
             tests: integration-test
 
     steps:
@@ -447,6 +458,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: ${{ matrix.projects }}
 
       - name: Download sentry-native (${{ matrix.rid }})
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -475,8 +488,8 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          for project in $PACKAGES; do
-            dotnet build "src/$project" -c Release --nologo -v:minimal
+          for project in $PROJECTS; do
+            dotnet build "$project" -c Release --nologo -v:minimal
           done
 
       - name: Save Cocoa SDK
@@ -491,8 +504,8 @@ jobs:
       - name: Create NuGet Packages
         shell: bash
         run: |
-          for project in $PACKAGES; do
-            dotnet pack "src/$project" -c Release --no-build --nologo
+          for project in $PROJECTS; do
+            dotnet pack "$project" -c Release --no-build --nologo
           done
 
       - name: Integration test

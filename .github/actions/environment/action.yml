@@ -5,6 +5,10 @@ inputs:
     description: The solution filter the job builds, so only the workloads its projects need are installed. Without one, every project in Sentry.slnx counts.
     required: false
     default: ''
+  projects:
+    description: The project files the job builds, separated by spaces, for jobs that build only a few projects instead of a solution filter.
+    required: false
+    default: ''
 runs:
   using: composite
 
@@ -79,7 +83,10 @@ runs:
         set -euo pipefail
         pwd
         filter="${{ inputs.solution-filter }}"
-        if [[ -n "$filter" ]]; then
+        projects="${{ inputs.projects }}"
+        if [[ -n "$projects" ]]; then
+          dotnet workload restore $projects --temp-dir "${{ runner.temp }}" --skip-sign-check
+        elif [[ -n "$filter" ]]; then
           # dotnet workload restore doesn't accept a solution filter, but it accepts the projects in one
           projects=$(grep -o '"[^"]*\.csproj"' "$filter" | tr -d '"' | sed 's#\\\\#/#g' || true)
           if [[ -z "$projects" ]]; then
@@ -93,7 +100,7 @@ runs:
             --skip-sign-check
         fi
         # Sentry.Android.AssemblyReader.Tests builds the Android test app. The Windows solution filters exclude both.
-        if [[ "$RUNNER_OS" != "Windows" ]] && { [[ -z "$filter" ]] || grep -q 'Sentry.Android.AssemblyReader.Tests' "$filter"; }; then
+        if [[ "$RUNNER_OS" != "Windows" ]] && { [[ -z "$filter" && -z "$projects" ]] || { [[ -n "$filter" ]] && grep -q 'Sentry.Android.AssemblyReader.Tests' "$filter"; }; }; then
           dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
             --temp-dir "${{ runner.temp }}" \
             --skip-sign-check
