@@ -1,5 +1,9 @@
 name: Setup Environment
 description: Sets env vars and installs dependencies
+inputs:
+  projects:
+    description: The solution filters and project files the job builds, separated by spaces, so only the workloads they need are installed. Jobs that build everything pass Sentry.slnx.
+    required: true
 runs:
   using: composite
 
@@ -39,14 +43,14 @@ runs:
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21
-      if: ${{ !matrix.container }}
+      if: ${{ !matrix.container && env.NO_MOBILE != 'true' }}
       uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
       with:
         distribution: temurin
         java-version: '21'
 
     - name: Setup Android SDK
-      if: ${{ !matrix.container }}
+      if: ${{ !matrix.container && env.NO_MOBILE != 'true' }}
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
@@ -70,14 +74,37 @@ runs:
 
     - name: Install .NET Workloads
       shell: bash
+      env:
+        PROJECTS: ${{ inputs.projects }}
       run: |
         set -euo pipefail
         pwd
-        dotnet workload restore \
-          --temp-dir "${{ runner.temp }}" \
-          --skip-sign-check
-        dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
-          --temp-dir "${{ runner.temp }}" \
-          --skip-sign-check
-        # Restore the Android test app explicitly to ensure runtime packs are available
-        dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true
+        projects=()
+        for item in $PROJECTS; do
+          if [[ "$item" == *.slnf ]]; then
+            # dotnet workload restore doesn't accept a solution filter, but it accepts the projects in one
+            found=$(grep -o '"[^"]*\.csproj"' "$item" | tr -d '"' | sed 's#\\\\#/#g' || true)
+            if [[ -z "$found" ]]; then
+              echo "::error::Found no projects in $item, so there are no workloads to restore"
+              exit 1
+            fi
+            projects+=($found)
+          else
+            projects+=("$item")
+          fi
+        done
+        if [[ ${#projects[@]} -eq 0 ]]; then
+          echo "::error::Pass the solution filters or project files this job builds as projects, so only their workloads are installed"
+          exit 1
+        fi
+        dotnet workload restore "${projects[@]}" --temp-dir "${{ runner.temp }}" --skip-sign-check
+        # Sentry.Android.AssemblyReader.Tests builds the Android test app with an MSBuild task, not a project reference,
+        # so workload restore doesn't see it. grep reads a here-string because with pipefail, printf piped into grep -q
+        # fails with SIGPIPE when grep exits before printf has written everything.
+        if grep -q -E 'Sentry\.slnx$|Sentry\.Android\.AssemblyReader\.Tests|AndroidTestApp' <<< "$(printf '%s\n' "${projects[@]}")"; then
+          dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
+            --temp-dir "${{ runner.temp }}" \
+            --skip-sign-check
+          # Restore the Android test app explicitly to ensure runtime packs are available
+          dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true
+        fi

@@ -44,6 +44,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: ${{ matrix.slnf }}
 
       - name: Restore sentry-native cache
         id: cache-native
@@ -62,9 +64,7 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Restore .NET Dependencies
-        run: |
-          dotnet workload restore
-          dotnet restore ${{ matrix.slnf }} --nologo
+        run: dotnet restore ${{ matrix.slnf }} --nologo
 
       - name: Build
         run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal
