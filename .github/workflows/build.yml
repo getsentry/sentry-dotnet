@@ -368,6 +368,11 @@ jobs:
         id: msbuild
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
+      # The app samples build in their own job, with the .NET CLI, so the MAUI sample's Android and Windows targets
+      # get an MSBuild build here
+      - name: Build the MAUI sample
+        run: msbuild samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj -t:Restore,Build -p:Configuration=Release --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:msbuild-maui.binlog
+
       - name: Test MSBuild
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         with:
@@ -381,6 +386,7 @@ jobs:
           path: |
             msbuild.log
             msbuild.binlog
+            msbuild-maui.binlog
           if-no-files-found: ignore
 
   # Unsupported Native AOT runtimes should have SentryNative auto-disabled
