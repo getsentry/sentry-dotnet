@@ -46,6 +46,14 @@ groupConfigs:
     - "**/Sentry.Samples.MacCatalyst.csproj"
     - "**/Sentry.Samples.MacOS.csproj"
     - "**/Sentry.Samples.Maui.csproj"
+  # The packages the integration tests use, which the build workflow's integration-test job builds and packs
+  integrationTestPackages:
+    - "**/Sentry.csproj"
+    - "**/Sentry.Extensions.Logging.csproj"
+    - "**/Sentry.Maui.csproj"
+    - "**/Sentry.Bindings.Android.csproj"
+    - "**/Sentry.Android.AssemblyReader.csproj"
+    - "**/Sentry.Bindings.Cocoa.csproj"
 
 filterConfigs:
 
@@ -164,6 +172,19 @@ filterConfigs:
       patterns:
         - "**/Sentry.Samples.Android.csproj"
         - "**/Sentry.Samples.Maui.csproj"
+
+  - outputPath: Sentry-CI-IntegrationTest-macOS.slnf
+    include:
+      groups:
+        - "integrationTestPackages"
+
+  - outputPath: Sentry-CI-IntegrationTest.slnf
+    include:
+      groups:
+        - "integrationTestPackages"
+    exclude:
+      groups:
+        - "macOnly"
 
   - outputPath: Sentry-CI-CodeQL.slnf
     include:
