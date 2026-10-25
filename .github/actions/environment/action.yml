@@ -1,10 +1,9 @@
 name: Setup Environment
 description: Sets env vars and installs dependencies
 inputs:
-  solution-filter:
-    description: The solution filter the job builds, so only the workloads its projects need are installed. Without one, every project in Sentry.slnx counts.
-    required: false
-    default: ''
+  projects:
+    description: The solution filters and project files the job builds, separated by spaces, so only the workloads they need are installed. Jobs that build everything pass Sentry.slnx.
+    required: true
 runs:
   using: composite
 
@@ -95,22 +94,28 @@ runs:
       run: |
         set -euo pipefail
         pwd
-        filter="${{ inputs.solution-filter }}"
-        if [[ -n "$filter" ]]; then
-          # dotnet workload restore doesn't accept a solution filter, but it accepts the projects in one
-          projects=$(grep -o '"[^"]*\.csproj"' "$filter" | tr -d '"' | sed 's#\\\\#/#g' || true)
-          if [[ -z "$projects" ]]; then
-            echo "::error::Found no projects in $filter, so there are no workloads to restore"
-            exit 1
+        projects=()
+        for item in ${{ inputs.projects }}; do
+          if [[ "$item" == *.slnf ]]; then
+            # dotnet workload restore doesn't accept a solution filter, but it accepts the projects in one
+            found=$(grep -o '"[^"]*\.csproj"' "$item" | tr -d '"' | sed 's#\\\\#/#g' || true)
+            if [[ -z "$found" ]]; then
+              echo "::error::Found no projects in $item, so there are no workloads to restore"
+              exit 1
+            fi
+            projects+=($found)
+          else
+            projects+=("$item")
           fi
-          echo "$projects" | xargs dotnet workload restore --temp-dir "${{ runner.temp }}" --skip-sign-check
-        else
-          dotnet workload restore \
-            --temp-dir "${{ runner.temp }}" \
-            --skip-sign-check
+        done
+        if [[ ${#projects[@]} -eq 0 ]]; then
+          echo "::error::Pass the solution filters or project files this job builds as projects, so only their workloads are installed"
+          exit 1
         fi
-        # Sentry.Android.AssemblyReader.Tests builds the Android test app
-        if [[ -z "$filter" ]] || grep -q 'Sentry.Android.AssemblyReader.Tests' "$filter"; then
+        dotnet workload restore "${projects[@]}" --temp-dir "${{ runner.temp }}" --skip-sign-check
+        # Sentry.Android.AssemblyReader.Tests builds the Android test app with an MSBuild task, not a project reference,
+        # so workload restore doesn't see it
+        if printf '%s\n' "${projects[@]}" | grep -q -E 'Sentry\.slnx$|Sentry\.Android\.AssemblyReader\.Tests|AndroidTestApp'; then
           dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
             --temp-dir "${{ runner.temp }}" \
             --skip-sign-check

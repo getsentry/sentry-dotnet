@@ -46,7 +46,7 @@ jobs:
           global-json-file: global.json
 
       - name: Install .NET Workloads
-        run: dotnet workload restore --temp-dir "${{ runner.temp }}" --skip-sign-check
+        run: dotnet workload restore test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.csproj --temp-dir "${{ runner.temp }}" --skip-sign-check
 
       - name: Build
         run: dotnet build test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests -c Release
