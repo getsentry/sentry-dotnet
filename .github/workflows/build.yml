@@ -358,7 +358,7 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
-          projects: Sentry-CI-Build-Windows.slnf
+          projects: Sentry-CI-Build-Windows.slnf samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
@@ -370,6 +370,11 @@ jobs:
         id: msbuild
         run: msbuild Sentry-CI-Build-Windows.slnf -restore -t:Build,Pack -p:Configuration=Release -m -nr:false --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
+      # The app samples build in their own job, with the .NET CLI, so the MAUI sample's Android and Windows targets
+      # get an MSBuild build here
+      - name: Build the MAUI sample
+        run: msbuild samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj -restore -t:Build -p:Configuration=Release -m -nr:false --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:msbuild-maui.binlog
+
       - name: Test MSBuild
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         with:
@@ -380,7 +385,9 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ runner.os }}-msbuild-logs
-          path: msbuild.binlog
+          path: |
+            msbuild.binlog
+            msbuild-maui.binlog
           if-no-files-found: ignore
 
   # Unsupported Native AOT runtimes should have SentryNative auto-disabled
@@ -476,6 +483,86 @@ jobs:
 # See https://youtrack.jetbrains.com/issue/RIDER-17115/Could-not-find-any-available-provisioning-profiles-for-iOS
 #      - name: Publish Test app (iOS)
 #        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-ios18.0 -r ios-arm64
+
+  # Nothing consumes the app samples, but their Release builds trim and AOT-compile each app, which made them the
+  # last minutes of the Build step in the .NET legs. Here they build next to the legs instead of inside them.
+  build-samples:
+    needs: build-sentry-native
+    name: Samples (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: xcode-27
+            rid: macos
+            samples: Sentry-CI-Build-Samples-macOS.slnf
+          # The MAUI sample's Windows target, which the MSBuild job also builds with msbuild.exe
+          - os: windows-latest
+            rid: win-x64
+            samples: samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj
+          # The Android and MAUI samples' Android targets on a Linux host, as the linux-x64 leg built them
+          - os: ubuntu-24.04
+            rid: linux-x64
+            samples: Sentry-CI-Build-Samples-Linux.slnf
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+        with:
+          projects: ${{ matrix.samples }}
+
+      - name: Download sentry-native (${{ matrix.rid }})
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+
+      # See build-sentry
+      - name: Get Cocoa SDK cache key
+        id: cocoa-key
+        if: runner.os == 'macOS'
+        uses: ./.github/actions/cocoa-cache-key
+
+      - name: Restore Cocoa SDK
+        id: cache-cocoa
+        if: runner.os == 'macOS' && !startsWith(github.ref_name, 'release/')
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cocoa-key.outputs.key }}
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore ${{ matrix.samples }} --nologo
+
+      - name: Build
+        run: dotnet build ${{ matrix.samples }} -c Release --no-restore --nologo -v:minimal -bl:build.binlog
+
+      - name: Save Cocoa SDK
+        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-primary-key != '' && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
+
+      - name: Upload build logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: samples-${{ matrix.rid }}-build-logs
+          path: build.binlog
+          if-no-files-found: ignore
 
   test-solution-filters:
     runs-on: ubuntu-24.04
