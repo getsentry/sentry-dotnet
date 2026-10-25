@@ -4,6 +4,10 @@ inputs:
   projects:
     description: The solution filters and project files the job builds, separated by spaces, so only the workloads they need are installed. Jobs that build everything pass Sentry.slnx.
     required: true
+  save-toolchain:
+    description: Whether to save the Windows toolchain cache on a miss. The build legs install the most workloads, so they save it.
+    required: false
+    default: 'false'
 runs:
   using: composite
 
@@ -49,8 +53,43 @@ runs:
         distribution: temurin
         java-version: '21'
 
+    # The Windows jobs keep .NET next to the workspace, see windows-dotnet-drive, so all of them on one architecture
+    # share one copy of the SDKs and workloads. The arm64 image has no Android SDK, so its jobs share one copy of that.
+    # The workload restore below still runs, and adds whatever this job needs that the cached copy lacks.
+    - name: Restore the .NET toolchain
+      id: dotnet-toolchain
+      if: runner.os == 'Windows' && env.DOTNET_INSTALL_DIR != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ env.DOTNET_INSTALL_DIR }}
+        key: dotnet-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('global.json', '.github/actions/environment/action.yml') }}
+
+    - name: Use the cached .NET toolchain
+      if: steps.dotnet-toolchain.outputs.cache-hit == 'true'
+      shell: pwsh
+      run: |
+        "DOTNET_ROOT=$env:DOTNET_INSTALL_DIR" >> $env:GITHUB_ENV
+        $env:DOTNET_INSTALL_DIR >> $env:GITHUB_PATH
+
+    - name: Restore the Android SDK
+      id: android-sdk
+      if: runner.os == 'Windows' && runner.arch == 'ARM64'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.android/sdk
+        key: android-sdk-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/actions/environment/action.yml') }}
+
+    - name: Use the cached Android SDK
+      if: steps.android-sdk.outputs.cache-hit == 'true'
+      shell: pwsh
+      run: |
+        $sdk = Join-Path $HOME '.android\sdk'
+        "ANDROID_HOME=$sdk" >> $env:GITHUB_ENV
+        "ANDROID_SDK_ROOT=$sdk" >> $env:GITHUB_ENV
+        Join-Path $sdk 'platform-tools' >> $env:GITHUB_PATH
+
     - name: Setup Android SDK
-      if: ${{ !matrix.container && env.NO_MOBILE != 'true' }}
+      if: ${{ !matrix.container && env.NO_MOBILE != 'true' && steps.android-sdk.outputs.cache-hit != 'true' }}
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
@@ -58,6 +97,7 @@ runs:
         log-accepted-android-sdk-licenses: false
 
     - name: Install .NET SDK
+      if: steps.dotnet-toolchain.outputs.cache-hit != 'true'
       uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
         global-json-file: global.json
@@ -67,7 +107,7 @@ runs:
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
-      if: ${{ runner.os != 'macOS' || runner.arch != 'ARM64' }}
+      if: ${{ (runner.os != 'macOS' || runner.arch != 'ARM64') && steps.dotnet-toolchain.outputs.cache-hit != 'true' }}
       uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
         dotnet-version: 5.0.x
@@ -105,3 +145,17 @@ runs:
           # Restore the Android test app explicitly to ensure runtime packs are available
           dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true
         fi
+
+    - name: Save the .NET toolchain
+      if: inputs.save-toolchain == 'true' && steps.dotnet-toolchain.outcome == 'success' && steps.dotnet-toolchain.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ env.DOTNET_INSTALL_DIR }}
+        key: ${{ steps.dotnet-toolchain.outputs.cache-primary-key }}
+
+    - name: Save the Android SDK
+      if: inputs.save-toolchain == 'true' && steps.android-sdk.outcome == 'success' && steps.android-sdk.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.android/sdk
+        key: ${{ steps.android-sdk.outputs.cache-primary-key }}
