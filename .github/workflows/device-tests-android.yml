@@ -98,8 +98,7 @@ jobs:
     needs: [build]
     name: Run Android API-${{ matrix.api-level }} Test (${{ matrix.tfm }})
 
-    # Requires a "larger runner", for nested virtualization support
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest
 
     strategy: &android-emulator-matrix
       fail-fast: false
@@ -176,8 +175,7 @@ jobs:
   android-integration-tests:
     name: Run Android API-${{ matrix.api-level }} Integration Test (${{ matrix.tfm }})
 
-    # Requires a "larger runner", for nested virtualization support
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest
 
     strategy: *android-emulator-matrix
     env: *android-emulator-env
