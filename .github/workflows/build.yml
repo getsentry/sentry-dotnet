@@ -337,7 +337,8 @@ jobs:
 #       # Note that when upgrading .NET versions, linux-musl may need special handling... see comments below
 #        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
-        if: ${{ (matrix.rid != 'linux-musl-x64') }}
+        # The win-arm64 integration tests run in the integration-test job
+        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'win-arm64') }}
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         env:
           SKIP_MAUI_TESTS: ${{ runner.os == 'macOS' }}
@@ -406,14 +407,29 @@ jobs:
 #        with:
 #          path: integration-test
 
-  # The MAUI cases build three Release apps, which takes 8-10 minutes on macOS, so they run next to the macOS leg
-  # against packages built here. CI_PUBLISHING_BUILD only adds desktop native libraries, which MAUI apps don't use.
-  maui-integration-test:
+  # These run integration tests next to a build leg, against packages built here from only the projects the tests
+  # use. CI_PUBLISHING_BUILD only adds desktop native libraries, which these tests don't use.
+  # - macos: the MAUI cases build three Release apps, which takes 8-10 minutes.
+  # - win-arm64: the runner has 4 cores, which the leg's unit tests keep busy, so every integration test runs here.
+  integration-test:
     needs: build-sentry-native
-    name: MAUI integration test (macos)
-    runs-on: xcode-27
+    name: Integration test (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
     env:
-      MAUI_PACKAGES: Sentry.Maui Sentry Sentry.Extensions.Logging Sentry.Bindings.Android Sentry.Bindings.Cocoa Sentry.Android.AssemblyReader
+      PACKAGES: ${{ matrix.packages }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: xcode-27
+            rid: macos
+            packages: Sentry.Maui Sentry Sentry.Extensions.Logging Sentry.Bindings.Android Sentry.Bindings.Cocoa Sentry.Android.AssemblyReader
+            tests: integration-test/cli-maui.Tests.ps1
+          - os: windows-11-arm
+            rid: win-arm64
+            packages: Sentry.Maui Sentry Sentry.Extensions.Logging Sentry.Bindings.Android Sentry.Android.AssemblyReader
+            tests: integration-test
 
     steps:
       - name: Cancel Previous Runs
@@ -425,23 +441,29 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install .NET and NuGet packages on a fast drive
+        if: runner.os == 'Windows'
+        uses: ./.github/actions/windows-dotnet-drive
+
       - name: Setup Environment
         uses: ./.github/actions/environment
 
-      - name: Download sentry-native (macos)
+      - name: Download sentry-native (${{ matrix.rid }})
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
+          enableCrossOsArchive: true
 
       - name: Get Cocoa SDK cache key
         id: cocoa-key
+        if: runner.os == 'macOS'
         uses: ./.github/actions/cocoa-cache-key
 
       - name: Restore Cocoa SDK
         id: cache-cocoa
-        if: ${{ !startsWith(github.ref_name, 'release/') }}
+        if: runner.os == 'macOS' && !startsWith(github.ref_name, 'release/')
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: modules/sentry-cocoa/Carthage
@@ -451,8 +473,9 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Build
+        shell: bash
         run: |
-          for project in $MAUI_PACKAGES; do
+          for project in $PACKAGES; do
             dotnet build "src/$project" -c Release --nologo -v:minimal
           done
 
@@ -466,15 +489,16 @@ jobs:
       # Like the build legs, pack the build outputs. Packing Sentry.Maui while building it on macOS fails with NU5026,
       # looking for the Windows target's .pri file, which isn't generated on macOS.
       - name: Create NuGet Packages
+        shell: bash
         run: |
-          for project in $MAUI_PACKAGES; do
+          for project in $PACKAGES; do
             dotnet pack "src/$project" -c Release --no-build --nologo
           done
 
       - name: Integration test
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         with:
-          path: integration-test/cli-maui.Tests.ps1
+          path: ${{ matrix.tests }}
 
   ms-build:
     needs: build-sentry-native
