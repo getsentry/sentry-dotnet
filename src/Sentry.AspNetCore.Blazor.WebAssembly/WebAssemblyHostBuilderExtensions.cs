@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
@@ -61,12 +60,13 @@ public static class WebAssemblyHostBuilderExtensions
 
         logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>, BlazorWasmOptionsSetup>();
 
-        logging.Services.AddSingleton<ILoggerProvider>(c => new SentryLoggerProvider(
-            c.GetRequiredService<IHub>(),
-            SystemClock.Clock,
-            c.GetRequiredService<IOptions<SentryBlazorOptions>>().Value.Logging));
-        logging.Services.AddSingleton<ILoggerProvider>(c => new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
-        logging.Services.TryAddSingleton<HostLoggerProvidersMarker>();
+        HostLoggerProviders.Add(
+            logging.Services,
+            events: c => new SentryLoggerProvider(
+                c.GetRequiredService<IHub>(),
+                SystemClock.Clock,
+                c.GetRequiredService<IOptions<SentryBlazorOptions>>().Value.Logging),
+            structuredLogs: c => new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
         logging.Services.AddSentry<SentryBlazorOptions>();
 
         logging.AddFilter<SentryLoggerProvider>(_ => true);

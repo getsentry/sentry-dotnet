@@ -78,7 +78,7 @@ public class SentryWebHostBuilderExtensionsTests
                 Assert.Single(c, d => d.ServiceType == typeof(IHub)))};
         yield return new object[] {
             new Action<IServiceCollection>(c =>
-                Assert.Single(c, d => d.ImplementationType == typeof(SentryAspNetCoreLoggerProvider)))};
+                Assert.Single(c, d => d.ServiceType == typeof(HostLoggerProviders)))};
         yield return new object[] {
             new Action<IServiceCollection>(c =>
                 Assert.Single(c, d => d.ImplementationType == typeof(SentryStartupFilter)))};

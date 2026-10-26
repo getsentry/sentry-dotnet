@@ -19,8 +19,12 @@ public class SentryLoggingOptions
         "section.";
 
     internal const string RedundantWithHostIntegration =
-        "Logging.AddSentry() is redundant because the host integration, such as UseSentry, already adds Sentry's " +
-        "logger providers. Its providers are disabled and its options ignored: remove the call and configure " +
+        "Logging.AddSentry() has no effect because the host integration, such as UseSentry, already adds Sentry's " +
+        "logger providers. Its options are ignored: configure logging through the host's Sentry options.";
+
+    internal const string OptionsIgnoredWithHostIntegration =
+        "Logging.AddSentry() added back the logger providers that the host integration, such as UseSentry, adds. " +
+        "They use the host's Sentry options, so the options passed to Logging.AddSentry() are ignored: configure " +
         "logging through the host's Sentry options.";
 
     /// <summary>
