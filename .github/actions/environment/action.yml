@@ -9,6 +9,52 @@ runs:
 
   steps:
 
+    # The Windows images keep .NET under Program Files, where workloads install as MSI packages, and the NuGet cache
+    # in the user profile on C:. So .NET goes next to the workspace, where workloads install as plain files. The x64
+    # runners put the workspace on D:, so the NuGet packages go there too. The arm64 runners only have C:, so the
+    # NuGet packages and TEMP go on a Dev Drive there. Defender already excludes C:\ on these images.
+    - name: Install .NET and NuGet packages on a fast drive
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $root = Split-Path $env:GITHUB_WORKSPACE
+        "DOTNET_INSTALL_DIR=$root\.dotnet" >> $env:GITHUB_ENV
+        if ($root.StartsWith('C:'))
+        {
+            try
+            {
+                # Only volumes mounted after this get no antivirus filters
+                fsutil devdrv enable /disallowAv | Out-Host
+                'create vdisk file="C:\devdrive.vhdx" maximum=81920 type=expandable', 'select vdisk file="C:\devdrive.vhdx"', 'attach vdisk', 'convert gpt', 'create partition primary' |
+                    Set-Content "$env:RUNNER_TEMP\diskpart.txt"
+                diskpart /s "$env:RUNNER_TEMP\diskpart.txt" | Out-Host
+                if ($LASTEXITCODE -ne 0) { throw "diskpart failed with exit code $LASTEXITCODE" }
+                $partition = Get-DiskImage -ImagePath 'C:\devdrive.vhdx' | Get-Disk | Get-Partition | Where-Object Type -eq 'Basic'
+                $partition | Format-Volume -DevDrive -Confirm:$false -Force | Out-Host
+                $partition | Add-PartitionAccessPath -AccessPath 'X:\'
+                # Right after the mount, trust can fail with "Access is denied" while the volume is still in use
+                for ($attempt = 1; $attempt -le 5; $attempt++)
+                {
+                    fsutil devdrv trust X: | Out-Host
+                    if ($LASTEXITCODE -eq 0) { break }
+                    Start-Sleep -Seconds 3
+                }
+                if ($LASTEXITCODE -ne 0) { Write-Warning "Couldn't mark X: as a trusted Dev Drive, so antivirus filters may still scan it" }
+                fsutil devdrv query X: | Out-Host
+                New-Item -ItemType Directory 'X:\tmp' | Out-Null
+                'TEMP=X:\tmp' >> $env:GITHUB_ENV
+                'TMP=X:\tmp' >> $env:GITHUB_ENV
+                $root = 'X:'
+            }
+            catch
+            {
+                # The Dev Drive is a speedup, so the job goes on without it
+                Write-Warning "Couldn't set up the Dev Drive, so the NuGet packages stay next to the workspace: $_"
+            }
+        }
+        "NUGET_PACKAGES=$root\.nuget\packages" >> $env:GITHUB_ENV
+        $global:LASTEXITCODE = 0
+
     - name: Set Global Environment Variables
       shell: bash
       run: |
