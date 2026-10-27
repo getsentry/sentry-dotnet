@@ -368,7 +368,7 @@ jobs:
 
       - name: Run MSBuild
         id: msbuild
-        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
+        run: msbuild Sentry-CI-Build-Windows.slnf -restore -t:Build,Pack -p:Configuration=Release -m -nr:false --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Test MSBuild
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
