@@ -319,9 +319,8 @@ jobs:
       - name: Integration test
 #       # Note that when upgrading .NET versions, linux-musl may need special handling... see comments below
 #        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
-        # TODO: Re-enable for linux-musl-x64 once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
         # The other legs' integration tests run in the integration-test job
-        if: matrix.rid == 'linux-arm64' || matrix.rid == 'linux-musl-arm64' || matrix.rid == 'macos'
+        if: matrix.rid == 'linux-arm64' || matrix.rid == 'linux-musl-x64' || matrix.rid == 'linux-musl-arm64' || matrix.rid == 'macos'
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         # The MAUI cases run in the integration-test job, against packages built there. On release branches they run
         # here too, so the packages craft publishes are the ones tested.
