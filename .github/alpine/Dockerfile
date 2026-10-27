@@ -14,7 +14,7 @@ RUN apk add curl-dev docker-cli libunwind-dev libunwind-static linux-headers ope
 RUN apk add grpc-plugins openjdk11 powershell
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV GRPC_PROTOC_PLUGIN=/usr/bin/grpc_csharp_plugin
-RUN pwsh -Command Install-Module Pester -Scope AllUsers -Force
+RUN pwsh -Command "Install-Module Pester -Scope AllUsers -Force -ErrorAction Stop"
 
 # mono (3.22+)
 RUN if ! apk add mono; then \
