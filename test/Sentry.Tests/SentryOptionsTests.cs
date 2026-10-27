@@ -7,10 +7,10 @@ using Sentry.Cocoa;
 public partial class SentryOptionsTests
 {
     [Fact]
-    public void DecompressionMethods_ByDefault_AllBitsSet()
+    public void DecompressionMethods_ByDefault_GZipAndDeflate()
     {
         var sut = new SentryOptions();
-        Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
+        Assert.Equal(DecompressionMethods.GZip | DecompressionMethods.Deflate, sut.DecompressionMethods);
     }
 
     [Fact]
