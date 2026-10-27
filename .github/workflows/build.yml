@@ -145,6 +145,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: ${{ matrix.slnf }}
 
       # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
@@ -234,7 +236,7 @@ jobs:
 
       - name: Build
         id: build
-        run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
+        run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       # Only a completed Cocoa build writes the stamp, so a failed one is never cached.
       - name: Save Cocoa SDK
@@ -249,9 +251,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.rid }}-build-logs
-          path: |
-            build.log
-            build.binlog
+          path: build.binlog
           if-no-files-found: ignore
 
       - name: Free disk space before tests
@@ -357,6 +357,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: Sentry-CI-Build-Windows.slnf
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
@@ -366,7 +368,7 @@ jobs:
 
       - name: Run MSBuild
         id: msbuild
-        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
+        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Test MSBuild
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
@@ -378,9 +380,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ runner.os }}-msbuild-logs
-          path: |
-            msbuild.log
-            msbuild.binlog
+          path: msbuild.binlog
           if-no-files-found: ignore
 
   # Unsupported Native AOT runtimes should have SentryNative auto-disabled
@@ -404,7 +404,7 @@ jobs:
 
     # This job is on the critical path, after the whole build-sentry matrix. aot.Tests.ps1 only publishes a
     # console app against the packages from the macOS build, so it needs the .NET SDK but not the full
-    # Setup Environment (Java, Android SDK, Mono, workloads).
+    # Setup Environment (Java, Android SDK, workloads).
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -459,6 +459,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: test/Sentry.TrimTest/Sentry.TrimTest.csproj test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative

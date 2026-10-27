@@ -74,6 +74,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj integration-test/net9-maui/Sentry.Maui.Device.IntegrationTestApp.csproj
 
       # See build.yml
       - name: Get Cocoa SDK cache key
