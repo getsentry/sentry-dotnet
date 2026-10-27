@@ -68,7 +68,7 @@ public class ServerFilterTests
         fixture.Hub.Received(1).CaptureCheckIn(RecurringJobFixture.MonitorSlug, CheckInStatus.Ok, checkInId, Arg.Any<TimeSpan?>());
     }
 
-    [SkippableTheory]
+    [Theory]
     [InlineData("0 */2 * * *", "Europe/Berlin", "0 */2 * * *", "Europe/Berlin")]
     [InlineData("30 0 */2 * * *", "UTC", "0 */2 * * *", "UTC")]
     [InlineData("0 0 * * MON", null, "0 0 * * MON", "UTC")]
@@ -368,7 +368,7 @@ public class ServerFilterTests
         SentryServerFilter.ToCrontab(cron).Should().Be(expected);
     }
 
-    [SkippableTheory]
+    [Theory]
     [InlineData(null, "UTC")]
     [InlineData("", "UTC")]
     [InlineData("UTC", "UTC")]

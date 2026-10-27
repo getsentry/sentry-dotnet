@@ -169,7 +169,7 @@ public class JobMonitorTests
         _fixture.Hub.ReceivedConfigureMonitorOptions("custom-slug").Should().BeNull();
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task StartAsync_JobsShareSlugWithDifferentTimeZones_CapturesCheckInWithoutMonitorConfig()
     {
         // Arrange

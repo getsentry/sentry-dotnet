@@ -107,7 +107,7 @@ public class TriggerScheduleTests
     }
 
 #if NET6_0_OR_GREATER
-    [SkippableTheory]
+    [Theory]
     [InlineData("Europe/Berlin", "Europe/Berlin")]
     [InlineData("W. Europe Standard Time", "Europe/Berlin")]
     public void ToIanaTimeZoneId_SystemTimeZone_ReturnsIanaId(string timeZoneId, string expected)
