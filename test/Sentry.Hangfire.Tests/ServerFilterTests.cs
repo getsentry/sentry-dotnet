@@ -75,8 +75,6 @@ public class ServerFilterTests
     public void OnPerforming_RecurringJobWithSendMonitorConfigEnabled_SendsMonitorConfig(
         string cron, string? timeZoneId, string expectedCrontab, string expectedTimeZone)
     {
-        Skip.If(timeZoneId is not (null or "UTC") && !TestEnvironment.HasTimeZone(timeZoneId), "No time zone database");
-
         // Arrange
         var fixture = new RecurringJobFixture { Cron = cron, TimeZoneId = timeZoneId };
         var filter = fixture.GetSut(sendMonitorConfig: true);
@@ -381,8 +379,6 @@ public class ServerFilterTests
     [InlineData("Not/A_Time_Zone", null)]
     public void ToIanaTimeZoneId_HangfireTimeZoneId_ReturnsIanaIdOrNull(string? timeZoneId, string? expected)
     {
-        Skip.If(expected is not (null or "UTC") && !TestEnvironment.HasTimeZone(timeZoneId!), "No time zone database");
-
         SentryServerFilter.ToIanaTimeZoneId(timeZoneId).Should().Be(expected);
     }
 

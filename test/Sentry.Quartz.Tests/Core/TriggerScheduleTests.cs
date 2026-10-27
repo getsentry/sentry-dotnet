@@ -112,8 +112,6 @@ public class TriggerScheduleTests
     [InlineData("W. Europe Standard Time", "Europe/Berlin")]
     public void ToIanaTimeZoneId_SystemTimeZone_ReturnsIanaId(string timeZoneId, string expected)
     {
-        Skip.If(!TestEnvironment.HasTimeZone(timeZoneId), "No time zone database");
-
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
 
         TriggerSchedule.ToIanaTimeZoneId(timeZone).Should().Be(expected);

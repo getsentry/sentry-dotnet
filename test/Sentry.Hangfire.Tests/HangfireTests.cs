@@ -64,8 +64,6 @@ public class HangfireTests : IClassFixture<HangfireFixture>
     [SkippableFact]
     public async Task ExecuteRecurringJob_SendMonitorConfigEnabled_CapturesCheckInWithMonitorConfig()
     {
-        Skip.If(!TestEnvironment.HasTimeZone("Europe/Berlin"), "No time zone database");
-
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
 
         await _fixture.TriggerRecurringJob<TestJob>("test-recurring-job-id", job => job.ExecuteRecurringJob(), "30 0 0 1 1 *", timeZone);
