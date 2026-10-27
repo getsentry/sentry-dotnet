@@ -773,11 +773,11 @@ public class SentryOptions
     /// Decompression methods accepted
     /// </summary>
     /// <remarks>
-    /// By default accepts all available compression methods supported by the platform
+    /// Defaults to <see cref="DecompressionMethods.GZip"/> and <see cref="DecompressionMethods.Deflate"/>.
+    /// Brotli is not enabled by default; add it explicitly if your Sentry endpoint requires it.
     /// </remarks>
     public DecompressionMethods DecompressionMethods { get; set; }
-    // Note the ~ enabling all bits
-        = ~DecompressionMethods.None;
+        = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
     /// <summary>
     /// The level of which to compress the <see cref="SentryEvent"/> before sending to Sentry
