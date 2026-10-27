@@ -14,7 +14,15 @@ while (-not (Get-Module -ListAvailable -Name $yamlModule) -and $retries -gt 0)
         Start-Sleep -Seconds 10
     }
     Write-Debug "The module '$yamlModule' is not installed. Installing..."
-    Install-Module -Name $yamlModule -Scope CurrentUser -Force
+    try
+    {
+        Install-Module -Name $yamlModule -Scope CurrentUser -Force
+    }
+    catch
+    {
+        # $ErrorActionPreference is Stop, so without the catch a failed download ends the script instead of retrying
+        Write-Warning "Couldn't install '$yamlModule': $_"
+    }
     $retries--
 }
 
