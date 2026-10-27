@@ -101,14 +101,14 @@ jobs:
     # Requires a "larger runner", for nested virtualization support
     runs-on: ubuntu-latest-4-cores
 
-    strategy:
+    strategy: &android-emulator-matrix
       fail-fast: false
       matrix:
         tfm: [net9.0, net10.0]
         # Must be 34+ for new apps and app updates as of August 31, 2024.
         # See https://apilevels.com/
         api-level: [34, 36]
-    env:
+    env: &android-emulator-env
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
       # We don't need the Google APIs, but the default images are not available for 32+
@@ -165,16 +165,39 @@ jobs:
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: *android-emulator-test
 
+      - name: Upload results
+        if: success() || failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
+          path: test_output
+
+  # The integration tests build and run their own app, so they run next to the device tests instead of after them
+  android-integration-tests:
+    name: Run Android API-${{ matrix.api-level }} Integration Test (${{ matrix.tfm }})
+
+    # Requires a "larger runner", for nested virtualization support
+    runs-on: ubuntu-latest-4-cores
+
+    strategy: *android-emulator-matrix
+    env: *android-emulator-env
+    steps:
+      # See https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
           projects: integration-test/net9-maui/Sentry.Maui.Device.IntegrationTestApp.csproj
-
-      - name: Select Java 21
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
-        with:
-          distribution: temurin
-          java-version: '21'
 
       - name: Checkout github-workflows
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -209,7 +232,6 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
-          path: |
-            test_output
-            integration-test/mobile-app/test_output
+          name: device-test-android-integration-${{ matrix.api-level }}-${{ matrix.tfm }}-results
+          path: integration-test/mobile-app/test_output
+          if-no-files-found: ignore
