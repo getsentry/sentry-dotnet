@@ -24,6 +24,8 @@ public static class LoggingBuilderExtensions
     /// In an app that calls <c>UseSentry</c>, which already adds the logging integration, this has no effect unless the
     /// app removed Sentry's logger providers, for example with <c>ClearProviders()</c>. It then adds back the providers
     /// that <c>UseSentry</c> added, which use the host's Sentry options.
+    /// Don't call it to add them back when <c>ILogger</c> entries already reach Sentry through another integration, such
+    /// as NLog, Serilog or log4net: each entry would then be sent twice.
     /// </remarks>
     /// <param name="builder">The builder.</param>
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder)
@@ -48,6 +50,8 @@ public static class LoggingBuilderExtensions
     /// app removed Sentry's logger providers, for example with <c>ClearProviders()</c>. It then adds back the providers
     /// that <c>UseSentry</c> added, which use the host's Sentry options, so <paramref name="optionsConfiguration"/> is
     /// ignored.
+    /// Don't call it to add them back when <c>ILogger</c> entries already reach Sentry through another integration, such
+    /// as NLog, Serilog or log4net: each entry would then be sent twice.
     /// </remarks>
     /// <param name="builder">The builder.</param>
     /// <param name="optionsConfiguration">The options configuration.</param>
