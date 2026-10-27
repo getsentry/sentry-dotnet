@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -13,6 +14,7 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
 {
     private readonly List<SentryEvent> _events = new();
     private readonly List<SentryLog> _logs = new();
+    private readonly InMemoryDiagnosticLogger _diagnosticLogger = new();
 
     public void Dispose() => SentrySdk.Close();
 
@@ -40,6 +42,17 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
         options.EnableLogs = true;
         DoNotSend(options);
     }
+
+    private void CaptureDiagnostics(SentryGenericHostOptions options)
+    {
+        Capture(options);
+        options.Debug = true;
+        options.DiagnosticLogger = _diagnosticLogger;
+    }
+
+    private IEnumerable<InMemoryDiagnosticLogger.Entry> LoggerProvidersRemovedWarnings()
+        => _diagnosticLogger.Entries.Where(entry =>
+            entry.Level == SentryLevel.Warning && entry.Message == SentryLoggingOptions.HostLoggerProvidersRemoved);
 
     private static SentryGenericHostOptions ResolveOptions(IHost host)
         => host.Services.GetRequiredService<IOptions<SentryGenericHostOptions>>().Value;
@@ -317,6 +330,64 @@ public sealed class SentryHostBuilderExtensionsTests : IDisposable
         host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MyApp.Worker").LogWarning("one logged warning");
 
         _events.Should().ContainSingle();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void UseSentry_LoggerProvidersCleared_WarnsLoggerProvidersRemoved(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(CaptureDiagnostics)
+            .ClearLoggerProviders();
+
+        using var host = testHost.Build(kind);
+
+        LoggerProvidersRemovedWarnings().Should().ContainSingle();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void UseSentry_LoggerProvidersClearedThenLoggingAddSentry_DoesNotWarn(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(CaptureDiagnostics)
+            .ClearLoggerProviders()
+            .LoggingAddSentry();
+
+        using var host = testHost.Build(kind);
+
+        LoggerProvidersRemovedWarnings().Should().BeEmpty();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void UseSentry_LoggerProvidersKept_DoesNotWarn(BuilderKind kind)
+    {
+        var testHost = new TestHost()
+            .UseSentry(CaptureDiagnostics);
+
+        using var host = testHost.Build(kind);
+
+        LoggerProvidersRemovedWarnings().Should().BeEmpty();
+    }
+
+    [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
+    public void UseSentry_LoggerFactoryReplaced_DoesNotCreateLoggerProviders(BuilderKind kind)
+    {
+        var loggerProviderCreated = false;
+        var testHost = new TestHost()
+            .UseSentry(CaptureDiagnostics)
+            .ConfigureServices(services =>
+            {
+                services.AddSingleton<ILoggerProvider>(_ =>
+                {
+                    loggerProviderCreated = true;
+                    return NullLoggerProvider.Instance;
+                });
+                services.Replace(ServiceDescriptor.Singleton<ILoggerFactory>(NullLoggerFactory.Instance));
+            });
+
+        using var host = testHost.Build(kind);
+
+        loggerProviderCreated.Should().BeFalse();
+        LoggerProvidersRemovedWarnings().Should().BeEmpty();
     }
 
     [Theory, MemberData(nameof(TestHost.Builders), MemberType = typeof(TestHost))]
