@@ -267,6 +267,12 @@ public sealed partial class SentryTarget : TargetWithContext
             return;
         }
 
+        // Must precede the reentrancy check below to avoid an infinite recursion
+        if (SentrySdkNamespaces.IsSentrySdk(logEvent.LoggerName))
+        {
+            return;
+        }
+
         if (isReentrant.Value)
         {
             HubAccessor()?.GetSentryOptions()?.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message:{logEvent.Message}");
