@@ -30,7 +30,7 @@
                 Message: message,
                 Formatted: message
               },
-              Logger: Sentry.NLog.Tests.IntegrationTests,
+              Logger: MyApp.IntegrationTests,
               Platform: csharp,
               Level: error,
               Request: {},

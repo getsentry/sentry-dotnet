@@ -317,6 +317,64 @@ public partial class SentryTargetTests
         _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
+    [Theory]
+    [InlineData("Sentry")]
+    [InlineData("Sentry.ISentryClient")]
+    [InlineData("Sentry.NLog.SentryTarget")]
+    [InlineData("Sentry.AspNetCore.SentryMiddleware")]
+    [InlineData("Sentry.Extensions.Logging.MelDiagnosticLogger")]
+    public void Log_LoggerFromSentrySdk_CaptureNotCalled(string loggerName)
+    {
+        var sut = _fixture.GetLoggerFactory().GetLogger(loggerName);
+
+        sut.Error(DefaultMessage);
+
+        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+    }
+
+    [Theory]
+    [InlineData("Sentry.Samples.AspNetCore.NLog.Program")]
+    [InlineData("Sentry.Some.Class")]
+    [InlineData("SentrySomething")]
+    public void Log_LoggerFromUserCode_CaptureCalled(string loggerName)
+    {
+        var sut = _fixture.GetLoggerFactory().GetLogger(loggerName);
+
+        sut.Error(DefaultMessage);
+
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == loggerName));
+    }
+
+    [Fact]
+    public void Log_SdkDiagnosticArrivesWhileWriting_IsIgnored()
+    {
+        var diagnosticLogger = new InMemoryDiagnosticLogger();
+        _fixture.SentryOptions.Debug = true;
+        _fixture.SentryOptions.DiagnosticLogger = diagnosticLogger;
+        var factory = _fixture.GetLoggerFactory();
+        var sdkDiagnostics = factory.GetLogger("Sentry.ISentryClient");
+        _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>())).Do(_ => sdkDiagnostics.Info("Capturing event."));
+
+        factory.GetLogger("MyApp.Service").Error(DefaultMessage);
+
+        diagnosticLogger.Entries.Should().NotContain(e => e.Message.Contains("Reentrant log event detected"));
+    }
+
+    [Fact]
+    public void Log_ApplicationLogArrivesWhileWriting_ReportsReentrancy()
+    {
+        var diagnosticLogger = new InMemoryDiagnosticLogger();
+        _fixture.SentryOptions.Debug = true;
+        _fixture.SentryOptions.DiagnosticLogger = diagnosticLogger;
+        var factory = _fixture.GetLoggerFactory();
+        var applicationLogger = factory.GetLogger("MyApp.Other");
+        _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>())).Do(_ => applicationLogger.Info("Nested"));
+
+        factory.GetLogger("MyApp.Service").Error(DefaultMessage);
+
+        diagnosticLogger.Entries.Should().Contain(e => e.Message.Contains("Reentrant log event detected"));
+    }
+
     [Fact]
     public void Log_Properties_AsExtra()
     {

@@ -28,7 +28,7 @@
               Message: message = {arg},
               Formatted: message = "arg value"
             },
-            Logger: Sentry.NLog.Tests.IntegrationTests,
+            Logger: MyApp.IntegrationTests,
             Platform: csharp,
             SentryExceptions: [
               {
@@ -99,7 +99,7 @@
               arg: arg value
             },
             Tags: {
-              logger: Sentry.NLog.Tests.IntegrationTests
+              logger: MyApp.IntegrationTests
             }
           }
         }

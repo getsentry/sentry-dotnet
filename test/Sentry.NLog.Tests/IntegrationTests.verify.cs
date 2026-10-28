@@ -48,7 +48,7 @@ public class IntegrationTests
 
             LogManager.Configuration = configuration;
 
-            var log = LogManager.GetCurrentClassLogger();
+            var log = LogManager.GetLogger("MyApp.IntegrationTests");
 
             using (ScopeContext.PushProperty("id", "myId"))
             {
@@ -93,7 +93,7 @@ public class IntegrationTests
 
             LogManager.Configuration = configuration;
 
-            var log = LogManager.GetCurrentClassLogger();
+            var log = LogManager.GetLogger("MyApp.IntegrationTests");
 
             SentrySdk.ConfigureScope(
                 scope =>
