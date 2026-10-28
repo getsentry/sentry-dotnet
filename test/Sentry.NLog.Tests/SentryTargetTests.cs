@@ -133,7 +133,7 @@ public partial class SentryTargetTests
     {
         var factory = _fixture.GetLoggerFactory();
 
-        var sut = factory.GetCurrentClassLogger();
+        var sut = factory.GetLogger("sentry");
 
         sut.Error(DefaultMessage);
         LogManager.Shutdown();
