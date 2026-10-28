@@ -400,7 +400,7 @@ public partial class AttachmentSerializationTests
         var serialized = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
-        serialized.Should().NotContain("empty.jpg");
+        serialized.Should().NotContain("empty.jpg").And.NotContain("\n\n");
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(serialized));
         using var deserialized = await Envelope.DeserializeAsync(stream);
         deserialized.Items.Should().ContainSingle()
@@ -417,7 +417,7 @@ public partial class AttachmentSerializationTests
         var serialized = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
-        serialized.Should().NotContain("empty.jpg");
+        serialized.Should().NotContain("empty.jpg").And.NotContain("\n\n");
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(serialized));
         using var deserialized = await Envelope.DeserializeAsync(stream);
         deserialized.Items.Should().ContainSingle()
