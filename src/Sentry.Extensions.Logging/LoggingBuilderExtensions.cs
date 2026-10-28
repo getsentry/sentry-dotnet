@@ -21,9 +21,9 @@ public static class LoggingBuilderExtensions
     /// Adds the Sentry logging integration.
     /// </summary>
     /// <remarks>
-    /// In an app that calls <c>UseSentry</c>, which already adds the logging integration, this has no effect unless the
-    /// app removed Sentry's logger providers, for example with <c>ClearProviders()</c>. It then adds back the providers
-    /// that <c>UseSentry</c> added, which use the host's Sentry options.
+    /// Apps that call <c>UseSentry</c> don't need this, because <c>UseSentry</c> already adds the logging integration.
+    /// If your app calls <c>ClearProviders()</c> after calling <c>UseSentry</c> that would also remove Sentry's logging
+    /// integration - in which case this method can be used to add Sentry's providers back again.
     /// </remarks>
     /// <param name="builder">The builder.</param>
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder)
@@ -44,10 +44,10 @@ public static class LoggingBuilderExtensions
     /// Adds the Sentry logging integration.
     /// </summary>
     /// <remarks>
-    /// In an app that calls <c>UseSentry</c>, which already adds the logging integration, this has no effect unless the
-    /// app removed Sentry's logger providers, for example with <c>ClearProviders()</c>. It then adds back the providers
-    /// that <c>UseSentry</c> added, which use the host's Sentry options, so <paramref name="optionsConfiguration"/> is
-    /// ignored.
+    /// Apps that call <c>UseSentry</c> don't need this, because <c>UseSentry</c> already adds the logging integration.
+    /// If your app calls <c>ClearProviders()</c> after calling <c>UseSentry</c> that would also remove Sentry's logging
+    /// integration - in which case this method can be used to add Sentry's providers back again. The providers it adds
+    /// back use the host's Sentry options, so <paramref name="optionsConfiguration"/> is ignored.
     /// </remarks>
     /// <param name="builder">The builder.</param>
     /// <param name="optionsConfiguration">The options configuration.</param>
