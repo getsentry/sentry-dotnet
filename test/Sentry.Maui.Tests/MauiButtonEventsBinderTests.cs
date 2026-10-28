@@ -57,4 +57,63 @@ public class MauiButtonEventsBinderTests
         // Assert
         Assert.Single(_fixture.Scope.Breadcrumbs);
     }
+
+    [Fact]
+    public void Button_Clicked_TextNotIncludedByDefault()
+    {
+        // Arrange
+        var button = new Button
+        {
+            StyleId = "button",
+            Text = "Save"
+        };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        // Act
+        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+
+        // Assert
+        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+        crumb.Data.Should().NotContainKey($"{nameof(Button)}.Text");
+    }
+
+    [Fact]
+    public void Button_Clicked_IncludeButtonTextInBreadcrumbs_IncludesText()
+    {
+        // Arrange
+        _fixture.Options.IncludeButtonTextInBreadcrumbs = true;
+        var button = new Button
+        {
+            StyleId = "button",
+            Text = "Save"
+        };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        // Act
+        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+
+        // Assert
+        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+        crumb.Data.Should().Contain($"{nameof(Button)}.Text", "Save");
+    }
+
+    [Fact]
+    public void Button_Clicked_IncludeTextInBreadcrumbs_IncludesText()
+    {
+        // Arrange
+        _fixture.Options.IncludeTextInBreadcrumbs = true;
+        var button = new Button
+        {
+            StyleId = "button",
+            Text = "Save"
+        };
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
+
+        // Act
+        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+
+        // Assert
+        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+        crumb.Data.Should().Contain($"{nameof(Button)}.Text", "Save");
+    }
 }

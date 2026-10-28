@@ -24,6 +24,13 @@ public class SentryMauiOptionsTests
     }
 
     [Fact]
+    public void IncludeButtonTextInBreadcrumbs_Default()
+    {
+        var options = GetSut();
+        Assert.False(options.IncludeButtonTextInBreadcrumbs);
+    }
+
+    [Fact]
     public void IncludeTitleInBreadcrumbs_Default()
     {
         var options = GetSut();

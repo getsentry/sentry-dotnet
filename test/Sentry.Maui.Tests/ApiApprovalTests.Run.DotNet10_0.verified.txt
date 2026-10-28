@@ -40,6 +40,7 @@ namespace Sentry.Maui
         public bool AttachScreenshot { get; set; }
         public bool CreateElementEventsBreadcrumbs { get; set; }
         public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
+        public bool IncludeButtonTextInBreadcrumbs { get; set; }
         public bool IncludeTextInBreadcrumbs { get; set; }
         public bool IncludeTitleInBreadcrumbs { get; set; }
         public void SetBeforeScreenshotCapture(System.Func<Sentry.SentryEvent, Sentry.SentryHint, bool> beforeCapture) { }

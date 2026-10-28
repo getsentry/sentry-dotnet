@@ -49,4 +49,44 @@ public partial class MauiEventsBinderTests
         // Assert
         Assert.Single(_fixture.Scope.Breadcrumbs);
     }
+
+    [Fact]
+    public void VisualElement_Focused_IncludeTextInBreadcrumbs_IncludesText()
+    {
+        // Arrange
+        _fixture.Options.IncludeTextInBreadcrumbs = true;
+        var entry = new Entry
+        {
+            StyleId = "entry",
+            Text = "some text"
+        };
+        _fixture.Binder.HandleVisualElementEvents(entry);
+
+        // Act
+        entry.RaiseEvent(nameof(VisualElement.Focused), new FocusEventArgs(entry, true));
+
+        // Assert
+        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+        crumb.Data.Should().Contain($"{nameof(Entry)}.Text", "some text");
+    }
+
+    [Fact]
+    public void VisualElement_Focused_IncludeButtonTextInBreadcrumbs_DoesNotIncludeText()
+    {
+        // Arrange
+        _fixture.Options.IncludeButtonTextInBreadcrumbs = true;
+        var entry = new Entry
+        {
+            StyleId = "entry",
+            Text = "some text"
+        };
+        _fixture.Binder.HandleVisualElementEvents(entry);
+
+        // Act
+        entry.RaiseEvent(nameof(VisualElement.Focused), new FocusEventArgs(entry, true));
+
+        // Assert
+        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+        crumb.Data.Should().NotContainKey($"{nameof(Entry)}.Text");
+    }
 }

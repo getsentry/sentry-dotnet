@@ -70,7 +70,9 @@ internal static class Extensions
             data.Add(prefix + nameof(ITitledElement.Title), title);
         }
 
-        if (options.IncludeTextInBreadcrumbs && element is IText { Text: { } text })
+        var includeText = options.IncludeTextInBreadcrumbs
+            || (options.IncludeButtonTextInBreadcrumbs && element is Button);
+        if (includeText && element is IText { Text: { } text })
         {
             data.Add(prefix + nameof(IText.Text), text);
         }

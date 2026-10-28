@@ -44,6 +44,15 @@ public class SentryMauiOptions : SentryLoggingOptions
     public bool IncludeTextInBreadcrumbs { get; set; }
 
     /// <summary>
+    /// Gets or sets whether <see cref="Button"/> elements will have their text included on breadcrumbs.
+    /// Unlike <see cref="IncludeTextInBreadcrumbs"/>, this doesn't include the text of other elements,
+    /// such as <see cref="Label"/> or <see cref="Entry"/>.
+    /// Use caution when enabling, as such values may contain personally identifiable information (PII).
+    /// The default is <c>false</c> (exclude).
+    /// </summary>
+    public bool IncludeButtonTextInBreadcrumbs { get; set; }
+
+    /// <summary>
     /// Gets or sets whether elements that implement <see cref="ITitledElement"/>
     /// (such as <see cref="Window"/>, <see cref="Page"/>, and others)
     /// will have their titles included on breadcrumbs.
