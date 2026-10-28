@@ -169,11 +169,9 @@ public class JobMonitorTests
         _fixture.Hub.ReceivedConfigureMonitorOptions("custom-slug").Should().BeNull();
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task StartAsync_JobsShareSlugWithDifferentTimeZones_CapturesCheckInWithoutMonitorConfig()
     {
-        Skip.If(!TestEnvironment.HasTimeZone("America/New_York"), "No time zone database");
-
         // Arrange
         _fixture.JobDetail = JobBuilder.Create<CustomSlugJob>().WithIdentity("eu", "reports").Build();
         var other = JobBuilder.Create<CustomSlugJob>().WithIdentity("us", "reports").Build();
