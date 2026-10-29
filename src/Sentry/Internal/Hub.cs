@@ -192,6 +192,16 @@ internal class Hub : IHub, IDisposable
             return NoOpTransaction.Instance;
         }
 
+        if (context.ParentSpanId is null
+            && _options.ExternalPropagationContext?.Snapshot() is { TraceId: { } externalTraceId } externalPropagationContext)
+        {
+            context = ContinueExternalTrace(context, externalTraceId, externalPropagationContext);
+            if (externalPropagationContext.IsSampled is not null)
+            {
+                dynamicSamplingContext ??= externalPropagationContext.GetDynamicSamplingContext(_options, _replaySession);
+            }
+        }
+
         bool? isSampled = null;
         double? sampleRate = null;
         DiscardReason? discardReason = null;
@@ -293,6 +303,20 @@ internal class Hub : IHub, IDisposable
         // A sampled out transaction still appears fully functional to the user
         // but will be dropped by the client and won't reach Sentry's servers.
         return transaction;
+    }
+
+    // Without a sampling decision to inherit, the transaction is a root in the external trace and samples itself.
+    private static TransactionContext ContinueExternalTrace(ITransactionContext context, SentryId traceId,
+        IExternalPropagationContext externalPropagationContext)
+    {
+        var isSampled = externalPropagationContext.IsSampled;
+        var parentSpanId = isSampled is null ? null : externalPropagationContext.SpanId;
+        return new TransactionContext(context.Name, context.Operation, context.SpanId, parentSpanId, traceId,
+            context.Description, context.Status, isSampled ?? context.IsSampled, isSampled, context.NameSource)
+        {
+            Instrumenter = (context as SpanContext)?.Instrumenter ?? Instrumenter.Sentry,
+            Origin = context.Origin
+        };
     }
 
     public void BindException(Exception exception, ISpan span)
