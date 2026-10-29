@@ -125,8 +125,6 @@
     <File Path="scripts/accept-verifier-changes.ps1" />
     <File Path="scripts/build-sentry-cocoa.sh" />
     <File Path="scripts/build-sentry-native.ps1" />
-    <File Path="scripts/bump-version.ps1" />
-    <File Path="scripts/bump-version.sh" />
     <File Path="scripts/commit-formatted-code.sh" />
     <File Path="scripts/device-test-utils.ps1" />
     <File Path="scripts/device-test.ps1" />

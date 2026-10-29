@@ -175,7 +175,11 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <inheritdoc />
-    public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger,
+    public Task SerializeAsync(Stream stream, IDiagnosticLogger? logger,
+        CancellationToken cancellationToken = default) =>
+        SerializeAsync(stream, logger, dropEmptyAttachment: false, cancellationToken);
+
+    internal async Task<bool> SerializeAsync(Stream stream, IDiagnosticLogger? logger, bool dropEmptyAttachment,
         CancellationToken cancellationToken = default)
     {
         // Always calculate the length of the payload, as Sentry will reject envelopes that have incorrect lengths
@@ -189,6 +193,11 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         await using (payloadBuffer.ConfigureAwait(false))
 #endif
         {
+            if (dropEmptyAttachment && IsEmptyAttachmentOfUnknownLength(payloadBuffer, logger))
+            {
+                return false;
+            }
+
             // Write to the outbound stream asynchronously. It's likely either an HttpRequestStream or a FileStream.
 
             // Header
@@ -199,17 +208,26 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
 
             // Payload
             await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+            return true;
         }
     }
 
     /// <inheritdoc />
-    public void Serialize(Stream stream, IDiagnosticLogger? logger)
+    public void Serialize(Stream stream, IDiagnosticLogger? logger) =>
+        Serialize(stream, logger, dropEmptyAttachment: false);
+
+    internal bool Serialize(Stream stream, IDiagnosticLogger? logger, bool dropEmptyAttachment)
     {
         // Always calculate the length of the payload, as Sentry will reject envelopes that have incorrect lengths
         // in item headers. Don't trust any previously calculated value to be correct.
         // See https://github.com/getsentry/sentry-dotnet/issues/1956
 
         using var payloadBuffer = BufferPayload(logger);
+
+        if (dropEmptyAttachment && IsEmptyAttachmentOfUnknownLength(payloadBuffer, logger))
+        {
+            return false;
+        }
 
         // Header
         var headerWithLength = Header.ToDict();
@@ -219,6 +237,18 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
 
         // Payload
         payloadBuffer.CopyTo(stream);
+        return true;
+    }
+
+    private bool IsEmptyAttachmentOfUnknownLength(MemoryStream payloadBuffer, IDiagnosticLogger? logger)
+    {
+        if (payloadBuffer.Length != 0 || TryGetLength() is not null || Payload is not BufferedStreamSerializable)
+        {
+            return false;
+        }
+
+        logger?.LogWarning("Did not add '{0}' to envelope because the attachment was empty.", TryGetFileName());
+        return true;
     }
 
     /// <inheritdoc />

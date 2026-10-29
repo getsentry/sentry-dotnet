@@ -26,7 +26,6 @@
       "samples\\Sentry.Samples.GraphQL.Server\\Sentry.Samples.GraphQL.Server.csproj",
       "samples\\Sentry.Samples.Hangfire\\Sentry.Samples.Hangfire.csproj",
       "samples\\Sentry.Samples.Log4Net\\Sentry.Samples.Log4Net.csproj",
-      "samples\\Sentry.Samples.Maui\\Sentry.Samples.Maui.csproj",
       "samples\\Sentry.Samples.ME.AI.AspNetCore\\Sentry.Samples.ME.AI.AspNetCore.csproj",
       "samples\\Sentry.Samples.ME.AI.Console\\Sentry.Samples.ME.AI.Console.csproj",
       "samples\\Sentry.Samples.ME.Logging\\Sentry.Samples.ME.Logging.csproj",
