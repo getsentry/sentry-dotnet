@@ -647,10 +647,7 @@ public class Scope : IEventLike
         _sdk?.CopyTo(clone.Sdk);
 
         // Copied directly so BeforeBreadcrumb and TagFilters don't run again
-        foreach (var breadcrumb in _breadcrumbs)
-        {
-            clone._breadcrumbs.Enqueue(breadcrumb);
-        }
+        clone._breadcrumbs.EnqueueRange(_breadcrumbs);
 
         if (_extra is { IsEmpty: false } extras)
         {

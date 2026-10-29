@@ -379,6 +379,45 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clone_Breadcrumbs_CopiedInOrderAndIndependent()
+    {
+        // Arrange
+        var scope = new Scope();
+        for (var i = 0; i < 5; i++)
+        {
+            scope.AddBreadcrumb(new Breadcrumb($"crumb {i}", "default"));
+        }
+
+        // Act
+        var clone = scope.Clone();
+        clone.AddBreadcrumb(new Breadcrumb("clone only", "default"));
+        scope.AddBreadcrumb(new Breadcrumb("original only", "default"));
+
+        // Assert
+        clone.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 0", "crumb 1", "crumb 2", "crumb 3", "crumb 4", "clone only");
+        scope.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 0", "crumb 1", "crumb 2", "crumb 3", "crumb 4", "original only");
+    }
+
+    [Fact]
+    public void Clone_MaxBreadcrumbs_AddingToCloneTrimsOldestOfCloneOnly()
+    {
+        // Arrange
+        var scope = new Scope(new SentryOptions { MaxBreadcrumbs = 3 });
+        for (var i = 0; i < 3; i++)
+        {
+            scope.AddBreadcrumb(new Breadcrumb($"crumb {i}", "default"));
+        }
+
+        // Act
+        var clone = scope.Clone();
+        clone.AddBreadcrumb(new Breadcrumb("crumb 3", "default"));
+
+        // Assert
+        clone.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 1", "crumb 2", "crumb 3");
+        scope.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 0", "crumb 1", "crumb 2");
+    }
+
+    [Fact]
     public void Clone_ScopeSyncEnabled_ObserverNotCalled()
     {
         // Arrange
