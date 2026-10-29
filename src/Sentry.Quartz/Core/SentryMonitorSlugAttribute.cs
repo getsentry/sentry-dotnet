@@ -8,8 +8,8 @@ namespace Sentry.Quartz;
 /// Jobs without this attribute are not monitored, unless <see cref="SentryQuartzOptions.MonitorAllJobs"/> is enabled.
 /// </para>
 /// <para>
-/// When no monitor slug is given, the slug is the job's key, lowercased with every run of other characters replaced
-/// by a hyphen. Jobs in the default group use only the job name: <c>reports.DailyEmail</c> becomes
+/// When no monitor slug is given, the slug is the job's group and name joined by a hyphen, normalized the way Sentry
+/// normalizes monitor slugs. Jobs in the default group use only the job name: <c>reports.DailyEmail</c> becomes
 /// <c>reports-dailyemail</c>, and <c>DEFAULT.Cleanup</c> becomes <c>cleanup</c>. Set <see cref="JobDataKey"/> in the
 /// job's or trigger's <c>JobDataMap</c> to use a different slug for that job or trigger.
 /// </para>

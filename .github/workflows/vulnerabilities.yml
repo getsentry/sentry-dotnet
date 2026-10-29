@@ -28,6 +28,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: Sentry.slnx
 
       # We only need to restore to check for vulnerable packages
       - name: Restore .NET Dependencies

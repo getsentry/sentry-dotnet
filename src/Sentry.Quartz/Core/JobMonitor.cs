@@ -1,14 +1,13 @@
 using Quartz;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry.Quartz;
 
 // Captures the check-ins of jobs with SentryMonitorSlugAttribute, or of every scheduled job with MonitorAllJobs
 internal sealed class JobMonitor
 {
-    private const int MaxSlugLength = 50;
-
     // How long the schedules of all monitored triggers are reused before they're read from the scheduler again
     internal static readonly TimeSpan TriggerSchedulesTtl = TimeSpan.FromMinutes(1);
 
@@ -369,40 +368,15 @@ internal sealed class JobMonitor
         var key = job.Key;
         if (HasIdentity(key))
         {
-            return ToSlug(key.Group == JobKey.DefaultGroup ? key.Name : key.Group + "." + key.Name);
+            return MonitorSlug.From(key.Group == JobKey.DefaultGroup ? key.Name : key.Group + "-" + key.Name);
         }
 
         fromJobType = true;
-        return ToSlug(QuartzApi.GetJobType(job).Name);
+        return MonitorSlug.From(QuartzApi.GetJobType(job).Name);
     }
 
     // Quartz names a job built without an identity with a new GUID
     internal static bool HasIdentity(JobKey key) => !Guid.TryParse(key.Name, out _);
-
-    // Produces a slug that Sentry's own slugify leaves unchanged
-    internal static string? ToSlug(string value)
-    {
-        var slug = new StringBuilder(value.Length);
-        foreach (var c in value.ToLowerInvariant())
-        {
-            if (c is >= 'a' and <= 'z' or >= '0' and <= '9' or '_')
-            {
-                slug.Append(c);
-            }
-            else if (slug.Length > 0 && slug[slug.Length - 1] != '-')
-            {
-                slug.Append('-');
-            }
-        }
-
-        var result = slug.ToString().Trim('-', '_');
-        if (result.Length > MaxSlugLength)
-        {
-            result = result.Substring(0, MaxSlugLength).Trim('-', '_');
-        }
-
-        return result.Length > 0 ? result : null;
-    }
 }
 
 internal sealed class JobCheckIn(string monitorSlug, SentryId id)
