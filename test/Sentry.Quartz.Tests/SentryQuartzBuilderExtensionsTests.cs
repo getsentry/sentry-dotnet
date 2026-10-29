@@ -64,6 +64,23 @@ public class SentryQuartzBuilderExtensionsTests
     }
 
     [Fact]
+    public async Task AddSentry_MonitorAllJobs_CapturesCheckInsForJobWithoutAttribute()
+    {
+        // Arrange
+        var second = DateTimeOffset.UtcNow.AddSeconds(3).Second;
+        var options = new SentryQuartzOptions { MonitorAllJobs = true };
+
+        // Act
+        var status = await RunUntilCheckInCompletes<NoOpJob>("Nightly Report", null, trigger => trigger
+            .WithCronSchedule($"{second} * * * * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc)), options);
+
+        // Assert
+        status.Should().Be(CheckInStatus.Ok);
+        var monitorConfig = MonitorConfigJson.Render(_hub.ReceivedConfigureMonitorOptions("nightly-report")!);
+        monitorConfig.GetProperty("schedule").GetProperty("value").GetString().Should().Be("* * * * *");
+    }
+
+    [Fact]
     public async Task AddSentry_MonitoredJob_CapturesCheckInsInJobScope()
     {
         // Arrange
@@ -89,7 +106,7 @@ public class SentryQuartzBuilderExtensionsTests
     public async Task AddSentry_JobFailsWithLoggingIntegration_CapturesExceptionOnce()
     {
         // Act
-        await RunUntilCheckInCompletes<FailingJob>("Sync", "billing", trigger => trigger.StartNow(), services => services
+        await RunUntilCheckInCompletes<FailingJob>("Sync", "billing", trigger => trigger.StartNow(), configureServices: services => services
             .AddSingleton(_hub)
             .AddLogging(logging => logging.AddSentry(options => options.InitializeSdk = false)));
 
@@ -162,9 +179,10 @@ public class SentryQuartzBuilderExtensionsTests
         string name,
         string? group,
         Action<ITriggerConfigurator<TJob>> configureTrigger,
+        SentryQuartzOptions? options = null,
         Action<IServiceCollection>? configureServices = null) where TJob : IJob
     {
-        var scheduler = await BuildScheduler<TJob>(name, group, configureTrigger, configureServices);
+        var scheduler = await BuildScheduler<TJob>(name, group, configureTrigger, options, configureServices);
         await scheduler.Start();
         try
         {
@@ -182,6 +200,7 @@ public class SentryQuartzBuilderExtensionsTests
         string name,
         string? group,
         Action<ITriggerConfigurator<TJob>> configureTrigger,
+        SentryQuartzOptions? options = null,
         Action<IServiceCollection>? configureServices = null) where TJob : IJob
     {
         var services = new ServiceCollection();
@@ -190,7 +209,7 @@ public class SentryQuartzBuilderExtensionsTests
         services.AddQuartz(properties, quartz =>
         {
             quartz.UseInMemoryStore();
-            quartz.AddSentry(new SentryQuartzOptions(), _hub);
+            quartz.AddSentry(options ?? new SentryQuartzOptions(), _hub);
 
             var jobKey = new JobKey(name, group ?? JobKey.DefaultGroup);
             quartz.AddJob<TJob>(job => job.WithIdentity(jobKey));

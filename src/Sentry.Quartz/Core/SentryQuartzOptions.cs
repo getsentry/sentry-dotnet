@@ -8,6 +8,34 @@ namespace Sentry.Quartz;
 public class SentryQuartzOptions
 {
     /// <summary>
+    /// When enabled, every job fired by a trigger whose schedule Sentry can represent sends check-ins, as if it had
+    /// <see cref="SentryMonitorSlugAttribute"/> without a monitor slug. Defaults to <c>false</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The monitor slug is the slug of the job's key, as described on <see cref="SentryMonitorSlugAttribute"/>. Jobs
+    /// built without an identity are skipped, and so are runs fired by other triggers, such as a job triggered once by
+    /// hand or a trigger with a calendar. <see cref="SendMonitorConfig"/> lists the schedules Sentry can represent.
+    /// Jobs with several triggers on different schedules are skipped, and so are jobs that share a monitor slug with
+    /// another job on a different schedule. Jobs with <see cref="SentryMonitorSlugAttribute"/> keep its settings and
+    /// still send check-ins.
+    /// </para>
+    /// <para>
+    /// To skip some jobs, add them to <see cref="ExcludedJobs"/>.
+    /// </para>
+    /// </remarks>
+    public bool MonitorAllJobs { get; set; }
+
+    /// <summary>
+    /// Jobs that <see cref="MonitorAllJobs"/> doesn't monitor. A string matches a job whose name or full key
+    /// (<c>group.name</c>) is equal to it, and a regular expression a job whose name or full key it matches.
+    /// </summary>
+    /// <remarks>
+    /// Jobs with <see cref="SentryMonitorSlugAttribute"/> are monitored even when they match.
+    /// </remarks>
+    public IList<StringOrRegex> ExcludedJobs { get; set; } = new List<StringOrRegex>();
+
+    /// <summary>
     /// When enabled, the in-progress check-in of each job with <see cref="SentryMonitorSlugAttribute"/> includes
     /// the schedule of the trigger that fired the job as the monitor config, so Sentry creates the monitor or updates
     /// its schedule. Defaults to <c>true</c>.
