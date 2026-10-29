@@ -419,7 +419,7 @@ public class ServerFilterTests
     }
 
     [Fact]
-    public void OnPerforming_MonitorAllRecurringJobsIdsShareSlugWithDifferentCron_SendsCheckInWithoutMonitorConfig()
+    public void OnPerforming_MonitorAllRecurringJobsIdsShareSlugWithDifferentCron_DoesNotCaptureCheckIn()
     {
         // Arrange
         var fixture = new RecurringJobFixture
@@ -432,6 +432,87 @@ public class ServerFilterTests
             Options = { MonitorAllRecurringJobs = true }
         };
         fixture.OtherRecurringJobs.Add(("cleanup", "0 8 * * *", null, Job.FromExpression<PlainJob>(job => job.Run())));
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+        fixture.PerformingContext.Items.Should().NotContainKey(SentryServerFilter.SentryCheckInIdKey);
+    }
+
+    [Theory]
+    [InlineData("0 0 L * *", "UTC", true)]
+    [InlineData("0 * * * *", "Not A Time Zone", true)]
+    [InlineData("0 0 L * *", "UTC", false)]
+    public void OnPerforming_MonitorAllRecurringJobsScheduleNotSupportedBySentry_DoesNotCaptureCheckIn(
+        string cron, string timeZoneId, bool sendMonitorConfig)
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture
+        {
+            AttributeSlug = null,
+            Slug = "test-recurring-job",
+            Cron = cron,
+            TimeZoneId = timeZoneId,
+            Options = { MonitorAllRecurringJobs = true }
+        };
+        var filter = fixture.GetSut(sendMonitorConfig);
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+        filter.OnPerformed(new PerformedContext(fixture.PerformingContext, null, false, null));
+
+        // Assert
+        fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+        fixture.PerformingContext.Items.Should().NotContainKey(SentryServerFilter.SentryCheckInIdKey);
+    }
+
+    [Fact]
+    public void OnPerforming_MonitorAllRecurringJobsRecurringJobDeleted_DoesNotCaptureCheckIn()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture
+        {
+            AttributeSlug = null,
+            Slug = "test-recurring-job",
+            RecurringJobExists = false,
+            Options = { MonitorAllRecurringJobs = true }
+        };
+        var filter = fixture.GetSut();
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+    }
+
+    [Fact]
+    public void OnPerforming_MonitorAllRecurringJobsSendMonitorConfigDisabled_SendsCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture
+        {
+            AttributeSlug = null,
+            Slug = "test-recurring-job",
+            Options = { MonitorAllRecurringJobs = true }
+        };
+        var filter = fixture.GetSut(sendMonitorConfig: false);
+
+        // Act
+        filter.OnPerforming(fixture.PerformingContext);
+
+        // Assert
+        fixture.AssertCheckInSentWithoutMonitorConfig();
+    }
+
+    [Fact]
+    public void OnPerforming_MonitorAllRecurringJobsAttributeWithScheduleNotSupportedBySentry_SendsCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture { Cron = "0 0 L * *", Options = { MonitorAllRecurringJobs = true } };
         var filter = fixture.GetSut();
 
         // Act
