@@ -765,34 +765,105 @@ public class JobMonitorTests
         checkIn!.MonitorSlug.Should().Be("daily-email");
     }
 
-    [Fact]
-    public async Task StartAsync_MonitorAllJobsJobHasTriggersWithDifferentSchedules_CapturesCheckInWithoutMonitorConfig()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task StartAsync_MonitorAllJobsJobHasTriggersWithDifferentSchedules_CapturesNothing(bool sendMonitorConfig)
     {
         // Arrange
         _fixture.Options.MonitorAllJobs = true;
+        _fixture.Options.SendMonitorConfig = sendMonitorConfig;
         _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
         _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 18 * * ?", _fixture.JobDetail)));
 
         // Act
-        await _fixture.StartAsync();
+        var checkIn = await _fixture.StartAsync();
 
         // Assert
+        checkIn.Should().BeNull();
+        _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+        _fixture.Logger.Entries.Should().Contain(e => e.Message.Contains("MonitorAllJobs only monitors"));
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsJobHasTriggersWithSameSchedule_CapturesCheckInWithMonitorConfig()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 12 * * ?", _fixture.JobDetail)));
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsSendMonitorConfigDisabled_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.Options.SendMonitorConfig = false;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
         _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
     }
 
     [Fact]
-    public async Task StartAsync_MonitorAllJobsOtherJobWithoutAttributeSharesSlug_CapturesCheckInWithoutMonitorConfig()
+    public async Task StartAsync_MonitorAllJobsAttributeJobHasTriggersWithDifferentSchedules_CapturesCheckInWithoutMonitorConfig()
     {
         // Arrange
         _fixture.Options.MonitorAllJobs = true;
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 18 * * ?", _fixture.JobDetail)));
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsOtherJobWithoutAttributeSharesSlug_CapturesNothing()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
         var other = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "Reports").Build();
         _fixture.OtherTriggers.Add((other, CronTrigger("0 0 18 * * ?", other)));
 
         // Act
-        await _fixture.StartAsync();
+        var checkIn = await _fixture.StartAsync();
 
         // Assert
-        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+        checkIn.Should().BeNull();
+        _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsConfigureMonitorOptionsSetsSchedule_CapturesCheckInWithThatSchedule()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.Options.ConfigureMonitorOptions = (_, options) => options.Interval(5, SentryMonitorInterval.Minute);
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+        _fixture.OtherTriggers.Add((_fixture.JobDetail, CronTrigger("0 0 18 * * ?", _fixture.JobDetail)));
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().NotBeNull();
     }
 
     [Fact]

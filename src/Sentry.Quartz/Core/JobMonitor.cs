@@ -54,9 +54,27 @@ internal sealed class JobMonitor
                 return null;
             }
 
-            configureMonitorOptions = _options.SendMonitorConfig && attribute.SendMonitorConfig
-                ? await GetMonitorConfigAsync(context, monitorSlug, cancellationToken).ConfigureAwait(false)
-                : null;
+            var monitoredByDefault = ReferenceEquals(attribute, DefaultAttribute);
+            bool hasNoSchedule;
+            if (_options.SendMonitorConfig && attribute.SendMonitorConfig)
+            {
+                configureMonitorOptions = await GetMonitorConfigAsync(context, monitorSlug, cancellationToken)
+                    .ConfigureAwait(false);
+                hasNoSchedule = configureMonitorOptions is null;
+            }
+            else
+            {
+                configureMonitorOptions = null;
+                hasNoSchedule = monitoredByDefault
+                    && await GetTriggerScheduleAsync(context, monitorSlug, cancellationToken).ConfigureAwait(false) is null;
+            }
+
+            if (monitoredByDefault && hasNoSchedule)
+            {
+                Logger?.LogDebug("Skipping the check-in for job '{0}'. MonitorAllJobs only monitors jobs whose " +
+                                 "schedule Sentry supports.", context.JobDetail.Key);
+                return null;
+            }
         }
         catch (Exception e)
         {
