@@ -169,6 +169,7 @@ public class JobMonitorTests
         _fixture.Hub.ReceivedConfigureMonitorOptions("custom-slug").Should().BeNull();
     }
 
+#if NET6_0_OR_GREATER
     [Fact]
     public async Task StartAsync_JobsShareSlugWithDifferentTimeZones_CapturesCheckInWithoutMonitorConfig()
     {
@@ -184,6 +185,7 @@ public class JobMonitorTests
         // Assert
         _fixture.Hub.ReceivedConfigureMonitorOptions("custom-slug").Should().BeNull();
     }
+#endif
 
     [Fact]
     public async Task StartAsync_JobsShareSlugWithSameConvertedSchedule_CapturesCheckInWithMonitorConfig()
