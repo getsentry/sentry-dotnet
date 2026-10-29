@@ -91,7 +91,8 @@ BeforeAll {
         }
 
         # We need to remove the package from cache or it won't re resolved properly
-        Remove-Item -Path ~/.nuget/packages/$($name.ToLower())/$packageVersion -Recurse -Force -ErrorAction SilentlyContinue
+        $packagesDir = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { "$HOME/.nuget/packages" }
+        Remove-Item -Path "$packagesDir/$($name.ToLower())/$packageVersion" -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     function ResetLocalPackages()
@@ -110,7 +111,7 @@ BeforeAll {
             Write-Host "::group::${action}ing $project"
             try
             {
-                dotnet $action $project -flp:logfile=build.log `
+                dotnet $action $project `
                     -c Release `
                     --nologo `
                     --framework $TargetFramework `

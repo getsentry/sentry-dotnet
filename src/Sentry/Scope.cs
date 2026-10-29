@@ -100,13 +100,15 @@ public class Scope : IEventLike
         set => _request = value;
     }
 
-    private readonly SentryContexts _contexts = new();
+    // The contexts, tags, extras, attachments and SDK version are created lazily as most scopes
+    // (e.g. those created by pushing a scope) never use them and they are comparatively expensive to allocate.
+    private SentryContexts? _contexts;
 
     /// <inheritdoc />
     public SentryContexts Contexts
     {
-        get => _contexts;
-        set => _contexts.ReplaceWith(value);
+        get => LazyInitializer.EnsureInitialized(ref _contexts, static () => new())!;
+        set => Contexts.ReplaceWith(value);
     }
 
     // Internal for testing.
@@ -254,8 +256,10 @@ public class Scope : IEventLike
 
     internal SessionUpdate? SessionUpdate { get; set; }
 
+    private SdkVersion? _sdk;
+
     /// <inheritdoc />
-    public SdkVersion Sdk { get; } = new();
+    public SdkVersion Sdk => LazyInitializer.EnsureInitialized(ref _sdk, static () => new())!;
 
     /// <inheritdoc />
     public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
@@ -265,22 +269,28 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _extra = new();
+    private ConcurrentDictionary<string, object?>? _extra;
+
+    private ConcurrentDictionary<string, object?> ExtraStore => LazyInitializer.EnsureInitialized(ref _extra, static () => new())!;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
+    public IReadOnlyDictionary<string, object?> Extra => ExtraStore;
 
-    private readonly ConcurrentDictionary<string, string> _tags = new();
+    private ConcurrentDictionary<string, string>? _tags;
+
+    private ConcurrentDictionary<string, string> TagStore => LazyInitializer.EnsureInitialized(ref _tags, static () => new())!;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags;
+    public IReadOnlyDictionary<string, string> Tags => TagStore;
 
-    private readonly ConcurrentBagLite<SentryAttachment> _attachments = new();
+    private ConcurrentBagLite<SentryAttachment>? _attachments;
+
+    private ConcurrentBagLite<SentryAttachment> AttachmentStore => LazyInitializer.EnsureInitialized(ref _attachments, static () => new())!;
 
     /// <summary>
     /// Attachments.
     /// </summary>
-    public IReadOnlyCollection<SentryAttachment> Attachments => _attachments;
+    public IReadOnlyCollection<SentryAttachment> Attachments => AttachmentStore;
 
     /// <summary>
     /// Creates a scope with the specified options.
@@ -354,7 +364,7 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public void SetExtra(string key, object? value)
     {
-        _extra[key] = value;
+        ExtraStore[key] = value;
         ScopeObserver?.SetExtra(key, value);
     }
 
@@ -366,14 +376,14 @@ public class Scope : IEventLike
             return;
         }
 
-        _tags[key] = value;
+        TagStore[key] = value;
         ScopeObserver?.SetTag(key, value);
     }
 
     /// <inheritdoc />
     public void UnsetTag(string key)
     {
-        _tags.TryRemove(key, out _);
+        _tags?.TryRemove(key, out _);
         ScopeObserver?.UnsetTag(key);
     }
 
@@ -382,7 +392,7 @@ public class Scope : IEventLike
     /// </summary>
     public void AddAttachment(SentryAttachment attachment)
     {
-        _attachments.Add(attachment);
+        AttachmentStore.Add(attachment);
         ScopeObserver?.AddAttachment(attachment);
     }
 
@@ -402,15 +412,15 @@ public class Scope : IEventLike
     {
         Level = default;
         Request = new();
-        Contexts.Clear();
+        _contexts?.Clear();
         User = new();
         Environment = default;
         TransactionName = default;
         Transaction = default;
         Fingerprint = Array.Empty<string>();
         ClearBreadcrumbs();
-        _extra.Clear();
-        _tags.Clear();
+        _extra?.Clear();
+        _tags?.Clear();
         ClearAttachments();
         PropagationContext = new();
     }
@@ -420,7 +430,7 @@ public class Scope : IEventLike
     /// </summary>
     public void ClearAttachments()
     {
-        _attachments.Clear();
+        _attachments?.Clear();
         ScopeObserver?.ClearAttachments();
     }
 
@@ -463,23 +473,29 @@ public class Scope : IEventLike
             other.AddBreadcrumb(breadcrumb);
         }
 
-        foreach (var (key, value) in Extra)
+        if (_extra is { } extras)
         {
-            if (!other.Extra.ContainsKey(key))
+            foreach (var (key, value) in extras)
             {
-                other.SetExtra(key, value);
+                if (!other.Extra.ContainsKey(key))
+                {
+                    other.SetExtra(key, value);
+                }
             }
         }
 
-        foreach (var (key, value) in Tags)
+        if (_tags is { } tags)
         {
-            if (!other.Tags.ContainsKey(key))
+            foreach (var (key, value) in tags)
             {
-                other.SetTag(key, value);
+                if (!other.Tags.ContainsKey(key))
+                {
+                    other.SetTag(key, value);
+                }
             }
         }
 
-        Contexts.CopyTo(other.Contexts);
+        _contexts?.CopyTo(other.Contexts);
         Request.CopyTo(other.Request);
         User.CopyTo(other.User);
 
@@ -487,15 +503,18 @@ public class Scope : IEventLike
         other.TransactionName ??= TransactionName;
         other.Level ??= Level;
 
-        if (other.Sdk.Name is null && other.Sdk.Version is null)
+        if (_sdk is { } sdk)
         {
-            other.Sdk.Name = Sdk.Name;
-            other.Sdk.Version = Sdk.Version;
-        }
+            if (other.Sdk.Name is null && other.Sdk.Version is null)
+            {
+                other.Sdk.Name = sdk.Name;
+                other.Sdk.Version = sdk.Version;
+            }
 
-        foreach (var package in Sdk.InternalPackages)
-        {
-            other.Sdk.AddPackage(package);
+            foreach (var package in sdk.InternalPackages)
+            {
+                other.Sdk.AddPackage(package);
+            }
         }
     }
 
@@ -515,10 +534,13 @@ public class Scope : IEventLike
         other.Transaction ??= Transaction;
         other.SessionUpdate ??= SessionUpdate;
 
-        foreach (var attachment in Attachments)
+        if (_attachments is { } attachments)
         {
-            // Set the attachment directly to avoid triggering a scope sync
-            other._attachments.Add(attachment);
+            foreach (var attachment in attachments)
+            {
+                // Set the attachment directly to avoid triggering a scope sync
+                other.AttachmentStore.Add(attachment);
+            }
         }
     }
 
@@ -550,29 +572,35 @@ public class Scope : IEventLike
             clone.User = user.Clone();
         }
 
-        Contexts.CopyTo(clone.Contexts);
-        Request.CopyTo(clone.Request);
-        Sdk.CopyTo(clone.Sdk);
+        _contexts?.CopyTo(clone.Contexts);
+        _request?.CopyTo(clone.Request);
+        _sdk?.CopyTo(clone.Sdk);
 
         // Copied directly so BeforeBreadcrumb and TagFilters don't run again
-        foreach (var breadcrumb in _breadcrumbs)
+        clone._breadcrumbs.EnqueueRange(_breadcrumbs);
+
+        if (_extra is { IsEmpty: false } extras)
         {
-            clone._breadcrumbs.Enqueue(breadcrumb);
+            foreach (var (key, value) in extras)
+            {
+                clone.ExtraStore[key] = value;
+            }
         }
 
-        foreach (var (key, value) in _extra)
+        if (_tags is { IsEmpty: false } tags)
         {
-            clone._extra[key] = value;
+            foreach (var (key, value) in tags)
+            {
+                clone.TagStore[key] = value;
+            }
         }
 
-        foreach (var (key, value) in _tags)
+        if (_attachments is { IsEmpty: false } attachments)
         {
-            clone._tags[key] = value;
-        }
-
-        foreach (var attachment in _attachments)
-        {
-            clone._attachments.Add(attachment);
+            foreach (var attachment in attachments)
+            {
+                clone.AttachmentStore.Add(attachment);
+            }
         }
 
         foreach (var processor in EventProcessors)

@@ -7,12 +7,6 @@ on:
       - 'test/Sentry.Testing/ApiExtensions.cs'
       - '.github/workflows/verify-api.yml'
 
-# Serialize with format-code.yml so the two auto-commit workflows can't race
-# each other's git push on the same PR branch.
-concurrency:
-  group: pr-auto-commit-${{ github.event.pull_request.number }}
-  cancel-in-progress: false
-
 jobs:
   run-api-tests:
     name: Run API Approval Tests (${{ matrix.rid }})
@@ -50,6 +44,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: ${{ matrix.slnf }}
 
       - name: Restore sentry-native cache
         id: cache-native
@@ -131,6 +127,11 @@ jobs:
     needs: run-api-tests
     runs-on: ubuntu-24.04
     if: github.event.pull_request.head.repo.full_name == github.repository
+    # Serialize with format-code.yml so the two auto-commit jobs can't race each other's git push
+    # on the same PR branch. Only the pushing job is in the group, so the API tests don't wait.
+    concurrency:
+      group: pr-auto-commit-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
     permissions:
       contents: write
       pull-requests: write

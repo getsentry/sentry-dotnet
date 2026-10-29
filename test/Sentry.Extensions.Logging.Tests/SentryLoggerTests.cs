@@ -172,6 +172,88 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void Log_MatchingFilter_DoesNotFormatMessage()
+    {
+        // Arrange
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => true);
+        var formatted = false;
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Log(LogLevel.Information, default, "state", null, (_, _) =>
+        {
+            formatted = true;
+            return "message";
+        });
+
+        // Assert
+        formatted.Should().BeFalse();
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_FromSentry_DoesNotFormatMessage()
+    {
+        // Arrange
+        _fixture.CategoryName = "Sentry.ISentryClient";
+        var formatted = false;
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Log(LogLevel.Information, default, "state", null, (_, _) =>
+        {
+            formatted = true;
+            return "message";
+        });
+
+        // Assert
+        formatted.Should().BeFalse();
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_BelowMinimumLevels_DoesNotFormatMessage()
+    {
+        // Arrange
+        var formatted = false;
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Log(LogLevel.Debug, default, "state", null, (_, _) =>
+        {
+            formatted = true;
+            return "message";
+        });
+
+        // Assert
+        formatted.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Log_EventAndBreadcrumbLevelsBothMet_FormatsMessageOnce()
+    {
+        // Arrange
+        var count = 0;
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Log(LogLevel.Critical, default, "state", null, (_, _) =>
+        {
+            count++;
+            return "formatted message";
+        });
+
+        // Assert
+        count.Should().Be(1);
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == "formatted message"));
+        _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be("formatted message");
+    }
+
+    [Fact]
     public void LogCritical_MatchingFilter_DoesNotCapturesEvent()
     {
         const string expected = "message";

@@ -7,15 +7,14 @@ on:
       - 'samples/**'
       - '.github/workflows/format-code.yml'
 
-# Serialize with verify-api.yml so the two auto-commit workflows can't race
-# each other's git push on the same PR branch.
-concurrency:
-  group: pr-auto-commit-${{ github.event.pull_request.number }}
-  cancel-in-progress: false
-
 jobs:
   format-code:
     name: Format Code
+    # Serialize with the commit job in verify-api.yml so the two auto-commit jobs can't race each
+    # other's git push on the same PR branch.
+    concurrency:
+      group: pr-auto-commit-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
     # Run on 'macos' because Linux is missing the `ios` workload: https://github.com/dotnet/runtime/issues/85505
     # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
     runs-on: xcode-27
@@ -29,12 +28,11 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: Sentry.slnx
 
       - name: Restore .NET Dependencies
-        # We should be able to get rid of the restore here, if we install the correct workloads in actions/environment
-        run: |
-          dotnet workload restore
-          dotnet restore Sentry.slnx --nologo
+        run: dotnet restore Sentry.slnx --nologo
 
       - name: Format Code
         # We exclude `./**/*OptionsSetup.cs` from the format because the tool struggles with

@@ -1,3 +1,5 @@
+using Sentry.Internal;
+
 namespace Sentry.Hangfire;
 
 /// <summary>
@@ -23,4 +25,50 @@ public class SentryHangfireOptions
     /// </para>
     /// </remarks>
     public bool SendMonitorConfig { get; set; } = true;
+
+    /// <summary>
+    /// When enabled, every recurring job sends check-ins, not only jobs marked with
+    /// <see cref="SentryMonitorSlugAttribute"/>. The monitor slug is the recurring job ID, normalized the way Sentry
+    /// normalizes monitor slugs: lowercased, accents removed, spaces and dashes turned into <c>-</c>, other characters
+    /// dropped, and cut to 50 characters. Defaults to <c>false</c>.
+    /// </summary>
+    /// <remarks>
+    /// Recurring jobs whose schedule Sentry can't represent are skipped, and so are recurring jobs that share a monitor
+    /// slug with another recurring job on a different schedule. <see cref="SendMonitorConfig"/> lists the schedules
+    /// Sentry can represent. Jobs marked with <see cref="SentryMonitorSlugAttribute"/> keep their monitor slug and
+    /// still send check-ins. Use <see cref="ExcludedRecurringJobs"/> to leave out some recurring jobs.
+    /// </remarks>
+    public bool MonitorAllRecurringJobs { get; set; }
+
+    /// <summary>
+    /// Recurring jobs that <see cref="MonitorAllRecurringJobs"/> doesn't send check-ins for. A string matches a
+    /// recurring job whose ID is equal to it, and a regular expression a recurring job whose ID it matches.
+    /// </summary>
+    /// <remarks>
+    /// Jobs marked with <see cref="SentryMonitorSlugAttribute"/> still send check-ins.
+    /// </remarks>
+    public IList<StringOrRegex> ExcludedRecurringJobs { get; set; } = new List<StringOrRegex>();
+
+    internal string? GetRecurringJobSlug(string recurringJobId)
+    {
+        if (!MonitorAllRecurringJobs || IsExcluded(recurringJobId))
+        {
+            return null;
+        }
+
+        return MonitorSlug.From(recurringJobId);
+    }
+
+    private bool IsExcluded(string recurringJobId)
+    {
+        foreach (var pattern in ExcludedRecurringJobs)
+        {
+            if (pattern.Regex is { } regex ? regex.IsMatch(recurringJobId) : pattern.ToString() == recurringJobId)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

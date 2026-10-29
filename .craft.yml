@@ -1,8 +1,19 @@
-minVersion: 2.26.3
-changelogPolicy: auto
-preReleaseCommand: bash scripts/bump-version.sh
+minVersion: 3.0.0
+changelog:
+  policy: auto
+versioning:
+  policy: auto
 targets:
   - name: nuget
+    # Craft reads Sentry.slnx and the project files to find our packages, and publishes each one as
+    # its own target in dependency order, so a retried release only pushes the packages that failed.
+    # It doesn't evaluate MSBuild: the test apps with their own Directory.Build.props look packable
+    # to it, so they're excluded by name. A package that the filters miss is silently not published:
+    # run `craft targets` after adding a package or a test app and check the list.
+    workspaces: true
+    solutionPath: Sentry.slnx
+    includeWorkspaces: '/^Sentry/'
+    excludeWorkspaces: '/(TrimTest|CrashableApp)$/'
   - name: github
   - name: registry
     # Every package carries name/packageUrl/mainDocsUrl so craft can create the registry entry
@@ -92,3 +103,11 @@ targets:
         name: Sentry.Profiling
         packageUrl: https://www.nuget.org/packages/Sentry.Profiling
         mainDocsUrl: https://docs.sentry.io/platforms/dotnet/profiling/
+      nuget:Sentry.Quartz:
+        name: Sentry.Quartz
+        packageUrl: https://www.nuget.org/packages/Sentry.Quartz
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/crons/quartz/
+      nuget:Sentry.Quartz3:
+        name: Sentry.Quartz3
+        packageUrl: https://www.nuget.org/packages/Sentry.Quartz3
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/crons/quartz/

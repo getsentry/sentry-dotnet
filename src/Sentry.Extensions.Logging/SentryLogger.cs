@@ -73,12 +73,12 @@ internal sealed class SentryLogger : ILogger
             return;
         }
 
-        var message = formatter?.Invoke(state, exception);
-
         if (IsFromSentry() || IsEfExceptionMessage(eventId) || IsFiltered(logLevel, eventId, exception))
         {
             return;
         }
+
+        var message = formatter?.Invoke(state, exception);
 
         if (ShouldCaptureEvent(logLevel))
         {
@@ -206,7 +206,17 @@ internal sealed class SentryLogger : ILogger
         LogLevel logLevel,
         EventId eventId,
         Exception? exception)
-        => _options.Filters.Any(f => IsFiltered(f, logLevel, eventId, exception));
+    {
+        foreach (var filter in _options.Filters)
+        {
+            if (IsFiltered(filter, logLevel, eventId, exception))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private bool IsFiltered(
         ILogEntryFilter filter,
