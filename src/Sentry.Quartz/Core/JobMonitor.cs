@@ -162,9 +162,9 @@ internal sealed class JobMonitor
             return false;
         }
 
-        // Only jobs that run on a schedule, and whose key stays the same across restarts
+        // Only jobs on a schedule Sentry can represent, and whose key stays the same across restarts
         var key = context.JobDetail.Key;
-        if (!RunsOnSchedule(context.Trigger) || !HasIdentity(key))
+        if (!HasSentrySchedule(context.Trigger) || !HasIdentity(key))
         {
             return false;
         }
@@ -182,8 +182,8 @@ internal sealed class JobMonitor
     private bool IsMonitoredByDefault(IJobDetail job) =>
         _options.MonitorAllJobs && HasIdentity(job.Key) && !IsExcluded(job.Key);
 
-    private static bool RunsOnSchedule(ITrigger trigger) =>
-        trigger is ICronTrigger or ISimpleTrigger { RepeatCount: not 0 };
+    private static bool HasSentrySchedule(ITrigger trigger) =>
+        TriggerSchedule.ToSchedule(trigger) is not null;
 
     private bool IsExcluded(JobKey key)
     {
@@ -256,7 +256,7 @@ internal sealed class JobMonitor
                 keys.Add(trigger.Key);
 
                 // Triggers whose runs aren't monitored, or whose schedule isn't sent, don't change the monitor
-                var attribute = GetAttribute(QuartzApi.GetJobType(job)) ?? (RunsOnSchedule(trigger) ? DefaultAttribute : null);
+                var attribute = GetAttribute(QuartzApi.GetJobType(job)) ?? DefaultAttribute;
                 if (attribute is not { SendMonitorConfig: true }
                     || TriggerSchedule.ToSchedule(trigger) is not { } schedule
                     || GetMonitorSlug(job, trigger, attribute) is not { } slug)

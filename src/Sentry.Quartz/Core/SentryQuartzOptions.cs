@@ -8,13 +8,14 @@ namespace Sentry.Quartz;
 public class SentryQuartzOptions
 {
     /// <summary>
-    /// When enabled, every job fired by a cron trigger or a repeating simple trigger sends check-ins, as if it had
+    /// When enabled, every job fired by a trigger whose schedule Sentry can represent sends check-ins, as if it had
     /// <see cref="SentryMonitorSlugAttribute"/> without a monitor slug. Defaults to <c>false</c>.
     /// </summary>
     /// <remarks>
     /// <para>
     /// The monitor slug is the slug of the job's key, as described on <see cref="SentryMonitorSlugAttribute"/>. Jobs
-    /// built without an identity and runs fired by other triggers, such as a job triggered once by hand, are skipped.
+    /// built without an identity are skipped, and so are runs fired by other triggers, such as a job triggered once by
+    /// hand or a trigger with a calendar. <see cref="SendMonitorConfig"/> lists the schedules Sentry can represent.
     /// Jobs with <see cref="SentryMonitorSlugAttribute"/> keep its settings.
     /// </para>
     /// <para>

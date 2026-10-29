@@ -619,6 +619,59 @@ public class JobMonitorTests
     }
 
     [Fact]
+    public async Task StartAsync_MonitorAllJobsScheduleSentryCantRepresent_CapturesNothing()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+        _fixture.Trigger = TriggerBuilder.Create()
+            .WithCronSchedule("0 0 12 L * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
+            .Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn.Should().BeNull();
+        _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsSimpleTriggerWithRepeatCount_CapturesNothing()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.JobDetail = JobBuilder.Create<NoOpJob>().WithIdentity("DailyEmail", "reports").Build();
+        _fixture.Trigger = TriggerBuilder.Create()
+            .WithSimpleSchedule(schedule => schedule.WithInterval(TimeSpan.FromMinutes(15)).WithRepeatCount(3))
+            .Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn.Should().BeNull();
+        _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(default!, default);
+    }
+
+    [Fact]
+    public async Task StartAsync_MonitorAllJobsAttributeWithScheduleSentryCantRepresent_CapturesCheckInWithoutMonitorConfig()
+    {
+        // Arrange
+        _fixture.Options.MonitorAllJobs = true;
+        _fixture.Trigger = TriggerBuilder.Create()
+            .WithCronSchedule("0 0 12 L * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc))
+            .Build();
+
+        // Act
+        var checkIn = await _fixture.StartAsync();
+
+        // Assert
+        checkIn!.MonitorSlug.Should().Be("reports-dailyemail");
+        _fixture.Hub.ReceivedConfigureMonitorOptions("reports-dailyemail").Should().BeNull();
+    }
+
+    [Fact]
     public async Task StartAsync_MonitorAllJobsWithoutIdentity_CapturesNothing()
     {
         // Arrange
