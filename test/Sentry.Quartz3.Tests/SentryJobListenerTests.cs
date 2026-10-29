@@ -53,6 +53,22 @@ public class SentryJobListenerTests
     }
 
     [Fact]
+    public async Task JobWasExecuted_JobCancelled_CapturesErrorCheckIn()
+    {
+        // Arrange
+        var sut = GetSut();
+        var context = GetContext<MonitoredJob>();
+        context.CancellationToken.Returns(new CancellationToken(canceled: true));
+        await sut.JobToBeExecuted(context);
+
+        // Act
+        await sut.JobWasExecuted(context, null);
+
+        // Assert
+        _hub.Received(1).CaptureCheckIn("cleanup", CheckInStatus.Error, _hub.ReceivedInProgressCheckInId("cleanup"), _jobRunTime);
+    }
+
+    [Fact]
     public async Task JobToBeExecuted_ConfigureMonitorOptions_ReceivesListenerContext()
     {
         // Arrange

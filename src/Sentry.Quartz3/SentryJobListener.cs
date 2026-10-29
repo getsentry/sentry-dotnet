@@ -65,7 +65,9 @@ public class SentryJobListener : IJobListener
         if (_checkIns.TryGetValue(context, out var checkIn))
         {
             _checkIns.Remove(context);
-            _monitor.Finish(checkIn, failed: jobException is not null, context.JobRunTime);
+            // Quartz swallows a cancelled job's OperationCanceledException and passes no exception here
+            _monitor.Finish(checkIn, failed: jobException is not null || context.CancellationToken.IsCancellationRequested,
+                context.JobRunTime);
         }
 
         return Task.CompletedTask;
