@@ -33,9 +33,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v11.0'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="11.0.0-rc.2.26504.105" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="11.0.0-rc.2.26504.105" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="11.0.0-rc.2.26504.105" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="11.0.0-rc.3.26522.148" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="11.0.0-rc.3.26522.148" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="11.0.0-rc.3.26522.148" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v10.0'">
