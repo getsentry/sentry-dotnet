@@ -41,7 +41,7 @@ internal class SentryServerFilter : IServerFilter
 
     public void OnPerforming(PerformingContext context)
     {
-        var monitorSlug = GetMonitorSlug(context);
+        var (monitorSlug, recurringJobId) = GetMonitorSlug(context);
         if (monitorSlug is null)
         {
             var jobType = context.BackgroundJob.Job.Type;
@@ -52,7 +52,18 @@ internal class SentryServerFilter : IServerFilter
             return;
         }
 
-        var checkInId = CaptureInProgressCheckIn(context, monitorSlug);
+        var monitoredByDefault = recurringJobId is not null;
+        var schedule = _options.SendMonitorConfig || monitoredByDefault
+            ? GetRecurringJobSchedule(context, monitorSlug)
+            : null;
+        if (monitoredByDefault && schedule is null)
+        {
+            _logger?.LogDebug("Skipping creating a check-in for recurring job '{0}'. MonitorAllRecurringJobs only " +
+                              "monitors jobs whose schedule Sentry supports.", recurringJobId);
+            return;
+        }
+
+        var checkInId = CaptureInProgressCheckIn(monitorSlug, _options.SendMonitorConfig ? schedule : null);
 
         // Note that we may be overwriting context.Items[SentryCheckInIdKey] here, which is intentional. If that happens
         // then implicitly OnPerforming was called previously with the same context, but we never made it to OnPerformed
@@ -61,30 +72,33 @@ internal class SentryServerFilter : IServerFilter
         context.Items[SentryMonitorSlugKey] = monitorSlug;
     }
 
-    private string? GetMonitorSlug(PerformContext context)
+    // The recurring job ID is set only when MonitorAllRecurringJobs supplies the slug.
+    private (string? MonitorSlug, string? RecurringJobId) GetMonitorSlug(PerformContext context)
     {
         var monitorSlug = context.GetJobParameter<string>(SentryMonitorSlugKey);
         if (monitorSlug is not null || !_options.MonitorAllRecurringJobs)
         {
-            return monitorSlug;
+            return (monitorSlug, null);
         }
 
         try
         {
             var recurringJobId = context.GetJobParameter<string>(RecurringJobIdKey);
-            return string.IsNullOrEmpty(recurringJobId) ? null : _options.GetRecurringJobSlug(recurringJobId!);
+            return string.IsNullOrEmpty(recurringJobId) || _options.GetRecurringJobSlug(recurringJobId!) is not { } slug
+                ? (null, null)
+                : (slug, recurringJobId);
         }
         catch (Exception e)
         {
             _logger?.LogError(e, "Failed to read the recurring job ID of job '{0}'.", context.BackgroundJob.Id);
-            return null;
+            return (null, null);
         }
     }
 
-    private SentryId CaptureInProgressCheckIn(PerformingContext context, string monitorSlug)
+    private SentryId CaptureInProgressCheckIn(string monitorSlug, (string Crontab, string TimeZone)? schedule)
     {
         Action<SentryMonitorOptions>? configureMonitorOptions = null;
-        if (_options.SendMonitorConfig && GetRecurringJobSchedule(context, monitorSlug) is (var crontab, var timeZone))
+        if (schedule is (var crontab, var timeZone))
         {
             configureMonitorOptions = options =>
             {

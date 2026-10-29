@@ -33,8 +33,10 @@ public class SentryHangfireOptions
     /// dropped, and cut to 50 characters. Defaults to <c>false</c>.
     /// </summary>
     /// <remarks>
-    /// Jobs marked with <see cref="SentryMonitorSlugAttribute"/> keep their monitor slug.
-    /// Use <see cref="ExcludedRecurringJobs"/> to leave out some recurring jobs.
+    /// Recurring jobs whose schedule Sentry can't represent are skipped, and so are recurring jobs that share a monitor
+    /// slug with another recurring job on a different schedule. <see cref="SendMonitorConfig"/> lists the schedules
+    /// Sentry can represent. Jobs marked with <see cref="SentryMonitorSlugAttribute"/> keep their monitor slug and
+    /// still send check-ins. Use <see cref="ExcludedRecurringJobs"/> to leave out some recurring jobs.
     /// </remarks>
     public bool MonitorAllRecurringJobs { get; set; }
 
