@@ -17,6 +17,27 @@ internal class ConcurrentQueueLite<T> : IReadOnlyCollection<T>
             _queue.Add(item);
         }
     }
+
+    /// <summary>
+    /// Appends all the items in <paramref name="source"/> to this queue.
+    /// Intended for populating a queue that is not yet shared with other threads.
+    /// </summary>
+    public void EnqueueRange(ConcurrentQueueLite<T> source)
+    {
+        lock (source._queue)
+        {
+            if (source._queue.Count == 0)
+            {
+                return;
+            }
+
+            lock (_queue)
+            {
+                _queue.AddRange(source._queue);
+            }
+        }
+    }
+
     public bool TryDequeue([NotNullWhen(true)] out T? item)
     {
         lock (_queue)

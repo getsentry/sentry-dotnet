@@ -181,7 +181,7 @@ public class ScopeTests
         string[] copied =
         [
             "Options", "OnEvaluating", "Level", "_request", "_contexts", "_user", "Release", "Distribution",
-            "Environment", "_fallbackTransactionName", "_transaction", "PropagationContext", "SessionUpdate", "Sdk",
+            "Environment", "_fallbackTransactionName", "_transaction", "PropagationContext", "SessionUpdate", "_sdk",
             "Fingerprint", "_breadcrumbs", "_extra", "_tags", "_attachments", "_lazyEventProcessors",
             "_lazyTransactionProcessors", "_lazyExceptionProcessors",
         ];
@@ -196,6 +196,76 @@ public class ScopeTests
             .Select(f => f.Name.TrimStart('<').Split('>')[0]);
 
         fields.Should().BeEquivalentTo(copied.Concat(notCopied));
+    }
+
+    [Fact]
+    public void Clone_PopulatedScope_CollectionsAreCopiedAndIndependent()
+    {
+        // Arrange
+        var scope = new Scope();
+        scope.SetTag("tag", "value");
+        scope.SetExtra("extra", "value");
+        scope.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([1]), "file.txt", null));
+        scope.Contexts["context"] = "value";
+
+        // Act
+        var clone = scope.Clone();
+        clone.SetTag("other-tag", "other-value");
+        clone.SetExtra("other-extra", "other-value");
+        clone.Contexts["other-context"] = "other-value";
+        clone.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([2]), "other.txt", null));
+
+        // Assert
+        clone.Tags.Should().Contain("tag", "value");
+        clone.Extra.Should().Contain("extra", "value");
+        clone.Attachments.Should().HaveCount(2);
+        clone.Contexts.Should().ContainKey("context");
+
+        scope.Tags.Should().NotContainKey("other-tag");
+        scope.Extra.Should().NotContainKey("other-extra");
+        scope.Contexts.Should().NotContainKey("other-context");
+        scope.Attachments.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void LazyCollections_ConcurrentAccess_ReturnSameInstance()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        // Act
+        var results = Enumerable.Range(0, 64)
+            .AsParallel()
+            .WithDegreeOfParallelism(16)
+            .Select(_ => (Tags: scope.Tags, Extra: scope.Extra, Attachments: scope.Attachments, Contexts: scope.Contexts, Sdk: scope.Sdk))
+            .ToArray();
+
+        // Assert
+        results.Select(r => r.Tags).Distinct().Should().ContainSingle();
+        results.Select(r => r.Extra).Distinct().Should().ContainSingle();
+        results.Select(r => r.Attachments).Distinct().Should().ContainSingle();
+        results.Select(r => r.Contexts).Distinct().Should().ContainSingle();
+        results.Select(r => r.Sdk).Distinct().Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Clone_Breadcrumbs_CopiedInOrderAndIndependent()
+    {
+        // Arrange
+        var scope = new Scope();
+        for (var i = 0; i < 5; i++)
+        {
+            scope.AddBreadcrumb(new Breadcrumb($"crumb {i}", "default"));
+        }
+
+        // Act
+        var clone = scope.Clone();
+        clone.AddBreadcrumb(new Breadcrumb("clone only", "default"));
+        scope.AddBreadcrumb(new Breadcrumb("original only", "default"));
+
+        // Assert
+        clone.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 0", "crumb 1", "crumb 2", "crumb 3", "crumb 4", "clone only");
+        scope.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 0", "crumb 1", "crumb 2", "crumb 3", "crumb 4", "original only");
     }
 
     [Fact]
