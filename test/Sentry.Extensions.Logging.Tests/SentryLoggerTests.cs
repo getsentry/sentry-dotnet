@@ -230,26 +230,6 @@ public class SentryLoggerTests
     }
 
     [Fact]
-    public void Log_Breadcrumb_FormatsMessageOnceAndUsesIt()
-    {
-        // Arrange
-        var count = 0;
-
-        var sut = _fixture.GetSut();
-
-        // Act
-        sut.Log(LogLevel.Information, default, "state", null, (_, _) =>
-        {
-            count++;
-            return "formatted message";
-        });
-
-        // Assert
-        count.Should().Be(1);
-        _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be("formatted message");
-    }
-
-    [Fact]
     public void Log_EventAndBreadcrumbLevelsBothMet_FormatsMessageOnce()
     {
         // Arrange

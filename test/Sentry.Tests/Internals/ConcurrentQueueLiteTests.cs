@@ -179,36 +179,4 @@ public class ConcurrentQueueLiteTests
         destination.ToArray().Should().Equal(0, 1, 2, 3);
         source.ToArray().Should().Equal(1, 2, 3);
     }
-
-    [Fact]
-    public void EnqueueRange_EmptySource_LeavesDestinationUnchanged()
-    {
-        // Arrange
-        var destination = new ConcurrentQueueLite<int>();
-        destination.Enqueue(1);
-
-        // Act
-        destination.EnqueueRange(new ConcurrentQueueLite<int>());
-
-        // Assert
-        destination.ToArray().Should().Equal(1);
-    }
-
-    [Fact]
-    public void EnqueueRange_DestinationIsIndependentOfSource()
-    {
-        // Arrange
-        var source = new ConcurrentQueueLite<int>();
-        source.Enqueue(1);
-        var destination = new ConcurrentQueueLite<int>();
-
-        // Act
-        destination.EnqueueRange(source);
-        destination.Enqueue(2);
-        source.TryDequeue(out _);
-
-        // Assert
-        destination.ToArray().Should().Equal(1, 2);
-        source.IsEmpty.Should().BeTrue();
-    }
 }

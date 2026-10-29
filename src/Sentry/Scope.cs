@@ -107,17 +107,7 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public SentryContexts Contexts
     {
-        get
-        {
-            var contexts = _contexts;
-            if (contexts is null)
-            {
-                contexts = new SentryContexts();
-                contexts = Interlocked.CompareExchange(ref _contexts, contexts, null) ?? contexts;
-            }
-
-            return contexts;
-        }
+        get => LazyInitializer.EnsureInitialized(ref _contexts, static () => new())!;
         set => Contexts.ReplaceWith(value);
     }
 
@@ -283,20 +273,7 @@ public class Scope : IEventLike
     private SdkVersion? _sdk;
 
     /// <inheritdoc />
-    public SdkVersion Sdk
-    {
-        get
-        {
-            var sdk = _sdk;
-            if (sdk is null)
-            {
-                sdk = new SdkVersion();
-                sdk = Interlocked.CompareExchange(ref _sdk, sdk, null) ?? sdk;
-            }
-
-            return sdk;
-        }
-    }
+    public SdkVersion Sdk => LazyInitializer.EnsureInitialized(ref _sdk, static () => new())!;
 
     /// <inheritdoc />
     public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
@@ -308,60 +285,21 @@ public class Scope : IEventLike
 
     private ConcurrentDictionary<string, object?>? _extra;
 
-    private ConcurrentDictionary<string, object?> ExtraStore
-    {
-        get
-        {
-            var extra = _extra;
-            if (extra is null)
-            {
-                extra = new ConcurrentDictionary<string, object?>();
-                extra = Interlocked.CompareExchange(ref _extra, extra, null) ?? extra;
-            }
-
-            return extra;
-        }
-    }
+    private ConcurrentDictionary<string, object?> ExtraStore => LazyInitializer.EnsureInitialized(ref _extra, static () => new())!;
 
     /// <inheritdoc />
     public IReadOnlyDictionary<string, object?> Extra => ExtraStore;
 
     private ConcurrentDictionary<string, string>? _tags;
 
-    private ConcurrentDictionary<string, string> TagStore
-    {
-        get
-        {
-            var tags = _tags;
-            if (tags is null)
-            {
-                tags = new ConcurrentDictionary<string, string>();
-                tags = Interlocked.CompareExchange(ref _tags, tags, null) ?? tags;
-            }
-
-            return tags;
-        }
-    }
+    private ConcurrentDictionary<string, string> TagStore => LazyInitializer.EnsureInitialized(ref _tags, static () => new())!;
 
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => TagStore;
 
     private ConcurrentBagLite<SentryAttachment>? _attachments;
 
-    private ConcurrentBagLite<SentryAttachment> AttachmentStore
-    {
-        get
-        {
-            var attachments = _attachments;
-            if (attachments is null)
-            {
-                attachments = new ConcurrentBagLite<SentryAttachment>();
-                attachments = Interlocked.CompareExchange(ref _attachments, attachments, null) ?? attachments;
-            }
-
-            return attachments;
-        }
-    }
+    private ConcurrentBagLite<SentryAttachment> AttachmentStore => LazyInitializer.EnsureInitialized(ref _attachments, static () => new())!;
 
     /// <summary>
     /// Attachments.

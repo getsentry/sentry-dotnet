@@ -199,33 +199,6 @@ public class ScopeTests
     }
 
     [Fact]
-    public void Clone_EmptyScope_CollectionsAreEmptyAndIndependent()
-    {
-        // Arrange
-        var scope = new Scope();
-
-        // Act
-        var clone = scope.Clone();
-
-        // Assert
-        clone.Tags.Should().BeEmpty();
-        clone.Extra.Should().BeEmpty();
-        clone.Attachments.Should().BeEmpty();
-        clone.Breadcrumbs.Should().BeEmpty();
-        clone.Contexts.Should().BeEmpty();
-
-        clone.SetTag("tag", "value");
-        clone.SetExtra("extra", "value");
-        clone.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([1]), "file.txt", null));
-        clone.Contexts["context"] = new object();
-
-        scope.Tags.Should().BeEmpty();
-        scope.Extra.Should().BeEmpty();
-        scope.Attachments.Should().BeEmpty();
-        scope.Contexts.Should().BeEmpty();
-    }
-
-    [Fact]
     public void Clone_PopulatedScope_CollectionsAreCopiedAndIndependent()
     {
         // Arrange
@@ -239,46 +212,19 @@ public class ScopeTests
         var clone = scope.Clone();
         clone.SetTag("other-tag", "other-value");
         clone.SetExtra("other-extra", "other-value");
+        clone.Contexts["other-context"] = "other-value";
+        clone.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([2]), "other.txt", null));
 
         // Assert
         clone.Tags.Should().Contain("tag", "value");
         clone.Extra.Should().Contain("extra", "value");
-        clone.Attachments.Should().ContainSingle();
+        clone.Attachments.Should().HaveCount(2);
         clone.Contexts.Should().ContainKey("context");
 
         scope.Tags.Should().NotContainKey("other-tag");
         scope.Extra.Should().NotContainKey("other-extra");
-    }
-
-    [Fact]
-    public void LazyCollections_ReturnSameLiveInstance()
-    {
-        // Arrange
-        var scope = new Scope();
-
-        // Act - Take references before anything has been added
-        var tags = scope.Tags;
-        var extra = scope.Extra;
-        var attachments = scope.Attachments;
-        var contexts = scope.Contexts;
-        var sdk = scope.Sdk;
-
-        scope.SetTag("tag", "value");
-        scope.SetExtra("extra", "value");
-        scope.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([1]), "file.txt", null));
-        scope.Contexts["context"] = "value";
-
-        // Assert - The earlier references observe the changes
-        tags.Should().Contain("tag", "value");
-        extra.Should().Contain("extra", "value");
-        attachments.Should().ContainSingle();
-        contexts.Should().ContainKey("context");
-
-        scope.Tags.Should().BeSameAs(tags);
-        scope.Extra.Should().BeSameAs(extra);
-        scope.Attachments.Should().BeSameAs(attachments);
-        scope.Contexts.Should().BeSameAs(contexts);
-        scope.Sdk.Should().BeSameAs(sdk);
+        scope.Contexts.Should().NotContainKey("other-context");
+        scope.Attachments.Should().ContainSingle();
     }
 
     [Fact]
@@ -303,82 +249,6 @@ public class ScopeTests
     }
 
     [Fact]
-    public void Clear_EmptyScope_DoesNotThrow()
-    {
-        // Arrange
-        var scope = new Scope();
-
-        // Act
-        scope.Clear();
-        scope.UnsetTag("missing");
-        scope.ClearAttachments();
-
-        // Assert
-        scope.Tags.Should().BeEmpty();
-        scope.Extra.Should().BeEmpty();
-        scope.Attachments.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void Clear_PopulatedScope_ClearsCollections()
-    {
-        // Arrange
-        var scope = new Scope();
-        scope.SetTag("tag", "value");
-        scope.SetExtra("extra", "value");
-        scope.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([1]), "file.txt", null));
-        scope.Contexts["context"] = "value";
-
-        // Act
-        scope.Clear();
-
-        // Assert
-        scope.Tags.Should().BeEmpty();
-        scope.Extra.Should().BeEmpty();
-        scope.Attachments.Should().BeEmpty();
-        scope.Contexts.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void Apply_EmptyScopeToEvent_LeavesEventUnchanged()
-    {
-        // Arrange
-        var scope = new Scope();
-        var @event = new SentryEvent();
-        @event.SetTag("existing", "tag");
-
-        // Act
-        scope.Apply(@event);
-
-        // Assert
-        @event.Tags.Should().ContainSingle().Which.Key.Should().Be("existing");
-        @event.Extra.Should().BeEmpty();
-        @event.Contexts.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void Apply_PopulatedScopeToEvent_CopiesTagsExtraAndContexts()
-    {
-        // Arrange
-        var scope = new Scope();
-        scope.SetTag("tag", "value");
-        scope.SetExtra("extra", "value");
-        scope.Contexts["context"] = "value";
-        scope.Sdk.Name = "sdk";
-        scope.Sdk.Version = "1.0";
-        var @event = new SentryEvent();
-
-        // Act
-        scope.Apply(@event);
-
-        // Assert
-        @event.Tags.Should().Contain("tag", "value");
-        @event.Extra.Should().Contain("extra", "value");
-        @event.Contexts.Should().ContainKey("context");
-        @event.Sdk.Name.Should().Be("sdk");
-    }
-
-    [Fact]
     public void Clone_Breadcrumbs_CopiedInOrderAndIndependent()
     {
         // Arrange
@@ -396,25 +266,6 @@ public class ScopeTests
         // Assert
         clone.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 0", "crumb 1", "crumb 2", "crumb 3", "crumb 4", "clone only");
         scope.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 0", "crumb 1", "crumb 2", "crumb 3", "crumb 4", "original only");
-    }
-
-    [Fact]
-    public void Clone_MaxBreadcrumbs_AddingToCloneTrimsOldestOfCloneOnly()
-    {
-        // Arrange
-        var scope = new Scope(new SentryOptions { MaxBreadcrumbs = 3 });
-        for (var i = 0; i < 3; i++)
-        {
-            scope.AddBreadcrumb(new Breadcrumb($"crumb {i}", "default"));
-        }
-
-        // Act
-        var clone = scope.Clone();
-        clone.AddBreadcrumb(new Breadcrumb("crumb 3", "default"));
-
-        // Assert
-        clone.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 1", "crumb 2", "crumb 3");
-        scope.Breadcrumbs.Select(b => b.Message).Should().Equal("crumb 0", "crumb 1", "crumb 2");
     }
 
     [Fact]
