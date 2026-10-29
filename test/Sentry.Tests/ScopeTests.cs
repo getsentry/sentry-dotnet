@@ -181,7 +181,7 @@ public class ScopeTests
         string[] copied =
         [
             "Options", "OnEvaluating", "Level", "_request", "_contexts", "_user", "Release", "Distribution",
-            "Environment", "_fallbackTransactionName", "_transaction", "PropagationContext", "SessionUpdate", "Sdk",
+            "Environment", "_fallbackTransactionName", "_transaction", "PropagationContext", "SessionUpdate", "_sdk",
             "Fingerprint", "_breadcrumbs", "_extra", "_tags", "_attachments", "_lazyEventProcessors",
             "_lazyTransactionProcessors", "_lazyExceptionProcessors",
         ];
@@ -196,6 +196,186 @@ public class ScopeTests
             .Select(f => f.Name.TrimStart('<').Split('>')[0]);
 
         fields.Should().BeEquivalentTo(copied.Concat(notCopied));
+    }
+
+    [Fact]
+    public void Clone_EmptyScope_CollectionsAreEmptyAndIndependent()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        // Act
+        var clone = scope.Clone();
+
+        // Assert
+        clone.Tags.Should().BeEmpty();
+        clone.Extra.Should().BeEmpty();
+        clone.Attachments.Should().BeEmpty();
+        clone.Breadcrumbs.Should().BeEmpty();
+        clone.Contexts.Should().BeEmpty();
+
+        clone.SetTag("tag", "value");
+        clone.SetExtra("extra", "value");
+        clone.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([1]), "file.txt", null));
+        clone.Contexts["context"] = new object();
+
+        scope.Tags.Should().BeEmpty();
+        scope.Extra.Should().BeEmpty();
+        scope.Attachments.Should().BeEmpty();
+        scope.Contexts.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Clone_PopulatedScope_CollectionsAreCopiedAndIndependent()
+    {
+        // Arrange
+        var scope = new Scope();
+        scope.SetTag("tag", "value");
+        scope.SetExtra("extra", "value");
+        scope.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([1]), "file.txt", null));
+        scope.Contexts["context"] = "value";
+
+        // Act
+        var clone = scope.Clone();
+        clone.SetTag("other-tag", "other-value");
+        clone.SetExtra("other-extra", "other-value");
+
+        // Assert
+        clone.Tags.Should().Contain("tag", "value");
+        clone.Extra.Should().Contain("extra", "value");
+        clone.Attachments.Should().ContainSingle();
+        clone.Contexts.Should().ContainKey("context");
+
+        scope.Tags.Should().NotContainKey("other-tag");
+        scope.Extra.Should().NotContainKey("other-extra");
+    }
+
+    [Fact]
+    public void LazyCollections_ReturnSameLiveInstance()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        // Act - Take references before anything has been added
+        var tags = scope.Tags;
+        var extra = scope.Extra;
+        var attachments = scope.Attachments;
+        var contexts = scope.Contexts;
+        var sdk = scope.Sdk;
+
+        scope.SetTag("tag", "value");
+        scope.SetExtra("extra", "value");
+        scope.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([1]), "file.txt", null));
+        scope.Contexts["context"] = "value";
+
+        // Assert - The earlier references observe the changes
+        tags.Should().Contain("tag", "value");
+        extra.Should().Contain("extra", "value");
+        attachments.Should().ContainSingle();
+        contexts.Should().ContainKey("context");
+
+        scope.Tags.Should().BeSameAs(tags);
+        scope.Extra.Should().BeSameAs(extra);
+        scope.Attachments.Should().BeSameAs(attachments);
+        scope.Contexts.Should().BeSameAs(contexts);
+        scope.Sdk.Should().BeSameAs(sdk);
+    }
+
+    [Fact]
+    public void LazyCollections_ConcurrentAccess_ReturnSameInstance()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        // Act
+        var results = Enumerable.Range(0, 64)
+            .AsParallel()
+            .WithDegreeOfParallelism(16)
+            .Select(_ => (Tags: scope.Tags, Extra: scope.Extra, Attachments: scope.Attachments, Contexts: scope.Contexts, Sdk: scope.Sdk))
+            .ToArray();
+
+        // Assert
+        results.Select(r => r.Tags).Distinct().Should().ContainSingle();
+        results.Select(r => r.Extra).Distinct().Should().ContainSingle();
+        results.Select(r => r.Attachments).Distinct().Should().ContainSingle();
+        results.Select(r => r.Contexts).Distinct().Should().ContainSingle();
+        results.Select(r => r.Sdk).Distinct().Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Clear_EmptyScope_DoesNotThrow()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        // Act
+        scope.Clear();
+        scope.UnsetTag("missing");
+        scope.ClearAttachments();
+
+        // Assert
+        scope.Tags.Should().BeEmpty();
+        scope.Extra.Should().BeEmpty();
+        scope.Attachments.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Clear_PopulatedScope_ClearsCollections()
+    {
+        // Arrange
+        var scope = new Scope();
+        scope.SetTag("tag", "value");
+        scope.SetExtra("extra", "value");
+        scope.AddAttachment(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent([1]), "file.txt", null));
+        scope.Contexts["context"] = "value";
+
+        // Act
+        scope.Clear();
+
+        // Assert
+        scope.Tags.Should().BeEmpty();
+        scope.Extra.Should().BeEmpty();
+        scope.Attachments.Should().BeEmpty();
+        scope.Contexts.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Apply_EmptyScopeToEvent_LeavesEventUnchanged()
+    {
+        // Arrange
+        var scope = new Scope();
+        var @event = new SentryEvent();
+        @event.SetTag("existing", "tag");
+
+        // Act
+        scope.Apply(@event);
+
+        // Assert
+        @event.Tags.Should().ContainSingle().Which.Key.Should().Be("existing");
+        @event.Extra.Should().BeEmpty();
+        @event.Contexts.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Apply_PopulatedScopeToEvent_CopiesTagsExtraAndContexts()
+    {
+        // Arrange
+        var scope = new Scope();
+        scope.SetTag("tag", "value");
+        scope.SetExtra("extra", "value");
+        scope.Contexts["context"] = "value";
+        scope.Sdk.Name = "sdk";
+        scope.Sdk.Version = "1.0";
+        var @event = new SentryEvent();
+
+        // Act
+        scope.Apply(@event);
+
+        // Assert
+        @event.Tags.Should().Contain("tag", "value");
+        @event.Extra.Should().Contain("extra", "value");
+        @event.Contexts.Should().ContainKey("context");
+        @event.Sdk.Name.Should().Be("sdk");
     }
 
     [Fact]
