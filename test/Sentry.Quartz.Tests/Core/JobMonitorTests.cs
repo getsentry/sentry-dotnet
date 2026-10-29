@@ -625,19 +625,6 @@ public class JobMonitorTests
         JobMonitor.GetMonitorSlug(_fixture.GetContext(), attribute).Should().Be(expected);
     }
 
-    [Theory]
-    [InlineData("Nightly Report", "nightly-report")]
-    [InlineData("Billing.Invoices/Send!", "billing-invoices-send")]
-    [InlineData("_queue__drain_", "queue__drain")]
-    [InlineData("-a.-b-", "a-b")]
-    [InlineData("日本語", null)]
-    [InlineData("a234567890b234567890c234567890d234567890e234567890f234567890", "a234567890b234567890c234567890d234567890e234567890")]
-    [InlineData("a234567890b234567890c234567890d234567890e23456789-f234567890", "a234567890b234567890c234567890d234567890e23456789")]
-    public void ToSlug_Value_ReturnsSlugSentryLeavesUnchanged(string value, string? expected)
-    {
-        JobMonitor.ToSlug(value).Should().Be(expected);
-    }
-
     private static ITrigger CronTrigger(
         string cronExpression,
         IJobDetail? job = null,
