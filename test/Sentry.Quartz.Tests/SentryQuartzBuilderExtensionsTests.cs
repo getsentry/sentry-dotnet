@@ -1,9 +1,10 @@
 using System.Collections.Specialized;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Sentry.AspNetCore;
-using Sentry.Extensions.Logging;
 
 namespace Sentry.Quartz.Tests;
 
@@ -105,35 +106,37 @@ public class SentryQuartzBuilderExtensionsTests
     [Fact]
     public async Task AddSentry_JobFailsWithLoggingIntegration_CapturesExceptionOnce()
     {
+        // Arrange
+        // The logging integration sends to the global hub
+        using var _ = SentrySdk.UseHub(_hub);
+
         // Act
         await RunUntilCheckInCompletes<FailingJob>("Sync", "billing", trigger => trigger.StartNow(), configureServices: services => services
-            .AddSingleton(_hub)
             .AddLogging(logging => logging.AddSentry()));
 
         // Assert
-        // Quartz also logs the job's own exception, which Sentry drops as the same exception instance
-        var exceptions = _hub.ReceivedCalls()
-            .Where(call => call.GetMethodInfo().Name == nameof(IHub.CaptureEvent))
-            .Select(call => ((SentryEvent)call.GetArguments()[0]!).Exception)
-            .ToList();
-        exceptions.Should().NotBeEmpty();
-        exceptions.Should().AllSatisfy(exception => exception.Should().BeOfType<InvalidOperationException>()
-            .And.BeSameAs(exceptions[0]));
+        AssertJobExceptionCapturedOnce();
     }
 
     [Fact]
-    public void AddSentry_LoggingOptionsOfAnyType_GetLogEntryFilter()
+    public async Task AddSentry_JobFailsWithAspNetCoreUseSentry_CapturesExceptionOnce()
     {
         // Arrange
-        var services = new ServiceCollection();
-        services.AddQuartz(quartz => quartz.AddSentry(new SentryQuartzOptions(), _hub));
+        using var host = new HostBuilder()
+            .ConfigureWebHost(web => web.UseSentry().Configure(_ => { }))
+            .ConfigureServices(services =>
+            {
+                services.AddSingleton(_hub);
+                AddScheduler<FailingJob>(services, "Sync", "billing", trigger => trigger.StartNow());
+            })
+            .Build();
+        var scheduler = await host.Services.GetRequiredService<ISchedulerFactory>().GetScheduler();
 
         // Act
-        using var provider = services.BuildServiceProvider();
+        await RunUntilCheckInCompletes(scheduler);
 
         // Assert
-        provider.GetServices<IConfigureOptions<SentryLoggingOptions>>().Should().ContainSingle();
-        provider.GetServices<IConfigureOptions<SentryAspNetCoreOptions>>().Should().ContainSingle();
+        AssertJobExceptionCapturedOnce();
     }
 
     [Fact]
@@ -180,9 +183,11 @@ public class SentryQuartzBuilderExtensionsTests
         string? group,
         Action<ITriggerConfigurator<TJob>> configureTrigger,
         SentryQuartzOptions? options = null,
-        Action<IServiceCollection>? configureServices = null) where TJob : IJob
+        Action<IServiceCollection>? configureServices = null) where TJob : IJob =>
+        await RunUntilCheckInCompletes(await BuildScheduler<TJob>(name, group, configureTrigger, options, configureServices));
+
+    private async Task<CheckInStatus> RunUntilCheckInCompletes(IScheduler scheduler)
     {
-        var scheduler = await BuildScheduler<TJob>(name, group, configureTrigger, options, configureServices);
         await scheduler.Start();
         try
         {
@@ -205,6 +210,19 @@ public class SentryQuartzBuilderExtensionsTests
     {
         var services = new ServiceCollection();
         configureServices?.Invoke(services);
+        AddScheduler(services, name, group, configureTrigger, options);
+
+        var provider = services.BuildServiceProvider();
+        return await provider.GetRequiredService<ISchedulerFactory>().GetScheduler();
+    }
+
+    private void AddScheduler<TJob>(
+        IServiceCollection services,
+        string name,
+        string? group,
+        Action<ITriggerConfigurator<TJob>> configureTrigger,
+        SentryQuartzOptions? options = null) where TJob : IJob
+    {
         var properties = new NameValueCollection { ["quartz.scheduler.instanceName"] = Guid.NewGuid().ToString() };
         services.AddQuartz(properties, quartz =>
         {
@@ -215,9 +233,18 @@ public class SentryQuartzBuilderExtensionsTests
             quartz.AddJob<TJob>(job => job.WithIdentity(jobKey));
             quartz.AddTrigger<TJob>(trigger => configureTrigger(trigger.ForJob(jobKey)));
         });
+    }
 
-        var provider = services.BuildServiceProvider();
-        return await provider.GetRequiredService<ISchedulerFactory>().GetScheduler();
+    // Quartz also logs the job's own exception, which Sentry drops as the same exception instance
+    private void AssertJobExceptionCapturedOnce()
+    {
+        var exceptions = _hub.ReceivedCalls()
+            .Where(call => call.GetMethodInfo().Name == nameof(IHub.CaptureEvent))
+            .Select(call => ((SentryEvent)call.GetArguments()[0]!).Exception)
+            .ToList();
+        exceptions.Should().NotBeEmpty();
+        exceptions.Should().AllSatisfy(exception => exception.Should().BeOfType<InvalidOperationException>()
+            .And.BeSameAs(exceptions[0]));
     }
 
     private sealed class UnrelatedOptions
