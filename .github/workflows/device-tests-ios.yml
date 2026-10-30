@@ -28,6 +28,8 @@ on:
       - 'test/Sentry.Testing/**'
       - 'test/Sentry.Testing.CrashableApp/**'
       - 'test/AndroidTestApp/**'
+      # Referenced by Sentry.Maui.Tests
+      - 'src/Sentry.Extensions.Hosting/**'
       # Integration tests
       - 'integration-test/android.Tests.ps1'
       - 'integration-test/ios.Tests.ps1'
