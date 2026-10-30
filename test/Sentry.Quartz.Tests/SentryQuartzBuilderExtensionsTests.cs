@@ -108,7 +108,7 @@ public class SentryQuartzBuilderExtensionsTests
         // Act
         await RunUntilCheckInCompletes<FailingJob>("Sync", "billing", trigger => trigger.StartNow(), configureServices: services => services
             .AddSingleton(_hub)
-            .AddLogging(logging => logging.AddSentry(options => options.InitializeSdk = false)));
+            .AddLogging(logging => logging.AddSentry()));
 
         // Assert
         // Quartz also logs the job's own exception, which Sentry drops as the same exception instance
