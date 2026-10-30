@@ -261,14 +261,6 @@ jobs:
           path: modules/sentry-cocoa/Carthage
           key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
 
-      # Only a completed Cocoa build writes the stamp, so a failed one is never cached.
-      - name: Save Cocoa SDK
-        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-primary-key != '' && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: modules/sentry-cocoa/Carthage
-          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
-
       - name: Upload build logs
         if: ${{ always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
