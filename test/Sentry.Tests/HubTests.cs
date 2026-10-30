@@ -1068,6 +1068,32 @@ public partial class HubTests : IDisposable
         unsampledTransaction.DiscardReason.Should().Be(expectedReason);
     }
 
+    [Fact]
+    public void StartTransaction_UpstreamUnsampledWhileHealthy_DiscardReasonIsSampleRate()
+    {
+        // Arrange
+        var sampleRand = 0.4;
+        var transactionContext = new TransactionContext("name", "operation", isSampled: false);
+
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
+        _fixture.SampleRandHelper.GenerateSampleRand(Arg.Any<string>()).Returns(sampleRand);
+        _fixture.Options.EnableBackpressureHandling = true;
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(0);
+        _fixture.Options.TracesSampleRate = 0.5;
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>());
+
+        // Assert
+        transaction.Should().BeOfType<UnsampledTransaction>();
+        var unsampledTransaction = (UnsampledTransaction)transaction;
+        unsampledTransaction.DiscardReason.Should().Be(new DiscardReason("sample_rate"));
+    }
+
     // overwrite the 'sample_rate' of the Dynamic Sampling Context (DSC) when a sampling decisions is made in the downstream SDK
     // 1. overwrite when 'TracesSampler' reaches a sampling decision
     // 2. keep when a sampling decision has been made upstream (via 'TransactionContext.IsSampled')
