@@ -195,7 +195,7 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
-          projects: integration-test/net9-maui/Sentry.Maui.Device.IntegrationTestApp.csproj
+          projects: integration-test/maui-device/Sentry.Maui.Device.IntegrationTestApp.csproj
 
       - name: Checkout github-workflows
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
