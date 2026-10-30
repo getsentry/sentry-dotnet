@@ -28,6 +28,8 @@ on:
       - 'test/Sentry.Testing/**'
       - 'test/Sentry.Testing.CrashableApp/**'
       - 'test/AndroidTestApp/**'
+      # Referenced by Sentry.Maui.Tests
+      - 'src/Sentry.Extensions.Hosting/**'
       # Integration tests
       - 'integration-test/android.Tests.ps1'
       - 'integration-test/ios.Tests.ps1'
@@ -76,18 +78,6 @@ jobs:
         uses: ./.github/actions/environment
         with:
           projects: test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj
-
-      # See build.yml
-      - name: Get Cocoa SDK cache key
-        id: cocoa-key
-        uses: ./.github/actions/cocoa-cache-key
-
-      - name: Restore Cocoa SDK
-        id: cache-cocoa
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: modules/sentry-cocoa/Carthage
-          key: ${{ steps.cocoa-key.outputs.key }}
 
       # See build.yml
       - name: Get Cocoa SDK cache key
