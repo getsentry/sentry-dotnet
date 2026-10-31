@@ -1033,14 +1033,16 @@ public partial class HubTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, 0.4f, "backpressure")]
-    [InlineData(true, 0.6f, "sample_rate")]
-    [InlineData(false, 0.4f, "backpressure")]
-    [InlineData(false, 0.6f, "sample_rate")]
-    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, double sampleRand, string discardReason)
+    [InlineData(true, null, 0.4f, "backpressure")]
+    [InlineData(true, null, 0.6f, "sample_rate")]
+    [InlineData(false, null, 0.4f, "backpressure")]
+    [InlineData(false, null, 0.6f, "sample_rate")]
+    [InlineData(true, false, 0.4f, "backpressure")]
+    [InlineData(false, false, 0.4f, "sample_rate")]
+    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, bool? isSampledUpstream, double sampleRand, string discardReason)
     {
         // Arrange
-        var transactionContext = new TransactionContext("name", "operation");
+        var transactionContext = new TransactionContext("name", "operation", isSampled: isSampledUpstream);
 
         var clock = new MockClock(DateTimeOffset.UtcNow);
         _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
@@ -1066,32 +1068,6 @@ public partial class HubTests : IDisposable
         var unsampledTransaction = (UnsampledTransaction)transaction;
         var expectedReason = new DiscardReason(discardReason);
         unsampledTransaction.DiscardReason.Should().Be(expectedReason);
-    }
-
-    [Fact]
-    public void StartTransaction_UpstreamUnsampledWhileHealthy_DiscardReasonIsSampleRate()
-    {
-        // Arrange
-        var sampleRand = 0.4;
-        var transactionContext = new TransactionContext("name", "operation", isSampled: false);
-
-        var clock = new MockClock(DateTimeOffset.UtcNow);
-        _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
-        _fixture.SampleRandHelper.GenerateSampleRand(Arg.Any<string>()).Returns(sampleRand);
-        _fixture.Options.EnableBackpressureHandling = true;
-        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
-        _fixture.BackpressureMonitor.SetDownsampleLevel(0);
-        _fixture.Options.TracesSampleRate = 0.5;
-
-        var hub = _fixture.GetSut();
-
-        // Act
-        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>());
-
-        // Assert
-        transaction.Should().BeOfType<UnsampledTransaction>();
-        var unsampledTransaction = (UnsampledTransaction)transaction;
-        unsampledTransaction.DiscardReason.Should().Be(new DiscardReason("sample_rate"));
     }
 
     // overwrite the 'sample_rate' of the Dynamic Sampling Context (DSC) when a sampling decisions is made in the downstream SDK
