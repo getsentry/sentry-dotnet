@@ -1033,14 +1033,16 @@ public partial class HubTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, 0.4f, "backpressure")]
-    [InlineData(true, 0.6f, "sample_rate")]
-    [InlineData(false, 0.4f, "backpressure")]
-    [InlineData(false, 0.6f, "sample_rate")]
-    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, double sampleRand, string discardReason)
+    [InlineData(true, null, 0.4f, "backpressure")]
+    [InlineData(true, null, 0.6f, "sample_rate")]
+    [InlineData(false, null, 0.4f, "backpressure")]
+    [InlineData(false, null, 0.6f, "sample_rate")]
+    [InlineData(true, false, 0.4f, "backpressure")]
+    [InlineData(false, false, 0.4f, "sample_rate")]
+    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, bool? isSampledUpstream, double sampleRand, string discardReason)
     {
         // Arrange
-        var transactionContext = new TransactionContext("name", "operation");
+        var transactionContext = new TransactionContext("name", "operation", isSampled: isSampledUpstream);
 
         var clock = new MockClock(DateTimeOffset.UtcNow);
         _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
