@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(TargetFrameworks);net9.0-android;net10.0-android</TargetFrameworks>
-<!-- Note: we can't run against net9-ios because .NET 10 requires Xcode 27.0 and .NET 9 requires Xcode 26.0.
+<!-- Note: we can't run against net9-ios because .NET 10 requires Xcode 27.1 and .NET 9 requires Xcode 26.0.
      The xcode-27 runner image only has Xcode 27 installed and no support for it is planned for
      net9.0-ios: https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
 -->
@@ -38,7 +38,7 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
     <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
       'netX.0-ios' resolves the latest version of the iOS SDK otherwise. -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">27.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">27.1</TargetPlatformVersion>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
     <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).
