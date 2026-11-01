@@ -7,11 +7,22 @@ $global:currentFrameworks = @($longTermFramework, $previousFramework, $latestFra
 
 AfterAll {
     Pop-Location
+    if (-not (Test-Path env:CI))
+    {
+        $env:NUGET_PACKAGES = $originalNugetPackages
+    }
 }
 
 BeforeAll {
     Push-Location $PSScriptRoot
     $env:SENTRY_LOG_LEVEL = 'debug';
+
+    # Local packs reuse released version numbers, so keep them out of the shared NuGet cache
+    if (-not (Test-Path env:CI))
+    {
+        $originalNugetPackages = $env:NUGET_PACKAGES
+        $env:NUGET_PACKAGES = "$PSScriptRoot/.nuget/packages"
+    }
 
     function GetAndroidTpv($framework)
     {
