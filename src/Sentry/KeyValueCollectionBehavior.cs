@@ -1,0 +1,89 @@
+using Sentry.Infrastructure;
+
+namespace Sentry;
+
+/// <summary>
+/// How a category of key-value data is collected.
+/// </summary>
+public enum KeyValueCollectionMode
+{
+    /// <summary>
+    /// Neither keys nor values are collected.
+    /// </summary>
+    Off,
+
+    /// <summary>
+    /// All key names are collected. Values are sent as-is, except for keys matching the built-in sensitive terms
+    /// or any additional terms supplied with the behavior, whose values are replaced with <c>[Filtered]</c>.
+    /// </summary>
+    DenyList,
+
+    /// <summary>
+    /// All key names are collected, but only values of keys matching the supplied terms are sent as-is. Values of
+    /// keys matching the built-in sensitive terms are replaced with <c>[Filtered]</c> even when they match a
+    /// supplied term.
+    /// </summary>
+    AllowList
+}
+
+/// <summary>
+/// Controls how a category of automatically collected key-value data - HTTP headers, cookies, URL query
+/// parameters or stack frame variables - is collected.
+/// </summary>
+/// <remarks>
+/// Terms are matched against key names as case-insensitive substrings. The built-in sensitive terms always apply,
+/// so additional deny terms extend that list rather than replacing it.
+/// <para>This API is experimental, and it may change in the future.</para>
+/// </remarks>
+[Experimental(DiagnosticId.ExperimentalFeature)]
+public sealed class KeyValueCollectionBehavior
+{
+    private KeyValueCollectionBehavior(KeyValueCollectionMode mode, IReadOnlyList<string> terms)
+    {
+        Mode = mode;
+        Terms = terms;
+    }
+
+    /// <summary>
+    /// How this category is collected.
+    /// </summary>
+    public KeyValueCollectionMode Mode { get; }
+
+    /// <summary>
+    /// Additional deny terms in <see cref="KeyValueCollectionMode.DenyList"/> mode, or the allowed key terms in
+    /// <see cref="KeyValueCollectionMode.AllowList"/> mode. Empty in <see cref="KeyValueCollectionMode.Off"/> mode.
+    /// </summary>
+    public IReadOnlyList<string> Terms { get; }
+
+    /// <summary>
+    /// Collect neither keys nor values.
+    /// </summary>
+    public static KeyValueCollectionBehavior Off { get; } = new(KeyValueCollectionMode.Off, []);
+
+    /// <summary>
+    /// Collect all key names, replacing values of sensitive keys with <c>[Filtered]</c>. This is the default
+    /// behavior for every key-value category.
+    /// </summary>
+    /// <param name="additionalTerms">
+    /// Key name terms to filter in addition to the built-in sensitive terms. To restore the header filtering that
+    /// <see cref="SentryOptions.SendDefaultPii"/> applied when disabled, pass
+    /// <c>"forwarded"</c>, <c>"-ip"</c>, <c>"remote-"</c>, <c>"via"</c> and <c>"-user"</c>.
+    /// </param>
+    public static KeyValueCollectionBehavior DenyList(params string[] additionalTerms) =>
+        new(KeyValueCollectionMode.DenyList, additionalTerms);
+
+    /// <summary>
+    /// Collect all key names, but send values only for keys matching <paramref name="terms"/>. Values of keys
+    /// matching the built-in sensitive terms are still replaced with <c>[Filtered]</c>.
+    /// </summary>
+    /// <param name="terms">Key name terms whose values are sent.</param>
+    public static KeyValueCollectionBehavior AllowList(params string[] terms) =>
+        new(KeyValueCollectionMode.AllowList, terms);
+
+    /// <summary>
+    /// Converts a boolean to a behavior, so categories can be switched on and off without naming a mode.
+    /// <c>true</c> is equivalent to <see cref="DenyList"/> and <c>false</c> to <see cref="Off"/>.
+    /// </summary>
+    /// <param name="collect">Whether to collect the category.</param>
+    public static implicit operator KeyValueCollectionBehavior(bool collect) => collect ? DenyList() : Off;
+}

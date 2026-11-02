@@ -333,6 +333,19 @@ public class SentryOptions
     public bool SendDefaultPii { get; set; }
 
     /// <summary>
+    /// Controls which categories of data the SDK's integrations collect automatically. Prefer this over
+    /// <see cref="SendDefaultPii"/>, which it replaces: it gives per-category control instead of a single
+    /// all-or-nothing switch.
+    /// </summary>
+    /// <remarks>
+    /// When any category here is configured, <see cref="SendDefaultPii"/> is ignored.
+    /// <para>This API is experimental, and it may change in the future.</para>
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/foundations/client/data-collection/"/>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public DataCollectionOptions DataCollection { get; } = new();
+
+    /// <summary>
     /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.
     /// </summary>
     /// <remarks>

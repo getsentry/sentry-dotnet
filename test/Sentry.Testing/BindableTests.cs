@@ -33,6 +33,9 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                 && !p.PropertyType.IsInterface // Exclude interface properties
                 && !skipProperties.Contains(p.Name) // Exclude any properties explicitly excluded by derived classes
 
+                // DataCollection binds via its own bindable type in #5427
+                && p.PropertyType != typeof(DataCollectionOptions)
+
                 // Exclude the Mobile sub-properties
 #if ANDROID
                 && !(p.PropertyType == typeof(SentryOptions.AndroidOptions))
