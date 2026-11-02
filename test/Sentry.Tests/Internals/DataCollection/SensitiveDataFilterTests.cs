@@ -4,11 +4,13 @@ namespace Sentry.Tests.Internals.DataCollection;
 
 public class SensitiveDataFilterTests
 {
+    private static string ValueOf(List<KeyValuePair<string, string>> data, string key) =>
+        data.Single(kvp => kvp.Key == key).Value;
+
     [Theory]
     [InlineData("auth")]
     [InlineData("token")]
     [InlineData("secret")]
-    [InlineData("session")]
     [InlineData("password")]
     [InlineData("passwd")]
     [InlineData("pwd")]
@@ -20,24 +22,40 @@ public class SensitiveDataFilterTests
     [InlineData("csrf")]
     [InlineData("xsrf")]
     [InlineData("credentials")]
+    [InlineData("session")]
     [InlineData("sid")]
     [InlineData("identity")]
-    [InlineData("set-cookie")]
-    [InlineData("cookie")]
     public void IsSensitiveKey_CanonicalDenylistTerm_ReturnsTrue(string term)
     {
         SensitiveDataFilter.IsSensitiveKey(term).Should().BeTrue();
     }
 
+    [Fact]
+    public void SensitiveKeyTerms_MatchesSpecDenylistExactly()
+    {
+        SensitiveDataFilter.SensitiveKeyTerms.Should().Equal(
+            "auth", "token", "secret", "password", "passwd", "pwd", "key", "jwt", "bearer",
+            "sso", "saml", "csrf", "xsrf", "credentials", "session", "sid", "identity");
+    }
+
     [Theory]
-    [InlineData("Authorization")] // contains "auth"
-    [InlineData("X-Api-Key")] // contains "key"
-    [InlineData("PHPSESSID")] // contains "sid"
+    [InlineData("Authorization")]
+    [InlineData("X-Api-Key")]
+    [InlineData("PHPSESSID")]
+    [InlineData("connect.sid")]
     [InlineData("X-CSRF-TOKEN")]
-    [InlineData("Set-Cookie")]
     public void IsSensitiveKey_KeyContainingTermInAnyCase_ReturnsTrue(string key)
     {
         SensitiveDataFilter.IsSensitiveKey(key).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("Cookie")]
+    [InlineData("Set-Cookie")]
+    [InlineData("cookie_consent")]
+    public void IsSensitiveKey_CookieNames_ReturnsFalse(string key)
+    {
+        SensitiveDataFilter.IsSensitiveKey(key).Should().BeFalse();
     }
 
     [Theory]
@@ -70,7 +88,6 @@ public class SensitiveDataFilterTests
     [Fact]
     public void FilterKeyValueData_DefaultBehavior_IsOff()
     {
-        // The default struct value must be the most conservative mode
         default(KeyValueFilterBehavior).Mode.Should().Be(KeyValueFilterMode.Off);
         default(KeyValueFilterBehavior).Terms.Should().BeEmpty();
     }
@@ -90,12 +107,28 @@ public class SensitiveDataFilterTests
         var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.DenyList);
 
         // Assert
-        result.Should().BeEquivalentTo(new Dictionary<string, string>
+        ValueOf(result, "User-Agent").Should().Be("TestAgent");
+        ValueOf(result, "Authorization").Should().Be("[Filtered]");
+        ValueOf(result, "X-API-KEY").Should().Be("[Filtered]");
+    }
+
+    [Fact]
+    public void FilterKeyValueData_PreservesInputOrderAndRepeatedKeys()
+    {
+        // Arrange
+        var data = new[]
         {
-            ["User-Agent"] = "TestAgent",
-            ["Authorization"] = "[Filtered]",
-            ["X-API-KEY"] = "[Filtered]"
-        });
+            new KeyValuePair<string, string>("Set-Cookie", "a=1"),
+            new KeyValuePair<string, string>("Accept", "text/html"),
+            new KeyValuePair<string, string>("Set-Cookie", "b=2")
+        };
+
+        // Act
+        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.DenyList);
+
+        // Assert
+        result.Select(kvp => kvp.Key).Should().Equal("Set-Cookie", "Accept", "Set-Cookie");
+        result.Select(kvp => kvp.Value).Should().Equal("a=1", "text/html", "b=2");
     }
 
     [Fact]
@@ -112,8 +145,8 @@ public class SensitiveDataFilterTests
         var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.DenyListWith("forwarded"));
 
         // Assert
-        result["X-Forwarded-For"].Should().Be("[Filtered]");
-        result["Accept"].Should().Be("application/json");
+        ValueOf(result, "X-Forwarded-For").Should().Be("[Filtered]");
+        ValueOf(result, "Accept").Should().Be("application/json");
     }
 
     [Fact]
@@ -131,18 +164,15 @@ public class SensitiveDataFilterTests
         var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.AllowList("user-agent"));
 
         // Assert
-        result.Should().BeEquivalentTo(new Dictionary<string, string>
-        {
-            ["User-Agent"] = "TestAgent",
-            ["Accept"] = "[Filtered]",
-            ["X-Custom"] = "[Filtered]"
-        });
+        ValueOf(result, "User-Agent").Should().Be("TestAgent");
+        ValueOf(result, "Accept").Should().Be("[Filtered]");
+        ValueOf(result, "X-Custom").Should().Be("[Filtered]");
     }
 
     [Fact]
     public void FilterKeyValueData_AllowListMode_BuiltInDenylistWins()
     {
-        // Arrange: allow-listing a sensitive key must not expose its value
+        // Arrange
         var data = new Dictionary<string, string>
         {
             ["Authorization"] = "Bearer 123"
@@ -152,7 +182,7 @@ public class SensitiveDataFilterTests
         var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.AllowList("authorization"));
 
         // Assert
-        result["Authorization"].Should().Be("[Filtered]");
+        ValueOf(result, "Authorization").Should().Be("[Filtered]");
     }
 
     [Fact]
@@ -169,8 +199,8 @@ public class SensitiveDataFilterTests
         var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.AllowList("tenant"));
 
         // Assert
-        result["X-Tenant-Id"].Should().Be("acme");
-        result["X-Request-Id"].Should().Be("[Filtered]");
+        ValueOf(result, "X-Tenant-Id").Should().Be("acme");
+        ValueOf(result, "X-Request-Id").Should().Be("[Filtered]");
     }
 
     [Theory]
@@ -178,7 +208,7 @@ public class SensitiveDataFilterTests
     [InlineData(true)]
     public void FilterKeyValueData_AdditionalDenyTerms_AppliedInEveryMode(bool useAllowList)
     {
-        // Arrange: "remember" is a cookie-name term, not part of the built-in denylist
+        // Arrange
         var data = new Dictionary<string, string>
         {
             ["remember_me"] = "yes"
@@ -192,7 +222,7 @@ public class SensitiveDataFilterTests
             data, behavior, SensitiveDataFilter.SensitiveCookieNameTerms);
 
         // Assert
-        result["remember_me"].Should().Be("[Filtered]");
+        ValueOf(result, "remember_me").Should().Be("[Filtered]");
     }
 
     [Theory]
@@ -216,7 +246,7 @@ public class SensitiveDataFilterTests
             data, KeyValueFilterBehavior.DenyList, SensitiveDataFilter.SensitiveCookieNameTerms);
 
         // Assert
-        result[cookieName].Should().Be("[Filtered]");
+        ValueOf(result, cookieName).Should().Be("[Filtered]");
     }
 
     [Fact]
@@ -224,6 +254,71 @@ public class SensitiveDataFilterTests
     {
         SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.DenyList)
             .Should().Be("text/html");
+    }
+
+    [Fact]
+    public void FilterValue_DenyListWithEmptyTerm_DoesNotFilterEverything()
+    {
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.DenyListWith(""))
+            .Should().Be("text/html");
+    }
+
+    [Fact]
+    public void FilterValue_AllowListWithEmptyTerm_DoesNotAllowEverything()
+    {
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.AllowList(""))
+            .Should().Be("[Filtered]");
+    }
+
+    [Fact]
+    public void FilterValue_DenyListWithNullTerm_DoesNotFilterEverything()
+    {
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.DenyListWith(null!))
+            .Should().Be("text/html");
+    }
+
+    [Fact]
+    public void FilterValue_AllowListWithNullTermsArray_DoesNotAllowEverything()
+    {
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.AllowList(null!))
+            .Should().Be("[Filtered]");
+    }
+
+    [Fact]
+    public void FilterValue_DenyListWithNullTermElement_DoesNotFilterEverything()
+    {
+        var behavior = KeyValueFilterBehavior.DenyListWith(new string[] { null! });
+
+        SensitiveDataFilter.FilterValue("Accept", "text/html", behavior).Should().Be("text/html");
+    }
+
+    [Fact]
+    public void FilterValue_AllowListWithNullTermElement_DoesNotAllowEverything()
+    {
+        var behavior = KeyValueFilterBehavior.AllowList(new string[] { null! });
+
+        SensitiveDataFilter.FilterValue("Accept", "text/html", behavior).Should().Be("[Filtered]");
+    }
+
+    [Fact]
+    public void FilterValue_EncodedSensitiveKey_FilteredWhenDecodedForMatching()
+    {
+        // Arrange
+        const string encodedKey = "%74oken";
+
+        // Act
+        var key = SensitiveDataFilter.DecodeKeyForMatching(encodedKey);
+
+        // Assert
+        key.Should().Be("token");
+        SensitiveDataFilter.FilterValue(key, "abc123", KeyValueFilterBehavior.DenyList)
+            .Should().Be("[Filtered]");
+    }
+
+    [Fact]
+    public void DecodeKeyForMatching_MalformedEscape_ReturnsOriginal()
+    {
+        SensitiveDataFilter.DecodeKeyForMatching("%zz").Should().Be("%zz");
     }
 
     [Theory]
@@ -234,7 +329,6 @@ public class SensitiveDataFilterTests
     [InlineData("X-Real-User")]
     public void FilterValue_PiiKeyTermsAsDenyTerms_Filtered(string key)
     {
-        // The GDPR terms are not filtered by default but must work as extra deny terms (SendDefaultPii=false bridge)
         SensitiveDataFilter.FilterValue(key, "value", KeyValueFilterBehavior.DenyList, SensitiveDataFilter.PiiKeyTerms)
             .Should().Be("[Filtered]");
     }

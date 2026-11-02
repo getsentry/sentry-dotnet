@@ -12,16 +12,14 @@ internal static class SensitiveDataFilter
     internal const string FilteredValue = PiiExtensions.RedactedText;
 
     /// <summary>
-    /// Case-insensitive substrings identifying sensitive key names, from the canonical denylist in the spec,
-    /// plus "set-cookie"/"cookie" so cookie headers are treated as sensitive wherever individual cookie
-    /// pairs cannot be extracted.
+    /// The canonical sensitive denylist from the spec, matched as case-insensitive substrings against header names,
+    /// cookie names and query parameter keys.
     /// </summary>
     internal static readonly string[] SensitiveKeyTerms =
     [
         "auth",
         "token",
         "secret",
-        "session",
         "password",
         "passwd",
         "pwd",
@@ -33,44 +31,35 @@ internal static class SensitiveDataFilter
         "csrf",
         "xsrf",
         "credentials",
+        "session",
         "sid",
         "identity",
-        "set-cookie",
-        "cookie",
     ];
 
     /// <summary>
-    /// Extra substrings matched only against individual Cookie / Set-Cookie names (not header names), covering
-    /// common session secrets that do not match <see cref="SensitiveKeyTerms"/> (e.g. "connect.sid") without
-    /// false positives on arbitrary HTTP headers. Cookie-only terms already implied by a
-    /// <see cref="SensitiveKeyTerms"/> match (e.g. "oauth", "id_token") are omitted.
+    /// Extra substrings matched only against individual cookie names, covering opaque session, sticky-routing and
+    /// identity-provider cookies whose names contain no <see cref="SensitiveKeyTerms"/> match. Not applied to header
+    /// names, where they would produce false positives.
     /// </summary>
     internal static readonly string[] SensitiveCookieNameTerms =
     [
-        // Express / Connect default session cookie
-        ".sid",
-        // Opaque session ids (PHPSESSID, ASPSESSIONID*, *sessid*, ...)
-        "sessid",
-        // "Remember me" tokens
         "remember",
-        // OIDC / OAuth auxiliary ("oauth*" is covered by "auth")
         "oidc",
         "pkce",
         "nonce",
         // RFC 6265bis high-security cookie name prefixes
         "__secure-",
         "__host-",
-        // Load balancer / CDN sticky-session cookies (opaque routing tokens)
+        // Load balancer / CDN sticky-session cookies
         "awsalb",
         "awselb",
         "akamai",
-        // BaaS / IdP session cookies (names often omit "session")
+        // Managed-service session cookies
         "__stripe",
         "cognito",
         "firebase",
         "supabase",
         "sb-",
-        // Step-up / MFA cookies
         "mfa",
         "2fa",
     ];
@@ -82,6 +71,23 @@ internal static class SensitiveDataFilter
     internal static readonly string[] PiiKeyTerms = ["forwarded", "-ip", "remote-", "via", "-user"];
 
     internal static bool IsSensitiveKey(string key) => MatchesAny(key, SensitiveKeyTerms);
+
+    /// <summary>
+    /// Percent-decodes a key so an encoded name such as "%74oken" is matched against the denylist. Callers must
+    /// still emit the original key and value: the spec requires encoded query parameters to be stored exactly as
+    /// they appear in the URL.
+    /// </summary>
+    internal static string DecodeKeyForMatching(string key)
+    {
+        try
+        {
+            return Uri.UnescapeDataString(key);
+        }
+        catch (UriFormatException)
+        {
+            return key;
+        }
+    }
 
     /// <summary>
     /// Filters a single value according to <paramref name="behavior"/>. Returns the value unchanged, or
@@ -110,16 +116,17 @@ internal static class SensitiveDataFilter
 
     /// <summary>
     /// Filters key-value data according to <paramref name="behavior"/>. Key names are always preserved; values are
-    /// either kept or replaced with <see cref="FilteredValue"/>. In <see cref="KeyValueFilterMode.Off"/> mode an
-    /// empty dictionary is returned. <paramref name="additionalDenyTerms"/> are extra sensitive terms applied in
-    /// every mode, beyond the built-in denylist (e.g. <see cref="SensitiveCookieNameTerms"/> when filtering cookies).
+    /// either kept or replaced with <see cref="FilteredValue"/>. In <see cref="KeyValueFilterMode.Off"/> mode nothing
+    /// is returned. <paramref name="additionalDenyTerms"/> are extra sensitive terms applied in every mode, beyond
+    /// the built-in denylist (e.g. <see cref="SensitiveCookieNameTerms"/> when filtering cookies).
+    /// Input order and repeated keys are preserved, because headers such as Set-Cookie may legitimately repeat.
     /// </summary>
-    internal static Dictionary<string, string> FilterKeyValueData(
+    internal static List<KeyValuePair<string, string>> FilterKeyValueData(
         IEnumerable<KeyValuePair<string, string>> data,
         KeyValueFilterBehavior behavior,
         string[]? additionalDenyTerms = null)
     {
-        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var result = new List<KeyValuePair<string, string>>();
         if (behavior.Mode == KeyValueFilterMode.Off)
         {
             return result;
@@ -127,7 +134,7 @@ internal static class SensitiveDataFilter
 
         foreach (var (key, value) in data)
         {
-            result[key] = FilterValue(key, value, behavior, additionalDenyTerms);
+            result.Add(new KeyValuePair<string, string>(key, FilterValue(key, value, behavior, additionalDenyTerms)));
         }
 
         return result;
@@ -137,7 +144,7 @@ internal static class SensitiveDataFilter
     {
         foreach (var term in terms)
         {
-            if (key.Contains(term, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(term) && key.Contains(term, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
