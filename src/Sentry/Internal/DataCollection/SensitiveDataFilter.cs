@@ -77,41 +77,29 @@ internal static class SensitiveDataFilter
     /// still emit the original key and value: the spec requires encoded query parameters to be stored exactly as
     /// they appear in the URL.
     /// </summary>
-    internal static string DecodeKeyForMatching(string key)
-    {
-        try
-        {
-            return Uri.UnescapeDataString(key);
-        }
-        catch (UriFormatException)
-        {
-            return key;
-        }
-    }
+    internal static string DecodeKeyForMatching(string key) => Uri.UnescapeDataString(key);
 
     /// <summary>
     /// Filters a single value according to <paramref name="behavior"/>. Returns the value unchanged, or
-    /// <see cref="FilteredValue"/> in its place. Must not be called in <see cref="KeyValueFilterMode.Off"/> mode
-    /// (in off mode nothing should be collected at all).
+    /// <see cref="FilteredValue"/> in its place.
     /// </summary>
     internal static string FilterValue(string key, string value, KeyValueFilterBehavior behavior,
         string[]? additionalDenyTerms = null)
     {
-        Debug.Assert(behavior.Mode != KeyValueFilterMode.Off,
-            "FilterValue must not be called in Off mode - collect nothing instead.");
-
-        if (MatchesAny(key, SensitiveKeyTerms) ||
+        if (behavior.Mode == KeyValueFilterMode.Off ||
+            MatchesAny(key, SensitiveKeyTerms) ||
             (additionalDenyTerms is not null && MatchesAny(key, additionalDenyTerms)))
         {
             return FilteredValue;
         }
 
-        return behavior.Mode switch
+        var matchesTerm = MatchesAny(key, behavior.Terms);
+        if (behavior.Mode == KeyValueFilterMode.AllowList)
         {
-            KeyValueFilterMode.DenyList => MatchesAny(key, behavior.Terms) ? FilteredValue : value,
-            KeyValueFilterMode.AllowList => MatchesAny(key, behavior.Terms) ? value : FilteredValue,
-            _ => value
-        };
+            return matchesTerm ? value : FilteredValue;
+        }
+
+        return matchesTerm ? FilteredValue : value;
     }
 
     /// <summary>

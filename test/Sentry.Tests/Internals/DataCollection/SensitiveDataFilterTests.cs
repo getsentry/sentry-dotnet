@@ -250,6 +250,13 @@ public class SensitiveDataFilterTests
     }
 
     [Fact]
+    public void FilterValue_OffMode_ReturnsFiltered()
+    {
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.Off)
+            .Should().Be("[Filtered]");
+    }
+
+    [Fact]
     public void FilterValue_BenignKeyDenyListMode_ReturnsValueUnchanged()
     {
         SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.DenyList)
