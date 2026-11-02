@@ -6,6 +6,7 @@
 
 #nullable enable
 
+using System;
 using ObjCRuntime;
 
 namespace Sentry.CocoaSdk;
@@ -119,6 +120,18 @@ internal enum SentryObjCRedactRegionType : long
     ClipBegin,
     ClipEnd,
     RedactSwiftUI
+}
+
+[Flags]
+[Native]
+internal enum SentryObjCMetricKitDiagnosticReport : ulong
+{
+    None = 0x0,
+    Crash = 1uL << 0,
+    Hang = 1uL << 1,
+    CPUException = 1uL << 2,
+    DiskWriteException = 1uL << 3,
+    AppLaunch = 1uL << 4
 }
 
 [Native]
