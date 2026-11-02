@@ -14,7 +14,6 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
     internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
         Debug.Assert(hub.IsEnabled);
-        Debug.Assert(options is { EnableLogs: true });
 
         _hub = hub;
         _options = options;
@@ -40,6 +39,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
             }
             catch (FormatException e)
             {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.LogItem);
                 _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
                 return;
             }
@@ -71,6 +71,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         }
         catch (Exception e)
         {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.LogItem);
             _options.DiagnosticLogger?.LogError(e, "The configureLog callback threw an exception. The Log will be dropped.");
             return;
         }
@@ -94,15 +95,20 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
             }
             catch (Exception e)
             {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.LogItem);
                 _options.DiagnosticLogger?.LogError(e, "The BeforeSendLog callback threw an exception. The Log will be dropped.");
                 return;
             }
         }
 
-        if (configuredLog is not null)
+        if (configuredLog is null)
         {
-            _batchProcessor.Enqueue(configuredLog);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+            _options.DiagnosticLogger?.LogInfo("Log dropped by BeforeSendLog callback.");
+            return;
         }
+
+        _batchProcessor.Enqueue(configuredLog);
     }
 
     /// <inheritdoc />

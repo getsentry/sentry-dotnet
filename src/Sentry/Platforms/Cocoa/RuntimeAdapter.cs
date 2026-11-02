@@ -25,7 +25,7 @@ internal sealed class RuntimeAdapter : IRuntime
 
     public bool IsMono { get; } = Type.GetType("Mono.Runtime") != null;
 
-    public void IgnoreNextSignal(int signal) => SentryCocoaHybridSdk.IgnoreNextSignal(signal);
+    public void IgnoreNextSignal(int signal) => SentryCocoaHybridSdk.Internal.IgnoreNextSignal(signal);
 
     [SecurityCritical]
     private void OnMarshalManagedException(object sender, MarshalManagedExceptionEventArgs e) => MarshalManagedException?.Invoke(this, e);

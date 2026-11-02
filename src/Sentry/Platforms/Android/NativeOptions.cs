@@ -165,6 +165,7 @@ public partial class SentryOptions
 
         /// <summary>
         /// Gets or sets a value that indicates if historical tombstones should be reported.
+        /// Requires <see cref="TombstoneEnabled"/> set <c>true</c>.
         /// The default value is <c>false</c> (disabled).
         /// </summary>
         /// <remarks>

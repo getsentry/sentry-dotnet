@@ -152,7 +152,7 @@ public sealed class Breadcrumb : ISentryJsonSerializable
     /// </summary>
     public static Breadcrumb FromJson(JsonElement json)
     {
-        var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
+        var timestamp = json.GetPropertyOrNull("timestamp")?.GetTimestamp();
         var message = json.GetPropertyOrNull("message")?.GetString();
         var type = json.GetPropertyOrNull("type")?.GetString();
         var data = json.GetPropertyOrNull("data")?.GetStringDictionaryOrNull();

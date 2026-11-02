@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<SentryOptions>(
             c => c.GetRequiredService<IOptions<TOptions>>().Value);
 
+        // Must not capture a hub instance: https://github.com/getsentry/sentry-dotnet/issues/103
         services.TryAddTransient<ISentryClient>(c => c.GetRequiredService<IHub>());
         services.TryAddTransient(c => c.GetRequiredService<Func<IHub>>()());
 

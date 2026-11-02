@@ -45,7 +45,8 @@ internal class SpotlightHttpTransport : HttpTransport
             try
             {
                 // Send to spotlight
-                using var processedEnvelope = ProcessEnvelope(envelope);
+                // Caller to dispose
+                var processedEnvelope = ProcessEnvelope(envelope);
                 if (processedEnvelope.Items.Count > 0)
                 {
                     using var request = CreateRequest(processedEnvelope);

@@ -71,5 +71,46 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
         Assert.NotEmpty(Logs);
         Assert.Contains(Logs, log => log.Level == SentryLogLevel.Info && log.Message == "Hello, World!");
     }
+
+    [Fact]
+    public async Task ILoggerFromApplicationNamespaceStartingWithSentry_CapturesEventAndRunsEventProcessors()
+    {
+        // Logs from our samples shouldn't be filtered - only logs from our SDK should be
+        const string category = "Sentry.Samples.AspNetCore.Serilog.Program";
+
+        var processor = new RecordingEventProcessor();
+        ConfigureServices = services => services.AddSingleton<ISentryEventProcessor>(processor);
+
+        var handler = new RequestHandler
+        {
+            Path = "/log",
+            Handler = context =>
+            {
+                context.RequestServices.GetRequiredService<ILoggerFactory>()
+                    .CreateLogger(category)
+                    .LogError(new InvalidOperationException("hello?"), "This is a problem");
+                return Task.CompletedTask;
+            }
+        };
+
+        Handlers = new[] { handler };
+        Build();
+        await HttpClient.GetAsync(handler.Path);
+        await ServiceProvider.GetRequiredService<IHub>().FlushAsync();
+
+        Assert.Contains(Events, e => e.Logger == category);
+        Assert.True(processor.Invoked);
+    }
+
+    private class RecordingEventProcessor : ISentryEventProcessor
+    {
+        public bool Invoked { get; private set; }
+
+        public SentryEvent Process(SentryEvent @event)
+        {
+            Invoked = true;
+            return @event;
+        }
+    }
 }
 #endif

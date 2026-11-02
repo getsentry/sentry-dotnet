@@ -9,6 +9,7 @@ namespace Sentry
         UnrealContext = 3,
         UnrealLogs = 4,
         ViewHierarchy = 5,
+        HeapDump = 6,
     }
     public class BaggageHeader
     {
@@ -109,6 +110,7 @@ namespace Sentry
     {
         public FileAttachmentContent(string filePath) { }
         public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
+        public FileAttachmentContent(string filePath, bool readFileAsynchronously, bool deleteOnClose) { }
         public System.IO.Stream GetStream() { }
     }
     public static class HasExtraExtensions
@@ -123,6 +125,7 @@ namespace Sentry
     public delegate bool HeapDumpTrigger(long usedMemory, long totalMemory);
     public static class HintTypes
     {
+        public const string Exception = "exception";
         public const string HttpResponseMessage = "http-response-message";
     }
     public readonly struct HttpStatusCodeRange : System.IEquatable<Sentry.HttpStatusCodeRange>
@@ -147,7 +150,9 @@ namespace Sentry
         public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
+        public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Infrastructure.ISystemClock? clock, string message, string? category, string? type, System.Collections.Generic.IDictionary<string, string>? data, Sentry.BreadcrumbLevel level, Sentry.SentryHint? hint) { }
         public static Sentry.SentryId CaptureException(this Sentry.IHub hub, System.Exception ex, System.Action<Sentry.Scope> configureScope) { }
+        public static Sentry.SentryId CaptureException(this Sentry.IHub hub, System.Exception ex, bool handled, bool terminal, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureFeedback(this Sentry.IHub hub, Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureMessage(this Sentry.IHub hub, string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
         public static void LockScope(this Sentry.IHub hub) { }
@@ -159,6 +164,10 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, string name, string operation, string? description) { }
         public static void UnlockScope(this Sentry.IHub hub) { }
+        public static void WithMonitor(this Sentry.IHub hub, string monitorSlug, System.Action job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static T WithMonitor<T>(this Sentry.IHub hub, string monitorSlug, System.Func<T> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static System.Threading.Tasks.Task WithMonitorAsync(this Sentry.IHub hub, string monitorSlug, System.Func<System.Threading.Tasks.Task> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static System.Threading.Tasks.Task<T> WithMonitorAsync<T>(this Sentry.IHub hub, string monitorSlug, System.Func<System.Threading.Tasks.Task<T>> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
     }
     public interface IAttachmentContent
     {
@@ -491,6 +500,7 @@ namespace Sentry
     public static class SentryClientExtensions
     {
         public static Sentry.SentryId CaptureException(this Sentry.ISentryClient client, System.Exception ex) { }
+        public static Sentry.SentryId CaptureException(this Sentry.ISentryClient client, System.Exception ex, bool handled, bool terminal = false) { }
         public static Sentry.SentryId CaptureFeedback(this Sentry.ISentryClient client, Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureFeedback(this Sentry.ISentryClient client, string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, Sentry.SentryId? associatedEventId = default, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureMessage(this Sentry.ISentryClient client, string message, Sentry.SentryLevel level = 1) { }
@@ -834,6 +844,8 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableBackpressureHandling { get; set; }
         public bool EnableLogs { get; set; }
+        [System.Obsolete("Metrics are always enabled. This option is ignored and will be removed in version" +
+            " 7.0.0. To drop metrics, use SetBeforeSendMetric and return null.")]
         public bool EnableMetrics { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
@@ -978,6 +990,8 @@ namespace Sentry
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureException(System.Exception exception) { }
         public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope) { }
+        public static Sentry.SentryId CaptureException(System.Exception exception, bool handled, bool terminal = false) { }
+        public static Sentry.SentryId CaptureException(System.Exception exception, bool handled, bool terminal, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureFeedback(Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureFeedback(Sentry.SentryFeedback feedback, out Sentry.CaptureFeedbackResult result, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
@@ -1026,6 +1040,10 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
         public static void UnsetTag(string key) { }
+        public static void WithMonitor(string monitorSlug, System.Action job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static T WithMonitor<T>(string monitorSlug, System.Func<T> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static System.Threading.Tasks.Task WithMonitorAsync(string monitorSlug, System.Func<System.Threading.Tasks.Task> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
+        public static System.Threading.Tasks.Task<T> WithMonitorAsync<T>(string monitorSlug, System.Func<System.Threading.Tasks.Task<T>> job, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
     }
     public class SentrySession : Sentry.ISentrySession
     {
@@ -1348,6 +1366,8 @@ namespace Sentry
     {
         public StringOrRegex(System.Text.RegularExpressions.Regex regex) { }
         public StringOrRegex(string stringOrRegex) { }
+        public bool IsRegex { get; }
+        public System.Text.RegularExpressions.Regex? Regex { get; }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string ToString() { }

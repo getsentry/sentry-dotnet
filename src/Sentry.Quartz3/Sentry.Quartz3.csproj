@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Official Quartz.NET 3.x integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <PackageTags>$(PackageTags);Quartz;Crons</PackageTags>
+    <TargetFrameworks>$(CurrentTfms);net462</TargetFrameworks>
+    <RootNamespace>Sentry.Quartz</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnableAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <!-- Shared with Sentry.Quartz. Only the hooks and the APIs that differ are version-specific. -->
+  <ItemGroup>
+    <Compile Include="..\Sentry.Quartz\Core\**\*.cs" Link="Core\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+    <!-- Quartz 4.x changed IJobListener to return ValueTask. Use Sentry.Quartz for it. -->
+    <PackageReference Include="Quartz" Version="[3.6.0,4.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Quartz3.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
+</Project>

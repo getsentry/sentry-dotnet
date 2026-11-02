@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Protocol;
 
@@ -108,11 +109,24 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
             SetAttribute("sentry.release", release);
         }
 
-        if (sdk.Name is { } name)
+        var sdkName = sdk.Name;
+        var sdkVersion = sdk.Version;
+
+        // The scope's Sdk is only populated by framework integrations (e.g. ASP.NET Core), so console
+        // apps leave both Name and Version null. Fall back to the SDK instance only when the SDK is
+        // entirely unset, so an integration that sets just the name (its Version can be null) keeps its
+        // own name rather than being relabelled with the default (see #5352).
+        if (sdkName is null && sdkVersion is null)
+        {
+            sdkName = Constants.SdkName;
+            sdkVersion = SdkVersion.Instance.Version;
+        }
+
+        if (sdkName is { } name)
         {
             SetAttribute("sentry.sdk.name", name);
         }
-        if (sdk.Version is { } version)
+        if (sdkVersion is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
         }

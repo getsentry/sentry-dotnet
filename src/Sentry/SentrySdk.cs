@@ -525,6 +525,19 @@ static partial class SentrySdk
         => CurrentHub.CaptureException(exception);
 
     /// <summary>
+    /// Captures the exception, explicitly marking it as handled or unhandled.
+    /// </summary>
+    /// <param name="exception">The exception.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed and the active transaction is aborted.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    public static SentryId CaptureException(Exception exception, bool handled, bool terminal = false)
+        => CurrentHub.CaptureException(exception, handled, terminal);
+
+    /// <summary>
     /// Captures the exception with a configurable scope.
     /// </summary>
     /// <remarks>
@@ -536,6 +549,25 @@ static partial class SentrySdk
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
         => CurrentHub.CaptureException(exception, configureScope);
+
+    /// <summary>
+    /// Captures the exception with a configurable scope, explicitly marking it as handled or unhandled and
+    /// whether it terminated the application.
+    /// </summary>
+    /// <remarks>
+    /// This allows modifying a scope without affecting other events.
+    /// </remarks>
+    /// <param name="exception">The exception.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed and the active transaction is aborted.</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    public static SentryId CaptureException(Exception exception, bool handled, bool terminal,
+        Action<Scope> configureScope)
+        => CurrentHub.CaptureException(exception, handled, terminal, configureScope);
 
     /// <summary>
     /// Captures the message.
@@ -652,6 +684,90 @@ static partial class SentrySdk
             duration,
             scope,
             configureMonitorOptions);
+
+    /// <summary>
+    /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
+    /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration.
+    /// Exceptions thrown by the job are rethrown.
+    /// </summary>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// SentrySdk.WithMonitor("nightly-cleanup", () => Cleanup(), options =>
+    /// {
+    ///     options.Interval("0 3 * * *");
+    ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="monitorSlug">The slug of the monitor.</param>
+    /// <param name="job">The job to run.</param>
+    /// <param name="configureMonitorOptions">
+    /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
+    /// </param>
+    [DebuggerStepThrough]
+    public static void WithMonitor(
+        string monitorSlug,
+        Action job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
+
+    /// <inheritdoc cref="WithMonitor(string, Action, Action{SentryMonitorOptions}?)"/>
+    /// <returns>The value returned by <paramref name="job"/>.</returns>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// For a job that returns a task, use <c>WithMonitorAsync</c>.
+    /// </remarks>
+    /// <exception cref="ArgumentException"><typeparamref name="T"/> is a <see cref="Task"/> or <see cref="ValueTask"/> type.</exception>
+    [DebuggerStepThrough]
+    public static T WithMonitor<T>(
+        string monitorSlug,
+        Func<T> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.WithMonitor(monitorSlug, job, configureMonitorOptions);
+
+    /// <summary>
+    /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
+    /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration
+    /// once the returned task completes. Exceptions thrown by the job are rethrown.
+    /// </summary>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// await SentrySdk.WithMonitorAsync("nightly-cleanup", async () => await CleanupAsync(), options =>
+    /// {
+    ///     options.Interval("0 3 * * *");
+    ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="monitorSlug">The slug of the monitor.</param>
+    /// <param name="job">The job to run.</param>
+    /// <param name="configureMonitorOptions">
+    /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
+    /// </param>
+    [DebuggerStepThrough]
+    public static Task WithMonitorAsync(
+        string monitorSlug,
+        Func<Task> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.WithMonitorAsync(monitorSlug, job, configureMonitorOptions);
+
+    /// <inheritdoc cref="WithMonitorAsync(string, Func{Task}, Action{SentryMonitorOptions}?)"/>
+    /// <returns>The value returned by <paramref name="job"/>.</returns>
+    [DebuggerStepThrough]
+    public static Task<T> WithMonitorAsync<T>(
+        string monitorSlug,
+        Func<Task<T>> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.WithMonitorAsync(monitorSlug, job, configureMonitorOptions);
 
     /// <summary>
     /// Starts a transaction if there is not already one active on the scope, otherwise starts a new child span on the

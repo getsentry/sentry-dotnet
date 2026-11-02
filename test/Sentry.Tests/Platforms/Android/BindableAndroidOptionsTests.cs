@@ -9,7 +9,7 @@ public class BindableAndroidOptionsTests : BindableTests<SentryOptions.AndroidOp
     public void BindableProperties_MatchOptionsProperties()
     {
         var actual = GetPropertyNames<BindableSentryOptions.AndroidOptions>();
-        AssertContainsAllOptionsProperties(actual);
+        AssertPropertiesMatchOptions(actual);
     }
 
     [Fact]

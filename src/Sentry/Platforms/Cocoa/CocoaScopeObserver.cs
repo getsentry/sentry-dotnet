@@ -112,7 +112,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
     {
         try
         {
-            SentryCocoaHybridSdk.SetTrace(traceId.ToCocoaSentryId(), parentSpanId.ToCocoaSpanId());
+            SentryCocoaHybridSdk.Internal.SetTrace(traceId.ToCocoaObjCId(), parentSpanId.ToCocoaObjCSpanId());
         }
         finally
         {

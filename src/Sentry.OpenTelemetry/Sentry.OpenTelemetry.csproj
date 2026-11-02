@@ -23,8 +23,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Version 1.6.0 is the minimum version that does not have trim warnings   -->
-    <PackageReference Include="OpenTelemetry" Version="1.6.0" />
+    <!-- 1.6.0 was the lowest version without trim warnings; 1.12.0 is the lowest that also avoids
+         the delisted 1.10.0-1.11.1 range (GHSA-8785-wc3w-h8q6). -->
+    <PackageReference Include="OpenTelemetry" Version="1.12.0" />
+  </ItemGroup>
+
+  <!-- On .NET Framework, we need an assembly reference to System.Net.Http. OpenTelemetry 1.6.0 pulled
+       one in transitively; 1.12.0 dropped those dependencies, so reference it explicitly. -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>

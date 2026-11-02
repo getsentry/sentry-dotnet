@@ -1033,6 +1033,26 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void ParseOtelSpanDescription_HttpServer()
+    {
+        // Arrange
+        var data = Tracer.StartActivity("test op", ActivityKind.Server)!;
+        var attributes = new Dictionary<string, object>()
+        {
+            [OtelSemanticConventions.AttributeHttpRequestMethod] = "GET",
+            [OtelSemanticConventions.AttributeHttpRoute] = "/foo/{id}",
+        };
+
+        // Act
+        var (operation, description, source) = SentrySpanProcessor.ParseOtelSpanDescription(data, attributes);
+
+        // Assert
+        operation.Should().Be("http.server");
+        description.Should().Be("GET /foo/{id}");
+        source.Should().Be(TransactionNameSource.Route);
+    }
+
+    [Fact]
     public void OnStart_WithExistingTransactionOnScope_DoesNotOverwriteExistingTransaction()
     {
         // Arrange

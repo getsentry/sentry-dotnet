@@ -91,7 +91,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
     {
         if (logEvent.TryGetSourceContext(out var context))
         {
-            if (IsSentryContext(context))
+            if (SentrySdkNamespaces.IsSentrySdk(context))
             {
                 return;
             }
@@ -161,8 +161,10 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
                     ? exception?.Message ?? ""
                     : formatted,
                 context,
+                type: null,
                 data: data,
-                level: logEvent.Level.ToBreadcrumbLevel());
+                level: logEvent.Level.ToBreadcrumbLevel(),
+                hint: exception.ToHint());
         }
 
         // Read the options from the Hub, rather than the Sink's Serilog-Options, because 'EnableLogs' is declared in the base 'SentryOptions', rather than the derived 'SentrySerilogOptions'.
@@ -174,10 +176,6 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
             CaptureStructuredLog(hub, options, logEvent, formatted, template);
         }
     }
-
-    private static bool IsSentryContext(string context) =>
-        context.StartsWith("Sentry.") ||
-        string.Equals(context, "Sentry", StringComparison.Ordinal);
 
     private string FormatLogEvent(LogEvent logEvent)
     {

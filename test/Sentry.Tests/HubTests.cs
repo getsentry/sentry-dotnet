@@ -71,6 +71,23 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void Ctor_NonGlobalModeWithScopeSync_SyncsTraceToObserver()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.Options.ScopeObserver = observer;
+        _fixture.Options.EnableScopeSync = true;
+        _fixture.Options.IsGlobalModeEnabled = false;
+
+        // Act
+        using var hub = _fixture.GetSut();
+
+        // Assert
+        var propagationContext = hub.ScopeManager.GetCurrent().Key.PropagationContext;
+        observer.Received(1).SetTrace(propagationContext.TraceId, propagationContext.SpanId);
+    }
+
+    [Fact]
     public void PushAndLockScope_DoesNotAffectOuterScope()
     {
         // Arrange
@@ -314,6 +331,93 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_ConfigureScope_CurrentScopeNotResynced()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.Options.ScopeObserver = observer;
+        _fixture.Options.EnableScopeSync = true;
+        using var hub = _fixture.GetSut();
+        hub.ConfigureScope(s =>
+        {
+            s.AddBreadcrumb("crumb");
+            s.SetTag("tag", "value");
+        });
+        observer.ClearReceivedCalls();
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(), _ => { });
+
+        // Assert
+        observer.ReceivedCalls().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CaptureEvent_ConfigureScope_ChangesNotSynced()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.Options.ScopeObserver = observer;
+        _fixture.Options.EnableScopeSync = true;
+        using var hub = _fixture.GetSut();
+        observer.ClearReceivedCalls();
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(), s =>
+        {
+            s.AddBreadcrumb("crumb");
+            s.SetTag("tag", "value");
+            s.User.Id = "user";
+        });
+
+        // Assert
+        observer.ReceivedCalls().Should().BeEmpty();
+        _fixture.Client.Received(1).CaptureEvent(
+            Arg.Any<SentryEvent>(), Arg.Is<Scope>(s => s.Tags["tag"] == "value"), Arg.Any<SentryHint>());
+    }
+
+    [Fact]
+    public void CaptureEvent_Exception_BreadcrumbHintContainsException()
+    {
+        // Arrange
+        SentryHint hint = null;
+        _fixture.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
+        {
+            hint = h;
+            return breadcrumb;
+        });
+        using var hub = _fixture.GetSut();
+        var exception = new Exception("original");
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Items[HintTypes.Exception].Should().BeSameAs(exception);
+    }
+
+    [Fact]
+    public void CaptureEvent_Exception_BeforeBreadcrumbCanFilterOnExceptionType()
+    {
+        // Arrange
+        _fixture.Options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+            hint.Items.TryGetValue(HintTypes.Exception, out var exception) && exception is InvalidOperationException
+                ? null
+                : breadcrumb);
+        using var hub = _fixture.GetSut();
+        var scope = hub.ScopeManager.GetCurrent().Key;
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(new InvalidOperationException("filtered")));
+        hub.CaptureEvent(new SentryEvent(new Exception("kept")));
+
+        // Assert
+        scope.Breadcrumbs.Should().ContainSingle(b => b.Category == "Exception")
+            .Which.Message.Should().Be("kept");
+    }
+
+    [Fact]
     public void CaptureEvent_WithMessageAndException_StoresExceptionMessageAsData()
     {
         // Arrange
@@ -543,6 +647,59 @@ public partial class HubTests : IDisposable
         // Assert
         transaction.Status.Should().Be(SpanStatus.Aborted);
         transaction.IsFinished.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CaptureException_Terminal_AbortsActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        // Act
+        hub.CaptureException(new Exception("test"), handled: false, terminal: true, _ => { });
+
+        // Assert
+        transaction.Status.Should().Be(SpanStatus.Aborted);
+        transaction.IsFinished.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CaptureException_TerminalWithoutScopeCallback_AbortsActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        // Act
+        hub.CaptureException(new Exception("test"), handled: false, terminal: true);
+
+        // Assert
+        transaction.Status.Should().Be(SpanStatus.Aborted);
+        transaction.IsFinished.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CaptureException_NonTerminal_LeavesActiveTransactionRunning()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        // Act
+        hub.CaptureException(new Exception("test"), handled: false, terminal: false, _ => { });
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
     }
 
     [Fact]
@@ -876,14 +1033,16 @@ public partial class HubTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, 0.4f, "backpressure")]
-    [InlineData(true, 0.6f, "sample_rate")]
-    [InlineData(false, 0.4f, "backpressure")]
-    [InlineData(false, 0.6f, "sample_rate")]
-    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, double sampleRand, string discardReason)
+    [InlineData(true, null, 0.4f, "backpressure")]
+    [InlineData(true, null, 0.6f, "sample_rate")]
+    [InlineData(false, null, 0.4f, "backpressure")]
+    [InlineData(false, null, 0.6f, "sample_rate")]
+    [InlineData(true, false, 0.4f, "backpressure")]
+    [InlineData(false, false, 0.4f, "sample_rate")]
+    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, bool? isSampledUpstream, double sampleRand, string discardReason)
     {
         // Arrange
-        var transactionContext = new TransactionContext("name", "operation");
+        var transactionContext = new TransactionContext("name", "operation", isSampled: isSampledUpstream);
 
         var clock = new MockClock(DateTimeOffset.UtcNow);
         _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
@@ -1374,6 +1533,82 @@ public partial class HubTests : IDisposable
 
         // Assert
         transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_TracesSamplerThrows_FallsBackToStaticAndLogsError()
+    {
+        // Arrange
+        var exception = new InvalidOperationException("sampler failed");
+        _fixture.Options.TracesSampler = _ => throw exception;
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar");
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+        _fixture.Options.ReceivedLogError(exception, "TracesSampler callback failed.");
+    }
+
+    [Fact]
+    public void StartTransaction_TracesSamplerThrows_PreservesInheritedDecision()
+    {
+        // Arrange
+        _fixture.Options.TracesSampler = _ => throw new InvalidOperationException("sampler failed");
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
+        var traceHeader = new SentryTraceHeader(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"),
+            true);
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar", traceHeader);
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_TracesSamplerThrows_PreservesInheritedSampledOutDecision()
+    {
+        // Arrange
+        _fixture.Options.TracesSampler = _ => throw new InvalidOperationException("sampler failed");
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+        var traceHeader = new SentryTraceHeader(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"),
+            false);
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar", traceHeader);
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_TracesSamplerThrows_StaticSampleOut_RecordsSampleRateDiscard()
+    {
+        // Arrange
+        var recorder = Substitute.For<IClientReportRecorder>();
+        _fixture.Options.ClientReportRecorder = recorder;
+        _fixture.Options.TracesSampler = _ => throw new InvalidOperationException("sampler failed");
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar");
+        transaction.Finish();
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, 1);
     }
 
     [Fact]
@@ -1941,30 +2176,11 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Logger_IsDisabled_DoesNotCaptureLog()
+    public void Logger_EnableLogsDisabled_StillCapturesLog()
     {
         // Arrange
+        // EnableLogs gates the logging integrations. Logs created directly via this API are always captured.
         Assert.False(_fixture.Options.EnableLogs);
-        var hub = _fixture.GetSut();
-
-        // Act
-        hub.Logger.LogWarning("Message");
-        hub.Logger.Flush();
-
-        // Assert
-        _fixture.Client.Received(0).CaptureEnvelope(
-            Arg.Is<Envelope>(envelope =>
-                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
-            )
-        );
-        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
-    }
-
-    [Fact]
-    public void Logger_IsEnabled_DoesCaptureLog()
-    {
-        // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -1981,30 +2197,21 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Logger_EnableAfterCreate_HasNoEffect()
+    public void Logger_DoesCaptureLog()
     {
         // Arrange
-        Assert.False(_fixture.Options.EnableLogs);
         var hub = _fixture.GetSut();
 
         // Act
-        _fixture.Options.EnableLogs = true;
+        hub.Logger.LogWarning("Message");
+        hub.Logger.Flush();
 
         // Assert
-        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
-    }
-
-    [Fact]
-    public void Logger_DisableAfterCreate_HasNoEffect()
-    {
-        // Arrange
-        _fixture.Options.EnableLogs = true;
-        var hub = _fixture.GetSut();
-
-        // Act
-        _fixture.Options.EnableLogs = false;
-
-        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
         hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
     }
 
@@ -2012,7 +2219,6 @@ public partial class HubTests : IDisposable
     public async Task Logger_FlushAsync_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -2037,7 +2243,6 @@ public partial class HubTests : IDisposable
     public void Logger_Dispose_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -2059,30 +2264,9 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Metrics_IsDisabled_DoesNotCaptureMetric()
+    public void Metrics_DoesCaptureMetric()
     {
         // Arrange
-        _fixture.Options.EnableMetrics = false;
-        var hub = _fixture.GetSut();
-
-        // Act
-        hub.Metrics.EmitCounter("sentry_tests.hub_tests.counter", 1);
-        hub.Metrics.Flush();
-
-        // Assert
-        _fixture.Client.Received(0).CaptureEnvelope(
-            Arg.Is<Envelope>(envelope =>
-                envelope.Items.Single(item => item.Header["type"].Equals("trace_metric")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
-            )
-        );
-        hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
-    }
-
-    [Fact]
-    public void Metrics_IsEnabled_DoesCaptureMetric()
-    {
-        // Arrange
-        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
@@ -2099,38 +2283,9 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Metrics_EnableAfterCreate_HasNoEffect()
-    {
-        // Arrange
-        _fixture.Options.EnableMetrics = false;
-        var hub = _fixture.GetSut();
-
-        // Act
-        _fixture.Options.EnableMetrics = true;
-
-        // Assert
-        hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
-    }
-
-    [Fact]
-    public void Metrics_DisableAfterCreate_HasNoEffect()
-    {
-        // Arrange
-        Assert.True(_fixture.Options.EnableMetrics);
-        var hub = _fixture.GetSut();
-
-        // Act
-        _fixture.Options.EnableMetrics = false;
-
-        // Assert
-        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
-    }
-
-    [Fact]
     public async Task Metrics_FlushAsync_DoesCaptureMetric()
     {
         // Arrange
-        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
@@ -2155,7 +2310,6 @@ public partial class HubTests : IDisposable
     public void Metrics_Dispose_DoesCaptureMetric()
     {
         // Arrange
-        Assert.True(_fixture.Options.EnableMetrics);
         var hub = _fixture.GetSut();
 
         // Act
@@ -2499,6 +2653,24 @@ public partial class HubTests : IDisposable
 
         // Assert
         _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Is<Scope>(s => s.Tags["foo"] == "bar"), Arg.Any<SentryHint>());
+    }
+
+    [Fact]
+    public void CaptureFeedback_ConfigureScope_ChangesNotSynced()
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        _fixture.Options.ScopeObserver = observer;
+        _fixture.Options.EnableScopeSync = true;
+        using var hub = _fixture.GetSut();
+        hub.ConfigureScope(s => s.SetTag("existing", "value"));
+        observer.ClearReceivedCalls();
+
+        // Act
+        hub.CaptureFeedback(new SentryFeedback("Test feedback"), s => s.SetTag("tag", "value"));
+
+        // Assert
+        observer.ReceivedCalls().Should().BeEmpty();
     }
 
     [Theory]

@@ -6,58 +6,82 @@
 
 #nullable enable
 
-using System.Runtime.InteropServices;
-using Foundation;
+using System;
 using ObjCRuntime;
 
 namespace Sentry.CocoaSdk;
 
 [Native]
-internal enum SentryAttachmentType : long
+internal enum SentryObjCAttachmentType : long
 {
-    EventAttachment,
+    EventAttachment = 0,
     ViewHierarchy
 }
 
 [Native]
-internal enum SentryLevel : ulong
+internal enum SentryObjCFeedbackSource : long
+{
+    Widget = 0,
+    Custom
+}
+
+[Native]
+internal enum SentryObjCLastRunStatus : long
+{
+    Unknown = 0,
+    DidNotCrash,
+    DidCrash
+}
+
+[Native]
+internal enum SentryObjCLevel : ulong
 {
     None = 0,
-    Debug = 1,
-    Info = 2,
-    Warning = 3,
-    Error = 4,
-    Fatal = 5
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal
 }
 
 [Native]
-internal enum SentryError : long
+internal enum SentryObjCLogLevel : long
 {
-    UnknownError = -1,
-    InvalidDsnError = 100,
-    SentryCrashNotInstalledError = 101,
-    InvalidCrashReportError = 102,
-    CompressionError = 103,
-    JsonConversionError = 104,
-    CouldNotFindDirectory = 105,
-    RequestError = 106,
-    EventNotSent = 107,
-    FileIO = 108,
-    Kernel = 109
+    Trace = 0,
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Fatal
 }
 
 [Native]
-internal enum SentrySampleDecision : ulong
+internal enum SentryObjCProfileLifecycle : long
 {
-    Undecided,
+    Manual = 0,
+    Trace
+}
+
+[Native]
+internal enum SentryObjCReplayQuality : long
+{
+    Low = 0,
+    Medium,
+    High
+}
+
+[Native]
+internal enum SentryObjCSampleDecision : ulong
+{
+    Undecided = 0,
     Yes,
     No
 }
 
 [Native]
-internal enum SentrySpanStatus : ulong
+internal enum SentryObjCSpanStatus : ulong
 {
-    Undefined,
+    Undefined = 0,
     Ok,
     DeadlineExceeded,
     Unauthenticated,
@@ -78,100 +102,49 @@ internal enum SentrySpanStatus : ulong
 }
 
 [Native]
-internal enum SentryAppStartType : ulong
-{
-    Warm,
-    Cold,
-    Unknown
-}
-
-[Native]
-internal enum SentryANRType : long
-{
-    FatalFullyBlocking = 0,
-    FatalNonFullyBlocking = 1,
-    FullyBlocking = 2,
-    NonFullyBlocking = 3,
-    Unknown = 4
-}
-
-[Native]
-internal enum SentryExtensionType : long
-{
-    Widget = 0,
-    Intent = 1,
-    Action = 2,
-    Share = 3,
-    NotificationService = 4
-}
-
-[Native]
-internal enum SentryFeedbackSource : long
-{
-    Widget = 0,
-    Custom = 1
-}
-
-[Native]
-internal enum SentryHttpStatusCode : long
-{
-    Ok = 200,
-    Created = 201,
-    BadRequest = 400,
-    PreconditionFailed = 412,
-    ContentTooLarge = 413,
-    TooManyRequests = 429,
-    InternalServerError = 500
-}
-
-[Native]
-internal enum SentryLastRunStatus : long
-{
-    Unknown = 0,
-    DidNotCrash = 1,
-    DidCrash = 2
-}
-
-[Native]
-internal enum SentryLogLevel : long
-{
-    Trace = 0,
-    Debug = 1,
-    Info = 2,
-    Warn = 3,
-    Error = 4,
-    Fatal = 5
-}
-
-[Native]
-internal enum SentryProfileLifecycle : long
-{
-    Manual = 0,
-    Trace = 1
-}
-
-[Native]
-internal enum SentryReplayQuality : long
-{
-    Low = 0,
-    Medium = 1,
-    High = 2
-}
-
-[Native]
-internal enum SentryReplayType : long
-{
-    Session = 0,
-    Buffer = 1
-}
-
-[Native]
-internal enum SentryTransactionNameSource : long
+internal enum SentryObjCTransactionNameSource : long
 {
     Custom = 0,
-    Url = 1,
-    Route = 2,
-    View = 3,
-    Component = 4,
-    Task = 5
+    Url,
+    Route,
+    View,
+    Component,
+    Task
+}
+
+[Native]
+internal enum SentryObjCRedactRegionType : long
+{
+    Redact = 0,
+    ClipOut,
+    ClipBegin,
+    ClipEnd,
+    RedactSwiftUI
+}
+
+[Flags]
+[Native]
+internal enum SentryObjCMetricKitDiagnosticReport : ulong
+{
+    None = 0x0,
+    Crash = 1uL << 0,
+    Hang = 1uL << 1,
+    CPUException = 1uL << 2,
+    DiskWriteException = 1uL << 3,
+    AppLaunch = 1uL << 4
+}
+
+[Native]
+internal enum SentryObjCMetricKitHangReportingMode : long
+{
+    Legacy = 0,
+    FlamegraphAttachment = 1
+}
+
+[Native]
+internal enum SentryObjCSwizzleMode : long
+{
+    Always = 0,
+    OncePerClass = 1,
+    OncePerClassAndSuperclasses = 2
 }

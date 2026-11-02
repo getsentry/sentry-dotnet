@@ -83,6 +83,22 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
     public bool? IsOnline { get; set; }
 
     /// <summary>
+    /// The type of the internet connection.
+    /// </summary>
+    /// <example>
+    /// wifi, ethernet, cellular
+    /// </example>
+    internal string? ConnectionType { get; set; }
+
+    /// <summary>
+    /// The generation of the cellular network technology, if the connection is cellular.
+    /// </summary>
+    /// <example>
+    /// 2g, 3g, 4g, 5g
+    /// </example>
+    internal string? ConnectionEffectiveType { get; set; }
+
+    /// <summary>
     /// This can be a string portrait or landscape to define the orientation of a device.
     /// </summary>
     public DeviceOrientation? Orientation { get; set; }
@@ -253,6 +269,8 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
             BatteryLevel = BatteryLevel,
             IsCharging = IsCharging,
             IsOnline = IsOnline,
+            ConnectionType = ConnectionType,
+            ConnectionEffectiveType = ConnectionEffectiveType,
             BootTime = BootTime,
             ExternalFreeStorage = ExternalFreeStorage,
             ExternalStorageSize = ExternalStorageSize,
@@ -307,6 +325,8 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         BatteryLevel ??= source.BatteryLevel;
         IsCharging ??= source.IsCharging;
         IsOnline ??= source.IsOnline;
+        ConnectionType ??= source.ConnectionType;
+        ConnectionEffectiveType ??= source.ConnectionEffectiveType;
         BootTime ??= source.BootTime;
         ExternalFreeStorage ??= source.ExternalFreeStorage;
         ExternalStorageSize ??= source.ExternalStorageSize;
@@ -362,6 +382,8 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         writer.WriteNumberIfNotNull("battery_level", BatteryLevel);
         writer.WriteBooleanIfNotNull("charging", IsCharging);
         writer.WriteBooleanIfNotNull("online", IsOnline);
+        writer.WriteStringIfNotWhiteSpace("connection_type", ConnectionType);
+        writer.WriteStringIfNotWhiteSpace("connection_effective_type", ConnectionEffectiveType);
         writer.WriteStringIfNotWhiteSpace("orientation", Orientation?.ToString().ToLowerInvariant());
         writer.WriteBooleanIfNotNull("simulator", Simulator);
         writer.WriteNumberIfNotNull("memory_size", MemorySize);
@@ -429,6 +451,8 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
             : (float?)null;
         var isCharging = json.GetPropertyOrNull("charging")?.GetBoolean();
         var isOnline = json.GetPropertyOrNull("online")?.GetBoolean();
+        var connectionType = json.GetPropertyOrNull("connection_type")?.GetString();
+        var connectionEffectiveType = json.GetPropertyOrNull("connection_effective_type")?.GetString();
         var orientation = json.GetPropertyOrNull("orientation")?.GetString()?.ParseEnum<DeviceOrientation>();
         var simulator = json.GetPropertyOrNull("simulator")?.GetBoolean();
         var memorySize = json.GetPropertyOrNull("memory_size")?.GetInt64();
@@ -470,6 +494,8 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
             BatteryLevel = batteryLevel,
             IsCharging = isCharging,
             IsOnline = isOnline,
+            ConnectionType = connectionType,
+            ConnectionEffectiveType = connectionEffectiveType,
             Orientation = orientation,
             Simulator = simulator,
             MemorySize = memorySize,

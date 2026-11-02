@@ -578,6 +578,18 @@ public class DynamicSamplingContextTests
         Assert.DoesNotContain("org_id", dsc.Items);
     }
 
+    [Fact]
+    public void CreateFromPropagationContext_TraceId_Empty_Throws()
+    {
+        var options = new SentryOptions { Dsn = "https://a@sentry.io/1" };
+        var propagationContext = new SentryPropagationContext(SentryId.Empty, SpanId.Create());
+
+        var ex = Assert.Throws<ArgumentException>(() =>
+            propagationContext.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession));
+
+        Assert.Equal("traceId", ex.ParamName);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

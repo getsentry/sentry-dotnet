@@ -43,7 +43,6 @@ internal partial class BindableSentryOptions
     public bool? DisableFileWrite { get; set; }
     public TimeSpan? InitCacheFlushTimeout { get; set; }
     public Dictionary<string, string>? DefaultTags { get; set; }
-    public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
     public bool? PropagateTraceparent { get; set; }
@@ -79,7 +78,9 @@ internal partial class BindableSentryOptions
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
         options.EnableLogs = EnableLogs ?? options.EnableLogs;
+#pragma warning disable CS0618 // Bound so existing configuration keys still resolve; the value is ignored.
         options.EnableMetrics = EnableMetrics ?? options.EnableMetrics;
+#pragma warning restore CS0618
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;

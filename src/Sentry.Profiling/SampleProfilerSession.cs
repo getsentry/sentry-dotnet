@@ -47,7 +47,8 @@ internal class SampleProfilerSession : IDisposable
     // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
     internal static int CircularBufferMB = 16;
 
-    // Exposed for tests
+    private const int ProcessingDrainTimeoutMs = 2_000;
+
     internal TraceLogEventSource EventSource { get; }
 
     public SampleProfilerTraceEventParser SampleEventParser => _sampleEventParser;
@@ -55,6 +56,29 @@ internal class SampleProfilerSession : IDisposable
     public TimeSpan Elapsed => _stopwatch.Elapsed;
 
     public TraceLog TraceLog => EventSource.TraceLog;
+
+    // Bumped every time the interning tables are discarded. Anything caching a 
+    // CallStackIndex can invalidate it's cache whenever this changes
+    internal int TrimGeneration;
+
+    /// <summary>
+    /// Discards TraceLog's call stack interning tables, invalidating CallStackIndexes.
+    /// Must be called from the event processing thread.
+    /// </summary>
+    internal void TrimLiveSessionState()
+    {
+        OnTrimForTests?.Invoke();
+        TraceLog.TrimLiveSessionState();
+        TrimGeneration++;
+    }
+
+    internal bool IsStopped => _stopped;
+
+    internal static Action? BeforeStartupForTests;
+
+    internal static Action<SampleProfilerSession>? OnSessionCreatedForTests;
+
+    internal static Action? OnTrimForTests;
 
     private static InterlockedBoolean _throwOnNextStartupForTests = false;
 
@@ -68,6 +92,8 @@ internal class SampleProfilerSession : IDisposable
     {
         try
         {
+            BeforeStartupForTests?.Invoke();
+
             var client = new DiagnosticsClient(Environment.ProcessId);
 
             if (_throwOnNextStartupForTests.CompareExchange(false, true) == true)
@@ -83,6 +109,8 @@ internal class SampleProfilerSession : IDisposable
             var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
+            // The continuation must stay unconditional - one whose criteria aren't met is Canceled,
+            // which would make the Wait() in Stop() throw.
             var processing = Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
                 .ContinueWith(_ =>
                 {
@@ -90,9 +118,11 @@ internal class SampleProfilerSession : IDisposable
                     {
                         logger?.LogWarning(e, "Error during sampler profiler EventPipeSession processing.");
                     }
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                });
 
-            return new SampleProfilerSession(stopWatch, session, eventSource, processing, logger);
+            var result = new SampleProfilerSession(stopWatch, session, eventSource, processing, logger);
+            OnSessionCreatedForTests?.Invoke(result);
+            return result;
         }
         catch (Exception ex)
         {
@@ -119,19 +149,37 @@ internal class SampleProfilerSession : IDisposable
 
     public void Stop()
     {
-        if (!_stopped)
+        if (_stopped)
         {
+            return;
+        }
+
+        _stopped = true;
+        try
+        {
+            _session.Stop();
+
+            if (!_processing.Wait(ProcessingDrainTimeoutMs))
+            {
+                _logger?.LogWarning("Sampler profiler event processing didn't finish within {0} ms of stopping the session.", ProcessingDrainTimeoutMs);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Error during sampler profiler session shutdown.");
+        }
+        finally
+        {
+            // These always need to happen, otherwise the EventPipe connection to the 
+            // runtime is left open.
             try
             {
-                _stopped = true;
-                _session.Stop();
-                _processing.Wait();
                 _session.Dispose();
                 EventSource.Dispose();
             }
             catch (Exception ex)
             {
-                _logger?.LogWarning(ex, "Error during sampler profiler session shutdown.");
+                _logger?.LogWarning(ex, "Error disposing the sampler profiler session.");
             }
         }
     }

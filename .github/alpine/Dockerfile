@@ -5,7 +5,7 @@ FROM ${BASE}
 RUN apk update
 
 # common
-RUN apk add bash build-base cmake curl git gpg icu lsb-release-minimal nodejs npm sudo tar wget
+RUN apk add bash build-base cmake curl git gpg icu lsb-release-minimal nodejs npm sudo tar tzdata wget
 
 # sentry-native
 RUN apk add curl-dev docker-cli libunwind-dev libunwind-static linux-headers openssl-dev zlib-dev xz-dev xz-static
@@ -14,7 +14,7 @@ RUN apk add curl-dev docker-cli libunwind-dev libunwind-static linux-headers ope
 RUN apk add grpc-plugins openjdk11 powershell
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV GRPC_PROTOC_PLUGIN=/usr/bin/grpc_csharp_plugin
-RUN pwsh -Command Install-Module Pester -Scope AllUsers -Force
+RUN pwsh -Command "Install-Module Pester -Scope AllUsers -Force -ErrorAction Stop"
 
 # mono (3.22+)
 RUN if ! apk add mono; then \

@@ -34,7 +34,7 @@ builder.Services.AddOpenTelemetry()
             .AddSentryOtlpExporter(dsn)
     );
 
-builder.WebHost.UseSentry(options =>
+builder.UseSentry(options =>
 {
     options.Dsn = dsn;
     options.Debug = builder.Environment.IsDevelopment();

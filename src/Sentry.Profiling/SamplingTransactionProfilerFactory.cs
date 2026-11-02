@@ -14,9 +14,29 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
+    private const int SHUTDOWN_TIMEOUT_MS = 2_000;
+
+    // Once the interning tables exceed this many entries we discard them ASAP
+    internal int MaxCallStackCount = 100_000;
+
     private readonly SentryOptions _options;
 
     internal Task<SampleProfilerSession> _sessionTask;
+
+    private readonly CancellationTokenSource _shutdownCts = new();
+
+    private readonly object _sessionLock = new();
+    private SampleProfilerSession? _session;
+    private bool _disposed;
+
+    internal bool IsDisposed
+    {
+        get { lock (_sessionLock) { return _disposed; } }
+    }
+
+    internal int TrimCount;
+
+    private bool _trimFailed;
 
     private bool _errorLogged = false;
 
@@ -24,13 +44,24 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
+        // Store local reference to avoid ObjectDisposed exception
+        var shutdownToken = _shutdownCts.Token;
+
         _sessionTask = Task.Run(async () =>
         {
             // This can block up to 30 seconds. The timeout is out of our hands.
             var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
 
+            if (!TryPublishSession(session))
+            {
+                session.Dispose();
+                throw new OperationCanceledException(shutdownToken);
+            }
+
             // This can block indefinitely.
-            await session.WaitForFirstEventAsync().ConfigureAwait(false);
+            await session.WaitForFirstEventAsync(shutdownToken).ConfigureAwait(false);
+
+            session.SampleEventParser.ThreadSample += _ => TrimSessionStateIfNeeded(session);
 
             return session;
         });
@@ -43,9 +74,43 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         }
     }
 
+    private bool TryPublishSession(SampleProfilerSession session)
+    {
+        lock (_sessionLock)
+        {
+            if (_disposed)
+            {
+                return false;
+            }
+
+            _session = session;
+            return true;
+        }
+    }
+
+    private bool TryBeginShutdown(out SampleProfilerSession? sessionToStop)
+    {
+        lock (_sessionLock)
+        {
+            sessionToStop = _session;
+            if (_disposed)
+            {
+                return false;
+            }
+
+            _disposed = true;
+            return true;
+        }
+    }
+
     /// <inheritdoc />
     public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken cancellationToken)
     {
+        if (IsDisposed)
+        {
+            return null;
+        }
+
         // Start a profiler if one wasn't running yet.
         if (!_errorLogged && !_inProgress.Exchange(true))
         {
@@ -81,8 +146,60 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         return null;
     }
 
+    /// <summary>
+    /// Must run on the event processing thread, which is the only thread allowed to trim - hence
+    /// hanging off ThreadSample rather than off profile completion.
+    /// </summary>
+    private void TrimSessionStateIfNeeded(SampleProfilerSession session)
+    {
+        if (_trimFailed || session.TraceLog.CallStacks.Count <= MaxCallStackCount)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Trimming profiler session state, {0} interned call stacks.", session.TraceLog.CallStacks.Count);
+            // Costs the in-flight sample: its stack mapping goes with the tables, so AddSample skips it.
+            session.TrimLiveSessionState();
+            TrimCount++;
+        }
+        catch (Exception e)
+        {
+            // Latch off rather than retrying on every subsequent sample, which would throw and log
+            // at sample rate on the event processing thread.
+            _trimFailed = true;
+            _options.LogError(e, "Failed to trim profiler session state. Profiling memory use is no longer bounded.");
+        }
+    }
+
     public void Dispose()
     {
-        _sessionTask.ContinueWith(session => session.Dispose());
+        if (!TryBeginShutdown(out var session))
+        {
+            return;
+        }
+
+        _shutdownCts.Cancel();
+
+        try
+        {
+            _sessionTask.Wait(SHUTDOWN_TIMEOUT_MS);
+        }
+        catch (Exception e)
+        {
+            _options.LogDebug("Profiler session didn't start up cleanly before shutdown: {0}", e.Message);
+        }
+
+        try
+        {
+            session?.Dispose();
+        }
+        catch (Exception e)
+        {
+            _options.LogWarning(e, "Failed to stop the profiler session.");
+        }
+
+        _shutdownCts.Dispose();
     }
 }

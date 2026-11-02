@@ -1,9 +1,10 @@
 #if NETFRAMEWORK
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.PlatformAbstractions;
 
-internal class NetFxInstallationsEventProcessor : ISentryEventProcessor
+internal class NetFxInstallationsEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     internal static readonly string NetFxInstallationsKey = ".NET Framework";
 

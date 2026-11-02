@@ -31,6 +31,12 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string FileNameKey = "filename";
 
     /// <summary>
+    /// An item header is a single short JSON object.
+    /// Bounding the read stops us buffering a whole corrupt file into memory.
+    /// </summary>
+    internal const int MaxHeaderLineLength = 64 * 1024;
+
+    /// <summary>
     /// Header associated with this envelope item.
     /// </summary>
     public IReadOnlyDictionary<string, object?> Header { get; }
@@ -46,14 +52,26 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         TypeValueEvent => DataCategory.Error,
 
         // These ones are equivalent
+        TypeValueFeedback => DataCategory.Feedback,
         TypeValueTransaction => DataCategory.Transaction,
         TypeValueSpan => DataCategory.Span,
         TypeValueSession => DataCategory.Session,
         TypeValueAttachment => DataCategory.Attachment,
         TypeValueProfile => DataCategory.Profile,
+        TypeValueLog => DataCategory.LogItem,
+        TypeValueTraceMetric => DataCategory.TraceMetric,
+
+        // The "check_in" item type corresponds to the "monitor" data category
+        TypeValueCheckIn => DataCategory.Monitor,
+
+        // The "statsd" item type corresponds to the "metric_bucket" data category
+        TypeValueMetric => DataCategory.MetricBucket,
+
+        // Client reports are SDK telemetry that Relay never rate-limits - mapped to internal
+        TypeValueClientReport => DataCategory.Internal,
 
         // Not all envelope item types equate to data categories
-        // Specifically, user_report and client_report just use "default"
+        // Specifically, user_report just uses "default"
         _ => DataCategory.Default
     };
 
@@ -157,7 +175,11 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <inheritdoc />
-    public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger,
+    public Task SerializeAsync(Stream stream, IDiagnosticLogger? logger,
+        CancellationToken cancellationToken = default) =>
+        SerializeAsync(stream, logger, dropEmptyAttachment: false, cancellationToken);
+
+    internal async Task<bool> SerializeAsync(Stream stream, IDiagnosticLogger? logger, bool dropEmptyAttachment,
         CancellationToken cancellationToken = default)
     {
         // Always calculate the length of the payload, as Sentry will reject envelopes that have incorrect lengths
@@ -171,6 +193,11 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         await using (payloadBuffer.ConfigureAwait(false))
 #endif
         {
+            if (dropEmptyAttachment && IsEmptyAttachmentOfUnknownLength(payloadBuffer, logger))
+            {
+                return false;
+            }
+
             // Write to the outbound stream asynchronously. It's likely either an HttpRequestStream or a FileStream.
 
             // Header
@@ -181,17 +208,26 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
 
             // Payload
             await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+            return true;
         }
     }
 
     /// <inheritdoc />
-    public void Serialize(Stream stream, IDiagnosticLogger? logger)
+    public void Serialize(Stream stream, IDiagnosticLogger? logger) =>
+        Serialize(stream, logger, dropEmptyAttachment: false);
+
+    internal bool Serialize(Stream stream, IDiagnosticLogger? logger, bool dropEmptyAttachment)
     {
         // Always calculate the length of the payload, as Sentry will reject envelopes that have incorrect lengths
         // in item headers. Don't trust any previously calculated value to be correct.
         // See https://github.com/getsentry/sentry-dotnet/issues/1956
 
         using var payloadBuffer = BufferPayload(logger);
+
+        if (dropEmptyAttachment && IsEmptyAttachmentOfUnknownLength(payloadBuffer, logger))
+        {
+            return false;
+        }
 
         // Header
         var headerWithLength = Header.ToDict();
@@ -201,6 +237,18 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
 
         // Payload
         payloadBuffer.CopyTo(stream);
+        return true;
+    }
+
+    private bool IsEmptyAttachmentOfUnknownLength(MemoryStream payloadBuffer, IDiagnosticLogger? logger)
+    {
+        if (payloadBuffer.Length != 0 || TryGetLength() is not null || Payload is not BufferedStreamSerializable)
+        {
+            return false;
+        }
+
+        logger?.LogWarning("Did not add '{0}' to envelope because the attachment was empty.", TryGetFileName());
+        return true;
     }
 
     /// <inheritdoc />
@@ -317,11 +365,43 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// </summary>
     public static EnvelopeItem FromAttachment(SentryAttachment attachment)
     {
+        if (attachment.Content is ByteAttachmentContent byteContent &&
+            byteContent.GetType() == typeof(ByteAttachmentContent))
+        {
+            var payload = new AttachmentSerializable(byteContent);
+            var payloadLength = byteContent.Bytes.Length;
+
+            return CreateAttachmentItem(attachment, payload, payloadLength);
+        }
+
+        if (attachment.Content is FileAttachmentContent { DeleteOnClose: false } fileContent &&
+            fileContent.GetType() == typeof(FileAttachmentContent))
+        {
+            using var lengthStream = fileContent.GetStream();
+
+            var payload = new AttachmentSerializable(fileContent);
+            var payloadLength = lengthStream.TryGetLength();
+
+            return CreateAttachmentItem(attachment, payload, payloadLength);
+        }
+
         var stream = attachment.Content.GetStream();
+
         return FromAttachment(attachment, stream);
     }
 
     internal static EnvelopeItem FromAttachment(SentryAttachment attachment, Stream stream)
+    {
+        var payloadLength = stream.TryGetLength();
+        var payload = new BufferedStreamSerializable(stream);
+
+        return CreateAttachmentItem(attachment, payload, payloadLength);
+    }
+
+    private static EnvelopeItem CreateAttachmentItem(
+        SentryAttachment attachment,
+        ISerializable payload,
+        long? payloadLength)
     {
         var attachmentType = attachment.Type switch
         {
@@ -330,19 +410,20 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             AttachmentType.UnrealContext => "unreal.context",
             AttachmentType.UnrealLogs => "unreal.logs",
             AttachmentType.ViewHierarchy => "event.view_hierarchy",
+            AttachmentType.HeapDump => "event.heapdump",
             _ => "event.attachment"
         };
 
         var header = new Dictionary<string, object?>(5, StringComparer.Ordinal)
         {
             [TypeKey] = TypeValueAttachment,
-            [LengthKey] = stream.TryGetLength(),
+            [LengthKey] = payloadLength,
             [FileNameKey] = attachment.FileName,
             ["attachment_type"] = attachmentType,
             ["content_type"] = attachment.ContentType
         };
 
-        return new EnvelopeItem(header, new StreamSerializable(stream));
+        return new EnvelopeItem(header, payload);
     }
 
     /// <summary>
@@ -386,11 +467,30 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         Stream stream,
         CancellationToken cancellationToken = default)
     {
-        var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+        var buffer = await stream.ReadLineAsync(MaxHeaderLineLength, cancellationToken).ConfigureAwait(false);
 
         return
             Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)
             ?? throw new InvalidOperationException("Envelope item header is malformed.");
+    }
+
+    private static int GetPayloadBufferLength(Stream stream, long? payloadLength)
+    {
+        var remaining = stream.Length - stream.Position;
+        var length = payloadLength ?? remaining;
+
+        if (length < 0 || length > remaining)
+        {
+            throw new InvalidDataException(
+                $"Envelope item declares a payload of {length} bytes but only {remaining} remain.");
+        }
+
+        if (length > int.MaxValue)
+        {
+            throw new InvalidDataException($"Envelope item payload of {length} bytes is too large to buffer.");
+        }
+
+        return (int)length;
     }
 
     private static async Task<ISerializable> DeserializePayloadAsync(
@@ -409,7 +509,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // Event
         if (string.Equals(payloadType, TypeValueEvent, StringComparison.OrdinalIgnoreCase))
         {
-            var bufferLength = (int)(payloadLength ?? stream.Length);
+            var bufferLength = GetPayloadBufferLength(stream, payloadLength);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var sentryEvent = Json.Parse(buffer, SentryEvent.FromJson);
 
@@ -419,7 +519,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // Transaction
         if (string.Equals(payloadType, TypeValueTransaction, StringComparison.OrdinalIgnoreCase))
         {
-            var bufferLength = (int)(payloadLength ?? stream.Length);
+            var bufferLength = GetPayloadBufferLength(stream, payloadLength);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var transaction = Json.Parse(buffer, SentryTransaction.FromJson);
 
@@ -429,7 +529,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // Session
         if (string.Equals(payloadType, TypeValueSession, StringComparison.OrdinalIgnoreCase))
         {
-            var bufferLength = (int)(payloadLength ?? stream.Length);
+            var bufferLength = GetPayloadBufferLength(stream, payloadLength);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var sessionUpdate = Json.Parse(buffer, SessionUpdate.FromJson);
 
@@ -439,7 +539,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // Client Report
         if (string.Equals(payloadType, TypeValueClientReport, StringComparison.OrdinalIgnoreCase))
         {
-            var bufferLength = (int)(payloadLength ?? stream.Length);
+            var bufferLength = GetPayloadBufferLength(stream, payloadLength);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var clientReport = Json.Parse(buffer, ClientReport.FromJson);
 

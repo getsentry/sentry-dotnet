@@ -169,6 +169,22 @@ public partial class SentryEventTests
     }
 
     [Fact]
+    public void FromJson_NumericTimestamps_ParsesUnixSeconds()
+    {
+        var json = """
+            {
+              "timestamp": 1759435453.5,
+              "breadcrumbs": [{ "timestamp": 1759435453.123, "message": "test" }]
+            }
+            """;
+
+        var actual = Json.Parse(json, SentryEvent.FromJson);
+
+        actual.Timestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453500));
+        actual.Breadcrumbs.Single().Timestamp.Should().Be(DateTimeOffset.FromUnixTimeMilliseconds(1759435453123));
+    }
+
+    [Fact]
     public void GetExceptionType_NoException_ReturnsNone()
     {
         var evt = new SentryEvent();
@@ -239,5 +255,17 @@ public partial class SentryEventTests
         };
 
         Assert.Equal(SentryEvent.ExceptionType.UnhandledNonTerminal, evt.GetExceptionType());
+    }
+
+    [Theory]
+    [InlineData("""[{"message": "first"}, {"message": "second"}]""")]
+    [InlineData("""{"values": [{"message": "first"}, {"message": "second"}]}""")]
+    public void FromJson_Breadcrumbs_AcceptsArrayOrValuesObject(string breadcrumbs)
+    {
+        var json = $$"""{"breadcrumbs": {{breadcrumbs}}}""";
+
+        var evt = Json.Parse(json, SentryEvent.FromJson);
+
+        evt.Breadcrumbs.Select(b => b.Message).Should().Equal("first", "second");
     }
 }

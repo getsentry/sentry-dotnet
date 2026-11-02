@@ -77,6 +77,29 @@ public partial class SentrySinkTests
     }
 
     [Fact]
+    public void EmitBreadcrumb_WithException_ProvidesExceptionInHint()
+    {
+        SentryHint hint = null;
+        _fixture.Scope.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
+        {
+            hint = h;
+            return breadcrumb;
+        });
+        var expectedException = new Exception("expected message");
+
+        var sut = _fixture.GetSut();
+
+        // LogEventLevel.Warning is below the default MinimumEventLevel, so only a breadcrumb is added
+        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Warning, expectedException,
+            MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
+
+        sut.Emit(evt);
+
+        hint.Should().NotBeNull();
+        hint.Items[HintTypes.Exception].Should().BeSameAs(expectedException);
+    }
+
+    [Fact]
     public void Emit_SerilogSdk_Name()
     {
         var sut = _fixture.GetSut();
@@ -281,60 +304,60 @@ public partial class SentrySinkTests
             && p.Message.Message == expectedMessage));
     }
 
-    [Fact]
-    public void Emit_SourceContextMatchesSentry_NoEventSent()
+    [Theory]
+    [InlineData("Sentry")]
+    [InlineData("Sentry.ISentryClient")]
+    [InlineData("Sentry.Serilog")]
+    [InlineData("Sentry.Serilog.SentrySink")]
+    [InlineData("Sentry.AspNetCore.SentryMiddleware")]
+    [InlineData("Sentry.Extensions.Logging.MelDiagnosticLogger")]
+    public void Emit_SourceContextFromSentrySdk_NoEventSent(string sourceContext)
     {
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
             new MessageTemplateParser().Parse("message"),
-            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry.Serilog")) });
+            new[] { new LogEventProperty("SourceContext", new ScalarValue(sourceContext)) });
 
         sut.Emit(evt);
 
         _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
-    [Fact]
-    public void Emit_SourceContextContainsSentry_NoEventSent()
+    [Theory]
+    [InlineData("Sentry")]
+    [InlineData("Sentry.ISentryClient")]
+    [InlineData("Sentry.Serilog")]
+    [InlineData("Sentry.AspNetCore.SentryMiddleware")]
+    public void Emit_SourceContextFromSentrySdk_NoScopeConfigured(string sourceContext)
     {
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
             new MessageTemplateParser().Parse("message"),
-            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry")) });
-
-        sut.Emit(evt);
-
-        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
-    [Fact]
-    public void Emit_SourceContextMatchesSentry_NoScopeConfigured()
-    {
-        var sut = _fixture.GetSut();
-
-        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
-            new MessageTemplateParser().Parse("message"),
-            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry.Serilog")) });
+            new[] { new LogEventProperty("SourceContext", new ScalarValue(sourceContext)) });
 
         sut.Emit(evt);
 
         _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
     }
 
-    [Fact]
-    public void Emit_SourceContextContainsSentry_NoScopeConfigured()
+    // See https://github.com/getsentry/sentry-dotnet/issues/5265
+    [Theory]
+    [InlineData("Sentry.Samples.AspNetCore.Serilog.Program")]
+    [InlineData("Sentry.Some.Class")]
+    [InlineData("SentrySomething")]
+    public void Emit_SourceContextFromUserCode_EventSent(string sourceContext)
     {
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
             new MessageTemplateParser().Parse("message"),
-            new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry")) });
+            new[] { new LogEventProperty("SourceContext", new ScalarValue(sourceContext)) });
 
         sut.Emit(evt);
 
-        _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == sourceContext));
     }
 
     [Fact]

@@ -14,4 +14,4 @@ jobs:
     if: false
     runs-on: ubuntu-latest
     steps:
-      - uses: getsentry/github-workflows/danger@607fed74f812e69201531a5185b6c3c57caa4e89 # 3.4.0
+      - uses: getsentry/github-workflows/danger@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1

@@ -59,6 +59,26 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void Log_BreadcrumbWithException_ProvidesExceptionInHint()
+    {
+        SentryHint hint = null;
+        _fixture.Scope.Options.SetBeforeBreadcrumb((breadcrumb, h) =>
+        {
+            hint = h;
+            return breadcrumb;
+        });
+        var expectedException = new Exception("expected message");
+
+        var sut = _fixture.GetSut();
+
+        // LogLevel.Warning is below the default MinimumEventLevel, so only a breadcrumb is added
+        sut.Log<object>(LogLevel.Warning, default, null, expectedException, null);
+
+        hint.Should().NotBeNull();
+        hint.Items[HintTypes.Exception].Should().BeSameAs(expectedException);
+    }
+
+    [Fact]
     public void Log_WithEventId_EventIdAsTagOnEvent()
     {
         var expectedEventId = new EventId(10, "EventId-!@#$%^&*(");
@@ -149,6 +169,88 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void Log_MatchingFilter_DoesNotFormatMessage()
+    {
+        // Arrange
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => true);
+        var formatted = false;
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Log(LogLevel.Information, default, "state", null, (_, _) =>
+        {
+            formatted = true;
+            return "message";
+        });
+
+        // Assert
+        formatted.Should().BeFalse();
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_FromSentry_DoesNotFormatMessage()
+    {
+        // Arrange
+        _fixture.CategoryName = "Sentry.ISentryClient";
+        var formatted = false;
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Log(LogLevel.Information, default, "state", null, (_, _) =>
+        {
+            formatted = true;
+            return "message";
+        });
+
+        // Assert
+        formatted.Should().BeFalse();
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_BelowMinimumLevels_DoesNotFormatMessage()
+    {
+        // Arrange
+        var formatted = false;
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Log(LogLevel.Debug, default, "state", null, (_, _) =>
+        {
+            formatted = true;
+            return "message";
+        });
+
+        // Assert
+        formatted.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Log_EventAndBreadcrumbLevelsBothMet_FormatsMessageOnce()
+    {
+        // Arrange
+        var count = 0;
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Log(LogLevel.Critical, default, "state", null, (_, _) =>
+        {
+            count++;
+            return "formatted message";
+        });
+
+        // Assert
+        count.Should().Be(1);
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == "formatted message"));
+        _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be("formatted message");
+    }
+
+    [Fact]
     public void LogCritical_MatchingFilter_DoesNotCapturesEvent()
     {
         const string expected = "message";
@@ -195,6 +297,67 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void LogCritical_EventAndBreadcrumbLevelsBothMet_EvaluatesFilterOnce()
+    {
+        var invocations = 0;
+        _fixture.Options.MinimumEventLevel = LogLevel.Critical;
+        _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Debug;
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) =>
+        {
+            invocations++;
+            return false;
+        });
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        invocations.Should().Be(1);
+    }
+
+    [Fact]
+    public void LogCritical_FilterThrows_DoesNotCaptureEventAndLogsError()
+    {
+        var exception = new InvalidOperationException("filter failed");
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw exception);
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Options.ReceivedLogError(exception,
+            "The {0} log filter callback failed. The log entry will be filtered out.",
+            nameof(DelegateLogEntryFilter));
+    }
+
+    [Fact]
+    public void LogCritical_FilterThrows_DoesNotAddBreadcrumb()
+    {
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw new InvalidOperationException("filter failed"));
+        _fixture.Options.AddDiagnosticLoggerSubstitute();
+
+        var sut = _fixture.GetSut();
+
+        sut.LogCritical("message");
+
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void LogCritical_FilterThrows_DoesNotReachTheCaller()
+    {
+        _fixture.Options.AddLogEntryFilter((_, _, _, _) => throw new InvalidOperationException("filter failed"));
+
+        var sut = _fixture.GetSut();
+
+        var log = () => sut.LogCritical("message");
+
+        log.Should().NotThrow();
+    }
+
+    [Fact]
     public void LogCritical_DefaultOptions_CapturesEvent()
     {
         const string expected = "message";
@@ -218,11 +381,15 @@ public class SentryLoggerTests
             .CaptureEvent(Arg.Any<SentryEvent>());
     }
 
-    [Fact]
-    public void Log_SentryCategory_DoesNotSendEvent()
+    [Theory]
+    [InlineData("Sentry")]
+    [InlineData("Sentry.ISentryClient")]
+    [InlineData("Sentry.Extensions.Logging.SentryLogger")]
+    [InlineData("Sentry.AspNetCore.SentryMiddleware")]
+    public void Log_SentryCategory_DoesNotSendEvent(string categoryName)
     {
         var expectedException = new Exception("expected message");
-        _fixture.CategoryName = "Sentry.Some.Class";
+        _fixture.CategoryName = categoryName;
         var sut = _fixture.GetSut();
 
         sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
@@ -231,25 +398,17 @@ public class SentryLoggerTests
             .CaptureEvent(Arg.Any<SentryEvent>());
     }
 
-    [Fact]
-    public void Log_SentryRootCategory_DoesNotSendEvent()
-    {
-        var expectedException = new Exception("expected message");
-        _fixture.CategoryName = "Sentry";
-        var sut = _fixture.GetSut();
-
-        sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
-
-        _ = _fixture.Hub.DidNotReceive()
-            .CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
+    // A category under a "Sentry" namespace that isn't one of ours belongs to the application.
     // https://github.com/getsentry/sentry-dotnet/issues/132
-    [Fact]
-    public void Log_SentrySomethingCategory_SendEvent()
+    // https://github.com/getsentry/sentry-dotnet/issues/5265
+    [Theory]
+    [InlineData("SentrySomething")]
+    [InlineData("Sentry.Some.Class")]
+    [InlineData("Sentry.Samples.AspNetCore.Serilog.Program")]
+    public void Log_UserCategory_SendsEvent(string categoryName)
     {
         var expectedException = new Exception("expected message");
-        _fixture.CategoryName = "SentrySomething";
+        _fixture.CategoryName = categoryName;
         var sut = _fixture.GetSut();
 
         sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);

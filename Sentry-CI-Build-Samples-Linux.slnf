@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "Sentry.slnx",
+    "projects": [
+      "samples\\Sentry.Samples.Android\\Sentry.Samples.Android.csproj",
+      "samples\\Sentry.Samples.Maui\\Sentry.Samples.Maui.csproj"
+    ]
+  }
+}

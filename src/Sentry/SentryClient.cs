@@ -212,7 +212,22 @@ public class SentryClient : ISentryClient, IDisposable
         var processedTransaction = transaction;
         foreach (var processor in scope.GetAllTransactionProcessors())
         {
-            processedTransaction = processor.DoProcessTransaction(transaction, hint);
+            try
+            {
+                processedTransaction = processor.DoProcessTransaction(processedTransaction, hint);
+            }
+            catch (Exception e) when (processor is ISdkProcessor)
+            {
+                _options.LogError(e, "Transaction processor {0} threw an exception. Continuing with the remaining processors.", processor.GetType().Name);
+            }
+            catch (Exception e)
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, spanCount);
+                _options.LogError(e, "Transaction processor {0} threw an exception. The transaction will be dropped.", processor.GetType().Name);
+                return;
+            }
+
             if (processedTransaction == null) // Rejected transaction
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
@@ -222,12 +237,9 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        processedTransaction = BeforeSendTransaction(processedTransaction, hint);
+        processedTransaction = BeforeSendTransaction(processedTransaction, hint, spanCount);
         if (processedTransaction is null) // Rejected transaction
         {
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, spanCount);
-            _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
             return;
         }
 
@@ -242,10 +254,7 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction, _options.DiagnosticLogger, attachments));
     }
 
-#if NET6_0_OR_GREATER
-    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
-#endif
-    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint)
+    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint, int spanCount)
     {
         if (_options.BeforeSendTransactionInternal is null)
         {
@@ -256,36 +265,23 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return _options.BeforeSendTransactionInternal?.Invoke(transaction, hint);
+            var processedTransaction = _options.BeforeSendTransactionInternal.Invoke(transaction, hint);
+            if (processedTransaction is null) // Rejected transaction
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, spanCount);
+                _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
+            }
+
+            return processedTransaction;
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsTrimmed)
-            {
-                // Attempt to demystify exceptions before adding them as breadcrumbs.
-                e.Demystify();
-            }
-
-            _options.LogError(e, "The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.");
-
-            var data = new Dictionary<string, string>
-            {
-                {"message", e.Message}
-            };
-
-            if (e.StackTrace is not null)
-            {
-                data.Add("stackTrace", e.StackTrace);
-            }
-
-            transaction.AddBreadcrumb(
-                message: "BeforeSendTransaction callback failed.",
-                category: "SentryClient",
-                data: data,
-                level: BreadcrumbLevel.Error);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Span, spanCount);
+            _options.LogError(e, "The BeforeSendTransaction callback threw an exception. The transaction will be dropped.");
+            return null;
         }
-
-        return transaction;
     }
 
     /// <inheritdoc />
@@ -339,7 +335,12 @@ public class SentryClient : ISentryClient, IDisposable
 
     private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
-        var filteredExceptions = ApplyExceptionFilters(@event.Exception);
+        var filteredExceptions = ApplyExceptionFilters(@event.Exception, out var filterThrew);
+        if (filterThrew)
+        {
+            return SentryId.Empty;
+        }
+
         if (filteredExceptions?.Count > 0)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -371,9 +372,20 @@ public class SentryClient : ISentryClient, IDisposable
             // after the SDK is initialized. Useful for example once a DI container is up
             foreach (var processor in scope.GetAllExceptionProcessors())
             {
-                processor.Process(@event.Exception, @event);
-
-                // NOTE: Exception processors can't drop events, but exception filters (above) can.
+                try
+                {
+                    processor.Process(@event.Exception, @event);
+                }
+                catch (Exception e) when (processor is ISdkProcessor)
+                {
+                    _options.LogError(e, "Exception processor {0} threw an exception. Continuing with the remaining processors.", processor.GetType().Name);
+                }
+                catch (Exception e)
+                {
+                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+                    _options.LogError(e, "Exception processor {0} threw an exception. The event will be dropped.", processor.GetType().Name);
+                    return SentryId.Empty;
+                }
             }
         }
 
@@ -445,8 +457,9 @@ public class SentryClient : ISentryClient, IDisposable
         return SentryId.Empty;
     }
 
-    private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
+    private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception, out bool filterThrew)
     {
+        filterThrew = false;
         var filters = _options.ExceptionFilters;
         if (exception == null || filters == null || filters.Count == 0)
         {
@@ -454,21 +467,39 @@ public class SentryClient : ISentryClient, IDisposable
             return null;
         }
 
-        if (filters.Any(f => f.Filter(exception)))
+        foreach (var filter in filters)
         {
-            // The event should be filtered based on the given exception
-            return new[] { exception };
+            try
+            {
+                if (filter.Filter(exception))
+                {
+                    // The event should be filtered based on the given exception
+                    return new[] { exception };
+                }
+            }
+            catch (Exception e)
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.Error);
+                _options.LogError(e, "Exception filter {0} threw an exception. The event will be dropped.", filter.GetType().Name);
+                filterThrew = true;
+                return null;
+            }
         }
 
         if (exception is AggregateException aggregate)
         {
             // Flatten the tree of aggregates such that all the inner exceptions are non-aggregates.
             var innerExceptions = aggregate.Flatten().InnerExceptions;
-            if (innerExceptions.All(e => ApplyExceptionFilters(e) != null))
+            foreach (var innerException in innerExceptions)
             {
-                // All inner exceptions matched a filter, so the event should be filtered.
-                return innerExceptions;
+                if (ApplyExceptionFilters(innerException, out filterThrew) == null)
+                {
+                    return null;
+                }
             }
+
+            // All inner exceptions matched a filter, so the event should be filtered.
+            return innerExceptions;
         }
 
         // The event should not be filtered.

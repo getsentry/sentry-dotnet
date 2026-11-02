@@ -11,6 +11,8 @@ else
     git config --global user.email 'bot+github-bot@sentry.io'
     git fetch
     git checkout ${GITHUB_BRANCH}
-    git commit -am "Format code"
+    # Submodule working trees can lag the branch's pointers; never stage them
+    git add -u -- . ':(exclude)modules'
+    git commit -m "Format code"
     git push --set-upstream origin ${GITHUB_BRANCH}
 fi

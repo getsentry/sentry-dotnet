@@ -57,6 +57,116 @@ public class HubExtensionsTests
     }
 
     [Fact]
+    public void CaptureException_ScopeCallback_NoHandledArgument_DoesNotSetHandledFlag()
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(true);
+        var ex = new Exception();
+
+        // Act
+        _ = Sut.CaptureException(ex, _ => { });
+
+        // Assert
+        Assert.False(ex.Data.Contains(Mechanism.HandledKey));
+        _ = Sut.Received(1).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Action<Scope>>());
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallback_NoHandledArgument_PresetFlagIsPreserved()
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(true);
+        var ex = new Exception();
+        ex.SetSentryMechanism("SomeMechanism", handled: false);
+
+        // Act
+        _ = Sut.CaptureException(ex, _ => { });
+
+        // Assert
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_ScopeCallback_ExplicitHandled_RecordsFlagOnException(bool handled)
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(true);
+        var ex = new Exception();
+
+        // Act
+        _ = Sut.CaptureException(ex, handled, terminal: false, _ => { });
+
+        // Assert
+        Assert.Equal(handled, ex.Data[Mechanism.HandledKey]);
+        _ = Sut.Received(1).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Action<Scope>>());
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallback_ExplicitHandled_OverridesFlagSetBySetSentryMechanism()
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(true);
+        var ex = new Exception();
+        ex.SetSentryMechanism("SomeMechanism", handled: true);
+
+        // Act
+        _ = Sut.CaptureException(ex, handled: false, terminal: false, _ => { });
+
+        // Assert
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallback_ExplicitHandled_DisabledHub_DoesNotRecordFlagOnException()
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(false);
+        var ex = new Exception();
+
+        // Act
+        var id = Sut.CaptureException(ex, handled: false, terminal: false, _ => { });
+
+        // Assert
+        Assert.Equal(SentryId.Empty, id);
+        Assert.False(ex.Data.Contains(Mechanism.HandledKey));
+        _ = Sut.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Action<Scope>>());
+    }
+
+    [Fact]
+    public void CaptureExceptionInternal_NoPresetFlag_DefaultsToUnhandled()
+    {
+        // Arrange
+        var ex = new Exception();
+
+        // Act
+        _ = Sut.CaptureExceptionInternal(ex);
+
+        // Assert
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+        _ = Sut.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureExceptionInternal_PresetFlag_IsNotOverwritten(bool handled)
+    {
+        // Arrange
+        // E.g. WinUIUnhandledExceptionIntegration forwards the platform's Handled value
+        // via SetSentryMechanism before capturing.
+        var ex = new Exception();
+        ex.SetSentryMechanism("SomeMechanism", handled: handled);
+
+        // Act
+        _ = Sut.CaptureExceptionInternal(ex);
+
+        // Assert
+        Assert.Equal(handled, ex.Data[Mechanism.HandledKey]);
+    }
+
+    [Fact]
     public void AddBreadcrumb_MinimalArguments_CreatesBreadcrumb()
     {
         const string expectedMessage = "message";
@@ -159,5 +269,39 @@ public class HubExtensionsTests
         // Assert
         traceId.Should().Be(SentryId.Empty);
         spanId.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureException_ScopeCallback_ExplicitTerminal_RecordsTerminalFlagOnException(bool terminal)
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(true);
+        var ex = new Exception();
+
+        // Act
+        _ = Sut.CaptureException(ex, handled: false, terminal, _ => { });
+
+        // Assert
+        Assert.Equal(false, ex.Data[Mechanism.HandledKey]);
+        Assert.Equal(terminal, ex.Data[Mechanism.TerminalKey]);
+        _ = Sut.Received(1).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Action<Scope>>());
+    }
+
+    [Fact]
+    public void CaptureException_ScopeCallback_ExplicitTerminal_DisabledHub_DoesNotRecordFlagsOnException()
+    {
+        // Arrange
+        _ = Sut.IsEnabled.Returns(false);
+        var ex = new Exception();
+
+        // Act
+        var id = Sut.CaptureException(ex, handled: false, terminal: true, _ => { });
+
+        // Assert
+        Assert.Equal(SentryId.Empty, id);
+        Assert.False(ex.Data.Contains(Mechanism.HandledKey));
+        Assert.False(ex.Data.Contains(Mechanism.TerminalKey));
     }
 }

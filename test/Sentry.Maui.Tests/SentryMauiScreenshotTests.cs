@@ -109,7 +109,7 @@ public class SentryMauiScreenshotTests
     }
 
     [SkippableFact]
-    public async Task CaptureException_BeforeCaptureScreenshot_DisableCaptureAsync()
+    public async Task CaptureException_BeforeScreenshotCapture_DisableCaptureAsync()
     {
 #if __IOS__
         Skip.If(true, "Flaky on iOS");
@@ -141,7 +141,7 @@ public class SentryMauiScreenshotTests
     // various static members like ActivityStateManager.Default:
     // https://github.com/dotnet/maui/blob/3c7b65264d2f341a48db32263a271fd8718cfd23/src/Essentials/src/Screenshot/Screenshot.android.cs#L28
     [SkippableFact]
-    public async Task CaptureException_BeforeCaptureScreenshot_DefaultAsync()
+    public async Task CaptureException_BeforeScreenshotCapture_DefaultAsync()
     {
 #if __IOS__
         Skip.If(true, "Flaky on iOS");

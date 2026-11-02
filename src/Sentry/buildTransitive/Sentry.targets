@@ -21,6 +21,8 @@
     <SentryProGuardUUID Condition="'$(SentryProGuardUUID)' == ''">$([System.Guid]::NewGuid())</SentryProGuardUUID>
     <SentryAllowFailure Condition="'$(SENTRY_ALLOW_FAILURE)' == 'true'">true</SentryAllowFailure>
     <SentryAllowFailure Condition="'$(SentryAllowFailure)' == ''">false</SentryAllowFailure>
+    <!-- From .NET 11 the SDK's Native AOT publish skips Build and runs _PublishOptimizedBuildAlternative instead -->
+    <_SentryAfterBuildTargets>Build;_PublishOptimizedBuildAlternative</_SentryAfterBuildTargets>
   </PropertyGroup>
 
   <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
@@ -52,7 +54,7 @@
     </WriteCodeFragment>
   </Target>
 
-  <Target Name="CheckSentryCLI" AfterTargets="Build" Condition="'$(InnerTargets)' == ''">
+  <Target Name="CheckSentryCLI" AfterTargets="$(_SentryAfterBuildTargets)" Condition="'$(InnerTargets)' == ''">
     <PropertyGroup>
       <!-- Set defaults for the Sentry properties. -->
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == ''">false</SentryUploadSymbols>
@@ -137,7 +139,8 @@
       <_SentryCLICommand>$(SentryCLIBaseCommand) info</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryOrg)' != '' And '$(SentryProject)' != ''">$(_SentryCLICommand) --no-defaults</_SentryCLICommand>
     </PropertyGroup>
-    <Exec Condition="'$(SentryCLI)' != ''" Command="$(_SentryCLICommand)" IgnoreExitCode="true" ConsoleToMsBuild="true" StandardOutputImportance="Low">
+    <Exec Condition="'$(SentryCLI)' != ''" Command="$(_SentryCLICommand)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true"
+      ConsoleToMsBuild="true" StandardOutputImportance="Low" StandardErrorImportance="Normal">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       <Output TaskParameter="ConsoleOutput" PropertyName="_SentryCLIOutput" />
     </Exec>
@@ -146,10 +149,10 @@
       <_SentryCLIRequestFailed Condition="$(_SentryCLIOutput.Contains('API request failed'))">true</_SentryCLIRequestFailed>
     </PropertyGroup>
     <Warning Condition="'$(_SentryCLIRequestFailed)' != ''"
-      Text="Sentry API request failed.  Either the authentication info is invalid, or the Sentry server could not be reached." />
+      Text="Sentry API request failed.  Either the authentication info is invalid, or the Sentry server could not be reached.  Skipping Sentry uploads and release creation." />
 
     <Message Importance="High" Condition="'$(_SentryCLIExitCode)' != '0' And '$(_SentryCLIRequestFailed)' == ''"
-      Text="The Sentry CLI is not fully configured with authentication, organization, and project." />
+      Text="The Sentry CLI is not fully configured with authentication, organization, and project.  Skipping Sentry uploads and release creation." />
     <PropertyGroup Condition="'$(_SentryCLIExitCode)' != '0'">
       <SentryCLI />
     </PropertyGroup>
@@ -214,29 +217,37 @@
 
     <PropertyGroup>
       <SentryCLIUploadItems>$(SentryCLIUploadDirectory)</SentryCLIUploadItems>
-      <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)linked')">$(SentryCLIUploadItems) $(IntermediateOutputPath)linked/*.pdb</SentryCLIUploadItems>
       <SentryCLIUploadItems Condition="'@(AndroidNativeSymbolFilesExceptDll)' != ''">$(SentryCLIUploadItems) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')</SentryCLIUploadItems>
+      <_SentryCLIUploadTrimmedPdbs Condition="Exists('$(IntermediateOutputPath)linked')">$(IntermediateOutputPath)linked/*.pdb</_SentryCLIUploadTrimmedPdbs>
+      <_SentryCLIUploadTrimmedPdbs Condition="Exists('$(IntermediateOutputPath)postprocessed-assemblies')">$(IntermediateOutputPath)postprocessed-assemblies/*.pdb</_SentryCLIUploadTrimmedPdbs>
+      <_SentryCLIIncludeSources Condition="'$(SentryUploadSources)' == 'true'">--include-sources</_SentryCLIIncludeSources>
     </PropertyGroup>
+    <ItemGroup>
+      <_SentryCLIUploadSymbolType Include="@(SentryCLIUploadSymbolType)" />
+    </ItemGroup>
+    <!-- Apple apps ship the trimmer's assemblies, whose PDBs each RID's own build uploads, so skip the pre-trim ones -->
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'maccatalyst'">
+      <_SentryCLIUploadSymbolType Remove="pdb;portablepdb" Condition="'$(_SentryCLIUploadTrimmedPdbs)' != '' or ('$(RuntimeIdentifiers)' != '' and '$(RuntimeIdentifier)' == '')" />
+    </ItemGroup>
 
-    <!-- if (UploadSymbols && UploadSources) { -->
+    <!-- if (UploadSymbols) { -->
       <Message Importance="High"
         Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
-        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadItems)" />
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadItems) $(_SentryCLIUploadTrimmedPdbs)" />
+      <Message Importance="High"
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadItems) $(_SentryCLIUploadTrimmedPdbs)" />
       <Exec
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
-        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') --include-sources $(SentryCLIUploadItems)"
+        Condition="'$(SentryUploadSymbols)' == 'true'"
+        Command="$(SentryCLIDebugFilesUploadCommand) @(_SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(_SentryCLIIncludeSources) $(SentryCLIUploadItems)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
-    <!-- } else if (UploadSymbols && !UploadSources) { -->
-      <Message Importance="High"
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
-        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadItems)" />
       <Exec
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
-        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(SentryCLIUploadItems)"
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(_SentryCLIUploadTrimmedPdbs)' != ''"
+        Command="$(SentryCLIDebugFilesUploadCommand) -t pdb -t portablepdb $(_SentryCLIIncludeSources) $(_SentryCLIUploadTrimmedPdbs)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
-        <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+        <Output TaskParameter="ExitCode" PropertyName="_SentryCLITrimmedPdbsExitCode" />
       </Exec>
     <!-- } else if (!UploadSymbols && UploadSources) { -->
       <PropertyGroup>
@@ -261,7 +272,7 @@
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
     <!-- } -->
-    <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload debug files." />
+    <Warning Condition="'$(_SentryCLIExitCode)' != '0' or ('$(_SentryCLITrimmedPdbsExitCode)' != '' and '$(_SentryCLITrimmedPdbsExitCode)' != '0')" Text="Sentry CLI could not upload debug files." />
   </Target>
 
   <!-- Only for the application assembly: https://github.com/getsentry/sentry-dotnet/pull/4647 -->
@@ -309,37 +320,46 @@
   <UsingTask TaskName="SentryGetApplicationVersion" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <AssemblyPath Required="true" />
+      <HasGeneratedInformationalVersion ParameterType="System.Boolean" />
       <Release Output="true" />
     </ParameterGroup>
     <Task>
       <Using Namespace="System"/>
+      <Using Namespace="System.Diagnostics"/>
       <Using Namespace="System.Reflection"/>
+      <Using Namespace="System.Runtime.InteropServices"/>
       <Code Type="Fragment" Language="cs">
         <![CDATA[
   try
   {
 #nullable enable
-    Log.LogMessage($"Loading assembly: {AssemblyPath}");
     var path = Path.GetFullPath(AssemblyPath);
-    var assembly = Assembly.LoadFile(path);
-
-    Log.LogMessage($"Getting assembly name...");
-    var assemblyName = assembly.GetName();
+    Log.LogMessage($"Reading version information from: {path}");
+    var assemblyName = AssemblyName.GetAssemblyName(path);
     var name = assemblyName.Name;
+    var assemblyVersion = assemblyName.Version?.ToString();
     Log.LogMessage($"Assembly name: {name}");
 
-    Log.LogMessage($"Reading AssemblyInformationalVersionAttribute...");
-    string? version = null;
-    try
+    // Unlike reflection, this doesn't need to load the types of the assembly's other attributes, see #3536
+    var versionInfo = FileVersionInfo.GetVersionInfo(path);
+    string? version = versionInfo.ProductVersion;
+    // On Windows, ProductVersion falls back to the file version when there's no informational version attribute
+    if (!HasGeneratedInformationalVersion && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        && version == versionInfo.FileVersion && version != assemblyVersion)
     {
-      var infoVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-      version = infoVersionAttribute?.InformationalVersion;
+      if (Encoding.ASCII.GetString(File.ReadAllBytes(path)).Contains("AssemblyInformationalVersionAttribute\0"))
+      {
+        Log.LogWarning($"Using {version} for the Sentry release, but {name} may report {assemblyVersion} at runtime. Set SENTRY_RELEASE to choose the release explicitly.");
+      }
+      else
+      {
+        version = null;
+      }
     }
-    catch
+    if (string.IsNullOrWhiteSpace(version))
     {
-      Log.LogMessage($"Failed to read informational version attribute");
+      version = assemblyVersion;
     }
-    version ??= assemblyName.Version?.ToString();
     Log.LogMessage($"Version: {version}");
 
     Log.LogMessage($"Compiling release information...");
@@ -365,16 +385,20 @@
     <_SentryRelease Condition="'$(_SentryRelease)' == '' And '$(SENTRY_RELEASE)' != ''">$(SENTRY_RELEASE)</_SentryRelease>
   </PropertyGroup>
 
-  <Target Name="_GetSentryRelease" AfterTargets="DispatchToInnerBuilds;AfterBuild" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true'">
+  <Target Name="_GetSentryRelease" AfterTargets="PrepareSentryCLI" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true' And '$(SentryCLI)' != ''">
 
     <Message Importance="High" Text="Getting Sentry Release..." />
 
-    <SentryGetApplicationVersion Condition="'$(_SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
+    <PropertyGroup>
+      <_SentryHasGeneratedInformationalVersion Condition="'$(UsingMicrosoftNETSdk)' == 'true' And '$(GenerateAssemblyInfo)' != 'false' And '$(GenerateAssemblyInformationalVersionAttribute)' != 'false'">true</_SentryHasGeneratedInformationalVersion>
+    </PropertyGroup>
+
+    <SentryGetApplicationVersion Condition="'$(_SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" HasGeneratedInformationalVersion="$(_SentryHasGeneratedInformationalVersion)">
       <Output TaskParameter="Release" PropertyName="_SentryRelease" />
     </SentryGetApplicationVersion>
 
     <Exec ConsoleToMSBuild="true"  Condition="'$(_SentryRelease)' == ''"
-          Command="sentry-cli releases propose-version"
+          Command="$(SentryCLIBaseCommand) releases propose-version"
           IgnoreExitCode="$(SentryAllowFailure)"
           ContinueOnError="$(SentryAllowFailure)">
       <Output TaskParameter="ConsoleOutput" PropertyName="_SentryRelease"/>
@@ -384,7 +408,7 @@
   </Target>
 
   <!-- Set release information after the build -->
-  <Target Name="_CreateSentryRelease" AfterTargets="Build" DependsOnTargets="_GetSentryRelease"
+  <Target Name="_CreateSentryRelease" AfterTargets="$(_SentryAfterBuildTargets)" DependsOnTargets="_GetSentryRelease"
           Condition="'$(SentryCLI)' != '' and '$(SentryCreateRelease)' == 'true' and '$(_SentryRelease)' != ''">
     <Message Importance="High" Text="Creating Sentry Release: $(_SentryRelease)" />
     <Exec
@@ -395,7 +419,7 @@
   </Target>
 
   <!-- Send commit details to Sentry -->
-  <Target Name="_SentrySetCommits" AfterTargets="Build" DependsOnTargets="_CreateSentryRelease"
+  <Target Name="_SentrySetCommits" AfterTargets="$(_SentryAfterBuildTargets)" DependsOnTargets="_CreateSentryRelease"
           Condition="'$(SentryCLI)' != '' and '$(SentrySetCommits)' == 'true' and '$(_SentryRelease)' != ''">
     <Message Importance="High" Text="Setting Sentry commits" />
     <Exec

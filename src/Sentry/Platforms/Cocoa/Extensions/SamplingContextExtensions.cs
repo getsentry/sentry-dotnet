@@ -4,7 +4,7 @@ namespace Sentry.Cocoa.Extensions;
 
 internal static class SamplingContextExtensions
 {
-    public static TransactionSamplingContext ToTransactionSamplingContext(this CocoaSdk.SentrySamplingContext context)
+    public static TransactionSamplingContext ToTransactionSamplingContext(this CocoaSdk.SentryObjCSamplingContext context)
     {
         var transactionContext = new TransactionContextFacade(context.TransactionContext);
         var customSamplingContext = context.CustomSamplingContext.ToObjectDictionary();

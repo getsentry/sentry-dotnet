@@ -9,7 +9,7 @@ using CodeFormatter = Microsoft.CodeAnalysis.Formatting.Formatter;
 
 if (args.Length != 1)
 {
-    Console.Error.WriteLine("Usage: patch-cocoa-bindings.cs <path/to/ApiDefinitions.cs>");
+    Console.Error.WriteLine("Usage: patch-cocoa-bindings.cs <path/to/ApiDefinition.cs>");
     return;
 }
 
@@ -26,72 +26,44 @@ var code = Header + File.ReadAllText(args[0]);
 
 // Fix broken multi-line comments
 code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\()\n\s*", "$1");
-code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""", "$1 ");
+// A single message can be split over three or more adjacent string literals. The pattern is
+// anchored on DEPRECATED_MSG_ATTRIBUTE( and scanning resumes past each match, so one pass joins
+// only the first pair - repeat to a fixed point or the tail stays on its own uncommented line.
+for (string previous = ""; previous != code;)
+{
+    previous = code;
+    code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""", "$1 ");
+}
 
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
     .WithNamespace("Sentry.CocoaSdk")
     .RemoveClass("CFunctions")
-    // Fold Swift-extension categories back into their base interface. Objective Sharpie emits
-    // members declared in a Swift `extension` (e.g. the entire `SentrySDK` API since sentry-cocoa
-    // 9.19.1 moved its class body into an extension) as a separate `[Category]` interface with an
-    // auto-generated name like `SentrySDK_Sentry_Swift_8248`. Left alone, KeepInterfaces would drop
-    // it because that generated name isn't in the keep-list, silently emptying the SentrySDK binding.
-    .MergeInterface("SentrySDK_*", "SentrySDK")
     // Make enums, interfaces, and delegates internal
     .AsInternal("Sentry*", "internal")
     .WithAttribute("*Sentry*", "Internal")
-    // Adjust protocols (some are models)
-    .VerifyModel("SentryRedactOptions")
-    .VerifyModel("SentrySerializable")
-    .VerifyModel("SentrySpan")
-    .RemoveComment("SentryRRWebEvent", "[Model]")
-    .RemoveComment("SentryReplayBreadcrumbConverter", "[Model]")
-    .RemoveComment("SentryViewScreenshotProvider", "[Model]")
-    // Adjust base types
-    .WithAttribute("SentrySpan", "BaseType (typeof(NSObject))")
-    .WithAttribute("SentryRedactOptions", "BaseType (typeof(NSObject))")
     // Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
     .RemoveBaseType("INSCopying")
+    // Unused, and gated out of the public API for Cocoa v10 (getsentry/sentry-cocoa#9403).
+    .RemoveProperty("SentryObjCScope", "Serialize")
     // Fix property-to-method conversions
-    .PropertyToMethod("Sentry*", "Serialize")
-    .PropertyToMethod("SentrySpan", "ToTraceHeader")
-    .PropertyToMethod("SentryTraceContext", "ToBaggage")
-    .PropertyToMethod("PrivateSentrySDKOnly", "Capture*")
+    .PropertyToMethod("SentryObjCSpan", "ToTraceHeader")
+    .PropertyToMethod("SentryObjCTraceContext", "ToBaggage")
+    .PropertyToMethod("SentryObjCInternalScopeApi", "CreateScope")
     // Verify the rest
     .VerifyProperty("*Sentry*", "*", "MethodToProperty") // TODO: replace broad patterns with one-by-one verification
-    .VerifyProperty("SentryOptions", "*Targets", "StronglyTypedNSArray")
+    .VerifyProperty("SentryObjCOptions", "*Targets", "StronglyTypedNSArray")
     // Fix delegate argument names
     .RenameParameter("NSError", "arg*", "error")
     .RenameParameter("NSHttpUrlResponse", "arg*", "response")
-    .RenameParameter("SentryEvent", "arg*", "@event")
-    .RenameParameter("SentrySamplingContext", "arg*", "samplingContext")
-    .RenameParameter("SentryBreadcrumb", "arg*", "breadcrumb")
-    .RenameParameter("SentrySpan", "arg*", "span")
-    .RenameParameter("SentryLog", "arg*", "log")
-    .RenameParameter("SentryProfileOptions", "arg*", "options")
-    // Fix interface names
-    .RenameInterface("ISentrySerializable", "SentrySerializable")
-    .RenameInterface("ISentryRedactOptions", "SentryRedactOptions")
-    .RenameBaseType("ISentrySerializable", "SentrySerializable")
-    .RenameBaseType("ISentryRedactOptions", "SentryRedactOptions")
-    // Rename conflicting SentryRRWebEvent (protocol vs. interface)
-    .RenameProtocol("SentryRRWebEvent", "ISentryRRWebEvent")
-    // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
-    .WithAttribute("SentryBeforeBreadcrumbCallback", "return: NullAllowed")
-    .WithAttribute("SentryBeforeSendEventCallback", "return: NullAllowed")
-    .WithAttribute("SentryTracesSamplerCallback", "return: NullAllowed")
-    // Fix nullable return attributes
-    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "NullAllowed")
-    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "NullAllowed")
-    .WithAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "return: NullAllowed")
-    .WithAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "return: NullAllowed")
+    .RenameParameter("SentryObjCEvent", "arg*", "@event")
+    .RenameParameter("SentryObjCSamplingContext", "arg*", "samplingContext")
+    .RenameParameter("SentryObjCBreadcrumb", "arg*", "breadcrumb")
+    .RenameParameter("SentryObjCSpan", "arg*", "span")
     // Fix nullable property attributes
-    .WithPropertyAttribute("SentryOptions", "OnCrashedLastRun", "NullAllowed")
+    .WithPropertyAttribute("SentryObjCOptions", "OnCrashedLastRun", "NullAllowed")
     // Fix nullable generic type arguments
-    .ChangePropertyType("SentryOptions", "OnLastRunStatusDetermined", "Action<SentryLastRunStatus, SentryEvent?>")
-    // For PrivateApiDefinitions.cs
-    .WithModifier("SentryScope", "partial")
+    .ChangePropertyType("SentryObjCOptions", "OnLastRunStatusDetermined", "Action<SentryObjCLastRunStatus, SentryObjCEvent?>")
     // error CS0246: The type or namespace name 'iOS' could not be found
     .RemoveAttribute("iOS")
     // error CS0246: The type or namespace name 'Mac' could not be found
@@ -102,83 +74,62 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveMethod("Sentry*", "IsEqual")
     // error CS0246: The type or namespace name '_NSZone' could not be found
     .RemoveMethod("Sentry*", "CopyWithZone")
-    // error CS0111: Type 'SentryAttribute' already defines a member called 'Constructor' with the same parameter types
-    .RemoveMethod("SentryLog", "SetAttribute")
-    // SentryEnvelope* is not whitelisted
-    .RemoveMethod("PrivateSentrySDKOnly", "CaptureEnvelope")
-    .RemoveMethod("PrivateSentrySDKOnly", "EnvelopeWithData")
-    .RemoveMethod("PrivateSentrySDKOnly", "StoreEnvelope")
-    // SentryLoggerDelegate and SentryCurrentDateProvider are not whitelisted
-    .RemoveMethod("SentryLogger", "Constructor")
-    // SentryAppStartMeasurement is not whitelisted
-    .RemoveDelegate("SentryOnAppStartMeasurementAvailable")
-    // unused
-    .RemoveDelegate("SentryUserFeedbackConfigurationBlock")
     // error CS0114: 'SentryXxx.Description' hides inherited member 'NSObject.Description'.
     .RemoveProperty("Sentry*", "Description")
-    // SentryAppStartMeasurement is not whitelisted
-    .RemoveProperty("PrivateSentrySDKOnly", "*AppStartMeasurement*")
-    // Minimize SentryDependencyContainer
-    .RemoveMethod("SentryDependencyContainer", "*")
-    .KeepProperties("SentryDependencyContainer", "SharedInstance", "DebugImageProvider")
-    // SentryUserFeedbackConfiguration is not whitelisted
-    .RemoveProperty("SentryOptions", "ConfigureUserFeedback")
-    .RemoveProperty("SentryOptions", "UserFeedbackConfiguration")
+    // Option properties that reference SentryObjC* types the .NET SDK doesn't whitelist.
+    .RemoveProperty("SentryObjCOptions", "BeforeSendLog")
+    .RemoveProperty("SentryObjCOptions", "BeforeSendMetric")
+    .RemoveProperty("SentryObjCOptions", "ConfigureUserFeedback")
+    .RemoveProperty("SentryObjCOptions", "BeforeSendWithHint")
+    .RemoveProperty("SentryObjCOptions", "BeforeBreadcrumbWithHint")
+    .RemoveProperty("SentryObjCOptions", "ConfigureProfiling")
+    // Experimental MetricKit options; bind SentryObjCMetricKitOptions too if .NET ever exposes MetricKit.
+    .RemoveProperty("SentryObjCExperimentalOptions", "Metrickit")
+    // SentryObjCSDK is both the public entry point and the hybrid-SDK gateway (via `internal`).
+    // Keep the public members the .NET SDK calls plus the `internal` accessor; drop the rest, whose
+    // signatures reference SentryObjC* types we don't whitelist.
+    .KeepMethods("SentryObjCSDK", "StartWithOptions", "ConfigureScope", "Crash")
+    .KeepProperties("SentryObjCSDK", "Internal", "CrashedLastRun")
+    // SentryObjCInternalApi: keep only the sub-APIs the .NET SDK uses (sdk, profiling, debug).
+    .KeepProperties("SentryObjCInternalApi", "Sdk", "Profiling", "Debug", "Scope", "Serializer")
+    .KeepMethods("SentryObjCInternalApi", "SetTrace", "IgnoreNextSignal")
     .KeepInterfaces(
-        "ISentryRRWebEvent",
-        "PrivateSentrySDKOnly",
-        "SentryAttachment",
-        "SentryBaggage",
-        "SentryBreadcrumb",
-        "SentryClient",
-        "SentryDebugImageProvider",
-        "SentryDebugMeta",
-        "SentryDependencyContainer",
-        "SentryDsn",
-        "SentryEvent",
-        "SentryException",
-        "SentryExperimentalOptions",
-        "SentryFeedback",
-        "SentryFeedbackAPI",
-        "SentryFrame",
-        "SentryGeo",
-        "SentryHttpStatusCodeRange",
-        "SentryHub",
-        "SentryId",
-        "SentryLog",
-        "SentryLogger",
-        "SentryMeasurementUnit",
-        "SentryMeasurementUnitDuration",
-        "SentryMeasurementUnitFraction",
-        "SentryMeasurementUnitInformation",
-        "SentryMechanism",
-        "SentryMechanismContext",
-        "SentryMessage",
-        "SentryNSError",
-        "SentryOptions",
-        "SentryProfileOptions",
-        "SentryRedactOptions",
-        "SentryReplayApi",
-        "SentryReplayBreadcrumbConverter",
-        "SentryReplayOptions",
-        "SentryRequest",
-        "SentryRRWebEvent",
-        "SentrySamplingContext",
-        "SentryScope",
-        "SentryScreenFrames",
-        "SentrySDK",
-        "SentrySerializable",
-        "SentrySpan",
-        "SentrySpanContext",
-        "SentrySpanId",
-        "SentryStacktrace",
-        "SentryThread",
-        "SentryTraceContext",
-        "SentryTraceHeader",
-        "SentryTransactionContext",
-        "SentryUser",
-        "SentryViewScreenshotOptions",
-        "SentryViewScreenshotProvider"
+        "SentryObjCAttachment",
+        "SentryObjCBreadcrumb",
+        "SentryObjCDebugMeta",
+        "SentryObjCEvent",
+        "SentryObjCException",
+        "SentryObjCExperimentalOptions",
+        "SentryObjCFrame",
+        "SentryObjCGeo",
+        "SentryObjCHttpStatusCodeRange",
+        "SentryObjCId",
+        "SentryObjCInternalApi",
+        "SentryObjCInternalDebugApi",
+        "SentryObjCInternalProfilingApi",
+        "SentryObjCInternalScopeApi",
+        "SentryObjCInternalSdkApi",
+        "SentryObjCInternalSerializerApi",
+        "SentryObjCMeasurementUnit",
+        "SentryObjCMechanism",
+        "SentryObjCMechanismContext",
+        "SentryObjCMessage",
+        "SentryObjCNSError",
+        "SentryObjCOptions",
+        "SentryObjCReplayOptions",
+        "SentryObjCRequest",
+        "SentryObjCSamplingContext",
+        "SentryObjCScope",
+        "SentryObjCSDK",
+        "SentryObjCSpan",
+        "SentryObjCSpanContext",
+        "SentryObjCSpanId",
+        "SentryObjCStacktrace",
+        "SentryObjCThread",
+        "SentryObjCTraceContext",
+        "SentryObjCTraceHeader",
+        "SentryObjCTransactionContext",
+        "SentryObjCUser"
     )
     // error CS0311: The type 'SentryXxx' cannot be used as type parameter 'TValue' in the generic type or method 'NSDictionary<TKey, TValue>'.
     .ChangeGenericTypeArgument("NSDictionary", "Sentry*", "NSObject");
@@ -249,6 +200,13 @@ internal static class FilterExtensions
         string name)
     {
         return root.RemoveByPredicate<ClassDeclarationSyntax>(node => node.Identifier.Matches(name));
+    }
+
+    public static CompilationUnitSyntax RemoveEnum(
+        this CompilationUnitSyntax root,
+        string name)
+    {
+        return root.RemoveByPredicate<EnumDeclarationSyntax>(node => node.Identifier.Matches(name));
     }
 
     public static CompilationUnitSyntax RemoveDelegate(

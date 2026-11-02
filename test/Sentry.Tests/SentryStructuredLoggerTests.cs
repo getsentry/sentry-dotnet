@@ -13,10 +13,12 @@ public partial class SentryStructuredLoggerTests : IDisposable
         {
             DiagnosticLogger = new InMemoryDiagnosticLogger();
             Hub = Substitute.For<IHub>();
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>();
             Options = new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
+                ClientReportRecorder = ClientReportRecorder,
             };
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
             BatchSize = 2;
@@ -39,6 +41,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
 
         public InMemoryDiagnosticLogger DiagnosticLogger { get; }
         public IHub Hub { get; }
+        public IClientReportRecorder ClientReportRecorder { get; }
         public SentryOptions Options { get; }
         public ISystemClock Clock { get; }
         public int BatchSize { get; set; }
@@ -74,10 +77,8 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Create_Enabled_NewDefaultInstance()
+    public void Create_NewDefaultInstance()
     {
-        _fixture.Options.EnableLogs = true;
-
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
 
@@ -86,22 +87,20 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Create_Disabled_CachedDisabledInstance()
+    public void Create_EnableLogsDisabled_NewDefaultInstance()
     {
+        // EnableLogs gates the logging integrations, not this API.
         _fixture.Options.EnableLogs.Should().BeFalse();
 
         var instance = _fixture.GetSut();
-        var other = _fixture.GetSut();
 
-        instance.Should().BeOfType<DisabledSentryStructuredLogger>();
-        instance.Should().BeSameAs(other);
+        instance.Should().BeOfType<DefaultSentryStructuredLogger>();
     }
 
     [Fact]
     public void Log_WithoutActiveSpan_CapturesEnvelope()
     {
         _fixture.WithoutActiveSpan();
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -120,7 +119,6 @@ public partial class SentryStructuredLoggerTests : IDisposable
         var invocations = 0;
         SentryLog configuredLog = null!;
 
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.SetBeforeSendLog((SentryLog log) =>
         {
             invocations++;
@@ -142,7 +140,6 @@ public partial class SentryStructuredLoggerTests : IDisposable
     {
         var invocations = 0;
 
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.SetBeforeSendLog((SentryLog log) =>
         {
             invocations++;
@@ -154,12 +151,17 @@ public partial class SentryStructuredLoggerTests : IDisposable
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.LogItem);
+        var entry = _fixture.DiagnosticLogger.Dequeue();
+        entry.Level.Should().Be(SentryLevel.Info);
+        entry.Message.Should().Be("Log dropped by BeforeSendLog callback.");
+        entry.Exception.Should().BeNull();
+        entry.Args.Should().BeEmpty();
     }
 
     [Fact]
     public void Log_InvalidFormat_DoesNotCaptureEnvelope()
     {
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}, {4}", "string", true, 1, 2.2);
@@ -170,12 +172,12 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("Template string does not match the provided argument. The Log will be dropped.");
         entry.Exception.Should().BeOfType<FormatException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.LogItem);
     }
 
     [Fact]
     public void Log_InvalidConfigureLog_DoesNotCaptureEnvelope()
     {
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         logger.LogTrace(static (SentryLog log) => throw new InvalidOperationException(), "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
@@ -186,12 +188,12 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("The configureLog callback threw an exception. The Log will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.LogItem);
     }
 
     [Fact]
     public void Log_InvalidBeforeSendLog_DoesNotCaptureEnvelope()
     {
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.SetBeforeSendLog(static (SentryLog log) => throw new InvalidOperationException());
         var logger = _fixture.GetSut();
 
@@ -203,12 +205,12 @@ public partial class SentryStructuredLoggerTests : IDisposable
         entry.Message.Should().Be("The BeforeSendLog callback threw an exception. The Log will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.LogItem);
     }
 
     [Fact]
     public void Flush_AfterLog_CapturesEnvelope()
     {
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -230,7 +232,6 @@ public partial class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Dispose_BeforeLog_DoesNotCaptureEnvelope()
     {
-        _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         var defaultLogger = logger.Should().BeOfType<DefaultSentryStructuredLogger>().Which;
@@ -253,7 +254,6 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Hub.SubstituteConfigureScope(scope);
 
         SentryLog capturedLog = null!;
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.SetBeforeSendLog((SentryLog log) =>
         {
             capturedLog = log;
@@ -277,7 +277,6 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Hub.SubstituteConfigureScope(scope);
 
         SentryLog capturedLog = null!;
-        _fixture.Options.EnableLogs = true;
         _fixture.Options.SetBeforeSendLog((SentryLog log) =>
         {
             capturedLog = log;

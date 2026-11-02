@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -190,6 +191,32 @@ public static class HubExtensions
         string? type = null,
         IDictionary<string, string>? data = null,
         BreadcrumbLevel level = default)
+        => hub.AddBreadcrumb(clock, message, category, type, data, level, hint: null);
+
+    /// <summary>
+    /// Adds a breadcrumb using a custom <see cref="ISystemClock"/> which allows better testability.
+    /// </summary>
+    /// <param name="hub">The Hub which holds the scope stack.</param>
+    /// <param name="clock">The system clock.</param>
+    /// <param name="message">The message.</param>
+    /// <param name="category">Category.</param>
+    /// <param name="type">Breadcrumb type.</param>
+    /// <param name="data">Additional data.</param>
+    /// <param name="level">Breadcrumb level.</param>
+    /// <param name="hint">A hint provided with the breadcrumb in the BeforeBreadcrumb callback.</param>
+    /// <remarks>
+    /// This method is to be used by integrations to allow testing.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static void AddBreadcrumb(
+        this IHub hub,
+        ISystemClock? clock,
+        string message,
+        string? category,
+        string? type,
+        IDictionary<string, string>? data,
+        BreadcrumbLevel level,
+        SentryHint? hint)
     {
         // Not to throw on code that ignores nullability warnings.
         if (hub.IsNull())
@@ -206,9 +233,7 @@ public static class HubExtensions
             level
         );
 
-        hub.AddBreadcrumb(
-            breadcrumb
-            );
+        hub.AddBreadcrumb(breadcrumb, hint);
     }
 
     /// <summary>
@@ -268,8 +293,17 @@ public static class HubExtensions
         public void Dispose() => _scope.Dispose();
     }
 
-    internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex) =>
-        hub.CaptureEvent(new SentryEvent(ex));
+    internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex)
+    {
+        // Integrations always call `SetSentryMechanism` before calling this method (e.g. WinUI forwards the
+        // platform's Handled value), so this fallback is defensive only. In practice, it never executes.
+        // Terminal is left unset (not false) so a missing SetSentryMechanism call still reads as a crash.
+        if (!ex.Data.Contains(Mechanism.HandledKey))
+        {
+            ex.Data[Mechanism.HandledKey] = false;
+        }
+        return hub.CaptureEvent(new SentryEvent(ex));
+    }
 
     /// <summary>
     /// Captures the exception with a configurable scope callback.
@@ -280,6 +314,30 @@ public static class HubExtensions
     /// <returns>The Id of the event</returns>
     public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope) =>
         hub.CaptureEvent(new SentryEvent(ex), configureScope);
+
+    /// <summary>
+    /// Captures the exception with a configurable scope callback, explicitly marking it as handled or unhandled
+    /// and whether it terminated the application.
+    /// </summary>
+    /// <param name="hub">The Sentry hub.</param>
+    /// <param name="ex">The exception.</param>
+    /// <param name="handled">Whether the exception was handled. Recorded on the exception, overriding any flag
+    /// previously set on it, including one set via <see cref="SentryExceptionExtensions.SetSentryMechanism"/>.</param>
+    /// <param name="terminal">Whether the app crashed. Only used when <paramref name="handled"/> is
+    /// <c>false</c>. If <c>true</c>, the session ends as crashed and the active transaction is aborted.</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <returns>The Id of the event</returns>
+    public static SentryId CaptureException(this IHub hub, Exception ex, bool handled, bool terminal,
+        Action<Scope> configureScope)
+    {
+        if (!hub.IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
+        ex.RecordMechanismFlags(handled, terminal);
+        return hub.CaptureEvent(new SentryEvent(ex), configureScope);
+    }
 
     /// <summary>
     /// Captures feedback from the user.
@@ -320,6 +378,211 @@ public static class HubExtensions
         };
 
         return hub.CaptureEvent(sentryEvent, configureScope);
+    }
+
+    /// <summary>
+    /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
+    /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration.
+    /// Exceptions thrown by the job are rethrown.
+    /// </summary>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// hub.WithMonitor("nightly-cleanup", () => Cleanup(), options =>
+    /// {
+    ///     options.Interval("0 3 * * *");
+    ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="hub">The Sentry hub.</param>
+    /// <param name="monitorSlug">The slug of the monitor.</param>
+    /// <param name="job">The job to run.</param>
+    /// <param name="configureMonitorOptions">
+    /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
+    /// </param>
+    public static void WithMonitor(
+        this IHub hub,
+        string monitorSlug,
+        Action job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+    {
+        ValidateWithMonitorArguments(monitorSlug, job);
+        hub.RunWithMonitor<object?>(monitorSlug, () =>
+        {
+            job();
+            return null;
+        }, configureMonitorOptions);
+    }
+
+    /// <inheritdoc cref="WithMonitor(IHub, string, Action, Action{SentryMonitorOptions}?)"/>
+    /// <returns>The value returned by <paramref name="job"/>.</returns>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// For a job that returns a task, use <c>WithMonitorAsync</c>.
+    /// </remarks>
+    /// <exception cref="ArgumentException"><typeparamref name="T"/> is a <see cref="Task"/> or <see cref="ValueTask"/> type.</exception>
+    public static T WithMonitor<T>(
+        this IHub hub,
+        string monitorSlug,
+        Func<T> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+    {
+        ValidateWithMonitorArguments(monitorSlug, job);
+        if (IsAwaitable(typeof(T)))
+        {
+            throw new ArgumentException(
+                "The job returns a task, so WithMonitor would send the check-in before it completes. " +
+                "Use WithMonitorAsync instead.", nameof(job));
+        }
+
+        return hub.RunWithMonitor(monitorSlug, job, configureMonitorOptions);
+    }
+
+    private static T RunWithMonitor<T>(
+        this IHub hub,
+        string monitorSlug,
+        Func<T> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions)
+    {
+        using var runScope = hub.PushMonitorRunScope();
+        var checkInId = hub.CaptureInProgressCheckIn(monitorSlug, configureMonitorOptions);
+        var stopwatch = SentryStopwatch.StartNew();
+        try
+        {
+            var result = job();
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Ok, checkInId, stopwatch.Elapsed);
+            return result;
+        }
+        catch
+        {
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Error, checkInId, stopwatch.Elapsed);
+            throw;
+        }
+    }
+
+    private static bool IsAwaitable(Type type) =>
+        typeof(Task).IsAssignableFrom(type) || type == typeof(ValueTask) ||
+        (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTask<>));
+
+    /// <summary>
+    /// Runs <paramref name="job"/> and reports it to the cron monitor <paramref name="monitorSlug"/>: an
+    /// in-progress check-in before the job starts, then an ok or error check-in with the job's duration
+    /// once the returned task completes. Exceptions thrown by the job are rethrown.
+    /// </summary>
+    /// <remarks>
+    /// The job runs in its own scope. Unless a span is active, each run gets a new trace, shared by its check-ins
+    /// and any events captured while it runs.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// await hub.WithMonitorAsync("nightly-cleanup", async () => await CleanupAsync(), options =>
+    /// {
+    ///     options.Interval("0 3 * * *");
+    ///     options.CheckInMargin = TimeSpan.FromMinutes(5);
+    /// });
+    /// </code>
+    /// </example>
+    /// <param name="hub">The Sentry hub.</param>
+    /// <param name="monitorSlug">The slug of the monitor.</param>
+    /// <param name="job">The job to run.</param>
+    /// <param name="configureMonitorOptions">
+    /// Optional monitor config, sent with the in-progress check-in. Sentry creates or updates the monitor from it.
+    /// </param>
+    public static Task WithMonitorAsync(
+        this IHub hub,
+        string monitorSlug,
+        Func<Task> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+    {
+        ValidateWithMonitorArguments(monitorSlug, job);
+        return hub.RunWithMonitorAsync<object?>(monitorSlug, async () =>
+        {
+            await job().ConfigureAwait(false);
+            return null;
+        }, configureMonitorOptions);
+    }
+
+    /// <inheritdoc cref="WithMonitorAsync(IHub, string, Func{Task}, Action{SentryMonitorOptions}?)"/>
+    /// <returns>The value returned by <paramref name="job"/>.</returns>
+    public static Task<T> WithMonitorAsync<T>(
+        this IHub hub,
+        string monitorSlug,
+        Func<Task<T>> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+    {
+        ValidateWithMonitorArguments(monitorSlug, job);
+        return hub.RunWithMonitorAsync(monitorSlug, job, configureMonitorOptions);
+    }
+
+    private static async Task<T> RunWithMonitorAsync<T>(
+        this IHub hub,
+        string monitorSlug,
+        Func<Task<T>> job,
+        Action<SentryMonitorOptions>? configureMonitorOptions)
+    {
+        using var runScope = hub.PushMonitorRunScope();
+        var checkInId = hub.CaptureInProgressCheckIn(monitorSlug, configureMonitorOptions);
+        var stopwatch = SentryStopwatch.StartNew();
+        try
+        {
+            var result = await job().ConfigureAwait(false);
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Ok, checkInId, stopwatch.Elapsed);
+            return result;
+        }
+        catch
+        {
+            hub.CaptureCheckIn(monitorSlug, CheckInStatus.Error, checkInId, stopwatch.Elapsed);
+            throw;
+        }
+    }
+
+    private static void ValidateWithMonitorArguments(string monitorSlug, Delegate job)
+    {
+        if (monitorSlug is null)
+        {
+            throw new ArgumentNullException(nameof(monitorSlug));
+        }
+
+        if (string.IsNullOrWhiteSpace(monitorSlug))
+        {
+            throw new ArgumentException("The monitor slug must not be empty.", nameof(monitorSlug));
+        }
+
+        if (job is null)
+        {
+            throw new ArgumentNullException(nameof(job));
+        }
+    }
+
+    // Like sentry-java's CheckInUtils: each run gets its own scope and, unless a span is active, its own trace
+    private static IDisposable PushMonitorRunScope(this IHub hub)
+    {
+        var parentScope = hub.GetScope();
+        var runScope = hub.PushScope();
+
+        // PushScope doesn't push in global mode or when the scope is locked, so don't reset the shared scope's trace
+        if (hub.GetScope() is { } scope && !ReferenceEquals(scope, parentScope) && scope.Span is null)
+        {
+            scope.SetPropagationContext(new SentryPropagationContext());
+        }
+
+        return runScope;
+    }
+
+    // Created here, so the final check-in has the same ID even when this one isn't sent
+    private static SentryId CaptureInProgressCheckIn(
+        this IHub hub,
+        string monitorSlug,
+        Action<SentryMonitorOptions>? configureMonitorOptions)
+    {
+        var checkInId = SentryId.Create();
+        hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress, checkInId, configureMonitorOptions: configureMonitorOptions);
+        return checkInId;
     }
 
     internal static ITransactionTracer StartTransaction(

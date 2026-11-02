@@ -60,7 +60,9 @@ public static partial class SentrySdk
             o.Release = options.Release;
             o.SampleRate = options.SampleRate.HasValue ? (JavaDouble)Convert.ToDouble(options.SampleRate.Value) : null;
             o.SendClientReports = options.SendClientReports;
+#pragma warning disable CS0618
             o.SendDefaultPii = options.SendDefaultPii;
+#pragma warning restore CS0618
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
@@ -113,7 +115,7 @@ public static partial class SentrySdk
 
             if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
             {
-                o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb);
+                o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb, options);
             }
 
             // These options we have behind feature flags
@@ -123,7 +125,7 @@ public static partial class SentrySdk
 
                 if (options.TracesSampler is { } tracesSampler)
                 {
-                    o.TracesSampler = new TracesSamplerCallback(tracesSampler);
+                    o.TracesSampler = new TracesSamplerCallback(tracesSampler, options);
                 }
             }
 
@@ -192,10 +194,9 @@ public static partial class SentrySdk
             // See https://github.com/getsentry/sentry-dotnet/issues/3828
             var networkLogger = new AndroidDiagnosticLogger(options.DiagnosticLogger);
             var buildInfoProvider = new BuildInfoProvider(networkLogger);
-            var timeProvider = AndroidCurrentDateProvider.Instance!;
             var mainHandler = new AndroidHandler(AndroidLooper.MainLooper!);
             o.ConnectionStatusProvider =
-                new AndroidConnectionStatusProvider(AppContext, o, buildInfoProvider, timeProvider, mainHandler).JavaCast<IConnectionStatusProvider>();
+                new AndroidConnectionStatusProvider(AppContext, o, buildInfoProvider, o.MonotonicTicker!, mainHandler).JavaCast<IConnectionStatusProvider>();
             o.AddIntegration(new SystemEventsBreadcrumbsIntegration(AppContext, mainHandler).JavaCast<JavaSdk.IIntegration>());
         });
 
@@ -239,9 +240,21 @@ public static partial class SentrySdk
             }
 
             // Call the user defined BeforeSend callback, if it's defined - otherwise return the event as-is
-            return (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
-                ? beforeSend(evt, hint)
-                : evt;
+            if (!options.Native.EnableBeforeSend || options.BeforeSendInternal is not { } beforeSend)
+            {
+                return evt;
+            }
+
+            try
+            {
+                return beforeSend(evt, hint);
+            }
+            catch (Exception e)
+            {
+                // Dropping the event is left to the Java SDK, which also records the client report for it.
+                options.LogError(e, "Android BeforeSend callback failed.");
+                return null;
+            }
         };
     }
 

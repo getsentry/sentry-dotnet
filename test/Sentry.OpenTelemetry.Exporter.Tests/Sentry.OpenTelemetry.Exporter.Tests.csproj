@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry" Version="1.15.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.0" />
+    <PackageReference Include="OpenTelemetry" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.18.0" />
+    <!-- Keep the OTLP exporter in lockstep with the rest of the OpenTelemetry family. Left at the
+         floor Sentry.OpenTelemetry.Exporter declares (1.10.0), mixing it with a newer OpenTelemetry
+         makes the public OtlpExporterOptions constructor throw TypeLoadException. -->
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.18.0" />
   </ItemGroup>
 
   <ItemGroup>

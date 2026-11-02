@@ -1,0 +1,13 @@
+name: Cocoa SDK cache key
+description: Computes the cache key for the Cocoa SDK that Sentry.Bindings.Cocoa builds from the sentry-cocoa submodule
+outputs:
+  key:
+    description: Covers the selected Xcode, build-sentry-cocoa.sh, sentry-cocoa.xcconfig and the submodule commit
+    value: ${{ steps.key.outputs.key }}
+runs:
+  using: composite
+
+  steps:
+    - id: key
+      shell: bash
+      run: echo "key=sentry-cocoa-$(xcodebuild -version | tr -cs '[:alnum:].' '-')-${{ hashFiles('scripts/build-sentry-cocoa.sh', 'scripts/sentry-cocoa.xcconfig') }}-${{ hashFiles('.git/modules/modules/sentry-cocoa/HEAD') }}" >> "$GITHUB_OUTPUT"

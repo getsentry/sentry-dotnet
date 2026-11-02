@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "Sentry.slnx",
+    "projects": [
+      "samples\\Sentry.Samples.Android\\Sentry.Samples.Android.csproj",
+      "samples\\Sentry.Samples.Ios\\Sentry.Samples.Ios.csproj",
+      "samples\\Sentry.Samples.MacCatalyst\\Sentry.Samples.MacCatalyst.csproj",
+      "samples\\Sentry.Samples.MacOS\\Sentry.Samples.MacOS.csproj",
+      "samples\\Sentry.Samples.Maui\\Sentry.Samples.Maui.csproj"
+    ]
+  }
+}

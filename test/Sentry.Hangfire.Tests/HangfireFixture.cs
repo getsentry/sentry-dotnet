@@ -7,6 +7,8 @@ namespace Sentry.Hangfire.Tests;
 
 public class HangfireFixture : IDisposable
 {
+    public const string ExcludedRecurringJobId = "Excluded Recurring Job";
+
     public IHub Hub { get; set; } = Substitute.For<IHub>();
     public IDiagnosticLogger Logger { get; }
     private readonly BackgroundJobServer _server;
@@ -21,14 +23,25 @@ public class HangfireFixture : IDisposable
 
         GlobalConfiguration.Configuration
             .UseMemoryStorage()
-            .UseSentry(Hub, Logger);
+            .UseSentry(Hub, Logger, new SentryHangfireOptions
+            {
+                MonitorAllRecurringJobs = true,
+                ExcludedRecurringJobs = { ExcludedRecurringJobId }
+            });
         _server = new BackgroundJobServer();
         _monitoringApi = JobStorage.Current.GetMonitoringApi();
     }
 
-    public Task Enqueue<T>(Expression<Action<T>> methodCall)
+    public Task Enqueue<T>(Expression<Action<T>> methodCall) => WaitForJob(BackgroundJob.Enqueue(methodCall));
+
+    public Task TriggerRecurringJob<T>(string recurringJobId, Expression<Action<T>> methodCall, string cron, TimeZoneInfo timeZone)
     {
-        var jobId = BackgroundJob.Enqueue(methodCall);
+        RecurringJob.AddOrUpdate(recurringJobId, methodCall, cron, new RecurringJobOptions { TimeZone = timeZone });
+        return WaitForJob(RecurringJob.TriggerJob(recurringJobId));
+    }
+
+    private Task WaitForJob(string jobId)
+    {
         var checkJobState = Task.Run(() =>
         {
             while (true)

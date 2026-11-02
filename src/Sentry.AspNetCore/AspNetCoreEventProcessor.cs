@@ -1,8 +1,9 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.AspNetCore;
 
-internal class AspNetCoreEventProcessor : ISentryEventProcessor
+internal class AspNetCoreEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
     public SentryEvent Process(SentryEvent @event)
     {

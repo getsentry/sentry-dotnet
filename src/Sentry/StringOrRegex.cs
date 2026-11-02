@@ -12,6 +12,16 @@ public class StringOrRegex
     internal readonly string? _string;
 
     /// <summary>
+    /// Whether this instance contains a regular expression.
+    /// </summary>
+    public bool IsRegex => _regex is Regex;
+
+    /// <summary>
+    /// The regular expression, or <c>null</c> when this instance contains a plain string.
+    /// </summary>
+    public Regex? Regex => _regex;
+
+    /// <summary>
     /// Constructs a <see cref="StringOrRegex"/> instance.
     /// </summary>
     /// <param name="stringOrRegex">The prefix or regular expression pattern to match on.</param>

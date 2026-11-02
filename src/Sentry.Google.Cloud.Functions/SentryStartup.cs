@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Reflection;
 
 namespace Google.Cloud.Functions.Framework;
@@ -94,7 +95,7 @@ public class SentryStartup : FunctionsStartup
         app.UseSentryTracing();
     }
 
-    private class SentryGoogleCloudFunctionEventProcessor : ISentryEventProcessor
+    private class SentryGoogleCloudFunctionEventProcessor : ISentryEventProcessor, ISdkProcessor
     {
         private static readonly SdkVersion NameAndVersion
             = typeof(SentryStartup).Assembly.GetNameAndVersion();

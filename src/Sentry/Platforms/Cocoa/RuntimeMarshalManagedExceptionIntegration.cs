@@ -54,9 +54,10 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
                 return;
             }
 
+            e.ExceptionMode = MarshalManagedExceptionMode.Abort;
+
             // Otherwise the runtime will call abort() after we return — directly via
-            // xamarin_assertion_message, or indirectly via the uncaught-NSException handler for
-            // ThrowObjectiveCException. Tell SentryCrash to ignore that SIGABRT so we don't emit a
+            // xamarin_assertion_message. Tell SentryCrash to ignore that SIGABRT so we don't emit a
             // duplicate native crash for an exception we've already captured. See
             // https://github.com/dotnet/macios/blob/be8a2ca1057242f745ef58011a02ffe21326d180/runtime/runtime.m#L2285
             const int SIGABRT = 6;

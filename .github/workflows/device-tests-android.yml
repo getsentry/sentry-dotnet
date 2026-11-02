@@ -11,6 +11,7 @@ on:
       - 'src/Sentry/**'
       - 'src/Sentry.Extensions.Logging/**'
       - 'src/Sentry.Compiler.Extensions/**'
+      - 'src/Sentry.Analyzers/**'
       # Mobile-specific packages
       - 'src/Sentry.Maui/**'
       - 'src/Sentry.Maui.CommunityToolkit.Mvvm/**'
@@ -25,6 +26,7 @@ on:
       - 'test/Sentry.Maui.CommunityToolkit.Mvvm.Tests/**'
       - 'test/Sentry.Android.AssemblyReader.Tests/**'
       - 'test/Sentry.Testing/**'
+      - 'test/Sentry.Testing.CrashableApp/**'
       - 'test/AndroidTestApp/**'
       # Integration tests
       - 'integration-test/android.Tests.ps1'
@@ -37,11 +39,13 @@ on:
       - 'lib/sentry-android-supplemental/**'
       - 'modules/sentry-native/**'
       - 'modules/sentry-cocoa/**'
-      - 'modules/sentry-cocoa.properties'
       # Build configuration (affects all builds)
       - 'global.json'
       - 'Directory.Build.props'
       - 'Directory.Build.targets'
+      - 'src/Directory.Build.*'
+      - 'test/Directory.Build.*'
+      - '.editorconfig'
       - 'nuget.config'
       # Scripts and CI
       - 'scripts/device-test.ps1'
@@ -67,12 +71,15 @@ jobs:
         uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
 
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
+      # The device test app references Sentry.Android.AssemblyReader.Tests, which builds the Android test app
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj test/AndroidTestApp/AndroidTestApp.csproj
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
@@ -81,7 +88,7 @@ jobs:
         run: pwsh ./scripts/device-test.ps1 android -Build -Tfm ${{ matrix.tfm }}
 
       - name: Upload Android Test App (${{ matrix.tfm }})
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: device-test-android-${{ matrix.tfm }}
           if-no-files-found: error
@@ -91,17 +98,16 @@ jobs:
     needs: [build]
     name: Run Android API-${{ matrix.api-level }} Test (${{ matrix.tfm }})
 
-    # Requires a "larger runner", for nested virtualization support
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest
 
-    strategy:
+    strategy: &android-emulator-matrix
       fail-fast: false
       matrix:
         tfm: [net9.0, net10.0]
         # Must be 34+ for new apps and app updates as of August 31, 2024.
         # See https://apilevels.com/
         api-level: [34, 36]
-    env:
+    env: &android-emulator-env
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
       # We don't need the Google APIs, but the default images are not available for 32+
@@ -119,18 +125,18 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
       - name: Download test app artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: device-test-android-${{ matrix.tfm }}
           path: bin
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           cache-provider: basic # 'enhanced' (default) is not open source under a proprietary license; 'basic' uses MIT
 
@@ -140,7 +146,7 @@ jobs:
         id: first-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: &android-emulator-test
           api-level: ${{ matrix.api-level }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
@@ -155,20 +161,44 @@ jobs:
       - name: Retry Tests (if previous failed to run)
         if: steps.first-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: *android-emulator-test
+
+      - name: Upload results
+        if: success() || failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
+          path: test_output
+
+  # The integration tests build and run their own app, so they run next to the device tests instead of after them
+  android-integration-tests:
+    name: Run Android API-${{ matrix.api-level }} Integration Test (${{ matrix.tfm }})
+
+    runs-on: ubuntu-latest
+
+    strategy: *android-emulator-matrix
+    env: *android-emulator-env
+    steps:
+      # See https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
 
       - name: Setup Environment
         uses: ./.github/actions/environment
-
-      - name: Select Java 21
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
-          distribution: temurin
-          java-version: '21'
+          projects: integration-test/net9-maui/Sentry.Maui.Device.IntegrationTestApp.csproj
 
       - name: Checkout github-workflows
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: getsentry/github-workflows
           ref: 95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
@@ -178,7 +208,7 @@ jobs:
         id: first-integration-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: &android-emulator-integration-test
           api-level: ${{ matrix.api-level }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
@@ -193,14 +223,13 @@ jobs:
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with: *android-emulator-integration-test
 
       - name: Upload results
         if: success() || failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
-          path: |
-            test_output
-            integration-test/mobile-app/test_output
+          name: device-test-android-integration-${{ matrix.api-level }}-${{ matrix.tfm }}-results
+          path: integration-test/mobile-app/test_output
+          if-no-files-found: ignore

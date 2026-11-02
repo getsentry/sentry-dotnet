@@ -13,10 +13,12 @@ public partial class SentryMetricEmitterTests : IDisposable
         {
             DiagnosticLogger = new InMemoryDiagnosticLogger();
             Hub = Substitute.For<IHub>();
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>();
             Options = new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
+                ClientReportRecorder = ClientReportRecorder,
             };
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
             BatchSize = 2;
@@ -39,6 +41,7 @@ public partial class SentryMetricEmitterTests : IDisposable
 
         public InMemoryDiagnosticLogger DiagnosticLogger { get; }
         public IHub Hub { get; }
+        public IClientReportRecorder ClientReportRecorder { get; }
         public SentryOptions Options { get; }
         public ISystemClock Clock { get; }
         public int BatchSize { get; set; }
@@ -74,10 +77,8 @@ public partial class SentryMetricEmitterTests : IDisposable
     }
 
     [Fact]
-    public void Create_Enabled_NewDefaultInstance()
+    public void Create_NewDefaultInstance()
     {
-        Assert.True(_fixture.Options.EnableMetrics);
-
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
 
@@ -86,22 +87,9 @@ public partial class SentryMetricEmitterTests : IDisposable
     }
 
     [Fact]
-    public void Create_Disabled_CachedDisabledInstance()
-    {
-        _fixture.Options.EnableMetrics = false;
-
-        var instance = _fixture.GetSut();
-        var other = _fixture.GetSut();
-
-        instance.Should().BeOfType<DisabledSentryMetricEmitter>();
-        instance.Should().BeSameAs(other);
-    }
-
-    [Fact]
     public void Emit_WithoutActiveSpan_CapturesEnvelope()
     {
         _fixture.WithoutActiveSpan();
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -120,7 +108,6 @@ public partial class SentryMetricEmitterTests : IDisposable
         var invocations = 0;
         SentryMetric configuredMetric = null!;
 
-        Assert.True(_fixture.Options.EnableMetrics);
         _fixture.Options.SetBeforeSendMetric((SentryMetric metric) =>
         {
             invocations++;
@@ -142,7 +129,6 @@ public partial class SentryMetricEmitterTests : IDisposable
     {
         var invocations = 0;
 
-        Assert.True(_fixture.Options.EnableMetrics);
         _fixture.Options.SetBeforeSendMetric((SentryMetric metric) =>
         {
             invocations++;
@@ -154,12 +140,17 @@ public partial class SentryMetricEmitterTests : IDisposable
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.TraceMetric);
+        var entry = _fixture.DiagnosticLogger.Dequeue();
+        entry.Level.Should().Be(SentryLevel.Info);
+        entry.Message.Should().Be("Metric dropped by BeforeSendMetric callback.");
+        entry.Exception.Should().BeNull();
+        entry.Args.Should().BeEmpty();
     }
 
     [Fact]
     public void Emit_InvalidBeforeSendMetric_DoesNotCaptureEnvelope()
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         _fixture.Options.SetBeforeSendMetric(static (SentryMetric metric) => throw new InvalidOperationException());
         var metrics = _fixture.GetSut();
 
@@ -171,12 +162,12 @@ public partial class SentryMetricEmitterTests : IDisposable
         entry.Message.Should().Be("The BeforeSendMetric callback threw an exception. The Metric will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.CallbackError, DataCategory.TraceMetric);
     }
 
     [Fact]
     public void Flush_AfterEmit_CapturesEnvelope()
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         Envelope envelope = null!;
@@ -198,7 +189,6 @@ public partial class SentryMetricEmitterTests : IDisposable
     [Fact]
     public void Dispose_BeforeEmit_DoesNotCaptureEnvelope()
     {
-        Assert.True(_fixture.Options.EnableMetrics);
         var metrics = _fixture.GetSut();
 
         var defaultMetrics = metrics.Should().BeOfType<DefaultSentryMetricEmitter>().Which;

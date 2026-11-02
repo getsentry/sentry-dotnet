@@ -12,19 +12,22 @@ BeforeDiscovery {
 }
 
 Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
-    # Note: we can't run against net10 and net9 becaus .NET 10 requires Xcode 26.5 and .NET 9 requires Xcode 26.0.
-    # The macOS GitHub Actions runners only have Xcode 26.1+ installed and no support for Xcode 26.5 is planned for
+    # Note: we can't run against net10 and net9 becaus .NET 10 requires Xcode 27.1 and .NET 9 requires Xcode 26.0.
+    # The xcode-27 runner image only has Xcode 27 installed and no support for it is planned for
     # net9.0-ios: https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
     #
     # TODO: add coreclr when available
-    @{ tfm = "net10.0-ios26.5"; configuration = "Release"; runtime = "mono" }
-    @{ tfm = "net10.0-ios26.5"; configuration = "Debug";   runtime = "mono" }
+    @{ tfm = "net10.0-ios27.1"; configuration = "Release"; runtime = "mono" }
+    @{ tfm = "net10.0-ios27.1"; configuration = "Debug";   runtime = "mono" }
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
+        # clean up potential old copied build outputs that may target a different configuration or runtime
+        Remove-Item -Path "$PSScriptRoot/mobile-app/bin", "$PSScriptRoot/mobile-app/obj" `
+            -Recurse -Force -ErrorAction SilentlyContinue
         Push-Location $PSScriptRoot/mobile-app
 
         $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
@@ -104,6 +107,20 @@ Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"(EXC_[A-Z_]+|SIG[A-Z]+)`""
+        $result.Envelopes() | Should -HaveCount 1
+    }
+
+    It 'does not leak managed exception as NSException (<configuration>, <runtime>)' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunIosApp -Dsn $url -TestArg "OnActivated"
+            RunIosApp -Dsn $url
+        }
+
+        $result.HasErrors() | Should -BeFalse
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"nsexception`""
+        $result.Envelopes() | Should -AnyElementMatch "`"in_foreground`":true"
         $result.Envelopes() | Should -HaveCount 1
     }
 

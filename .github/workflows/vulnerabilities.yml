@@ -1,35 +1,49 @@
 name: List vulnerable packages
 
+# Deliberately NOT triggered on `pull_request`.
+#
+# `dotnet package list --vulnerable` consults live advisory data, so a GHSA published
+# overnight against one of our transitive dependencies would turn every open PR red -
+# halting unrelated work until the dependency is updated, which is routine maintenance
+# rather than a defect in the PR. Running on a schedule keeps the signal without making
+# it a gate on everybody's work.
+#
+# Weekly rather than daily - we don't publish nightly builds for sentry-dotnet anyway
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # once a day
-  pull_request:
+    - cron: "0 0 * * 4" # once a week, on Thursdays
 
 jobs:
   list-vulnerable-packages:
     name: List vulnerable packages
     # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          projects: Sentry.slnx
 
       # We only need to restore to check for vulnerable packages
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry.slnx --nologo
 
-      # The dotnet package list command doesn't change its exit code on detection, so tee to a file and scan it
-      # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
+      # `dotnet package list` doesn't change its exit code on detection, so the script reads its
+      # JSON output and decides. See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
+      #
+      # Advisories we've reviewed and decided to hold on are recorded, with reasoning, in
+      # scripts/vulnerability-allowlist.json. Anything not listed there fails the run.
+      #
+      # NuGetAuditSuppress - the mechanism you'd normally reach for - is not an option here:
+      # `dotnet package list --vulnerable` ignores it entirely (it only silences restore-time
+      # NU19xx warnings), and restore-time auditing doesn't produce findings in this repo
+      # anyway, because the audit can't use the extra feeds in NuGet.config.
       - name: List vulnerable packages
-        shell: bash
-        run: |
-          dotnet package list --project Sentry.slnx --vulnerable --include-transitive --no-restore | tee vulnerable.txt
-          # https://github.com/getsentry/sentry-dotnet/issues/2814
-          # ! grep 'has the following vulnerable packages' vulnerable.txt
+        run: pwsh scripts/check-vulnerabilities.ps1

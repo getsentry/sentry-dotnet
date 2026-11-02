@@ -35,7 +35,7 @@ public class CocoaExtensionsTests
             IpAddress = "127.0.0.1"
         };
 
-        var native = new CocoaSdk.SentryEvent();
+        var native = new CocoaSdk.SentryObjCEvent();
         evt.CopyToCocoaSentryEvent(native);
 
         AssertEqual(evt, native);
@@ -50,10 +50,10 @@ public class CocoaExtensionsTests
     [Fact]
     public void ToSentryEvent_ConvertToManaged()
     {
-        var native = new CocoaSdk.SentryEvent();
+        var native = new CocoaSdk.SentryObjCEvent();
 
         native.Timestamp = DateTimeOffset.UtcNow.ToNSDate();
-        native.Level = Sentry.CocoaSdk.SentryLevel.Debug;
+        native.Level = Sentry.CocoaSdk.SentryObjCLevel.Debug;
         native.ServerName = "native server name";
         native.Dist = "native dist";
         native.Logger = "native logger";
@@ -66,9 +66,9 @@ public class CocoaExtensionsTests
         native.Error = new NSError(new NSString("Test Error"), IntPtr.Zero);
         native.Breadcrumbs =
         [
-            new CocoaSdk.SentryBreadcrumb(CocoaSdk.SentryLevel.Debug, "category")
+            new CocoaSdk.SentryObjCBreadcrumb(CocoaSdk.SentryObjCLevel.Debug, "category")
         ];
-        native.User = new CocoaSdk.SentryUser
+        native.User = new CocoaSdk.SentryObjCUser
         {
             UserId = "user id",
             Username = "test",
@@ -136,7 +136,7 @@ public class CocoaExtensionsTests
         result[(NSString)SentryHttpMessageHandler.RequestStartKey].Should().Be(NSObject.FromObject("not-a-number"));
     }
 
-    private static void AssertEqual(SentryEvent managed, CocoaSdk.SentryEvent native)
+    private static void AssertEqual(SentryEvent managed, CocoaSdk.SentryObjCEvent native)
     {
         native.ServerName.Should().Be(managed.ServerName, "Server Name");
         native.Dist.Should().Be(managed.Distribution, "Distribution");

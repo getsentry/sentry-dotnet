@@ -423,8 +423,8 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         var name = json.GetProperty("transaction").GetStringOrThrow();
         var nameSource = json.GetPropertyOrNull("transaction_info")?.GetPropertyOrNull("source")?
             .GetString()?.ParseEnum<TransactionNameSource>() ?? TransactionNameSource.Custom;
-        var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
-        var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
+        var startTimestamp = json.GetProperty("start_timestamp").GetTimestamp();
+        var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetTimestamp();
         var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
         var platform = json.GetPropertyOrNull("platform")?.GetString();
         var release = json.GetPropertyOrNull("release")?.GetString();
@@ -436,7 +436,7 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
         var fingerprint = json.GetPropertyOrNull("fingerprint")?
             .EnumerateArray().Select(j => j.GetString()!).ToArray();
-        var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?
+        var breadcrumbs = json.GetValuesArrayOrNull("breadcrumbs")?
             .EnumerateArray().Select(Breadcrumb.FromJson).ToList() ?? new();
         var extra = json.GetPropertyOrNull("extra")?
             .GetDictionaryOrNull() ?? new();

@@ -17,6 +17,11 @@ public class Scope : IEventLike
 
     internal bool Locked { get; set; }
 
+    internal bool ScopeSyncEnabled { get; set; } = true;
+
+    private IScopeObserver? ScopeObserver =>
+        ScopeSyncEnabled && Options.EnableScopeSync ? Options.ScopeObserver : null;
+
     private readonly Lock _lastEventIdSync = new();
     private SentryId _lastEventId;
 
@@ -95,24 +100,19 @@ public class Scope : IEventLike
         set => _request = value;
     }
 
-    private readonly SentryContexts _contexts = new();
+    // The contexts, tags, extras, attachments and SDK version are created lazily as most scopes
+    // (e.g. those created by pushing a scope) never use them and they are comparatively expensive to allocate.
+    private SentryContexts? _contexts;
 
     /// <inheritdoc />
     public SentryContexts Contexts
     {
-        get => _contexts;
-        set => _contexts.ReplaceWith(value);
+        get => LazyInitializer.EnsureInitialized(ref _contexts, static () => new())!;
+        set => Contexts.ReplaceWith(value);
     }
 
     // Internal for testing.
-    internal Action<SentryUser?> UserChanged => user =>
-    {
-        if (Options.EnableScopeSync &&
-            Options.ScopeObserver is { } observer)
-        {
-            observer.SetUser(user);
-        }
-    };
+    internal Action<SentryUser?> UserChanged => user => ScopeObserver?.SetUser(user);
 
     private SentryUser? _user;
 
@@ -165,10 +165,7 @@ public class Scope : IEventLike
                 field = value;
             }
 
-            if (Options is { EnableScopeSync: true, ScopeObserver: { } observer })
-            {
-                observer.SetEnvironment(field);
-            }
+            ScopeObserver?.SetEnvironment(field);
         }
     }
 
@@ -248,17 +245,17 @@ public class Scope : IEventLike
             {
                 _transaction.Value = value;
 
-                if (Options.EnableScopeSync)
+                if (ScopeObserver is { } observer)
                 {
                     if (_transaction.Value != null)
                     {
                         // If there is a transaction set we propagate the trace to the native layer
-                        Options.ScopeObserver?.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
+                        observer.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
                     }
                     else
                     {
                         // If the transaction is being removed from the scope, reset and sync the trace as well
-                        Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                        observer.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
                     }
                 }
             }
@@ -273,8 +270,10 @@ public class Scope : IEventLike
 
     internal SessionUpdate? SessionUpdate { get; set; }
 
+    private SdkVersion? _sdk;
+
     /// <inheritdoc />
-    public SdkVersion Sdk { get; } = new();
+    public SdkVersion Sdk => LazyInitializer.EnsureInitialized(ref _sdk, static () => new())!;
 
     /// <inheritdoc />
     public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
@@ -284,22 +283,28 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _extra = new();
+    private ConcurrentDictionary<string, object?>? _extra;
+
+    private ConcurrentDictionary<string, object?> ExtraStore => LazyInitializer.EnsureInitialized(ref _extra, static () => new())!;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
+    public IReadOnlyDictionary<string, object?> Extra => ExtraStore;
 
-    private readonly ConcurrentDictionary<string, string> _tags = new();
+    private ConcurrentDictionary<string, string>? _tags;
+
+    private ConcurrentDictionary<string, string> TagStore => LazyInitializer.EnsureInitialized(ref _tags, static () => new())!;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags;
+    public IReadOnlyDictionary<string, string> Tags => TagStore;
 
-    private readonly ConcurrentBagLite<SentryAttachment> _attachments = new();
+    private ConcurrentBagLite<SentryAttachment>? _attachments;
+
+    private ConcurrentBagLite<SentryAttachment> AttachmentStore => LazyInitializer.EnsureInitialized(ref _attachments, static () => new())!;
 
     /// <summary>
     /// Attachments.
     /// </summary>
-    public IReadOnlyCollection<SentryAttachment> Attachments => _attachments;
+    public IReadOnlyCollection<SentryAttachment> Attachments => AttachmentStore;
 
     /// <summary>
     /// Creates a scope with the specified options.
@@ -335,15 +340,24 @@ public class Scope : IEventLike
         {
             hint.AddAttachmentsFromScope(this);
 
-            if (beforeBreadcrumb(breadcrumb, hint) is { } processedBreadcrumb)
+            Breadcrumb? processedBreadcrumb;
+            try
             {
-                breadcrumb = processedBreadcrumb;
+                processedBreadcrumb = beforeBreadcrumb(breadcrumb, hint);
             }
-            else
+            catch (Exception e)
+            {
+                Options.LogError(e, "BeforeBreadcrumb callback failed.");
+                return;
+            }
+
+            if (processedBreadcrumb is null)
             {
                 // Callback returned null, which means the breadcrumb should be dropped
                 return;
             }
+
+            breadcrumb = processedBreadcrumb;
         }
 
         if (Options.MaxBreadcrumbs <= 0)
@@ -358,20 +372,14 @@ public class Scope : IEventLike
         }
 
         _breadcrumbs.Enqueue(breadcrumb);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
-        }
+        ScopeObserver?.AddBreadcrumb(breadcrumb);
     }
 
     /// <inheritdoc />
     public void SetExtra(string key, object? value)
     {
-        _extra[key] = value;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetExtra(key, value);
-        }
+        ExtraStore[key] = value;
+        ScopeObserver?.SetExtra(key, value);
     }
 
     /// <inheritdoc />
@@ -382,21 +390,15 @@ public class Scope : IEventLike
             return;
         }
 
-        _tags[key] = value;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetTag(key, value);
-        }
+        TagStore[key] = value;
+        ScopeObserver?.SetTag(key, value);
     }
 
     /// <inheritdoc />
     public void UnsetTag(string key)
     {
-        _tags.TryRemove(key, out _);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.UnsetTag(key);
-        }
+        _tags?.TryRemove(key, out _);
+        ScopeObserver?.UnsetTag(key);
     }
 
     /// <summary>
@@ -404,21 +406,18 @@ public class Scope : IEventLike
     /// </summary>
     public void AddAttachment(SentryAttachment attachment)
     {
-        _attachments.Add(attachment);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.AddAttachment(attachment);
-        }
+        AttachmentStore.Add(attachment);
+        ScopeObserver?.AddAttachment(attachment);
     }
 
     internal void SetPropagationContext(SentryPropagationContext propagationContext)
     {
         PropagationContext = propagationContext;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetTrace(propagationContext.TraceId, propagationContext.SpanId);
-        }
+        SyncPropagationContext();
     }
+
+    internal void SyncPropagationContext() =>
+        ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
 
     /// <summary>
     /// Resets all the properties and collections within the scope to their default values.
@@ -427,7 +426,7 @@ public class Scope : IEventLike
     {
         Level = default;
         Request = new();
-        Contexts.Clear();
+        _contexts?.Clear();
         User = new();
         Release = default;
         Distribution = default;
@@ -436,8 +435,8 @@ public class Scope : IEventLike
         Transaction = default;
         Fingerprint = Array.Empty<string>();
         ClearBreadcrumbs();
-        _extra.Clear();
-        _tags.Clear();
+        _extra?.Clear();
+        _tags?.Clear();
         ClearAttachments();
         PropagationContext = new();
     }
@@ -447,11 +446,8 @@ public class Scope : IEventLike
     /// </summary>
     public void ClearAttachments()
     {
-        _attachments.Clear();
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.ClearAttachments();
-        }
+        _attachments?.Clear();
+        ScopeObserver?.ClearAttachments();
     }
 
     /// <summary>
@@ -493,23 +489,29 @@ public class Scope : IEventLike
             other.AddBreadcrumb(breadcrumb);
         }
 
-        foreach (var (key, value) in Extra)
+        if (_extra is { } extras)
         {
-            if (!other.Extra.ContainsKey(key))
+            foreach (var (key, value) in extras)
             {
-                other.SetExtra(key, value);
+                if (!other.Extra.ContainsKey(key))
+                {
+                    other.SetExtra(key, value);
+                }
             }
         }
 
-        foreach (var (key, value) in Tags)
+        if (_tags is { } tags)
         {
-            if (!other.Tags.ContainsKey(key))
+            foreach (var (key, value) in tags)
             {
-                other.SetTag(key, value);
+                if (!other.Tags.ContainsKey(key))
+                {
+                    other.SetTag(key, value);
+                }
             }
         }
 
-        Contexts.CopyTo(other.Contexts);
+        _contexts?.CopyTo(other.Contexts);
         Request.CopyTo(other.Request);
         User.CopyTo(other.User);
 
@@ -519,16 +521,7 @@ public class Scope : IEventLike
         other.TransactionName ??= TransactionName;
         other.Level ??= Level;
 
-        if (Sdk.Name is not null && Sdk.Version is not null)
-        {
-            other.Sdk.Name = Sdk.Name;
-            other.Sdk.Version = Sdk.Version;
-        }
-
-        foreach (var package in Sdk.InternalPackages)
-        {
-            other.Sdk.AddPackage(package);
-        }
+        _sdk?.CopyTo(other.Sdk);
     }
 
     /// <summary>
@@ -547,10 +540,13 @@ public class Scope : IEventLike
         other.Transaction ??= Transaction;
         other.SessionUpdate ??= SessionUpdate;
 
-        foreach (var attachment in Attachments)
+        if (_attachments is { } attachments)
         {
-            // Set the attachment directly to avoid triggering a scope sync
-            other._attachments.Add(attachment);
+            foreach (var attachment in attachments)
+            {
+                // Set the attachment directly to avoid triggering a scope sync
+                other.AttachmentStore.Add(attachment);
+            }
         }
     }
 
@@ -567,10 +563,53 @@ public class Scope : IEventLike
     {
         var clone = new Scope(Options, PropagationContext)
         {
-            OnEvaluating = OnEvaluating
+            ScopeSyncEnabled = false,
+            OnEvaluating = OnEvaluating,
+            Level = Level,
+            Release = Release,
+            Distribution = Distribution,
+            Environment = Environment,
+            TransactionName = TransactionName,
+            Transaction = Transaction,
+            Fingerprint = Fingerprint,
+            SessionUpdate = SessionUpdate,
         };
 
-        Apply(clone);
+        if (_user is { } user)
+        {
+            clone.User = user.Clone();
+        }
+
+        _contexts?.CopyTo(clone.Contexts);
+        _request?.CopyTo(clone.Request);
+        _sdk?.CopyTo(clone.Sdk);
+
+        // Copied directly so BeforeBreadcrumb and TagFilters don't run again
+        clone._breadcrumbs.EnqueueRange(_breadcrumbs);
+
+        if (_extra is { IsEmpty: false } extras)
+        {
+            foreach (var (key, value) in extras)
+            {
+                clone.ExtraStore[key] = value;
+            }
+        }
+
+        if (_tags is { IsEmpty: false } tags)
+        {
+            foreach (var (key, value) in tags)
+            {
+                clone.TagStore[key] = value;
+            }
+        }
+
+        if (_attachments is { IsEmpty: false } attachments)
+        {
+            foreach (var attachment in attachments)
+            {
+                clone.AttachmentStore.Add(attachment);
+            }
+        }
 
         foreach (var processor in EventProcessors)
         {
@@ -587,6 +626,7 @@ public class Scope : IEventLike
             clone.ExceptionProcessors.Add(processor);
         }
 
+        clone.ScopeSyncEnabled = true;
         return clone;
     }
 

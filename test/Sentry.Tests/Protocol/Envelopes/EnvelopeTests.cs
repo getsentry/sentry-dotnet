@@ -988,6 +988,92 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public async Task Deserialization_ItemLengthLongerThanStream_Throws()
+    {
+        // Arrange
+        using var input = """
+            {"event_id":"12c2d058d58442709aa2eca08bf20986"}
+            {"type":"event","length":1000000}
+            {"message":"hello"}
+
+            """.ToMemoryStream();
+
+        // Act & assert
+        await Assert.ThrowsAsync<InvalidDataException>(
+            async () => await Envelope.DeserializeAsync(input));
+    }
+
+    [Fact]
+    public async Task Deserialization_ItemLengthOverflowingInt_Throws()
+    {
+        // Arrange
+        using var input = """
+            {"event_id":"12c2d058d58442709aa2eca08bf20986"}
+            {"type":"event","length":3000000000}
+            {"message":"hello"}
+
+            """.ToMemoryStream();
+
+        // Act & assert
+        await Assert.ThrowsAsync<InvalidDataException>(
+            async () => await Envelope.DeserializeAsync(input));
+    }
+
+    [Fact]
+    public async Task Deserialization_NegativeItemLength_Throws()
+    {
+        // Arrange
+        using var input = """
+            {"event_id":"12c2d058d58442709aa2eca08bf20986"}
+            {"type":"event","length":-1}
+            {"message":"hello"}
+
+            """.ToMemoryStream();
+
+        // Act & assert
+        await Assert.ThrowsAsync<InvalidDataException>(
+            async () => await Envelope.DeserializeAsync(input));
+    }
+
+    [Fact]
+    public async Task Deserialization_ItemWithoutLengthOnOversizedStream_Throws()
+    {
+        // Arrange
+        var envelope = """
+            {"event_id":"12c2d058d58442709aa2eca08bf20986"}
+            {"type":"event"}
+            {"message":"hello"}
+
+            """;
+
+        using var input = new OversizedStream(Encoding.UTF8.GetBytes(envelope));
+
+        // Act & assert
+        await Assert.ThrowsAsync<InvalidDataException>(
+            async () => await Envelope.DeserializeAsync(input));
+    }
+
+    [Fact]
+    public async Task Deserialization_BufferedItemWithoutLength_Success()
+    {
+        // Arrange
+        var serialized = await Envelope.FromEvent(new SentryEvent())
+            .SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        var lines = serialized.Split('\n');
+        lines[1] = """{"type":"event"}""";
+
+        using var input = string.Join("\n", lines).ToMemoryStream();
+
+        // Act
+        using var envelope = await Envelope.DeserializeAsync(input);
+
+        // Assert
+        envelope.Items.Should().HaveCount(1);
+        envelope.Items[0].TryGetType().Should().Be("event");
+    }
+
+    [Fact]
     public void FromEvent_Header_IncludesSdkInformation()
     {
         // Act
@@ -1136,5 +1222,15 @@ public class EnvelopeTests
         envelope.Items[0].Header["type"].Should().Be("attachment");
         envelope.Items[0].Header["filename"].Should().Be("test.txt");
         envelope.Items[0].Header["content_type"].Should().Be("text/plain");
+    }
+
+    private sealed class OversizedStream : MemoryStream
+    {
+        public OversizedStream(byte[] buffer)
+            : base(buffer)
+        {
+        }
+
+        public override long Length => 3_000_000_000;
     }
 }

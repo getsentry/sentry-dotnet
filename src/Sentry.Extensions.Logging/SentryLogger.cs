@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry.Extensions.Logging;
 
@@ -48,9 +50,14 @@ internal sealed class SentryLogger : ILogger
             return;
         }
 
+        if (IsFromSentry() || IsEfExceptionMessage(eventId) || IsFiltered(logLevel, eventId, exception))
+        {
+            return;
+        }
+
         var message = formatter?.Invoke(state, exception);
 
-        if (ShouldCaptureEvent(logLevel, eventId, exception))
+        if (ShouldCaptureEvent(logLevel))
         {
             var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName);
 
@@ -63,7 +70,7 @@ internal sealed class SentryLogger : ILogger
             }
         }
 
-        if (ShouldAddBreadcrumb(logLevel, eventId, exception))
+        if (ShouldAddBreadcrumb(logLevel))
         {
             var data = eventId.ToDictionaryOrNull();
 
@@ -81,7 +88,8 @@ internal sealed class SentryLogger : ILogger
                 CategoryName,
                 null,
                 data,
-                logLevel.ToBreadcrumbLevel());
+                logLevel.ToBreadcrumbLevel(),
+                exception.ToHint());
         }
     }
 
@@ -151,53 +159,49 @@ internal sealed class SentryLogger : ILogger
         return @event;
     }
 
-    private bool ShouldCaptureEvent(
-        LogLevel logLevel,
-        EventId eventId,
-        Exception? exception)
+    private bool ShouldCaptureEvent(LogLevel logLevel)
         => _options.MinimumEventLevel != LogLevel.None
-           && logLevel >= _options.MinimumEventLevel
-           && !IsFromSentry()
-           && !IsEfExceptionMessage(eventId)
-           && _options.Filters.All(
-               f => !f.Filter(
-                   CategoryName,
-                   logLevel,
-                   eventId,
-                   exception));
+           && logLevel >= _options.MinimumEventLevel;
 
-    private bool ShouldAddBreadcrumb(
+    private bool ShouldAddBreadcrumb(LogLevel logLevel)
+        => _options.MinimumBreadcrumbLevel != LogLevel.None
+           && logLevel >= _options.MinimumBreadcrumbLevel;
+
+    private bool IsFiltered(
         LogLevel logLevel,
         EventId eventId,
         Exception? exception)
-        => _options.MinimumBreadcrumbLevel != LogLevel.None
-           && logLevel >= _options.MinimumBreadcrumbLevel
-           && !IsFromSentry()
-           && !IsEfExceptionMessage(eventId)
-           && _options.Filters.All(
-               f => !f.Filter(
-                   CategoryName,
-                   logLevel,
-                   eventId,
-                   exception));
-
-
-    private bool IsFromSentry()
     {
-        if (string.Equals(CategoryName, "Sentry", StringComparison.Ordinal))
+        foreach (var filter in _options.Filters)
         {
+            if (IsFiltered(filter, logLevel, eventId, exception))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsFiltered(
+        ILogEntryFilter filter,
+        LogLevel logLevel,
+        EventId eventId,
+        Exception? exception)
+    {
+        try
+        {
+            return filter.Filter(CategoryName, logLevel, eventId, exception);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "The {0} log filter callback failed. The log entry will be filtered out.", filter.GetType().Name);
             return true;
         }
-
-#if DEBUG
-        if (CategoryName.StartsWith("Sentry.Samples.", StringComparison.Ordinal))
-        {
-            return false;
-        }
-#endif
-
-        return CategoryName.StartsWith("Sentry.", StringComparison.Ordinal);
     }
+
+
+    private bool IsFromSentry() => SentrySdkNamespaces.IsSentrySdk(CategoryName);
 
     internal static bool IsEfExceptionMessage(EventId eventId)
     {

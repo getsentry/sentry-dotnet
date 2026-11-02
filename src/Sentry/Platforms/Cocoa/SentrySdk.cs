@@ -62,7 +62,17 @@ public static partial class SentrySdk
                 // See https://github.com/getsentry/sentry-cocoa/issues/2325
                 var hint = new SentryHint();
                 var breadcrumb = b.ToBreadcrumb(options.DiagnosticLogger);
-                var result = beforeBreadcrumb(breadcrumb, hint)?.ToCocoaBreadcrumb();
+
+                CocoaSdk.SentryObjCBreadcrumb? result;
+                try
+                {
+                    result = beforeBreadcrumb(breadcrumb, hint)?.ToCocoaBreadcrumb();
+                }
+                catch (Exception ex)
+                {
+                    options.LogError(ex, "Cocoa BeforeBreadcrumb callback failed.");
+                    result = null;
+                }
 
                 // Note: Nullable result is allowed but delegate is generated incorrectly
                 // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
@@ -80,7 +90,16 @@ public static partial class SentrySdk
                 nativeOptions.TracesSampler = cocoaContext =>
                 {
                     var context = cocoaContext.ToTransactionSamplingContext();
-                    var result = tracesSampler(context);
+                    double? result;
+                    try
+                    {
+                        result = tracesSampler(context);
+                    }
+                    catch (Exception ex)
+                    {
+                        options.LogError(ex, "TracesSampler callback failed.");
+                        result = null;
+                    }
 
                     // Note: Nullable result is allowed but delegate is generated incorrectly
                     // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
@@ -123,6 +142,7 @@ public static partial class SentrySdk
         nativeOptions.EnableAutoPerformanceTracing = options.Native.EnableAutoPerformanceTracing;
         nativeOptions.EnableCoreDataTracing = options.Native.EnableCoreDataTracing;
         nativeOptions.EnableFileIOTracing = options.Native.EnableFileIOTracing;
+        nativeOptions.EnableMemoryIntrospection = options.Native.EnableMemoryIntrospection;
         nativeOptions.EnableNetworkBreadcrumbs = options.Native.EnableNetworkBreadcrumbs;
         nativeOptions.EnableNetworkTracking = options.Native.EnableNetworkTracking;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -155,7 +175,7 @@ public static partial class SentrySdk
 
             var sessionSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate ?? 0f);
             var onErrorSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate ?? 0f);
-            var cocoaReplayOptions = new Sentry.CocoaSdk.SentryReplayOptions();
+            var cocoaReplayOptions = new Sentry.CocoaSdk.SentryObjCReplayOptions();
             cocoaReplayOptions.SessionSampleRate = sessionSampleRate;
             cocoaReplayOptions.OnErrorSampleRate = onErrorSampleRate;
             cocoaReplayOptions.MaskAllText = options.Native.ExperimentalOptions.SessionReplay.MaskAllText;
@@ -166,7 +186,7 @@ public static partial class SentrySdk
         }
 
         // Set hybrid SDK name
-        SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
+        SentryCocoaHybridSdk.Internal.Sdk.Name = "sentry.cocoa.dotnet";
 
         // Now initialize the Cocoa SDK
         SentryCocoaSdk.StartWithOptions(nativeOptions);
@@ -198,20 +218,20 @@ public static partial class SentrySdk
 
     private static string GetBundleValue(string key) => NSBundle.MainBundle.ObjectForInfoDictionary(key).ToString();
 
-    private static CocoaSdk.SentryHttpStatusCodeRange[] GetFailedRequestStatusCodes(IList<HttpStatusCodeRange> httpStatusCodeRanges)
+    private static CocoaSdk.SentryObjCHttpStatusCodeRange[] GetFailedRequestStatusCodes(IList<HttpStatusCodeRange> httpStatusCodeRanges)
     {
-        var nativeRanges = new CocoaSdk.SentryHttpStatusCodeRange[httpStatusCodeRanges.Count];
+        var nativeRanges = new CocoaSdk.SentryObjCHttpStatusCodeRange[httpStatusCodeRanges.Count];
         for (var i = 0; i < httpStatusCodeRanges.Count; i++)
         {
             var range = httpStatusCodeRanges[i];
-            nativeRanges[i] = new CocoaSdk.SentryHttpStatusCodeRange(range.Start, range.End);
+            nativeRanges[i] = new CocoaSdk.SentryObjCHttpStatusCodeRange(range.Start, range.End);
         }
 
         return nativeRanges;
     }
 
     [DebuggerStepThrough]
-    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt)
+    internal static CocoaSdk.SentryObjCEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryObjCEvent evt)
         => ProcessOnBeforeSend(options, evt, CurrentHub);
 
     /// <summary>
@@ -222,7 +242,7 @@ public static partial class SentrySdk
     /// The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
     /// But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
     /// </summary>
-    private static bool SuppressNativeCrash(SentryOptions options, CocoaSdk.SentryEvent evt)
+    private static bool SuppressNativeCrash(SentryOptions options, CocoaSdk.SentryObjCEvent evt)
     {
         // There should only be one exception on the event in this case
         if ((options.Native.SuppressSignalAborts || options.Native.SuppressExcBadAccess) && evt.Exceptions?.Length == 1)
@@ -261,7 +281,7 @@ public static partial class SentrySdk
     /// This overload allows us to inject an IHub for testing. During normal execution, the CurrentHub is used.
     /// However, since this class is static, there's no easy alternative way to inject this when executing tests.
     /// </summary>
-    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
+    internal static CocoaSdk.SentryObjCEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryObjCEvent evt, IHub hub)
     {
         // Redundant native crash events must be suppressed even if the SDK is
         // disabled (or not yet fully initialized) to avoid sending duplicates.

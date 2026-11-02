@@ -71,10 +71,12 @@ public class SentryHint
     {
         if (_options is not null)
         {
+            var deleteOnClose = type == AttachmentType.HeapDump;
+
             _attachments.Add(
                 new SentryAttachment(
                     type,
-                    new FileAttachmentContent(filePath, _options.UseAsyncFileIO),
+                    new FileAttachmentContent(filePath, _options.UseAsyncFileIO, deleteOnClose),
                     Path.GetFileName(filePath),
                     contentType));
         }

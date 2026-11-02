@@ -3,8 +3,10 @@ using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.Internal;
 
-internal class TraceIgnoreStatusCodeTransactionProcessor : ISentryTransactionProcessor
+internal class TraceIgnoreStatusCodeTransactionProcessor : ISentryTransactionProcessor, ISdkProcessor
 {
+    private const string IncomingRequestOperation = "http.server";
+
     private readonly SentryOptions _options;
 
     public TraceIgnoreStatusCodeTransactionProcessor(SentryOptions options)
@@ -14,7 +16,7 @@ internal class TraceIgnoreStatusCodeTransactionProcessor : ISentryTransactionPro
 
     public SentryTransaction? Process(SentryTransaction transaction)
     {
-        if (_options.TraceIgnoreStatusCodes.Count == 0)
+        if (_options.TraceIgnoreStatusCodes.Count == 0 || transaction.Operation != IncomingRequestOperation)
         {
             return transaction;
         }

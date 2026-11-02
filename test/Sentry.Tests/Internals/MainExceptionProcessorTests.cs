@@ -48,6 +48,24 @@ public partial class MainExceptionProcessorTests
     }
 
     [Fact]
+    public void Process_StackTraceFactoryThrows_KeepsExceptionWithoutStackTrace()
+    {
+        var factoryException = new InvalidOperationException("factory failed");
+        _fixture.SentryStackTraceFactory.Create(Arg.Any<Exception>()).Throws(factoryException);
+        _fixture.SentryOptions.AddDiagnosticLoggerSubstitute();
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+
+        sut.Process(new InvalidOperationException("captured"), evt);
+
+        var sentryException = evt.SentryExceptions.Should().ContainSingle().Subject;
+        sentryException.Type.Should().Be(typeof(InvalidOperationException).FullName);
+        sentryException.Value.Should().Be("captured");
+        sentryException.Stacktrace.Should().BeNull();
+        _fixture.SentryOptions.ReceivedLogError(factoryException, "Stack trace factory {0} threw an exception. The stack trace will be omitted.");
+    }
+
+    [Fact]
     public void Process_ExceptionWithout_Handled()
     {
         var sut = _fixture.GetSut();
@@ -56,8 +74,9 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
+        // No integration set the flag, so this was captured by user code, which counts as handled.
         Assert.NotNull(evt.SentryExceptions);
-        Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == null);
+        Assert.Single(evt.SentryExceptions, p => p.Mechanism?.Handled == true);
     }
 
     [Fact]

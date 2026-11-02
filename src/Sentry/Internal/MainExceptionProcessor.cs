@@ -4,7 +4,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
-internal class MainExceptionProcessor : ISentryEventExceptionProcessor
+internal class MainExceptionProcessor : ISentryEventExceptionProcessor, ISdkProcessor
 {
     private const string ExceptionDataKeyPrefix = "sentry:";
     internal const string ExceptionDataTagKey = ExceptionDataKeyPrefix + "tag:";
@@ -155,7 +155,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             sentryEx.Mechanism = mechanism;
         }
 
-        sentryEx.Stacktrace ??= SentryStackTraceFactoryAccessor().Create(exception);
+        sentryEx.Stacktrace ??= SentryStackTraceFactoryAccessor().TryCreate(_options, exception);
         return sentryEx;
     }
 
@@ -174,17 +174,12 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             mechanism.Handled = handled;
             exception.Data.Remove(Mechanism.HandledKey);
         }
-        else if (exception.StackTrace != null)
-        {
-            // The exception was thrown, but it was caught by the user, not an integration.
-            // Thus, we can mark it as handled.
-            mechanism.Handled = true;
-        }
         else
         {
-            // The exception was never thrown.  It was just constructed and then captured.
-            // Thus, it is neither handled nor unhandled.
-            mechanism.Handled = null;
+            // https://getsentry.github.io/relay/relay_event_schema/protocol/struct.Mechanism.html#structfield.handled
+            // "Exceptions captured using capture_exception (called from user code) are handled=true as the user
+            // explicitly captured the exception (and therefore kind of handled it)."
+            mechanism.Handled = true;
         }
 
         if (exception.Data[Mechanism.MechanismKey] is string mechanismType)

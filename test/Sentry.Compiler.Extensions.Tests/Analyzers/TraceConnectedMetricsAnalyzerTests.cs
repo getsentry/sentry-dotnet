@@ -34,11 +34,6 @@ public class TraceConnectedMetricsAnalyzerTests
 
                     public class AnalyzerTest
                     {
-                        public void Init(SentryOptions options)
-                        {
-                            options.EnableMetrics = false;
-                        }
-
                         public void Emit(IHub hub)
                         {
                             var metrics = SentrySdk.Metrics;

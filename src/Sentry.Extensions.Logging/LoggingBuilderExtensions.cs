@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
+using Sentry;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
@@ -50,8 +51,10 @@ public static class LoggingBuilderExtensions
         }
 
         builder.Services.AddSingleton<IConfigureOptions<TOptions>, SentryLoggingOptionsSetup>();
-        builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
-        builder.Services.AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>();
+        builder.Services.AddSingleton<ILoggerProvider>(sp =>
+            new SentryLoggerProvider(sp.GetRequiredService<IOptions<TOptions>>(), sp.GetRequiredService<IHub>()));
+        builder.Services.AddSingleton<ILoggerProvider>(sp =>
+            new SentryStructuredLoggerProvider(sp.GetRequiredService<IOptions<TOptions>>(), sp.GetRequiredService<IHub>()));
         builder.Services.AddSentry<TOptions>();
 
         // All logs should flow to the SentryLogger, regardless of level.

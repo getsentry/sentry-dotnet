@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Routing;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.AspNetCore;
 
 #if NET6_0_OR_GREATER
-internal class ExceptionHandlerFeatureProcessor : ISentryEventExceptionProcessor
+internal class ExceptionHandlerFeatureProcessor : ISentryEventExceptionProcessor, ISdkProcessor
 {
     private readonly string _originalMethod;
     private readonly IExceptionHandlerFeature _exceptionHandlerFeature;

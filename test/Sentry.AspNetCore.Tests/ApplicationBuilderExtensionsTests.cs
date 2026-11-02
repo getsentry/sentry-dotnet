@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.Extensions.Logging;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -10,12 +12,13 @@ public class ApplicationBuilderExtensionsTests
         public ISentryEventProcessor SentryEventProcessor { get; set; } = Substitute.For<ISentryEventProcessor>();
         public ISentryEventExceptionProcessor SentryEventExceptionProcessor { get; set; } = Substitute.For<ISentryEventExceptionProcessor>();
         public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; } = new();
+        public IServiceProvider ServiceProvider { get; } = Substitute.For<IServiceProvider>();
 
         public Dictionary<string, object> Properties { get; } = new();
 
         public IApplicationBuilder GetSut()
         {
-            var provider = Substitute.For<IServiceProvider>();
+            var provider = ServiceProvider;
             var options = Substitute.For<IOptions<SentryAspNetCoreOptions>>();
             _ = options.Value.Returns(SentryAspNetCoreOptions);
             _ = provider.GetService(typeof(IOptions<SentryAspNetCoreOptions>)).Returns(options);
@@ -59,6 +62,25 @@ public class ApplicationBuilderExtensionsTests
         _ = sut.UseSentry();
 
         Assert.Same(diagnosticLogger, _fixture.SentryAspNetCoreOptions.DiagnosticLogger);
+    }
+
+    [Fact]
+    public void UseSentry_DebugEnabled_ResolvesHubFactoryAfterSettingDiagnosticLogger()
+    {
+        _fixture.SentryAspNetCoreOptions.Debug = true;
+        var sut = _fixture.GetSut();
+        _ = _fixture.ServiceProvider.GetService(typeof(ILogger<ISentryClient>))
+            .Returns(Substitute.For<ILogger<ISentryClient>>());
+        IDiagnosticLogger diagnosticLoggerWhenHubFactoryResolved = null;
+        _ = _fixture.ServiceProvider.GetService(typeof(Func<IHub>)).Returns(_ =>
+        {
+            diagnosticLoggerWhenHubFactoryResolved = _fixture.SentryAspNetCoreOptions.DiagnosticLogger;
+            return null;
+        });
+
+        _ = sut.UseSentry();
+
+        Assert.IsType<MelDiagnosticLogger>(diagnosticLoggerWhenHubFactoryResolved);
     }
 
     [Fact]

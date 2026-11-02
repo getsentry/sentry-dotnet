@@ -9,7 +9,7 @@ public class SentryLoggingOptionsTests : BindableTests<SentryLoggingOptions>
     public void BindableProperties_MatchOptionsProperties()
     {
         var propertyNames = GetPropertyNames<BindableSentryLoggingOptions>();
-        AssertContainsAllOptionsProperties(propertyNames);
+        AssertPropertiesMatchOptions(propertyNames);
     }
 
     [Fact]

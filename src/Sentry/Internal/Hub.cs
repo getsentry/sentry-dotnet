@@ -78,6 +78,7 @@ internal class Hub : IHub, IDisposable
         {
             // Push the first scope so the async local starts from here
             PushScope();
+            ScopeManager.ConfigureScope(static scope => scope.SyncPropagationContext());
         }
 
         Logger = SentryStructuredLogger.Create(this, options, _clock);
@@ -205,20 +206,31 @@ internal class Hub : IHub, IDisposable
                 context,
                 customSamplingContext);
 
-            if (tracesSampler(samplingContext) is { } samplerSampleRate)
+            double? samplerSampleRate;
+            try
+            {
+                samplerSampleRate = tracesSampler(samplingContext);
+            }
+            catch (Exception ex)
+            {
+                _options.LogError(ex, "TracesSampler callback failed.");
+                samplerSampleRate = null;
+            }
+
+            if (samplerSampleRate is { } samplerRate)
             {
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
-                sampleRate = samplerSampleRate * _backpressureMonitor.GetDownsampleFactor();
+                sampleRate = samplerRate * _backpressureMonitor.GetDownsampleFactor();
                 isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
                 if (isSampled is false)
                 {
                     // If sampling out is only a result of the downsampling then we specify the reason as backpressure
                     // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
-                    discardReason = sampleRand < samplerSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+                    discardReason = sampleRand < samplerRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
                 }
 
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
-                dynamicSamplingContext?.SetSampleRate(samplerSampleRate);
+                dynamicSamplingContext?.SetSampleRate(samplerRate);
             }
         }
 
@@ -233,7 +245,7 @@ internal class Hub : IHub, IDisposable
             {
                 // If sampling out is only a result of the downsampling then we specify the reason as backpressure
                 // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
-                discardReason = sampleRand < optionsSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+                discardReason = context.IsSampled is null && sampleRand < optionsSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
             }
 
             if (context.IsSampled is null && _options.TracesSampleRate is not null)
@@ -587,7 +599,17 @@ internal class Hub : IHub, IDisposable
                     {"exception_message", exceptionMessage}
                 };
             }
-            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Fatal);
+
+            var hint = new SentryHint(_options);
+            hint.Items[HintTypes.Exception] = exception;
+
+            var breadcrumb = new Breadcrumb(
+                message: breadcrumbMessage,
+                data: data,
+                category: "Exception",
+                level: BreadcrumbLevel.Fatal);
+
+            scope.AddBreadcrumb(breadcrumb, hint);
         }
         catch (Exception e)
         {
@@ -608,6 +630,7 @@ internal class Hub : IHub, IDisposable
         try
         {
             var clonedScope = CurrentScope.Clone();
+            clonedScope.ScopeSyncEnabled = false;
             configureScope(clonedScope);
 
             // Although we clone a temporary scope for the configureScope action, for the second scope
@@ -701,6 +724,7 @@ internal class Hub : IHub, IDisposable
         try
         {
             var clonedScope = CurrentScope.Clone();
+            clonedScope.ScopeSyncEnabled = false;
             configureScope(clonedScope);
 
             return CaptureFeedback(feedback, out result, clonedScope, hint);
@@ -759,7 +783,7 @@ internal class Hub : IHub, IDisposable
                 Level = _options.HeapDumpOptions?.Level ?? SentryLevel.Warning,
             };
             var hint = new SentryHint(_options);
-            hint.AddAttachment(dumpFile);
+            hint.AddAttachment(dumpFile, AttachmentType.HeapDump);
             CaptureEvent(evt, CurrentScope, hint);
         }
         catch (Exception e)

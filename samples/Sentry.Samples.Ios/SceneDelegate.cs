@@ -9,9 +9,109 @@ public class SceneDelegate : UIResponder, IUIWindowSceneDelegate
     [Export("scene:willConnectToSession:options:")]
     public void WillConnect(UIScene scene, UISceneSession session, UISceneConnectionOptions connectionOptions)
     {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see UIApplicationDelegate `GetConfiguration` instead).
+        if (scene is not UIWindowScene windowScene)
+        {
+            return;
+        }
+
+        // determine control colours (SystemBackground requires iOS >= 13.0)
+        var backgroundColor = UIDevice.CurrentDevice.CheckSystemVersion(13, 0)
+#pragma warning disable CA1416
+            ? UIColor.SystemBackground
+#pragma warning restore CA1416
+            : UIColor.White;
+        var buttonConfig = UIButtonConfiguration.TintedButtonConfiguration;
+        var terminalButtonConfig = UIButtonConfiguration.TintedButtonConfiguration;
+        terminalButtonConfig.BaseBackgroundColor = UIColor.SystemRed;
+
+        var vc = new UIViewController();
+
+        var label = new UILabel
+        {
+            BackgroundColor = backgroundColor,
+            TextAlignment = UITextAlignment.Center,
+            Text = "Hello, iOS!",
+            AutoresizingMask = UIViewAutoresizing.All
+        };
+
+        // UIButton for a managed exception that we'll catch and handle (won't crash the app)
+        var managedCrashButton = new UIButton(UIButtonType.RoundedRect)
+        {
+            AutoresizingMask = UIViewAutoresizing.All,
+            Configuration = buttonConfig
+        };
+        managedCrashButton.SetTitle("Managed Crash", UIControlState.Normal);
+        managedCrashButton.TouchUpInside += delegate
+        {
+            Console.WriteLine("Managed Crash button clicked!");
+            try
+            {
+                throw new Exception("Catch this!");
+            }
+            catch (Exception e)
+            {
+                SentrySdk.CaptureException(e);
+            }
+        };
+
+        // UIButton for unhandled managed exception
+        var unhandledCrashButton = new UIButton(UIButtonType.RoundedRect)
+        {
+            AutoresizingMask = UIViewAutoresizing.All,
+            Configuration = terminalButtonConfig
+        };
+        unhandledCrashButton.SetTitle("Unhandled Crash", UIControlState.Normal);
+        unhandledCrashButton.TouchUpInside += delegate
+        {
+            Console.WriteLine("Unhandled Crash button clicked!");
+            string s = null!;
+            // This will cause a NullReferenceException that will crash the app before Sentry can send the event.
+            // Since we're using a caching transport though, the exception will be written to disk and sent the
+            // next time the app is launched.
+            Console.WriteLine("Length: {0}", s.Length);
+        };
+
+        // UIButton for native crash
+        var nativeCrashButton = new UIButton(UIButtonType.System)
+        {
+            Configuration = terminalButtonConfig
+        };
+        nativeCrashButton.SetTitle("Native Crash", UIControlState.Normal);
+        nativeCrashButton.TouchUpInside += delegate
+        {
+            Console.WriteLine("Native Crash button clicked!");
+#pragma warning disable CS0618 // Type or member is obsolete
+            // This will cause a native crash that will crash the application before
+            // Sentry gets a chance to send the event. Since we've enabled caching however,
+            // the event will be written to disk and sent the next time the app is launched.
+            SentrySdk.CauseCrash(CrashType.Native);
+#pragma warning restore CS0618 // Type or member is obsolete
+        };
+
+        // create a UIStackView to hold the label and buttons
+        var stackView = new UIStackView(new UIView[] { label, managedCrashButton, unhandledCrashButton, nativeCrashButton })
+        {
+            Axis = UILayoutConstraintAxis.Vertical,
+            Distribution = UIStackViewDistribution.FillEqually,
+            Alignment = UIStackViewAlignment.Center,
+            Spacing = 10,
+            TranslatesAutoresizingMaskIntoConstraints = false,
+        };
+
+        // add the stack view to the view controller's view
+        vc.View!.BackgroundColor = backgroundColor;
+        vc.View.AddSubview(stackView);
+
+        // set constraints for the stack view
+        NSLayoutConstraint.ActivateConstraints([
+            stackView.CenterXAnchor.ConstraintEqualTo(vc.View.CenterXAnchor),
+            stackView.CenterYAnchor.ConstraintEqualTo(vc.View.CenterYAnchor),
+            stackView.WidthAnchor.ConstraintEqualTo(vc.View.WidthAnchor, 0.8f),
+            stackView.HeightAnchor.ConstraintEqualTo(vc.View.HeightAnchor, 0.5f)
+        ]);
+
+        Window = new UIWindow(windowScene) { RootViewController = vc };
+        Window.MakeKeyAndVisible();
     }
 
     [Export("sceneDidDisconnect:")]

@@ -4,9 +4,11 @@ internal readonly struct DiscardReason : IEnumeration<DiscardReason>
 {
     // See https://develop.sentry.dev/sdk/client-reports/ for list
     public static DiscardReason BeforeSend = new("before_send");
+    public static DiscardReason CallbackError = new("callback_error");
     public static DiscardReason BufferOverflow = new("buffer_overflow");
     public static DiscardReason CacheOverflow = new("cache_overflow");
     public static DiscardReason EventProcessor = new("event_processor");
+    public static DiscardReason Invalid = new("invalid");
     public static DiscardReason NetworkError = new("network_error");
     public static DiscardReason QueueOverflow = new("queue_overflow");
     public static DiscardReason SendError = new("send_error");
