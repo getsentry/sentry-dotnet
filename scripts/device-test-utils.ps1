@@ -1,10 +1,13 @@
 function Install-XHarness
 {
-    if (!(Get-Command xharness -ErrorAction SilentlyContinue))
+    $package = 'Microsoft.DotNet.XHarness.CLI'
+    $version = '11.0.0-prerelease.26506.3'
+    $installed = dotnet tool list --global $package | Select-String "\s$([regex]::Escape($version))\s"
+    if (!$installed)
     {
         $CI = Test-Path env:CI
         Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/tmp')
-        dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '11.0.0-prerelease.26506.3' `
+        dotnet tool update $package --global --version $version --allow-downgrade `
             --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
         Pop-Location
     }
