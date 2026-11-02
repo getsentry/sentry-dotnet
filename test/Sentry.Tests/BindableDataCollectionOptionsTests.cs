@@ -57,26 +57,41 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_NoDataCollectionSection_LeavesEveryCategoryUnset()
+    public void Bind_NoDataCollectionSection_LeavesDataCollectionUnset()
     {
         var options = Bind(("Dsn", "https://k@o.ingest.sentry.io/1"));
 
+        options.DataCollection.Should().BeNull();
+    }
+
+    [Fact]
+    public void Bind_SectionPresent_OptsInAndLeavesUnsetCategoriesNull()
+    {
+        var options = Bind(("DataCollection:UserInfo", "false"));
+
         using (new AssertionScope())
         {
-            options.DataCollection.UserInfo.Should().BeNull();
-            options.DataCollection.Cookies.Should().BeNull();
-            options.DataCollection.HttpHeaders.Request.Should().BeNull();
-            options.DataCollection.IsExplicitlyConfigured.Should().BeFalse();
+            options.DataCollection.Should().NotBeNull();
+            options.DataCollection!.UserInfo.Should().BeFalse();
+            options.DataCollection!.Cookies.Should().BeNull();
+            options.DataCollection!.HttpHeaders.Request.Should().BeNull();
         }
     }
 
     [Fact]
-    public void Bind_Enabled_OptsInWithoutRestrictingACategory()
+    public void Bind_SectionPresent_MergesIntoOptionsSetInCode()
     {
-        var options = Bind(("DataCollection:Enabled", "true"));
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection([new KeyValuePair<string, string>("DataCollection:Queues", "false")])
+            .Build();
+        var bindable = new BindableSentryOptions();
+        config.Bind(bindable);
+        var options = new SentryOptions { DataCollection = new DataCollectionOptions { UserInfo = false } };
 
-        options.DataCollection.IsExplicitlyConfigured.Should().BeTrue();
-        options.DataCollection.UserInfo.Should().BeNull();
+        bindable.ApplyTo(options);
+
+        options.DataCollection!.UserInfo.Should().BeFalse();
+        options.DataCollection!.Queues.Should().BeFalse();
     }
 
     [Fact]
@@ -91,11 +106,11 @@ public class DataCollectionConfigurationTests
 
         using (new AssertionScope())
         {
-            options.DataCollection.UserInfo.Should().BeFalse();
-            options.DataCollection.DatabaseQueryData.Should().BeFalse();
-            options.DataCollection.Queues.Should().BeFalse();
-            options.DataCollection.FilePaths.Should().BeFalse();
-            options.DataCollection.FrameContextLines.Should().Be(0);
+            options.DataCollection!.UserInfo.Should().BeFalse();
+            options.DataCollection!.DatabaseQueryData.Should().BeFalse();
+            options.DataCollection!.Queues.Should().BeFalse();
+            options.DataCollection!.FilePaths.Should().BeFalse();
+            options.DataCollection!.FrameContextLines.Should().Be(0);
         }
     }
 
@@ -110,11 +125,11 @@ public class DataCollectionConfigurationTests
 
         using (new AssertionScope())
         {
-            options.DataCollection.GraphQL.Document.Should().BeFalse();
-            options.DataCollection.GraphQL.Variables.Should().BeFalse();
-            options.DataCollection.GenAI.Inputs.Should().BeFalse();
-            options.DataCollection.GenAI.Outputs.Should().BeNull();
-            options.DataCollection.Mcp.Outputs.Should().BeFalse();
+            options.DataCollection!.GraphQL.Document.Should().BeFalse();
+            options.DataCollection!.GraphQL.Variables.Should().BeFalse();
+            options.DataCollection!.GenAI.Inputs.Should().BeFalse();
+            options.DataCollection!.GenAI.Outputs.Should().BeNull();
+            options.DataCollection!.Mcp.Outputs.Should().BeFalse();
         }
     }
 
@@ -126,7 +141,7 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:Cookies:Mode", configured));
 
-        options.DataCollection.Cookies!.Mode.Should().Be(expected);
+        options.DataCollection!.Cookies!.Mode.Should().Be(expected);
     }
 
     [Fact]
@@ -137,7 +152,7 @@ public class DataCollectionConfigurationTests
             ("DataCollection:HttpHeaders:Request:Terms:0", "forwarded"),
             ("DataCollection:HttpHeaders:Request:Terms:1", "-ip"));
 
-        var request = options.DataCollection.HttpHeaders.Request!;
+        var request = options.DataCollection!.HttpHeaders.Request!;
         request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         request.Terms.Should().Equal("forwarded", "-ip");
     }
@@ -147,7 +162,7 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:UrlQueryParams:Terms:0", "session_id"));
 
-        var behavior = options.DataCollection.UrlQueryParams!;
+        var behavior = options.DataCollection!.UrlQueryParams!;
         behavior.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         behavior.Terms.Should().Equal("session_id");
     }
@@ -157,8 +172,8 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:UserInfo", "false"));
 
-        options.DataCollection.Cookies.Should().BeNull();
-        options.DataCollection.HttpHeaders.Response.Should().BeNull();
+        options.DataCollection!.Cookies.Should().BeNull();
+        options.DataCollection!.HttpHeaders.Response.Should().BeNull();
     }
 
     [Fact]
@@ -166,7 +181,7 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:HttpBodies", "IncomingRequest, OutgoingResponse"));
 
-        options.DataCollection.HttpBodies.Should().Be(
+        options.DataCollection!.HttpBodies.Should().Be(
             HttpBodyTypes.IncomingRequest | HttpBodyTypes.OutgoingResponse);
     }
 
@@ -175,13 +190,13 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:HttpBodies", "None"));
 
-        options.DataCollection.HttpBodies.Should().Be(HttpBodyTypes.None);
+        options.DataCollection!.HttpBodies.Should().Be(HttpBodyTypes.None);
     }
 
     [Fact]
-    public void Bind_AnyCategory_MarksExplicitlyConfigured()
+    public void Bind_AnyCategory_OptsIn()
     {
-        Bind(("DataCollection:Cookies:Mode", "Off")).DataCollection.IsExplicitlyConfigured.Should().BeTrue();
+        Bind(("DataCollection:Cookies:Mode", "Off")).DataCollection.Should().NotBeNull();
     }
 }
 #endif

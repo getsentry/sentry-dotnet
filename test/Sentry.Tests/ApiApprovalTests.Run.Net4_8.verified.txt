@@ -84,7 +84,6 @@ namespace Sentry
         public Sentry.KeyValueCollectionBehavior? StackFrameVariables { get; set; }
         public Sentry.KeyValueCollectionBehavior? UrlQueryParams { get; set; }
         public bool? UserInfo { get; set; }
-        public void Enable() { }
         public sealed class GenAIOptions
         {
             public GenAIOptions() { }
@@ -885,7 +884,7 @@ namespace Sentry
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
         public System.Func<bool>? CrashedLastRun { get; set; }
         public System.Func<System.Net.Http.HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
-        public Sentry.DataCollectionOptions DataCollection { get; }
+        public Sentry.DataCollectionOptions? DataCollection { get; set; }
         public bool Debug { get; set; }
         public System.Net.DecompressionMethods DecompressionMethods { get; set; }
         public Sentry.DeduplicateMode DeduplicateMode { get; set; }

@@ -116,7 +116,11 @@ internal partial class BindableSentryOptions
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
-        DataCollection.ApplyTo(options.DataCollection);
+        if (DataCollection is not null)
+        {
+            options.DataCollection ??= new Sentry.DataCollectionOptions();
+            DataCollection.ApplyTo(options.DataCollection);
+        }
 
 #if ANDROID
         Android.ApplyTo(options.Android);

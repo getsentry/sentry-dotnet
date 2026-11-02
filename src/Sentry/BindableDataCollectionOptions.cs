@@ -2,11 +2,10 @@ namespace Sentry;
 
 internal partial class BindableSentryOptions
 {
-    public DataCollectionOptions DataCollection { get; } = new();
+    public DataCollectionOptions? DataCollection { get; set; }
 
     public class DataCollectionOptions
     {
-        public bool? Enabled { get; set; }
         public bool? UserInfo { get; set; }
         public KeyValueBehavior Cookies { get; } = new();
         public HttpHeaderOptions HttpHeaders { get; } = new();
@@ -23,7 +22,6 @@ internal partial class BindableSentryOptions
 
         public void ApplyTo(Sentry.DataCollectionOptions options)
         {
-            options.Enabled = Enabled ?? options.Enabled;
             options.UserInfo = UserInfo ?? options.UserInfo;
             options.Cookies = Cookies.ToBehavior() ?? options.Cookies;
             options.HttpBodies = HttpBodies ?? options.HttpBodies;

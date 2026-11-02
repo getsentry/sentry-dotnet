@@ -3,9 +3,15 @@ namespace Sentry.Tests;
 public class DataCollectionOptionsTests
 {
     [Fact]
-    public void DataCollection_ByDefault_LeavesEveryCategoryUnset()
+    public void DataCollection_ByDefault_IsUnset()
     {
-        var options = new SentryOptions();
+        new SentryOptions().DataCollection.Should().BeNull();
+    }
+
+    [Fact]
+    public void DataCollection_WhenAssigned_LeavesEveryCategoryUnset()
+    {
+        var options = new SentryOptions { DataCollection = new DataCollectionOptions() };
 
         using (new AssertionScope())
         {
@@ -18,7 +24,7 @@ public class DataCollectionOptionsTests
             options.DataCollection.FilePaths.Should().BeNull();
             options.DataCollection.StackFrameVariables.Should().BeNull();
             options.DataCollection.FrameContextLines.Should().BeNull();
-            options.DataCollection.HttpHeaders.Request.Should().BeNull();
+            options.DataCollection!.HttpHeaders.Request.Should().BeNull();
             options.DataCollection.HttpHeaders.Response.Should().BeNull();
             options.DataCollection.GraphQL.Document.Should().BeNull();
             options.DataCollection.GraphQL.Variables.Should().BeNull();
@@ -30,51 +36,12 @@ public class DataCollectionOptionsTests
     }
 
     [Fact]
-    public void IsExplicitlyConfigured_ByDefault_IsFalse()
+    public void DataCollection_WhenAssigned_SignalsOptIn()
     {
-        new SentryOptions().DataCollection.IsExplicitlyConfigured.Should().BeFalse();
-    }
+        var options = new SentryOptions { DataCollection = new DataCollectionOptions { UserInfo = false } };
 
-    [Fact]
-    public void IsExplicitlyConfigured_AfterEnable_IsTrue()
-    {
-        var options = new SentryOptions();
-
-        options.DataCollection.Enable();
-
-        options.DataCollection.IsExplicitlyConfigured.Should().BeTrue();
-    }
-
-    public static IEnumerable<object[]> CategorySetters()
-    {
-        yield return [(Action<DataCollectionOptions>)(o => o.UserInfo = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.Cookies = KeyValueCollectionBehavior.Off)];
-        yield return [(Action<DataCollectionOptions>)(o => o.HttpBodies = HttpBodyTypes.None)];
-        yield return [(Action<DataCollectionOptions>)(o => o.UrlQueryParams = KeyValueCollectionBehavior.Off)];
-        yield return [(Action<DataCollectionOptions>)(o => o.DatabaseQueryData = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.Queues = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.FilePaths = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.StackFrameVariables = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.FrameContextLines = 0)];
-        yield return [(Action<DataCollectionOptions>)(o => o.HttpHeaders.Request = KeyValueCollectionBehavior.Off)];
-        yield return [(Action<DataCollectionOptions>)(o => o.HttpHeaders.Response = KeyValueCollectionBehavior.Off)];
-        yield return [(Action<DataCollectionOptions>)(o => o.GraphQL.Document = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.GraphQL.Variables = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.GenAI.Inputs = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.GenAI.Outputs = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.Mcp.Inputs = false)];
-        yield return [(Action<DataCollectionOptions>)(o => o.Mcp.Outputs = false)];
-    }
-
-    [Theory]
-    [MemberData(nameof(CategorySetters))]
-    public void IsExplicitlyConfigured_WhenAnyCategorySet_IsTrue(Action<DataCollectionOptions> configure)
-    {
-        var options = new SentryOptions();
-
-        configure(options.DataCollection);
-
-        options.DataCollection.IsExplicitlyConfigured.Should().BeTrue();
+        options.DataCollection.Should().NotBeNull();
+        options.DataCollection!.UserInfo.Should().BeFalse();
     }
 
     [Fact]
@@ -82,7 +49,7 @@ public class DataCollectionOptionsTests
     {
         var options = new SentryOptions { SendDefaultPii = true };
 
-        options.DataCollection.IsExplicitlyConfigured.Should().BeFalse();
+        options.DataCollection.Should().BeNull();
     }
 }
 
@@ -135,10 +102,10 @@ public class KeyValueCollectionBehaviorTests
     [Fact]
     public void ImplicitConversionFromBool_AssignsToCategory()
     {
-        var options = new SentryOptions();
-
-        options.DataCollection.Cookies = false;
-        options.DataCollection.StackFrameVariables = true;
+        var options = new SentryOptions
+        {
+            DataCollection = new DataCollectionOptions { Cookies = false, StackFrameVariables = true }
+        };
 
         options.DataCollection.Cookies!.Mode.Should().Be(KeyValueCollectionMode.Off);
         options.DataCollection.StackFrameVariables!.Mode.Should().Be(KeyValueCollectionMode.DenyList);

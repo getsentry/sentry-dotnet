@@ -338,12 +338,18 @@ public class SentryOptions
     /// all-or-nothing switch.
     /// </summary>
     /// <remarks>
-    /// When any category here is configured, <see cref="SendDefaultPii"/> is ignored.
+    /// Unset by default, in which case <see cref="SendDefaultPii"/> still governs what is collected. Assigning it
+    /// opts into the <see cref="DataCollectionOptions"/> defaults and <see cref="SendDefaultPii"/> is ignored.
     /// <para>This API is experimental, and it may change in the future.</para>
     /// </remarks>
+    /// <example>
+    /// <code>
+    /// options.DataCollection = new DataCollectionOptions { UserInfo = false };
+    /// </code>
+    /// </example>
     /// <seealso href="https://develop.sentry.dev/sdk/foundations/client/data-collection/"/>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public DataCollectionOptions DataCollection { get; } = new();
+    public DataCollectionOptions? DataCollection { get; set; }
 
     /// <summary>
     /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.

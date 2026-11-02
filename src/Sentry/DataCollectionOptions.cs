@@ -6,7 +6,9 @@ namespace Sentry;
 /// Controls which categories of data the SDK's integrations collect automatically.
 /// </summary>
 /// <remarks>
-/// Every category is collected by default, including user identity and HTTP bodies. Set a category to restrict it.
+/// Assigning this option at all opts into these defaults, which collect every category including user identity
+/// and HTTP bodies, and causes the deprecated <see cref="SentryOptions.SendDefaultPii"/> to be ignored. Set an
+/// individual category to restrict it.
 /// <para>
 /// This only gates data the SDK gathers by itself. Data you provide explicitly - a <see cref="SentryUser"/> set on
 /// the scope, tags, or anything added in <see cref="SentryOptions.SetBeforeSend(System.Func{SentryEvent, SentryHint, SentryEvent})"/>
@@ -103,31 +105,6 @@ public class DataCollectionOptions
     public int? FrameContextLines { get; set; }
 
     /// <summary>
-    /// Opts into these options without restricting any individual category, so that the defaults described here
-    /// apply and the deprecated <see cref="SentryOptions.SendDefaultPii"/> is ignored. Setting any category has
-    /// the same effect, so this is only needed to take the defaults wholesale.
-    /// </summary>
-    public void Enable() => Enabled = true;
-
-    internal bool Enabled { get; set; }
-
-    internal bool IsExplicitlyConfigured =>
-        Enabled
-        || UserInfo is not null
-        || Cookies is not null
-        || HttpBodies is not null
-        || UrlQueryParams is not null
-        || DatabaseQueryData is not null
-        || Queues is not null
-        || FilePaths is not null
-        || StackFrameVariables is not null
-        || FrameContextLines is not null
-        || HttpHeaders.HasOverrides
-        || GraphQL.HasOverrides
-        || GenAI.HasOverrides
-        || Mcp.HasOverrides;
-
-    /// <summary>
     /// How request and response headers are collected.
     /// </summary>
     public sealed class HttpHeaderOptions
@@ -144,7 +121,6 @@ public class DataCollectionOptions
         /// </summary>
         public KeyValueCollectionBehavior? Response { get; set; }
 
-        internal bool HasOverrides => Request is not null || Response is not null;
     }
 
     /// <summary>
@@ -162,7 +138,6 @@ public class DataCollectionOptions
         /// </summary>
         public bool? Variables { get; set; }
 
-        internal bool HasOverrides => Document is not null || Variables is not null;
     }
 
     /// <summary>
@@ -183,7 +158,6 @@ public class DataCollectionOptions
         /// </summary>
         public bool? Outputs { get; set; }
 
-        internal bool HasOverrides => Inputs is not null || Outputs is not null;
     }
 
     /// <summary>
@@ -208,6 +182,5 @@ public class DataCollectionOptions
         /// </summary>
         public bool? Outputs { get; set; }
 
-        internal bool HasOverrides => Inputs is not null || Outputs is not null;
     }
 }
