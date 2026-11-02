@@ -33,7 +33,7 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                 && !p.PropertyType.IsInterface // Exclude interface properties
                 && !skipProperties.Contains(p.Name) // Exclude any properties explicitly excluded by derived classes
 
-                // DataCollection binds via its own bindable type in #5427
+                // Exclude the DataCollection sub-properties
                 && p.PropertyType != typeof(DataCollectionOptions)
 
                 // Exclude the Mobile sub-properties

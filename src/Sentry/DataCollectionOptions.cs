@@ -19,7 +19,6 @@ namespace Sentry;
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public class DataCollectionOptions
 {
-    private bool _enabled;
 
     /// <summary>
     /// Whether integrations may populate user identity information automatically, including
@@ -108,10 +107,12 @@ public class DataCollectionOptions
     /// apply and the deprecated <see cref="SentryOptions.SendDefaultPii"/> is ignored. Setting any category has
     /// the same effect, so this is only needed to take the defaults wholesale.
     /// </summary>
-    public void Enable() => _enabled = true;
+    public void Enable() => Enabled = true;
+
+    internal bool Enabled { get; set; }
 
     internal bool IsExplicitlyConfigured =>
-        _enabled
+        Enabled
         || UserInfo is not null
         || Cookies is not null
         || HttpBodies is not null
