@@ -59,10 +59,10 @@ public class SentryGrpcInterceptor : Interceptor
 
         using (hub.PushAndLockScope())
         {
-            hub.ConfigureScope(scope =>
+            hub.ConfigureScope(static (scope, state) =>
             {
-                scope.OnEvaluating += (_, activeScope) => activeScope.Populate(context, request, _options);
-            });
+                scope.OnEvaluating += (_, activeScope) => activeScope.Populate(state.Context, state.Request, state.Setup._options);
+            }, (Setup: this, Context: context, Request: request));
 
             try
             {
@@ -102,10 +102,10 @@ public class SentryGrpcInterceptor : Interceptor
 
         using (hub.PushAndLockScope())
         {
-            hub.ConfigureScope(scope =>
+            hub.ConfigureScope(static (scope, state) =>
             {
-                scope.OnEvaluating += (_, activeScope) => activeScope.Populate(context, request, _options);
-            });
+                scope.OnEvaluating += (_, activeScope) => activeScope.Populate(state.Context, state.Request, state.Setup._options);
+            }, (Setup: this, Context: context, Request: request));
 
             try
             {
@@ -140,10 +140,10 @@ public class SentryGrpcInterceptor : Interceptor
 
         using (hub.PushAndLockScope())
         {
-            hub.ConfigureScope(scope =>
+            hub.ConfigureScope(static (scope, state) =>
             {
-                scope.OnEvaluating += (_, activeScope) => activeScope.Populate<TRequest>(context, null, _options);
-            });
+                scope.OnEvaluating += (_, activeScope) => activeScope.Populate<TRequest>(state.Context, null, state.Setup._options);
+            }, (Setup: this, Context: context));
 
             try
             {
@@ -183,10 +183,10 @@ public class SentryGrpcInterceptor : Interceptor
 
         using (hub.PushAndLockScope())
         {
-            hub.ConfigureScope(scope =>
+            hub.ConfigureScope(static (scope, state) =>
             {
-                scope.OnEvaluating += (_, activeScope) => activeScope.Populate<TRequest>(context, null, _options);
-            });
+                scope.OnEvaluating += (_, activeScope) => activeScope.Populate<TRequest>(state.Context, null, state.Setup._options);
+            }, (Setup: this, Context: context));
 
             try
             {
