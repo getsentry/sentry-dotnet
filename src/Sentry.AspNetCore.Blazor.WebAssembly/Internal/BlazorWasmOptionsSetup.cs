@@ -35,10 +35,7 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
         var previousUrl = _navigationManager.Uri;
 
         // Set the initial scope request URL
-        _hub.ConfigureScope(static (scope, state) =>
-        {
-            scope.Request.Url = state.Setup.ToRelativePath(state.Url);
-        }, (Setup: this, Url: previousUrl));
+        _hub.ConfigureScope(static (scope, url) => scope.Request.Url = url, ToRelativePath(previousUrl));
 
         _navigationManager.LocationChanged += (_, args) =>
         {
