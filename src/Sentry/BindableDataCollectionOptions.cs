@@ -9,7 +9,7 @@ internal partial class BindableSentryOptions
         public bool? UserInfo { get; set; }
         public KeyValueBehavior Cookies { get; } = new();
         public HttpHeaderOptions HttpHeaders { get; } = new();
-        public HttpBodyTypes? HttpBodies { get; set; }
+        public List<string>? HttpBodies { get; set; }
         public KeyValueBehavior UrlQueryParams { get; } = new();
         public GraphQLOptions GraphQL { get; } = new();
         public GenAIOptions GenAI { get; } = new();
@@ -24,7 +24,7 @@ internal partial class BindableSentryOptions
         {
             options.UserInfo = UserInfo ?? options.UserInfo;
             options.Cookies = Cookies.ToBehavior() ?? options.Cookies;
-            options.HttpBodies = HttpBodies ?? options.HttpBodies;
+            options.HttpBodies = ParseHttpBodies() ?? options.HttpBodies;
             options.UrlQueryParams = UrlQueryParams.ToBehavior() ?? options.UrlQueryParams;
             options.DatabaseQueryData = DatabaseQueryData ?? options.DatabaseQueryData;
             options.Queues = Queues ?? options.Queues;
@@ -35,6 +35,28 @@ internal partial class BindableSentryOptions
             GraphQL.ApplyTo(options.GraphQL);
             GenAI.ApplyTo(options.GenAI);
             Mcp.ApplyTo(options.Mcp);
+        }
+
+        private HttpBodyTypes? ParseHttpBodies()
+        {
+            if (HttpBodies is null)
+            {
+                return null;
+            }
+
+            var result = HttpBodyTypes.None;
+            foreach (var entry in HttpBodies)
+            {
+                foreach (var part in entry.Split(','))
+                {
+                    if (Enum.TryParse<HttpBodyTypes>(part.Trim(), ignoreCase: true, out var parsed))
+                    {
+                        result |= parsed;
+                    }
+                }
+            }
+
+            return result;
         }
 
         /// <summary>

@@ -43,28 +43,43 @@ public enum KeyValueCollectionMode
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class KeyValueCollectionBehavior
 {
+    private IReadOnlyList<string> _terms = [];
+
+    /// <summary>
+    /// Creates a behavior that collects all key names and filters values of sensitive keys, equivalent to
+    /// <see cref="DenyList"/>. Set <see cref="Mode"/> and <see cref="Terms"/> to configure it, or use
+    /// <see cref="Off"/>, <see cref="DenyList"/> and <see cref="AllowList"/>.
+    /// </summary>
+    public KeyValueCollectionBehavior()
+    {
+    }
+
     private KeyValueCollectionBehavior(KeyValueCollectionMode mode, IReadOnlyList<string>? terms)
     {
         Mode = mode;
-        Terms = terms ?? [];
+        Terms = terms!;
     }
 
     /// <summary>
     /// How this category is collected.
     /// </summary>
-    public KeyValueCollectionMode Mode { get; }
+    public KeyValueCollectionMode Mode { get; set; } = KeyValueCollectionMode.DenyList;
 
     /// <summary>
     /// Additional deny terms in <see cref="KeyValueCollectionMode.DenyList"/> mode, or the allowed key terms in
     /// <see cref="KeyValueCollectionMode.AllowList"/> mode. Never null; empty in
     /// <see cref="KeyValueCollectionMode.Off"/> mode, or when no terms were supplied.
     /// </summary>
-    public IReadOnlyList<string> Terms { get; }
+    public IReadOnlyList<string> Terms
+    {
+        get => _terms;
+        set => _terms = value ?? [];
+    }
 
     /// <summary>
     /// Collect neither keys nor values.
     /// </summary>
-    public static KeyValueCollectionBehavior Off { get; } = new(KeyValueCollectionMode.Off, []);
+    public static KeyValueCollectionBehavior Off => new(KeyValueCollectionMode.Off, []);
 
     /// <summary>
     /// Collect all key names, replacing values of sensitive keys with <c>[Filtered]</c>. This is the default
