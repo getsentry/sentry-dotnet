@@ -271,6 +271,25 @@ public partial class SentryMauiAppBuilderExtensionsTests
     }
 
     [Fact]
+    public void UseSentry_CreateElementEventsBreadcrumbsSetInCode_IsNotOverwritten()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.UseSentry(options =>
+        {
+            options.CreateElementEventsBreadcrumbs = true;
+        });
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        Assert.True(options.CreateElementEventsBreadcrumbs);
+    }
+
+    [Fact]
     public void UseSentry_DebugFalse_LoggerLeftDefault()
     {
         // Arrange
