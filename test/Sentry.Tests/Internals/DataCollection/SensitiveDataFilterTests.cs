@@ -79,17 +79,10 @@ public class SensitiveDataFilterTests
         };
 
         // Act
-        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.Off);
+        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueCollectionBehavior.Off);
 
         // Assert
         result.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void FilterKeyValueData_DefaultBehavior_IsOff()
-    {
-        default(KeyValueFilterBehavior).Mode.Should().Be(KeyValueFilterMode.Off);
-        default(KeyValueFilterBehavior).Terms.Should().BeEmpty();
     }
 
     [Fact]
@@ -104,7 +97,7 @@ public class SensitiveDataFilterTests
         };
 
         // Act
-        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.DenyList);
+        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueCollectionBehavior.DenyList());
 
         // Assert
         ValueOf(result, "User-Agent").Should().Be("TestAgent");
@@ -124,7 +117,7 @@ public class SensitiveDataFilterTests
         };
 
         // Act
-        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.DenyList);
+        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueCollectionBehavior.DenyList());
 
         // Assert
         result.Select(kvp => kvp.Key).Should().Equal("Set-Cookie", "Accept", "Set-Cookie");
@@ -142,7 +135,7 @@ public class SensitiveDataFilterTests
         };
 
         // Act
-        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.DenyListWith("forwarded"));
+        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueCollectionBehavior.DenyList("forwarded"));
 
         // Assert
         ValueOf(result, "X-Forwarded-For").Should().Be("[Filtered]");
@@ -161,7 +154,7 @@ public class SensitiveDataFilterTests
         };
 
         // Act
-        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.AllowList("user-agent"));
+        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueCollectionBehavior.AllowList("user-agent"));
 
         // Assert
         ValueOf(result, "User-Agent").Should().Be("TestAgent");
@@ -179,7 +172,7 @@ public class SensitiveDataFilterTests
         };
 
         // Act
-        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.AllowList("authorization"));
+        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueCollectionBehavior.AllowList("authorization"));
 
         // Assert
         ValueOf(result, "Authorization").Should().Be("[Filtered]");
@@ -196,7 +189,7 @@ public class SensitiveDataFilterTests
         };
 
         // Act
-        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueFilterBehavior.AllowList("tenant"));
+        var result = SensitiveDataFilter.FilterKeyValueData(data, KeyValueCollectionBehavior.AllowList("tenant"));
 
         // Assert
         ValueOf(result, "X-Tenant-Id").Should().Be("acme");
@@ -214,8 +207,8 @@ public class SensitiveDataFilterTests
             ["remember_me"] = "yes"
         };
         var behavior = useAllowList
-            ? KeyValueFilterBehavior.AllowList("remember_me")
-            : KeyValueFilterBehavior.DenyList;
+            ? KeyValueCollectionBehavior.AllowList("remember_me")
+            : KeyValueCollectionBehavior.DenyList();
 
         // Act
         var result = SensitiveDataFilter.FilterKeyValueData(
@@ -243,7 +236,7 @@ public class SensitiveDataFilterTests
 
         // Act
         var result = SensitiveDataFilter.FilterKeyValueData(
-            data, KeyValueFilterBehavior.DenyList, SensitiveDataFilter.SensitiveCookieNameTerms);
+            data, KeyValueCollectionBehavior.DenyList(), SensitiveDataFilter.SensitiveCookieNameTerms);
 
         // Assert
         ValueOf(result, cookieName).Should().Be("[Filtered]");
@@ -252,49 +245,49 @@ public class SensitiveDataFilterTests
     [Fact]
     public void FilterValue_OffMode_ReturnsFiltered()
     {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.Off)
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.Off)
             .Should().Be("[Filtered]");
     }
 
     [Fact]
     public void FilterValue_BenignKeyDenyListMode_ReturnsValueUnchanged()
     {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.DenyList)
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.DenyList())
             .Should().Be("text/html");
     }
 
     [Fact]
     public void FilterValue_DenyListWithEmptyTerm_DoesNotFilterEverything()
     {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.DenyListWith(""))
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.DenyList(""))
             .Should().Be("text/html");
     }
 
     [Fact]
     public void FilterValue_AllowListWithEmptyTerm_DoesNotAllowEverything()
     {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.AllowList(""))
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.AllowList(""))
             .Should().Be("[Filtered]");
     }
 
     [Fact]
     public void FilterValue_DenyListWithNullTerm_DoesNotFilterEverything()
     {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.DenyListWith(null!))
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.DenyList(null!))
             .Should().Be("text/html");
     }
 
     [Fact]
     public void FilterValue_AllowListWithNullTermsArray_DoesNotAllowEverything()
     {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueFilterBehavior.AllowList(null!))
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.AllowList(null!))
             .Should().Be("[Filtered]");
     }
 
     [Fact]
     public void FilterValue_DenyListWithNullTermElement_DoesNotFilterEverything()
     {
-        var behavior = KeyValueFilterBehavior.DenyListWith(new string[] { null! });
+        var behavior = KeyValueCollectionBehavior.DenyList(new string[] { null! });
 
         SensitiveDataFilter.FilterValue("Accept", "text/html", behavior).Should().Be("text/html");
     }
@@ -302,7 +295,7 @@ public class SensitiveDataFilterTests
     [Fact]
     public void FilterValue_AllowListWithNullTermElement_DoesNotAllowEverything()
     {
-        var behavior = KeyValueFilterBehavior.AllowList(new string[] { null! });
+        var behavior = KeyValueCollectionBehavior.AllowList(new string[] { null! });
 
         SensitiveDataFilter.FilterValue("Accept", "text/html", behavior).Should().Be("[Filtered]");
     }
@@ -318,7 +311,7 @@ public class SensitiveDataFilterTests
 
         // Assert
         key.Should().Be("token");
-        SensitiveDataFilter.FilterValue(key, "abc123", KeyValueFilterBehavior.DenyList)
+        SensitiveDataFilter.FilterValue(key, "abc123", KeyValueCollectionBehavior.DenyList())
             .Should().Be("[Filtered]");
     }
 
@@ -336,20 +329,20 @@ public class SensitiveDataFilterTests
     [InlineData("X-Real-User")]
     public void FilterValue_PiiKeyTermsAsDenyTerms_Filtered(string key)
     {
-        SensitiveDataFilter.FilterValue(key, "value", KeyValueFilterBehavior.DenyList, SensitiveDataFilter.PiiKeyTerms)
+        SensitiveDataFilter.FilterValue(key, "value", KeyValueCollectionBehavior.DenyList(), SensitiveDataFilter.PiiKeyTerms)
             .Should().Be("[Filtered]");
     }
 
     [Fact]
     public void FilterValue_PiiKeyTermsNotPassed_NotFilteredByDefault()
     {
-        SensitiveDataFilter.FilterValue("X-Forwarded-For", "203.0.113.7", KeyValueFilterBehavior.DenyList)
+        SensitiveDataFilter.FilterValue("X-Forwarded-For", "203.0.113.7", KeyValueCollectionBehavior.DenyList())
             .Should().Be("203.0.113.7");
     }
 
     [Fact]
     public void FilterKeyValueData_EmptyData_ReturnsEmpty()
     {
-        SensitiveDataFilter.FilterKeyValueData([], KeyValueFilterBehavior.DenyList).Should().BeEmpty();
+        SensitiveDataFilter.FilterKeyValueData([], KeyValueCollectionBehavior.DenyList()).Should().BeEmpty();
     }
 }

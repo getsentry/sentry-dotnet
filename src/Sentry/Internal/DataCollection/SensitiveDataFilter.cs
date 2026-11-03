@@ -83,10 +83,10 @@ internal static class SensitiveDataFilter
     /// Filters a single value according to <paramref name="behavior"/>. Returns the value unchanged, or
     /// <see cref="FilteredValue"/> in its place.
     /// </summary>
-    internal static string FilterValue(string key, string value, KeyValueFilterBehavior behavior,
-        string[]? additionalDenyTerms = null)
+    internal static string FilterValue(string key, string value, KeyValueCollectionBehavior behavior,
+        IReadOnlyList<string>? additionalDenyTerms = null)
     {
-        if (behavior.Mode == KeyValueFilterMode.Off ||
+        if (behavior.Mode == KeyValueCollectionMode.Off ||
             MatchesAny(key, SensitiveKeyTerms) ||
             (additionalDenyTerms is not null && MatchesAny(key, additionalDenyTerms)))
         {
@@ -94,7 +94,7 @@ internal static class SensitiveDataFilter
         }
 
         var matchesTerm = MatchesAny(key, behavior.Terms);
-        if (behavior.Mode == KeyValueFilterMode.AllowList)
+        if (behavior.Mode == KeyValueCollectionMode.AllowList)
         {
             return matchesTerm ? value : FilteredValue;
         }
@@ -104,18 +104,18 @@ internal static class SensitiveDataFilter
 
     /// <summary>
     /// Filters key-value data according to <paramref name="behavior"/>. Key names are always preserved; values are
-    /// either kept or replaced with <see cref="FilteredValue"/>. In <see cref="KeyValueFilterMode.Off"/> mode nothing
+    /// either kept or replaced with <see cref="FilteredValue"/>. In <see cref="KeyValueCollectionMode.Off"/> mode nothing
     /// is returned. <paramref name="additionalDenyTerms"/> are extra sensitive terms applied in every mode, beyond
     /// the built-in denylist (e.g. <see cref="SensitiveCookieNameTerms"/> when filtering cookies).
     /// Input order and repeated keys are preserved, because headers such as Set-Cookie may legitimately repeat.
     /// </summary>
     internal static List<KeyValuePair<string, string>> FilterKeyValueData(
         IEnumerable<KeyValuePair<string, string>> data,
-        KeyValueFilterBehavior behavior,
-        string[]? additionalDenyTerms = null)
+        KeyValueCollectionBehavior behavior,
+        IReadOnlyList<string>? additionalDenyTerms = null)
     {
         var result = new List<KeyValuePair<string, string>>();
-        if (behavior.Mode == KeyValueFilterMode.Off)
+        if (behavior.Mode == KeyValueCollectionMode.Off)
         {
             return result;
         }
@@ -128,10 +128,16 @@ internal static class SensitiveDataFilter
         return result;
     }
 
-    private static bool MatchesAny(string key, string[] terms)
+    private static bool MatchesAny(string key, IReadOnlyList<string>? terms)
     {
-        foreach (var term in terms)
+        if (terms is null)
         {
+            return false;
+        }
+
+        for (var i = 0; i < terms.Count; i++)
+        {
+            var term = terms[i];
             if (!string.IsNullOrEmpty(term) && key.Contains(term, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
