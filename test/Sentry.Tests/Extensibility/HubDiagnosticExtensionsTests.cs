@@ -19,4 +19,12 @@ public class HubDiagnosticExtensionsTests
 
         hub.GetDiagnosticLogger().Should().BeNull();
     }
+
+    [Fact]
+    public void GetDiagnosticLogger_CustomHub_ReturnsNull()
+    {
+        var hub = Substitute.For<IHub>();
+
+        hub.GetDiagnosticLogger().Should().BeNull();
+    }
 }
