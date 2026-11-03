@@ -681,4 +681,145 @@ public class GlobalSessionManagerTests
             DateTimeOffset.Now,
             1,
             null);
+
+    [Fact]
+    public void PauseSession_AlreadyPaused_KeepsFirstPauseTimestamp()
+    {
+        // Arrange
+        var start = DateTimeOffset.Now;
+        _fixture.Clock.GetUtcNow().Returns(start);
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        sut.PauseSession();
+        _fixture.Clock.GetUtcNow().Returns(start.AddSeconds(10));
+
+        // Act
+        sut.PauseSession();
+
+        // Assert
+        var recovered = sut.TryRecoverPersistedSession();
+        recovered.Should().NotBeNull();
+        recovered!.Timestamp.Should().Be(start);
+    }
+
+    [Fact]
+    public void ResumeSession_WithinInterval_PersistsSessionWithoutPause()
+    {
+        // Arrange
+        var start = DateTimeOffset.Now;
+        _fixture.Clock.GetUtcNow().Returns(start);
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        sut.PauseSession();
+        _fixture.Clock.GetUtcNow().Returns(start.AddSeconds(1));
+
+        // Act
+        var updates = sut.ResumeSession();
+
+        // Assert
+        updates.Should().BeEmpty();
+        var recovered = sut.TryRecoverPersistedSession();
+        recovered.Should().NotBeNull();
+        recovered!.EndStatus.Should().Be(SessionEndStatus.Abnormal);
+    }
+
+    [Fact]
+    public void ResumeSession_BeyondInterval_EndsSessionAtPauseTimestampAndStartsNewOne()
+    {
+        // Arrange
+        var start = DateTimeOffset.Now;
+        _fixture.Clock.GetUtcNow().Returns(start);
+        var sut = _fixture.GetSut();
+        var initial = sut.StartSession();
+        sut.PauseSession();
+        _fixture.Clock.GetUtcNow().Returns(start + _fixture.Options.AutoSessionTrackingInterval);
+
+        // Act
+        var updates = sut.ResumeSession();
+
+        // Assert
+        updates.Should().HaveCount(2);
+        updates[0].Id.Should().Be(initial!.Id);
+        updates[0].EndStatus.Should().Be(SessionEndStatus.Exited);
+        updates[0].Timestamp.Should().Be(start);
+        updates[1].Id.Should().NotBe(initial.Id);
+        updates[1].IsInitial.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ResumeSession_NotPaused_LogsDebug()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+
+        // Act
+        var updates = sut.ResumeSession();
+
+        // Assert
+        updates.Should().BeEmpty();
+        _fixture.Logger.Entries.Should().Contain(e =>
+            e.Level == SentryLevel.Debug && e.Message.Contains("hasn't been paused"));
+    }
+
+    [Fact]
+    public void StartSession_WhilePaused_NewSessionCanBePaused()
+    {
+        // Arrange
+        var start = DateTimeOffset.Now;
+        _fixture.Clock.GetUtcNow().Returns(start);
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        sut.PauseSession();
+        sut.StartSession();
+        _fixture.Clock.GetUtcNow().Returns(start.AddSeconds(5));
+
+        // Act
+        sut.PauseSession();
+
+        // Assert
+        var recovered = sut.TryRecoverPersistedSession();
+        recovered.Should().NotBeNull();
+        recovered!.EndStatus.Should().Be(SessionEndStatus.Exited);
+        recovered.Timestamp.Should().Be(start.AddSeconds(5));
+    }
+
+    [Fact]
+    public void TryRecoverPersistedSession_ErrorReported_KeepsErrorCount()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        sut.ReportError();
+
+        // Act
+        var recovered = sut.TryRecoverPersistedSession();
+
+        // Assert
+        recovered.Should().NotBeNull();
+        recovered!.EndStatus.Should().Be(SessionEndStatus.Abnormal);
+        recovered.ErrorCount.Should().Be(1);
+    }
+
+    [Fact]
+    public void TryRecoverPersistedSession_ErrorReportedWhilePaused_EndsAsExitedWithErrorCount()
+    {
+        // Arrange
+        var start = DateTimeOffset.Now;
+        _fixture.Clock.GetUtcNow().Returns(start);
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        sut.PauseSession();
+        _fixture.Clock.GetUtcNow().Returns(start.AddSeconds(5));
+        sut.ReportError();
+
+        // Act
+        var recovered = sut.TryRecoverPersistedSession();
+
+        // Assert
+        recovered.Should().NotBeNull();
+        recovered!.EndStatus.Should().Be(SessionEndStatus.Exited);
+        recovered.ErrorCount.Should().Be(1);
+        recovered.Timestamp.Should().Be(start);
+    }
 }

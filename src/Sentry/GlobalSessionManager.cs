@@ -16,6 +16,8 @@ internal class GlobalSessionManager : ISessionManager
 
     private readonly string? _persistenceDirectoryPath;
 
+    private readonly object _sessionLock = new();
+
     private SentrySession? _currentSession;
     private DateTimeOffset? _lastPauseTimestamp;
 
@@ -225,26 +227,31 @@ internal class GlobalSessionManager : ISessionManager
         var environment = _options.SettingLocator.GetEnvironment();
         var distinctId = _options.InstallationId;
 
-        // Create new session
-        var session = new SentrySession(distinctId, release, environment);
-
-        // Set new session and check whether we ended up overwriting an active one in the process
-        var previousSession = Interlocked.Exchange(ref _currentSession, session);
-        if (previousSession is not null)
+        lock (_sessionLock)
         {
-            _options.LogWarning("Starting a new session while an existing one is still active.");
+            // Create new session
+            var session = new SentrySession(distinctId, release, environment);
 
-            // End previous session
-            EndSession(previousSession, _clock.GetUtcNow(), SessionEndStatus.Exited);
+            // Set new session and check whether we ended up overwriting an active one in the process
+            var previousSession = Interlocked.Exchange(ref _currentSession, session);
+            if (previousSession is not null)
+            {
+                _options.LogWarning("Starting a new session while an existing one is still active.");
+
+                // End previous session
+                EndSession(previousSession, _clock.GetUtcNow(), SessionEndStatus.Exited);
+            }
+
+            _lastPauseTimestamp = null;
+
+            _options.LogInfo("Started new session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
+
+            var update = session.CreateUpdate(true, _clock.GetUtcNow());
+
+            PersistSession(update);
+
+            return update;
         }
-
-        _options.LogInfo("Started new session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
-
-        var update = session.CreateUpdate(true, _clock.GetUtcNow());
-
-        PersistSession(update);
-
-        return update;
     }
 
     private SessionUpdate EndSession(SentrySession session, DateTimeOffset timestamp, SessionEndStatus status)
@@ -275,118 +282,146 @@ internal class GlobalSessionManager : ISessionManager
 
     public SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status)
     {
-        var session = Interlocked.Exchange(ref _currentSession, null);
-        if (session is null)
+        lock (_sessionLock)
         {
-            _options.LogWarning("Failed to end session because there is none active.");
-            return null;
-        }
+            var session = Interlocked.Exchange(ref _currentSession, null);
+            if (session is null)
+            {
+                _options.LogWarning("Failed to end session because there is none active.");
+                return null;
+            }
 
-        return EndSession(session, timestamp, status);
+            _lastPauseTimestamp = null;
+
+            return EndSession(session, timestamp, status);
+        }
     }
 
     public SessionUpdate? EndSession(SessionEndStatus status) => EndSession(_clock.GetUtcNow(), status);
 
     public void PauseSession()
     {
-        if (_currentSession is not { } session)
+        lock (_sessionLock)
         {
-            _options.LogWarning("Attempted to pause a session, but a session has not been started.");
-            return;
+            if (_currentSession is not { } session)
+            {
+                _options.LogWarning("Attempted to pause a session, but a session has not been started.");
+                return;
+            }
+
+            if (_lastPauseTimestamp is not null)
+            {
+                _options.LogDebug("Session (SID: {0}) is already paused.", session.Id);
+                return;
+            }
+
+            _options.LogInfo("Pausing session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
+
+            var now = _clock.GetUtcNow();
+            _lastPauseTimestamp = now;
+            PersistSession(session.CreateUpdate(false, now), now, session.IsMarkedAsPendingUnhandled);
         }
-
-        _options.LogInfo("Pausing session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
-
-        var now = _clock.GetUtcNow();
-        _lastPauseTimestamp = now;
-        PersistSession(session.CreateUpdate(false, now), now, session.IsMarkedAsPendingUnhandled);
     }
 
     public IReadOnlyList<SessionUpdate> ResumeSession()
     {
-        if (_currentSession is not { } session)
+        lock (_sessionLock)
         {
-            _options.LogWarning("Attempted to resume a session, but a session has not been started.");
-            return Array.Empty<SessionUpdate>();
-        }
-
-        // Ensure a session has been paused before
-        if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
-        {
-            _options.LogWarning("Attempted to resume a session, but the current session hasn't been paused.");
-            return Array.Empty<SessionUpdate>();
-        }
-
-        _options.LogInfo("Resuming session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
-
-        // Reset the pause timestamp since the session is about to be resumed
-        _lastPauseTimestamp = null;
-
-        // If the pause duration exceeded tracking interval, start a new session
-        // (otherwise do nothing)
-        var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
-        if (pauseDuration >= _options.AutoSessionTrackingInterval)
-        {
-            _options.LogDebug(
-                "Paused session has been paused for {0}, which is longer than the configured timeout. " +
-                "Starting a new session instead of resuming this one.",
-                pauseDuration);
-
-            var updates = new List<SessionUpdate>(2);
-
-            // End current session
-            if (EndSession(sessionPauseTimestamp, SessionEndStatus.Exited) is { } endUpdate)
+            if (_currentSession is not { } session)
             {
-                updates.Add(endUpdate);
+                _options.LogWarning("Attempted to resume a session, but a session has not been started.");
+                return Array.Empty<SessionUpdate>();
             }
 
-            // Start a new session
-            if (StartSession() is { } startUpdate)
+            // Ensure a session has been paused before
+            if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
             {
-                updates.Add(startUpdate);
+                _options.LogDebug("Attempted to resume a session, but the current session hasn't been paused.");
+                return Array.Empty<SessionUpdate>();
             }
 
-            return updates;
+            _options.LogInfo("Resuming session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
+
+            // Reset the pause timestamp since the session is about to be resumed
+            _lastPauseTimestamp = null;
+
+            // If the pause duration exceeded tracking interval, start a new session
+            var now = _clock.GetUtcNow();
+            var pauseDuration = (now - sessionPauseTimestamp).Duration();
+            if (pauseDuration >= _options.AutoSessionTrackingInterval)
+            {
+                _options.LogDebug(
+                    "Paused session has been paused for {0}, which is longer than the configured timeout. " +
+                    "Starting a new session instead of resuming this one.",
+                    pauseDuration);
+
+                var updates = new List<SessionUpdate>(2);
+
+                // End current session
+                if (EndSession(sessionPauseTimestamp, SessionEndStatus.Exited) is { } endUpdate)
+                {
+                    updates.Add(endUpdate);
+                }
+
+                // Start a new session
+                if (StartSession() is { } startUpdate)
+                {
+                    updates.Add(startUpdate);
+                }
+
+                return updates;
+            }
+
+            // A persisted pause timestamp would make a later kill in the foreground recover as 'Exited'
+            PersistSession(session.CreateUpdate(false, now), pendingUnhandled: session.IsMarkedAsPendingUnhandled);
+
+            _options.LogInfo("Resumed session (SID: {0}; DID: {1}) after being paused for {2}.",
+                session.Id, session.DistinctId, pauseDuration);
+
+            return Array.Empty<SessionUpdate>();
         }
-
-        _options.LogInfo("Resumed session (SID: {0}; DID: {1}) after being paused for {2}.",
-            session.Id, session.DistinctId, pauseDuration);
-
-        return Array.Empty<SessionUpdate>();
     }
 
     public SessionUpdate? ReportError()
     {
-        if (_currentSession is not { } session)
+        lock (_sessionLock)
         {
-            _options.LogDebug("There is no session active. Skipping updating the session as errored. " +
-                              "Consider setting 'AutoSessionTracking = true' to enable Release Health and crash free rate.");
-            return null;
+            if (_currentSession is not { } session)
+            {
+                _options.LogDebug("There is no session active. Skipping updating the session as errored. " +
+                                  "Consider setting 'AutoSessionTracking = true' to enable Release Health and crash free rate.");
+                return null;
+            }
+
+            session.ReportError();
+
+            // If we already have at least one error reported, the session update is pointless, so don't return anything.
+            if (session.ErrorCount > 1)
+            {
+                _options.LogDebug("Reported an error on a session that already contains errors. Not creating an update.");
+                return null;
+            }
+
+            var update = session.CreateUpdate(false, _clock.GetUtcNow());
+            PersistSession(update, _lastPauseTimestamp, session.IsMarkedAsPendingUnhandled);
+            return update;
         }
-
-        session.ReportError();
-
-        // If we already have at least one error reported, the session update is pointless, so don't return anything.
-        if (session.ErrorCount > 1)
-        {
-            _options.LogDebug("Reported an error on a session that already contains errors. Not creating an update.");
-            return null;
-        }
-
-        return session.CreateUpdate(false, _clock.GetUtcNow());
     }
 
     public void MarkSessionAsUnhandled()
     {
-        if (_currentSession is not { } session)
+        lock (_sessionLock)
         {
-            _options.LogDebug("There is no session active. Skipping marking session as unhandled.");
-            return;
+            if (_currentSession is not { } session)
+            {
+                _options.LogDebug("There is no session active. Skipping marking session as unhandled.");
+                return;
+            }
+
+            session.MarkUnhandledException();
+
+            var sessionUpdate = session.CreateUpdate(false, _clock.GetUtcNow());
+            PersistSession(sessionUpdate, _lastPauseTimestamp, pendingUnhandled: true);
         }
-
-        session.MarkUnhandledException();
-
-        var sessionUpdate = session.CreateUpdate(false, _clock.GetUtcNow());
-        PersistSession(sessionUpdate, pendingUnhandled: true);
     }
 }
