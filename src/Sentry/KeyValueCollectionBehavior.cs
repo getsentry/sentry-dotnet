@@ -33,6 +33,11 @@ public enum KeyValueCollectionMode
 /// <remarks>
 /// Terms are matched against key names as case-insensitive substrings. The built-in sensitive terms always apply,
 /// so additional deny terms extend that list rather than replacing it.
+/// <para>
+/// In configuration this binds from <c>Mode</c> and <c>Terms</c> keys, for example
+/// <c>Sentry:DataCollection:Cookies:Mode=Off</c>. The <c>bool</c> shorthand available in code has no configuration
+/// equivalent, so a scalar such as <c>Sentry:DataCollection:Cookies=false</c> is ignored.
+/// </para>
 /// <para>This API is experimental, and it may change in the future.</para>
 /// </remarks>
 [Experimental(DiagnosticId.ExperimentalFeature)]

@@ -176,6 +176,23 @@ public class DataCollectionConfigurationTests
         options.DataCollection!.HttpHeaders.Response.Should().BeNull();
     }
 
+    [Theory]
+    [InlineData("false")]
+    [InlineData("Off")]
+    public void Bind_KeyValueScalarValue_IsIgnoredAndStillOptsIn(string scalar)
+    {
+        // The bool shorthand that code has for key-value categories has no configuration equivalent: the
+        // surrogate binds from Mode/Terms, so a scalar is silently dropped by the configuration binder.
+        // The section is still present, so DataCollection is opted into with the category left at its default.
+        var options = Bind(("DataCollection:Cookies", scalar));
+
+        using (new AssertionScope())
+        {
+            options.DataCollection.Should().NotBeNull();
+            options.DataCollection!.Cookies.Should().BeNull();
+        }
+    }
+
     [Fact]
     public void Bind_HttpBodies_AcceptsCommaSeparatedFlags()
     {
