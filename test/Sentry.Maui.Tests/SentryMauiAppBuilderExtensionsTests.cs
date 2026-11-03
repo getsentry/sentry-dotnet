@@ -275,14 +275,13 @@ public partial class SentryMauiAppBuilderExtensionsTests
     {
         // Arrange
         var builder = _fixture.Builder;
-
-        // Act
-        builder.UseSentry(options =>
+        builder.Services.Configure<SentryMauiOptions>(options =>
         {
             options.CreateElementEventsBreadcrumbs = true;
         });
 
-        using var app = builder.Build();
+        // Act
+        using var app = builder.UseSentry().Build();
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
 
         // Assert
