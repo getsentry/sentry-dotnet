@@ -89,6 +89,18 @@ public class KeyValueCollectionBehaviorTests
         behavior.Terms.Should().Equal("user-agent");
     }
 
+    [Fact]
+    public void DenyList_ExplicitNullTerms_HasEmptyTerms()
+    {
+        KeyValueCollectionBehavior.DenyList(null!).Terms.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void AllowList_ExplicitNullTerms_HasEmptyTerms()
+    {
+        KeyValueCollectionBehavior.AllowList(null!).Terms.Should().BeEmpty();
+    }
+
     [Theory]
     [InlineData(true, KeyValueCollectionMode.DenyList)]
     [InlineData(false, KeyValueCollectionMode.Off)]
