@@ -8,16 +8,16 @@ namespace Sentry.Tests.Platforms.Cocoa;
 public class AppLifecycleSessionTrackerTests
 {
     private readonly IHub _hub = Substitute.For<IHub>();
+    private readonly NSNotificationCenter _center = new();
 
     private AppLifecycleSessionTracker GetSut()
     {
-        var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions());
+        var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions(), _center);
         sut.AddObservers();
         return sut;
     }
 
-    private static void Post(NSString notification) =>
-        NSNotificationCenter.DefaultCenter.PostNotificationName(notification, null);
+    private void Post(NSString notification) => _center.PostNotificationName(notification, null);
 
     [Theory]
     [InlineData(nameof(UIApplication.DidEnterBackgroundNotification))]

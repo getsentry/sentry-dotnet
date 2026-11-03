@@ -8,13 +8,15 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
 {
     private readonly IHub _hub;
     private readonly SentryOptions _options;
+    private readonly NSNotificationCenter _center;
     private readonly List<NSObject> _observers = new();
     private volatile bool _disposed;
 
-    internal AppLifecycleSessionTracker(IHub hub, SentryOptions options)
+    internal AppLifecycleSessionTracker(IHub hub, SentryOptions options, NSNotificationCenter? center = null)
     {
         _hub = hub;
         _options = options;
+        _center = center ?? NSNotificationCenter.DefaultCenter;
     }
 
     public static AppLifecycleSessionTracker Start(IHub hub, SentryOptions options)
@@ -27,12 +29,11 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
 
     internal void AddObservers()
     {
-        var center = NSNotificationCenter.DefaultCenter;
-        _observers.Add(center.AddObserver(UIApplication.DidEnterBackgroundNotification, _ => Pause()));
-        _observers.Add(center.AddObserver(UIApplication.WillTerminateNotification, _ => Pause()));
-        _observers.Add(center.AddObserver(UIApplication.WillEnterForegroundNotification, _ => Resume()));
+        _observers.Add(_center.AddObserver(UIApplication.DidEnterBackgroundNotification, _ => Pause()));
+        _observers.Add(_center.AddObserver(UIApplication.WillTerminateNotification, _ => Pause()));
+        _observers.Add(_center.AddObserver(UIApplication.WillEnterForegroundNotification, _ => Resume()));
         // A background launch that the user then opens may get DidBecomeActive without WillEnterForeground
-        _observers.Add(center.AddObserver(UIApplication.DidBecomeActiveNotification, _ => Resume()));
+        _observers.Add(_center.AddObserver(UIApplication.DidBecomeActiveNotification, _ => Resume()));
     }
 
     // Apps launched for a background fetch, a silent push or a location update never move to the background
@@ -77,7 +78,7 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
         _disposed = true;
         foreach (var observer in _observers)
         {
-            NSNotificationCenter.DefaultCenter.RemoveObserver(observer);
+            _center.RemoveObserver(observer);
         }
         _observers.Clear();
     }
