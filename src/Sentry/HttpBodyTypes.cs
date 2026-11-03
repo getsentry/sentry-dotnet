@@ -22,12 +22,12 @@ public enum HttpBodyTypes
     OutgoingRequest = 1 << 1,
 
     /// <summary>
-    /// Bodies of responses this application returns.
+    /// Bodies of responses this application receives from other services.
     /// </summary>
     IncomingResponse = 1 << 2,
 
     /// <summary>
-    /// Bodies of responses this application receives from other services.
+    /// Bodies of responses this application returns.
     /// </summary>
     OutgoingResponse = 1 << 3,
 

@@ -8,6 +8,7 @@ public class BindableDataCollectionOptionsTests : BindableTests<DataCollectionOp
     public BindableDataCollectionOptionsTests()
         : base(
             nameof(DataCollectionOptions.Cookies),
+            nameof(DataCollectionOptions.HttpBodies),
             nameof(DataCollectionOptions.UrlQueryParams),
             nameof(DataCollectionOptions.StackFrameVariables),
             nameof(DataCollectionOptions.HttpHeaders),
@@ -121,6 +122,8 @@ public class DataCollectionConfigurationTests
             ("DataCollection:GraphQL:Document", "false"),
             ("DataCollection:GraphQL:Variables", "false"),
             ("DataCollection:GenAI:Inputs", "false"),
+            ("DataCollection:GenAI:Outputs", "false"),
+            ("DataCollection:Mcp:Inputs", "false"),
             ("DataCollection:Mcp:Outputs", "false"));
 
         using (new AssertionScope())
@@ -128,7 +131,8 @@ public class DataCollectionConfigurationTests
             options.DataCollection!.GraphQL.Document.Should().BeFalse();
             options.DataCollection!.GraphQL.Variables.Should().BeFalse();
             options.DataCollection!.GenAI.Inputs.Should().BeFalse();
-            options.DataCollection!.GenAI.Outputs.Should().BeNull();
+            options.DataCollection!.GenAI.Outputs.Should().BeFalse();
+            options.DataCollection!.Mcp.Inputs.Should().BeFalse();
             options.DataCollection!.Mcp.Outputs.Should().BeFalse();
         }
     }
@@ -158,6 +162,22 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
+    public void Bind_ResponseHeadersAndStackFrameVariables_AreApplied()
+    {
+        var options = Bind(
+            ("DataCollection:HttpHeaders:Response:Mode", "Off"),
+            ("DataCollection:StackFrameVariables:Mode", "AllowList"),
+            ("DataCollection:StackFrameVariables:Terms:0", "orderId"));
+
+        using (new AssertionScope())
+        {
+            options.DataCollection!.HttpHeaders.Response!.Mode.Should().Be(KeyValueCollectionMode.Off);
+            options.DataCollection!.StackFrameVariables!.Mode.Should().Be(KeyValueCollectionMode.AllowList);
+            options.DataCollection!.StackFrameVariables!.Terms.Should().Equal("orderId");
+        }
+    }
+
+    [Fact]
     public void Bind_KeyValueTermsWithoutMode_DefaultsToDenyList()
     {
         var options = Bind(("DataCollection:UrlQueryParams:Terms:0", "session_id"));
@@ -176,21 +196,59 @@ public class DataCollectionConfigurationTests
         options.DataCollection!.HttpHeaders.Response.Should().BeNull();
     }
 
-    [Fact]
-    public void Bind_HttpBodies_AcceptsCommaSeparatedFlags()
+    [Theory]
+    [InlineData("false")]
+    [InlineData("Off")]
+    public void Bind_KeyValueScalarValue_IsIgnoredAndStillOptsIn(string scalar)
     {
-        var options = Bind(("DataCollection:HttpBodies", "IncomingRequest, OutgoingResponse"));
+        // The bool shorthand that code has for key-value categories has no configuration equivalent: the
+        // surrogate binds from Mode/Terms, so a scalar is silently dropped by the configuration binder.
+        // The section is still present, so DataCollection is opted into with the category left at its default.
+        var options = Bind(("DataCollection:Cookies", scalar));
+
+        using (new AssertionScope())
+        {
+            options.DataCollection.Should().NotBeNull();
+            options.DataCollection!.Cookies.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public void Bind_HttpBodiesArray_CombinesEntries()
+    {
+        var options = Bind(
+            ("DataCollection:HttpBodies:0", "IncomingRequest"),
+            ("DataCollection:HttpBodies:1", "OutgoingResponse"));
 
         options.DataCollection!.HttpBodies.Should().Be(
             HttpBodyTypes.IncomingRequest | HttpBodyTypes.OutgoingResponse);
     }
 
     [Fact]
-    public void Bind_HttpBodiesNone_DisablesBodyCollection()
+    public void Bind_HttpBodiesNoneEntry_DisablesBodyCollection()
     {
-        var options = Bind(("DataCollection:HttpBodies", "None"));
+        var options = Bind(("DataCollection:HttpBodies:0", "None"));
 
         options.DataCollection!.HttpBodies.Should().Be(HttpBodyTypes.None);
+    }
+
+    [Fact]
+    public void Bind_HttpBodiesEmptyArray_LeavesCategoryUnset()
+    {
+        // A JSON empty array emits the key with an empty value and no children, which the binder surfaces as
+        // null rather than an empty list. The spec's "[]" opt-out is therefore not expressible in configuration;
+        // "[\"None\"]" is the equivalent. Locked in so a future change to the surrogate has to confront it.
+        var options = Bind(("DataCollection:HttpBodies", string.Empty));
+
+        options.DataCollection!.HttpBodies.Should().BeNull();
+    }
+
+    [Fact]
+    public void Bind_HttpBodiesScalar_IsIgnored()
+    {
+        var options = Bind(("DataCollection:HttpBodies", "IncomingRequest"));
+
+        options.DataCollection!.HttpBodies.Should().BeNull();
     }
 
     [Fact]

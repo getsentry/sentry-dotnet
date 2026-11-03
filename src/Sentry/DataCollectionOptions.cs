@@ -44,6 +44,12 @@ public class DataCollectionOptions
     /// the size of a body it collects - such as <c>SentryAspNetCoreOptions.MaxRequestBodySize</c> - that limit
     /// still applies.
     /// </summary>
+    /// <remarks>
+    /// In configuration this binds from an array of body type names, for example
+    /// <c>"HttpBodies": ["IncomingRequest"]</c>. Use <c>["None"]</c> to collect no bodies: an empty array emits a
+    /// valueless configuration key that cannot be told apart from the option being absent, so the spec's
+    /// <c>[]</c> opt-out does not survive configuration binding. A comma-separated scalar is not supported.
+    /// </remarks>
     public HttpBodyTypes? HttpBodies { get; set; }
 
     /// <summary>
