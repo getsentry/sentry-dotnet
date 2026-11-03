@@ -10,6 +10,10 @@ function Install-XHarness
         dotnet tool update $package --global --version $version --allow-downgrade `
             --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
         Pop-Location
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "Failed to install XHarness $version"
+        }
     }
 }
 
