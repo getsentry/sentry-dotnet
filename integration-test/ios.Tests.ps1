@@ -12,7 +12,7 @@ BeforeDiscovery {
 }
 
 Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
-    # Note: we can't run against net10 and net9 becaus .NET 10 requires Xcode 27 and .NET 9 requires Xcode 26.0.
+    # Note: we can't run against net10 and net9 because .NET 10 requires Xcode 27 and .NET 9 requires Xcode 26.0.
     # The xcode-27 runner image only has Xcode 27 installed and no support for it is planned for
     # net9.0-ios: https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
     #
