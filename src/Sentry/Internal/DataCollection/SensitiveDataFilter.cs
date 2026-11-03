@@ -88,7 +88,7 @@ internal static class SensitiveDataFilter
     {
         if (behavior.Mode == KeyValueCollectionMode.Off ||
             MatchesAny(key, SensitiveKeyTerms) ||
-            (additionalDenyTerms is not null && MatchesAny(key, additionalDenyTerms)))
+            MatchesAny(key, additionalDenyTerms))
         {
             return FilteredValue;
         }
