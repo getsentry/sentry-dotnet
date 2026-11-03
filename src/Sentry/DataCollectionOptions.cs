@@ -45,8 +45,10 @@ public class DataCollectionOptions
     /// still applies.
     /// </summary>
     /// <remarks>
-    /// In configuration this binds from an array of body type names, with an empty array collecting no bodies,
-    /// for example <c>"HttpBodies": ["IncomingRequest"]</c>. A comma-separated scalar is not supported.
+    /// In configuration this binds from an array of body type names, for example
+    /// <c>"HttpBodies": ["IncomingRequest"]</c>. Use <c>["None"]</c> to collect no bodies: an empty array emits a
+    /// valueless configuration key that cannot be told apart from the option being absent, so the spec's
+    /// <c>[]</c> opt-out does not survive configuration binding. A comma-separated scalar is not supported.
     /// </remarks>
     public HttpBodyTypes? HttpBodies { get; set; }
 

@@ -225,17 +225,22 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_HttpBodiesEmptyArray_DisablesBodyCollection()
+    public void Bind_HttpBodiesNoneEntry_DisablesBodyCollection()
     {
-        var bindable = new BindableSentryOptions
-        {
-            DataCollection = new BindableSentryOptions.DataCollectionOptions { HttpBodies = [] }
-        };
-        var options = new SentryOptions();
-
-        bindable.ApplyTo(options);
+        var options = Bind(("DataCollection:HttpBodies:0", "None"));
 
         options.DataCollection!.HttpBodies.Should().Be(HttpBodyTypes.None);
+    }
+
+    [Fact]
+    public void Bind_HttpBodiesEmptyArray_LeavesCategoryUnset()
+    {
+        // A JSON empty array emits the key with an empty value and no children, which the binder surfaces as
+        // null rather than an empty list. The spec's "[]" opt-out is therefore not expressible in configuration;
+        // "[\"None\"]" is the equivalent. Locked in so a future change to the surrogate has to confront it.
+        var options = Bind(("DataCollection:HttpBodies", string.Empty));
+
+        options.DataCollection!.HttpBodies.Should().BeNull();
     }
 
     [Fact]
