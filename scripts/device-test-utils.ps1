@@ -29,7 +29,7 @@ function Get-AndroidEmulatorId
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
-        [string]$IosVersion = '27.0',
+        [string]$IosVersion,
         [string[]]$PreferredDeviceTypes = @(
             'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
             'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
@@ -39,6 +39,9 @@ function Get-IosSimulatorUdid {
     )
 
     try {
+        if (-not $IosVersion) {
+            $IosVersion = & xcrun --sdk iphonesimulator --show-sdk-version
+        }
         $simDevices = & xcrun simctl list devices --json | ConvertFrom-Json
     } catch {
         Write-Verbose "Failed to query simctl: $($_.Exception.Message)"
