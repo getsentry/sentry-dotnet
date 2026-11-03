@@ -11,7 +11,7 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
     private readonly List<NSObject> _observers = new();
     private volatile bool _disposed;
 
-    private AppLifecycleSessionTracker(IHub hub, SentryOptions options)
+    internal AppLifecycleSessionTracker(IHub hub, SentryOptions options)
     {
         _hub = hub;
         _options = options;
@@ -25,12 +25,14 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
         return tracker;
     }
 
-    private void AddObservers()
+    internal void AddObservers()
     {
         var center = NSNotificationCenter.DefaultCenter;
         _observers.Add(center.AddObserver(UIApplication.DidEnterBackgroundNotification, _ => Pause()));
         _observers.Add(center.AddObserver(UIApplication.WillTerminateNotification, _ => Pause()));
         _observers.Add(center.AddObserver(UIApplication.WillEnterForegroundNotification, _ => Resume()));
+        // A background launch that the user then opens may get DidBecomeActive without WillEnterForeground
+        _observers.Add(center.AddObserver(UIApplication.DidBecomeActiveNotification, _ => Resume()));
     }
 
     // Apps launched for a background fetch, a silent push or a location update never move to the background

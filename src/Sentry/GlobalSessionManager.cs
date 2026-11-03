@@ -16,7 +16,7 @@ internal class GlobalSessionManager : ISessionManager
 
     private readonly string? _persistenceDirectoryPath;
 
-    private readonly object _sessionLock = new();
+    private readonly Lock _sessionLock = new();
 
     private SentrySession? _currentSession;
     private DateTimeOffset? _lastPauseTimestamp;
@@ -41,8 +41,6 @@ internal class GlobalSessionManager : ISessionManager
         _persistenceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
     }
 
-    // Take pause timestamp directly instead of referencing _lastPauseTimestamp to avoid
-    // potential race conditions.
     private void PersistSession(SessionUpdate update, DateTimeOffset? pauseTimestamp = null, bool pendingUnhandled = false)
     {
         _options.LogDebug("Persisting session (SID: '{0}') to a file.", update.Id);
@@ -233,7 +231,8 @@ internal class GlobalSessionManager : ISessionManager
             var session = new SentrySession(distinctId, release, environment);
 
             // Set new session and check whether we ended up overwriting an active one in the process
-            var previousSession = Interlocked.Exchange(ref _currentSession, session);
+            var previousSession = _currentSession;
+            _currentSession = session;
             if (previousSession is not null)
             {
                 _options.LogWarning("Starting a new session while an existing one is still active.");
@@ -284,7 +283,8 @@ internal class GlobalSessionManager : ISessionManager
     {
         lock (_sessionLock)
         {
-            var session = Interlocked.Exchange(ref _currentSession, null);
+            var session = _currentSession;
+            _currentSession = null;
             if (session is null)
             {
                 _options.LogWarning("Failed to end session because there is none active.");
