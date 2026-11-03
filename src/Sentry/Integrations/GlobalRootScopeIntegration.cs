@@ -9,6 +9,6 @@ internal class GlobalRootScopeIntegration : ISdkIntegration
             return;
         }
 
-        hub.ConfigureScope(scope => scope.User.Id ??= options.InstallationId);
+        hub.ConfigureScope(static (scope, options) => scope.User.Id ??= options.InstallationId, options);
     }
 }

@@ -24,7 +24,9 @@ public class GlobalRootScopeIntegrationTests
         integration.Register(hub, options);
 
         // Assert
-        hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
+        hub.DidNotReceive().ConfigureScope(
+            Arg.Any<Action<Scope, SentryOptions>>(),
+            Arg.Any<SentryOptions>());
         scope.User.Id.Should().BeNull();
     }
 
@@ -48,7 +50,9 @@ public class GlobalRootScopeIntegrationTests
         integration.Register(hub, options);
 
         // Assert
-        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
+        hub.Received(1).ConfigureScope(
+            Arg.Any<Action<Scope, SentryOptions>>(),
+            Arg.Any<SentryOptions>());
         scope.User.Id.Should().Be(options.InstallationId);
     }
 
@@ -79,7 +83,9 @@ public class GlobalRootScopeIntegrationTests
         integration.Register(hub, options);
 
         // Assert
-        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
+        hub.Received(1).ConfigureScope(
+            Arg.Any<Action<Scope, SentryOptions>>(),
+            Arg.Any<SentryOptions>());
         scope.User.Id.Should().Be(oldId);
     }
 

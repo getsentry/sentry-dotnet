@@ -120,7 +120,7 @@ public static class HttpContextExtensions
         var transaction = SentrySdk.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
         transaction.Contexts.Trace.Origin = AspNetOrigin;
 
-        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+        SentrySdk.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
         httpContext.Items[HttpContextTransactionItemName] = transaction;
 
         if (options?.SendDefaultPii is true)
