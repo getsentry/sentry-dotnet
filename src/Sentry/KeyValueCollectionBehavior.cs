@@ -38,10 +38,10 @@ public enum KeyValueCollectionMode
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class KeyValueCollectionBehavior
 {
-    private KeyValueCollectionBehavior(KeyValueCollectionMode mode, IReadOnlyList<string> terms)
+    private KeyValueCollectionBehavior(KeyValueCollectionMode mode, IReadOnlyList<string>? terms)
     {
         Mode = mode;
-        Terms = terms;
+        Terms = terms ?? [];
     }
 
     /// <summary>
@@ -51,7 +51,8 @@ public sealed class KeyValueCollectionBehavior
 
     /// <summary>
     /// Additional deny terms in <see cref="KeyValueCollectionMode.DenyList"/> mode, or the allowed key terms in
-    /// <see cref="KeyValueCollectionMode.AllowList"/> mode. Empty in <see cref="KeyValueCollectionMode.Off"/> mode.
+    /// <see cref="KeyValueCollectionMode.AllowList"/> mode. Never null; empty in
+    /// <see cref="KeyValueCollectionMode.Off"/> mode, or when no terms were supplied.
     /// </summary>
     public IReadOnlyList<string> Terms { get; }
 
