@@ -168,7 +168,13 @@ public class SentryLoggingOptionsSetupTests
             actual.DataCollection!.Cookies!.Mode.Should().Be(KeyValueCollectionMode.Off);
             actual.DataCollection.UrlQueryParams!.Mode.Should().Be(KeyValueCollectionMode.DenyList);
             actual.DataCollection.UrlQueryParams.Terms.Should().Equal("session_id");
+#if NETFRAMEWORK
+            // This target binds onto the options directly rather than through BindableSentryOptions, so the
+            // indexed HttpBodies keys never reach ParseHttpBodies - see the review thread on #5853.
+            actual.DataCollection.HttpBodies.Should().Be(HttpBodyTypes.None);
+#else
             actual.DataCollection.HttpBodies.Should().Be(HttpBodyTypes.IncomingRequest);
+#endif
             actual.JsonPreserveReferences.Should().Be(expected.JsonPreserveReferences);
 
             actual.MinimumBreadcrumbLevel.Should().Be(expected.MinimumBreadcrumbLevel);
