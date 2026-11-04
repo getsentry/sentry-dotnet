@@ -5,6 +5,7 @@ namespace Sentry;
 /// <summary>
 /// How a category of key-value data is collected.
 /// </summary>
+[Experimental(DiagnosticId.ExperimentalFeature)]
 public enum KeyValueCollectionMode
 {
     /// <summary>
@@ -67,13 +68,14 @@ public sealed class KeyValueCollectionBehavior
 
     /// <summary>
     /// Additional deny terms in <see cref="KeyValueCollectionMode.DenyList"/> mode, or the allowed key terms in
-    /// <see cref="KeyValueCollectionMode.AllowList"/> mode. Never null; empty in
-    /// <see cref="KeyValueCollectionMode.Off"/> mode, or when no terms were supplied.
+    /// <see cref="KeyValueCollectionMode.AllowList"/> mode. Never null, and never contains a null or empty term,
+    /// which would otherwise match every key. Empty in <see cref="KeyValueCollectionMode.Off"/> mode, or when no
+    /// terms were supplied.
     /// </summary>
     public IReadOnlyList<string> Terms
     {
         get => _terms;
-        set => _terms = value ?? [];
+        set => _terms = value?.Where(term => !string.IsNullOrEmpty(term)).ToArray() ?? [];
     }
 
     /// <summary>

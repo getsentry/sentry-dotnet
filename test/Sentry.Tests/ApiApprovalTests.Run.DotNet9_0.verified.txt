@@ -170,6 +170,7 @@ namespace Sentry
         public const string Exception = "exception";
         public const string HttpResponseMessage = "http-response-message";
     }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     [System.Flags]
     public enum HttpBodyTypes
     {
@@ -413,6 +414,7 @@ namespace Sentry
         public static Sentry.KeyValueCollectionBehavior DenyList(params string[] additionalTerms) { }
         public static Sentry.KeyValueCollectionBehavior op_Implicit(bool collect) { }
     }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public enum KeyValueCollectionMode
     {
         Off = 0,

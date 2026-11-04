@@ -47,12 +47,9 @@ internal partial class BindableSentryOptions
             var result = HttpBodyTypes.None;
             foreach (var entry in HttpBodies)
             {
-                foreach (var part in entry.Split(','))
+                if (Enum.TryParse<HttpBodyTypes>(entry, ignoreCase: true, out var parsed))
                 {
-                    if (Enum.TryParse<HttpBodyTypes>(part.Trim(), ignoreCase: true, out var parsed))
-                    {
-                        result |= parsed;
-                    }
+                    result |= parsed;
                 }
             }
 

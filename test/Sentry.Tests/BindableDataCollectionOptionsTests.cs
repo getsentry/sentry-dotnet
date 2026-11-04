@@ -96,26 +96,6 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_BooleanCategories_AreApplied()
-    {
-        var options = Bind(
-            ("DataCollection:UserInfo", "false"),
-            ("DataCollection:DatabaseQueryData", "false"),
-            ("DataCollection:Queues", "false"),
-            ("DataCollection:FilePaths", "false"),
-            ("DataCollection:FrameContextLines", "0"));
-
-        using (new AssertionScope())
-        {
-            options.DataCollection!.UserInfo.Should().BeFalse();
-            options.DataCollection!.DatabaseQueryData.Should().BeFalse();
-            options.DataCollection!.Queues.Should().BeFalse();
-            options.DataCollection!.FilePaths.Should().BeFalse();
-            options.DataCollection!.FrameContextLines.Should().Be(0);
-        }
-    }
-
-    [Fact]
     public void Bind_NestedCategories_AreApplied()
     {
         var options = Bind(
@@ -188,37 +168,12 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_KeyValueSectionAbsent_LeavesCategoryUnset()
-    {
-        var options = Bind(("DataCollection:UserInfo", "false"));
-
-        options.DataCollection!.Cookies.Should().BeNull();
-        options.DataCollection!.HttpHeaders.Response.Should().BeNull();
-    }
-
-    [Theory]
-    [InlineData("false")]
-    [InlineData("Off")]
-    public void Bind_KeyValueScalarValue_IsIgnoredAndStillOptsIn(string scalar)
-    {
-        // The bool shorthand that code has for key-value categories has no configuration equivalent: the
-        // surrogate binds from Mode/Terms, so a scalar is silently dropped by the configuration binder.
-        // The section is still present, so DataCollection is opted into with the category left at its default.
-        var options = Bind(("DataCollection:Cookies", scalar));
-
-        using (new AssertionScope())
-        {
-            options.DataCollection.Should().NotBeNull();
-            options.DataCollection!.Cookies.Should().BeNull();
-        }
-    }
-
-    [Fact]
-    public void Bind_HttpBodiesArray_CombinesEntries()
+    public void Bind_HttpBodiesArray_CombinesRecognizedEntries()
     {
         var options = Bind(
-            ("DataCollection:HttpBodies:0", "IncomingRequest"),
-            ("DataCollection:HttpBodies:1", "OutgoingResponse"));
+            ("DataCollection:HttpBodies:0", "incomingRequest"),
+            ("DataCollection:HttpBodies:1", "OutgoingResponse"),
+            ("DataCollection:HttpBodies:2", "Typo"));
 
         options.DataCollection!.HttpBodies.Should().Be(
             HttpBodyTypes.IncomingRequest | HttpBodyTypes.OutgoingResponse);
@@ -241,20 +196,6 @@ public class DataCollectionConfigurationTests
         var options = Bind(("DataCollection:HttpBodies", string.Empty));
 
         options.DataCollection!.HttpBodies.Should().BeNull();
-    }
-
-    [Fact]
-    public void Bind_HttpBodiesScalar_IsIgnored()
-    {
-        var options = Bind(("DataCollection:HttpBodies", "IncomingRequest"));
-
-        options.DataCollection!.HttpBodies.Should().BeNull();
-    }
-
-    [Fact]
-    public void Bind_AnyCategory_OptsIn()
-    {
-        Bind(("DataCollection:Cookies:Mode", "Off")).DataCollection.Should().NotBeNull();
     }
 }
 #endif

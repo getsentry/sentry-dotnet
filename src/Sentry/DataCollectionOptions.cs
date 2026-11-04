@@ -7,7 +7,7 @@ namespace Sentry;
 /// </summary>
 /// <remarks>
 /// Assigning this option at all opts into these defaults, which collect every category including user identity
-/// and HTTP bodies, and causes the deprecated <see cref="SentryOptions.SendDefaultPii"/> to be ignored. Set an
+/// and HTTP bodies, and causes the legacy <see cref="SentryOptions.SendDefaultPii"/> to be ignored. Set an
 /// individual category to restrict it.
 /// <para>
 /// This only gates data the SDK gathers by itself. Data you provide explicitly - a <see cref="SentryUser"/> set on
@@ -46,9 +46,10 @@ public class DataCollectionOptions
     /// </summary>
     /// <remarks>
     /// In configuration this binds from an array of body type names, for example
-    /// <c>"HttpBodies": ["IncomingRequest"]</c>. Use <c>["None"]</c> to collect no bodies: an empty array emits a
-    /// valueless configuration key that cannot be told apart from the option being absent, so the spec's
-    /// <c>[]</c> opt-out does not survive configuration binding. A comma-separated scalar is not supported.
+    /// <c>"HttpBodies": ["IncomingRequest"]</c>, or <c>Sentry__DataCollection__HttpBodies__0=IncomingRequest</c> as
+    /// an environment variable. Use <c>["None"]</c> to collect no bodies: an empty array emits a valueless
+    /// configuration key that cannot be told apart from the option being absent, so the spec's <c>[]</c> opt-out
+    /// does not survive configuration binding. A scalar value such as <c>"None"</c> is ignored.
     /// </remarks>
     public HttpBodyTypes? HttpBodies { get; set; }
 
