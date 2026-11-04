@@ -16,7 +16,7 @@ internal sealed class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationO
     /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
     /// </summary>
     public SentryAspNetCoreOptionsSetup(
-        ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider> providerConfiguration)
+        ILoggerProviderConfiguration<SentryAspNetCoreStructuredLoggerProvider> providerConfiguration)
         : base(providerConfiguration.Configuration)
     {
     }
@@ -41,7 +41,7 @@ internal sealed class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAsp
     /// <summary>
     /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
     /// </summary>
-    public SentryAspNetCoreOptionsSetup(ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider> providerConfiguration)
+    public SentryAspNetCoreOptionsSetup(ILoggerProviderConfiguration<SentryAspNetCoreStructuredLoggerProvider> providerConfiguration)
         : this(providerConfiguration.Configuration)
     {
     }

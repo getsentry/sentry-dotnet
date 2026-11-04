@@ -14,13 +14,11 @@ public class SentryLoggerProviderTests
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public void Type_CustomAttributes_HasProviderAliasAttribute()
+    public void Type_CustomAttributes_HasNoProviderAliasAttribute()
     {
         var type = typeof(SentryLoggerProvider);
 
-        type.GetCustomAttributes<ProviderAliasAttribute>().Should()
-            .ContainSingle().Which
-            .Alias.Should().Be("Sentry");
+        type.GetCustomAttributes<ProviderAliasAttribute>().Should().BeEmpty();
     }
 
     [Fact]
