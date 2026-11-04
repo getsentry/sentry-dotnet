@@ -493,8 +493,6 @@ namespace Sentry
         public static void Flush(this Sentry.ISentryClient client) { }
         public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
-        [System.Obsolete("WARNING: This method is meant for internal usage only")]
-        public static Sentry.SentryOptions? GetInternalSentryOptions(this Sentry.ISentryClient clientOrHub) { }
     }
     public static class SentryConstants
     {
@@ -1595,6 +1593,10 @@ namespace Sentry.Extensibility
         public void StartSession() { }
         public Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
         public void UnsetTag(string key) { }
+    }
+    public static class HubDiagnosticExtensions
+    {
+        public static Sentry.Extensibility.IDiagnosticLogger? GetDiagnosticLogger(this Sentry.IHub hub) { }
     }
     public interface IBackgroundWorker
     {
