@@ -479,6 +479,38 @@ public class GlobalSessionManagerTests
         persistedSessionUpdate.Should().BeNull();
     }
 
+    [Fact]
+    public void TryRecoverPersistedSession_AlreadyRecovered_ReturnsNull()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        sut.TryRecoverPersistedSession();
+
+        // Act
+        var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+        // Assert
+        persistedSessionUpdate.Should().BeNull();
+    }
+
+    [Fact]
+    public void TryRecoverPersistedSession_UnreadableFile_DeletesFile()
+    {
+        // Arrange
+        _fixture.PersistedSessionProvider = _ => throw new EndOfStreamException();
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        var filePath = Path.Combine(_fixture.Options.TryGetDsnSpecificCacheDirectoryPath()!, ".session");
+        _fixture.Options.FileSystem.FileExists(filePath).Should().BeTrue();
+
+        // Act
+        sut.TryRecoverPersistedSession();
+
+        // Assert
+        _fixture.Options.FileSystem.FileExists(filePath).Should().BeFalse();
+    }
+
     public SessionUpdate TryRecoverPersistedSessionWithExceptionOnLastRun()
     {
         // Arrange

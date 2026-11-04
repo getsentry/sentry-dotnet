@@ -1,3 +1,5 @@
+using Sentry.Internal;
+
 namespace Sentry.Integrations;
 
 internal class AutoSessionTrackingIntegration : ISdkIntegration, IDisposable
@@ -16,10 +18,18 @@ internal class AutoSessionTrackingIntegration : ISdkIntegration, IDisposable
 
     public void Register(IHub hub, SentryOptions options)
     {
-        if (options.AutoSessionTracking)
+        if (!options.AutoSessionTracking)
+        {
+            return;
+        }
+
+        (hub as Hub)?.RecoverPersistedSession();
+
+        // On mobile, the session starts when the app first comes to the foreground
+        _appLifecycleSubscription = _subscribeToAppLifecycle(hub, options);
+        if (_appLifecycleSubscription is null)
         {
             hub.StartSession();
-            _appLifecycleSubscription = _subscribeToAppLifecycle(hub, options);
         }
     }
 

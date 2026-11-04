@@ -25,6 +25,7 @@ public class AppLifecycleSessionTrackerTests
     public void Notification_Background_PausesSession(string name)
     {
         // Arrange
+        _hub.IsSessionActive.Returns(true);
         using var sut = GetSut();
 
         // Act
@@ -38,9 +39,10 @@ public class AppLifecycleSessionTrackerTests
     [Theory]
     [InlineData(nameof(UIApplication.WillEnterForegroundNotification))]
     [InlineData(nameof(UIApplication.DidBecomeActiveNotification))]
-    public void Notification_Foreground_ResumesSession(string name)
+    public void Notification_ForegroundWithActiveSession_ResumesSession(string name)
     {
         // Arrange
+        _hub.IsSessionActive.Returns(true);
         using var sut = GetSut();
 
         // Act
@@ -48,6 +50,38 @@ public class AppLifecycleSessionTrackerTests
 
         // Assert
         _hub.Received(1).ResumeSession();
+        _hub.DidNotReceive().StartSession();
+        _hub.DidNotReceive().PauseSession();
+    }
+
+    [Theory]
+    [InlineData(nameof(UIApplication.WillEnterForegroundNotification))]
+    [InlineData(nameof(UIApplication.DidBecomeActiveNotification))]
+    public void Notification_ForegroundWithoutSession_StartsSession(string name)
+    {
+        // Arrange
+        _hub.IsSessionActive.Returns(false);
+        using var sut = GetSut();
+
+        // Act
+        Post(GetNotification(name));
+
+        // Assert
+        _hub.Received(1).StartSession();
+        _hub.DidNotReceive().ResumeSession();
+    }
+
+    [Fact]
+    public void Notification_TerminateWithoutSession_DoesNotPause()
+    {
+        // Arrange
+        _hub.IsSessionActive.Returns(false);
+        using var sut = GetSut();
+
+        // Act
+        Post(UIApplication.WillTerminateNotification);
+
+        // Assert
         _hub.DidNotReceive().PauseSession();
     }
 
@@ -65,6 +99,7 @@ public class AppLifecycleSessionTrackerTests
         // Assert
         _hub.DidNotReceive().PauseSession();
         _hub.DidNotReceive().ResumeSession();
+        _hub.DidNotReceive().StartSession();
     }
 
     private static NSString GetNotification(string name) => name switch

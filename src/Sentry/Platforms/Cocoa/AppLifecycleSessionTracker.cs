@@ -23,7 +23,7 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
     {
         var tracker = new AppLifecycleSessionTracker(hub, options);
         tracker.AddObservers();
-        NSRunLoop.Main.BeginInvokeOnMainThread(tracker.PauseIfInBackground);
+        NSRunLoop.Main.BeginInvokeOnMainThread(tracker.StartIfAlreadyActive);
         return tracker;
     }
 
@@ -31,19 +31,19 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
     {
         _observers.Add(_center.AddObserver(UIApplication.DidEnterBackgroundNotification, _ => Pause()));
         _observers.Add(_center.AddObserver(UIApplication.WillTerminateNotification, _ => Pause()));
-        _observers.Add(_center.AddObserver(UIApplication.WillEnterForegroundNotification, _ => Resume()));
+        _observers.Add(_center.AddObserver(UIApplication.WillEnterForegroundNotification, _ => ResumeOrStart()));
         // A background launch that the user then opens may get DidBecomeActive without WillEnterForeground
-        _observers.Add(_center.AddObserver(UIApplication.DidBecomeActiveNotification, _ => Resume()));
+        _observers.Add(_center.AddObserver(UIApplication.DidBecomeActiveNotification, _ => ResumeOrStart()));
     }
 
-    // Apps launched for a background fetch, a silent push or a location update never move to the background
-    private void PauseIfInBackground()
+    // DidBecomeActive has already been posted when the SDK is initialized late
+    private void StartIfAlreadyActive()
     {
         try
         {
-            if (UIApplication.SharedApplication is { ApplicationState: UIApplicationState.Background })
+            if (UIApplication.SharedApplication is { ApplicationState: UIApplicationState.Active })
             {
-                Pause();
+                ResumeOrStart();
             }
         }
         catch (Exception e)
@@ -54,17 +54,26 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
 
     private void Pause()
     {
-        if (!_disposed)
+        if (!_disposed && _hub.IsSessionActive)
         {
             _hub.PauseSession();
         }
     }
 
-    private void Resume()
+    private void ResumeOrStart()
     {
-        if (!_disposed)
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (_hub.IsSessionActive)
         {
             _hub.ResumeSession();
+        }
+        else
+        {
+            _hub.StartSession();
         }
     }
 

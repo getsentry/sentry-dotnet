@@ -5,9 +5,6 @@ namespace Sentry.Android;
 
 internal sealed class AppLifecycleSessionTracker : IDisposable
 {
-    // Longer than a cold start, so only processes started for a push, a broadcast or a job get paused
-    internal static readonly TimeSpan BackgroundLaunchCheckDelay = TimeSpan.FromSeconds(5);
-
     private readonly IHub _hub;
     private readonly SentryOptions _options;
     private readonly AndroidHandler _mainHandler = new(AndroidLooper.MainLooper!);
@@ -38,31 +35,11 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
         try
         {
             ProcessLifecycleOwner.Get().Lifecycle.AddObserver(_observer);
-            _mainHandler.PostDelayed(PauseIfInBackground, (long)BackgroundLaunchCheckDelay.TotalMilliseconds);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failed to observe the app lifecycle for session tracking.");
-        }
-    }
-
-    private void PauseIfInBackground()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        try
-        {
-            if (!ProcessLifecycleOwner.Get().Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Started!))
-            {
-                _hub.PauseSession();
-            }
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failed to read the app lifecycle state for session tracking.");
+            _hub.StartSession();
         }
     }
 
@@ -79,7 +56,19 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
         }
         else if (e == Lifecycle.Event.OnStart)
         {
+            ResumeOrStartSession();
+        }
+    }
+
+    private void ResumeOrStartSession()
+    {
+        if (_hub.IsSessionActive)
+        {
             _hub.ResumeSession();
+        }
+        else
+        {
+            _hub.StartSession();
         }
     }
 

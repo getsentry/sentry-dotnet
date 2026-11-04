@@ -8,14 +8,14 @@ public class AutoSessionTrackingIntegrationTests
     private readonly IDisposable _subscription = Substitute.For<IDisposable>();
     private int _subscribeCount;
 
-    private AutoSessionTrackingIntegration GetSut() => new((_, _) =>
+    private AutoSessionTrackingIntegration GetSut(bool tracksAppLifecycle = true) => new((_, _) =>
     {
         _subscribeCount++;
-        return _subscription;
+        return tracksAppLifecycle ? _subscription : null;
     });
 
     [Fact]
-    public void Register_AutoSessionTrackingEnabled_StartsSessionAndSubscribesToAppLifecycle()
+    public void Register_AppLifecycleTracked_SubscribesWithoutStartingSession()
     {
         // Arrange
         var sut = GetSut();
@@ -24,8 +24,39 @@ public class AutoSessionTrackingIntegrationTests
         sut.Register(_hub, new SentryOptions { AutoSessionTracking = true });
 
         // Assert
-        _hub.Received(1).StartSession();
+        _hub.DidNotReceive().StartSession();
         _subscribeCount.Should().Be(1);
+    }
+
+    [Fact]
+    public void Register_AppLifecycleNotTracked_StartsSession()
+    {
+        // Arrange
+        var sut = GetSut(tracksAppLifecycle: false);
+
+        // Act
+        sut.Register(_hub, new SentryOptions { AutoSessionTracking = true });
+
+        // Assert
+        _hub.Received(1).StartSession();
+    }
+
+    [Fact]
+    public void Register_AppLifecycleTracked_RecoversPersistedSession()
+    {
+        // Arrange
+        var sessionManager = Substitute.For<ISessionManager>();
+        var options = new SentryOptions { Dsn = ValidDsn, AutoSessionTracking = false };
+        using var hub = new Hub(options, Substitute.For<ISentryClient>(), sessionManager);
+        options.AutoSessionTracking = true;
+        var sut = GetSut();
+
+        // Act
+        sut.Register(hub, options);
+
+        // Assert
+        sessionManager.Received(1).TryRecoverPersistedSession();
+        sessionManager.DidNotReceive().StartSession();
     }
 
     [Fact]

@@ -207,6 +207,10 @@ internal class GlobalSessionManager : ISessionManager
 
             return null;
         }
+        finally
+        {
+            DeletePersistedSession();
+        }
     }
 
     public SessionUpdate? StartSession()

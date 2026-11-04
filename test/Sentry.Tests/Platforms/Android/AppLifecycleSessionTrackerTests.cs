@@ -23,9 +23,10 @@ public class AppLifecycleSessionTrackerTests
     }
 
     [Fact]
-    public void OnStateChanged_OnStart_ResumesSession()
+    public void OnStateChanged_OnStartWithActiveSession_ResumesSession()
     {
         // Arrange
+        _hub.IsSessionActive.Returns(true);
         using var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions());
 
         // Act
@@ -33,7 +34,23 @@ public class AppLifecycleSessionTrackerTests
 
         // Assert
         _hub.Received(1).ResumeSession();
+        _hub.DidNotReceive().StartSession();
         _hub.DidNotReceive().PauseSession();
+    }
+
+    [Fact]
+    public void OnStateChanged_OnStartWithoutSession_StartsSession()
+    {
+        // Arrange
+        _hub.IsSessionActive.Returns(false);
+        using var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions());
+
+        // Act
+        sut.OnStateChanged(Lifecycle.Event.OnStart!);
+
+        // Assert
+        _hub.Received(1).StartSession();
+        _hub.DidNotReceive().ResumeSession();
     }
 
     [Fact]
@@ -65,6 +82,7 @@ public class AppLifecycleSessionTrackerTests
         // Assert
         _hub.DidNotReceive().PauseSession();
         _hub.DidNotReceive().ResumeSession();
+        _hub.DidNotReceive().StartSession();
     }
 }
 #endif
