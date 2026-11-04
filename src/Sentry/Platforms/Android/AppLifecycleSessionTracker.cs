@@ -34,11 +34,21 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
 
         try
         {
-            ProcessLifecycleOwner.Get().Lifecycle.AddObserver(_observer);
+            Observe(ProcessLifecycleOwner.Get().Lifecycle);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failed to observe the app lifecycle for session tracking.");
+            _hub.StartSession();
+        }
+    }
+
+    internal void Observe(Lifecycle lifecycle)
+    {
+        lifecycle.AddObserver(_observer);
+        if (!lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Created!))
+        {
+            _options.LogWarning("ProcessLifecycleOwner is not initialized, so sessions will not pause in the background.");
             _hub.StartSession();
         }
     }
