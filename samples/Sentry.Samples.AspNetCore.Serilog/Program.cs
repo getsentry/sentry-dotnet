@@ -48,7 +48,7 @@ public class Program
             c.Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                // Configure Serilog to send logs to Sentry. This only configures the sink - Sentry is initialised below.
+                // Configure Serilog to send logs to Sentry. This only configures the sink: it does not initialize Sentry.
                 .WriteTo.Sentry(s =>
                 {
                     // Sets the minimum log level required to add a log message as breadcrumb
