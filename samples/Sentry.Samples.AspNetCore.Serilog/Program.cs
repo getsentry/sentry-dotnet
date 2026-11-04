@@ -6,7 +6,40 @@ namespace Sentry.Samples.AspNetCore.Serilog;
 
 public class Program
 {
-    public static void Main(string[] args) => BuildWebApp(args).Run();
+    public static int Main(string[] args)
+    {
+        // UseSentry below only starts Sentry once the app is running. Initializing it here as well captures crashes
+        // during startup, until UseSentry takes over: https://docs.sentry.io/platforms/dotnet/guides/serilog/#capturing-startup-crashes
+        using var _ = SentrySdk.Init(o =>
+        {
+#if !SENTRY_DSN_DEFINED_IN_ENV
+            o.Dsn = SamplesShared.Dsn;
+#else
+            o.Dsn = EnvironmentVariables.Dsn;
+#endif
+            o.UseSerilog();
+        });
+
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.Sentry()
+            .CreateBootstrapLogger();
+
+        try
+        {
+            BuildWebApp(args).Run();
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application terminated unexpectedly");
+            return 1;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
 
     public static WebApplication BuildWebApp(string[] args)
     {
