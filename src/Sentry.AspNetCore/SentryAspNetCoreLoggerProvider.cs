@@ -8,7 +8,6 @@ namespace Sentry.AspNetCore;
 /// <summary>
 /// Sentry Logger Provider for <see cref="Breadcrumb"/> and <see cref="SentryEvent"/>.
 /// </summary>
-[ProviderAlias("Sentry")]
 internal sealed class SentryAspNetCoreLoggerProvider : SentryLoggerProvider
 {
     /// <summary>

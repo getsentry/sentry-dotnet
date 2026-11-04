@@ -8,7 +8,7 @@ internal sealed class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggin
 {
     private readonly IConfiguration _config;
 
-    public SentryLoggingOptionsSetup(ILoggerProviderConfiguration<SentryLoggerProvider> config)
+    public SentryLoggingOptionsSetup(ILoggerProviderConfiguration<SentryStructuredLoggerProvider> config)
     {
         ArgumentNullException.ThrowIfNull(config);
         _config = config.Configuration;
