@@ -10,11 +10,9 @@ public class BindableDataCollectionOptionsTests : BindableTests<DataCollectionOp
             nameof(DataCollectionOptions.Cookies),
             nameof(DataCollectionOptions.HttpBodies),
             nameof(DataCollectionOptions.UrlQueryParams),
-            nameof(DataCollectionOptions.StackFrameVariables),
             nameof(DataCollectionOptions.HttpHeaders),
             nameof(DataCollectionOptions.GraphQL),
-            nameof(DataCollectionOptions.GenAI),
-            nameof(DataCollectionOptions.Mcp))
+            nameof(DataCollectionOptions.GenAI))
     {
     }
 
@@ -83,7 +81,7 @@ public class DataCollectionConfigurationTests
     public void Bind_SectionPresent_MergesIntoOptionsSetInCode()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection([new KeyValuePair<string, string>("DataCollection:Queues", "false")])
+            .AddInMemoryCollection([new KeyValuePair<string, string>("DataCollection:DatabaseQueryData", "false")])
             .Build();
         var bindable = new BindableSentryOptions();
         config.Bind(bindable);
@@ -92,7 +90,7 @@ public class DataCollectionConfigurationTests
         bindable.ApplyTo(options);
 
         options.DataCollection!.UserInfo.Should().BeFalse();
-        options.DataCollection!.Queues.Should().BeFalse();
+        options.DataCollection!.DatabaseQueryData.Should().BeFalse();
     }
 
     [Fact]
@@ -102,9 +100,7 @@ public class DataCollectionConfigurationTests
             ("DataCollection:GraphQL:Document", "false"),
             ("DataCollection:GraphQL:Variables", "false"),
             ("DataCollection:GenAI:Inputs", "false"),
-            ("DataCollection:GenAI:Outputs", "false"),
-            ("DataCollection:Mcp:Inputs", "false"),
-            ("DataCollection:Mcp:Outputs", "false"));
+            ("DataCollection:GenAI:Outputs", "false"));
 
         using (new AssertionScope())
         {
@@ -112,8 +108,6 @@ public class DataCollectionConfigurationTests
             options.DataCollection!.GraphQL.Variables.Should().BeFalse();
             options.DataCollection!.GenAI.Inputs.Should().BeFalse();
             options.DataCollection!.GenAI.Outputs.Should().BeFalse();
-            options.DataCollection!.Mcp.Inputs.Should().BeFalse();
-            options.DataCollection!.Mcp.Outputs.Should().BeFalse();
         }
     }
 
@@ -142,19 +136,11 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_ResponseHeadersAndStackFrameVariables_AreApplied()
+    public void Bind_ResponseHeaders_AreApplied()
     {
-        var options = Bind(
-            ("DataCollection:HttpHeaders:Response:Mode", "Off"),
-            ("DataCollection:StackFrameVariables:Mode", "AllowList"),
-            ("DataCollection:StackFrameVariables:Terms:0", "orderId"));
+        var options = Bind(("DataCollection:HttpHeaders:Response:Mode", "Off"));
 
-        using (new AssertionScope())
-        {
-            options.DataCollection!.HttpHeaders.Response!.Mode.Should().Be(KeyValueCollectionMode.Off);
-            options.DataCollection!.StackFrameVariables!.Mode.Should().Be(KeyValueCollectionMode.AllowList);
-            options.DataCollection!.StackFrameVariables!.Terms.Should().Equal("orderId");
-        }
+        options.DataCollection!.HttpHeaders.Response!.Mode.Should().Be(KeyValueCollectionMode.Off);
     }
 
     [Fact]

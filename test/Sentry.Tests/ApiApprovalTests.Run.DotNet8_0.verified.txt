@@ -75,15 +75,10 @@ namespace Sentry
         public DataCollectionOptions() { }
         public Sentry.KeyValueCollectionBehavior? Cookies { get; set; }
         public bool? DatabaseQueryData { get; set; }
-        public bool? FilePaths { get; set; }
-        public int? FrameContextLines { get; set; }
         public Sentry.DataCollectionOptions.GenAIOptions GenAI { get; }
         public Sentry.DataCollectionOptions.GraphQLOptions GraphQL { get; }
         public Sentry.HttpBodyTypes? HttpBodies { get; set; }
         public Sentry.DataCollectionOptions.HttpHeaderOptions HttpHeaders { get; }
-        public Sentry.DataCollectionOptions.McpOptions Mcp { get; }
-        public bool? Queues { get; set; }
-        public Sentry.KeyValueCollectionBehavior? StackFrameVariables { get; set; }
         public Sentry.KeyValueCollectionBehavior? UrlQueryParams { get; set; }
         public bool? UserInfo { get; set; }
         public sealed class GenAIOptions
@@ -103,12 +98,6 @@ namespace Sentry
             public HttpHeaderOptions() { }
             public Sentry.KeyValueCollectionBehavior? Request { get; set; }
             public Sentry.KeyValueCollectionBehavior? Response { get; set; }
-        }
-        public sealed class McpOptions
-        {
-            public McpOptions() { }
-            public bool? Inputs { get; set; }
-            public bool? Outputs { get; set; }
         }
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]

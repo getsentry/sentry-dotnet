@@ -70,11 +70,6 @@ public class DataCollectionOptions
     public GenAIOptions GenAI { get; } = new();
 
     /// <summary>
-    /// How Model Context Protocol request and response content is collected.
-    /// </summary>
-    public McpOptions Mcp { get; } = new();
-
-    /// <summary>
     /// Whether data associated with database queries is collected - bound query parameters, payloads for write
     /// operations, and returned result data. Defaults to <c>true</c>.
     /// </summary>
@@ -83,33 +78,6 @@ public class DataCollectionOptions
     /// the table acted upon - are always collected.
     /// </remarks>
     public bool? DatabaseQueryData { get; set; }
-
-    /// <summary>
-    /// Whether arguments passed to queued tasks are collected. Defaults to <c>true</c>.
-    /// </summary>
-    public bool? Queues { get; set; }
-
-    /// <summary>
-    /// Whether file and directory paths collected by file-system instrumentation are attached.
-    /// Defaults to <c>true</c>.
-    /// </summary>
-    /// <remarks>
-    /// This does not control source code locations in stack frames, profile frames or debug images, and it does not
-    /// gate attachment names or paths you supply yourself.
-    /// </remarks>
-    public bool? FilePaths { get; set; }
-
-    /// <summary>
-    /// How local variable values captured within stack frames are collected. Defaults to collecting all variables.
-    /// Assign <c>false</c> to collect none, or a behavior to filter variables by name.
-    /// </summary>
-    public KeyValueCollectionBehavior? StackFrameVariables { get; set; }
-
-    /// <summary>
-    /// The number of source code lines to include above and below each stack frame. Defaults to <c>5</c>.
-    /// Set to <c>0</c> to attach no surrounding lines.
-    /// </summary>
-    public int? FrameContextLines { get; set; }
 
     /// <summary>
     /// How request and response headers are collected.
@@ -161,30 +129,6 @@ public class DataCollectionOptions
 
         /// <summary>
         /// Whether the content of generative AI outputs is collected - completion text and tool call results.
-        /// Defaults to <c>true</c>.
-        /// </summary>
-        public bool? Outputs { get; set; }
-
-    }
-
-    /// <summary>
-    /// How Model Context Protocol request and response content is collected. Metadata such as the method, tool and
-    /// prompt names is always collected.
-    /// </summary>
-    /// <remarks>
-    /// Content collected by MCP instrumentation is gated by these options even where it is stored on a
-    /// <c>gen_ai.*</c> attribute, so <see cref="GenAIOptions"/> does not apply to it.
-    /// </remarks>
-    public sealed class McpOptions
-    {
-        /// <summary>
-        /// Whether the content of incoming MCP requests is collected - tool call arguments, prompt arguments and
-        /// the message payload of logging notifications. Defaults to <c>true</c>.
-        /// </summary>
-        public bool? Inputs { get; set; }
-
-        /// <summary>
-        /// Whether the content of MCP responses is collected - tool result content and prompt result messages.
         /// Defaults to <c>true</c>.
         /// </summary>
         public bool? Outputs { get; set; }

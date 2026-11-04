@@ -15,18 +15,12 @@ public class DataCollectionOptionsTests
             options.DataCollection.HttpBodies.Should().BeNull();
             options.DataCollection.UrlQueryParams.Should().BeNull();
             options.DataCollection.DatabaseQueryData.Should().BeNull();
-            options.DataCollection.Queues.Should().BeNull();
-            options.DataCollection.FilePaths.Should().BeNull();
-            options.DataCollection.StackFrameVariables.Should().BeNull();
-            options.DataCollection.FrameContextLines.Should().BeNull();
             options.DataCollection!.HttpHeaders.Request.Should().BeNull();
             options.DataCollection.HttpHeaders.Response.Should().BeNull();
             options.DataCollection.GraphQL.Document.Should().BeNull();
             options.DataCollection.GraphQL.Variables.Should().BeNull();
             options.DataCollection.GenAI.Inputs.Should().BeNull();
             options.DataCollection.GenAI.Outputs.Should().BeNull();
-            options.DataCollection.Mcp.Inputs.Should().BeNull();
-            options.DataCollection.Mcp.Outputs.Should().BeNull();
         }
     }
 

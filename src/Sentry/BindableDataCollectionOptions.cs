@@ -13,12 +13,7 @@ internal partial class BindableSentryOptions
         public KeyValueBehavior UrlQueryParams { get; } = new();
         public GraphQLOptions GraphQL { get; } = new();
         public GenAIOptions GenAI { get; } = new();
-        public McpOptions Mcp { get; } = new();
         public bool? DatabaseQueryData { get; set; }
-        public bool? Queues { get; set; }
-        public bool? FilePaths { get; set; }
-        public KeyValueBehavior StackFrameVariables { get; } = new();
-        public int? FrameContextLines { get; set; }
 
         public void ApplyTo(Sentry.DataCollectionOptions options)
         {
@@ -27,14 +22,9 @@ internal partial class BindableSentryOptions
             options.HttpBodies = ParseHttpBodies() ?? options.HttpBodies;
             options.UrlQueryParams = UrlQueryParams.ToBehavior() ?? options.UrlQueryParams;
             options.DatabaseQueryData = DatabaseQueryData ?? options.DatabaseQueryData;
-            options.Queues = Queues ?? options.Queues;
-            options.FilePaths = FilePaths ?? options.FilePaths;
-            options.StackFrameVariables = StackFrameVariables.ToBehavior() ?? options.StackFrameVariables;
-            options.FrameContextLines = FrameContextLines ?? options.FrameContextLines;
             HttpHeaders.ApplyTo(options.HttpHeaders);
             GraphQL.ApplyTo(options.GraphQL);
             GenAI.ApplyTo(options.GenAI);
-            Mcp.ApplyTo(options.Mcp);
         }
 
         private HttpBodyTypes? ParseHttpBodies()
@@ -113,18 +103,6 @@ internal partial class BindableSentryOptions
             public bool? Outputs { get; set; }
 
             public void ApplyTo(Sentry.DataCollectionOptions.GenAIOptions options)
-            {
-                options.Inputs = Inputs ?? options.Inputs;
-                options.Outputs = Outputs ?? options.Outputs;
-            }
-        }
-
-        public class McpOptions
-        {
-            public bool? Inputs { get; set; }
-            public bool? Outputs { get; set; }
-
-            public void ApplyTo(Sentry.DataCollectionOptions.McpOptions options)
             {
                 options.Inputs = Inputs ?? options.Inputs;
                 options.Outputs = Outputs ?? options.Outputs;
