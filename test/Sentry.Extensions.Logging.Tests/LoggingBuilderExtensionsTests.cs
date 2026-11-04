@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -103,6 +104,28 @@ public sealed class LoggingBuilderExtensionsTests : IDisposable
         two.CategoryName.Should().Be(typeof(ISentryClient).FullName);
         two.LogLevel.Should().Be(LogLevel.None);
         two.Filter.Should().BeNull();
+    }
+
+    [Fact]
+    public void AddSentry_CategoryLogLevelInSentrySection_StillCapturesEvents()
+    {
+        var worker = Substitute.For<IBackgroundWorker>();
+        InitSdk(worker);
+        var loggingConfiguration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string> { ["Sentry:LogLevel:Noisy"] = "None" })
+            .Build();
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder => builder.AddConfiguration(loggingConfiguration).AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+        var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Noisy.Thing");
+
+        logger.LogError("error");
+
+        worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+            e.Items
+                .Select(i => i.Payload).OfType<JsonSerializable>()
+                .Select(i => i.Source).OfType<SentryEvent>()
+                .Any(evt => evt.Message!.Message == "error")));
     }
 
     [Fact]

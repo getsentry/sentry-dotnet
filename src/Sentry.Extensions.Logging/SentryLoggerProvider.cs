@@ -8,7 +8,6 @@ namespace Sentry.Extensions.Logging;
 /// <summary>
 /// Sentry Logger Provider for <see cref="Breadcrumb"/> and <see cref="SentryEvent"/>.
 /// </summary>
-[ProviderAlias("Sentry")]
 internal class SentryLoggerProvider : ILoggerProvider
 {
     private readonly ISystemClock _clock;
