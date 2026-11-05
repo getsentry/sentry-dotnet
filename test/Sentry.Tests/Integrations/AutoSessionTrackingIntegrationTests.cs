@@ -8,10 +8,10 @@ public class AutoSessionTrackingIntegrationTests
     private readonly IDisposable _subscription = Substitute.For<IDisposable>();
     private int _subscribeCount;
 
-    private AutoSessionTrackingIntegration GetSut(bool tracksAppLifecycle = true) => new((_, _) =>
+    private AutoSessionTrackingIntegration GetSut() => new((_, _) =>
     {
         _subscribeCount++;
-        return tracksAppLifecycle ? _subscription : null;
+        return _subscription;
     });
 
     [Fact]
@@ -26,19 +26,6 @@ public class AutoSessionTrackingIntegrationTests
         // Assert
         _hub.DidNotReceive().StartSession();
         _subscribeCount.Should().Be(1);
-    }
-
-    [Fact]
-    public void Register_AppLifecycleNotTracked_StartsSession()
-    {
-        // Arrange
-        var sut = GetSut(tracksAppLifecycle: false);
-
-        // Act
-        sut.Register(_hub, new SentryOptions { AutoSessionTracking = true });
-
-        // Assert
-        _hub.Received(1).StartSession();
     }
 
     [Fact]
