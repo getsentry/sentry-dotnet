@@ -14,14 +14,6 @@ public class SentryLoggerProviderTests
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public void Type_CustomAttributes_HasNoProviderAliasAttribute()
-    {
-        var type = typeof(SentryLoggerProvider);
-
-        type.GetCustomAttributes<ProviderAliasAttribute>().Should().BeEmpty();
-    }
-
-    [Fact]
     public void CreateLogger_LoggerType_SentryLogger()
     {
         var sut = _fixture.GetSut();

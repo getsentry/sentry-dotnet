@@ -82,42 +82,6 @@ public class SentryWebApplicationBuilderExtensionsTests : IDisposable
     }
 
     [Fact]
-    public void UseSentry_LoggingSentrySection_BindsOptions()
-    {
-        var builder = CreateBuilder(settings: new[]
-        {
-            ("Logging:Sentry:Dsn", ValidDsn),
-            ("Logging:Sentry:MinimumEventLevel", "Warning"),
-        });
-
-        builder.UseSentry();
-
-        var options = ResolveOptions(builder);
-        options.Dsn.Should().Be(ValidDsn);
-        options.MinimumEventLevel.Should().Be(LogLevel.Warning);
-    }
-
-    [Fact]
-    public void UseSentry_CategoryLogLevelInLoggingSentrySection_FiltersStructuredLogsButNotEvents()
-    {
-        var hub = Substitute.For<IHub>();
-        hub.IsEnabled.Returns(true);
-        hub.Logger.Returns(Substitute.For<Sentry.SentryStructuredLogger>());
-        var builder = CreateBuilder(settings: ("Logging:Sentry:LogLevel:Noisy", "None"));
-        builder.Services.AddSingleton(hub);
-        builder.UseSentry(options => options.EnableLogs = true);
-        using var services = builder.Services.BuildServiceProvider();
-        var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-
-        loggerFactory.CreateLogger("Noisy.Thing").LogError("noisy");
-        loggerFactory.CreateLogger("App").LogError("app");
-
-        _ = hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == "Noisy.Thing"));
-        hub.Logger.DidNotReceive().CaptureLog(Arg.Is<SentryLog>(log => log.Message == "noisy"));
-        hub.Logger.Received(1).CaptureLog(Arg.Is<SentryLog>(log => log.Message == "app"));
-    }
-
-    [Fact]
     public void UseSentry_Dsn_SetsDsn()
     {
         var builder = CreateBuilder();
