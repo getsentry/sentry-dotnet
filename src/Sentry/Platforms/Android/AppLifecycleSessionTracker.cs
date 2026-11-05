@@ -1,3 +1,4 @@
+using Android.App;
 using AndroidX.Lifecycle;
 using Sentry.Extensibility;
 
@@ -8,13 +9,15 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
     private readonly IHub _hub;
     private readonly SentryOptions _options;
     private readonly AndroidHandler _mainHandler = new(AndroidLooper.MainLooper!);
+    private readonly Func<bool> _isInForeground;
     private readonly Observer _observer;
     private volatile bool _disposed;
 
-    internal AppLifecycleSessionTracker(IHub hub, SentryOptions options)
+    internal AppLifecycleSessionTracker(IHub hub, SentryOptions options, Func<bool>? isInForeground = null)
     {
         _hub = hub;
         _options = options;
+        _isInForeground = isInForeground ?? HasForegroundImportance;
         _observer = new Observer(this);
     }
 
@@ -34,22 +37,36 @@ internal sealed class AppLifecycleSessionTracker : IDisposable
 
         try
         {
-            Observe(ProcessLifecycleOwner.Get().Lifecycle);
+            ProcessLifecycleOwner.Get().Lifecycle.AddObserver(_observer);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failed to observe the app lifecycle for session tracking.");
+        }
+
+        StartSessionIfInForeground();
+    }
+
+    internal void StartSessionIfInForeground()
+    {
+        if (_isInForeground() && !_hub.IsSessionActive)
+        {
             _hub.StartSession();
         }
     }
 
-    internal void Observe(Lifecycle lifecycle)
+    private bool HasForegroundImportance()
     {
-        lifecycle.AddObserver(_observer);
-        if (!lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Created!))
+        try
         {
-            _options.LogWarning("ProcessLifecycleOwner is not initialized, so sessions will not pause in the background.");
-            _hub.StartSession();
+            var processInfo = new ActivityManager.RunningAppProcessInfo();
+            ActivityManager.GetMyMemoryState(processInfo);
+            return processInfo.Importance == Importance.Foreground;
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failed to read the process importance for session tracking.");
+            return false;
         }
     }
 

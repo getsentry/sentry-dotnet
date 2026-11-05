@@ -9,34 +9,45 @@ public class AppLifecycleSessionTrackerTests
     private readonly IHub _hub = Substitute.For<IHub>();
 
     [Fact]
-    public void Observe_LifecycleNotInitialized_StartsSession()
+    public void StartSessionIfInForeground_InForegroundWithoutSession_StartsSession()
     {
         // Arrange
-        var owner = new TestLifecycleOwner();
-        using var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions());
+        _hub.IsSessionActive.Returns(false);
+        using var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions(), () => true);
 
         // Act
-        sut.Observe(owner.Registry);
+        sut.StartSessionIfInForeground();
 
         // Assert
         _hub.Received(1).StartSession();
-        GC.KeepAlive(owner);
     }
 
     [Fact]
-    public void Observe_LifecycleCreated_WaitsForForeground()
+    public void StartSessionIfInForeground_InForegroundWithActiveSession_DoesNotStartSession()
     {
         // Arrange
-        var owner = new TestLifecycleOwner();
-        owner.Registry.HandleLifecycleEvent(Lifecycle.Event.OnCreate!);
-        using var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions());
+        _hub.IsSessionActive.Returns(true);
+        using var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions(), () => true);
 
         // Act
-        sut.Observe(owner.Registry);
+        sut.StartSessionIfInForeground();
 
         // Assert
         _hub.DidNotReceive().StartSession();
-        GC.KeepAlive(owner);
+    }
+
+    [Fact]
+    public void StartSessionIfInForeground_InBackground_DoesNotStartSession()
+    {
+        // Arrange
+        _hub.IsSessionActive.Returns(false);
+        using var sut = new AppLifecycleSessionTracker(_hub, new SentryOptions(), () => false);
+
+        // Act
+        sut.StartSessionIfInForeground();
+
+        // Assert
+        _hub.DidNotReceive().StartSession();
     }
 
     [Fact]
@@ -114,15 +125,6 @@ public class AppLifecycleSessionTrackerTests
         _hub.DidNotReceive().PauseSession();
         _hub.DidNotReceive().ResumeSession();
         _hub.DidNotReceive().StartSession();
-    }
-
-    private sealed class TestLifecycleOwner : Java.Lang.Object, ILifecycleOwner
-    {
-        public TestLifecycleOwner() => Registry = LifecycleRegistry.CreateUnsafe(this);
-
-        public LifecycleRegistry Registry { get; }
-
-        public Lifecycle Lifecycle => Registry;
     }
 }
 #endif
