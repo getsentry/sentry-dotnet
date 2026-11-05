@@ -28,8 +28,8 @@ public enum KeyValueCollectionMode
 }
 
 /// <summary>
-/// Controls how a category of automatically collected key-value data - HTTP headers, cookies, URL query
-/// parameters or stack frame variables - is collected.
+/// Controls how a category of automatically collected key-value data - HTTP headers, cookies or URL query
+/// parameters - is collected.
 /// </summary>
 /// <remarks>
 /// Instances are immutable. Build one with <see cref="Off"/>, <see cref="DenyList"/> or <see cref="AllowList"/>

@@ -86,11 +86,16 @@ public class DataCollectionConfigurationTests
         var bindable = new BindableSentryOptions();
         config.Bind(bindable);
         var options = new SentryOptions();
-        options.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = false);
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.UserInfo = false;
+            dataCollection.Cookies = KeyValueCollectionBehavior.Off;
+        });
 
         bindable.ApplyTo(options);
 
         options.DataCollection!.UserInfo.Should().BeFalse();
+        options.DataCollection.Cookies.Mode.Should().Be(KeyValueCollectionMode.Off);
         options.DataCollection.DatabaseQueryData.Should().BeFalse();
     }
 

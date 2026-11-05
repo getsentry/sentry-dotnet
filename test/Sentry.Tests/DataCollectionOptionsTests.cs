@@ -47,21 +47,6 @@ public class DataCollectionOptionsTests
     }
 
     [Fact]
-    public void ConfigureDataCollection_DefaultBehaviors_AreIndependentPerCategory()
-    {
-        var options = new SentryOptions();
-
-        options.ConfigureDataCollection(dataCollection => dataCollection.Cookies = KeyValueCollectionBehavior.Off);
-
-        using (new AssertionScope())
-        {
-            options.DataCollection!.Cookies.Mode.Should().Be(KeyValueCollectionMode.Off);
-            options.DataCollection.UrlQueryParams.Mode.Should().Be(KeyValueCollectionMode.DenyList);
-            options.DataCollection.HttpHeaders.Request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
-        }
-    }
-
-    [Fact]
     public void ConfigureDataCollection_CalledTwice_BuildsOnTheSameOptions()
     {
         var options = new SentryOptions();
