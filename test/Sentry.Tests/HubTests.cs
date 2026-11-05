@@ -2848,7 +2848,9 @@ public partial class HubTests : IDisposable
             Dsn = ValidDsn,
             AutoSessionTracking = false,
             IsGlobalModeEnabled = true,
-            Transport = transport
+            Transport = transport,
+            // The default of 2 seconds isn't always enough to flush on a busy CI runner
+            ShutdownTimeout = TimeSpan.FromSeconds(10)
         };
 
         if (cachingEnabled)
@@ -2857,6 +2859,8 @@ public partial class HubTests : IDisposable
         }
 
         var hub = new Hub(options);
+        // The hub doesn't dispose the client, so stop the cache worker before the temp directory is deleted
+        using var cachingTransport = options.Transport as CachingTransport;
         var id = hub.CaptureEvent(new SentryEvent());
 
         // Act

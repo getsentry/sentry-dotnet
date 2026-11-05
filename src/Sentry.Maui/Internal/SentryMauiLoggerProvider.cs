@@ -8,7 +8,6 @@ namespace Sentry.Maui.Internal;
 /// <summary>
 /// Sentry Logger Provider for <see cref="Breadcrumb"/> and <see cref="SentryEvent"/>.
 /// </summary>
-[ProviderAlias("Sentry")]
 internal sealed class SentryMauiLoggerProvider : SentryLoggerProvider
 {
     public SentryMauiLoggerProvider(IOptions<SentryMauiOptions> options, IHub hub)

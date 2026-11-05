@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -99,6 +100,25 @@ public class LoggingBuilderExtensionsTests
         capturedLog.Message.Should().Be("message");
     }
 
+    [Fact]
+    public void AddSentry_CategoryLogLevelInSentrySection_StillCapturesEventsAndBreadcrumbs()
+    {
+        // Arrange
+        var hub = CreateHub();
+        var scope = new Scope(new SentryOptions());
+        hub.SubstituteConfigureScope(scope);
+        using var serviceProvider = CreateServiceProvider(hub, ("Logging:Sentry:LogLevel:Noisy", "None"));
+        var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Noisy.Thing");
+
+        // Act
+        logger.LogInformation("breadcrumb");
+        logger.LogError("error");
+
+        // Assert
+        _ = hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == "Noisy.Thing"));
+        scope.Breadcrumbs.Should().Contain(b => b.Category == "Noisy.Thing" && b.Message == "breadcrumb");
+    }
+
     private class DerivedSentryLoggingOptions : SentryLoggingOptions;
 
     private static IHub CreateHub()
@@ -118,6 +138,23 @@ public class LoggingBuilderExtensionsTests
             options.InitializeSdk = false;
             configureOptions(options);
         }));
+        return serviceCollection.BuildServiceProvider();
+    }
+
+    private static ServiceProvider CreateServiceProvider(IHub hub, params (string Key, string Value)[] settings)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(settings.ToDictionary(s => s.Key, s => s.Value))
+            .Build();
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton(hub);
+        serviceCollection.AddLogging(builder => builder
+            .AddConfiguration(configuration.GetSection("Logging"))
+            .AddSentry(options =>
+            {
+                options.EnableLogs = true;
+                options.InitializeSdk = false;
+            }));
         return serviceCollection.BuildServiceProvider();
     }
 }

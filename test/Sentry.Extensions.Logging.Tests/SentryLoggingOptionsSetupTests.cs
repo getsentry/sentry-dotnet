@@ -115,7 +115,7 @@ public class SentryLoggingOptionsSetupTests
             })
             .Build();
 
-        var providerConfig = Substitute.For<ILoggerProviderConfiguration<SentryLoggerProvider>>();
+        var providerConfig = Substitute.For<ILoggerProviderConfiguration<SentryStructuredLoggerProvider>>();
         providerConfig.Configuration.Returns(config);
         var actual = new SentryLoggingOptions();
 

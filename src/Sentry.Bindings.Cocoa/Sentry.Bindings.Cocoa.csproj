@@ -5,6 +5,8 @@
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">$(PreviousIosTfm)</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">$(PreviousMacCatalystTfm)</TargetFrameworks>
     <IsBindingProject>true</IsBindingProject>
+    <!-- The iOS SDK only rewrites our block trampolines for NativeAOT when the assembly is trimmable. See https://github.com/getsentry/sentry-dotnet/issues/5855 -->
+    <IsTrimmable>true</IsTrimmable>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
     <SentryCocoaCache>..\..\modules\sentry-cocoa\</SentryCocoaCache>
