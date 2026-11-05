@@ -1033,14 +1033,16 @@ public partial class HubTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, 0.4f, "backpressure")]
-    [InlineData(true, 0.6f, "sample_rate")]
-    [InlineData(false, 0.4f, "backpressure")]
-    [InlineData(false, 0.6f, "sample_rate")]
-    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, double sampleRand, string discardReason)
+    [InlineData(true, null, 0.4f, "backpressure")]
+    [InlineData(true, null, 0.6f, "sample_rate")]
+    [InlineData(false, null, 0.4f, "backpressure")]
+    [InlineData(false, null, 0.6f, "sample_rate")]
+    [InlineData(true, false, 0.4f, "backpressure")]
+    [InlineData(false, false, 0.4f, "sample_rate")]
+    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, bool? isSampledUpstream, double sampleRand, string discardReason)
     {
         // Arrange
-        var transactionContext = new TransactionContext("name", "operation");
+        var transactionContext = new TransactionContext("name", "operation", isSampled: isSampledUpstream);
 
         var clock = new MockClock(DateTimeOffset.UtcNow);
         _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
@@ -2825,7 +2827,9 @@ public partial class HubTests : IDisposable
             Dsn = ValidDsn,
             AutoSessionTracking = false,
             IsGlobalModeEnabled = true,
-            Transport = transport
+            Transport = transport,
+            // The default of 2 seconds isn't always enough to flush on a busy CI runner
+            ShutdownTimeout = TimeSpan.FromSeconds(10)
         };
 
         if (cachingEnabled)
@@ -2834,6 +2838,8 @@ public partial class HubTests : IDisposable
         }
 
         var hub = new Hub(options);
+        // The hub doesn't dispose the client, so stop the cache worker before the temp directory is deleted
+        using var cachingTransport = options.Transport as CachingTransport;
         var id = hub.CaptureEvent(new SentryEvent());
 
         // Act
