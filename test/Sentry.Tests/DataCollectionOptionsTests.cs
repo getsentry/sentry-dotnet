@@ -32,7 +32,7 @@ public class DataCollectionOptionsTests
 
         options.ConfigureDataCollection(dataCollection =>
         {
-            dataCollection.HttpHeaders.Request.Mode = KeyValueCollectionMode.AllowList;
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("x-tenant-id");
             dataCollection.GraphQL.Variables = false;
             dataCollection.GenAI.Inputs = false;
         });
@@ -40,6 +40,7 @@ public class DataCollectionOptionsTests
         using (new AssertionScope())
         {
             options.DataCollection!.HttpHeaders.Request.Mode.Should().Be(KeyValueCollectionMode.AllowList);
+            options.DataCollection.HttpHeaders.Request.Terms.Should().Equal("x-tenant-id");
             options.DataCollection.GraphQL.Variables.Should().BeFalse();
             options.DataCollection.GenAI.Inputs.Should().BeFalse();
         }
@@ -50,7 +51,7 @@ public class DataCollectionOptionsTests
     {
         var options = new SentryOptions();
 
-        options.ConfigureDataCollection(dataCollection => dataCollection.Cookies.Mode = KeyValueCollectionMode.Off);
+        options.ConfigureDataCollection(dataCollection => dataCollection.Cookies = KeyValueCollectionBehavior.Off);
 
         using (new AssertionScope())
         {
@@ -79,12 +80,12 @@ public class DataCollectionOptionsTests
 public class KeyValueCollectionBehaviorTests
 {
     [Fact]
-    public void Off_ReturnsIndependentInstances()
+    public void Off_HasOffModeAndNoTerms()
     {
-        var cookies = KeyValueCollectionBehavior.Off;
-        cookies.Mode = KeyValueCollectionMode.DenyList;
+        var behavior = KeyValueCollectionBehavior.Off;
 
-        KeyValueCollectionBehavior.Off.Mode.Should().Be(KeyValueCollectionMode.Off);
+        behavior.Mode.Should().Be(KeyValueCollectionMode.Off);
+        behavior.Terms.Should().BeEmpty();
     }
 
     [Fact]

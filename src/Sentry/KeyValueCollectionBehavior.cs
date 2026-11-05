@@ -32,39 +32,35 @@ public enum KeyValueCollectionMode
 /// parameters or stack frame variables - is collected.
 /// </summary>
 /// <remarks>
+/// Instances are immutable. Build one with <see cref="Off"/>, <see cref="DenyList"/> or <see cref="AllowList"/>
+/// and assign it to the category, replacing whatever was there: terms only mean something next to their mode, so
+/// a category is never part deny list and part allow list.
+/// <para>
 /// Terms are matched against key names as case-insensitive substrings. The built-in sensitive terms always apply,
 /// so additional deny terms extend that list rather than replacing it.
+/// </para>
 /// <para>
 /// In configuration this binds from <c>Mode</c> and <c>Terms</c> keys, for example
-/// <c>Sentry:DataCollection:Cookies:Mode=Off</c>. The <c>bool</c> shorthand available in code has no configuration
-/// equivalent, so a scalar such as <c>Sentry:DataCollection:Cookies=false</c> is ignored.
+/// <c>Sentry:DataCollection:Cookies:Mode=Off</c>, and likewise replaces the category as a whole. <c>Terms</c>
+/// without a <c>Mode</c> is a deny list, the default for every key-value category. The <c>bool</c> shorthand
+/// available in code has no configuration equivalent, so a scalar such as
+/// <c>Sentry:DataCollection:Cookies=false</c> is ignored.
 /// </para>
 /// <para>This API is experimental, and it may change in the future.</para>
 /// </remarks>
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class KeyValueCollectionBehavior
 {
-    private IReadOnlyList<string> _terms = [];
-
-    /// <summary>
-    /// Creates a behavior that collects all key names and filters values of sensitive keys, equivalent to
-    /// <see cref="DenyList"/>. Set <see cref="Mode"/> and <see cref="Terms"/> to configure it, or use
-    /// <see cref="Off"/>, <see cref="DenyList"/> and <see cref="AllowList"/>.
-    /// </summary>
-    public KeyValueCollectionBehavior()
-    {
-    }
-
     private KeyValueCollectionBehavior(KeyValueCollectionMode mode, IReadOnlyList<string>? terms)
     {
         Mode = mode;
-        Terms = terms!;
+        Terms = terms?.Where(term => !string.IsNullOrEmpty(term)).ToArray() ?? [];
     }
 
     /// <summary>
     /// How this category is collected.
     /// </summary>
-    public KeyValueCollectionMode Mode { get; set; } = KeyValueCollectionMode.DenyList;
+    public KeyValueCollectionMode Mode { get; }
 
     /// <summary>
     /// Additional deny terms in <see cref="KeyValueCollectionMode.DenyList"/> mode, or the allowed key terms in
@@ -72,11 +68,7 @@ public sealed class KeyValueCollectionBehavior
     /// which would otherwise match every key. Empty in <see cref="KeyValueCollectionMode.Off"/> mode, or when no
     /// terms were supplied.
     /// </summary>
-    public IReadOnlyList<string> Terms
-    {
-        get => _terms;
-        set => _terms = value?.Where(term => !string.IsNullOrEmpty(term)).ToArray() ?? [];
-    }
+    public IReadOnlyList<string> Terms { get; }
 
     /// <summary>
     /// Collect neither keys nor values.

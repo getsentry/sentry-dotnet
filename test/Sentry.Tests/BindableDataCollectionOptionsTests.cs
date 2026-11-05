@@ -95,6 +95,26 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
+    public void Bind_KeyValueCategorySetInCode_IsReplacedWholeByConfig()
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(
+                [new KeyValuePair<string, string>("DataCollection:HttpHeaders:Request:Terms:0", "forwarded")])
+            .Build();
+        var bindable = new BindableSentryOptions();
+        config.Bind(bindable);
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("x-tenant-id"));
+
+        bindable.ApplyTo(options);
+
+        var request = options.DataCollection!.HttpHeaders.Request;
+        request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+        request.Terms.Should().Equal("forwarded");
+    }
+
+    [Fact]
     public void Bind_NestedCategories_AreApplied()
     {
         var options = Bind(

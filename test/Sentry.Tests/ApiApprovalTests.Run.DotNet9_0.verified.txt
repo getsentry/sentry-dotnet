@@ -391,9 +391,8 @@ namespace Sentry
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public sealed class KeyValueCollectionBehavior
     {
-        public KeyValueCollectionBehavior() { }
-        public Sentry.KeyValueCollectionMode Mode { get; set; }
-        public System.Collections.Generic.IReadOnlyList<string> Terms { get; set; }
+        public Sentry.KeyValueCollectionMode Mode { get; }
+        public System.Collections.Generic.IReadOnlyList<string> Terms { get; }
         public static Sentry.KeyValueCollectionBehavior Off { get; }
         public static Sentry.KeyValueCollectionBehavior AllowList(params string[] terms) { }
         public static Sentry.KeyValueCollectionBehavior DenyList(params string[] additionalTerms) { }
