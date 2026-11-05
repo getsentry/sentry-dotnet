@@ -62,6 +62,10 @@ public class SentryLoggingOptionsSetupTests
             .AddInMemoryCollection(new Dictionary<string, string>
             {
                 ["IsGlobalModeEnabled"] = expected.IsGlobalModeEnabled.ToString(),
+                ["DataCollection:Cookies:Mode"] = "Off",
+                ["DataCollection:UrlQueryParams:Terms:0"] = "session_id",
+                ["DataCollection:HttpBodies:0"] = "IncomingRequest",
+                ["DataCollection:HttpBodies:1"] = null,
                 ["EnableScopeSync"] = expected.EnableScopeSync.ToString(),
                 ["TagFilters:0"] = expected.TagFilters.First().ToString(),
                 ["TagFilters:1"] = expected.TagFilters.Last().ToString(),
@@ -161,6 +165,10 @@ public class SentryLoggingOptionsSetupTests
             actual.AutoSessionTrackingInterval.Should().Be(expected.AutoSessionTrackingInterval);
             actual.AutoSessionTracking.Should().Be(expected.AutoSessionTracking);
             actual.UseAsyncFileIO.Should().Be(expected.UseAsyncFileIO);
+            actual.DataCollection!.Cookies.Mode.Should().Be(KeyValueCollectionMode.Off);
+            actual.DataCollection.UrlQueryParams.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            actual.DataCollection.UrlQueryParams.Terms.Should().Equal("session_id");
+            actual.DataCollection.HttpBodies.Should().Be(HttpBodyTypes.IncomingRequest);
             actual.JsonPreserveReferences.Should().Be(expected.JsonPreserveReferences);
 
             actual.MinimumBreadcrumbLevel.Should().Be(expected.MinimumBreadcrumbLevel);

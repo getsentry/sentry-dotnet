@@ -70,6 +70,33 @@ namespace Sentry
         Native = 2,
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+    public class DataCollectionOptions
+    {
+        public Sentry.KeyValueCollectionBehavior Cookies { get; set; }
+        public bool DatabaseQueryData { get; set; }
+        public Sentry.DataCollectionOptions.GenAIOptions GenAI { get; }
+        public Sentry.DataCollectionOptions.GraphQLOptions GraphQL { get; }
+        public Sentry.HttpBodyTypes HttpBodies { get; set; }
+        public Sentry.DataCollectionOptions.HttpHeaderOptions HttpHeaders { get; }
+        public Sentry.KeyValueCollectionBehavior UrlQueryParams { get; set; }
+        public bool UserInfo { get; set; }
+        public sealed class GenAIOptions
+        {
+            public bool Inputs { get; set; }
+            public bool Outputs { get; set; }
+        }
+        public sealed class GraphQLOptions
+        {
+            public bool Document { get; set; }
+            public bool Variables { get; set; }
+        }
+        public sealed class HttpHeaderOptions
+        {
+            public Sentry.KeyValueCollectionBehavior Request { get; set; }
+            public Sentry.KeyValueCollectionBehavior Response { get; set; }
+        }
+    }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public class Debouncer
     {
         public static Sentry.Debouncer PerApplicationLifetime(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
@@ -127,6 +154,17 @@ namespace Sentry
     {
         public const string Exception = "exception";
         public const string HttpResponseMessage = "http-response-message";
+    }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+    [System.Flags]
+    public enum HttpBodyTypes
+    {
+        None = 0,
+        IncomingRequest = 1,
+        OutgoingRequest = 2,
+        IncomingResponse = 4,
+        OutgoingResponse = 8,
+        All = 15,
     }
     public readonly struct HttpStatusCodeRange : System.IEquatable<Sentry.HttpStatusCodeRange>
     {
@@ -349,6 +387,23 @@ namespace Sentry
     {
         Sentry = 0,
         OpenTelemetry = 1,
+    }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+    public sealed class KeyValueCollectionBehavior
+    {
+        public Sentry.KeyValueCollectionMode Mode { get; }
+        public System.Collections.Generic.IReadOnlyList<string> Terms { get; }
+        public static Sentry.KeyValueCollectionBehavior Off { get; }
+        public static Sentry.KeyValueCollectionBehavior AllowList(params string[] terms) { }
+        public static Sentry.KeyValueCollectionBehavior DenyList(params string[] additionalTerms) { }
+        public static Sentry.KeyValueCollectionBehavior op_Implicit(bool collect) { }
+    }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+    public enum KeyValueCollectionMode
+    {
+        Off = 0,
+        DenyList = 1,
+        AllowList = 2,
     }
     public readonly struct MeasurementUnit : System.IEquatable<Sentry.MeasurementUnit>
     {
@@ -911,6 +966,8 @@ namespace Sentry
         public void AddTransactionProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor>> processorProvider) { }
         public void AddTransactionProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
         public void ApplyDefaultTags(Sentry.IHasTags hasTags) { }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+        public void ConfigureDataCollection(System.Action<Sentry.DataCollectionOptions> configure) { }
         public void DisableAppDomainProcessExitFlush() { }
         public void DisableAppDomainUnhandledExceptionCapture() { }
         public void DisableDiagnosticSourceIntegration() { }
