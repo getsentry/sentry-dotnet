@@ -64,7 +64,7 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_SectionPresent_OptsInAndLeavesUnsetCategoriesNull()
+    public void Bind_SectionPresent_OptsInAndLeavesUnsetCategoriesAtDefaults()
     {
         var options = Bind(("DataCollection:UserInfo", "false"));
 
@@ -72,8 +72,8 @@ public class DataCollectionConfigurationTests
         {
             options.DataCollection.Should().NotBeNull();
             options.DataCollection!.UserInfo.Should().BeFalse();
-            options.DataCollection!.Cookies.Should().BeNull();
-            options.DataCollection!.HttpHeaders.Request.Should().BeNull();
+            options.DataCollection.Cookies.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            options.DataCollection.HttpHeaders.Request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         }
     }
 
@@ -85,12 +85,13 @@ public class DataCollectionConfigurationTests
             .Build();
         var bindable = new BindableSentryOptions();
         config.Bind(bindable);
-        var options = new SentryOptions { DataCollection = new DataCollectionOptions { UserInfo = false } };
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = false);
 
         bindable.ApplyTo(options);
 
         options.DataCollection!.UserInfo.Should().BeFalse();
-        options.DataCollection!.DatabaseQueryData.Should().BeFalse();
+        options.DataCollection.DatabaseQueryData.Should().BeFalse();
     }
 
     [Fact]
@@ -105,9 +106,9 @@ public class DataCollectionConfigurationTests
         using (new AssertionScope())
         {
             options.DataCollection!.GraphQL.Document.Should().BeFalse();
-            options.DataCollection!.GraphQL.Variables.Should().BeFalse();
-            options.DataCollection!.GenAI.Inputs.Should().BeFalse();
-            options.DataCollection!.GenAI.Outputs.Should().BeFalse();
+            options.DataCollection.GraphQL.Variables.Should().BeFalse();
+            options.DataCollection.GenAI.Inputs.Should().BeFalse();
+            options.DataCollection.GenAI.Outputs.Should().BeFalse();
         }
     }
 
@@ -119,7 +120,7 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:Cookies:Mode", configured));
 
-        options.DataCollection!.Cookies!.Mode.Should().Be(expected);
+        options.DataCollection!.Cookies.Mode.Should().Be(expected);
     }
 
     [Fact]
@@ -130,7 +131,7 @@ public class DataCollectionConfigurationTests
             ("DataCollection:HttpHeaders:Request:Terms:0", "forwarded"),
             ("DataCollection:HttpHeaders:Request:Terms:1", "-ip"));
 
-        var request = options.DataCollection!.HttpHeaders.Request!;
+        var request = options.DataCollection!.HttpHeaders.Request;
         request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         request.Terms.Should().Equal("forwarded", "-ip");
     }
@@ -140,7 +141,7 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:HttpHeaders:Response:Mode", "Off"));
 
-        options.DataCollection!.HttpHeaders.Response!.Mode.Should().Be(KeyValueCollectionMode.Off);
+        options.DataCollection!.HttpHeaders.Response.Mode.Should().Be(KeyValueCollectionMode.Off);
     }
 
     [Fact]
@@ -148,7 +149,7 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:UrlQueryParams:Terms:0", "session_id"));
 
-        var behavior = options.DataCollection!.UrlQueryParams!;
+        var behavior = options.DataCollection!.UrlQueryParams;
         behavior.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         behavior.Terms.Should().Equal("session_id");
     }
@@ -174,14 +175,14 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_HttpBodiesEmptyArray_LeavesCategoryUnset()
+    public void Bind_HttpBodiesEmptyArray_LeavesCategoryAtDefault()
     {
         // A JSON empty array emits the key with an empty value and no children, which the binder surfaces as
         // null rather than an empty list. The spec's "[]" opt-out is therefore not expressible in configuration;
         // "[\"None\"]" is the equivalent. Locked in so a future change to the surrogate has to confront it.
         var options = Bind(("DataCollection:HttpBodies", string.Empty));
 
-        options.DataCollection!.HttpBodies.Should().BeNull();
+        options.DataCollection!.HttpBodies.Should().Be(HttpBodyTypes.All);
     }
 }
 #endif

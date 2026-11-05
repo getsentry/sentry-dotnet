@@ -6,9 +6,8 @@ namespace Sentry;
 /// Controls which categories of data the SDK's integrations collect automatically.
 /// </summary>
 /// <remarks>
-/// Assigning this option at all opts into these defaults, which collect every category including user identity
-/// and HTTP bodies, and causes the legacy <see cref="SentryOptions.SendDefaultPii"/> to be ignored. Set an
-/// individual category to restrict it.
+/// Every category starts at the default from the data collection spec, which collects it - including user identity
+/// and HTTP bodies - with sensitive keys filtered out. Restrict an individual category by setting it.
 /// <para>
 /// This only gates data the SDK gathers by itself. Data you provide explicitly - a <see cref="SentryUser"/> set on
 /// the scope, tags, or anything added in <see cref="SentryOptions.SetBeforeSend(System.Func{SentryEvent, SentryHint, SentryEvent})"/>
@@ -21,18 +20,21 @@ namespace Sentry;
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public class DataCollectionOptions
 {
+    internal DataCollectionOptions()
+    {
+    }
 
     /// <summary>
     /// Whether integrations may populate user identity information automatically, including
     /// <see cref="SentryUser.Id"/>, <see cref="SentryUser.Email"/>, <see cref="SentryUser.Username"/> and the
     /// user's IP address. Defaults to <c>true</c>. A user you set yourself is never affected.
     /// </summary>
-    public bool? UserInfo { get; set; }
+    public bool UserInfo { get; set; } = true;
 
     /// <summary>
     /// How cookies are collected. Defaults to <see cref="KeyValueCollectionBehavior.DenyList"/>.
     /// </summary>
-    public KeyValueCollectionBehavior? Cookies { get; set; }
+    public KeyValueCollectionBehavior Cookies { get; set; } = KeyValueCollectionBehavior.DenyList();
 
     /// <summary>
     /// How request and response headers are collected.
@@ -51,13 +53,13 @@ public class DataCollectionOptions
     /// configuration key that cannot be told apart from the option being absent, so the spec's <c>[]</c> opt-out
     /// does not survive configuration binding. A scalar value such as <c>"None"</c> is ignored.
     /// </remarks>
-    public HttpBodyTypes? HttpBodies { get; set; }
+    public HttpBodyTypes HttpBodies { get; set; } = HttpBodyTypes.All;
 
     /// <summary>
     /// How URL query parameters are collected, wherever a query string appears.
     /// Defaults to <see cref="KeyValueCollectionBehavior.DenyList"/>.
     /// </summary>
-    public KeyValueCollectionBehavior? UrlQueryParams { get; set; }
+    public KeyValueCollectionBehavior UrlQueryParams { get; set; } = KeyValueCollectionBehavior.DenyList();
 
     /// <summary>
     /// How GraphQL documents and variables are collected.
@@ -77,25 +79,28 @@ public class DataCollectionOptions
     /// Sanitized query statements and structural metadata - the database system, query summary, operation name and
     /// the table acted upon - are always collected.
     /// </remarks>
-    public bool? DatabaseQueryData { get; set; }
+    public bool DatabaseQueryData { get; set; } = true;
 
     /// <summary>
     /// How request and response headers are collected.
     /// </summary>
     public sealed class HttpHeaderOptions
     {
+        internal HttpHeaderOptions()
+        {
+        }
+
         /// <summary>
         /// How headers of incoming requests are collected.
         /// Defaults to <see cref="KeyValueCollectionBehavior.DenyList"/>.
         /// </summary>
-        public KeyValueCollectionBehavior? Request { get; set; }
+        public KeyValueCollectionBehavior Request { get; set; } = KeyValueCollectionBehavior.DenyList();
 
         /// <summary>
         /// How headers of responses are collected.
         /// Defaults to <see cref="KeyValueCollectionBehavior.DenyList"/>.
         /// </summary>
-        public KeyValueCollectionBehavior? Response { get; set; }
-
+        public KeyValueCollectionBehavior Response { get; set; } = KeyValueCollectionBehavior.DenyList();
     }
 
     /// <summary>
@@ -103,16 +108,19 @@ public class DataCollectionOptions
     /// </summary>
     public sealed class GraphQLOptions
     {
+        internal GraphQLOptions()
+        {
+        }
+
         /// <summary>
         /// Whether the GraphQL document is collected. Defaults to <c>true</c>.
         /// </summary>
-        public bool? Document { get; set; }
+        public bool Document { get; set; } = true;
 
         /// <summary>
         /// Whether the variables passed to GraphQL operations are collected. Defaults to <c>true</c>.
         /// </summary>
-        public bool? Variables { get; set; }
-
+        public bool Variables { get; set; } = true;
     }
 
     /// <summary>
@@ -121,17 +129,20 @@ public class DataCollectionOptions
     /// </summary>
     public sealed class GenAIOptions
     {
+        internal GenAIOptions()
+        {
+        }
+
         /// <summary>
         /// Whether the content of generative AI inputs is collected - system instructions, prompt messages, tool
         /// definitions and tool call arguments. Defaults to <c>true</c>.
         /// </summary>
-        public bool? Inputs { get; set; }
+        public bool Inputs { get; set; } = true;
 
         /// <summary>
         /// Whether the content of generative AI outputs is collected - completion text and tool call results.
         /// Defaults to <c>true</c>.
         /// </summary>
-        public bool? Outputs { get; set; }
-
+        public bool Outputs { get; set; } = true;
     }
 }

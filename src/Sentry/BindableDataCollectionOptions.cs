@@ -47,7 +47,8 @@ internal partial class BindableSentryOptions
         }
 
         /// <summary>
-        /// Configuration surrogate for <see cref="KeyValueCollectionBehavior"/>, which has no public constructor.
+        /// Configuration surrogate for <see cref="KeyValueCollectionBehavior"/>, whose <c>Terms</c> is an
+        /// <see cref="IReadOnlyList{T}"/> the configuration binder cannot populate.
         /// A <c>Terms</c> list without a <c>Mode</c> is treated as <see cref="KeyValueCollectionMode.DenyList"/>,
         /// since that is the default behavior for every key-value category.
         /// </summary>

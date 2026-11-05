@@ -165,8 +165,8 @@ public class SentryLoggingOptionsSetupTests
             actual.AutoSessionTrackingInterval.Should().Be(expected.AutoSessionTrackingInterval);
             actual.AutoSessionTracking.Should().Be(expected.AutoSessionTracking);
             actual.UseAsyncFileIO.Should().Be(expected.UseAsyncFileIO);
-            actual.DataCollection!.Cookies!.Mode.Should().Be(KeyValueCollectionMode.Off);
-            actual.DataCollection.UrlQueryParams!.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            actual.DataCollection!.Cookies.Mode.Should().Be(KeyValueCollectionMode.Off);
+            actual.DataCollection.UrlQueryParams.Mode.Should().Be(KeyValueCollectionMode.DenyList);
             actual.DataCollection.UrlQueryParams.Terms.Should().Equal("session_id");
             actual.DataCollection.HttpBodies.Should().Be(HttpBodyTypes.IncomingRequest);
             actual.JsonPreserveReferences.Should().Be(expected.JsonPreserveReferences);
