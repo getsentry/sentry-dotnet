@@ -19,6 +19,22 @@ internal enum SentryObjCAttachmentType : long
 }
 
 [Native]
+internal enum SentryObjCErrorCode : long
+{
+    UnknownError = -1,
+    InvalidDsnError = 100,
+    SentryCrashNotInstalledError = 101,
+    InvalidCrashReportError = 102,
+    CompressionError = 103,
+    JsonConversionError = 104,
+    CouldNotFindDirectory = 105,
+    RequestError = 106,
+    EventNotSent = 107,
+    FileIO = 108,
+    Kernel = 109
+}
+
+[Native]
 internal enum SentryObjCFeedbackSource : long
 {
     Widget = 0,
@@ -131,7 +147,67 @@ internal enum SentryObjCMetricKitDiagnosticReport : ulong
     Hang = 1uL << 1,
     CPUException = 1uL << 2,
     DiskWriteException = 1uL << 3,
-    AppLaunch = 1uL << 4
+    AppLaunch = 1uL << 4,
+    MemoryException = 1uL << 5
+}
+
+[Flags]
+internal enum SentryObjCMetricKitMetricReport : ulong
+{
+    None = 0x0,
+    CPUCumulativeTime = 1uL << 0,
+    CPUCumulativeInstructions = 1uL << 1,
+    GPUCumulativeTime = 1uL << 2,
+    AppTimeForeground = 1uL << 3,
+    AppTimeBackground = 1uL << 4,
+    AppTimeBackgroundAudio = 1uL << 5,
+    AppTimeBackgroundLocation = 1uL << 6,
+    NetworkWifiUpload = 1uL << 7,
+    NetworkWifiDownload = 1uL << 8,
+    NetworkCellularUpload = 1uL << 9,
+    NetworkCellularDownload = 1uL << 10,
+    DiskIOLogicalWrites = 1uL << 11,
+    LocationBestAccuracyTime = 1uL << 12,
+    LocationBestAccuracyForNavigationTime = 1uL << 13,
+    LocationNearestTenMetersTime = 1uL << 14,
+    LocationHundredMetersTime = 1uL << 15,
+    LocationKilometerTime = 1uL << 16,
+    LocationThreeKilometersTime = 1uL << 17,
+    MemoryPeakUsage = 1uL << 18,
+    MemoryAverageSuspended = 1uL << 19,
+    DisplayAveragePixelLuminance = 1uL << 20,
+    AnimationScrollHitchTimeRatio = 1uL << 21,
+    AnimationHitchTimeRatio = 1uL << 22,
+    DiskSpaceBinaryFileSize = 1uL << 23,
+    DiskSpaceBinaryFileCount = 1uL << 24,
+    DiskSpaceDataFileSize = 1uL << 25,
+    DiskSpaceDataFileCount = 1uL << 26,
+    DiskSpaceCacheFolderSize = 1uL << 27,
+    DiskSpaceCloneSize = 1uL << 28,
+    DiskSpaceTotalUsed = 1uL << 29,
+    DiskSpaceTotalCapacity = 1uL << 30,
+    ExitForegroundNormal = 1uL << 31,
+    ExitForegroundMemoryResourceLimit = 1uL << 32,
+    ExitForegroundBadAccess = 1uL << 33,
+    ExitForegroundAbnormal = 1uL << 34,
+    ExitForegroundIllegalInstruction = 1uL << 35,
+    ExitForegroundWatchdog = 1uL << 36,
+    ExitBackgroundNormal = 1uL << 37,
+    ExitBackgroundMemoryResourceLimit = 1uL << 38,
+    ExitBackgroundCPUResourceLimit = 1uL << 39,
+    ExitBackgroundMemoryPressure = 1uL << 40,
+    ExitBackgroundBadAccess = 1uL << 41,
+    ExitBackgroundAbnormal = 1uL << 42,
+    ExitBackgroundIllegalInstruction = 1uL << 43,
+    ExitBackgroundWatchdog = 1uL << 44,
+    ExitBackgroundSuspendedWithLockedFile = 1uL << 45,
+    ExitBackgroundTaskTimeout = 1uL << 46,
+    AnimationTotalHitchTime = 1uL << 47,
+    AnimationTotalAnimationTime = 1uL << 48,
+    MetalFramesPerSecond = 1uL << 49,
+    MetalFrameCount = 1uL << 50,
+    MetalActiveDrawingDuration = 1uL << 51,
+    All = (1uL << 52) - 0x1
 }
 
 [Native]
