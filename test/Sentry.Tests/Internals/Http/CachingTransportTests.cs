@@ -679,6 +679,56 @@ public class CachingTransportTests : IDisposable
     }
 
     [Fact]
+    public async Task FlushAsync_CancelledWhileAnotherFlushIsSending_NextFlushWaitsForIt()
+    {
+        // Arrange
+        var firstSendStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondSendStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseFirstSend = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var sendCount = 0;
+
+        var innerTransport = Substitute.For<ITransport>();
+        innerTransport.SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .Returns(async _ =>
+            {
+                if (Interlocked.Increment(ref sendCount) == 1)
+                {
+                    firstSendStarted.SetResult(true);
+                    await releaseFirstSend.Task;
+                }
+                else
+                {
+                    secondSendStarted.TrySetResult(true);
+                }
+            });
+
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        using var firstEnvelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(firstEnvelope);
+        var firstFlush = transport.FlushAsync();
+        await firstSendStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        using var secondEnvelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(secondEnvelope);
+
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => transport.FlushAsync(timeout.Token));
+
+        // Act
+        var nextFlush = transport.FlushAsync();
+        await Task.WhenAny(secondSendStarted.Task, Task.Delay(TimeSpan.FromMilliseconds(500)));
+        var sentConcurrently = secondSendStarted.Task.IsCompleted;
+
+        releaseFirstSend.SetResult(true);
+        await Task.WhenAll(firstFlush, nextFlush).WaitAsync(TimeSpan.FromSeconds(5));
+
+        // Assert
+        sentConcurrently.Should().BeFalse();
+        sendCount.Should().Be(2);
+    }
+
+    [Fact]
     public async Task DoesntWriteSentAtHeaderToCacheFile()
     {
         // Arrange
