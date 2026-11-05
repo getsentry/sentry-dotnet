@@ -80,8 +80,8 @@ public sealed class KeyValueCollectionBehavior
     /// behavior for every key-value category.
     /// </summary>
     /// <param name="additionalTerms">
-    /// Key name terms to filter in addition to the built-in sensitive terms. To restore the header filtering that
-    /// <see cref="SentryOptions.SendDefaultPii"/> applied when disabled, pass
+    /// Key name terms to filter in addition to the built-in sensitive terms. To also filter the keys that commonly
+    /// identify an end user, pass the terms the data collection spec names for that purpose:
     /// <c>"forwarded"</c>, <c>"-ip"</c>, <c>"remote-"</c>, <c>"via"</c> and <c>"-user"</c>.
     /// </param>
     public static KeyValueCollectionBehavior DenyList(params string[] additionalTerms) =>
