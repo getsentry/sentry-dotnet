@@ -270,34 +270,22 @@ public class SensitiveDataFilterTests
             .Should().Be("[Filtered]");
     }
 
-    [Fact]
-    public void FilterValue_DenyListWithNullTerm_DoesNotFilterEverything()
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public void FilterValue_AdditionalDenyTermEmptyOrNull_DoesNotFilterEverything(string term)
     {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.DenyList(null!))
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.DenyList(), [term])
             .Should().Be("text/html");
     }
 
-    [Fact]
-    public void FilterValue_AllowListWithNullTermsArray_DoesNotAllowEverything()
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public void FilterValue_AllowListWithAdditionalDenyTermEmptyOrNull_StillSendsAllowedKey(string term)
     {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.AllowList(null!))
-            .Should().Be("[Filtered]");
-    }
-
-    [Fact]
-    public void FilterValue_DenyListWithNullTermElement_DoesNotFilterEverything()
-    {
-        var behavior = KeyValueCollectionBehavior.DenyList(new string[] { null! });
-
-        SensitiveDataFilter.FilterValue("Accept", "text/html", behavior).Should().Be("text/html");
-    }
-
-    [Fact]
-    public void FilterValue_AllowListWithNullTermElement_DoesNotAllowEverything()
-    {
-        var behavior = KeyValueCollectionBehavior.AllowList(new string[] { null! });
-
-        SensitiveDataFilter.FilterValue("Accept", "text/html", behavior).Should().Be("[Filtered]");
+        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.AllowList("accept"), [term])
+            .Should().Be("text/html");
     }
 
     [Fact]
