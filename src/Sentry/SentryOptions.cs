@@ -333,23 +333,45 @@ public class SentryOptions
     public bool SendDefaultPii { get; set; }
 
     /// <summary>
-    /// Controls which categories of data the SDK's integrations collect automatically. Prefer this over
-    /// <see cref="SendDefaultPii"/>, which it replaces: it gives per-category control instead of a single
-    /// all-or-nothing switch.
+    /// Configures which categories of data the SDK's integrations collect automatically, the successor to
+    /// <see cref="SendDefaultPii"/>: per-category control instead of a single all-or-nothing switch.
     /// </summary>
+    /// <param name="configure">
+    /// Receives the options with every category at its default from the data collection spec. Restrict a category
+    /// by setting it; nothing on the object is ever <c>null</c>, so nested categories can be set directly.
+    /// </param>
     /// <remarks>
-    /// Unset by default, in which case <see cref="SendDefaultPii"/> still governs what is collected. Assigning it
-    /// opts into the <see cref="DataCollectionOptions"/> defaults and <see cref="SendDefaultPii"/> is ignored.
+    /// The options are recorded but not yet consumed: no integration reads them, so what is collected is still
+    /// governed entirely by <see cref="SendDefaultPii"/>, and restricting a category here has no effect yet.
+    /// <para>
+    /// Once the integrations are migrated onto these options, calling this will replace
+    /// <see cref="SendDefaultPii"/>, which is then ignored. The spec defaults collect every category, so an
+    /// application relying on <c>SendDefaultPii = false</c> to suppress user identity will need to set
+    /// <see cref="DataCollectionOptions.UserInfo"/> to <c>false</c> here as well.
+    /// </para>
+    /// <para>Repeated calls build on the same options.</para>
     /// <para>This API is experimental, and it may change in the future.</para>
     /// </remarks>
     /// <example>
     /// <code>
-    /// options.DataCollection = new DataCollectionOptions { UserInfo = false };
+    /// options.ConfigureDataCollection(dataCollection =>
+    /// {
+    ///     dataCollection.UserInfo = false;
+    ///     dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("x-tenant-id");
+    /// });
     /// </code>
     /// </example>
     /// <seealso href="https://develop.sentry.dev/sdk/foundations/client/data-collection/"/>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public DataCollectionOptions? DataCollection { get; set; }
+    public void ConfigureDataCollection(Action<DataCollectionOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        DataCollection ??= new DataCollectionOptions();
+        configure(DataCollection);
+    }
+
+    internal DataCollectionOptions? DataCollection { get; set; }
 
     /// <summary>
     /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.

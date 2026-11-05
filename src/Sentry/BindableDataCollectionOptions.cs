@@ -13,12 +13,7 @@ internal partial class BindableSentryOptions
         public KeyValueBehavior UrlQueryParams { get; } = new();
         public GraphQLOptions GraphQL { get; } = new();
         public GenAIOptions GenAI { get; } = new();
-        public McpOptions Mcp { get; } = new();
         public bool? DatabaseQueryData { get; set; }
-        public bool? Queues { get; set; }
-        public bool? FilePaths { get; set; }
-        public KeyValueBehavior StackFrameVariables { get; } = new();
-        public int? FrameContextLines { get; set; }
 
         public void ApplyTo(Sentry.DataCollectionOptions options)
         {
@@ -27,14 +22,9 @@ internal partial class BindableSentryOptions
             options.HttpBodies = ParseHttpBodies() ?? options.HttpBodies;
             options.UrlQueryParams = UrlQueryParams.ToBehavior() ?? options.UrlQueryParams;
             options.DatabaseQueryData = DatabaseQueryData ?? options.DatabaseQueryData;
-            options.Queues = Queues ?? options.Queues;
-            options.FilePaths = FilePaths ?? options.FilePaths;
-            options.StackFrameVariables = StackFrameVariables.ToBehavior() ?? options.StackFrameVariables;
-            options.FrameContextLines = FrameContextLines ?? options.FrameContextLines;
             HttpHeaders.ApplyTo(options.HttpHeaders);
             GraphQL.ApplyTo(options.GraphQL);
             GenAI.ApplyTo(options.GenAI);
-            Mcp.ApplyTo(options.Mcp);
         }
 
         private HttpBodyTypes? ParseHttpBodies()
@@ -47,12 +37,9 @@ internal partial class BindableSentryOptions
             var result = HttpBodyTypes.None;
             foreach (var entry in HttpBodies)
             {
-                foreach (var part in entry.Split(','))
+                if (Enum.TryParse<HttpBodyTypes>(entry, ignoreCase: true, out var parsed))
                 {
-                    if (Enum.TryParse<HttpBodyTypes>(part.Trim(), ignoreCase: true, out var parsed))
-                    {
-                        result |= parsed;
-                    }
+                    result |= parsed;
                 }
             }
 
@@ -60,7 +47,8 @@ internal partial class BindableSentryOptions
         }
 
         /// <summary>
-        /// Configuration surrogate for <see cref="KeyValueCollectionBehavior"/>, which has no public constructor.
+        /// Configuration surrogate for <see cref="KeyValueCollectionBehavior"/>, whose <c>Terms</c> is an
+        /// <see cref="IReadOnlyList{T}"/> the configuration binder cannot populate.
         /// A <c>Terms</c> list without a <c>Mode</c> is treated as <see cref="KeyValueCollectionMode.DenyList"/>,
         /// since that is the default behavior for every key-value category.
         /// </summary>
@@ -116,18 +104,6 @@ internal partial class BindableSentryOptions
             public bool? Outputs { get; set; }
 
             public void ApplyTo(Sentry.DataCollectionOptions.GenAIOptions options)
-            {
-                options.Inputs = Inputs ?? options.Inputs;
-                options.Outputs = Outputs ?? options.Outputs;
-            }
-        }
-
-        public class McpOptions
-        {
-            public bool? Inputs { get; set; }
-            public bool? Outputs { get; set; }
-
-            public void ApplyTo(Sentry.DataCollectionOptions.McpOptions options)
             {
                 options.Inputs = Inputs ?? options.Inputs;
                 options.Outputs = Outputs ?? options.Outputs;

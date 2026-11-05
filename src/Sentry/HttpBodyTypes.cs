@@ -1,9 +1,12 @@
+using Sentry.Infrastructure;
+
 namespace Sentry;
 
 /// <summary>
 /// The HTTP bodies that may be attached to telemetry.
 /// </summary>
 [Flags]
+[Experimental(DiagnosticId.ExperimentalFeature)]
 public enum HttpBodyTypes
 {
     /// <summary>

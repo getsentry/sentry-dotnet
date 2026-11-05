@@ -10,11 +10,9 @@ public class BindableDataCollectionOptionsTests : BindableTests<DataCollectionOp
             nameof(DataCollectionOptions.Cookies),
             nameof(DataCollectionOptions.HttpBodies),
             nameof(DataCollectionOptions.UrlQueryParams),
-            nameof(DataCollectionOptions.StackFrameVariables),
             nameof(DataCollectionOptions.HttpHeaders),
             nameof(DataCollectionOptions.GraphQL),
-            nameof(DataCollectionOptions.GenAI),
-            nameof(DataCollectionOptions.Mcp))
+            nameof(DataCollectionOptions.GenAI))
     {
     }
 
@@ -66,7 +64,7 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_SectionPresent_OptsInAndLeavesUnsetCategoriesNull()
+    public void Bind_SectionPresent_OptsInAndLeavesUnsetCategoriesAtDefaults()
     {
         var options = Bind(("DataCollection:UserInfo", "false"));
 
@@ -74,8 +72,8 @@ public class DataCollectionConfigurationTests
         {
             options.DataCollection.Should().NotBeNull();
             options.DataCollection!.UserInfo.Should().BeFalse();
-            options.DataCollection!.Cookies.Should().BeNull();
-            options.DataCollection!.HttpHeaders.Request.Should().BeNull();
+            options.DataCollection.Cookies.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            options.DataCollection.HttpHeaders.Request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         }
     }
 
@@ -83,36 +81,42 @@ public class DataCollectionConfigurationTests
     public void Bind_SectionPresent_MergesIntoOptionsSetInCode()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection([new KeyValuePair<string, string>("DataCollection:Queues", "false")])
+            .AddInMemoryCollection([new KeyValuePair<string, string>("DataCollection:DatabaseQueryData", "false")])
             .Build();
         var bindable = new BindableSentryOptions();
         config.Bind(bindable);
-        var options = new SentryOptions { DataCollection = new DataCollectionOptions { UserInfo = false } };
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.UserInfo = false;
+            dataCollection.Cookies = KeyValueCollectionBehavior.Off;
+        });
 
         bindable.ApplyTo(options);
 
         options.DataCollection!.UserInfo.Should().BeFalse();
-        options.DataCollection!.Queues.Should().BeFalse();
+        options.DataCollection.Cookies.Mode.Should().Be(KeyValueCollectionMode.Off);
+        options.DataCollection.DatabaseQueryData.Should().BeFalse();
     }
 
     [Fact]
-    public void Bind_BooleanCategories_AreApplied()
+    public void Bind_KeyValueCategorySetInCode_IsReplacedWholeByConfig()
     {
-        var options = Bind(
-            ("DataCollection:UserInfo", "false"),
-            ("DataCollection:DatabaseQueryData", "false"),
-            ("DataCollection:Queues", "false"),
-            ("DataCollection:FilePaths", "false"),
-            ("DataCollection:FrameContextLines", "0"));
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(
+                [new KeyValuePair<string, string>("DataCollection:HttpHeaders:Request:Terms:0", "forwarded")])
+            .Build();
+        var bindable = new BindableSentryOptions();
+        config.Bind(bindable);
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("x-tenant-id"));
 
-        using (new AssertionScope())
-        {
-            options.DataCollection!.UserInfo.Should().BeFalse();
-            options.DataCollection!.DatabaseQueryData.Should().BeFalse();
-            options.DataCollection!.Queues.Should().BeFalse();
-            options.DataCollection!.FilePaths.Should().BeFalse();
-            options.DataCollection!.FrameContextLines.Should().Be(0);
-        }
+        bindable.ApplyTo(options);
+
+        var request = options.DataCollection!.HttpHeaders.Request;
+        request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+        request.Terms.Should().Equal("forwarded");
     }
 
     [Fact]
@@ -122,18 +126,14 @@ public class DataCollectionConfigurationTests
             ("DataCollection:GraphQL:Document", "false"),
             ("DataCollection:GraphQL:Variables", "false"),
             ("DataCollection:GenAI:Inputs", "false"),
-            ("DataCollection:GenAI:Outputs", "false"),
-            ("DataCollection:Mcp:Inputs", "false"),
-            ("DataCollection:Mcp:Outputs", "false"));
+            ("DataCollection:GenAI:Outputs", "false"));
 
         using (new AssertionScope())
         {
             options.DataCollection!.GraphQL.Document.Should().BeFalse();
-            options.DataCollection!.GraphQL.Variables.Should().BeFalse();
-            options.DataCollection!.GenAI.Inputs.Should().BeFalse();
-            options.DataCollection!.GenAI.Outputs.Should().BeFalse();
-            options.DataCollection!.Mcp.Inputs.Should().BeFalse();
-            options.DataCollection!.Mcp.Outputs.Should().BeFalse();
+            options.DataCollection.GraphQL.Variables.Should().BeFalse();
+            options.DataCollection.GenAI.Inputs.Should().BeFalse();
+            options.DataCollection.GenAI.Outputs.Should().BeFalse();
         }
     }
 
@@ -145,7 +145,7 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:Cookies:Mode", configured));
 
-        options.DataCollection!.Cookies!.Mode.Should().Be(expected);
+        options.DataCollection!.Cookies.Mode.Should().Be(expected);
     }
 
     [Fact]
@@ -156,25 +156,17 @@ public class DataCollectionConfigurationTests
             ("DataCollection:HttpHeaders:Request:Terms:0", "forwarded"),
             ("DataCollection:HttpHeaders:Request:Terms:1", "-ip"));
 
-        var request = options.DataCollection!.HttpHeaders.Request!;
+        var request = options.DataCollection!.HttpHeaders.Request;
         request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         request.Terms.Should().Equal("forwarded", "-ip");
     }
 
     [Fact]
-    public void Bind_ResponseHeadersAndStackFrameVariables_AreApplied()
+    public void Bind_ResponseHeaders_AreApplied()
     {
-        var options = Bind(
-            ("DataCollection:HttpHeaders:Response:Mode", "Off"),
-            ("DataCollection:StackFrameVariables:Mode", "AllowList"),
-            ("DataCollection:StackFrameVariables:Terms:0", "orderId"));
+        var options = Bind(("DataCollection:HttpHeaders:Response:Mode", "Off"));
 
-        using (new AssertionScope())
-        {
-            options.DataCollection!.HttpHeaders.Response!.Mode.Should().Be(KeyValueCollectionMode.Off);
-            options.DataCollection!.StackFrameVariables!.Mode.Should().Be(KeyValueCollectionMode.AllowList);
-            options.DataCollection!.StackFrameVariables!.Terms.Should().Equal("orderId");
-        }
+        options.DataCollection!.HttpHeaders.Response.Mode.Should().Be(KeyValueCollectionMode.Off);
     }
 
     [Fact]
@@ -182,43 +174,18 @@ public class DataCollectionConfigurationTests
     {
         var options = Bind(("DataCollection:UrlQueryParams:Terms:0", "session_id"));
 
-        var behavior = options.DataCollection!.UrlQueryParams!;
+        var behavior = options.DataCollection!.UrlQueryParams;
         behavior.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         behavior.Terms.Should().Equal("session_id");
     }
 
     [Fact]
-    public void Bind_KeyValueSectionAbsent_LeavesCategoryUnset()
-    {
-        var options = Bind(("DataCollection:UserInfo", "false"));
-
-        options.DataCollection!.Cookies.Should().BeNull();
-        options.DataCollection!.HttpHeaders.Response.Should().BeNull();
-    }
-
-    [Theory]
-    [InlineData("false")]
-    [InlineData("Off")]
-    public void Bind_KeyValueScalarValue_IsIgnoredAndStillOptsIn(string scalar)
-    {
-        // The bool shorthand that code has for key-value categories has no configuration equivalent: the
-        // surrogate binds from Mode/Terms, so a scalar is silently dropped by the configuration binder.
-        // The section is still present, so DataCollection is opted into with the category left at its default.
-        var options = Bind(("DataCollection:Cookies", scalar));
-
-        using (new AssertionScope())
-        {
-            options.DataCollection.Should().NotBeNull();
-            options.DataCollection!.Cookies.Should().BeNull();
-        }
-    }
-
-    [Fact]
-    public void Bind_HttpBodiesArray_CombinesEntries()
+    public void Bind_HttpBodiesArray_CombinesRecognizedEntries()
     {
         var options = Bind(
-            ("DataCollection:HttpBodies:0", "IncomingRequest"),
-            ("DataCollection:HttpBodies:1", "OutgoingResponse"));
+            ("DataCollection:HttpBodies:0", "incomingRequest"),
+            ("DataCollection:HttpBodies:1", "OutgoingResponse"),
+            ("DataCollection:HttpBodies:2", "Typo"));
 
         options.DataCollection!.HttpBodies.Should().Be(
             HttpBodyTypes.IncomingRequest | HttpBodyTypes.OutgoingResponse);
@@ -233,28 +200,14 @@ public class DataCollectionConfigurationTests
     }
 
     [Fact]
-    public void Bind_HttpBodiesEmptyArray_LeavesCategoryUnset()
+    public void Bind_HttpBodiesEmptyArray_LeavesCategoryAtDefault()
     {
         // A JSON empty array emits the key with an empty value and no children, which the binder surfaces as
         // null rather than an empty list. The spec's "[]" opt-out is therefore not expressible in configuration;
         // "[\"None\"]" is the equivalent. Locked in so a future change to the surrogate has to confront it.
         var options = Bind(("DataCollection:HttpBodies", string.Empty));
 
-        options.DataCollection!.HttpBodies.Should().BeNull();
-    }
-
-    [Fact]
-    public void Bind_HttpBodiesScalar_IsIgnored()
-    {
-        var options = Bind(("DataCollection:HttpBodies", "IncomingRequest"));
-
-        options.DataCollection!.HttpBodies.Should().BeNull();
-    }
-
-    [Fact]
-    public void Bind_AnyCategory_OptsIn()
-    {
-        Bind(("DataCollection:Cookies:Mode", "Off")).DataCollection.Should().NotBeNull();
+        options.DataCollection!.HttpBodies.Should().Be(HttpBodyTypes.All);
     }
 }
 #endif

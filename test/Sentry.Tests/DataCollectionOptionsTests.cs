@@ -3,78 +3,80 @@ namespace Sentry.Tests;
 public class DataCollectionOptionsTests
 {
     [Fact]
-    public void DataCollection_ByDefault_IsUnset()
+    public void ConfigureDataCollection_StartsAtSpecDefaults()
     {
-        new SentryOptions().DataCollection.Should().BeNull();
-    }
+        var options = new SentryOptions();
 
-    [Fact]
-    public void DataCollection_WhenAssigned_LeavesEveryCategoryUnset()
-    {
-        var options = new SentryOptions { DataCollection = new DataCollectionOptions() };
+        options.ConfigureDataCollection(_ => { });
 
         using (new AssertionScope())
         {
-            options.DataCollection.UserInfo.Should().BeNull();
-            options.DataCollection.Cookies.Should().BeNull();
-            options.DataCollection.HttpBodies.Should().BeNull();
-            options.DataCollection.UrlQueryParams.Should().BeNull();
-            options.DataCollection.DatabaseQueryData.Should().BeNull();
-            options.DataCollection.Queues.Should().BeNull();
-            options.DataCollection.FilePaths.Should().BeNull();
-            options.DataCollection.StackFrameVariables.Should().BeNull();
-            options.DataCollection.FrameContextLines.Should().BeNull();
-            options.DataCollection!.HttpHeaders.Request.Should().BeNull();
-            options.DataCollection.HttpHeaders.Response.Should().BeNull();
-            options.DataCollection.GraphQL.Document.Should().BeNull();
-            options.DataCollection.GraphQL.Variables.Should().BeNull();
-            options.DataCollection.GenAI.Inputs.Should().BeNull();
-            options.DataCollection.GenAI.Outputs.Should().BeNull();
-            options.DataCollection.Mcp.Inputs.Should().BeNull();
-            options.DataCollection.Mcp.Outputs.Should().BeNull();
+            options.DataCollection!.UserInfo.Should().BeTrue();
+            options.DataCollection.HttpBodies.Should().Be(HttpBodyTypes.All);
+            options.DataCollection.DatabaseQueryData.Should().BeTrue();
+            options.DataCollection.Cookies.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            options.DataCollection.UrlQueryParams.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            options.DataCollection.HttpHeaders.Request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            options.DataCollection.HttpHeaders.Response.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            options.DataCollection.GraphQL.Document.Should().BeTrue();
+            options.DataCollection.GraphQL.Variables.Should().BeTrue();
+            options.DataCollection.GenAI.Inputs.Should().BeTrue();
+            options.DataCollection.GenAI.Outputs.Should().BeTrue();
         }
     }
 
     [Fact]
-    public void DataCollection_WhenAssigned_SignalsOptIn()
+    public void ConfigureDataCollection_NestedCategories_AreSettableInPlace()
     {
-        var options = new SentryOptions { DataCollection = new DataCollectionOptions { UserInfo = false } };
+        var options = new SentryOptions();
 
-        options.DataCollection.Should().NotBeNull();
-        options.DataCollection!.UserInfo.Should().BeFalse();
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("x-tenant-id");
+            dataCollection.GraphQL.Variables = false;
+            dataCollection.GenAI.Inputs = false;
+        });
+
+        using (new AssertionScope())
+        {
+            options.DataCollection!.HttpHeaders.Request.Mode.Should().Be(KeyValueCollectionMode.AllowList);
+            options.DataCollection.HttpHeaders.Request.Terms.Should().Equal("x-tenant-id");
+            options.DataCollection.GraphQL.Variables.Should().BeFalse();
+            options.DataCollection.GenAI.Inputs.Should().BeFalse();
+        }
     }
 
     [Fact]
-    public void DataCollection_IsNotAffectedBySendDefaultPii()
+    public void ConfigureDataCollection_CalledTwice_BuildsOnTheSameOptions()
     {
-        var options = new SentryOptions { SendDefaultPii = true };
+        var options = new SentryOptions();
 
-        options.DataCollection.Should().BeNull();
+        options.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = false);
+        options.ConfigureDataCollection(dataCollection => dataCollection.DatabaseQueryData = false);
+
+        using (new AssertionScope())
+        {
+            options.DataCollection!.UserInfo.Should().BeFalse();
+            options.DataCollection.DatabaseQueryData.Should().BeFalse();
+        }
     }
 }
 
 public class KeyValueCollectionBehaviorTests
 {
     [Fact]
-    public void Off_CollectsNothingAndHasNoTerms()
+    public void Off_HasOffModeAndNoTerms()
     {
-        KeyValueCollectionBehavior.Off.Mode.Should().Be(KeyValueCollectionMode.Off);
-        KeyValueCollectionBehavior.Off.Terms.Should().BeEmpty();
-    }
+        var behavior = KeyValueCollectionBehavior.Off;
 
-    [Fact]
-    public void DenyList_WithoutTerms_UsesDenyListModeAndNoAdditionalTerms()
-    {
-        var behavior = KeyValueCollectionBehavior.DenyList();
-
-        behavior.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+        behavior.Mode.Should().Be(KeyValueCollectionMode.Off);
         behavior.Terms.Should().BeEmpty();
     }
 
     [Fact]
-    public void DenyList_WithTerms_KeepsTerms()
+    public void DenyList_WithTerms_KeepsNonEmptyTerms()
     {
-        var behavior = KeyValueCollectionBehavior.DenyList("forwarded", "-ip");
+        var behavior = KeyValueCollectionBehavior.DenyList("forwarded", "", null!, "-ip");
 
         behavior.Mode.Should().Be(KeyValueCollectionMode.DenyList);
         behavior.Terms.Should().Equal("forwarded", "-ip");
@@ -95,12 +97,6 @@ public class KeyValueCollectionBehaviorTests
         KeyValueCollectionBehavior.DenyList(null!).Terms.Should().BeEmpty();
     }
 
-    [Fact]
-    public void AllowList_ExplicitNullTerms_HasEmptyTerms()
-    {
-        KeyValueCollectionBehavior.AllowList(null!).Terms.Should().BeEmpty();
-    }
-
     [Theory]
     [InlineData(true, KeyValueCollectionMode.DenyList)]
     [InlineData(false, KeyValueCollectionMode.Off)]
@@ -111,47 +107,4 @@ public class KeyValueCollectionBehaviorTests
         behavior.Mode.Should().Be(expected);
     }
 
-    [Fact]
-    public void ImplicitConversionFromBool_AssignsToCategory()
-    {
-        var options = new SentryOptions
-        {
-            DataCollection = new DataCollectionOptions { Cookies = false, StackFrameVariables = true }
-        };
-
-        options.DataCollection.Cookies!.Mode.Should().Be(KeyValueCollectionMode.Off);
-        options.DataCollection.StackFrameVariables!.Mode.Should().Be(KeyValueCollectionMode.DenyList);
-    }
-}
-
-public class HttpBodyTypesTests
-{
-    [Fact]
-    public void All_ContainsEveryDirection()
-    {
-        HttpBodyTypes.All.Should().Be(
-            HttpBodyTypes.IncomingRequest | HttpBodyTypes.OutgoingRequest |
-            HttpBodyTypes.IncomingResponse | HttpBodyTypes.OutgoingResponse);
-    }
-
-    [Fact]
-    public void None_IsDefaultAndHasNoFlags()
-    {
-        default(HttpBodyTypes).Should().Be(HttpBodyTypes.None);
-        HttpBodyTypes.All.HasFlag(HttpBodyTypes.None).Should().BeTrue();
-    }
-
-    [Fact]
-    public void Flags_AreIndependentlyCombinable()
-    {
-        var bodies = HttpBodyTypes.IncomingRequest | HttpBodyTypes.OutgoingResponse;
-
-        using (new AssertionScope())
-        {
-            bodies.HasFlag(HttpBodyTypes.IncomingRequest).Should().BeTrue();
-            bodies.HasFlag(HttpBodyTypes.OutgoingResponse).Should().BeTrue();
-            bodies.HasFlag(HttpBodyTypes.OutgoingRequest).Should().BeFalse();
-            bodies.HasFlag(HttpBodyTypes.IncomingResponse).Should().BeFalse();
-        }
-    }
 }

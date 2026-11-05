@@ -22,7 +22,7 @@ public class SentryAspNetCoreOptionsSetupTests
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection(Configuration)
                 .Build();
-            var loggingConfig = Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>();
+            var loggingConfig = Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreStructuredLoggerProvider>>();
             loggingConfig.Configuration.Returns(config);
             return new(loggingConfig);
         }
