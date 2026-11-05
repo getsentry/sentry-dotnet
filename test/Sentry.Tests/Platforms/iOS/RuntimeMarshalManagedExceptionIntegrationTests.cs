@@ -125,6 +125,37 @@ public class RuntimeMarshalManagedExceptionIntegrationTests
         _fixture.Runtime.Received(1).IgnoreNextSignal(6);
     }
 
+    [Theory]
+    [InlineData(true, MarshalManagedExceptionMode.UnwindNativeCode)]
+    [InlineData(false, MarshalManagedExceptionMode.ThrowObjectiveCException)]
+    public void Handle_EscapedNativeScopeCallback_ReturnsExceptionToCaller(bool isMono, MarshalManagedExceptionMode expectedMode)
+    {
+        _fixture.Runtime.IsMono.Returns(isMono);
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+        var args = new MarshalManagedExceptionEventArgs { Exception = new Exception(), ExceptionMode = MarshalManagedExceptionMode.Default };
+
+        CocoaScope.Configure(_ => { }, configureNativeScope: _ => sut.Handle(this, args));
+
+        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        Assert.Equal(expectedMode, args.ExceptionMode);
+        _fixture.Runtime.DidNotReceive().IgnoreNextSignal(Arg.Any<int>());
+    }
+
+    [Fact]
+    public void Handle_CaptureThrows_LeavesModeUnchanged()
+    {
+        _fixture.Hub.When(hub => hub.CaptureEvent(Arg.Any<SentryEvent>())).Do(_ => throw new InvalidOperationException());
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+        var args = new MarshalManagedExceptionEventArgs { Exception = new Exception(), ExceptionMode = MarshalManagedExceptionMode.Default };
+
+        sut.Handle(this, args);
+
+        Assert.Equal(MarshalManagedExceptionMode.Default, args.ExceptionMode);
+        _fixture.Runtime.DidNotReceive().IgnoreNextSignal(Arg.Any<int>());
+    }
+
     [Fact]
     public void Handle_NoException_DoesNotIgnoreSigabrt()
     {
