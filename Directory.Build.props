@@ -95,7 +95,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
+    <!-- Stryker's analysis builds don't build project references, so the detector can't open their assemblies -->
+    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" Condition="'$(SkipUnoptimizedAssemblyDetector)' != 'true'" />
     <PackageReference Include="Roslynator.Analyzers" Version="4.15.0" PrivateAssets="All" />
   </ItemGroup>
 
