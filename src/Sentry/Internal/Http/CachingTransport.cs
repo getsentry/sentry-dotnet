@@ -268,11 +268,10 @@ internal class CachingTransport : ITransport, IDisposable
 
     private async Task ProcessCacheAsync(CancellationToken cancellation)
     {
+        // Make sure we're the only thread processing items
+        await _processingSignal.WaitAsync(cancellation).ConfigureAwait(false);
         try
         {
-            // Make sure we're the only thread processing items
-            await _processingSignal.WaitAsync(cancellation).ConfigureAwait(false);
-
             // Signal that we can start waiting for _options.InitCacheFlushTimeout
             _preInitCacheResetEvent?.Set();
 
