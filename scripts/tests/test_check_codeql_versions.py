@@ -62,6 +62,19 @@ class CodeQlVersionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "upload-sarif@v3"):
             checker.check_versions(self.root)
 
+    def test_issue_templates_and_non_action_yaml_are_ignored(self):
+        self.write("workflows/codeql.yml", "- uses: github/codeql-action/init@v4\n"
+                   "- uses: github/codeql-action/analyze@v4\n")
+        self.write("ISSUE_TEMPLATE/bug.yml", "description: |\n"
+                   "  uses: github/codeql-action/init@old\n")
+        self.write("actions/example/config.yml", "uses: github/codeql-action/init@old\n")
+        self.assertEqual(checker.check_versions(self.root), "v4")
+
+    def test_nested_workflow_examples_are_ignored(self):
+        self.write("workflows/codeql.yml", "- uses: github/codeql-action/init@v4\n")
+        self.write("workflows/examples/old.yml", "- uses: github/codeql-action/init@old\n")
+        self.assertEqual(checker.check_versions(self.root), "v4")
+
     def test_missing_references_fail(self):
         self.write("workflows/other.yml", "- uses: actions/checkout@v7\n")
         with self.assertRaisesRegex(ValueError, "No CodeQL action references"):

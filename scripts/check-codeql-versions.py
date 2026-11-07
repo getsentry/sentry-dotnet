@@ -10,8 +10,12 @@ ACTION = re.compile(
 
 def check_versions(root):
     actions = []
-    for path in sorted((root / ".github").rglob("*")):
-        if not path.is_file() or path.suffix not in (".yml", ".yaml"):
+    paths = set()
+    for extension in ("yml", "yaml"):
+        paths.update(root.glob(f".github/workflows/*.{extension}"))
+        paths.update(root.glob(f".github/actions/**/action.{extension}"))
+    for path in sorted(paths):
+        if not path.is_file():
             continue
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             match = ACTION.fullmatch(line)
