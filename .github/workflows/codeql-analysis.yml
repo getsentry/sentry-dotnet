@@ -31,6 +31,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Check CodeQL action versions
+        run: |
+          python3 -B -m unittest discover -s scripts/tests -p 'test_check_codeql_versions.py'
+          python3 -B scripts/check-codeql-versions.py
+
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
