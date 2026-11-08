@@ -5,6 +5,7 @@ using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore;
@@ -142,7 +143,7 @@ internal static class ScopeExtensions
                 continue;
             }
 
-            scope.Request.Headers[requestHeader.Key] = requestHeader.Value!;
+            scope.Request.Headers[requestHeader.Key] = SensitiveDataFilter.FilterHeaderValue(requestHeader.Key, requestHeader.Value!);
 
             if (requestHeader.Key == HeaderNames.Cookie)
             {

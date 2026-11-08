@@ -30,6 +30,39 @@ public class SensitiveDataFilterTests
         SensitiveDataFilter.IsSensitiveKey(term).Should().BeTrue();
     }
 
+    [Theory]
+    [InlineData("Authorization")]
+    [InlineData("Proxy-Authorization")]
+    [InlineData("X-Api-Key")]
+    [InlineData("X-CSRF-Token")]
+    [InlineData("Cookie")]
+    [InlineData("cookie")]
+    [InlineData("COOKIE")]
+    [InlineData("Set-Cookie")]
+    [InlineData("set-cookie")]
+    public void FilterHeaderValue_SensitiveHeader_ReturnsFiltered(string name)
+    {
+        SensitiveDataFilter.FilterHeaderValue(name, "value").Should().Be("[Filtered]");
+    }
+
+    [Theory]
+    [InlineData("Content-Type")]
+    [InlineData("X-Cookie-Debug")]
+    [InlineData("Cookie-Consent")]
+    [InlineData("Set-Cookie2")]
+    public void FilterHeaderValue_NonSensitiveHeader_KeepsValue(string name)
+    {
+        SensitiveDataFilter.FilterHeaderValue(name, "value").Should().Be("value");
+    }
+
+    [Theory]
+    [InlineData("Cookie")]
+    [InlineData("Set-Cookie")]
+    public void IsSensitiveKey_CookieHeaderNames_ReturnsFalse(string name)
+    {
+        SensitiveDataFilter.IsSensitiveKey(name).Should().BeFalse();
+    }
+
     [Fact]
     public void SensitiveKeyTerms_MatchesSpecDenylistExactly()
     {

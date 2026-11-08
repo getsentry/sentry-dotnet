@@ -72,6 +72,14 @@ internal static class SensitiveDataFilter
 
     internal static bool IsSensitiveKey(string key) => MatchesAny(key, SensitiveKeyTerms);
 
+    internal static string FilterHeaderValue(string name, string value) =>
+        IsSensitiveKey(name) || IsCookieHeader(name) ? FilteredValue : value;
+
+    // Exact match, because a "cookie" denylist term would also filter names such as X-Cookie-Debug
+    private static bool IsCookieHeader(string name) =>
+        name.Equals("Cookie", StringComparison.OrdinalIgnoreCase) ||
+        name.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>
     /// Percent-decodes a key so an encoded name such as "%74oken" is matched against the denylist. Callers must
     /// still emit the original key and value: the spec requires encoded query parameters to be stored exactly as

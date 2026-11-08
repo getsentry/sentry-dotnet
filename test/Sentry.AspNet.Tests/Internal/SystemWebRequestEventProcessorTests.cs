@@ -87,4 +87,66 @@ public class SystemWebRequestEventProcessorTests :
         var processedEvt = sut.Process(evt);
         Assert.Equal(userIp, processedEvt?.User.IpAddress);
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Process_SensitiveRequestHeaders_KeepsNamesAndFiltersValues(bool sendDefaultPii)
+    {
+        Context = HttpContextBuilder.BuildWithHeaders(
+            ["Authorization", "Bearer secret"],
+            ["X-Api-Key", "secret"],
+            ["Set-Cookie", "name=secret"],
+            ["X-Request-Id", "abc"]);
+        Context.User = new GenericPrincipal(new GenericIdentity("TestUser"), null);
+        _fixture.SentryOptions.SendDefaultPii = sendDefaultPii;
+        var evt = new SentryEvent();
+
+        _fixture.GetSut().Process(evt);
+
+        Assert.Equal("[Filtered]", evt.Request.Headers["Authorization"]);
+        Assert.Equal("[Filtered]", evt.Request.Headers["X-Api-Key"]);
+        Assert.Equal("[Filtered]", evt.Request.Headers["Set-Cookie"]);
+        Assert.Equal("abc", evt.Request.Headers["X-Request-Id"]);
+    }
+
+    [Fact]
+    public void Process_SendDefaultPiiTrue_FiltersCookieHeaderValue()
+    {
+        Context = HttpContextBuilder.BuildWithHeaders(["Cookie", "name=secret"]);
+        Context.User = new GenericPrincipal(new GenericIdentity("TestUser"), null);
+        _fixture.SentryOptions.SendDefaultPii = true;
+        var evt = new SentryEvent();
+
+        _fixture.GetSut().Process(evt);
+
+        Assert.Equal("[Filtered]", evt.Request.Headers["Cookie"]);
+    }
+
+    [Fact]
+    public void Process_SendDefaultPiiFalse_DoesNotCaptureCookieHeader()
+    {
+        Context = HttpContextBuilder.BuildWithHeaders(["Cookie", "name=secret"]);
+        _fixture.SentryOptions.SendDefaultPii = false;
+        var evt = new SentryEvent();
+
+        _fixture.GetSut().Process(evt);
+
+        Assert.False(evt.Request.Headers.ContainsKey("Cookie"));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Process_LowercaseCookieHeader_FiltersValue(bool sendDefaultPii)
+    {
+        Context = HttpContextBuilder.BuildWithHeaders(["cookie", "name=secret"]);
+        Context.User = new GenericPrincipal(new GenericIdentity("TestUser"), null);
+        _fixture.SentryOptions.SendDefaultPii = sendDefaultPii;
+        var evt = new SentryEvent();
+
+        _fixture.GetSut().Process(evt);
+
+        Assert.Equal("[Filtered]", evt.Request.Headers["cookie"]);
+    }
 }
