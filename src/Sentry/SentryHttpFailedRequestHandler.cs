@@ -85,7 +85,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
         }
         else
         {
-            sentryRequest.Url = uri is null ? null : QueryStringFilter.FilterUrl(uri.AbsoluteUri);
+            sentryRequest.Url = QueryStringFilter.FilterUrl(uri?.AbsoluteUri);
             sentryRequest.Cookies = request.Headers.GetCookies();
             sentryRequest.AddHeaders(request.Headers);
             responseContext.Cookies = response.Headers.GetCookies();

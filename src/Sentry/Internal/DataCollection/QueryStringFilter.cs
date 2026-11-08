@@ -33,8 +33,14 @@ internal static class QueryStringFilter
         return prefix + string.Join("&", parameters);
     }
 
-    internal static string FilterUrl(string url)
+    [return: NotNullIfNotNull(nameof(url))]
+    internal static string? FilterUrl(string? url)
     {
+        if (url is null)
+        {
+            return null;
+        }
+
         var queryStart = url.IndexOf('?');
         var fragmentStart = url.IndexOf('#');
         if (queryStart < 0 || (fragmentStart >= 0 && fragmentStart < queryStart))

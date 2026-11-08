@@ -61,6 +61,7 @@ public class QueryStringFilterTests
     [InlineData("https://example.com/api/users")]
     [InlineData("https://example.com/#a?token=abc")]
     [InlineData("")]
+    [InlineData(null)]
     public void FilterUrl_NoQuery_ReturnsInputUnchanged(string input) =>
         QueryStringFilter.FilterUrl(input).Should().Be(input);
 

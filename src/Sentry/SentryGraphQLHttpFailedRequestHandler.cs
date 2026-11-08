@@ -73,7 +73,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             {
                 sentryRequest.Cookies = request.Headers.GetCookies();
                 sentryRequest.Data = requestContent?.RequestContent;
-                sentryRequest.Url = request.RequestUri is null ? null : QueryStringFilter.FilterUrl(request.RequestUri.AbsoluteUri);
+                sentryRequest.Url = QueryStringFilter.FilterUrl(request.RequestUri?.AbsoluteUri);
                 sentryRequest.AddHeaders(request.Headers);
                 responseContext.Cookies = response.Headers.GetCookies();
                 responseContext.Data = json;
