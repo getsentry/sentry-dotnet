@@ -109,6 +109,16 @@ public partial class ScopeExtensionsTests
     }
 
     [Fact]
+    public void Populate_Request_QueryStringWithSensitiveParameter_FiltersValueAndPreservesEncoding()
+    {
+        _httpContext.Request.QueryString.Returns(new QueryString("?token=abc123&q=a%20b%26c&page=5"));
+
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        Assert.Equal("?token=[Filtered]&q=a%20b%26c&page=5", _sut.Request.QueryString);
+    }
+
+    [Fact]
     public void Populate_Request_Url_SetToScope()
     {
         const string expectedPath = "/request/path";

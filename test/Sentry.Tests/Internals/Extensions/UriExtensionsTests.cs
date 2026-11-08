@@ -4,7 +4,7 @@ namespace Sentry.Tests.Internals.Extensions;
 public class UriExtensionsTests
 {
     [Fact]
-    public void HttpRequestUrl_ReturnsHttpRequestUrl()
+    public void FilteredHttpRequestUrl_ReturnsHttpRequestUrl()
     {
         // Arrange
         var baseUri = new Uri("https://www.contoso.com");
@@ -12,14 +12,24 @@ public class UriExtensionsTests
         var expected = "https://www.contoso.com/catalog/shownew.htm?date=today";
 
         // Act
-        var actual = uri.HttpRequestUrl();
+        var actual = uri.FilteredHttpRequestUrl();
 
         // Assert
         actual.Should().Be(expected);
     }
 
     [Fact]
-    public void HttpRequestUrl_DangerousDisablePathAndQueryCanonicalization_ReturnsHttpRequestUrl()
+    public void FilteredHttpRequestUrl_SensitiveParameter_FiltersValueAndPreservesEncoding()
+    {
+        var uri = new Uri("https://user:pass@example.com/api/users?token=abc123&q=a%20b%26c&page=5#top");
+
+        var actual = uri.FilteredHttpRequestUrl();
+
+        actual.Should().Be("https://example.com/api/users?token=[Filtered]&q=a%20b%26c&page=5");
+    }
+
+    [Fact]
+    public void FilteredHttpRequestUrl_DangerousDisablePathAndQueryCanonicalization_ReturnsHttpRequestUrl()
     {
         // Arrange
         var options = new UriCreationOptions();
@@ -28,7 +38,7 @@ public class UriExtensionsTests
         var expected = "https://www.contoso.com/";
 
         // Act
-        var actual = uri.HttpRequestUrl();
+        var actual = uri.FilteredHttpRequestUrl();
 
         // Assert
         actual.Should().Be(expected);

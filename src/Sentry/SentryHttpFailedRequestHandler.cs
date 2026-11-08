@@ -1,3 +1,4 @@
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
@@ -61,7 +62,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
         var uri = response.RequestMessage?.RequestUri;
         var sentryRequest = new SentryRequest
         {
-            QueryString = uri?.Query,
+            QueryString = QueryStringFilter.Filter(uri?.Query),
             Method = response.RequestMessage?.Method.Method.ToUpperInvariant()
         };
 
@@ -80,11 +81,11 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
 
         if (!Options.SendDefaultPii)
         {
-            sentryRequest.Url = uri?.HttpRequestUrl();
+            sentryRequest.Url = uri?.FilteredHttpRequestUrl();
         }
         else
         {
-            sentryRequest.Url = uri?.AbsoluteUri;
+            sentryRequest.Url = uri is null ? null : QueryStringFilter.FilterUrl(uri.AbsoluteUri);
             sentryRequest.Cookies = request.Headers.GetCookies();
             sentryRequest.AddHeaders(request.Headers);
             responseContext.Cookies = response.Headers.GetCookies();

@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
@@ -78,7 +79,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         // (may be null if transaction is not set on the scope)
         var span = _hub.GetSpan()?.StartChild(
             "http.client",
-            $"{method} {url}" // e.g. "GET https://example.com"
+            $"{method} {QueryStringFilter.RemoveQueryAndFragment(url)}" // e.g. "GET https://example.com"
             );
         span?.SetOrigin(HttpClientOrigin);
         span?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
@@ -94,7 +95,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     {
         var breadcrumbData = new Dictionary<string, string>
         {
-            {"url", url},
+            {"url", QueryStringFilter.FilterUrl(url)},
             {"method", method},
             {"status_code", ((int) response.StatusCode).ToString()}
         };

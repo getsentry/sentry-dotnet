@@ -1,6 +1,7 @@
 using OpenTelemetry;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.OpenTelemetry;
 
@@ -19,6 +20,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
     private readonly SentryOptions? _options;
+    private static readonly string[] UrlAttributeKeys =
+    [
+        OtelSemanticConventions.AttributeUrlFull,
+        OtelSemanticConventions.AttributeHttpUrl,
+        OtelSemanticConventions.AttributeHttpTarget,
+    ];
+
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
 
     private static readonly long PruningInterval = TimeSpan.FromSeconds(5).Ticks;
@@ -232,6 +240,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             return;
         }
 
+        FilterUrlQueryAttributes(attributes);
+
         var (operation, description, source) = ParseOtelSpanDescription(data, attributes);
         span.Operation = operation;
         span.Description = description;
@@ -405,7 +415,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             {
                 // Per OpenTelemetry spec, client spans use only the method.
                 var description = (attributes.UrlFullAttribute() is { } fullUrl)
-                    ? $"{httpMethod} {fullUrl}"
+                    ? $"{httpMethod} {QueryStringFilter.RemoveQueryAndFragment(fullUrl)}"
                     : httpMethod;
                 return ("http.client", description, TransactionNameSource.Custom);
             }
@@ -419,8 +429,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpTarget, out string httpTarget))
             {
                 // A target exists.  Use the method and target.  If the target is "/" we can treat it like a route.
-                var source = httpTarget == "/" ? TransactionNameSource.Route : TransactionNameSource.Url;
-                return ("http.server", $"{httpMethod} {httpTarget}", source);
+                var target = QueryStringFilter.RemoveQueryAndFragment(httpTarget);
+                var source = target == "/" ? TransactionNameSource.Route : TransactionNameSource.Url;
+                return ("http.server", $"{httpMethod} {target}", source);
             }
 
             // Some other type of HTTP server span.  Pass it through with the original name.
@@ -481,6 +492,22 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         }
 
         return otelContext;
+    }
+
+    private static void FilterUrlQueryAttributes(IDictionary<string, object?> attributes)
+    {
+        foreach (var key in UrlAttributeKeys)
+        {
+            if (attributes.TryGetTypedValue(key, out string url))
+            {
+                attributes[key] = QueryStringFilter.FilterUrl(url);
+            }
+        }
+
+        if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeUrlQuery, out string query))
+        {
+            attributes[OtelSemanticConventions.AttributeUrlQuery] = QueryStringFilter.Filter(query);
+        }
     }
 
     private void GenerateSentryErrorsFromOtelSpan(Activity activity, IDictionary<string, object?> spanAttributes)

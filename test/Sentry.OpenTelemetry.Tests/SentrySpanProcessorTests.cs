@@ -1033,6 +1033,73 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void ParseOtelSpanDescription_HttpClientUrlWithQuery_ExcludesQuery()
+    {
+        var data = Tracer.StartActivity("test op", ActivityKind.Client)!;
+        var attributes = new Dictionary<string, object>()
+        {
+            [OtelSemanticConventions.AttributeHttpRequestMethod] = "GET",
+            [OtelSemanticConventions.AttributeUrlFull] = "https://example.com/foo?token=abc#top",
+        };
+
+        var (_, description, _) = SentrySpanProcessor.ParseOtelSpanDescription(data, attributes);
+
+        description.Should().Be("GET https://example.com/foo");
+    }
+
+    [Theory]
+    [InlineData("/?token=abc", "GET /", TransactionNameSource.Route)]
+    [InlineData("/foo?token=abc", "GET /foo", TransactionNameSource.Url)]
+    public void ParseOtelSpanDescription_HttpTargetWithQuery_ExcludesQuery(
+        string target, string expectedDescription, TransactionNameSource expectedSource)
+    {
+        var data = Tracer.StartActivity("test op", ActivityKind.Server)!;
+        var attributes = new Dictionary<string, object>()
+        {
+            [OtelSemanticConventions.AttributeHttpRequestMethod] = "GET",
+            [OtelSemanticConventions.AttributeHttpTarget] = target,
+        };
+
+        var (_, description, source) = SentrySpanProcessor.ParseOtelSpanDescription(data, attributes);
+
+        description.Should().Be(expectedDescription);
+        source.Should().Be(expectedSource);
+    }
+
+    [Fact]
+    public void OnEnd_SpanWithSensitiveUrlAttributes_FiltersQueryParameterValues()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity(name: "transaction")!;
+        sut.OnStart(parent);
+
+        var tags = new Dictionary<string, object>
+        {
+            { OtelSemanticConventions.AttributeUrlFull, "https://example.com/api/users?token=abc123&q=a%20b%26c&page=5" },
+            { OtelSemanticConventions.AttributeHttpUrl, "https://example.com/api/users?token=abc123" },
+            { OtelSemanticConventions.AttributeHttpTarget, "/api/users?token=abc123" },
+            { OtelSemanticConventions.AttributeUrlQuery, "token=abc123&q=a%20b%26c&page=5" },
+        };
+        var data = Tracer.StartActivity(name: "span", kind: ActivityKind.Client, parentContext: default, tags)!;
+        sut.OnStart(data);
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        var extra = ((SpanTracer)span!).Extra;
+        extra[OtelSemanticConventions.AttributeUrlFull].Should()
+            .Be("https://example.com/api/users?token=[Filtered]&q=a%20b%26c&page=5");
+        extra[OtelSemanticConventions.AttributeHttpUrl].Should().Be("https://example.com/api/users?token=[Filtered]");
+        extra[OtelSemanticConventions.AttributeHttpTarget].Should().Be("/api/users?token=[Filtered]");
+        extra[OtelSemanticConventions.AttributeUrlQuery].Should().Be("token=[Filtered]&q=a%20b%26c&page=5");
+    }
+
+    [Fact]
     public void ParseOtelSpanDescription_HttpServer()
     {
         // Arrange
