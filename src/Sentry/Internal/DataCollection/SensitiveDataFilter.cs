@@ -75,9 +75,20 @@ internal static class SensitiveDataFilter
     /// <summary>
     /// Percent-decodes a key so an encoded name such as "%74oken" is matched against the denylist. Callers must
     /// still emit the original key and value: the spec requires encoded query parameters to be stored exactly as
-    /// they appear in the URL.
+    /// they appear in the URL. A malformed escape is matched undecoded rather than throwing.
     /// </summary>
-    internal static string DecodeKeyForMatching(string key) => Uri.UnescapeDataString(key);
+    internal static string DecodeKeyForMatching(string key)
+    {
+        try
+        {
+            return Uri.UnescapeDataString(key);
+        }
+        // .NET Framework throws for a malformed escape where modern .NET returns the input unchanged
+        catch (UriFormatException)
+        {
+            return key;
+        }
+    }
 
     /// <summary>
     /// Filters a single value according to <paramref name="behavior"/>. Returns the value unchanged, or
