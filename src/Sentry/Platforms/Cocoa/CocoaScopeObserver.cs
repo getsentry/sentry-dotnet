@@ -23,7 +23,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
         try
         {
             var b = breadcrumb.ToCocoaBreadcrumb();
-            SentryCocoaSdk.ConfigureScope(scope => scope.AddBreadcrumb(b));
+            CocoaScope.Configure(scope => scope.AddBreadcrumb(b), _options);
         }
         finally
         {
@@ -43,8 +43,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
 
             if (value is string s)
             {
-                SentryCocoaSdk.ConfigureScope(scope =>
-                    scope.SetExtraValue(NSObject.FromObject(s), key));
+                CocoaScope.Configure(scope => scope.SetExtraValue(NSObject.FromObject(s), key), _options);
 
                 return;
             }
@@ -52,7 +51,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
             try
             {
                 var json = value.ToUtf8Json();
-                SentryCocoaSdk.ConfigureScope(scope => scope.SetExtraValue(NSObject.FromObject(json), key));
+                CocoaScope.Configure(scope => scope.SetExtraValue(NSObject.FromObject(json), key), _options);
             }
             catch (Exception ex)
             {
@@ -75,7 +74,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
 
         try
         {
-            SentryCocoaSdk.ConfigureScope(scope => scope.SetTagValue(value, key));
+            CocoaScope.Configure(scope => scope.SetTagValue(value, key), _options);
         }
         finally
         {
@@ -87,7 +86,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
     {
         try
         {
-            SentryCocoaSdk.ConfigureScope(scope => scope.RemoveTagForKey(key));
+            CocoaScope.Configure(scope => scope.RemoveTagForKey(key), _options);
         }
         finally
         {
@@ -100,7 +99,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
         try
         {
             var u = user?.ToCocoaUser();
-            SentryCocoaSdk.ConfigureScope(scope => scope.SetUser(u));
+            CocoaScope.Configure(scope => scope.SetUser(u), _options);
         }
         finally
         {
@@ -124,7 +123,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
     {
         try
         {
-            SentryCocoaSdk.ConfigureScope(scope => scope.SetEnvironment(environment));
+            CocoaScope.Configure(scope => scope.SetEnvironment(environment), _options);
         }
         finally
         {
