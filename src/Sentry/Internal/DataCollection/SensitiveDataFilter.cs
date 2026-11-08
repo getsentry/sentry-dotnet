@@ -81,7 +81,8 @@ internal static class SensitiveDataFilter
 
     /// <summary>
     /// Filters a single value according to <paramref name="behavior"/>. Returns the value unchanged, or
-    /// <see cref="FilteredValue"/> in its place.
+    /// <see cref="FilteredValue"/> in its place. In <see cref="KeyValueCollectionMode.Off"/> mode the caller must
+    /// drop the key as well; this returns <see cref="FilteredValue"/> only so that a missed check fails closed.
     /// </summary>
     internal static string FilterValue(string key, string value, KeyValueCollectionBehavior behavior,
         IReadOnlyList<string>? additionalDenyTerms = null)

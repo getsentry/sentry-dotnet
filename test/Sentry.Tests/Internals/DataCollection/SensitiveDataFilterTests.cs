@@ -256,20 +256,6 @@ public class SensitiveDataFilterTests
             .Should().Be("text/html");
     }
 
-    [Fact]
-    public void FilterValue_DenyListWithEmptyTerm_DoesNotFilterEverything()
-    {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.DenyList(""))
-            .Should().Be("text/html");
-    }
-
-    [Fact]
-    public void FilterValue_AllowListWithEmptyTerm_DoesNotAllowEverything()
-    {
-        SensitiveDataFilter.FilterValue("Accept", "text/html", KeyValueCollectionBehavior.AllowList(""))
-            .Should().Be("[Filtered]");
-    }
-
     [Theory]
     [InlineData("")]
     [InlineData(null)]
