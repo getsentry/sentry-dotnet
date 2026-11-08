@@ -1283,8 +1283,8 @@ public class SentryOptions
 
 #if __MOBILE__
     /// <summary>
-    /// Whether the SDK should start a session automatically when it's initialized and
-    /// end the session when it's closed.
+    /// Whether the SDK should start a session automatically when the app comes to the foreground,
+    /// and end it once the app has been in the background for longer than <see cref="AutoSessionTrackingInterval"/>.
     /// On mobile application platforms, this is enabled by default.
     /// </summary>
     public bool AutoSessionTracking { get; set; } = true;
