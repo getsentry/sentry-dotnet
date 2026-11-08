@@ -19,7 +19,6 @@ public class DataCollectionResolverTests
             resolver.GraphQLVariables.Should().BeFalse();
             resolver.GenAIInputs.Should().BeFalse();
             resolver.GenAIOutputs.Should().BeFalse();
-            resolver.IncomingRequestBody.Should().BeFalse();
             resolver.OutgoingRequestBody.Should().BeFalse();
             resolver.IncomingResponseBody.Should().BeFalse();
             resolver.OutgoingResponseBody.Should().BeFalse();
@@ -70,6 +69,16 @@ public class DataCollectionResolverTests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void IncomingRequestBody_WithoutDataCollection_IsCollectedRegardlessOfSendDefaultPii(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+
+        Resolver(options).IncomingRequestBody.Should().BeTrue();
+    }
+
     [Fact]
     public void ConfiguredDataCollection_WithoutSendDefaultPii_UsesSpecDefaults()
     {
@@ -100,7 +109,6 @@ public class DataCollectionResolverTests
         var options = new SentryOptions { SendDefaultPii = true };
         options.ConfigureDataCollection(dataCollection =>
         {
-            dataCollection.UserInfo = false;
             dataCollection.DatabaseQueryData = false;
             dataCollection.HttpBodies = HttpBodyTypes.None;
             dataCollection.Cookies = KeyValueCollectionBehavior.Off;
@@ -112,7 +120,7 @@ public class DataCollectionResolverTests
 
         using (new AssertionScope())
         {
-            resolver.UserInfo.Should().BeFalse();
+            resolver.UserInfo.Should().BeTrue();
             resolver.DatabaseQueryData.Should().BeFalse();
             resolver.GraphQLDocument.Should().BeFalse();
             resolver.GraphQLVariables.Should().BeTrue();
@@ -124,21 +132,24 @@ public class DataCollectionResolverTests
         }
     }
 
-    [Fact]
-    public void HttpBodies_ConfiguredForOneDirection_CollectsOnlyThatDirection()
+    [Theory]
+    [InlineData(HttpBodyTypes.IncomingRequest)]
+    [InlineData(HttpBodyTypes.OutgoingRequest)]
+    [InlineData(HttpBodyTypes.IncomingResponse)]
+    [InlineData(HttpBodyTypes.OutgoingResponse)]
+    public void HttpBodies_ConfiguredForOneDirection_CollectsOnlyThatDirection(HttpBodyTypes bodyType)
     {
         var options = new SentryOptions();
-        options.ConfigureDataCollection(dataCollection =>
-            dataCollection.HttpBodies = HttpBodyTypes.IncomingRequest | HttpBodyTypes.OutgoingResponse);
+        options.ConfigureDataCollection(dataCollection => dataCollection.HttpBodies = bodyType);
 
         var resolver = Resolver(options);
 
         using (new AssertionScope())
         {
-            resolver.IncomingRequestBody.Should().BeTrue();
-            resolver.OutgoingResponseBody.Should().BeTrue();
-            resolver.OutgoingRequestBody.Should().BeFalse();
-            resolver.IncomingResponseBody.Should().BeFalse();
+            resolver.IncomingRequestBody.Should().Be(bodyType == HttpBodyTypes.IncomingRequest);
+            resolver.OutgoingRequestBody.Should().Be(bodyType == HttpBodyTypes.OutgoingRequest);
+            resolver.IncomingResponseBody.Should().Be(bodyType == HttpBodyTypes.IncomingResponse);
+            resolver.OutgoingResponseBody.Should().Be(bodyType == HttpBodyTypes.OutgoingResponse);
         }
     }
 
