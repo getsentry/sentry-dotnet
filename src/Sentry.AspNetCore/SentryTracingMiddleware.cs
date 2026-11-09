@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.AspNetCore;
@@ -87,6 +89,15 @@ internal class SentryTracingMiddleware
                 transaction.TraceId);
 
             transaction?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, context.Request.Method);
+
+            if (_options.SendDefaultPii && transaction is not null)
+            {
+                var cookies = CookieFilter.FilterCookieHeaders(context.Request.Headers[HeaderNames.Cookie]);
+                if (cookies.Length > 0)
+                {
+                    transaction.SetData(CookieFilter.RequestCookieAttribute, cookies);
+                }
+            }
 
             return transaction;
         }

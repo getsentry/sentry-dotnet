@@ -87,4 +87,31 @@ public class SystemWebRequestEventProcessorTests :
         var processedEvt = sut.Process(evt);
         Assert.Equal(userIp, processedEvt?.User.IpAddress);
     }
+
+    [Fact]
+    public void Process_SendDefaultPiiTrue_FiltersCookies()
+    {
+        Context = HttpContextBuilder.BuildWithCookies(new[]
+        {
+            new HttpCookie("user_session", "abc"),
+            new HttpCookie("theme", "dark-mode")
+        });
+        Context.User = new GenericPrincipal(new GenericIdentity("TestUser"), null);
+        _fixture.SentryOptions.SendDefaultPii = true;
+
+        var processedEvt = _fixture.GetSut().Process(new SentryEvent());
+
+        processedEvt?.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode");
+    }
+
+    [Fact]
+    public void Process_SendDefaultPiiFalse_DoesNotSetCookies()
+    {
+        Context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("theme", "dark-mode") });
+        _fixture.SentryOptions.SendDefaultPii = false;
+
+        var processedEvt = _fixture.GetSut().Process(new SentryEvent());
+
+        processedEvt?.Request.Cookies.Should().BeNull();
+    }
 }

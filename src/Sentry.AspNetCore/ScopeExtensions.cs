@@ -5,6 +5,7 @@ using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore;
@@ -146,7 +147,7 @@ internal static class ScopeExtensions
 
             if (requestHeader.Key == HeaderNames.Cookie)
             {
-                scope.Request.Cookies = requestHeader.Value;
+                scope.Request.Cookies = CookieFilter.ToEventCookies(CookieFilter.FilterCookieHeaders(requestHeader.Value));
             }
         }
 

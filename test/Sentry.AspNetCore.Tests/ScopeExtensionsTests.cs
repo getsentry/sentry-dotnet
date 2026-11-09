@@ -209,7 +209,21 @@ public partial class ScopeExtensionsTests
 
         Assert.Equal(headers[firstKey], _sut.Request.Headers[firstKey]);
 
-        _sut.Request.Cookies.Should().Be(headers[firstKey]);
+        _sut.Request.Cookies.Should().Be("[Filtered]");
+    }
+
+    [Fact]
+    public void Populate_SendDefaultPiiTrueRequestCookies_FiltersEachCookie()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "Cookie", new StringValues("user_session=abc; theme=dark-mode;opaque-token") }
+        });
+
+        SentryAspNetCoreOptions.SendDefaultPii = true;
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode; [Filtered]");
     }
 
     [Fact]

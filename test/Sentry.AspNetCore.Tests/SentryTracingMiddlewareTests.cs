@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry.AspNetCore.TestUtils;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.AspNetCore.Tests;
@@ -455,6 +456,60 @@ public class SentryTracingMiddlewareTests
         var dsc = transaction?.DynamicSamplingContext;
         Assert.NotNull(dsc);
         Assert.Equal(expectedBaggageHeader, dsc.ToBaggageHeader().ToString());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Transaction_cookie_attribute_is_filtered_and_gated_on_SendDefaultPii(bool sendDefaultPii)
+    {
+        // Arrange
+        ITransactionData transaction = null;
+
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 });
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry(options => options.SendDefaultPii = sendDefaultPii)
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+
+                app.UseEndpoints(routes =>
+                {
+                    routes.Map("/person/{id}", _ =>
+                    {
+                        transaction = (ITransactionData)hub.GetSpan();
+                        return Task.CompletedTask;
+                    });
+                });
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13");
+        request.Headers.Add("Cookie", "user_session=abc; theme=dark-mode;opaque-token");
+        await client.SendAsync(request);
+
+        // Assert
+        transaction.Should().NotBeNull();
+        if (sendDefaultPii)
+        {
+            var cookies = transaction.Data[CookieFilter.RequestCookieAttribute].Should().BeOfType<string[]>().Subject;
+            cookies.Should().Equal("user_session=[Filtered]", "theme=dark-mode", "[Filtered]");
+        }
+        else
+        {
+            transaction.Data.Should().NotContainKey(CookieFilter.RequestCookieAttribute);
+        }
     }
 
     [Fact]

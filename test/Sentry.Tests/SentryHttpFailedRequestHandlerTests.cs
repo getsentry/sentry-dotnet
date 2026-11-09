@@ -290,6 +290,31 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
+    public void HandleResponse_FailedRequestWithPii_FiltersCookies()
+    {
+        // Arrange
+        var sut = GetSut(new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            SendDefaultPii = true
+        });
+
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Post, "http://foo/bar");
+        response.RequestMessage.Headers.Add("Cookie", "user_session=abc; theme=dark-mode;opaque-token");
+        response.Headers.Add("Cookie", "csrf_token=abc; lang=en");
+
+        // Act
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        @event.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode; [Filtered]");
+        @event.Contexts.Response.Cookies.Should().Be("csrf_token=[Filtered]; lang=en");
+    }
+
+    [Fact]
     public void HandleResponse_FailedRequestNoPii_SkipsCookiesAndHeaders()
     {
         // Arrange
