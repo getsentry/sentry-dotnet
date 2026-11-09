@@ -52,6 +52,7 @@ public class CookieFilterTests
     [InlineData("theme=dark mode")]
     [InlineData("the me=dark")]
     [InlineData("theme=\"dark")]
+    [InlineData("theme=\"")]
     [InlineData("lang=en; theme=dark, user_session=abc")]
     [InlineData(";;")]
     public void FilterCookieHeader_Malformed_FallsBackToSingleFilteredElement(string header)
@@ -146,6 +147,12 @@ public class CookieFilterTests
     }
 
     [Fact]
+    public void FilterSetCookieHeader_NoAttributes_KeepsCookie()
+    {
+        CookieFilter.FilterSetCookieHeader("theme=light-mode").Should().Equal("theme=light-mode");
+    }
+
+    [Fact]
     public void FilterSetCookieHeader_SensitiveName_FiltersValue()
     {
         var result = CookieFilter.FilterSetCookieHeader("user_session=abc; Path=/; HttpOnly");
@@ -166,6 +173,7 @@ public class CookieFilterTests
     [Theory]
     [InlineData(null)]
     [InlineData("")]
+    [InlineData("   ")]
     public void FilterSetCookieHeader_NoHeader_ReturnsEmpty(string header)
     {
         CookieFilter.FilterSetCookieHeader(header).Should().BeEmpty();
@@ -188,6 +196,14 @@ public class CookieFilterTests
         ]);
 
         result.Should().Equal($"user_session={Filtered}", "theme=dark-mode", Filtered);
+    }
+
+    [Fact]
+    public void FilterCookiePairs_NullValue_KeepsNameWithEmptyValue()
+    {
+        var result = CookieFilter.FilterCookiePairs([new KeyValuePair<string, string>("theme", null)]);
+
+        result.Should().Equal("theme=");
     }
 
     [Fact]
