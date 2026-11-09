@@ -1,78 +1,15 @@
 # Changelog
 
-## 7.0.0-rc.3
-
-### Breaking Changes 🛠
-
-- Exclude Brotli from default SentryOptions.DecompressionMethods by @jamescrosswell and @claude in [#5816](https://github.com/getsentry/sentry-dotnet/pull/5816)
-
-### Features ✨
-
-#### Hangfire
-
-- feat(hangfire): Add an option to monitor all recurring jobs by @wedamija and @claude in [#5742](https://github.com/getsentry/sentry-dotnet/pull/5742)
-- Hangfire recurring jobs marked with `[SentryMonitorSlug]` now send their cron schedule and time zone with the check-in, so Sentry creates the monitor if it doesn't exist yet. This is on by default: on upgrade, existing monitors take their schedule and time zone from the recurring job on its next run (other monitor settings are kept). To keep managing schedules in Sentry, opt out with `UseSentry(o => o.SendMonitorConfig = false)`. by @wedamija and @claude in [#5665](https://github.com/getsentry/sentry-dotnet/pull/5665)
-
-#### Other
-
-- feat(quartz): Add an option to monitor all scheduled jobs by @wedamija, @michaelmairegger and 3 others in [#5741](https://github.com/getsentry/sentry-dotnet/pull/5741)
-- feat: add support for .NET 11 RC 3 by @ric-oliv, @claude and @jamescrosswell in [#5830](https://github.com/getsentry/sentry-dotnet/pull/5830)
-- Add `Sentry.Quartz3`, an integration for Quartz.NET 3.x (3.6 and later) on .NET Framework 4.6.2+ and .NET 8+ by @wedamija, @michaelmairegger and 3 others in [#5668](https://github.com/getsentry/sentry-dotnet/pull/5668)
-  - Register it with `services.AddQuartz(q => q.AddJobListener<SentryJobListener>())` or `scheduler.ListenerManager.AddJobListener(new SentryJobListener())`
-  - Jobs marked with `[SentryMonitorSlug]` send a Sentry Crons check-in for every run, with the trigger's cron or interval schedule as the monitor config, so monitors are created and kept up to date automatically
-  - Quartz.NET 3.x has no job middleware, so unlike `Sentry.Quartz` this doesn't run each job in its own scope or capture the exceptions jobs throw
-- Add `Sentry.Quartz`, an integration for Quartz.NET 4.x by @michaelmairegger, @jamescrosswell and 3 others in [#5505](https://github.com/getsentry/sentry-dotnet/pull/5505)
-  - `services.AddQuartz(q => q.AddSentry())` runs each job in its own scope and trace, tagged with its job key, and captures the exceptions jobs throw
-  - Jobs marked with `[SentryMonitorSlug]` send a Sentry Crons check-in for every run, with the trigger's cron or interval schedule as the monitor config, so monitors are created and kept up to date automatically
-  - `SentryQuartzOptions.ConfigureMonitorOptions` customizes thresholds or the schedule, and `SendMonitorConfig = false` sends check-ins without a schedule
-
-### Fixes 🐛
-
-#### Logging
-
-- fix(logging): warn when ClearProviders() removes the logger providers UseSentry added by @ric-oliv and @claude in [#5789](https://github.com/getsentry/sentry-dotnet/pull/5789)
-- fix(logging): make Logging.AddSentry() work after UseSentry and ClearProviders() by @ric-oliv and @claude in [#5776](https://github.com/getsentry/sentry-dotnet/pull/5776)
-
-#### Other
-
-- fix(hosting): start the SDK during Build() even when the app clears or replaces logger providers by @ric-oliv and @claude in [#5772](https://github.com/getsentry/sentry-dotnet/pull/5772)
-- fix(maui): report in_foreground for apps using the UIScene lifecycle by @jamescrosswell and @claude in [#5730](https://github.com/getsentry/sentry-dotnet/pull/5730)
-- fix(nlog): stack overflow when Debug is on and NLog handles ILogger by @jamescrosswell and @claude in [#5823](https://github.com/getsentry/sentry-dotnet/pull/5823)
-- fix: drop attachments whose stream turns out empty when the envelope is sent by @bitsandfoxes in [#5787](https://github.com/getsentry/sentry-dotnet/pull/5787)
-- fix: upload symbols and create releases when publishing Native AOT with the .NET 11 SDK by @jamescrosswell and @claude in [#5731](https://github.com/getsentry/sentry-dotnet/pull/5731)
-- fix: don't upload pre-trim PDBs for trimmed iOS and Mac Catalyst builds by @jamescrosswell and @claude in [#5732](https://github.com/getsentry/sentry-dotnet/pull/5732)
-- fix: avoid first-chance exception when getting length of non-seekable attachment streams by @bitsandfoxes in [#5736](https://github.com/getsentry/sentry-dotnet/pull/5736)
-
-### Dependencies ⬆️
-
-#### Deps
-
-- chore(deps): update Native SDK to v0.17.5 by @github-actions in [#5826](https://github.com/getsentry/sentry-dotnet/pull/5826)
-- chore(deps): update Java SDK to v8.62.0 by @github-actions in [#5824](https://github.com/getsentry/sentry-dotnet/pull/5824)
-- chore(deps): update Java SDK to v8.61.1 by @github-actions in [#5777](https://github.com/getsentry/sentry-dotnet/pull/5777)
-- chore(deps): update CLI to v3.8.2 by @github-actions in [#5778](https://github.com/getsentry/sentry-dotnet/pull/5778)
-- chore(deps): update Cocoa SDK to v9.31.0 by @ric-oliv and @claude with @github-actions in [#5769](https://github.com/getsentry/sentry-dotnet/pull/5769)
-- chore(deps): update CLI to v3.8.1 by @github-actions in [#5768](https://github.com/getsentry/sentry-dotnet/pull/5768)
-- chore(deps): update Native SDK to v0.17.4 by @github-actions in [#5743](https://github.com/getsentry/sentry-dotnet/pull/5743)
-- chore(deps): update Java SDK to v8.61.0 by @jamescrosswell and @claude with @github-actions in [#5734](https://github.com/getsentry/sentry-dotnet/pull/5734)
-- chore(deps): update Cocoa SDK to v9.30.2 by @github-actions in [#5735](https://github.com/getsentry/sentry-dotnet/pull/5735)
-
-### Other
-
-- perf: reduce allocations when pushing scopes via ILogger.BeginScope by @martincostello and @claude in [#5828](https://github.com/getsentry/sentry-dotnet/pull/5828)
-
-## 7.0.0-rc.2
+## Unreleased
 
 Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a single place to be initialized. It contains breaking changes, so read the upgrade notes below before you upgrade.
-
-> This is a release candidate, built against .NET 11 RC 2.
 
 ### Highlights
 
 - **.NET 11.** The SDK targets `net11.0` alongside .NET 8, 9 and 10, including Android, iOS and Mac Catalyst apps on .NET 11, with support for its new Android assembly store format and Zstandard-compressed assemblies.
 - **One place to initialize Sentry.** The `Microsoft.Extensions.Logging`, Serilog, NLog and log4net integrations now only capture logs, breadcrumbs and events; they no longer start the SDK. Initialize Sentry with `SentrySdk.Init` or `UseSentry`, and configure it from the `Sentry` section of `appsettings.json`.
 - **`UseSentry` for generic host apps.** The new `Sentry.Extensions.Hosting` package adds `UseSentry` to `Host.CreateApplicationBuilder` and `IHostBuilder`, for worker services, console apps, Azure Functions (isolated) and Windows services. ASP.NET Core apps can call `builder.UseSentry(...)` on `WebApplicationBuilder` and keep chaining.
-- **Cron monitors from code.** `SentrySdk.WithMonitor` and `SentrySdk.WithMonitorAsync` run a job, send its check-ins, and can create the monitor along with its schedule. Hangfire recurring jobs marked with `[SentryMonitorSlug]` send their cron schedule automatically.
+- **Cron monitors from code.** `SentrySdk.WithMonitor` and `SentrySdk.WithMonitorAsync` run a job, send its check-ins, and can create the monitor along with its schedule. Hangfire recurring jobs marked with `[SentryMonitorSlug]` send their cron schedule automatically, and the new `Sentry.Quartz` and `Sentry.Quartz3` packages do the same for Quartz.NET jobs.
 - **Less noise in tracing.** Requests that end in 301, 305–399 or 401–404 are no longer traced by default.
 - **The right environment everywhere.** ASP.NET Core, generic host apps, Blazor WebAssembly and Google Cloud Functions take the Sentry environment from the host environment, and logs, metrics, sessions and check-ins use an environment set on the scope.
 
@@ -102,7 +39,8 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 - `SentryOptions.ScopeObserver`, `EnableScopeSync` and `CrashedLastRun` are now internal.
 - On iOS and Mac Catalyst, `SentryOptions.Native.EnableAppHangTrackingV2` is removed; use `EnableAppHangTracking`. `SentryOptions.Native.AddInAppExclude(string)`, which had no effect, is removed too.
 - `Envelope.FromEvent`, `Envelope.FromFeedback` and `Envelope.FromTransaction` take the `IDiagnosticLogger` as their last parameter.
-- The OTLP exporter no longer sets a global OpenTelemetry propagator, and its `defaultTextMapPropagator` parameter is removed. The propagator should be configured via the OpenTelemetry SDK instead. `Sentry.OpenTelemetry` and `Sentry.OpenTelemetry.Exporter` now require OpenTelemetry 1.12.0 or later.
+- The OTLP exporter no longer sets a global OpenTelemetry propagator, and its `defaultTextMapPropagator` parameter is removed. The propagator should be configured via the OpenTelemetry SDK instead.
+- `SentryClientExtensions.GetInternalSentryOptions` is removed. Integrations that need the SDK's diagnostic logger can call the new `GetDiagnosticLogger()` extension on `IHub`, in `Sentry.Extensibility`.
 
 #### Changes in behavior
 
@@ -111,14 +49,18 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 - Events, transactions, logs and metrics report the SDK name of the integration that initialized Sentry, such as `sentry.dotnet.aspnetcore`, rather than the logging integration that captured them.
 - On Android and iOS, `SENTRY_RELEASE` takes precedence over the release derived from the app package.
 - Hangfire recurring jobs marked with `[SentryMonitorSlug]` send their schedule and time zone, which updates existing monitors on the next run. To keep managing schedules in Sentry, opt out with `UseSentry(o => o.SendMonitorConfig = false)`.
+- Category entries under `Logging:Sentry:LogLevel` now only filter structured logs. Apps that silenced a category this way start getting its breadcrumbs and events; to keep dropping them, use `AddLogEntryFilter`.
+- `SentryOptions.DecompressionMethods` now defaults to `GZip | Deflate`, leaving out Brotli. To accept Brotli responses again, set `options.DecompressionMethods |= DecompressionMethods.Brotli`.
 
 ### Breaking Changes 🛠
 
+- fix(logging)!: `Logging:Sentry:LogLevel` category entries only filter structured logs by @ric-oliv in [#5869](https://github.com/getsentry/sentry-dotnet/pull/5869)
+- Remove `GetInternalSentryOptions`, which was only meant for Sentry's own integrations. Integrations that need the SDK's diagnostic logger can call the new `GetDiagnosticLogger()` extension on `IHub`, in `Sentry.Extensibility`. by @jamescrosswell in [#5862](https://github.com/getsentry/sentry-dotnet/pull/5862)
+- Exclude Brotli from default SentryOptions.DecompressionMethods by @jamescrosswell and @claude in [#5816](https://github.com/getsentry/sentry-dotnet/pull/5816)
 - `builder.Logging.AddSentry()` no longer registers `IHub`, `ISentryClient` or `Func<IHub>` in the service collection. `UseSentry` registers them; apps that initialize Sentry with `SentrySdk.Init` and inject them now register them themselves by @jamescrosswell in [#5740](https://github.com/getsentry/sentry-dotnet/pull/5740)
 - fix(maui)!: options set in UseSentry now take precedence over appsettings.json by @jamescrosswell in [#5658](https://github.com/getsentry/sentry-dotnet/pull/5658)
 - The `Microsoft.Extensions.Logging` integration no longer initializes the SDK. Sentry must now be initialized separately from the logging integration (using `SentrySdk.Init` or `UseSentry`) by @jamescrosswell in [#5595](https://github.com/getsentry/sentry-dotnet/pull/5595)
 - Sentry's logging configuration section (`Logging:Sentry`) now only configures the logging integration. Core SDK settings there, such as `Dsn`, no longer have any effect and fail at startup with migration guidance: move them to the `Sentry` section, or pass them where Sentry is initialized by @jamescrosswell in [#5595](https://github.com/getsentry/sentry-dotnet/pull/5595)
-- Blazor WebAssembly's logger now respects the `MinimumEventLevel`, `MinimumBreadcrumbLevel`, log entry filters and `ConfigureScope` callbacks set in `UseSentry` by @jamescrosswell in [#5595](https://github.com/getsentry/sentry-dotnet/pull/5595)
 - feat(log4net)!: the Sentry appender no longer initializes the SDK by @jamescrosswell in [#5592](https://github.com/getsentry/sentry-dotnet/pull/5592)
 - feat(nlog)!: the Sentry target no longer initializes the SDK by @jamescrosswell in [#5585](https://github.com/getsentry/sentry-dotnet/pull/5585)
 - feat(serilog)!: the Sentry sink no longer initializes the SDK by @jamescrosswell in [#5573](https://github.com/getsentry/sentry-dotnet/pull/5573)
@@ -136,7 +78,6 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
   // Before
   Envelope.FromEvent(@event, logger, attachments, sessionUpdate);
   Envelope.FromTransaction(transaction, logger, attachments);
-
   // After
   Envelope.FromEvent(@event, attachments, sessionUpdate, logger);
   Envelope.FromTransaction(transaction, attachments, logger);
@@ -149,17 +90,23 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 
 ### Features ✨
 
-- Hangfire recurring jobs marked with `[SentryMonitorSlug]` now send their cron schedule and time zone with the check-in, so Sentry creates the monitor if it doesn't exist yet. This is on by default: on upgrade, existing monitors take their schedule and time zone from the recurring job on its next run (other monitor settings are kept). To keep managing schedules in Sentry, opt out with `UseSentry(o => o.SendMonitorConfig = false)`. by @wedamija in [#5665](https://github.com/getsentry/sentry-dotnet/pull/5665)
+- feat(hangfire): Add an option to monitor all recurring jobs by @wedamija and @claude in [#5742](https://github.com/getsentry/sentry-dotnet/pull/5742)
+- Hangfire recurring jobs marked with `[SentryMonitorSlug]` now send their cron schedule and time zone with the check-in, so Sentry creates the monitor if it doesn't exist yet. This is on by default: on upgrade, existing monitors take their schedule and time zone from the recurring job on its next run (other monitor settings are kept). To keep managing schedules in Sentry, opt out with `UseSentry(o => o.SendMonitorConfig = false)`. by @wedamija and @claude in [#5665](https://github.com/getsentry/sentry-dotnet/pull/5665)
+- feat(quartz): Add an option to monitor all scheduled jobs by @wedamija, @michaelmairegger and 3 others in [#5741](https://github.com/getsentry/sentry-dotnet/pull/5741)
+- Add `Sentry.Quartz3`, an integration for Quartz.NET 3.x (3.6 and later) on .NET Framework 4.6.2+ and .NET 8+ by @wedamija, @michaelmairegger and 3 others in [#5668](https://github.com/getsentry/sentry-dotnet/pull/5668)
+  - Register it with `services.AddQuartz(q => q.AddJobListener<SentryJobListener>())` or `scheduler.ListenerManager.AddJobListener(new SentryJobListener())`
+  - Jobs marked with `[SentryMonitorSlug]` send a Sentry Crons check-in for every run, with the trigger's cron or interval schedule as the monitor config, so monitors are created and kept up to date automatically
+  - Quartz.NET 3.x has no job middleware, so unlike `Sentry.Quartz` this doesn't run each job in its own scope or capture the exceptions jobs throw
+- Add `Sentry.Quartz`, an integration for Quartz.NET 4.x by @michaelmairegger, @jamescrosswell and 3 others in [#5505](https://github.com/getsentry/sentry-dotnet/pull/5505)
+  - `services.AddQuartz(q => q.AddSentry())` runs each job in its own scope and trace, tagged with its job key, and captures the exceptions jobs throw
+  - Jobs marked with `[SentryMonitorSlug]` send a Sentry Crons check-in for every run, with the trigger's cron or interval schedule as the monitor config, so monitors are created and kept up to date automatically
+  - `SentryQuartzOptions.ConfigureMonitorOptions` customizes thresholds or the schedule, and `SendMonitorConfig = false` sends check-ins without a schedule
 - feat(aspnetcore): add UseSentry overloads on WebApplicationBuilder by @ric-oliv in [#5720](https://github.com/getsentry/sentry-dotnet/pull/5720)
-- feat(otel): raise the OpenTelemetry floor to 1.12.0 by @jamescrosswell in [#5560](https://github.com/getsentry/sentry-dotnet/pull/5560)
-- feat: add support for .NET 11 RC 2 by @jamescrosswell in [#5725](https://github.com/getsentry/sentry-dotnet/pull/5725)
 - feat: add Sentry.Extensions.Hosting with UseSentry for generic host apps by @ric-oliv in [#5739](https://github.com/getsentry/sentry-dotnet/pull/5739)
 - feat: add SentrySdk.WithMonitor to run a job with cron check-ins and create the monitor from code by @wedamija in [#5664](https://github.com/getsentry/sentry-dotnet/pull/5664)
 - feat: Support reading .NET 11 Android assembly stores by @jamescrosswell in [#5577](https://github.com/getsentry/sentry-dotnet/pull/5577)
 - feat: Support Zstandard-compressed assemblies on Android (.NET 11) by @jamescrosswell in [#5575](https://github.com/getsentry/sentry-dotnet/pull/5575)
-- feat: add support for .NET 11 RC 1 by @jamescrosswell in [#5566](https://github.com/getsentry/sentry-dotnet/pull/5566)
 - feat: Accept Android assembly store v4 versions by @jamescrosswell in [#5574](https://github.com/getsentry/sentry-dotnet/pull/5574)
-- feat: Logs are always enabled and `SentryOptions.EnableLogs` is ignored by @jamescrosswell in [#5504](https://github.com/getsentry/sentry-dotnet/pull/5504)
 - Support for .NET 11 by @jamescrosswell in [#5529](https://github.com/getsentry/sentry-dotnet/pull/5529)
 - Mobile targets now require .NET 10 or later - `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst` and `net9.0-windows` have been dropped. by @jamescrosswell in [#5529](https://github.com/getsentry/sentry-dotnet/pull/5529)
 - On .NET 11 the minimum Android API level is now 24 (Android 7.0) and the minimum MacCatalyst version is 17.0. by @jamescrosswell in [#5529](https://github.com/getsentry/sentry-dotnet/pull/5529)
@@ -167,21 +114,43 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 
 ### Fixes 🐛
 
-- fix(maui): report in_foreground for apps using the UIScene lifecycle by @jamescrosswell in [#5730](https://github.com/getsentry/sentry-dotnet/pull/5730)
+- fix(maui): CreateElementEventsBreadcrumbs set in code is no longer overwritten by @jamescrosswell in [#5861](https://github.com/getsentry/sentry-dotnet/pull/5861)
+- fix: iOS NativeAOT apps using TrimMode=partial crash at launch in SentryObjCOptions.set_BeforeSend by @jamescrosswell in [#5857](https://github.com/getsentry/sentry-dotnet/pull/5857)
+- fix: transactions left unsampled by an upstream trace decision are no longer reported as `backpressure` drops in client reports by @chiliec in [#5841](https://github.com/getsentry/sentry-dotnet/pull/5841)
+- fix(logging): warn when ClearProviders() removes the logger providers UseSentry added by @ric-oliv and @claude in [#5789](https://github.com/getsentry/sentry-dotnet/pull/5789)
+- fix(logging): make Logging.AddSentry() work after UseSentry and ClearProviders() by @ric-oliv and @claude in [#5776](https://github.com/getsentry/sentry-dotnet/pull/5776)
+- fix(hosting): start the SDK during Build() even when the app clears or replaces logger providers by @ric-oliv and @claude in [#5772](https://github.com/getsentry/sentry-dotnet/pull/5772)
+- fix(maui): report in_foreground for apps using the UIScene lifecycle by @jamescrosswell and @claude in [#5730](https://github.com/getsentry/sentry-dotnet/pull/5730)
+- fix(nlog): stack overflow when Debug is on and NLog handles ILogger by @jamescrosswell and @claude in [#5823](https://github.com/getsentry/sentry-dotnet/pull/5823)
+- fix: drop attachments whose stream turns out empty when the envelope is sent by @bitsandfoxes in [#5787](https://github.com/getsentry/sentry-dotnet/pull/5787)
+- fix: upload symbols and create releases when publishing Native AOT with the .NET 11 SDK by @jamescrosswell and @claude in [#5731](https://github.com/getsentry/sentry-dotnet/pull/5731)
+- fix: don't upload pre-trim PDBs for trimmed iOS and Mac Catalyst builds by @jamescrosswell and @claude in [#5732](https://github.com/getsentry/sentry-dotnet/pull/5732)
+- fix: avoid first-chance exception when getting length of non-seekable attachment streams by @bitsandfoxes in [#5736](https://github.com/getsentry/sentry-dotnet/pull/5736)
 - fix(aspnetcore): start the SDK when the host starts, not on the first request by @ric-oliv in [#5721](https://github.com/getsentry/sentry-dotnet/pull/5721)
 - fix(otlp): don't configure an automatic OTel propagator by @jamescrosswell in [#5319](https://github.com/getsentry/sentry-dotnet/pull/5319)
-- fix: upload symbols and create releases when publishing Native AOT with the .NET 11 SDK by @jamescrosswell in [#5731](https://github.com/getsentry/sentry-dotnet/pull/5731)
-- fix: don't upload pre-trim PDBs for trimmed iOS and Mac Catalyst builds by @jamescrosswell in [#5732](https://github.com/getsentry/sentry-dotnet/pull/5732)
-- fix: avoid first-chance exception when getting length of non-seekable attachment streams by @bitsandfoxes in [#5736](https://github.com/getsentry/sentry-dotnet/pull/5736)
 
 ### Dependencies ⬆️
 
 #### Deps
 
+- chore(deps): update Cocoa SDK to v9.33.0 by @github-actions in [#5880](https://github.com/getsentry/sentry-dotnet/pull/5880)
+- chore(deps): update Native SDK to v0.17.6 by @github-actions in [#5879](https://github.com/getsentry/sentry-dotnet/pull/5879)
+- chore(deps): update Cocoa SDK to v9.32.0 by @github-actions in [#5835](https://github.com/getsentry/sentry-dotnet/pull/5835)
+- chore(deps): update Native SDK to v0.17.5 by @github-actions in [#5826](https://github.com/getsentry/sentry-dotnet/pull/5826)
+- chore(deps): update Java SDK to v8.62.0 by @github-actions in [#5824](https://github.com/getsentry/sentry-dotnet/pull/5824)
+- chore(deps): update Java SDK to v8.61.1 by @github-actions in [#5777](https://github.com/getsentry/sentry-dotnet/pull/5777)
+- chore(deps): update CLI to v3.8.2 by @github-actions in [#5778](https://github.com/getsentry/sentry-dotnet/pull/5778)
+- chore(deps): update Cocoa SDK to v9.31.0 by @ric-oliv and @claude with @github-actions in [#5769](https://github.com/getsentry/sentry-dotnet/pull/5769)
+- chore(deps): update CLI to v3.8.1 by @github-actions in [#5768](https://github.com/getsentry/sentry-dotnet/pull/5768)
 - chore(deps): update Native SDK to v0.17.4 by @github-actions in [#5743](https://github.com/getsentry/sentry-dotnet/pull/5743)
-- chore(deps): update Java SDK to v8.61.0 by @github-actions in [#5734](https://github.com/getsentry/sentry-dotnet/pull/5734)
+- chore(deps): update Java SDK to v8.61.0 by @jamescrosswell and @claude with @github-actions in [#5734](https://github.com/getsentry/sentry-dotnet/pull/5734)
 - chore(deps): update Cocoa SDK to v9.30.2 by @github-actions in [#5735](https://github.com/getsentry/sentry-dotnet/pull/5735)
 - chore(deps): update Native SDK to v0.17.3 by @github-actions in [#5717](https://github.com/getsentry/sentry-dotnet/pull/5717)
+
+### Other
+
+- perf: reduce allocations in ConfigureScope callbacks by @XAN9xXx in [#5856](https://github.com/getsentry/sentry-dotnet/pull/5856)
+- perf: reduce allocations when pushing scopes via ILogger.BeginScope by @martincostello and @claude in [#5828](https://github.com/getsentry/sentry-dotnet/pull/5828)
 
 ## 6.12.1
 
