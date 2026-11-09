@@ -207,7 +207,7 @@ public partial class ScopeExtensionsTests
         SentryAspNetCoreOptions.SendDefaultPii = true;
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        Assert.Equal(headers[firstKey], _sut.Request.Headers[firstKey]);
+        Assert.Equal("[Filtered]", _sut.Request.Headers[firstKey]);
 
         _sut.Request.Cookies.Should().Be("[Filtered]");
     }
@@ -224,6 +224,51 @@ public partial class ScopeExtensionsTests
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
         _sut.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode; [Filtered]");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Populate_SensitiveRequestHeaders_KeepsNamesAndFiltersValues(bool sendDefaultPii)
+    {
+        var headers = new HeaderDictionary
+        {
+            { "Authorization", new StringValues("Bearer secret") },
+            { "Proxy-Authorization", new StringValues("Basic secret") },
+            { "X-Api-Key", new StringValues("secret") },
+            { "Set-Cookie", new StringValues(new[] { "first=secret", "second=secret" }) },
+            { "Accept", new StringValues("text/plain") }
+        };
+        _httpRequest.Headers.Returns(headers);
+
+        SentryAspNetCoreOptions.SendDefaultPii = sendDefaultPii;
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Headers.Should().Equal(new Dictionary<string, string>
+        {
+            { "Authorization", "[Filtered]" },
+            { "Proxy-Authorization", "[Filtered]" },
+            { "X-Api-Key", "[Filtered]" },
+            { "Set-Cookie", "[Filtered]" },
+            { "Accept", "text/plain" }
+        });
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Populate_LowercaseCookieHeader_FiltersValue(bool sendDefaultPii)
+    {
+        var headers = new HeaderDictionary
+        {
+            { "cookie", new StringValues("name=secret") }
+        };
+        _httpRequest.Headers.Returns(headers);
+
+        SentryAspNetCoreOptions.SendDefaultPii = sendDefaultPii;
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Headers["cookie"].Should().Be("[Filtered]");
     }
 
     [Fact]

@@ -143,7 +143,7 @@ internal static class ScopeExtensions
                 continue;
             }
 
-            scope.Request.Headers[requestHeader.Key] = requestHeader.Value!;
+            scope.Request.Headers[requestHeader.Key] = SensitiveDataFilter.FilterHeaderValue(requestHeader.Key, requestHeader.Value!);
 
             if (requestHeader.Key == HeaderNames.Cookie)
             {

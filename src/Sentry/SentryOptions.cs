@@ -341,13 +341,13 @@ public class SentryOptions
     /// by setting it; nothing on the object is ever <c>null</c>, so nested categories can be set directly.
     /// </param>
     /// <remarks>
-    /// The options are recorded but not yet consumed: no integration reads them, so what is collected is still
-    /// governed entirely by <see cref="SendDefaultPii"/>, and restricting a category here has no effect yet.
-    /// <para>
-    /// Once the integrations are migrated onto these options, calling this will replace
-    /// <see cref="SendDefaultPii"/>, which is then ignored. The spec defaults collect every category, so an
-    /// application relying on <c>SendDefaultPii = false</c> to suppress user identity will need to set
+    /// Calling this replaces <see cref="SendDefaultPii"/> for every integration that has moved onto these options,
+    /// which then ignore it. The spec defaults collect every category, so an application relying on
+    /// <c>SendDefaultPii = false</c> to suppress user identity needs to set
     /// <see cref="DataCollectionOptions.UserInfo"/> to <c>false</c> here as well.
+    /// <para>
+    /// The integrations are still being migrated onto these options. Until they are, <see cref="SendDefaultPii"/>
+    /// still decides what they collect, and setting a category here has no effect yet.
     /// </para>
     /// <para>Repeated calls build on the same options.</para>
     /// <para>This API is experimental, and it may change in the future.</para>
@@ -372,6 +372,8 @@ public class SentryOptions
     }
 
     internal DataCollectionOptions? DataCollection { get; set; }
+
+    internal DataCollectionResolver DataCollectionResolver { get; }
 
     /// <summary>
     /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.
@@ -1471,6 +1473,7 @@ public class SentryOptions
     public SentryOptions()
     {
         SettingLocator = new SettingLocator(this);
+        DataCollectionResolver = new DataCollectionResolver(this);
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 
         TransactionProcessorsProviders = [() => TransactionProcessors ?? []];
