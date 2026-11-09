@@ -40,7 +40,6 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public KeyValueCollectionBehavior UrlQueryParams => Configured?.UrlQueryParams ?? DenyList;
 
-    // SendDefaultPii has never gated incoming request bodies; MaxRequestBodySize is their only legacy gate.
     public bool IncomingRequestBody => CollectsBody(HttpBodyTypes.IncomingRequest, legacyFallback: true);
 
     public bool OutgoingRequestBody => CollectsBody(HttpBodyTypes.OutgoingRequest, SendDefaultPii);
