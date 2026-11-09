@@ -53,11 +53,19 @@ public class CookieFilterTests
     [InlineData("the me=dark")]
     [InlineData("theme=\"dark")]
     [InlineData("theme=\"")]
-    [InlineData("lang=en; theme=dark, user_session=abc")]
     [InlineData(";;")]
     public void FilterCookieHeader_Malformed_FallsBackToSingleFilteredElement(string header)
     {
         CookieFilter.FilterCookieHeader(header).Should().Equal(Filtered);
+    }
+
+    [Theory]
+    [InlineData("lang=en; theme=dark, user_session=abc; country=nz")]
+    [InlineData("lang=en; the me=dark; country=nz")]
+    [InlineData("lang=en; theme=\"dark; country=nz")]
+    public void FilterCookieHeader_MalformedPairAmongValidPairs_FiltersOnlyThatElement(string header)
+    {
+        CookieFilter.FilterCookieHeader(header).Should().Equal("lang=en", Filtered, "country=nz");
     }
 
     [Fact]
@@ -207,7 +215,7 @@ public class CookieFilterTests
     }
 
     [Fact]
-    public void FilterCookiePairs_MalformedValue_FallsBackToSingleFilteredElement()
+    public void FilterCookiePairs_MalformedValue_FiltersOnlyThatElement()
     {
         var result = CookieFilter.FilterCookiePairs(
         [
@@ -215,7 +223,7 @@ public class CookieFilterTests
             new KeyValuePair<string, string>("lang", "en"),
         ]);
 
-        result.Should().Equal(Filtered);
+        result.Should().Equal(Filtered, "lang=en");
     }
 
     [Fact]

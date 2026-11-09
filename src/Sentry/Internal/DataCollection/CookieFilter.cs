@@ -26,12 +26,7 @@ internal static class CookieFilter
             var separator = segment.IndexOf('=');
             var name = separator < 0 ? null : segment[..separator].TrimEnd();
             var value = separator < 0 ? segment : segment[(separator + 1)..].TrimStart();
-            if (FilterPair(name, value, behavior) is not { } cookie)
-            {
-                return [SensitiveDataFilter.FilteredValue];
-            }
-
-            filtered.Add(cookie);
+            filtered.Add(FilterPair(name, value, behavior));
         }
 
         return filtered.Count > 0 ? filtered.ToArray() : [SensitiveDataFilter.FilteredValue];
@@ -53,7 +48,7 @@ internal static class CookieFilter
         var separator = cookie.IndexOf('=');
         var name = separator < 0 ? null : cookie[..separator].TrimEnd();
         var value = separator < 0 ? cookie : cookie[(separator + 1)..].TrimStart();
-        return [FilterPair(name, value, behavior) ?? SensitiveDataFilter.FilteredValue];
+        return [FilterPair(name, value, behavior)];
     }
 
     internal static string[] FilterCookiePairs(IEnumerable<KeyValuePair<string?, string?>> cookies, KeyValueCollectionBehavior? behavior = null)
@@ -67,12 +62,7 @@ internal static class CookieFilter
         var filtered = new List<string>();
         foreach (var (name, value) in cookies)
         {
-            if (FilterPair(name, value ?? string.Empty, behavior) is not { } cookie)
-            {
-                return [SensitiveDataFilter.FilteredValue];
-            }
-
-            filtered.Add(cookie);
+            filtered.Add(FilterPair(name, value ?? string.Empty, behavior));
         }
 
         return filtered.ToArray();
@@ -81,16 +71,11 @@ internal static class CookieFilter
     internal static string ToEventCookies(IEnumerable<string> filteredCookies) =>
         string.Join(EventCookieSeparator, filteredCookies);
 
-    private static string? FilterPair(string? name, string value, KeyValueCollectionBehavior behavior)
+    private static string FilterPair(string? name, string value, KeyValueCollectionBehavior behavior)
     {
-        if (string.IsNullOrEmpty(name))
+        if (string.IsNullOrEmpty(name) || !IsValidName(name) || !IsValidValue(value))
         {
             return SensitiveDataFilter.FilteredValue;
-        }
-
-        if (!IsValidName(name) || !IsValidValue(value))
-        {
-            return null;
         }
 
         return $"{name}={SensitiveDataFilter.FilterValue(name, value, behavior, SensitiveDataFilter.SensitiveCookieNameTerms)}";
