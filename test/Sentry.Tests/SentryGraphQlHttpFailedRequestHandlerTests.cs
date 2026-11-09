@@ -219,6 +219,83 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     }
 
     [Fact]
+    public void HandleResponse_ErrorWithPii_FiltersSensitiveHeaderValues()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            SendDefaultPii = true
+        });
+        var response = ResponseWithSensitiveHeaders();
+
+        // Act
+        SentryEvent @event = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Authorization", "[Filtered]" },
+                { "X-Api-Key", "[Filtered]" },
+                { "Cookie", "[Filtered]" },
+                { "Accept", "text/plain" }
+            });
+            @event.Contexts.Response.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Set-Cookie", "[Filtered]" },
+                { "X-Auth-Token", "[Filtered]" },
+                { "myHeader", "myValue" }
+            });
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_ErrorNoPii_DoesNotCaptureSensitiveHeaders()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            SendDefaultPii = false
+        });
+        var response = ResponseWithSensitiveHeaders();
+
+        // Act
+        SentryEvent @event = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().BeEmpty();
+            @event.Contexts.Response.Headers.Should().BeEmpty();
+        }
+    }
+
+    private HttpResponseMessage ResponseWithSensitiveHeaders()
+    {
+        var request = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, "http://foo/bar");
+        request.Headers.Add("Authorization", "Bearer secret");
+        request.Headers.Add("X-Api-Key", "secret");
+        request.Headers.Add("Cookie", "name=secret");
+        request.Headers.Add("Accept", "text/plain");
+
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = request;
+        response.Headers.Add("Set-Cookie", ["first=secret", "second=secret"]);
+        response.Headers.Add("X-Auth-Token", "secret");
+        response.Headers.Add("myHeader", "myValue");
+        return response;
+    }
+
+    [Fact]
     public void HandleResponse_Error_ResponseAsHint()
     {
         // Arrange

@@ -323,6 +323,81 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
+    public void HandleResponse_FailedRequestWithPii_FiltersSensitiveHeaderValues()
+    {
+        // Arrange
+        var sut = GetSut(new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            SendDefaultPii = true
+        });
+        var response = ResponseWithSensitiveHeaders();
+
+        // Act
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Authorization", "[Filtered]" },
+                { "X-Api-Key", "[Filtered]" },
+                { "Cookie", "[Filtered]" },
+                { "Accept", "text/plain" }
+            });
+            @event.Contexts.Response.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Set-Cookie", "[Filtered]" },
+                { "X-Auth-Token", "[Filtered]" },
+                { "myHeader", "myValue" }
+            });
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_FailedRequestNoPii_DoesNotCaptureSensitiveHeaders()
+    {
+        // Arrange
+        var sut = GetSut(new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            SendDefaultPii = false
+        });
+        var response = ResponseWithSensitiveHeaders();
+
+        // Act
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().BeEmpty();
+            @event.Contexts.Response.Headers.Should().BeEmpty();
+        }
+    }
+
+    private static HttpResponseMessage ResponseWithSensitiveHeaders()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "http://foo/bar");
+        request.Headers.Add("Authorization", "Bearer secret");
+        request.Headers.Add("X-Api-Key", "secret");
+        request.Headers.Add("Cookie", "name=secret");
+        request.Headers.Add("Accept", "text/plain");
+
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = request;
+        response.Headers.Add("Set-Cookie", ["first=secret", "second=secret"]);
+        response.Headers.Add("X-Auth-Token", "secret");
+        response.Headers.Add("myHeader", "myValue");
+        return response;
+    }
+
+    [Fact]
     public void HandleResponse_FailedRequestWithHint_HasHint()
     {
         // Arrange
