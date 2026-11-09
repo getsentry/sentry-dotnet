@@ -21,6 +21,32 @@ public class SentrySdkTests
     }
 
     [Fact]
+    public void CreateBeforeSendCallback_SuppressionWithDisabledFilter_ReturnsUnconvertedEventWithoutCallingFilter()
+    {
+        var options = new SentryOptions();
+        options.Android.SuppressSegfaults = true;
+        options.Native.EnableBeforeSend = false;
+        var called = false;
+        options.SetBeforeSend((evt, _) =>
+        {
+            called = true;
+            return evt;
+        });
+        using var javaOptions = new JavaSdk.SentryOptions();
+        using var callback = SentrySdk.CreateBeforeSendCallback(options, javaOptions);
+        using var evt = new JavaSdk.SentryEvent
+        {
+            EventId = new JavaSdk.Protocol.SentryId(new string('z', 32))
+        };
+        using var hint = new JavaSdk.Hint();
+
+        var result = callback!.Execute(evt, hint);
+
+        called.Should().BeFalse();
+        result.Should().BeSameAs(evt);
+    }
+
+    [Fact]
     public void CreateBeforeSendCallback_BeforeSendThrows_ReturnsNullAndLogsError()
     {
         // Arrange
