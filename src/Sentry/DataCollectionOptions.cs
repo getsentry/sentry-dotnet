@@ -6,8 +6,8 @@ namespace Sentry;
 /// Controls which categories of data the SDK's integrations collect automatically.
 /// </summary>
 /// <remarks>
-/// No integration reads these options yet, so setting a category has no effect on what is collected; see
-/// <see cref="SentryOptions.ConfigureDataCollection"/>.
+/// The integrations are still being migrated onto these options, so setting a category does not yet change what
+/// they collect; see <see cref="SentryOptions.ConfigureDataCollection"/>.
 /// <para>
 /// Every category starts at the default from the data collection spec, which collects it - including user identity
 /// and HTTP bodies - with sensitive keys filtered out. Restrict an individual category by setting it.
