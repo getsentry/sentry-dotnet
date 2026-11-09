@@ -26,9 +26,11 @@ try
 {
     if (!$Tfm)
     {
-        # Matches $(LatestTfm) in Directory.Build.props. The Android workflow passes -Tfm
-        # explicitly per matrix; the iOS workflow relies on this default.
-        $Tfm = 'net11.0'
+        $Tfm = dotnet msbuild Directory.Build.props -getProperty:LatestTfm
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw 'Failed to read LatestTfm from Directory.Build.props'
+        }
     }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
