@@ -137,15 +137,15 @@ internal static class ScopeExtensions
         scope.Request.QueryString = context.Request.QueryString.ToString();
         foreach (var requestHeader in context.Request.Headers)
         {
-            // Don't add cookies that might contain PII
-            if (!options.SendDefaultPii && requestHeader.Key == HeaderNames.Cookie)
+            var isCookieHeader = string.Equals(requestHeader.Key, HeaderNames.Cookie, StringComparison.OrdinalIgnoreCase);
+            if (!options.SendDefaultPii && isCookieHeader)
             {
                 continue;
             }
 
             scope.Request.Headers[requestHeader.Key] = SensitiveDataFilter.FilterHeaderValue(requestHeader.Key, requestHeader.Value!);
 
-            if (string.Equals(requestHeader.Key, HeaderNames.Cookie, StringComparison.OrdinalIgnoreCase))
+            if (isCookieHeader)
             {
                 scope.Request.Cookies = CookieFilter.ToEventCookies(CookieFilter.FilterCookieHeaders(requestHeader.Value));
             }
