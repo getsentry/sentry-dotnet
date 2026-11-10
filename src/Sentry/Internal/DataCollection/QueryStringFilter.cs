@@ -22,7 +22,7 @@ internal static class QueryStringFilter
             var name = separator < 0 ? parameter : parameter[..separator];
             if (HasMalformedEscape(name) || (name.Length == 0 && parameter.Length > 1))
             {
-                return SensitiveDataFilter.FilteredValue;
+                return prefix + SensitiveDataFilter.FilteredValue;
             }
 
             if (separator >= 0 && SensitiveDataFilter.IsSensitiveKey(SensitiveDataFilter.DecodeKeyForMatching(name)))

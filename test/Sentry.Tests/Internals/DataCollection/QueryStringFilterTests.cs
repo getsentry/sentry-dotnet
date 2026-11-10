@@ -32,15 +32,16 @@ public class QueryStringFilterTests
         QueryStringFilter.Filter(input).Should().BeSameAs(input);
 
     [Theory]
-    [InlineData("%zz=abc")]
-    [InlineData("to%ken=abc")]
-    [InlineData("%74oken%=abc")]
-    [InlineData("%74oken%7=abc")]
-    [InlineData("%u0074oken=abc")]
-    [InlineData("=abc")]
-    [InlineData("?page=5&=abc")]
-    public void Filter_UnparseableName_FiltersWholeQueryString(string input) =>
-        QueryStringFilter.Filter(input).Should().Be(SensitiveDataFilter.FilteredValue);
+    [InlineData("%zz=abc", "[Filtered]")]
+    [InlineData("to%ken=abc", "[Filtered]")]
+    [InlineData("%74oken%=abc", "[Filtered]")]
+    [InlineData("%74oken%7=abc", "[Filtered]")]
+    [InlineData("%u0074oken=abc", "[Filtered]")]
+    [InlineData("=abc", "[Filtered]")]
+    [InlineData("?page=5&=abc", "?[Filtered]")]
+    [InlineData("?%zz=abc", "?[Filtered]")]
+    public void Filter_UnparseableName_FiltersWholeQueryString(string input, string expected) =>
+        QueryStringFilter.Filter(input).Should().Be(expected);
 
     [Theory]
     [InlineData(null)]

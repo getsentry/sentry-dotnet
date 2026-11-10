@@ -29,6 +29,16 @@ public class UriExtensionsTests
     }
 
     [Fact]
+    public void FilteredHttpRequestUrl_UnparseableQuery_KeepsQueryMarker()
+    {
+        var uri = new Uri("https://example.com/api?page=5&=abc");
+
+        var actual = uri.FilteredHttpRequestUrl();
+
+        actual.Should().Be("https://example.com/api?[Filtered]");
+    }
+
+    [Fact]
     public void FilteredHttpRequestUrl_DangerousDisablePathAndQueryCanonicalization_ReturnsHttpRequestUrl()
     {
         // Arrange
