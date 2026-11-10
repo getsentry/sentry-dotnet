@@ -226,6 +226,20 @@ public partial class ScopeExtensionsTests
         _sut.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode; [Filtered]");
     }
 
+    [Fact]
+    public void Populate_SendDefaultPiiTrueLowercaseCookieHeader_FiltersEachCookie()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "cookie", new StringValues("user_session=abc; theme=dark-mode") }
+        });
+
+        SentryAspNetCoreOptions.SendDefaultPii = true;
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode");
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

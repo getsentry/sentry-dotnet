@@ -145,7 +145,7 @@ internal static class ScopeExtensions
 
             scope.Request.Headers[requestHeader.Key] = SensitiveDataFilter.FilterHeaderValue(requestHeader.Key, requestHeader.Value!);
 
-            if (requestHeader.Key == HeaderNames.Cookie)
+            if (string.Equals(requestHeader.Key, HeaderNames.Cookie, StringComparison.OrdinalIgnoreCase))
             {
                 scope.Request.Cookies = CookieFilter.ToEventCookies(CookieFilter.FilterCookieHeaders(requestHeader.Value));
             }
