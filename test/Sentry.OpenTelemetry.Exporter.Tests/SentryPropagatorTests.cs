@@ -169,4 +169,21 @@ public class SentryPropagatorTests
             outContext.Baggage.GetBaggage("sentry-sample_rate").Should().Be("1.0");
         }
     }
+
+    [Theory]
+    [InlineData("5bd5f6d346b442dd9177dce9302fd737-b0d83d6cfec87606-1", ActivityTraceFlags.Recorded)]
+    [InlineData("5bd5f6d346b442dd9177dce9302fd737-b0d83d6cfec87606", ActivityTraceFlags.Recorded)]
+    [InlineData("5bd5f6d346b442dd9177dce9302fd737-b0d83d6cfec87606-0", ActivityTraceFlags.None)]
+    public void Extract_SamplingFlag_MapsToTraceFlags(string sentryTrace, ActivityTraceFlags expected)
+    {
+        // Arrange
+        var carrier = new Dictionary<string, string> { { "sentry-trace", sentryTrace } };
+        var sut = new SentryPropagator();
+
+        // Act
+        var outContext = sut.Extract(new PropagationContext(), carrier, _getter);
+
+        // Assert
+        outContext.ActivityContext.TraceFlags.Should().Be(expected);
+    }
 }
