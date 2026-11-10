@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Hangfire;
-using Hangfire.MemoryStorage;
 using Hangfire.Storage;
 
 namespace Sentry.Hangfire.Tests;
@@ -22,7 +21,7 @@ public class HangfireFixture : IDisposable
         Hub.IsEnabled.Returns(true);
 
         GlobalConfiguration.Configuration
-            .UseMemoryStorage()
+            .UseInMemoryStorage()
             .UseSentry(Hub, Logger, new SentryHangfireOptions
             {
                 MonitorAllRecurringJobs = true,
@@ -47,7 +46,7 @@ public class HangfireFixture : IDisposable
             while (true)
             {
                 var jobDetails = _monitoringApi.JobDetails(jobId);
-                var currentState = jobDetails.History[^1].StateName;
+                var currentState = jobDetails.History[0].StateName;
 
                 if (currentState != "Enqueued" && currentState != "Processing")
                 {
