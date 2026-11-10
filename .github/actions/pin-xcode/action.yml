@@ -8,4 +8,4 @@ runs:
     # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_27.app
+      run: sudo xcode-select --switch /Applications/Xcode_27.2.app
