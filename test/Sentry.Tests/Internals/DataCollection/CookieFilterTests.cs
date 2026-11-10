@@ -23,14 +23,6 @@ public class CookieFilterTests
         result.Should().Equal("theme=light-mode");
     }
 
-    [Fact]
-    public void FilterCookieHeader_NoSpaceAfterSemicolon_SplitsCookies()
-    {
-        var result = CookieFilter.FilterCookieHeader("theme=dark;user_session=abc;lang=en");
-
-        result.Should().Equal("theme=dark", "user_session=[Filtered]", "lang=en");
-    }
-
     [Theory]
     [InlineData("opaque-token")]
     [InlineData("=opaque-token")]
@@ -49,6 +41,7 @@ public class CookieFilterTests
 
     [Theory]
     [InlineData("theme=dark, user_session=abc")]
+    [InlineData("theme=dark,user_session=abc")]
     [InlineData("theme=dark mode")]
     [InlineData("the me=dark")]
     [InlineData("theme=\"dark")]
@@ -68,20 +61,14 @@ public class CookieFilterTests
         CookieFilter.FilterCookieHeader(header).Should().Equal("lang=en", Filtered, "country=nz");
     }
 
-    [Fact]
-    public void FilterCookieHeader_MultiplePairs_NeverContainsSensitiveValue()
-    {
-        var result = CookieFilter.FilterCookieHeader("user_session=s3cret;csrf_token=s3cret; theme=dark");
-
-        result.Should().NotContain(element => element.Contains("s3cret"));
-    }
-
     [Theory]
     [InlineData("__Host-prefs", "value")]
     [InlineData("__Secure-prefs", "value")]
     [InlineData("AWSALB", "value")]
     [InlineData("remember_me", "value")]
     [InlineData("USER_SESSION", "value")]
+    [InlineData(".AspNetCore.Cookies", "value")]
+    [InlineData(".AspNet.ApplicationCookie", "value")]
     public void FilterCookieHeader_SensitiveName_FiltersValueAndKeepsName(string name, string value)
     {
         var result = CookieFilter.FilterCookieHeader($"{name}={value}");

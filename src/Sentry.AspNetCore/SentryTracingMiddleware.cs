@@ -90,7 +90,7 @@ internal class SentryTracingMiddleware
 
             transaction?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, context.Request.Method);
 
-            if (_options.SendDefaultPii && transaction is not null)
+            if (_options.SendDefaultPii && transaction is { IsSampled: true })
             {
                 var cookies = CookieFilter.FilterCookieHeaders(context.Request.Headers[HeaderNames.Cookie]);
                 if (cookies.Length > 0)

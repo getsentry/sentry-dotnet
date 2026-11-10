@@ -62,6 +62,9 @@ internal static class SensitiveDataFilter
         "sb-",
         "mfa",
         "2fa",
+        // ASP.NET Core and OWIN auth, antiforgery and custom-scheme cookies
+        ".aspnetcore.",
+        ".aspnet.",
     ];
 
     /// <summary>
