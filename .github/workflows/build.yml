@@ -15,14 +15,17 @@ on:
 # use. Which runtimes need pinning varies by release: for .NET 10 it was only linux-musl, for
 # .NET 11 the glibc runtimes need it too because the images moved from noble to resolute.
 #
-# At GA, blank these two values - do NOT delete them or the steps that use them. They are needed
-# again for every subsequent preview. An empty value is ignored (see integration-test/aot.Tests.ps1),
-# so the SDK goes back to deriving the tag itself.
+# At GA, blank each value whose derived tag exists - do NOT delete them or the steps that use them.
+# They are needed again for every subsequent preview. An empty value is ignored (see
+# integration-test/aot.Tests.ps1), so the SDK goes back to deriving the tag itself.
+#
+# The .NET 11 GA SDK still derives noble for glibc, and there is no 11.0-noble-chiseled image, so
+# glibc stays pinned to the GA resolute tag until https://github.com/dotnet/sdk/issues/53370 is fixed.
 #
 # See CONTRIBUTING.md -> "Upgrading to a new .NET major version".
 env:
-  CONTAINER_BASE_IMAGE_GLIBC: 'mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-resolute-chiseled'
-  CONTAINER_BASE_IMAGE_MUSL: 'mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-alpine'
+  CONTAINER_BASE_IMAGE_GLIBC: 'mcr.microsoft.com/dotnet/runtime-deps:11.0-resolute-chiseled'
+  CONTAINER_BASE_IMAGE_MUSL: ''
 
 jobs:
   build-sentry-native:
