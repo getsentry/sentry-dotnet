@@ -52,21 +52,25 @@ jobs:
 
       # Stryker failing or timing out on a big PR never fails the check; only the step below can
       - name: Mutate the changed lines
+        id: mutate
         continue-on-error: true
         timeout-minutes: 25
         shell: pwsh
         run: scripts/run-mutation-tests.ps1 -Base HEAD^1
 
+      # A timeout leaves no report for the project Stryker was on, so the summary says not every line was checked
       - name: Write the job summary
         id: summary
         if: always()
+        env:
+          MUTATE_OUTCOME: ${{ steps.mutate.outcome }}
         run: |
-          if [[ -f StrykerOutput/summary.md ]]; then
-            tee -a "$GITHUB_STEP_SUMMARY" < StrykerOutput/summary.md
-            { echo 'summary<<EOF'; cat StrykerOutput/summary.md; echo 'EOF'; } >> "$GITHUB_OUTPUT"
-          else
-            echo "Stryker failed, so there's no report. The log of the step before has the details." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$MUTATE_OUTCOME" != success ]]; then
+            mkdir -p StrykerOutput
+            echo "### Stryker didn't finish, so not every changed line was checked. The job log has the details." >> StrykerOutput/summary.md
           fi
+          tee -a "$GITHUB_STEP_SUMMARY" < StrykerOutput/summary.md
+          { echo 'summary<<EOF'; cat StrykerOutput/summary.md; echo 'EOF'; } >> "$GITHUB_OUTPUT"
 
       # A surviving mutant only warns, because some can't be caught by any test, but a changed line no test runs fails
       - name: Fail when no test runs a changed line
@@ -95,7 +99,8 @@ jobs:
       pull-requests: write
 
     steps:
-      # Only starts a comment when a mutant survived, but keeps an existing one up to date, so a fixed gap shows as fixed
+      # Only starts a comment when a mutant survived or Stryker didn't run, but keeps an existing one up to date, so a
+      # fixed gap shows as fixed
       - name: Comment on the pull request
         env:
           GH_TOKEN: ${{ github.token }}
@@ -112,6 +117,6 @@ jobs:
           id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)
           if [[ -n "$id" ]]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
-          elif grep -q -E '\| (Survived|NoCoverage) \|' <<< "$SUMMARY"; then
+          elif grep -q -E "\| (Survived|NoCoverage) \||Stryker (didn't finish|couldn't run)" <<< "$SUMMARY"; then
             gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "$body"
           fi

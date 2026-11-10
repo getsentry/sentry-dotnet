@@ -55,6 +55,7 @@ $runnableTests = (Get-ChildItem test/*/*.Tests.csproj).FullName | Where-Object {
 }
 
 Remove-Item StrykerOutput -Recurse -ErrorAction Ignore
+New-Item -ItemType Directory StrykerOutput | Out-Null
 $summary = "$PWD/StrykerOutput/summary.md"
 foreach ($project in $hunks | Group-Object { ($_.File -split '/')[1] })
 {
@@ -63,7 +64,7 @@ foreach ($project in $hunks | Group-Object { ($_.File -split '/')[1] })
     $testProjects = @($runnableTests | Where-Object { Test-DependsOn $_ $sourceProject })
     if (-not $testProjects)
     {
-        Write-Host "Skipping $name, which no test project that runs here depends on"
+        Add-Content $summary "### ${name}: skipped, because no test project that runs here depends on it`n"
         continue
     }
     Write-Host "Mutating $name, tested by $($testProjects.Count) test projects"
@@ -168,5 +169,5 @@ foreach ($project in $hunks | Group-Object { ($_.File -split '/')[1] })
 
 if (-not (Test-Path $summary))
 {
-    New-Item -Force $summary -Value "No changed lines under ``src/`` have a test project, so there's nothing to mutate.`n" | Out-Null
+    New-Item -Force $summary -Value "No lines under ``src/`` were added or changed, so there's nothing to mutate.`n" | Out-Null
 }
