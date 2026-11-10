@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Sentry.Internal.DataCollection;
 
 namespace Sentry.Maui.Internal;
 
@@ -422,16 +423,16 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnShellOnNavigating(object? sender, ShellNavigatingEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Shell.Navigating), NavigationType, NavigationCategory, data =>
         {
-            data.Add("from", e.Current?.Location.ToString() ?? "");
-            data.Add("to", e.Target?.Location.ToString() ?? "");
+            data.Add("from", QueryStringFilter.FilterUrl(e.Current?.Location.ToString()) ?? "");
+            data.Add("to", QueryStringFilter.FilterUrl(e.Target?.Location.ToString()) ?? "");
             data.Add(nameof(e.Source), e.Source.ToString());
         });
 
     private void OnShellOnNavigated(object? sender, ShellNavigatedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Shell.Navigated), NavigationType, NavigationCategory, data =>
         {
-            data.Add("from", e.Previous?.Location.ToString() ?? "");
-            data.Add("to", e.Current?.Location.ToString() ?? "");
+            data.Add("from", QueryStringFilter.FilterUrl(e.Previous?.Location.ToString()) ?? "");
+            data.Add("to", QueryStringFilter.FilterUrl(e.Current?.Location.ToString()) ?? "");
             data.Add(nameof(e.Source), e.Source.ToString());
         });
 
