@@ -287,6 +287,11 @@ jobs:
           echo "Disk usage after cleanup:"
           df -h
 
+      # VSTest's new artifacts-directory check fails on ubuntu-24.04-arm (https://github.com/microsoft/vstest/issues/16652)
+      - name: Skip VSTest's artifacts-directory check
+        if: matrix.rid == 'linux-arm64'
+        run: echo "VSTEST_DISABLE_ARTIFACTS_DIRECTORY_VERIFICATION=1" >> "$GITHUB_ENV"
+
       - name: Test
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
 
