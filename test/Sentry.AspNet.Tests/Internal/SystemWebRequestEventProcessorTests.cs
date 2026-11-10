@@ -105,6 +105,22 @@ public class SystemWebRequestEventProcessorTests :
     }
 
     [Fact]
+    public void Process_SendDefaultPiiTrue_KeepsEachCookieWithDuplicateName()
+    {
+        Context = HttpContextBuilder.BuildWithCookies(new[]
+        {
+            new HttpCookie("theme", "dark-mode"),
+            new HttpCookie("theme", "light-mode")
+        });
+        Context.User = new GenericPrincipal(new GenericIdentity("TestUser"), null);
+        _fixture.SentryOptions.SendDefaultPii = true;
+
+        var processedEvt = _fixture.GetSut().Process(new SentryEvent());
+
+        processedEvt?.Request.Cookies.Should().Be("theme=dark-mode; theme=light-mode");
+    }
+
+    [Fact]
     public void Process_SendDefaultPiiFalse_DoesNotSetCookies()
     {
         Context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("theme", "dark-mode") });
