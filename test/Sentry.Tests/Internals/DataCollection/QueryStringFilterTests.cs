@@ -29,12 +29,13 @@ public class QueryStringFilterTests
     [InlineData("=")]
     [InlineData("?")]
     public void Filter_NothingToFilter_ReturnsInputUnchanged(string input) =>
-        QueryStringFilter.Filter(input).Should().Be(input);
+        QueryStringFilter.Filter(input).Should().BeSameAs(input);
 
     [Theory]
     [InlineData("%zz=abc")]
     [InlineData("to%ken=abc")]
     [InlineData("%74oken%=abc")]
+    [InlineData("%74oken%7=abc")]
     [InlineData("%u0074oken=abc")]
     [InlineData("=abc")]
     [InlineData("?page=5&=abc")]
@@ -59,11 +60,12 @@ public class QueryStringFilterTests
 
     [Theory]
     [InlineData("https://example.com/api/users")]
+    [InlineData("https://example.com/api/users?q=a%20b&page=5#top")]
     [InlineData("https://example.com/#a?token=abc")]
     [InlineData("")]
     [InlineData(null)]
-    public void FilterUrl_NoQuery_ReturnsInputUnchanged(string input) =>
-        QueryStringFilter.FilterUrl(input).Should().Be(input);
+    public void FilterUrl_NothingToFilter_ReturnsInputUnchanged(string input) =>
+        QueryStringFilter.FilterUrl(input).Should().BeSameAs(input);
 
     [Theory]
     [InlineData("https://example.com/api/users?token=abc&q=1", "https://example.com/api/users")]

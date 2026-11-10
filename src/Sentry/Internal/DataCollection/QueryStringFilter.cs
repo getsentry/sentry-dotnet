@@ -14,6 +14,7 @@ internal static class QueryStringFilter
 
         var prefix = queryString[0] == '?' ? "?" : string.Empty;
         var parameters = queryString[prefix.Length..].Split('&');
+        var filtered = false;
         for (var i = 0; i < parameters.Length; i++)
         {
             var parameter = parameters[i];
@@ -27,10 +28,11 @@ internal static class QueryStringFilter
             if (separator >= 0 && SensitiveDataFilter.IsSensitiveKey(SensitiveDataFilter.DecodeKeyForMatching(name)))
             {
                 parameters[i] = $"{name}={SensitiveDataFilter.FilteredValue}";
+                filtered = true;
             }
         }
 
-        return prefix + string.Join("&", parameters);
+        return filtered ? prefix + string.Join("&", parameters) : queryString;
     }
 
     [return: NotNullIfNotNull(nameof(url))]
@@ -49,7 +51,9 @@ internal static class QueryStringFilter
         }
 
         var queryEnd = fragmentStart < 0 ? url.Length : fragmentStart;
-        return $"{url[..(queryStart + 1)]}{Filter(url[(queryStart + 1)..queryEnd])}{url[queryEnd..]}";
+        var query = url[(queryStart + 1)..queryEnd];
+        var filteredQuery = Filter(query);
+        return ReferenceEquals(filteredQuery, query) ? url : $"{url[..(queryStart + 1)]}{filteredQuery}{url[queryEnd..]}";
     }
 
     internal static string RemoveQueryAndFragment(string url)
