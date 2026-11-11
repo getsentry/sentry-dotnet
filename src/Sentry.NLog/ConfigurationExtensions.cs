@@ -55,6 +55,8 @@ public static class ConfigurationExtensions
     /// <remarks>
     /// This doesn't initialise Sentry. Initialise Sentry separately, using <c>SentrySdk.Init</c> or another Sentry
     /// integration (such as ASP.NET Core or MAUI).
+    /// The rule it adds starts at the lowest of the target's minimum levels. Lowering one of them after calling this
+    /// method doesn't let lower entries through.
     /// </remarks>
     /// <param name="configuration">The NLog configuration.</param>
     /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
@@ -89,9 +91,15 @@ public static class ConfigurationExtensions
 
         configuration.AddTarget(targetName, target);
 
-        configuration.AddRuleForAllLevels(targetName);
+        configuration.AddRule(LowestMinimumLevel(options), LogLevel.Fatal, targetName);
 
         return configuration;
+    }
+
+    private static LogLevel LowestMinimumLevel(SentryNLogOptions options)
+    {
+        LogLevel?[] levels = [options.MinimumEventLevel, options.MinimumBreadcrumbLevel, options.MinimumLogLevel];
+        return levels.OfType<LogLevel>().DefaultIfEmpty(LogLevel.Off).Min()!;
     }
 
     /// <summary>

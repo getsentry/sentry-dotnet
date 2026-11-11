@@ -25,6 +25,45 @@ public class ConfigurationExtensionsTest
     }
 
     [Fact]
+    public void AddSentry_DefaultOptions_RuleStartsAtInfo()
+    {
+        var actual = new LoggingConfiguration().AddSentry();
+
+        Assert.Equal(new[] { LogLevel.Info, LogLevel.Warn, LogLevel.Error, LogLevel.Fatal },
+            Assert.Single(actual.LoggingRules).Levels);
+    }
+
+    [Theory]
+    [InlineData("Trace", "Info", "Info", "Trace")]
+    [InlineData("Info", "Debug", "Info", "Debug")]
+    [InlineData("Info", "Info", "Trace", "Trace")]
+    [InlineData("Off", "Off", "Warn", "Warn")]
+    public void AddSentry_RuleStartsAtLowestMinimumLevel(string eventLevel, string breadcrumbLevel, string logLevel, string expected)
+    {
+        var actual = new LoggingConfiguration().AddSentry(o =>
+        {
+            o.MinimumEventLevel = LogLevel.FromString(eventLevel);
+            o.MinimumBreadcrumbLevel = LogLevel.FromString(breadcrumbLevel);
+            o.MinimumLogLevel = LogLevel.FromString(logLevel);
+        });
+
+        Assert.Equal(LogLevel.FromString(expected), Assert.Single(actual.LoggingRules).Levels.Min());
+    }
+
+    [Fact]
+    public void AddSentry_AllMinimumLevelsNull_RuleHasNoLevels()
+    {
+        var actual = new LoggingConfiguration().AddSentry(o =>
+        {
+            o.MinimumEventLevel = null;
+            o.MinimumBreadcrumbLevel = null;
+            o.MinimumLogLevel = null;
+        });
+
+        Assert.Empty(Assert.Single(actual.LoggingRules).Levels);
+    }
+
+    [Fact]
     public void AddTag_SetToTarget()
     {
         var sut = new SentryNLogOptions();
