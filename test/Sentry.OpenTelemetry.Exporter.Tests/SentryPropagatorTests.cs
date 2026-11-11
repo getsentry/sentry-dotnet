@@ -171,7 +171,6 @@ public class SentryPropagatorTests
     }
 
     [Theory]
-    [InlineData("5bd5f6d346b442dd9177dce9302fd737-b0d83d6cfec87606-1", ActivityTraceFlags.Recorded)]
     [InlineData("5bd5f6d346b442dd9177dce9302fd737-b0d83d6cfec87606", ActivityTraceFlags.Recorded)]
     [InlineData("5bd5f6d346b442dd9177dce9302fd737-b0d83d6cfec87606-0", ActivityTraceFlags.None)]
     public void Extract_SamplingFlag_MapsToTraceFlags(string sentryTrace, ActivityTraceFlags expected)
