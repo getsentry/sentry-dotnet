@@ -43,9 +43,20 @@ incremental = true
 
 [[skills.triggers]]
 type = "pull_request"
-actions = ["opened", "synchronize", "reopened", "labeled"]
+actions = ["opened", "synchronize", "reopened"]
 draft = false
-labels = ["Warden"]
+
+[[skills]]
+name = "sdk-review"
+paths = ["src/**"]
+ignorePaths = ["src/Sentry.Bindings.Cocoa/ApiDefinition.cs", "src/Sentry.Bindings.Cocoa/StructsAndEnums.cs"]
+incremental = true
+failOn = "off"
+
+[[skills.triggers]]
+type = "pull_request"
+actions = ["opened", "synchronize", "reopened"]
+draft = false
 
 [[skills]]
 name = "gha-security-review"
