@@ -1,6 +1,6 @@
 ---
 name: sdk-review
-description: Review sentry-dotnet changes for violations of Sentry SDK contracts: host-app safety, data-collection gates, supported versions, public API, and .NET-specific rules.
+description: "Review sentry-dotnet changes for violations of Sentry SDK contracts: host-app safety, data-collection gates, supported versions, public API, and .NET-specific rules."
 allowed-tools: Read Grep Glob
 ---
 Review only the changed code. Report a finding only if you can point to the exact line and show how it breaks a user's app, build or data. If unsure, do not report. Generic logic bugs belong to `code-review`; this skill only covers SDK contracts.
@@ -24,6 +24,6 @@ Review only the changed code. Report a finding only if you can point to the exac
 ## .NET rules
 
 5. **Customer build breaks** (high). Changes in `buildTransitive/*.targets` or `.props` that can fail or change customer builds on any OS or target.
-6. **Targets** (medium). Code that fails on `net48` / `netstandard2.0`, Android, iOS or Mac Catalyst. Check the TFM conditionals.
+6. **Targets** (medium). Code that fails on `net462` / `netstandard2.0`, Android, iOS or Mac Catalyst. Check the TFM conditionals.
 7. **Options or DI wiring** (medium). `AddSentry` / `UseSentry` ordering where one overwrites the other's options or callbacks, or options that are never registered.
 8. **Undisposed `IDisposable`** (medium). Service scopes, streams or file handles that SDK code creates and never disposes.

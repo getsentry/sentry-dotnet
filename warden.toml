@@ -43,7 +43,7 @@ incremental = true
 
 [[skills.triggers]]
 type = "pull_request"
-actions = ["opened", "synchronize", "reopened"]
+actions = ["opened", "synchronize", "reopened", "ready_for_review"]
 draft = false
 
 [[skills]]
@@ -55,7 +55,7 @@ failOn = "off"
 
 [[skills.triggers]]
 type = "pull_request"
-actions = ["opened", "synchronize", "reopened"]
+actions = ["opened", "synchronize", "reopened", "ready_for_review"]
 draft = false
 
 [[skills]]
