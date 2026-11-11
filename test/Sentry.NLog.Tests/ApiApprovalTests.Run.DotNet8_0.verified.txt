@@ -55,8 +55,8 @@ namespace Sentry.NLog
         public NLog.Layouts.Layout? BreadcrumbLayout { get; set; }
         [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
         public NLog.Layouts.Layout? Dsn { get; set; }
-        [System.Obsolete("This option is ignored and will be removed in a future major version. To stop the" +
-            " Sentry target sending logs, set MinimumLogLevel to Off.")]
+        [System.Obsolete("Use MinimumLogLevel instead. Setting this to false is the same as setting Minimum" +
+            "LogLevel to Off. This option will be removed in a future major version.")]
         public bool EnableLogs { get; set; }
         public bool IgnoreEventsWithNoException { get; set; }
         public bool IncludeEventDataOnBreadcrumbs { get; set; }

@@ -147,29 +147,24 @@ public sealed partial class SentryTarget : TargetWithContext
     }
 
     internal const string ObsoleteEnableLogs =
-        "This option is ignored and will be removed in a future major version. " +
-        "To stop the Sentry target sending logs, set MinimumLogLevel to Off.";
-
-    internal const string EnableLogsFalseIgnored =
-        "enableLogs=\"false\" no longer turns logs off. Remove enableLogs from the target configuration, " +
-        "and set minimumLogLevel=\"Off\" instead.";
+        "Use MinimumLogLevel instead. Setting this to false is the same as setting MinimumLogLevel to Off. " +
+        "This option will be removed in a future major version.";
 
     /// <summary>
-    /// No longer has any effect. Use <see cref="MinimumLogLevel"/> instead.
+    /// Setting this to <see langword="false"/> sets <see cref="MinimumLogLevel"/> to <c>Off</c>.
     /// </summary>
     /// <remarks>
-    /// The getter always returns <see langword="true"/>.
-    /// Setting it to <see langword="false"/> only writes a warning to standard error.
+    /// Setting it to <see langword="true"/> has no effect. Use <see cref="MinimumLogLevel"/> instead.
     /// </remarks>
     [Obsolete(ObsoleteEnableLogs)]
     public bool EnableLogs
     {
-        get => true;
+        get => Options.MinimumLogLevel is { } level && level != LogLevel.Off;
         set
         {
             if (!value)
             {
-                WriteToStandardError("Sentry: " + EnableLogsFalseIgnored);
+                Options.MinimumLogLevel = LogLevel.Off;
             }
         }
     }

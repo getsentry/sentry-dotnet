@@ -577,7 +577,7 @@ public partial class SentryTargetTests
     }
 
     [Fact]
-    public void EnableLogs_IsObsoleteAndAlwaysEnabled()
+    public void EnableLogs_SetFalse_SetsMinimumLogLevelOff()
     {
         var target = (SentryTarget)_fixture.GetTarget();
 
@@ -586,8 +586,22 @@ public partial class SentryTargetTests
 
         target.EnableLogs = false;
 
-        Assert.True(target.EnableLogs);
+        Assert.False(target.EnableLogs);
 #pragma warning restore CS0618
+        Assert.Equal(LogLevel.Off, target.Options.MinimumLogLevel);
+    }
+
+    [Fact]
+    public void EnableLogs_SetTrue_KeepsMinimumLogLevel()
+    {
+        _fixture.Options.MinimumLogLevel = LogLevel.Warn;
+        var target = (SentryTarget)_fixture.GetTarget();
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        target.EnableLogs = true;
+#pragma warning restore CS0618
+
+        Assert.Equal(LogLevel.Warn, target.Options.MinimumLogLevel);
     }
 
     [Fact]
