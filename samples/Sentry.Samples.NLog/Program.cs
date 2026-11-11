@@ -136,7 +136,8 @@ public static class Program
                 };
 
                 options.AddTag("logger", "${logger}");  // Send the logger name as a tag
-            });
+            },
+            minLevel: LogLevel.Debug); // Debug and higher reach the Sentry target and are sent as logs (default is Info)
 
         config.AddTarget(new DebuggerTarget("debugger"));
 

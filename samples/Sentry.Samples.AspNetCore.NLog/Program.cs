@@ -23,9 +23,7 @@ nlogConfig.AddSentry(options =>
         options.MinimumBreadcrumbLevel = NLog.LogLevel.Warn;
         // Error and higher are sent as events (default is Error)
         options.MinimumEventLevel = NLog.LogLevel.Error;
-    },
-    // Info and higher are sent as logs. Breadcrumbs and events can only use entries at this level or higher.
-    minLevel: NLog.LogLevel.Info);
+    });
 LogManager.Configuration = nlogConfig;
 
 try
