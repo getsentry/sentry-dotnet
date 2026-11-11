@@ -256,7 +256,7 @@ internal class DebugStackTrace : SentryStackTrace
         frame.InstructionAddress = stackFrame.GetNativeIP();
 
 #if __ANDROID__
-        _nativeDebugImages ??= _options.Native.EnableNdk
+        _nativeDebugImages ??= _options is { InitNativeSdks: true, Native.EnableNdk: true }
             ? Sentry.Android.NativeDebugImages.Load(_options.DiagnosticLogger)
             : new();
 #elif __IOS__ || MACCATALYST

@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry.Android;
@@ -29,7 +28,7 @@ internal static class NativeDebugImages
         logger?.LogDebug("Collecting a list of native debug images.");
         try
         {
-            var modules = new global::IO.Sentry.Ndk.NativeModuleListLoader().LoadModuleList() ?? [];
+            var modules = global::IO.Sentry.Ndk.NativeModuleListLoader.NativeLoadModuleList() ?? [];
             logger?.LogDebug("There are {0} native debug images, parsing the information.", modules.Length);
             return Convert(modules);
         }
@@ -45,9 +44,9 @@ internal static class NativeDebugImages
         var result = new Dictionary<long, DebugImage>();
         foreach (var module in modules)
         {
-            if (module.ImageAddr is { Length: > 0 } imageAddr)
+            if (module.ImageAddr is { } imageAddr && imageAddr.StartsWith("0x") && long.TryParse(
+                    imageAddr.AsSpan(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var imageAddress))
             {
-                var imageAddress = imageAddr.ParseHexAsLong();
                 result[imageAddress] = new DebugImage
                 {
                     CodeFile = module.CodeFile,
