@@ -39,6 +39,7 @@ reportOn = "medium"
 
 [[skills]]
 name = "code-review"
+ignorePaths = ["src/Sentry.Bindings.Cocoa/ApiDefinition.cs", "src/Sentry.Bindings.Cocoa/StructsAndEnums.cs", "samples/**", "benchmarks/**"]
 incremental = true
 
 [[skills.triggers]]
