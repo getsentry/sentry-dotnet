@@ -15,14 +15,6 @@ public class CookieFilterTests
         result.Should().Equal("user_session=[Filtered]", "theme=dark-mode", "[Filtered]");
     }
 
-    [Fact]
-    public void FilterSetCookieHeader_IssueExample_DropsAttributes()
-    {
-        var result = CookieFilter.FilterSetCookieHeader("theme=light-mode; HttpOnly");
-
-        result.Should().Equal("theme=light-mode");
-    }
-
     [Theory]
     [InlineData("opaque-token")]
     [InlineData("=opaque-token")]
@@ -124,60 +116,6 @@ public class CookieFilterTests
         var result = CookieFilter.FilterCookieHeaders(["theme=dark", "user_session=abc"]);
 
         result.Should().Equal("theme=dark", $"user_session={Filtered}");
-    }
-
-    [Theory]
-    [InlineData("Max-Age=3600")]
-    [InlineData("Path=/")]
-    [InlineData("Domain=example.com")]
-    [InlineData("Expires=Wed, 21 Oct 2026 07:28:00 GMT")]
-    [InlineData("SameSite=Lax")]
-    [InlineData("Secure")]
-    [InlineData("HttpOnly")]
-    public void FilterSetCookieHeader_Attribute_IsNotACookie(string attribute)
-    {
-        var result = CookieFilter.FilterSetCookieHeader($"theme=light-mode; {attribute}");
-
-        result.Should().Equal("theme=light-mode");
-    }
-
-    [Fact]
-    public void FilterSetCookieHeader_NoAttributes_KeepsCookie()
-    {
-        CookieFilter.FilterSetCookieHeader("theme=light-mode").Should().Equal("theme=light-mode");
-    }
-
-    [Fact]
-    public void FilterSetCookieHeader_SensitiveName_FiltersValue()
-    {
-        var result = CookieFilter.FilterSetCookieHeader("user_session=abc; Path=/; HttpOnly");
-
-        result.Should().Equal($"user_session={Filtered}");
-    }
-
-    [Theory]
-    [InlineData("opaque-token; Path=/")]
-    [InlineData("=opaque-token; Path=/")]
-    [InlineData("; Path=/")]
-    [InlineData("theme=dark, user_session=abc; Path=/")]
-    public void FilterSetCookieHeader_Unparseable_FallsBackToSingleFilteredElement(string header)
-    {
-        CookieFilter.FilterSetCookieHeader(header).Should().Equal(Filtered);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void FilterSetCookieHeader_NoHeader_ReturnsEmpty(string header)
-    {
-        CookieFilter.FilterSetCookieHeader(header).Should().BeEmpty();
-    }
-
-    [Fact]
-    public void FilterSetCookieHeader_Off_ReturnsEmpty()
-    {
-        CookieFilter.FilterSetCookieHeader("theme=dark", KeyValueCollectionBehavior.Off).Should().BeEmpty();
     }
 
     [Fact]

@@ -35,22 +35,6 @@ internal static class CookieFilter
     internal static string[] FilterCookieHeaders(IEnumerable<string?> headers, KeyValueCollectionBehavior? behavior = null) =>
         headers.SelectMany(header => FilterCookieHeader(header, behavior)).ToArray();
 
-    internal static string[] FilterSetCookieHeader(string? header, KeyValueCollectionBehavior? behavior = null)
-    {
-        behavior ??= KeyValueCollectionBehavior.DenyList();
-        if (behavior.Mode == KeyValueCollectionMode.Off || string.IsNullOrWhiteSpace(header))
-        {
-            return [];
-        }
-
-        var attributesStart = header.IndexOf(';');
-        var cookie = (attributesStart < 0 ? header : header[..attributesStart]).Trim();
-        var separator = cookie.IndexOf('=');
-        var name = separator < 0 ? null : cookie[..separator].TrimEnd();
-        var value = separator < 0 ? cookie : cookie[(separator + 1)..].TrimStart();
-        return [FilterPair(name, value, behavior)];
-    }
-
     internal static string[] FilterCookiePairs(IEnumerable<KeyValuePair<string?, string?>> cookies, KeyValueCollectionBehavior? behavior = null)
     {
         behavior ??= KeyValueCollectionBehavior.DenyList();
