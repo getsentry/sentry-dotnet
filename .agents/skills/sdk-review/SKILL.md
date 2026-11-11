@@ -8,7 +8,7 @@ Review only the changed code. Report a finding only if you can point to the exac
 ## Core SDK rules (same in every SDK repo)
 
 1. **Never break the host app** (high). SDK code that can raise, block, or change the user's behavior: exceptions, return values, signatures, job or request flow.
-2. **Data collected without its gate** (high). Bodies, headers, cookies, user info, `gen_ai` inputs/outputs or DB results recorded without their data-collection option. Header and cookie names match case-insensitively. Gate through `DataCollectionResolver`; `SendDefaultPii` is only its legacy fallback.
+2. **Data collected without its gate** (high). Bodies, headers, cookies, user info, `gen_ai` inputs/outputs or DB results recorded without their data-collection option. Header and cookie names match case-insensitively. Gate through `DataCollectionResolver`; `SendDefaultPii` is only its legacy fallback. Automatically collected header, cookie, query or body values must go through the denylist filter in `src/Sentry/Internal/DataCollection/SensitiveDataFilter.cs`; a new path that sends them raw is a finding. Data the user set explicitly (scope, span, `before_send`) is never gated or scrubbed: don't flag reading it back from the scope, but do flag new code that gates or rewrites it.
 3. **Supported versions** (high). Language, runtime, target or dependency APIs newer than the repo's declared minimum, used without a guard. Minimums come from `TargetFrameworks` in each `src/*/*.csproj` (lowest are `net462` and `netstandard2.0`).
 4. **Public API** (medium). Breaking public changes without a deprecation path, or internals exposed as public API.
 
