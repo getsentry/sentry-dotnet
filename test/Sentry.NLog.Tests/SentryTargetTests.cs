@@ -96,6 +96,18 @@ public partial class SentryTargetTests
         Assert.True(t.Options.IncludeEventPropertiesAsTags);
     }
 
+    [Theory]
+    [InlineData("Debug", "Debug")]
+    [InlineData(null, "Off")]
+    public void MinimumLogLevel_Get_ReturnsOptionsLevel(string optionsLevel, string expected)
+    {
+        _fixture.Options.MinimumLogLevel = optionsLevel is null ? null : LogLevel.FromString(optionsLevel);
+
+        var target = (SentryTarget)_fixture.GetTarget();
+
+        Assert.Equal(expected, target.MinimumLogLevel);
+    }
+
     [Fact]
     public void Can_configure_user_from_xml_file()
     {
