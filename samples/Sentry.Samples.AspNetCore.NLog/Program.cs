@@ -23,6 +23,8 @@ nlogConfig.AddSentry(options =>
         options.MinimumBreadcrumbLevel = NLog.LogLevel.Warn;
         // Error and higher are sent as events (default is Error)
         options.MinimumEventLevel = NLog.LogLevel.Error;
+        // Info and higher are sent as logs (default is Info)
+        options.MinimumLogLevel = NLog.LogLevel.Info;
     });
 LogManager.Configuration = nlogConfig;
 
@@ -49,7 +51,7 @@ try
 
     app.MapGet("/", (ILogger<Program> logger) =>
     {
-        logger.LogDebug("Below the Sentry rule's minimum level, so not sent to Sentry");
+        logger.LogDebug("Below every Sentry minimum level, so not sent to Sentry");
         logger.LogInformation("Sent as a log");
         logger.LogWarning("Sent as a log and added as a breadcrumb");
         logger.LogError("Sent as a log and as an event, which includes the breadcrumb above");

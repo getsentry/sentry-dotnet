@@ -3,9 +3,9 @@ namespace NLog
 {
     public static class ConfigurationExtensions
     {
+        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null, string targetName = "sentry") { }
         [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
         public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, string? dsn, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
-        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null, string targetName = "sentry", NLog.LogLevel? minLevel = null) { }
         [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
         public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, string? dsn, string targetName, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
         public static void AddTag(this Sentry.NLog.SentryNLogOptions options, string name, NLog.Layouts.Layout layout) { }
@@ -28,6 +28,7 @@ namespace Sentry.NLog
         public NLog.Layouts.Layout? Layout { get; set; }
         public NLog.LogLevel? MinimumBreadcrumbLevel { get; set; }
         public NLog.LogLevel? MinimumEventLevel { get; set; }
+        public NLog.LogLevel? MinimumLogLevel { get; set; }
         [NLog.Config.NLogConfigurationIgnoreProperty]
         public System.Collections.Generic.IList<NLog.Targets.TargetPropertyWithContext> Tags { get; }
         [NLog.Config.NLogConfigurationIgnoreProperty]
@@ -54,9 +55,8 @@ namespace Sentry.NLog
         public NLog.Layouts.Layout? BreadcrumbLayout { get; set; }
         [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
         public NLog.Layouts.Layout? Dsn { get; set; }
-        [System.Obsolete("The Sentry target always sends logs. This option is ignored and will be removed i" +
-            "n a future major version. To drop logs, use SetBeforeSendLog on the options pass" +
-            "ed to SentrySdk.Init and return null.")]
+        [System.Obsolete("This option is ignored and will be removed in a future major version. To stop the" +
+            " Sentry target sending logs, set MinimumLogLevel to Off.")]
         public bool EnableLogs { get; set; }
         public bool IgnoreEventsWithNoException { get; set; }
         public bool IncludeEventDataOnBreadcrumbs { get; set; }
@@ -65,6 +65,7 @@ namespace Sentry.NLog
         public bool InitializeSdk { get; set; }
         public string MinimumBreadcrumbLevel { get; set; }
         public string MinimumEventLevel { get; set; }
+        public string MinimumLogLevel { get; set; }
         public Sentry.NLog.SentryNLogOptions Options { get; }
         [NLog.Config.ArrayParameter(typeof(NLog.Targets.TargetPropertyWithContext), "tag")]
         public System.Collections.Generic.IList<NLog.Targets.TargetPropertyWithContext> Tags { get; }

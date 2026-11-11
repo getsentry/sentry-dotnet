@@ -25,24 +25,6 @@ public class ConfigurationExtensionsTest
     }
 
     [Fact]
-    public void AddSentry_NoMinLevel_RuleStartsAtInfo()
-    {
-        var actual = new LoggingConfiguration().AddSentry();
-
-        var rule = Assert.Single(actual.LoggingRules);
-        Assert.Equal(new[] { LogLevel.Info, LogLevel.Warn, LogLevel.Error, LogLevel.Fatal }, rule.Levels);
-    }
-
-    [Fact]
-    public void AddSentry_MinLevel_RuleStartsAtMinLevel()
-    {
-        var actual = new LoggingConfiguration().AddSentry(minLevel: LogLevel.Trace);
-
-        var rule = Assert.Single(actual.LoggingRules);
-        Assert.Equal(LogLevel.AllLoggingLevels, rule.Levels);
-    }
-
-    [Fact]
     public void AddTag_SetToTarget()
     {
         var sut = new SentryNLogOptions();

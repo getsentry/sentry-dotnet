@@ -75,7 +75,7 @@ public partial class SentryTargetTests
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
                     </extensions>
                     <targets>
-                        <target type='Sentry' name='sentry' minimumEventLevel='Warn' ignoreEventsWithNoException='true'>
+                        <target type='Sentry' name='sentry' minimumEventLevel='Warn' minimumLogLevel='Debug' ignoreEventsWithNoException='true'>
                             <options>
                                 <includeEventPropertiesAsTags>True</includeEventPropertiesAsTags>
                             </options>
@@ -91,6 +91,7 @@ public partial class SentryTargetTests
         var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
         Assert.NotNull(t);
         Assert.Equal(LogLevel.Warn, t.Options.MinimumEventLevel);
+        Assert.Equal(LogLevel.Debug, t.Options.MinimumLogLevel);
         Assert.True(t.Options.IgnoreEventsWithNoException);
         Assert.True(t.Options.IncludeEventPropertiesAsTags);
     }

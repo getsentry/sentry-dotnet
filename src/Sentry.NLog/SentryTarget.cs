@@ -137,22 +137,29 @@ public sealed partial class SentryTarget : TargetWithContext
         set => Options.MinimumBreadcrumbLevel = LogLevel.FromString(value);
     }
 
+    /// <summary>
+    /// Minimum log level to be sent to Sentry as a structured log. Defaults to <see cref="M:LogLevel.Info" />.
+    /// </summary>
+    public string MinimumLogLevel
+    {
+        get => Options.MinimumLogLevel?.ToString() ?? LogLevel.Off.ToString();
+        set => Options.MinimumLogLevel = LogLevel.FromString(value);
+    }
+
     internal const string ObsoleteEnableLogs =
-        "The Sentry target always sends logs. This option is ignored and will be removed in a future major version. " +
-        "To drop logs, use SetBeforeSendLog on the options passed to SentrySdk.Init and return null.";
+        "This option is ignored and will be removed in a future major version. " +
+        "To stop the Sentry target sending logs, set MinimumLogLevel to Off.";
 
     internal const string EnableLogsFalseIgnored =
-        "The Sentry target always sends logs, so enableLogs=\"false\" no longer turns them off. " +
-        "Remove enableLogs from the target configuration. " +
-        "To drop logs, use SetBeforeSendLog on the options passed to SentrySdk.Init and return null.";
+        "enableLogs=\"false\" no longer turns logs off. Remove enableLogs from the target configuration, " +
+        "and set minimumLogLevel=\"Off\" instead.";
 
     /// <summary>
-    /// Logs are always generated and sent.
+    /// No longer has any effect. Use <see cref="MinimumLogLevel"/> instead.
     /// </summary>
     /// <remarks>
-    /// This option no longer has any effect. The getter always returns <see langword="true"/>.
+    /// The getter always returns <see langword="true"/>.
     /// Setting it to <see langword="false"/> only writes a warning to standard error.
-    /// To filter or drop logs, use <see cref="SentryOptions.SetBeforeSendLog(Func{SentryLog, SentryLog})"/> and return <see langword="null"/>.
     /// </remarks>
     [Obsolete(ObsoleteEnableLogs)]
     public bool EnableLogs
@@ -253,6 +260,9 @@ public sealed partial class SentryTarget : TargetWithContext
     /// as a breadcrumb to the Sentry Sdk.
     /// </para>
     /// <para>
+    /// If the event level is &gt;= the <see cref="MinimumLogLevel"/>, the event is sent as a structured log.
+    /// </para>
+    /// <para>
     /// If sentry is not enabled, this is a No-op.
     /// </para>
     /// </summary>
@@ -337,7 +347,7 @@ public sealed partial class SentryTarget : TargetWithContext
         }
 
         var sentryOptions = hub.GetSentryOptions();
-        if (sentryOptions is not null)
+        if (sentryOptions is not null && logEvent.Level >= Options.MinimumLogLevel)
         {
             try
             {
