@@ -3,9 +3,9 @@ namespace NLog
 {
     public static class ConfigurationExtensions
     {
-        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null, string targetName = "sentry") { }
         [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
         public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, string? dsn, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
+        public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null, string targetName = "sentry", NLog.LogLevel? minLevel = null) { }
         [System.Obsolete(@"The Sentry target no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'dsn', 'initializeSdk' and any other core SDK settings from the target configuration.", true)]
         public static NLog.Config.LoggingConfiguration AddSentry(this NLog.Config.LoggingConfiguration configuration, string? dsn, string targetName, System.Action<Sentry.NLog.SentryNLogOptions>? optionsConfig = null) { }
         public static void AddTag(this Sentry.NLog.SentryNLogOptions options, string name, NLog.Layouts.Layout layout) { }

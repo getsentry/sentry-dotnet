@@ -2,7 +2,6 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using NLog.Web;
-using Sentry.NLog;
 
 // UseSentry below only starts Sentry once the app is running. Initializing it here as well captures crashes during
 // startup, until UseSentry takes over: https://docs.sentry.io/platforms/dotnet/guides/nlog/#capturing-startup-crashes
@@ -15,20 +14,18 @@ using var _ = SentrySdk.Init(o =>
 #endif
 });
 
-// Configure NLog to send logs to Sentry. This only adds the Sentry target: it does not initialize Sentry.
-var sentryTarget = new SentryTarget(new SentryNLogOptions
-{
-    // Warn and higher are added as breadcrumbs (default is Info)
-    MinimumBreadcrumbLevel = NLog.LogLevel.Warn,
-    // Error and higher are sent as events (default is Error)
-    MinimumEventLevel = NLog.LogLevel.Error,
-});
-
 var nlogConfig = new LoggingConfiguration();
 nlogConfig.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, new ColoredConsoleTarget("console"));
-// Every entry that reaches the Sentry target is sent as a structured log, so this rule sets the minimum level for logs.
-// Info and higher are sent as logs. Breadcrumbs and events can only use entries that pass this rule.
-nlogConfig.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, sentryTarget);
+// Configure NLog to send logs to Sentry. This only adds the Sentry target: it does not initialize Sentry.
+nlogConfig.AddSentry(options =>
+    {
+        // Warn and higher are added as breadcrumbs (default is Info)
+        options.MinimumBreadcrumbLevel = NLog.LogLevel.Warn;
+        // Error and higher are sent as events (default is Error)
+        options.MinimumEventLevel = NLog.LogLevel.Error;
+    },
+    // Info and higher are sent as logs. Breadcrumbs and events can only use entries at this level or higher.
+    minLevel: NLog.LogLevel.Info);
 LogManager.Configuration = nlogConfig;
 
 try

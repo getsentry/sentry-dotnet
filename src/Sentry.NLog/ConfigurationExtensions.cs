@@ -59,11 +59,17 @@ public static class ConfigurationExtensions
     /// <param name="configuration">The NLog configuration.</param>
     /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
     /// <param name="targetName">The name to give the new target.</param>
+    /// <param name="minLevel">
+    /// The minimum level of entries that reach the target. Every entry that reaches it is sent as a log, so this sets
+    /// the minimum level for logs, and breadcrumbs and events can only use entries at this level or higher.
+    /// Defaults to <see cref="LogLevel.Trace"/>, which sends every entry.
+    /// </param>
     /// <returns>The configuration.</returns>
     public static LoggingConfiguration AddSentry(
         this LoggingConfiguration configuration,
         Action<SentryNLogOptions>? optionsConfig = null,
-        string targetName = DefaultTargetName)
+        string targetName = DefaultTargetName,
+        LogLevel? minLevel = null)
     {
         // Not to throw on code that ignores nullability warnings.
         if (configuration.IsNull())
@@ -89,7 +95,7 @@ public static class ConfigurationExtensions
 
         configuration.AddTarget(targetName, target);
 
-        configuration.AddRuleForAllLevels(targetName);
+        configuration.AddRule(minLevel ?? LogLevel.Trace, LogLevel.Fatal, targetName);
 
         return configuration;
     }
