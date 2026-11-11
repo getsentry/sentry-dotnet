@@ -75,7 +75,7 @@ public partial class SentryTargetTests
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
                     </extensions>
                     <targets>
-                        <target type='Sentry' name='sentry' minimumEventLevel='Warn' ignoreEventsWithNoException='true'>
+                        <target type='Sentry' name='sentry' minimumEventLevel='Warn' minimumLogLevel='Debug' ignoreEventsWithNoException='true'>
                             <options>
                                 <includeEventPropertiesAsTags>True</includeEventPropertiesAsTags>
                             </options>
@@ -91,8 +91,21 @@ public partial class SentryTargetTests
         var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
         Assert.NotNull(t);
         Assert.Equal(LogLevel.Warn, t.Options.MinimumEventLevel);
+        Assert.Equal(LogLevel.Debug, t.Options.MinimumLogLevel);
         Assert.True(t.Options.IgnoreEventsWithNoException);
         Assert.True(t.Options.IncludeEventPropertiesAsTags);
+    }
+
+    [Theory]
+    [InlineData("Debug", "Debug")]
+    [InlineData(null, "Off")]
+    public void MinimumLogLevel_Get_ReturnsOptionsLevel(string optionsLevel, string expected)
+    {
+        _fixture.Options.MinimumLogLevel = optionsLevel is null ? null : LogLevel.FromString(optionsLevel);
+
+        var target = (SentryTarget)_fixture.GetTarget();
+
+        Assert.Equal(expected, target.MinimumLogLevel);
     }
 
     [Fact]
@@ -564,7 +577,7 @@ public partial class SentryTargetTests
     }
 
     [Fact]
-    public void EnableLogs_IsObsoleteAndAlwaysEnabled()
+    public void EnableLogs_SetFalse_SetsMinimumLogLevelOff()
     {
         var target = (SentryTarget)_fixture.GetTarget();
 
@@ -573,8 +586,22 @@ public partial class SentryTargetTests
 
         target.EnableLogs = false;
 
-        Assert.True(target.EnableLogs);
+        Assert.False(target.EnableLogs);
 #pragma warning restore CS0618
+        Assert.Equal(LogLevel.Off, target.Options.MinimumLogLevel);
+    }
+
+    [Fact]
+    public void EnableLogs_SetTrue_KeepsMinimumLogLevel()
+    {
+        _fixture.Options.MinimumLogLevel = LogLevel.Warn;
+        var target = (SentryTarget)_fixture.GetTarget();
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        target.EnableLogs = true;
+#pragma warning restore CS0618
+
+        Assert.Equal(LogLevel.Warn, target.Options.MinimumLogLevel);
     }
 
     [Fact]
