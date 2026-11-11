@@ -1,4 +1,4 @@
-minVersion: 3.9.0
+minVersion: 3.12.0
 changelog:
   policy: auto
 versioning:
@@ -14,6 +14,10 @@ targets:
     solutionPath: Sentry.slnx
     includeWorkspaces: '/^Sentry/'
     excludeWorkspaces: '/(TrimTest|CrashableApp)$/'
+    # Publish with nuget.org trusted publishing (GitHub OIDC from getsentry/publish) instead of a
+    # long-lived NUGET_API_TOKEN that has to be renewed by hand. The value is the nuget.org profile
+    # name of whoever created the trusted publishing policy, not the `sentry` org.
+    trustedPublishingUser: TODO-nuget-policy-creator
   - name: github
   - name: registry
     # Every package carries name/packageUrl/mainDocsUrl so craft can create the registry entry
