@@ -39,7 +39,7 @@ reportOn = "medium"
 
 [[skills]]
 name = "code-review"
-ignorePaths = ["src/Sentry.Bindings.Cocoa/ApiDefinition.cs", "src/Sentry.Bindings.Cocoa/StructsAndEnums.cs", "samples/**", "benchmarks/**"]
+ignorePaths = ["src/Sentry.Bindings.Cocoa/ApiDefinition.cs", "src/Sentry.Bindings.Cocoa/StructsAndEnums.cs", "benchmarks/**"]
 incremental = true
 
 [[skills.triggers]]
@@ -49,7 +49,7 @@ draft = false
 
 [[skills]]
 name = "sdk-review"
-paths = ["src/**"]
+paths = ["src/**", ".agents/skills/sdk-review/**"]
 ignorePaths = ["src/Sentry.Bindings.Cocoa/ApiDefinition.cs", "src/Sentry.Bindings.Cocoa/StructsAndEnums.cs"]
 incremental = true
 failOn = "off"
