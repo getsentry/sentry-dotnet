@@ -333,6 +333,49 @@ public class SentryOptions
     public bool SendDefaultPii { get; set; }
 
     /// <summary>
+    /// Configures which categories of data the SDK's integrations collect automatically, the successor to
+    /// <see cref="SendDefaultPii"/>: per-category control instead of a single all-or-nothing switch.
+    /// </summary>
+    /// <param name="configure">
+    /// Receives the options with every category at its default from the data collection spec. Restrict a category
+    /// by setting it; nothing on the object is ever <c>null</c>, so nested categories can be set directly.
+    /// </param>
+    /// <remarks>
+    /// Calling this replaces <see cref="SendDefaultPii"/> for every integration that has moved onto these options,
+    /// which then ignore it. The spec defaults collect every category, so an application relying on
+    /// <c>SendDefaultPii = false</c> to suppress user identity needs to set
+    /// <see cref="DataCollectionOptions.UserInfo"/> to <c>false</c> here as well.
+    /// <para>
+    /// The integrations are still being migrated onto these options. Until they are, <see cref="SendDefaultPii"/>
+    /// still decides what they collect, and setting a category here has no effect yet.
+    /// </para>
+    /// <para>Repeated calls build on the same options.</para>
+    /// <para>This API is experimental, and it may change in the future.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// options.ConfigureDataCollection(dataCollection =>
+    /// {
+    ///     dataCollection.UserInfo = false;
+    ///     dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("x-tenant-id");
+    /// });
+    /// </code>
+    /// </example>
+    /// <seealso href="https://develop.sentry.dev/sdk/foundations/client/data-collection/"/>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public void ConfigureDataCollection(Action<DataCollectionOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        DataCollection ??= new DataCollectionOptions();
+        configure(DataCollection);
+    }
+
+    internal DataCollectionOptions? DataCollection { get; set; }
+
+    internal DataCollectionResolver DataCollectionResolver { get; }
+
+    /// <summary>
     /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.
     /// </summary>
     /// <remarks>
@@ -1215,8 +1258,8 @@ public class SentryOptions
 
 #if __MOBILE__
     /// <summary>
-    /// Whether the SDK should start a session automatically when it's initialized and
-    /// end the session when it's closed.
+    /// Whether the SDK should start a session automatically when the app comes to the foreground,
+    /// and end it once the app has been in the background for longer than <see cref="AutoSessionTrackingInterval"/>.
     /// On mobile application platforms, this is enabled by default.
     /// </summary>
     public bool AutoSessionTracking { get; set; } = true;
@@ -1427,6 +1470,7 @@ public class SentryOptions
     public SentryOptions()
     {
         SettingLocator = new SettingLocator(this);
+        DataCollectionResolver = new DataCollectionResolver(this);
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 
         TransactionProcessorsProviders = [() => TransactionProcessors ?? []];

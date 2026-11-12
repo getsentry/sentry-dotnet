@@ -20,6 +20,7 @@ internal static class ArchiveUtils
         return memStream;
     }
 
+    // .NET 9/10 Android apps still ship LZ4; keep it until the oldest supported TFM is .NET 11.
     /// <summary>
     /// The DLL may be compressed, see https://github.com/xamarin/xamarin-android/pull/4686
     /// In particular: https://github.com/dotnet/android/blob/44c5c30d3da692c54ca27d4a41571ef20b73670f/src/Xamarin.Android.Build.Tasks/Utilities/AssemblyCompression.cs#L96-L104

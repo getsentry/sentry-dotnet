@@ -35,7 +35,7 @@ internal class BeforeSendCallback : JavaObject, JavaSdk.SentryOptions.IBeforeSen
         catch (Exception exception)
         {
             _options.LogError(exception, "Before Send Error");
-            return e;
+            return null;
         }
     }
 }

@@ -38,4 +38,40 @@ public class RequestTests
         Assert.Equal(sut.Other.First().Key, clone.Other.First().Key);
         Assert.Equal(sut.Other.First().Value, clone.Other.First().Value);
     }
+
+    [Theory]
+    [InlineData("Authorization")]
+    [InlineData("Proxy-Authorization")]
+    [InlineData("X-Api-Key")]
+    [InlineData("Cookie")]
+    [InlineData("cookie")]
+    [InlineData("Set-Cookie")]
+    public void AddHeaders_SensitiveHeader_KeepsNameAndFiltersValue(string name)
+    {
+        var sut = new SentryRequest();
+
+        sut.AddHeaders([new(name, ["secret"])]);
+
+        sut.Headers.Should().Equal(new Dictionary<string, string> { { name, "[Filtered]" } });
+    }
+
+    [Fact]
+    public void AddHeaders_NonSensitiveHeader_JoinsValues()
+    {
+        var sut = new SentryRequest();
+
+        sut.AddHeaders([new("X-Cookie-Debug", ["one", "two"])]);
+
+        sut.Headers.Should().Equal(new Dictionary<string, string> { { "X-Cookie-Debug", "one; two" } });
+    }
+
+    [Fact]
+    public void Headers_ExplicitlySetSensitiveHeader_NotFilteredByDenylist()
+    {
+        var sut = new SentryRequest();
+
+        sut.Headers["X-Api-Key"] = "user-supplied";
+
+        sut.Headers["X-Api-Key"].Should().Be("user-supplied");
+    }
 }

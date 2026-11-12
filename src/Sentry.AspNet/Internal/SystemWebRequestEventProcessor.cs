@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 
 namespace Sentry.AspNet.Internal;
 
@@ -60,7 +61,7 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProce
                 continue;
             }
 
-            @event.Request.Headers[key] = context.Request.Headers[key];
+            @event.Request.Headers[key] = SensitiveDataFilter.FilterHeaderValue(key, context.Request.Headers[key]);
         }
 
         if (_options.SendDefaultPii)

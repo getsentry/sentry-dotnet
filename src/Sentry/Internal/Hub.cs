@@ -443,7 +443,7 @@ internal class Hub : IHub, IDisposable
         return true;
     }
 
-    public void StartSession()
+    internal void RecoverPersistedSession()
     {
         // Attempt to recover persisted session left over from previous run
         if (_isPersistedSessionRecovered.Exchange(true) != true)
@@ -461,6 +461,11 @@ internal class Hub : IHub, IDisposable
                 _options.LogError(ex, "Failed to recover persisted session.");
             }
         }
+    }
+
+    public void StartSession()
+    {
+        RecoverPersistedSession();
 
         // Start a new session
         try

@@ -71,4 +71,30 @@ public class ResponseTests
             { "X-Test", "header1; header2" }
         });
     }
+
+    [Theory]
+    [InlineData("Authorization")]
+    [InlineData("Proxy-Authorization")]
+    [InlineData("X-Api-Key")]
+    [InlineData("Cookie")]
+    [InlineData("Set-Cookie")]
+    [InlineData("set-cookie")]
+    public void AddHeaders_SensitiveHeader_KeepsNameAndFiltersValue(string name)
+    {
+        var sut = new Response();
+
+        sut.AddHeaders([new(name, ["secret"])]);
+
+        sut.Headers.Should().Equal(new Dictionary<string, string> { { name, "[Filtered]" } });
+    }
+
+    [Fact]
+    public void AddHeaders_RepeatedSetCookie_FiltersEveryValue()
+    {
+        var sut = new Response();
+
+        sut.AddHeaders([new("Set-Cookie", ["first=secret", "second=secret"])]);
+
+        sut.Headers.Should().Equal(new Dictionary<string, string> { { "Set-Cookie", "[Filtered]" } });
+    }
 }
