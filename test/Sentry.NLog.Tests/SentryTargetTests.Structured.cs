@@ -40,12 +40,56 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.MinimumLogLevel = LogLevel.Trace;
 
         var logger = _fixture.GetLogger();
 
         logger.Log(level, "Message");
 
         capturer.Logs.Should().ContainSingle().Which.Level.Should().Be(expected);
+    }
+
+    public static TheoryData<string?, string[]> MinimumLogLevelData => new()
+    {
+        { null, ["Info message"] },
+        { "Debug", ["Debug message", "Info message"] },
+        { "Warn", [] },
+        { "Off", [] },
+    };
+
+    [Theory]
+    [MemberData(nameof(MinimumLogLevelData))]
+    public void Write_StructuredLogging_MinimumLogLevel(string? minimumLogLevel, string[] expectedMessages)
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        if (minimumLogLevel is not null)
+        {
+            _fixture.Options.MinimumLogLevel = LogLevel.FromString(minimumLogLevel);
+        }
+
+        var logger = _fixture.GetLogger();
+
+        logger.Debug("Debug message");
+        logger.Info("Info message");
+
+        capturer.Logs.Select(log => log.Message).Should().Equal(expectedMessages);
+    }
+
+    [Fact]
+    public void Write_BelowMinimumLogLevel_StillAddsBreadcrumb()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Trace;
+        _fixture.Options.MinimumLogLevel = LogLevel.Info;
+
+        var logger = _fixture.GetLogger();
+
+        logger.Trace(DefaultMessage);
+
+        capturer.Logs.Should().BeEmpty();
+        _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be(DefaultMessage);
     }
 
     [Theory]

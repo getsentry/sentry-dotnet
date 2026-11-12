@@ -37,7 +37,7 @@ BeforeAll {
     {
         switch ($framework) {
             'net10.0' { return '26' }     # matches PreviousIosTfm / PreviousMacCatalystTfm
-            'net11.0' { return '27.0' }   # matches LatestIosTfm / LatestMacCatalystTfm
+            'net11.0' { return '27.2' }   # matches LatestIosTfm / LatestMacCatalystTfm
             default { throw "Unsupported framework '$framework' for iOS target platform version." }
         }
     }

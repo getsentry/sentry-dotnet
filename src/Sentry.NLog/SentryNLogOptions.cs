@@ -21,6 +21,11 @@ public class SentryNLogOptions
     public LogLevel? MinimumBreadcrumbLevel { get; set; } = LogLevel.Info;
 
     /// <summary>
+    /// Minimum log level to be sent to Sentry as a structured log. Defaults to <see cref="M:LogLevel.Info" />.
+    /// </summary>
+    public LogLevel? MinimumLogLevel { get; set; } = LogLevel.Info;
+
+    /// <summary>
     /// Set this to <see langword="true" /> to ignore log messages that don't contain an exception.
     /// </summary>
     public bool IgnoreEventsWithNoException { get; set; } = false;

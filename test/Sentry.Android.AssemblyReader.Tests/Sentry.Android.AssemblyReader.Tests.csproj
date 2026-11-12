@@ -56,9 +56,11 @@
     <PropertyGroup>
       <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
       <!-- RunAOTCompilation is Mono-only, and .NET 11 rejects UseMonoRuntime on mobile TFMs
-           (NETSDK1242), so the AOT variants are only built for TFMs that still support Mono. -->
+           (NETSDK1242), so the AOT variants are only built for TFMs that still support Mono.
+           The .NET 11 Android pack also fails on RunAOTCompilation=false under CoreCLR (XA1044),
+           so only Mono TFMs get it. -->
       <_RuntimeProps Condition="'$(_Aot)' == 'True'">RunAOTCompilation=true;UseMonoRuntime=true</_RuntimeProps>
-      <_RuntimeProps Condition="'$(_Aot)' != 'True'">RunAOTCompilation=false</_RuntimeProps>
+      <_RuntimeProps Condition="'$(_Aot)' != 'True' And $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '11.0'))">RunAOTCompilation=false</_RuntimeProps>
       <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
       <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>

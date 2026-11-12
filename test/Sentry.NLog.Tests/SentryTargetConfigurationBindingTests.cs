@@ -123,22 +123,14 @@ public class SentryTargetConfigurationBindingTests
         Assert.Single(standardError);
     }
 
-    [Fact]
-    public void EnableLogs_WhenSetToFalse_WritesMessageToStandardError()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void EnableLogs_WhenSet_WritesNothing(bool value)
     {
         var standardError = new List<string>();
 
-        Set(GetTarget(standardError), "EnableLogs", false);
-
-        Assert.Contains(SentryTarget.EnableLogsFalseIgnored, Assert.Single(standardError));
-    }
-
-    [Fact]
-    public void EnableLogs_WhenSetToTrue_WritesNothing()
-    {
-        var standardError = new List<string>();
-
-        Set(GetTarget(standardError), "EnableLogs", true);
+        Set(GetTarget(standardError), "EnableLogs", value);
 
         Assert.Empty(standardError);
     }

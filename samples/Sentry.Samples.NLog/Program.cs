@@ -119,6 +119,7 @@ public static class Program
 
                 options.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default is Info)
                 options.MinimumEventLevel = LogLevel.Error; // Error and higher are sent as events (default is Error)
+                options.MinimumLogLevel = LogLevel.Info; // Info and higher are sent as logs (default is Info)
 
                 options.IncludeEventDataOnBreadcrumbs = true; // Optionally include event properties with breadcrumbs
 
