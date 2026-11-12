@@ -192,4 +192,7 @@
   <!-- Remove SentryShakeDetector to avoid CS8767 nullability mismatch with ISensorEventListener -->
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='SentryShakeDetector']" />
 
+  <!-- AnrProfilingIntegration became final in 8.64.0, so its protected nested enum fails with CS0628 (new protected member declared in sealed type) -->
+  <remove-node path="/api/package[@name='io.sentry.android.core.anr']/class[@name='AnrProfilingIntegration.MainThreadState']" />
+
 </metadata>
