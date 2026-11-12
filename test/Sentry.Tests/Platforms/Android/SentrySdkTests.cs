@@ -3,118 +3,51 @@ namespace Sentry.Tests.Platforms.Android;
 
 public class SentrySdkTests
 {
-    [Fact]
-    public void BeforeSendWrapper_Suppress_SIGSEGV_ReturnsNull()
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void CreateBeforeSendCallback_NoEnabledFilter_ReturnsNull(bool enabled, bool hasFilter)
     {
-        // Arrange
-        var options = new SentryOptions();
-        options.Android.SuppressSegfaults = true;
-        var evt = new SentryEvent
-        {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Type = "SIGSEGV",
-                    Value = "Segfault"
-                }
-            }
-        };
-        var hint = new SentryHint();
-
-        // Act
-        var result = SentrySdk.BeforeSendWrapper(options).Invoke(evt, hint);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
-    [Fact]
-    public void BeforeSendWrapper_DontSupress_SIGSEGV_ReturnsEvent()
-    {
-        // Arrange
         var options = new SentryOptions();
         options.Android.SuppressSegfaults = false;
-        var evt = new SentryEvent
+        options.Native.EnableBeforeSend = enabled;
+        if (hasFilter)
         {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Type = "SIGSEGV",
-                    Value = "Segfault"
-                }
-            }
-        };
-        var hint = new SentryHint();
+            options.SetBeforeSend((evt, _) => evt);
+        }
+        using var javaOptions = new JavaSdk.SentryOptions();
 
-        // Act
-        var result = SentrySdk.BeforeSendWrapper(options).Invoke(evt, hint);
-
-        // Assert
-        result.Should().Be(evt);
+        SentrySdk.CreateBeforeSendCallback(options, javaOptions).Should().BeNull();
     }
 
     [Fact]
-    public void BeforeSendWrapper_BeforeSendCallbackDefined_CallsBeforeSend()
+    public void CreateBeforeSendCallback_SuppressionWithDisabledFilter_ReturnsUnconvertedEventWithoutCallingFilter()
     {
-        // Arrange
-        var beforeSend = Substitute.For<Func<SentryEvent, SentryHint, SentryEvent>>();
-        beforeSend.Invoke(Arg.Any<SentryEvent>(), Arg.Any<SentryHint>()).Returns(callInfo => callInfo.Arg<SentryEvent>());
-
         var options = new SentryOptions();
-        options.Native.EnableBeforeSend = true;
-        options.SetBeforeSend(beforeSend);
-        var evt = new SentryEvent();
-        var hint = new SentryHint();
-
-        // Act
-        var result = SentrySdk.BeforeSendWrapper(options).Invoke(evt, hint);
-
-        // Assert
-        beforeSend.Received(1).Invoke(Arg.Any<SentryEvent>(), Arg.Any<SentryHint>());
-        result.Should().Be(evt);
-    }
-
-    [Fact]
-    public void BeforeSendWrapper_NoBeforeSendCallback_ReturnsEvent()
-    {
-        // Arrange
-        var options = new SentryOptions();
-        options.Native.EnableBeforeSend = true;
-        var evt = new SentryEvent();
-        var hint = new SentryHint();
-
-        // Act
-        var result = SentrySdk.BeforeSendWrapper(options).Invoke(evt, hint);
-
-        // Assert
-        result.Should().Be(evt);
-    }
-
-    [Fact]
-    public void BeforeSendWrapper_NativeBeforeSendDisabled_ReturnsEvent()
-    {
-        // Arrange
-        var beforeSend = Substitute.For<Func<SentryEvent, SentryHint, SentryEvent>>();
-        beforeSend.Invoke(Arg.Any<SentryEvent>(), Arg.Any<SentryHint>()).Returns(_ => null);
-
-        var options = new SentryOptions();
-        options.SetBeforeSend(beforeSend);
+        options.Android.SuppressSegfaults = true;
         options.Native.EnableBeforeSend = false;
-        var evt = new SentryEvent();
-        var hint = new SentryHint();
+        var called = false;
+        options.SetBeforeSend((evt, _) =>
+        {
+            called = true;
+            return evt;
+        });
+        using var javaOptions = new JavaSdk.SentryOptions();
+        using var callback = SentrySdk.CreateBeforeSendCallback(options, javaOptions);
+        using var evt = new JavaSdk.SentryEvent
+        {
+            EventId = new JavaSdk.Protocol.SentryId(new string('z', 32))
+        };
+        using var hint = new JavaSdk.Hint();
 
-        // Act
-        var result = SentrySdk.BeforeSendWrapper(options).Invoke(evt, hint);
+        var result = callback!.Execute(evt, hint);
 
-        // Assert
-        beforeSend.DidNotReceive().Invoke(Arg.Any<SentryEvent>(), Arg.Any<SentryHint>());
-        result.Should().Be(evt);
+        called.Should().BeFalse();
+        result.Should().BeSameAs(evt);
     }
 
     [Fact]
-    public void BeforeSendWrapper_BeforeSendThrows_ReturnsNullAndLogsError()
+    public void CreateBeforeSendCallback_BeforeSendThrows_ReturnsNullAndLogsError()
     {
         // Arrange
         var exception = new InvalidOperationException("callback failed");
@@ -122,11 +55,14 @@ public class SentrySdkTests
         var options = new SentryOptions { Debug = true, DiagnosticLogger = logger };
         options.Native.EnableBeforeSend = true;
         options.SetBeforeSend((SentryEvent _, SentryHint _) => throw exception);
-        var evt = new SentryEvent();
-        var hint = new SentryHint();
+        options.Android.SuppressSegfaults = false;
+        using var javaOptions = new JavaSdk.SentryOptions();
+        using var callback = SentrySdk.CreateBeforeSendCallback(options, javaOptions);
+        using var evt = new JavaSdk.SentryEvent();
+        using var hint = new JavaSdk.Hint();
 
         // Act
-        var result = SentrySdk.BeforeSendWrapper(options).Invoke(evt, hint);
+        var result = callback!.Execute(evt, hint);
 
         // Assert
         result.Should().BeNull();

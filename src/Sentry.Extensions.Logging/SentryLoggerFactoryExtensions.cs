@@ -1,7 +1,4 @@
-using Sentry;
-using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
-using Sentry.Infrastructure;
 
 // ReSharper disable once CheckNamespace
 // Ensures 'AddSentry' can be found without: 'using Sentry;'
@@ -13,24 +10,21 @@ namespace Microsoft.Extensions.Logging;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryLoggerFactoryExtensions
 {
+    internal const string ObsoleteLoggerFactoryOverload =
+        "ILoggerFactory.AddSentry() is no longer supported. Add Sentry while building the logger factory instead, " +
+        "with LoggerFactory.Create(builder => builder.AddSentry()) or ILoggingBuilder.AddSentry(), which also " +
+        "sends structured logs.";
+
     /// <summary>
-    /// Adds the Sentry logging integration.
+    /// Not supported. Use <see cref="LoggingBuilderExtensions.AddSentry(ILoggingBuilder, Action{SentryLoggingOptions}?)"/> instead.
     /// </summary>
-    /// <remarks>
-    /// This method does not initialize Sentry. Initialize it separately, with <see cref="SentrySdk.Init(Action{SentryOptions})"/>
-    /// or a framework integration such as <c>UseSentry</c>.
-    /// </remarks>
     /// <param name="factory">The factory.</param>
-    /// <param name="optionsConfiguration">The options configuration.</param>
+    /// <param name="optionsConfiguration">No longer supported.</param>
+    /// <returns>Never returns.</returns>
+    /// <exception cref="NotSupportedException">Always.</exception>
+    [Obsolete(ObsoleteLoggerFactoryOverload, error: true)]
     public static ILoggerFactory AddSentry(
         this ILoggerFactory factory,
         Action<SentryLoggingOptions>? optionsConfiguration = null)
-    {
-        var options = new SentryLoggingOptions();
-
-        optionsConfiguration?.Invoke(options);
-
-        factory.AddProvider(new SentryLoggerProvider(HubAdapter.Instance, SystemClock.Clock, options));
-        return factory;
-    }
+        => throw new NotSupportedException(ObsoleteLoggerFactoryOverload);
 }

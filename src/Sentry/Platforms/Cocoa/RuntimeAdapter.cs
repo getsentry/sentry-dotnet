@@ -23,7 +23,7 @@ internal sealed class RuntimeAdapter : IRuntime
     public event MarshalManagedExceptionHandler? MarshalManagedException;
     public event MarshalObjectiveCExceptionHandler? MarshalObjectiveCException;
 
-    public bool IsMono { get; } = Type.GetType("Mono.Runtime") != null;
+    public bool IsMono { get; } = Type.GetType("Mono.RuntimeStructs") != null;
 
     public void IgnoreNextSignal(int signal) => SentryCocoaHybridSdk.Internal.IgnoreNextSignal(signal);
 

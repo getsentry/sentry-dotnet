@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -103,13 +104,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
     {
         foreach (var header in headers)
         {
-            // Always redact the Authorization header
-            if (header.Key.Equals("Authorization", StringComparison.OrdinalIgnoreCase))
-            {
-                Headers.Add(header.Key, PiiExtensions.RedactedText);
-                continue;
-            }
-            Headers.Add(header.Key, string.Join("; ", header.Value));
+            Headers.Add(header.Key, SensitiveDataFilter.FilterHeaderValue(header.Key, string.Join("; ", header.Value)));
         }
     }
 

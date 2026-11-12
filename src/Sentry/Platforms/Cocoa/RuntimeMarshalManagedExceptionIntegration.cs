@@ -28,21 +28,39 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
     [SecurityCritical]
     internal void Handle(object? sender, MarshalManagedExceptionEventArgs e)
     {
+        if (CocoaScope.IsConfiguring)
+        {
+            // Return it to CocoaScope.Configure: only Mono can unwind native frames, CoreCLR has to rethrow it as an NSException.
+            e.ExceptionMode = _runtime.IsMono
+                ? MarshalManagedExceptionMode.UnwindNativeCode
+                : MarshalManagedExceptionMode.ThrowObjectiveCException;
+            _options?.LogDebug("Managed exception escaped a native scope callback: {0}", e.Exception?.Message);
+            return;
+        }
+
         _options?.LogDebug("Runtime Marshal Managed Exception mode {0}", e.ExceptionMode.ToString("G"));
 
         if (e.Exception is { } ex)
         {
-            ex.SetSentryMechanism(
-                "Runtime.MarshalManagedException",
-                "This exception was caught by the .NET Runtime Marshal Managed Exception global error handler. " +
-                "The application may have crashed as a result of this exception.",
-                handled: false);
+            try
+            {
+                ex.SetSentryMechanism(
+                    "Runtime.MarshalManagedException",
+                    "This exception was caught by the .NET Runtime Marshal Managed Exception global error handler. " +
+                    "The application may have crashed as a result of this exception.",
+                    handled: false);
 
-            // Call the internal implementation, so that we still capture even if the hub has been disabled.
-            _hub?.CaptureExceptionInternal(ex);
+                // Call the internal implementation, so that we still capture even if the hub has been disabled.
+                _hub?.CaptureExceptionInternal(ex);
 
-            // This is likely a terminal exception so try to send the crash report before shutting down
-            _hub?.Flush();
+                // This is likely a terminal exception so try to send the crash report before shutting down
+                _hub?.Flush();
+            }
+            catch (Exception captureException)
+            {
+                _options?.LogError(captureException, "Failed to capture the marshaled managed exception.");
+                return;
+            }
 
             // Under Mono, Disable/UnwindNativeCode call mono_raise_exception which can unwind into
             // a managed catch and never hit abort(). The thread-local ignore flag would then linger

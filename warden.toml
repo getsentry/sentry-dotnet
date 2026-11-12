@@ -39,17 +39,7 @@ reportOn = "medium"
 
 [[skills]]
 name = "code-review"
-remote = "getsentry/skills"
-
-[[skills.triggers]]
-type = "pull_request"
-actions = ["opened", "synchronize", "reopened", "labeled"]
-draft = false
-labels = ["Warden"]
-
-[[skills]]
-name = "find-bugs"
-remote = "getsentry/skills"
+incremental = true
 
 [[skills.triggers]]
 type = "pull_request"
@@ -59,6 +49,7 @@ labels = ["Warden"]
 
 [[skills]]
 name = "gha-security-review"
+incremental = true
 remote = "getsentry/skills"
 
 [[skills.triggers]]
