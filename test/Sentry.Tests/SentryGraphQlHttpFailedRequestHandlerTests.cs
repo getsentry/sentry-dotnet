@@ -153,6 +153,26 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         responseContext?.Data.Should().BeNull();
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_SensitiveQueryParameter_FiltersUrlAndQueryString(bool sendDefaultPii)
+    {
+        var hub = Substitute.For<IHub>();
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
+
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/api/users?token=abc123&q=a%20b%26c&page=5"));
+
+        SentryEvent @event = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        @event.Request.Url.Should().Be("https://example.com/api/users?token=[Filtered]&q=a%20b%26c&page=5");
+        @event.Request.QueryString.Should().Be("?token=[Filtered]&q=a%20b%26c&page=5");
+    }
+
     [Fact]
     public void HandleResponse_Error_CaptureRequestAndResponse()
     {

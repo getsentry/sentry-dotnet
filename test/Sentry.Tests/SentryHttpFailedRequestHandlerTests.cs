@@ -238,6 +238,25 @@ public class SentryHttpFailedRequestHandlerTests
         @event.Request.Url.Should().Be("http://localhost/test/path?query=string"); // No admin:1234
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_SensitiveQueryParameter_FiltersUrlAndQueryString(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        var sut = GetSut(options);
+
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/api/users?token=abc123&q=a%20b%26c&page=5"));
+
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        @event.Request.Url.Should().Be("https://example.com/api/users?token=[Filtered]&q=a%20b%26c&page=5");
+        @event.Request.QueryString.Should().Be("?token=[Filtered]&q=a%20b%26c&page=5");
+    }
+
     [Fact]
     public void HandleResponse_FailedRequest_HasRequestAndResponse()
     {

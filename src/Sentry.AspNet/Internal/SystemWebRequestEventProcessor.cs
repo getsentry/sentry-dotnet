@@ -43,12 +43,11 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProce
         }
 
         @event.Request.Method = context.Request.HttpMethod;
-        @event.Request.Url = context.Request.Url.AbsoluteUri;
+        @event.Request.Url = context.Request.Url.GetLeftPart(UriPartial.Path);
 
         try
         {
-            // ReSharper disable once ConstantConditionalAccessQualifier
-            @event.Request.QueryString = context.Request.QueryString?.ToString();
+            @event.Request.QueryString = QueryStringFilter.Filter(GetRawQueryString(context.Request.Unvalidated.RawUrl));
         }
         catch (NullReferenceException)
         {
@@ -105,5 +104,12 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProce
         @event.Sdk.Version = SdkVersion.Version;
         @event.Sdk.AddPackage($"nuget:{SdkVersion.Name}", SdkVersion.Version);
         return @event;
+    }
+
+    // HttpRequest.QueryString.ToString() re-encodes the parameters, so read them from the raw URL.
+    private static string? GetRawQueryString(string rawUrl)
+    {
+        var queryStart = rawUrl.IndexOf('?');
+        return queryStart < 0 ? null : rawUrl[(queryStart + 1)..];
     }
 }

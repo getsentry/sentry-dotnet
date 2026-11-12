@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
@@ -47,7 +48,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
 
             var sentryRequest = new SentryRequest
             {
-                QueryString = request.RequestUri?.Query,
+                QueryString = QueryStringFilter.Filter(request.RequestUri?.Query),
                 Method = request.Method.Method.ToUpperInvariant(),
                 ApiTarget = "graphql"
             };
@@ -66,13 +67,13 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             var requestContent = request.GetFused<GraphQLRequestContent>();
             if (!_options.SendDefaultPii)
             {
-                sentryRequest.Url = request.RequestUri?.HttpRequestUrl();
+                sentryRequest.Url = request.RequestUri?.FilteredHttpRequestUrl();
             }
             else
             {
                 sentryRequest.Cookies = request.Headers.GetCookies();
                 sentryRequest.Data = requestContent?.RequestContent;
-                sentryRequest.Url = request.RequestUri?.AbsoluteUri;
+                sentryRequest.Url = QueryStringFilter.FilterUrl(request.RequestUri?.AbsoluteUri);
                 sentryRequest.AddHeaders(request.Headers);
                 responseContext.Cookies = response.Headers.GetCookies();
                 responseContext.Data = json;

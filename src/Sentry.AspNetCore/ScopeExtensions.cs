@@ -134,7 +134,7 @@ internal static class ScopeExtensions
         scope.Request.Url = $"{context.Request.Scheme}://{host}{context.Request.Path}";
         scope.UnsetTag("RequestPath");
 
-        scope.Request.QueryString = context.Request.QueryString.ToString();
+        scope.Request.QueryString = QueryStringFilter.Filter(context.Request.QueryString.ToString());
         foreach (var requestHeader in context.Request.Headers)
         {
             // Don't add cookies that might contain PII

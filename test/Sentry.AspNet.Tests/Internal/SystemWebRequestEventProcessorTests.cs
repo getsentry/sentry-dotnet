@@ -47,6 +47,21 @@ public class SystemWebRequestEventProcessorTests :
     }
 
     [Fact]
+    public void Process_QueryStringWithSensitiveParameter_FiltersValueAndPreservesEncoding()
+    {
+        const string query = "token=abc123&q=a%20b%26c&page=5";
+        Context = new HttpContext(
+            new HttpRequest("test", $"http://test/the/path?{query}", query),
+            new HttpResponse(TextWriter.Null));
+        var evt = new SentryEvent();
+
+        _fixture.GetSut().Process(evt);
+
+        Assert.Equal("token=[Filtered]&q=a%20b%26c&page=5", evt.Request.QueryString);
+        Assert.Equal("http://test/the/path", evt.Request.Url);
+    }
+
+    [Fact]
     public void Process_NoHttpContext_NoRequestData()
     {
         Context = null;
