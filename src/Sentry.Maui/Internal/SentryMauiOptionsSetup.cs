@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 #if !PLATFORM_NEUTRAL
 using Microsoft.Maui.Networking;
@@ -10,21 +9,9 @@ namespace Sentry.Maui.Internal;
 
 internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
 {
-    private readonly IConfiguration _config;
-
-    public SentryMauiOptionsSetup(IConfiguration config)
-    {
-        ArgumentNullException.ThrowIfNull(config);
-        _config = config.GetSection("Sentry");
-    }
-
     public void Configure(SentryMauiOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-
-        var bindable = new BindableSentryMauiOptions();
-        _config.Bind(bindable);
-        bindable.ApplyTo(options);
 
 #if __ANDROID__ || __IOS__
         options.Native.AttachScreenshot = options.AttachScreenshot;
@@ -32,9 +19,6 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
 
         // NOTE: Anything set here will overwrite options set by the user.
         //       For option defaults that can be changed, use the constructor in SentryMauiOptions instead.
-
-        // We'll initialize the SDK in SentryMauiInitializer
-        options.InitializeSdk = false;
 
         // Global Mode makes sense for client apps
         options.IsGlobalModeEnabled = true;

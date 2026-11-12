@@ -551,8 +551,8 @@ public partial class HttpTransportTests
 
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
-            logger,
-            new[] { attachment });
+            new[] { attachment },
+            logger: logger);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -603,7 +603,6 @@ public partial class HttpTransportTests
 
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
-            null,
             new[] { attachmentNormal, attachmentTooBig });
 
         // Act
@@ -648,7 +647,6 @@ public partial class HttpTransportTests
 
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
-            null,
             [heapDumpAttachment]);
 
         try
@@ -703,7 +701,6 @@ public partial class HttpTransportTests
 
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
-            null,
             [heapDumpAttachment]);
 
         try
@@ -758,7 +755,6 @@ public partial class HttpTransportTests
 
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
-            null,
             [normalAttachment]);
 
         try
@@ -797,7 +793,7 @@ public partial class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
 
         // Send session update with init=true
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(true, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
         // Pretend the rate limit has already passed
         foreach (var (category, _) in httpTransport.CategoryLimitResets)
@@ -808,7 +804,7 @@ public partial class HttpTransportTests
         // Act
 
         // Send another update with init=false (should get promoted)
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(false, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
         var actualEnvelopeSerialized = await lastRequest.Content!.ReadAsStringAsync();
@@ -839,7 +835,7 @@ public partial class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
 
         // Send session update with init=true
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(true, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
         // Pretend the rate limit has already passed
         foreach (var (category, _) in httpTransport.CategoryLimitResets)
@@ -851,7 +847,7 @@ public partial class HttpTransportTests
 
         // Send an update for different session with init=false (should NOT get promoted)
         var nextSession = new SentrySession("foo2", "bar2", "baz2");
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
         var actualEnvelopeSerialized = await lastRequest.Content!.ReadAsStringAsync();

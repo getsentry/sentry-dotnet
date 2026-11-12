@@ -1,8 +1,11 @@
 {
   "sdk": {
-    "version": "10.0.403",
-    "workloadVersion": "10.0.403",
+    "version": "11.0.100",
+    "workloadVersion": "11.0.100",
     "rollForward": "disable",
     "allowPrerelease": false
+  },
+  "msbuild-sdks": {
+    "Azure.Functions.Sdk": "1.0.1"
   }
 }

@@ -453,6 +453,6 @@ public partial class AttachmentSerializationTests
             "empty.jpg",
             "image/jpeg");
 
-        return Envelope.FromEvent(new SentryEvent(), _testOutputLogger, [attachment]);
+        return Envelope.FromEvent(new SentryEvent(), [attachment], logger: _testOutputLogger);
     }
 }

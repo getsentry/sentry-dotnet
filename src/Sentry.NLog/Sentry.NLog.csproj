@@ -28,6 +28,7 @@
     <Using Include="Sentry.NLog" />
     <Using Include="Sentry.Extensibility" />
     <Using Include="Sentry.Infrastructure" />
+    <Using Include="Sentry.Internal" />
     <Using Include="Sentry.Reflection" />
   </ItemGroup>
 

@@ -1,15 +1,11 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.DataCollection;
-using Sentry.Reflection;
 
 namespace Sentry.AspNet.Internal;
 
 internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
-    private static readonly SdkVersion SdkVersion =
-        typeof(SystemWebRequestEventProcessor).Assembly.GetNameAndVersion();
-
     private readonly SentryOptions _options;
     internal IRequestPayloadExtractor PayloadExtractor { get; }
 
@@ -99,10 +95,6 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProce
             @event.Request.Data = body;
         }
 
-        // Always set the SDK info
-        @event.Sdk.Name = "sentry.dotnet.aspnet";
-        @event.Sdk.Version = SdkVersion.Version;
-        @event.Sdk.AddPackage($"nuget:{SdkVersion.Name}", SdkVersion.Version);
         return @event;
     }
 

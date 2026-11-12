@@ -1,16 +1,14 @@
 namespace Sentry.Serilog;
 
 /// <summary>
-/// Sentry Options for Serilog logging
+/// Options for the Sentry sink for Serilog.
 /// </summary>
-/// <inheritdoc />
-public class SentrySerilogOptions : SentryOptions
+/// <remarks>
+/// These options only configure the sink. The Sentry SDK itself is configured and initialised separately, using
+/// <c>SentrySdk.Init</c> or another Sentry integration (such as ASP.NET Core or MAUI).
+/// </remarks>
+public class SentrySerilogOptions
 {
-    /// <summary>
-    /// Whether to initialize this SDK through this integration
-    /// </summary>
-    public bool InitializeSdk { get; set; } = true;
-
     /// <summary>
     /// Minimum log level to send an event.
     /// </summary>

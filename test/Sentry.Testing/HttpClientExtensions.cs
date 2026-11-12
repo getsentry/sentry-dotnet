@@ -91,7 +91,12 @@ public static class HttpClientExtensions
         CancellationToken cancellationToken = default)
     {
         var message = new HttpRequestMessage(HttpMethod.Get, requestUri);
+        // .NET 11 annotates the synchronous HttpClient.Send as unsupported on iOS/MacCatalyst.
+        // Every test using this helper supplies a substitute inner handler, so the request is
+        // answered in-process and never reaches the platform transport that has no sync path.
+#pragma warning disable CA1416
         return client.Send(message, cancellationToken);
+#pragma warning restore CA1416
     }
 #endif
 }

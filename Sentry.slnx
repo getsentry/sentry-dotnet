@@ -89,6 +89,7 @@
     <Project Path="samples/Sentry.Samples.AspNetCore.Blazor.Wasm/Sentry.Samples.AspNetCore.Blazor.Wasm.csproj" />
     <Project Path="samples/Sentry.Samples.AspNetCore.Grpc/Sentry.Samples.AspNetCore.Grpc.csproj" />
     <Project Path="samples/Sentry.Samples.AspNetCore.Mvc/Sentry.Samples.AspNetCore.Mvc.csproj" />
+    <Project Path="samples/Sentry.Samples.AspNetCore.NLog/Sentry.Samples.AspNetCore.NLog.csproj" />
     <Project Path="samples/Sentry.Samples.AspNetCore.Serilog/Sentry.Samples.AspNetCore.Serilog.csproj" />
     <Project Path="samples/Sentry.Samples.AspNetCore.WebAPI.Profiling/Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj" />
     <Project Path="samples/Sentry.Samples.Aws.Lambda.AspNetCoreServer/Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj" />
@@ -157,6 +158,7 @@
     <Project Path="src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" />
     <Project Path="src/Sentry.EntityFramework/Sentry.EntityFramework.csproj" />
     <Project Path="src/Sentry.Extensions.AI/Sentry.Extensions.AI.csproj" />
+    <Project Path="src/Sentry.Extensions.Hosting/Sentry.Extensions.Hosting.csproj" />
     <Project Path="src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj" />
     <Project Path="src/Sentry.Google.Cloud.Functions/Sentry.Google.Cloud.Functions.csproj" />
     <Project Path="src/Sentry.Hangfire/Sentry.Hangfire.csproj" />
@@ -190,6 +192,7 @@
     <Project Path="test/Sentry.DiagnosticSource.Tests/Sentry.DiagnosticSource.Tests.csproj" />
     <Project Path="test/Sentry.EntityFramework.Tests/Sentry.EntityFramework.Tests.csproj" />
     <Project Path="test/Sentry.Extensions.AI.Tests/Sentry.Extensions.AI.Tests.csproj" />
+    <Project Path="test/Sentry.Extensions.Hosting.Tests/Sentry.Extensions.Hosting.Tests.csproj" />
     <Project Path="test/Sentry.Extensions.Logging.Tests/Sentry.Extensions.Logging.Tests.csproj" />
     <Project Path="test/Sentry.Google.Cloud.Functions.Tests/Sentry.Google.Cloud.Functions.Tests.csproj" />
     <Project Path="test/Sentry.Hangfire.Tests/Sentry.Hangfire.Tests.csproj" />

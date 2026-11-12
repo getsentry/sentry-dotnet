@@ -1,4 +1,4 @@
-{
+﻿{
   Envelopes: [
     {
       Header: {
@@ -77,6 +77,27 @@
                 Id: Guid_3
               },
               Environment: production
+            }
+          }
+        }
+      ]
+    },
+    {
+      Header: {
+        sdk: {
+          name: sentry.dotnet
+        }
+      },
+      Items: [
+        {
+          Header: {
+            content_type: application/vnd.sentry.items.log+json,
+            item_count: 2,
+            type: log
+          },
+          Payload: {
+            Source: {
+              Length: 2
             }
           }
         }

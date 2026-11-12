@@ -1,0 +1,56 @@
+name: Warm Cocoa SDK cache
+
+# Pull request runs can only restore caches saved by the same PR, its base branch or the default branch.
+# Pushes to the version branches don't run build.yml, so without this every PR into them builds the Cocoa SDK
+# from source on its first run. main doesn't need it, because build.yml saves the cache on main.
+on:
+  push:
+    branches:
+      - version*
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A run that starts while another one builds would miss the cache and build it a second time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  cocoa:
+    name: Cocoa SDK
+    runs-on: xcode-27
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
+      # The same Xcode as Setup Environment, without the installs that building the Cocoa SDK doesn't need
+      - name: Pin the Xcode Version
+        uses: ./.github/actions/pin-xcode
+
+      - name: Get Cocoa SDK cache key
+        id: cocoa-key
+        uses: ./.github/actions/cocoa-cache-key
+
+      - name: Look up Cocoa SDK
+        id: cache-cocoa
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cocoa-key.outputs.key }}
+          lookup-only: true
+
+      - name: Build Cocoa SDK
+        if: steps.cache-cocoa.outputs.cache-hit != 'true'
+        run: bash scripts/build-sentry-cocoa.sh
+
+      - name: Save Cocoa SDK
+        if: steps.cache-cocoa.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}

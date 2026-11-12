@@ -12,9 +12,19 @@
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And $([MSBuild]::VersionGreaterThanOrEquals($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '11.0'))">17.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android' And $([MSBuild]::VersionGreaterThanOrEquals($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '11.0'))">24.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+  </PropertyGroup>
+
+  <!--
+MAUI 11 pulls Microsoft.Windows.SDK.BuildTools.MSIX, which copies assets from referenced .pri files to the output.
+Only runs on Windows and not relevant for our library packages (dll + xml only).
+  -->
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows' And !$([MSBuild]::IsOSPlatform('Windows'))">
+    <AppxGeneratePriEnabled>false</AppxGeneratePriEnabled>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'android'">

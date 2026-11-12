@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.Extensions.Logging;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -59,8 +60,7 @@ public class SentryWebApplicationBuilderExtensionsTests : IDisposable
         builder.Services.Should().ContainSingle(d => d.ImplementationType == typeof(SentryStartupFilter));
         builder.Services.Should().ContainSingle(d => d.ImplementationType == typeof(SentryTracingStartupFilter));
         builder.Services.Should().ContainSingle(d => d.ImplementationType == typeof(SentryMiddleware));
-        builder.Services.Should().ContainSingle(d => d.ImplementationType == typeof(SentryAspNetCoreLoggerProvider));
-        builder.Services.Should().ContainSingle(d => d.ImplementationType == typeof(SentryAspNetCoreStructuredLoggerProvider));
+        builder.Services.Should().ContainSingle(d => d.ServiceType == typeof(HostLoggerProviders));
     }
 
     [Fact]

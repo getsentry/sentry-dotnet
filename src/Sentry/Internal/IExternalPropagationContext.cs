@@ -12,7 +12,7 @@ internal interface IExternalPropagationContext
 
     public BaggageHeader GetBaggageHeader();
 
-    public DynamicSamplingContext? GetDynamicSamplingContext(SentryOptions options, IReplaySession replaySession);
+    public DynamicSamplingContext? GetDynamicSamplingContext(SentryOptions options, IReplaySession replaySession, Scope? scope = null);
 
     /// <summary>
     /// Returns a snapshot of this context with all values fixed at the current instant.

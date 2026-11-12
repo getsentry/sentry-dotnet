@@ -28,10 +28,12 @@ on:
       - 'test/Sentry.Testing/**'
       - 'test/Sentry.Testing.CrashableApp/**'
       - 'test/AndroidTestApp/**'
+      # Referenced by Sentry.Maui.Tests
+      - 'src/Sentry.Extensions.Hosting/**'
       # Integration tests
       - 'integration-test/android.Tests.ps1'
       - 'integration-test/ios.Tests.ps1'
-      - 'integration-test/net9-maui/**'
+      - 'integration-test/maui-device/**'
       - 'integration-test/common.ps1'
       - 'integration-test/Directory.Build.*'
       # Native libraries and modules
@@ -61,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tfm: [net9.0, net10.0]
+        tfm: [net10.0, net11.0]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -103,7 +105,7 @@ jobs:
     strategy: &android-emulator-matrix
       fail-fast: false
       matrix:
-        tfm: [net9.0, net10.0]
+        tfm: [net10.0, net11.0]
         # Must be 34+ for new apps and app updates as of August 31, 2024.
         # See https://apilevels.com/
         api-level: [34, 36]
@@ -195,7 +197,7 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
-          projects: integration-test/net9-maui/Sentry.Maui.Device.IntegrationTestApp.csproj
+          projects: integration-test/maui-device/Sentry.Maui.Device.IntegrationTestApp.csproj
 
       - name: Checkout github-workflows
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

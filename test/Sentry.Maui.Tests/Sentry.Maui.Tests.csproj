@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Extensions.Hosting\Sentry.Extensions.Hosting.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 

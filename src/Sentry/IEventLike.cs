@@ -17,11 +17,6 @@ public interface IEventLike : IHasTags, IHasExtra
     public void AddBreadcrumb(Breadcrumb breadcrumb);
 
     /// <summary>
-    /// The release distribution of the application.
-    /// </summary>
-    public string? Distribution { get; set; }
-
-    /// <summary>
     /// Sentry level.
     /// </summary>
     public SentryLevel? Level { get; set; }
@@ -49,11 +44,6 @@ public interface IEventLike : IHasTags, IHasExtra
     /// The user.
     /// </value>
     public SentryUser User { get; set; }
-
-    /// <summary>
-    /// The release version of the application.
-    /// </summary>
-    public string? Release { get; set; }
 
     /// <summary>
     /// The environment name, such as 'production' or 'staging'.

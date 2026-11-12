@@ -11,12 +11,12 @@ internal class SentryPropagationContext
 
     public DynamicSamplingContext? DynamicSamplingContext { get; private set; }
 
-    public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options, IReplaySession replaySession)
+    public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options, IReplaySession replaySession, Scope? scope = null)
     {
         if (DynamicSamplingContext is null)
         {
             options.LogDebug("Creating the Dynamic Sampling Context from the Propagation Context.");
-            DynamicSamplingContext = this.CreateDynamicSamplingContext(options, replaySession);
+            DynamicSamplingContext = this.CreateDynamicSamplingContext(options, replaySession, scope);
         }
 
         return DynamicSamplingContext;

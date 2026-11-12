@@ -4,6 +4,111 @@ namespace Sentry.Android.AssemblyReader.Tests;
 
 public class StoreReaderTests
 {
+    [Theory]
+    [InlineData(0x80000003u | 0x00010000u, true, sizeof(ulong))] // v3, 64-bit, arm64 (MonoVM)
+    [InlineData(0x80000003u | 0x00010000u, true, sizeof(uint))] // v3, 64-bit, arm64 (CoreCLR)
+    [InlineData(0x00000003u | 0x00020000u, false, sizeof(uint))] // v3, 32-bit, arm
+    public void Create_SupportedVersion_ReadsStore(uint version, bool is64Bit, int nameHashSize)
+    {
+        // Arrange
+        using var stream = CreateStore(version, nameHashSize, "testAssembly.dll");
+
+        // Act
+        var reader = AssemblyStoreReader.Create(stream, "testStore", null);
+
+        // Assert
+        reader.Should().NotBeNull();
+        reader!.Is64Bit.Should().Be(is64Bit);
+        reader.Assemblies.Should().ContainSingle().Which.Name.Should().Be("testAssembly.dll");
+    }
+
+    [Theory]
+    [InlineData(0x80000005u | 0x00010000u)] // v5
+    [InlineData(0x80000004u | 0x00010000u)] // v4 (.NET 11 previews only)
+    [InlineData(0x80000002u | 0x00010000u)] // v2
+    public void Create_UnsupportedVersion_ReturnsNull(uint version)
+    {
+        // Arrange
+        using var stream = CreateStore(version, sizeof(ulong), "testAssembly.dll");
+
+        // Act
+        var reader = AssemblyStoreReader.Create(stream, "testStore", null);
+
+        // Assert
+        reader.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(12u, 1u)] // v2 layout: 64-bit hash, no ignore flag
+    [InlineData(17u, 2u)] // not evenly divisible
+    public void Create_InvalidIndexSize_Throws(uint indexSize, uint indexEntryCount)
+    {
+        // Arrange
+        using var stream = new MemoryStream();
+        using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+        {
+            WriteHeader(writer, 0x80000003u | 0x00010000u, indexEntryCount, indexSize);
+            writer.Write(new byte[indexSize]);
+        }
+        stream.Position = 0;
+
+        // Act
+        var act = () => AssemblyStoreReader.Create(stream, "testStore", null);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage("*testStore*index*");
+    }
+
+    private static MemoryStream CreateStore(uint version, int nameHashSize, string assemblyName)
+    {
+        var stream = new MemoryStream();
+        using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+        {
+            var indexEntrySize = nameHashSize + sizeof(uint) + sizeof(byte);
+            WriteHeader(writer, version, indexEntryCount: 1, (uint)indexEntrySize);
+
+            const ulong nameHash64 = 0xDEADBEEFDEADBEEF;
+            const uint nameHash32 = 0xDEADBEEF;
+            const uint descriptorIndex = 0;
+            const byte ignore = 0;
+            const int descriptorFieldCount = 7;
+
+            if (nameHashSize == sizeof(ulong))
+            {
+                writer.Write(nameHash64);
+            }
+            else
+            {
+                writer.Write(nameHash32);
+            }
+            writer.Write(descriptorIndex);
+            writer.Write(ignore);
+
+            for (var i = 0; i < descriptorFieldCount; i++)
+            {
+                writer.Write(0u);
+            }
+
+            var nameBytes = Encoding.UTF8.GetBytes(assemblyName);
+            writer.Write((uint)nameBytes.Length);
+            writer.Write(nameBytes);
+        }
+
+        stream.Position = 0;
+        return stream;
+    }
+
+    private static void WriteHeader(BinaryWriter writer, uint version, uint indexEntryCount, uint indexSize)
+    {
+        const uint entryCount = 1;
+
+        writer.Write(Utils.AssemblyStoreMagic);
+        writer.Write(version);
+        writer.Write(entryCount);
+        writer.Write(indexEntryCount);
+        writer.Write(indexSize);
+    }
+
     [Fact]
     public void IsSupported_Concurrent_IsThreadSafe()
     {

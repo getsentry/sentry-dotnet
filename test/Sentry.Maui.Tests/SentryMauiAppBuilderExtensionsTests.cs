@@ -1,7 +1,10 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sentry.Internal.Http;
 using Sentry.Maui.Internal;
+using Sentry.Reflection;
 using MauiConstants = Sentry.Maui.Internal.Constants;
 
 namespace Sentry.Maui.Tests;
@@ -144,6 +147,46 @@ public partial class SentryMauiAppBuilderExtensionsTests
     }
 
     [Fact]
+    public void UseSentry_SetInConfigurationAndCallback_CallbackWins()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string>
+        {
+            ["Sentry:Release"] = "from-configuration"
+        });
+
+        // Act
+        builder.UseSentry(options => options.Release = "from-code");
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.Release.Should().Be("from-code");
+    }
+
+    [Fact]
+    public void UseSentry_SetInConfigurationOnly_ConfigurationApplies()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string>
+        {
+            ["Sentry:Environment"] = "from-configuration"
+        });
+
+        // Act
+        builder.UseSentry(options => options.Release = "from-code");
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.Environment.Should().Be("from-configuration");
+    }
+
+    [Fact]
     public void UseSentry_EnablesGlobalMode()
     {
         // Arrange
@@ -187,7 +230,33 @@ public partial class SentryMauiAppBuilderExtensionsTests
         // Assert
         Assert.NotNull(@event);
         Assert.Equal(MauiConstants.SdkName, @event.Sdk.Name);
-        Assert.Equal(MauiConstants.SdkVersion, @event.Sdk.Version);
+        Assert.Equal(typeof(SentryMauiOptions).Assembly.GetNameAndVersion().Version, @event.Sdk.Version);
+    }
+
+    [Fact]
+    public void UseSentry_ConfigureScope_AppliedWhenSdkInitialized()
+    {
+        // Arrange
+        SentryEvent @event = null;
+        var builder = _fixture.Builder
+            .UseSentry(options =>
+            {
+                options.ConfigureScope(scope => scope.SetTag("configured", "at-init"));
+                options.SetBeforeSend((e, _) =>
+                {
+                    @event = e;
+                    return null;
+                });
+            });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        client.CaptureMessage("test");
+
+        // Assert
+        Assert.NotNull(@event);
+        Assert.Equal("at-init", @event.Tags["configured"]);
     }
 
     [Fact]
@@ -329,6 +398,26 @@ public partial class SentryMauiAppBuilderExtensionsTests
     }
 
     [Fact]
+    public void UseSentry_DebugTrueInConfiguration_ConsoleAndTracingDiagnosticsLogger()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string>
+        {
+            ["Sentry:Debug"] = "true"
+        });
+
+        // Act
+        builder.UseSentry(ValidDsn);
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.DiagnosticLogger.Should().BeOfType<ConsoleAndTraceDiagnosticLogger>();
+    }
+
+    [Fact]
     public void UseSentry_DebugTrue_CustomDiagnosticsLogger()
     {
         // Arrange
@@ -356,11 +445,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
         var builder = _fixture.Builder;
 
         // Act
-        builder.UseSentry((SentryMauiOptions options) =>
-        {
-            options.EnableLogs = true;
-            options.InitializeSdk = false;
-        });
+        builder.UseSentry();
 
         using var serviceProvider = builder.Services.BuildServiceProvider();
         var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>().ToArray();
@@ -372,17 +457,34 @@ public partial class SentryMauiAppBuilderExtensionsTests
     }
 
     [Fact]
+    public void UseSentry_WithLoggingAddSentry_LoggingAddSentryProvidersDisabled()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.Logging.AddSentry();
+        builder.UseSentry();
+
+        using var serviceProvider = builder.Services.BuildServiceProvider();
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        // Assert
+        providers.Select(p => p.GetType()).Should().Equal(
+            typeof(NullLoggerProvider),
+            typeof(NullLoggerProvider),
+            typeof(SentryMauiLoggerProvider),
+            typeof(SentryMauiStructuredLoggerProvider));
+    }
+
+    [Fact]
     public void UseSentry_Logging_AddLoggerFilterRules()
     {
         // Arrange
         var builder = _fixture.Builder;
 
         // Act
-        builder.UseSentry((SentryMauiOptions options) =>
-        {
-            options.EnableLogs = true;
-            options.InitializeSdk = false;
-        });
+        builder.UseSentry();
 
         using var serviceProvider = builder.Services.BuildServiceProvider();
         var loggerFilterOptions = serviceProvider.GetRequiredService<IOptions<LoggerFilterOptions>>().Value;

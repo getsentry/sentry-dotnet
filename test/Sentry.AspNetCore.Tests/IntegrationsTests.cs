@@ -177,17 +177,6 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
     }
 
     [Fact]
-    public void WebHost_LoggerFactoryReplacedInitializeSdkFalse_SdkDisabled()
-    {
-        Configure = o => o.InitializeSdk = false;
-        _ = ReplaceLoggerFactory();
-
-        Build();
-
-        Assert.False(SentrySdk.IsEnabled);
-    }
-
-    [Fact]
     public void WebHost_LoggerFactoryReplacedInvalidDsn_StartThrows()
     {
         Configure = o => o.Dsn = "invalid dsn";

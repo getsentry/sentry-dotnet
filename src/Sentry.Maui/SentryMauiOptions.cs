@@ -1,13 +1,14 @@
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 using Sentry.Maui.Internal;
+using Sentry.Reflection;
 
 namespace Sentry.Maui;
 
 /// <summary>
 /// Sentry MAUI integration options
 /// </summary>
-public class SentryMauiOptions : SentryLoggingOptions
+public class SentryMauiOptions : SentryHostOptions
 {
     /// <summary>
     /// Creates a new instance of <see cref="SentryMauiOptions"/>.
@@ -21,6 +22,7 @@ public class SentryMauiOptions : SentryLoggingOptions
         AutoSessionTracking = true;
         DetectStartupTime = StartupTimeDetectionMode.Fast;
         IsEnvironmentUser = false;
+        SetSdk(Constants.SdkName, typeof(SentryMauiOptions).Assembly.GetNameAndVersion());
 #if !PLATFORM_NEUTRAL
         CacheDirectoryPath = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
 #endif
@@ -32,6 +34,19 @@ public class SentryMauiOptions : SentryLoggingOptions
         where TEventBinder : class, IMauiElementEventBinder
     {
         IntegrationEventBinders.Add(new MauiElementEventBinderRegistration<TEventBinder>());
+    }
+
+    /// <summary>
+    /// Whether the <see cref="ILogger"/> integration that <c>UseSentry</c> adds sends log entries to Sentry as structured logs.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see langword="false"/>, including when the app also calls <c>AddSentry()</c> on its
+    /// <see cref="ILoggingBuilder"/>.
+    /// </remarks>
+    public bool EnableLogs
+    {
+        get => LogsEnabled;
+        set => LogsEnabled = value;
     }
 
     /// <summary>

@@ -6,40 +6,32 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging.Tests;
 
-public class SentryStructuredLoggerProviderTests
+[Collection(nameof(SentrySdkCollection))]
+public class SentryStructuredLoggerProviderTests : IDisposable
 {
     private class Fixture
     {
-        public IOptions<SentryLoggingOptions> Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
-        public SdkVersion Sdk { get; }
 
         public Fixture()
         {
-            var loggingOptions = new SentryLoggingOptions();
-            loggingOptions.EnableLogs = true;
-
-            Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
-            Hub.SubstituteConfigureScope(new Scope(loggingOptions));
+            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions();
+            Hub.SubstituteConfigureScope(new Scope(new SentryOptions()));
             Clock = new MockClock();
-            Sdk = new SdkVersion
-            {
-                Name = "SDK Name",
-                Version = "SDK Version",
-            };
-
             Hub.IsEnabled.Returns(true);
         }
 
         public SentryStructuredLoggerProvider GetSut()
         {
-            return new SentryStructuredLoggerProvider(Options.Value, Hub, Clock, Sdk);
+            return new SentryStructuredLoggerProvider(Hub, Clock);
         }
     }
 
     private readonly Fixture _fixture = new();
+
+    public void Dispose() => SentryClientExtensions.SentryOptionsForTestingOnly = null;
 
     [Fact]
     public void Type_CustomAttributes_HasProviderAliasAttribute()
@@ -57,7 +49,6 @@ public class SentryStructuredLoggerProviderTests
         using var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>()
-            .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
@@ -86,7 +77,6 @@ public class SentryStructuredLoggerProviderTests
         using var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>()
-            .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
@@ -98,10 +88,10 @@ public class SentryStructuredLoggerProviderTests
         categoryName.Should().Be(typeof(SentryStructuredLoggerProviderTests).FullName);
 
         capturedLog.TryGetAttribute("sentry.sdk.name", out object? name).Should().BeTrue();
-        name.Should().Be(Constants.SdkName);
+        name.Should().Be(SdkVersion.Instance.Name);
 
         capturedLog.TryGetAttribute("sentry.sdk.version", out object? version).Should().BeTrue();
-        version.Should().Be(SentryLoggerProvider.NameAndVersion.Version);
+        version.Should().Be(SdkVersion.Instance.Version);
 
         capturedLog.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
         origin.Should().Be("auto.log.extensions_logging");

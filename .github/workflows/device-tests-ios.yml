@@ -28,10 +28,12 @@ on:
       - 'test/Sentry.Testing/**'
       - 'test/Sentry.Testing.CrashableApp/**'
       - 'test/AndroidTestApp/**'
+      # Referenced by Sentry.Maui.Tests
+      - 'src/Sentry.Extensions.Hosting/**'
       # Integration tests
       - 'integration-test/android.Tests.ps1'
       - 'integration-test/ios.Tests.ps1'
-      - 'integration-test/net9-maui/**'
+      - 'integration-test/maui-device/**'
       - 'integration-test/common.ps1'
       - 'integration-test/Directory.Build.*'
       # Native libraries and modules
@@ -134,7 +136,7 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
-          projects: integration-test/net9-maui/Sentry.Maui.Device.IntegrationTestApp.csproj
+          projects: integration-test/maui-device/Sentry.Maui.Device.IntegrationTestApp.csproj
 
       - name: Get Cocoa SDK cache key
         id: cocoa-key

@@ -149,10 +149,10 @@ internal static class CocoaExtensions
         var d = new Dictionary<NSString, NSObject>();
         foreach (var item in dict)
         {
-            // skip null values, but add others as NSObject
-            if (item.Value is { } value)
+            // skip null values, and any the runtime can't represent, but add others as NSObject
+            if (item.Value is { } value && NSObject.FromObject(value) is { } nsValue)
             {
-                d.Add((NSString)item.Key, NSObject.FromObject(value));
+                d.Add((NSString)item.Key, nsValue);
             }
         }
 
@@ -210,7 +210,10 @@ internal static class CocoaExtensions
                 continue;
             }
 
-            dict[(NSString)key] = NSObject.FromObject(value);
+            if (NSObject.FromObject(value) is { } nsValue)
+            {
+                dict[(NSString)key] = nsValue;
+            }
         }
 
         return dict.Count == 0

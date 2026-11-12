@@ -136,11 +136,28 @@ modules/              # Native SDK submodules (sentry-native, Ben.Demystifier, e
 scripts/              # Build and maintenance scripts
 ```
 
+## Upgrading to a new .NET major version
+
+Taking a dependency on a new .NET preview breaks the same handful of things every year -
+package/version pinning, container base images, per-TFM `ItemGroup`s, platform minimums, CI
+runner setup, Xcode pinning and Verify snapshots. Read
+[CONTRIBUTING.md -> Upgrading to a new .NET major version](CONTRIBUTING.md#upgrading-to-a-new-net-major-version)
+before starting one, and extend it with anything new you hit.
+
+Two things worth knowing up front, because they cost the most time when missed:
+`dotnet pack` and the integration tests catch most of it and a solution-filter build does not,
+and the local checks must be run **serially**.
+
+- Build samples locally with `GITHUB_ACTIONS=true`. Without CI's `CI_BUILD` define they stop at the
+  DSN `#error` in `samples/SamplesShared.cs`, so later steps such as ILLink never run.
+- To tell a new-SDK regression from an existing failure, rebuild just the failing project and TFM
+  with the previous `global.json`.
+
 ## Platform Targets
 
 ### Non-mobile (Linux / macOS / Windows)
 - Use `SentryNoMobile.slnf` — no extra toolchain needed.
-- Targets: `net9.0`, `net10.0`, `netstandard2.0`, `netstandard2.1`, `net462`.
+- Targets: `net10.0`, `net11.0`, `netstandard2.0`, `netstandard2.1`, `net462`.
 
 ### Android
 - Requires `JAVA_HOME` set and Java installed.
@@ -297,6 +314,12 @@ internal static SentryStackFrame ParseNativeAOTToString(string info)
 
 (that last one is real, from `src/Sentry/Internal/DebugStackTrace.cs` — it records an upstream
 runtime limitation the code itself can't convey.)
+
+**This applies to the library, not to `samples/`.** Samples are documentation: people read them
+to learn how to wire Sentry up, and copy them as a starting point. Comment them concisely but clearly,
+including the configuration files — `appsettings.json` and the like carry `//` comments in this
+repo even though JSON doesn't officially support them, and that has never caused a problem.
+When a sample changes, update its comments rather than dropping them.
 
 ## Adding New Options (AOT Compatibility)
 

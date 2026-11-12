@@ -86,17 +86,15 @@ internal static class C
         // Note: DSN is not null because options.IsValid() must have returned true for this to be called.
         sentry_options_set_dsn(cOptions, options.Dsn!);
 
-        if (options.Release is not null)
+        var defaults = options.ScopeDefaults;
+        if (defaults.Release is { } release)
         {
-            options.DiagnosticLogger?.LogDebug("Setting Release: {0}", options.Release);
-            sentry_options_set_release(cOptions, options.Release);
+            options.DiagnosticLogger?.LogDebug("Setting Release: {0}", release);
+            sentry_options_set_release(cOptions, release);
         }
 
-        if (options.Environment is not null)
-        {
-            options.DiagnosticLogger?.LogDebug("Setting Environment: {0}", options.Environment);
-            sentry_options_set_environment(cOptions, options.Environment);
-        }
+        options.DiagnosticLogger?.LogDebug("Setting Environment: {0}", defaults.Environment);
+        sentry_options_set_environment(cOptions, defaults.Environment);
 
         options.DiagnosticLogger?.LogDebug("Setting Debug: {0}", options.Debug);
         sentry_options_set_debug(cOptions, options.Debug ? 1 : 0);

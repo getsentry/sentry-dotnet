@@ -10,6 +10,23 @@ on:
       - "**.md"
   workflow_dispatch:
 
+# While we track a .NET preview or RC, the runtime-deps tag the SDK derives from the runtime
+# version doesn't exist yet, so the container integration tests have to be told which image to
+# use. Which runtimes need pinning varies by release: for .NET 10 it was only linux-musl, for
+# .NET 11 the glibc runtimes need it too because the images moved from noble to resolute.
+#
+# At GA, blank each value whose derived tag exists - do NOT delete them or the steps that use them.
+# They are needed again for every subsequent preview. An empty value is ignored (see
+# integration-test/aot.Tests.ps1), so the SDK goes back to deriving the tag itself.
+#
+# The .NET 11 GA SDK still derives noble for glibc, and there is no 11.0-noble-chiseled image, so
+# glibc stays pinned to the GA resolute tag until https://github.com/dotnet/sdk/issues/53370 is fixed.
+#
+# See CONTRIBUTING.md -> "Upgrading to a new .NET major version".
+env:
+  CONTAINER_BASE_IMAGE_GLIBC: 'mcr.microsoft.com/dotnet/runtime-deps:11.0-resolute-chiseled'
+  CONTAINER_BASE_IMAGE_MUSL: ''
+
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.rid }})
@@ -36,9 +53,9 @@ jobs:
                 - /tmp/node24:/__e/node24
           - os: xcode-27 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
-          - os: windows-latest
+          - os: windows-2025-vs2026
             rid: win-x64
-          - os: windows-11-arm
+          - os: windows-11-vs2026-arm
             rid: win-arm64
 
     steps:
@@ -107,10 +124,11 @@ jobs:
           - os: xcode-27 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
             slnf: Sentry-CI-Build-macOS.slnf
-          - os: windows-latest
+          # .NET 10+ Native AOT requires VS 2026 (https://github.com/dotnet/runtime/issues/133835)
+          - os: windows-2025-vs2026
             rid: win-x64
             slnf: Sentry-CI-Build-Windows.slnf
-          - os: windows-11-arm
+          - os: windows-11-vs2026-arm
             rid: win-arm64
             slnf: Sentry-CI-Build-Windows-arm64.slnf
 
@@ -269,6 +287,11 @@ jobs:
           echo "Disk usage after cleanup:"
           df -h
 
+      # VSTest's new artifacts-directory check fails on ubuntu-24.04-arm (https://github.com/microsoft/vstest/issues/16652)
+      - name: Skip VSTest's artifacts-directory check
+        if: matrix.rid == 'linux-arm64'
+        run: echo "VSTEST_DISABLE_ARTIFACTS_DIRECTORY_VERIFICATION=1" >> "$GITHUB_ENV"
+
       - name: Test
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=GeneratedCodeAttribute
 
@@ -316,16 +339,23 @@ jobs:
           name: ${{ github.sha }}
           path: src
 
+      # ContainerBaseImage comes from the workflow-level env block at the top of this file.
       - name: Integration test
-#       # Note that when upgrading .NET versions, linux-musl may need special handling... see comments below
-#        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
-        # The other legs' integration tests run in the integration-test job
-        if: matrix.rid == 'linux-arm64' || matrix.rid == 'linux-musl-x64' || matrix.rid == 'linux-musl-arm64' || matrix.rid == 'macos'
+        if: matrix.rid == 'linux-arm64' || matrix.rid == 'macos'
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         # The MAUI cases run in the integration-test job, against packages built there. On release branches they run
         # here too, so the packages craft publishes are the ones tested.
         env:
           SKIP_MAUI_TESTS: ${{ runner.os == 'macOS' && !startsWith(github.ref_name, 'release/') }}
+          ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_GLIBC }}
+        with:
+          path: integration-test
+
+      - name: Integration test (musl)
+        if: matrix.rid == 'linux-musl-x64' || matrix.rid == 'linux-musl-arm64'
+        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        env:
+          ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_MUSL }}
         with:
           path: integration-test
 
@@ -357,19 +387,10 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
         env:
           RuntimeIdentifier: ${{ matrix.rid == 'linux-arm64' && 'linux-arm' || 'win-x86' }}
+          # The glibc tag covers linux/arm/v7; win-x86 skips the Container test.
+          ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_GLIBC }}
         with:
           path: integration-test/aot.Tests.ps1
-
-#      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
-#      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
-#      # by passing it as parameter to aot.Tests.ps1 via an environment variable
-#      - name: Integration test (musl)
-#        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
-#        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
-#        env:
-#          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
-#        with:
-#          path: integration-test
 
   # These run integration tests next to a build leg, against packages built here from only the projects the tests
   # use, which the Sentry-CI-IntegrationTest filters list. CI_PUBLISHING_BUILD only adds the other platforms' native
@@ -394,11 +415,11 @@ jobs:
             rid: linux-x64
             slnf: Sentry-CI-IntegrationTest.slnf
             tests: integration-test
-          - os: windows-latest
+          - os: windows-2025-vs2026
             rid: win-x64
             slnf: Sentry-CI-IntegrationTest.slnf
             tests: integration-test
-          - os: windows-11-arm
+          - os: windows-11-vs2026-arm
             rid: win-arm64
             slnf: Sentry-CI-IntegrationTest.slnf
             tests: integration-test
@@ -458,6 +479,8 @@ jobs:
 
       - name: Integration test
         uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        env:
+          ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_GLIBC }}
         with:
           path: ${{ matrix.tests }}
 
@@ -550,13 +573,13 @@ jobs:
         run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64 -p:NO_MOBILE=true
 
       - name: Publish Test app (Android)
-        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-android35.0 -r android-arm64
+        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-android36.0 -r android-arm64
 
 # We can't publish iOS applications on CI yet. We'd need a valid bundle identifier and to install the relevant
 # certificates/profiles on CI (presumably certs associated with the Sentry org).
 # See https://youtrack.jetbrains.com/issue/RIDER-17115/Could-not-find-any-available-provisioning-profiles-for-iOS
 #      - name: Publish Test app (iOS)
-#        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-ios18.0 -r ios-arm64
+#        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-ios26 -r ios-arm64
 
   # Nothing consumes the app samples, but their Release builds trim and AOT-compile each app, which made them the
   # last minutes of the Build step in the .NET legs. Here they build next to the legs instead of inside them.
@@ -573,7 +596,7 @@ jobs:
             rid: macos
             samples: Sentry-CI-Build-Samples-macOS.slnf
           # The MAUI sample's Windows target, which the MSBuild job also builds with msbuild.exe
-          - os: windows-latest
+          - os: windows-2025-vs2026
             rid: win-x64
             samples: samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj
           # The Android and MAUI samples' Android targets on a Linux host, as the linux-x64 leg built them

@@ -1,12 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TargetFrameworks);net9.0-android35.0;net10.0-android36.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net10.0-ios</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net10.0-android36.0;net11.0-android37.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net11.0-ios</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Maui.Device.IntegrationTestApp</RootNamespace>
     <UseMaui>true</UseMaui>
+    <!-- ReadyToRun can't target Android - crossgen2 fails with "Target OS 'android' is
+         not supported" - but .NET 11 turns it on by default (NETSDK1096). -->
+    <PublishReadyToRun>false</PublishReadyToRun>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -30,7 +33,7 @@
     <ApplicationVersion>1</ApplicationVersion>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 
   </PropertyGroup>
 

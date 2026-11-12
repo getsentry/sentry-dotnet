@@ -34,6 +34,7 @@ We prefer code that explains itself, so comments should be kept to a minimum:
 ## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
+  - [.NET 11.0](https://dotnet.microsoft.com/download/dotnet/11.0)
   - [.NET 10.0](https://dotnet.microsoft.com/download/dotnet/10.0)
   - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
@@ -175,6 +176,107 @@ In CI, these packages are expected to be present, while locally, scripts will ru
 You can run individual tests either via Pester integration (e.g. in VS Code), or from command line: `./integration-test/cli.Tests.ps1`. Consult Pester docs for details on how to write tests.
 
 Because these tests rely on a Sentry server mock (`Invoke-SentryServer`) from <https://github.com/getsentry/github-workflows/tree/main/sentry-cli/integration-test>, you need to check out [getsentry/github-workflows](https://github.com/getsentry/github-workflows) as a sibling directory next to your `getsentry/sentry-dotnet` checkout.
+
+## Upgrading to a new .NET major version
+
+Every year we take a dependency on a .NET preview, follow it through the RCs, and land on GA.
+The same handful of things break each time, so this is the list of what to expect and where to
+fix it. Most of these repeat annually — please extend this section rather than replacing it.
+
+The single most useful habit: **`dotnet pack` and the integration tests, run locally, catch most
+of this.** Building and testing a solution filter does not — several of these only appear at pack
+time, in the integration tests, or in projects that aren't in any filter.
+
+### Which target frameworks we support
+
+Mobile and non-mobile follow different rules, because mobile workloads are far more expensive to
+keep working across versions:
+
+- **Mobile** (`-android`, `-ios`, `-maccatalyst`, `-windows`): every .NET version still supported
+  by Microsoft — in practice the latest two.
+- **Non-mobile**: the latest two LTS releases, plus every STS release after the older of them.
+
+So while .NET 10 is the latest LTS we support net8.0 and later; when .NET 12 ships that becomes
+net10.0 and later. The count oscillates between three and four: each year adds one TFM, and every
+second year — when a new LTS lands — drops two.
+
+These map onto properties in `Directory.Build.props`, and nothing else needs to change:
+
+| Property | Holds | Used by |
+| --- | --- | --- |
+| `CurrentTfms` | the whole non-mobile set | the 13 packages and 20 test projects that aren't mobile-specific |
+| `OldestTfm` | first entry of `CurrentTfms` | — |
+| `LatestTfm` / `PreviousTfm` | the two newest non-mobile TFMs | `Sentry.Maui`, `Sentry.Maui.CommunityToolkit.Mvvm`, `Sentry.Android.AssemblyReader`, benchmarks |
+| `Latest*Tfm` / `Previous*Tfm` | the two newest per mobile platform | the mobile TFM lists |
+
+Because the mobile projects reference `LatestTfm`/`PreviousTfm` rather than `CurrentTfms`, widening
+the non-mobile set does **not** pull mobile along with it.
+
+Two things don't follow automatically when you add or drop a non-mobile TFM:
+
+- **Exhaustive `#if` ladders.** `SingleFileAppTests.cs`, `ReferenceAssembliesExtensions.cs` and
+  `LocalDbFixture.cs` switch on the exact TFM and `#error` on an unknown one. They fail loudly, by
+  design — add an arm rather than a fallback.
+- **Verify snapshots.** Each non-mobile TFM has its own `.DotNet{N}_0.` variants. The
+  `ApiApprovalTests` ones are regenerated and committed by the `verify api` workflow, so in practice
+  only the behavioural snapshots need attention.
+
+When dropping a TFM, delete its snapshots but **leave the `#elif NET{N}_0` arms in `src/` alone** —
+they cost nothing, and the next LTS transition brings some of those versions back.
+
+### Recurring, expect these every time
+
+| Symptom | Where | What to do |
+| --- | --- | --- |
+| `NU5104` A stable release of a package should not have a prerelease dependency | `Directory.Build.props` | While we depend on preview `Microsoft.*` packages our own packages must be prerelease too. Set `VersionPrefix` to the upcoming major and `VersionSuffix` to `prerelease`. Remove the `VersionSuffix` again in the GA bump, or the stable release ships as `-prerelease`. |
+| `CONTAINER1015` Unable to access the repository `dotnet/runtime-deps` at tag ... | `.github/workflows/build.yml` | The SDK derives a `runtime-deps` tag from the runtime version and it doesn't exist yet for previews. Set `CONTAINER_BASE_IMAGE_GLIBC` / `CONTAINER_BASE_IMAGE_MUSL` at the top of the workflow. Which runtimes need it varies: .NET 10 needed only musl, .NET 11 needed glibc too (images moved from noble to resolute). At GA, blank a value only once the tag the GA SDK derives exists: `dotnet msbuild -restore -t:ComputeContainerBaseImage -p:RuntimeIdentifier=<rid> -p:EnableSdkContainerSupport=true -getProperty:ContainerBaseImage` in a `dotnet new console --aot` app prints it. The .NET 11 GA SDK still derives `noble` for glibc ([dotnet/sdk#53370](https://github.com/dotnet/sdk/issues/53370)), so glibc stays pinned to `11.0-resolute-chiseled`. |
+| A new TFM silently gets **no** package references | any `'$(TargetFrameworkVersion)' == 'v{N}.0'` `ItemGroup` | These are exact-match, so a new TFM matches nothing and gets no packages — with no error. Add a `v{N+1}.0` sibling to every one of them. This is what caused the Android `XA4242` Java dependency failures in the .NET 11 bump. |
+| `XA5207` Could not find `android.jar` for API level {N} | `.github/actions/environment/action.yml` | Add the new platform to the `setup-android` `packages:` list, e.g. `platforms;android-37.0`. Check the exact id — preview API levels carry a minor, `android-37.0` not `android-37`. |
+| Test hosts fail to start: `You must install or update .NET` | `.github/actions/environment/action.yml` | Once `global.json` pins the new SDK, the previous runtime no longer comes with it, but we still target and test it. Add `{N-1}.0.x` to `dotnet-version`. Most runners have it preinstalled, so this usually only shows up on the Alpine containers. |
+| `XA4216` deployment target not supported / `SupportedOSPlatformVersion` lower than minimum | `Directory.Build.props` **and** `Directory.Build.targets` | Platform minimums rise with each release. Condition the new value on the new TFM so existing consumers aren't affected — see the Android and MacCatalyst entries there. These are user-facing breaking changes; add them to the PR's `### Changelog Entry`. |
+| `NETSDK1094` / `NETSDK1096` optimizing assemblies for performance failed | app `.csproj`s with an Android TFM | ReadyToRun can't target Android at all (`crossgen2`: `Target OS 'android' is not supported`), but the SDK may enable it by default. Set `PublishReadyToRun=false` on the affected app. |
+| `XA1044` The MSBuild property 'RunAOTCompilation' is not compatible with the CoreCLR runtime | `test/Sentry.Android.AssemblyReader.Tests` | `RunAOTCompilation` is a Mono switch. From .NET 11 GA, the Android pack fails as soon as it's set on CoreCLR, even to `false`. Pass it only for TFMs that still run on Mono, and use `PublishReadyToRun=false` to turn off ReadyToRun on CoreCLR. |
+| iOS app builds fail with `requires Xcode X, the current version is Y` | `integration-test/*.ps1`, device test apps | Each .NET for iOS SDK pack pins an **exact** Xcode version, so only one iOS TFM is buildable on a given machine. Build the TFM matching the Xcode that CI pins, and don't try to cover two. Libraries skip this check, which is why only app builds are affected. When an RC needs an Xcode the `macos-*` images don't carry yet, move the macOS jobs to the matching preview image (.NET 11 RC 2 needed `xcode-27`) and update the Xcode in `.github/actions/pin-xcode/action.yml`, which Setup Environment and the Cocoa SDK cache warm-up both use. |
+| `NETSDK1140` X is not a valid TargetPlatformVersion for ios | `Directory.Build.props`, `integration-test/common.ps1`, `.github/actions/pin-xcode/action.yml` | An Apple pack accepts only its own platform version, so when a release moves to a new Xcode the old TFM stops resolving. .NET 11 RC 2 went from 26.5 to 27.0, and GA shipped only the 27.2 packs, with no GA build of the 27.0 one. The version is spelled out in the first two files, so update them together, and move the Xcode pin to the matching version. The test apps, `ios.Tests.ps1` and the simulator picker use the unversioned TFM or read it from `Directory.Build.props`. |
+| iOS device tests fail with XHarness exit code 80 (`APP_CRASH`), but the app never launched | `scripts/device-test-utils.ps1` | The `mlaunch` bundled with XHarness doesn't support the new Xcode. Bump the pinned XHarness. `Install-XHarness` doesn't install if any `xharness` is already on the `PATH`, so update your local one too. |
+| Symbol upload silently stops, or sends the wrong files | `src/Sentry/buildTransitive/Sentry.targets` | We depend on SDK target names and intermediate directories, and these change between previews without errors. In .NET 11, `_CopyAotSymbols` went away in preview 7, `linked` became `postprocessed-assemblies` in RC 1, and in RC 2 Native AOT publish stopped running `Build` and both directories were written. `cli.Tests.ps1` is what catches it. Compare which targets run and which directories get written under the old and new SDKs. |
+| Verify snapshots missing for the new TFM | `test/**/*.verified.txt` | Delete the snapshots for dropped TFMs. New ones for macOS-covered TFMs regenerate on a local test run. The `.Windows.` and `Net4_8` ones can only be produced on Windows — take them from the `<rid>-verify-test-results` CI artifact rather than hand-writing them; they are UTF-8 with BOM and no trailing newline. |
+| `CS0400` The type or namespace name '...' could not be found | `src/Sentry.Bindings.Android/Transforms/` | Newer Android binding generators stopped pruning methods whose parameter/return types are unbound, so a `Bind="false"` Java dependency leaks an unresolvable type into the generated C#. `remove-node` the offending member. Because the older generator already pruned it, the same entry warns `BG8A00` there - put net-N-only entries in their own transform file and `TransformFile Remove` it for older TFMs, since the SDK auto-globs `Transforms/**/*.xml` into every TFM. |
+| `CsWinRT1032` Collection expressions targeting non mutable interface type | any `-windows` TFM | A newer CsWinRT rejects a collection expression whose target is a non-mutable interface (`IEnumerable<T>`), because the synthesised type isn't trim/AOT-safe for WinRT. Cast the expression to a concrete array rather than changing the public signature it's passed to. |
+| `IL2037` No members were resolved for '...' | `Directory.Build.props` | External ILLink descriptors naming members that don't resolve. We ship none of our own, so these are always the platform's. `ILLinkTreatWarningsAsErrors` defaults to `TreatWarningsAsErrors`, so add the id to `WarningsNotAsErrors` to demote rather than silence it, and drop that once the platform fixes the descriptors. |
+| `LNK1322` cannot avoid potential ARM hazard (Cortex-A53 MPCore processor bug #843419) | `.github/workflows/*.yml` | Native AOT for .NET 10+ requires Visual Studio 2026 ([dotnet/runtime#133835](https://github.com/dotnet/runtime/issues/133835)), so Windows jobs use the VS 2026 runner images (`windows-2025-vs2026`, `windows-11-vs2026-arm`). `scripts/build-sentry-native.ps1` still compiles the shipped `sentry-native.lib` with the VS 2022 toolset (`-T v143`) so VS 2022 users can link it ([why](https://github.com/getsentry/sentry-dotnet/pull/5566#issuecomment-5671353352)). |
+
+### Places that don't follow the usual rules
+
+- **`samples/`** deliberately uses literal TFMs, not the centralized properties, because samples are
+  documentation people copy. Bump them by hand.
+- **`test/Sentry.TrimTest`, `test/Sentry.MauiTrimTest` and `test/AndroidTestApp`** ship empty
+  `Directory.Build.props`/`.targets` stubs to isolate themselves from the repo's build
+  customization. The centralized TFM properties are unavailable there — keep their TFMs literal.
+  Using a property yields an empty `TargetFrameworks` and a confusing
+  `MSB4006: circular dependency ... _GetRequiredWorkloads`.
+- **`Sentry-CI-Build-macOS.slnf` is not every project.** A green build of it still leaves the
+  Playwright test apps, `Sentry.AspNet.Tests`, `AndroidTestApp`, both trim tests and the
+  integration-test app unbuilt. Build those separately.
+
+### Verifying locally before pushing
+
+Run these **serially** — `scripts/build-sentry-native.ps1 -Clean` wipes the CMake cache, so a
+concurrent build in the same worktree fails with a misleading `CMAKE_C_COMPILER not set`.
+
+```shell-script
+dotnet build Sentry-CI-Build-macOS.slnf -c Release
+dotnet pack  Sentry-CI-Build-macOS.slnf -c Release --no-build   # catches NU5104 / NU5026
+# the projects outside the filter, at the TFMs CI builds
+dotnet build test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-android36.0
+# ...and the integration tests
+pwsh -c "Invoke-Pester integration-test/aot.Tests.ps1, integration-test/cli.Tests.ps1"
+```
+
+What genuinely can't be checked locally on macOS: the Windows jobs (`net48`, the `.Windows.` and
+`Net4_8` snapshots), the Linux-only `Container` test in `aot.Tests.ps1` (it requires a Linux
+*host*, not just Docker), and anything caused by the CI runner's environment rather than the code —
+for those, read `.github/actions/environment/action.yml` against the TFMs you just added.
 
 ## Maintaining the Ben.Demystifier Submodule
 

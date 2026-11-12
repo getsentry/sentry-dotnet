@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
-using Sentry.Internal;
+using Sentry.Extensions.Logging;
 using Sentry.Reflection;
 
 namespace Google.Cloud.Functions.Framework;
@@ -18,6 +19,8 @@ namespace Google.Cloud.Functions.Framework;
 /// </summary>
 public class SentryStartup : FunctionsStartup
 {
+    private static readonly SdkVersion NameAndVersion = typeof(SentryStartup).Assembly.GetNameAndVersion();
+
     /// <summary>
     /// Configure Sentry logging.
     /// </summary>
@@ -26,18 +29,22 @@ public class SentryStartup : FunctionsStartup
         base.ConfigureLogging(context, logging);
         logging.AddConfiguration(context.Configuration);
 
-        logging.Services.AddSingleton<ISentryEventProcessor, SentryGoogleCloudFunctionEventProcessor>();
-
         // TODO: refactor this with SentryWebHostBuilderExtensions
         var section = context.Configuration.GetSection("Sentry");
         logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(
             _ => new SentryAspNetCoreOptionsSetup(section)
+            );
+        logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(
+            _ => new SentryHostLoggingOptionsSetup<SentryAspNetCoreOptions>(context.Configuration)
             );
 
         logging.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
             // Make sure all events are flushed out
             options.FlushBeforeRequestCompleted = true;
+
+            options.SetSdk(Sentry.Google.Cloud.Functions.Constants.SdkName, NameAndVersion);
+            options.SetEnvironment(context.HostingEnvironment.EnvironmentName);
 
             // K_SERVICE is where the name of the FAAS is stored.
             // It will return null if GCP Function is running locally.
@@ -56,9 +63,12 @@ public class SentryStartup : FunctionsStartup
             }
         });
 
-        logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
-        logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
-        logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
+        HostLoggerProviders.Add(
+            logging.Services,
+            events: c => new SentryAspNetCoreLoggerProvider(
+                c.GetRequiredService<IOptions<SentryAspNetCoreOptions>>(), c.GetRequiredService<IHub>()),
+            structuredLogs: c => new SentryAspNetCoreStructuredLoggerProvider(c.GetRequiredService<IHub>()));
+        logging.Services.TryAddSingleton<HostIntegrationMarker>();
 
         // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
         logging.AddFilter<SentryAspNetCoreLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
@@ -93,29 +103,6 @@ public class SentryStartup : FunctionsStartup
         base.Configure(context, app);
         app.UseMiddleware<SentryGoogleCloudFunctionsMiddleware>();
         app.UseSentryTracing();
-    }
-
-    private class SentryGoogleCloudFunctionEventProcessor : ISentryEventProcessor, ISdkProcessor
-    {
-        private static readonly SdkVersion NameAndVersion
-            = typeof(SentryStartup).Assembly.GetNameAndVersion();
-
-        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
-        private const string SdkName = "sentry.dotnet.google-cloud-function";
-
-        public SentryEvent Process(SentryEvent @event)
-        {
-            // Take over the SDK name since this wraps ASP.NET Core
-            @event.Sdk.Name = SdkName;
-            @event.Sdk.Version = NameAndVersion.Version;
-
-            if (NameAndVersion.Version != null)
-            {
-                @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-            }
-
-            return @event;
-        }
     }
 
     private class SentryGoogleCloudFunctionsMiddleware

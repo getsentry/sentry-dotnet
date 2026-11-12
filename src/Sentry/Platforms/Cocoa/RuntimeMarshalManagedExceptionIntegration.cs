@@ -26,7 +26,7 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
 
     // Internal for testability
     [SecurityCritical]
-    internal void Handle(object sender, MarshalManagedExceptionEventArgs e)
+    internal void Handle(object? sender, MarshalManagedExceptionEventArgs e)
     {
         if (CocoaScope.IsConfiguring)
         {

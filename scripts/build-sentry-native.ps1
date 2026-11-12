@@ -40,7 +40,9 @@ try
         }
         $additionalArgs += @(
             '-D', "CMAKE_C_FLAGS_RELWITHDEBINFO=$msvcFlags",
-            '-D', "CMAKE_CXX_FLAGS_RELWITHDEBINFO=$msvcFlags"
+            '-D', "CMAKE_CXX_FLAGS_RELWITHDEBINFO=$msvcFlags",
+            # VS 2022 toolset, so the shipped lib stays linkable by VS 2022. See https://github.com/getsentry/sentry-dotnet/pull/5566#issuecomment-5671353352
+            '-T', 'v143'
         )
     }
     elseif ($IsLinux)

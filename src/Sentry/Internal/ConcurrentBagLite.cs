@@ -28,6 +28,24 @@ internal class ConcurrentBagLite<T> : IReadOnlyCollection<T>
         }
     }
 
+    public void AddRange(IEnumerable<T> items)
+    {
+        // Materialised outside the lock: the source may be a lazy sequence running arbitrary code.
+        var toAdd = items.ToArray();
+        lock (_items)
+        {
+            _items.AddRange(toAdd);
+        }
+    }
+
+    public int RemoveAll(Predicate<T> match)
+    {
+        lock (_items)
+        {
+            return _items.RemoveAll(match);
+        }
+    }
+
     public int Count
     {
         get

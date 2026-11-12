@@ -32,7 +32,6 @@ internal class SentryMiddleware : IMiddleware
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
 
-    private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     // Ben.BlockingDetector
     private readonly IBlockingMonitor? _monitor;
@@ -254,13 +253,6 @@ internal class SentryMiddleware : IMiddleware
         scope.AddEventProcessors(_eventProcessors.Except(scope.GetAllEventProcessors()));
         scope.AddExceptionProcessors(_eventExceptionProcessors.Except(scope.GetAllExceptionProcessors()));
         scope.AddTransactionProcessors(_transactionProcessors.Except(scope.GetAllTransactionProcessors()));
-        scope.Sdk.Name = Constants.SdkName;
-        scope.Sdk.Version = NameAndVersion.Version;
-
-        if (NameAndVersion.Version is { } version)
-        {
-            scope.Sdk.AddPackage(ProtocolPackageName, version);
-        }
 
         if (_hostingEnvironment.WebRootPath is { } webRootPath)
         {

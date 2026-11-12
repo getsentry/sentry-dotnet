@@ -1,0 +1,68 @@
+﻿namespace Microsoft.Extensions.Logging
+{
+    public static class LoggingBuilderExtensions
+    {
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder) { }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration) { }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with UseSentry from Sentry.Extensions.Hosting (worker and other generic host apps), Sentry.AspNetCore or Sentry.Maui, or with SentrySdk.Init. Then remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration; UseSentry reads them from the 'Sentry' section.", true)]
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, string dsn) { }
+    }
+    public static class SentryLoggerFactoryExtensions
+    {
+        [System.Obsolete("ILoggerFactory.AddSentry() is no longer supported. Add Sentry while building the " +
+            "logger factory instead, with LoggerFactory.Create(builder => builder.AddSentry()" +
+            ") or ILoggingBuilder.AddSentry(), which also sends structured logs.", true)]
+        public static Microsoft.Extensions.Logging.ILoggerFactory AddSentry(this Microsoft.Extensions.Logging.ILoggerFactory factory, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration = null) { }
+    }
+}
+namespace Sentry.Extensions.Logging
+{
+    public class DelegateLogEntryFilter : Sentry.Extensions.Logging.ILogEntryFilter
+    {
+        public DelegateLogEntryFilter(System.Func<string, Microsoft.Extensions.Logging.LogLevel, Microsoft.Extensions.Logging.EventId, System.Exception?, bool> filter) { }
+        public bool Filter(string categoryName, Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, System.Exception? exception) { }
+    }
+    public interface ILogEntryFilter
+    {
+        bool Filter(string categoryName, Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, System.Exception? exception);
+    }
+    public class MelDiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    {
+        public MelDiagnosticLogger(Microsoft.Extensions.Logging.ILogger<Sentry.ISentryClient> logger, Sentry.SentryLevel level) { }
+        public bool IsEnabled(Sentry.SentryLevel level) { }
+        public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
+    }
+    public abstract class SentryHostOptions : Sentry.SentryOptions
+    {
+        protected SentryHostOptions() { }
+        public bool AdjustStandardEnvironmentNameCasing { get; set; }
+        public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
+        public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
+        public void ConfigureScope(System.Action<Sentry.Scope> action) { }
+    }
+    public class SentryLoggingOptions
+    {
+        public SentryLoggingOptions() { }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with UseSentry from Sentry.Extensions.Hosting (worker and other generic host apps), Sentry.AspNetCore or Sentry.Maui, or with SentrySdk.Init. Then remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration; UseSentry reads them from the 'Sentry' section.", true)]
+        public string? Dsn { get; set; }
+        [System.Obsolete(@"The Microsoft.Extensions.Logging integration no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with UseSentry from Sentry.Extensions.Hosting (worker and other generic host apps), Sentry.AspNetCore or Sentry.Maui, or with SentrySdk.Init. Then remove 'Dsn', 'InitializeSdk' and any other core SDK settings from the logging configuration; UseSentry reads them from the 'Sentry' section.", true)]
+        public bool InitializeSdk { get; set; }
+        public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
+        public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
+    }
+    public static class SentryLoggingOptionsExtensions
+    {
+        public static void AddLogEntryFilter(this Sentry.Extensions.Logging.SentryHostOptions options, Sentry.Extensions.Logging.ILogEntryFilter filter) { }
+        public static void AddLogEntryFilter(this Sentry.Extensions.Logging.SentryHostOptions options, System.Func<string, Microsoft.Extensions.Logging.LogLevel, Microsoft.Extensions.Logging.EventId, System.Exception?, bool> filter) { }
+        public static void AddLogEntryFilter(this Sentry.Extensions.Logging.SentryLoggingOptions options, Sentry.Extensions.Logging.ILogEntryFilter filter) { }
+        public static void AddLogEntryFilter(this Sentry.Extensions.Logging.SentryLoggingOptions options, System.Func<string, Microsoft.Extensions.Logging.LogLevel, Microsoft.Extensions.Logging.EventId, System.Exception?, bool> filter) { }
+    }
+}
+namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
+{
+    public static class ServiceCollectionExtensions
+    {
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddSentry<TOptions>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services)
+            where TOptions : Sentry.Extensions.Logging.SentryHostOptions, new () { }
+    }
+}

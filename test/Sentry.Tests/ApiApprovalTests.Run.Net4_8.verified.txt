@@ -201,11 +201,9 @@ namespace Sentry
     {
         System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         Sentry.SentryContexts Contexts { get; set; }
-        string? Distribution { get; set; }
         string? Environment { get; set; }
         System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         Sentry.SentryLevel? Level { get; set; }
-        string? Release { get; set; }
         Sentry.SentryRequest Request { get; set; }
         Sentry.SdkVersion Sdk { get; }
         string? TransactionName { get; set; }
@@ -346,7 +344,9 @@ namespace Sentry
     }
     public interface ITransactionData : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
+        string? Distribution { get; set; }
         string? Platform { get; set; }
+        string? Release { get; set; }
     }
     public interface ITransactionRecorder : Sentry.ISpanRecorder
     {
@@ -448,12 +448,10 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment> Attachments { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.SentryContexts Contexts { get; set; }
-        public string? Distribution { get; set; }
         public string? Environment { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public Sentry.SentryLevel? Level { get; set; }
-        public string? Release { get; set; }
         public Sentry.SentryRequest Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.ISpan? Span { get; set; }
@@ -546,8 +544,6 @@ namespace Sentry
         public static void Flush(this Sentry.ISentryClient client) { }
         public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
-        [System.Obsolete("WARNING: This method is meant for internal usage only")]
-        public static Sentry.SentryOptions? GetInternalSentryOptions(this Sentry.ISentryClient clientOrHub) { }
     }
     public static class SentryConstants
     {
@@ -867,7 +863,6 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
         public bool CaptureFailedRequests { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
-        public System.Func<bool>? CrashedLastRun { get; set; }
         public System.Func<System.Net.Http.HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
         public bool Debug { get; set; }
         public System.Net.DecompressionMethods DecompressionMethods { get; set; }
@@ -881,11 +876,6 @@ namespace Sentry
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableBackpressureHandling { get; set; }
-        public bool EnableLogs { get; set; }
-        [System.Obsolete("Metrics are always enabled. This option is ignored and will be removed in version" +
-            " 7.0.0. To drop metrics, use SetBeforeSendMetric and return null.")]
-        public bool EnableMetrics { get; set; }
-        public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
@@ -910,7 +900,6 @@ namespace Sentry
         public bool RequestBodyCompressionBuffered { get; set; }
         public System.IO.Compression.CompressionLevel RequestBodyCompressionLevel { get; set; }
         public float? SampleRate { get; set; }
-        public Sentry.IScopeObserver? ScopeObserver { get; set; }
         public bool SendClientReports { get; set; }
         public bool SendDefaultPii { get; set; }
         public Sentry.ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; }
@@ -948,7 +937,6 @@ namespace Sentry
         public void AddTransactionProcessor(Sentry.Extensibility.ISentryTransactionProcessor processor) { }
         public void AddTransactionProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor>> processorProvider) { }
         public void AddTransactionProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
-        public void ApplyDefaultTags(Sentry.IHasTags hasTags) { }
         public void ConfigureDataCollection(System.Action<Sentry.DataCollectionOptions> configure) { }
         public void DisableAppDomainProcessExitFlush() { }
         public void DisableAppDomainUnhandledExceptionCapture() { }
@@ -1658,6 +1646,10 @@ namespace Sentry.Extensibility
         public Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
         public void UnsetTag(string key) { }
     }
+    public static class HubDiagnosticExtensions
+    {
+        public static Sentry.Extensibility.IDiagnosticLogger? GetDiagnosticLogger(this Sentry.IHub hub) { }
+    }
     public interface IBackgroundWorker
     {
         int QueuedItems { get; }
@@ -2085,10 +2077,10 @@ namespace Sentry.Protocol.Envelopes
         public Sentry.SentryId? TryGetEventId() { }
         public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.Envelope> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
         public static Sentry.Protocol.Envelopes.Envelope FromCheckIn(Sentry.SentryCheckIn checkIn) { }
-        public static Sentry.Protocol.Envelopes.Envelope FromEvent(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
-        public static Sentry.Protocol.Envelopes.Envelope FromFeedback(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromEvent(Sentry.SentryEvent @event, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null, Sentry.Extensibility.IDiagnosticLogger? logger = null) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromFeedback(Sentry.SentryEvent @event, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null, Sentry.Extensibility.IDiagnosticLogger? logger = null) { }
         public static Sentry.Protocol.Envelopes.Envelope FromSession(Sentry.SessionUpdate sessionUpdate) { }
-        public static Sentry.Protocol.Envelopes.Envelope FromTransaction(Sentry.SentryTransaction transaction, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromTransaction(Sentry.SentryTransaction transaction, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.Extensibility.IDiagnosticLogger? logger = null) { }
     }
     public sealed class EnvelopeItem : Sentry.Protocol.Envelopes.ISerializable, System.IDisposable
     {

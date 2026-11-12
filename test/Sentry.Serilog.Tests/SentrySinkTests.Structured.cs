@@ -4,31 +4,27 @@ namespace Sentry.Serilog.Tests;
 
 public partial class SentrySinkTests
 {
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Emit_StructuredLogging_IsEnabled(bool isEnabled)
+    [Fact]
+    public void Emit_StructuredLogging_CapturesLog()
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = isEnabled;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
 
         logger.Write(LogEventLevel.Information, "Message");
 
-        capturer.Logs.Should().HaveCount(isEnabled ? 1 : 0);
+        capturer.Logs.Should().HaveCount(1);
     }
 
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Emit_StructuredLogging_UseHubOptionsOverSinkOptions(bool isEnabled)
+    public void Emit_StructuredLogging_RequiresHubOptions(bool isEnabled)
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         if (!isEnabled)
         {
@@ -54,7 +50,6 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -71,9 +66,8 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
-        _fixture.Options.Environment = "test-environment";
-        _fixture.Options.Release = "test-release";
+        _fixture.SentryOptions.Environment = "test-environment";
+        _fixture.SentryOptions.Release = "test-release";
 
         if (withActiveSpan)
         {
@@ -121,9 +115,9 @@ public partial class SentrySinkTests
         log.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
         origin.Should().Be("auto.log.serilog");
         log.TryGetAttribute("sentry.sdk.name", out object? sdkName).Should().BeTrue();
-        sdkName.Should().Be(SentrySink.SdkName);
+        sdkName.Should().Be(SdkVersion.Instance.Name);
         log.TryGetAttribute("sentry.sdk.version", out object? sdkVersion).Should().BeTrue();
-        sdkVersion.Should().Be(SentrySink.NameAndVersion.Version);
+        sdkVersion.Should().Be(SdkVersion.Instance.Version);
 
         log.TryGetAttribute("property.Scalar-Property", out object? scalar).Should().BeTrue();
         scalar.Should().Be(42);
@@ -140,7 +134,6 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -156,7 +149,6 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();

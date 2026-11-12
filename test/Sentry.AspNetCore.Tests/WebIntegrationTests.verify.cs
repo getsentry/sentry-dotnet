@@ -65,6 +65,8 @@ public class WebIntegrationTests
         await Verify(new { result, transport.Payloads })
             .IgnoreStandardSentryMembers()
             .ScrubAspMembers()
+            // How many logs ASP.NET Core's own infrastructure emits per request is not deterministic.
+            .IgnoreMembers<StructuredLog>(_ => _.Length)
             .UniqueForTargetFrameworkAndVersion();
     }
 
@@ -136,7 +138,11 @@ public class WebIntegrationTests
 
         // No transaction should be recorded for pre-flight/options requests
         // See: https://github.com/getsentry/sentry-dotnet/issues/1835#issuecomment-1239546099
-        transport.Payloads.Any().Should().BeFalse();
+        // Other signals (logs, client reports, ...) are captured as usual - only transactions matter here.
+        transport.Envelopes
+            .SelectMany(envelope => envelope.Items)
+            .Where(item => item.TryGetType() == EnvelopeItem.TypeValueTransaction)
+            .Should().BeEmpty();
     }
 
     [ApiController]

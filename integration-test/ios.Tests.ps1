@@ -12,19 +12,25 @@ BeforeDiscovery {
 }
 
 Describe 'iOS app (<tfm>, <configuration>, <runtime>)' -ForEach @(
-    # Note: we can't run against net10 and net9 because .NET 10 requires Xcode 27 and .NET 9 requires Xcode 26.0.
-    # The xcode-27 runner image only has Xcode 27 installed and no support for it is planned for
-    # net9.0-ios: https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
+    # Note: only the latest iOS TFM is covered. Each github runner only has Xcode
+    # versions to test a single version of .NET.
+    # See https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
     #
-    # TODO: add coreclr when available
-    @{ tfm = "net10.0-ios"; configuration = "Release"; runtime = "mono" }
-    @{ tfm = "net10.0-ios"; configuration = "Debug";   runtime = "mono" }
+    # CoreCLR only: as of .NET 11 preview 6 it is the only runtime for MAUI mobile apps and the
+    # UseMonoRuntime property was removed. Mono on iOS is therefore covered only by net10.0, which
+    # this job can't build alongside net11.0 because of the Xcode pinning noted above. See
+    # https://devblogs.microsoft.com/dotnet/coreclr-progress-and-mono-timeline-dotnet-maui/
+    @{ tfm = "net11.0-ios"; configuration = "Release"; runtime = "coreclr" }
+    @{ tfm = "net11.0-ios"; configuration = "Debug";   runtime = "coreclr" }
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
+        # Note: maui-device, not maui-app. cli.Tests.ps1 generates a fresh app from the
+        # MAUI template at integration-test/maui-app and deletes whatever is there first, so
+        # this source app must not share that name.
+        Copy-Item -Path "$PSScriptRoot/maui-device" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         # clean up potential old copied build outputs that may target a different configuration or runtime
         Remove-Item -Path "$PSScriptRoot/mobile-app/bin", "$PSScriptRoot/mobile-app/obj" `
             -Recurse -Force -ErrorAction SilentlyContinue

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Sentry.Extensibility;
 
 namespace Sentry.Maui.Internal;
 
@@ -14,6 +15,7 @@ internal class SentryMauiInitializer : IMauiInitializeService
 
         // Initialize the Sentry SDK.
         var disposable = SentrySdk.Init(options);
+        options.ApplyConfigureScopeCallbacks(HubAdapter.Instance);
 
         // Register the return value from initializing the SDK with the disposer.
         // This will ensure that it gets disposed when the service provider is disposed.

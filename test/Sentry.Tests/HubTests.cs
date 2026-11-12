@@ -1873,7 +1873,7 @@ public partial class HubTests : IDisposable
             {"sentry-public_key", "49d0f7386ad645858ae85020e393bef3"},
             {"sentry-sample_rate", "1.0"}
         }).CreateDynamicSamplingContext(_fixture.ReplaySession);
-        externalContext.GetDynamicSamplingContext(Arg.Any<SentryOptions>(), Arg.Any<IReplaySession>())
+        externalContext.GetDynamicSamplingContext(Arg.Any<SentryOptions>(), Arg.Any<IReplaySession>(), Arg.Any<Scope>())
             .Returns(dynamicSamplingContext);
 
         _fixture.Options.ExternalPropagationContext = externalContext;
@@ -2173,27 +2173,6 @@ public partial class HubTests : IDisposable
         lines[3].Should().StartWith("{\"type\":\"profile\",\"length\":");
         lines[4].Should().Contain("\"profile\":{");
         lines[5].Should().BeEmpty();
-    }
-
-    [Fact]
-    public void Logger_EnableLogsDisabled_StillCapturesLog()
-    {
-        // Arrange
-        // EnableLogs gates the logging integrations. Logs created directly via this API are always captured.
-        Assert.False(_fixture.Options.EnableLogs);
-        var hub = _fixture.GetSut();
-
-        // Act
-        hub.Logger.LogWarning("Message");
-        hub.Logger.Flush();
-
-        // Assert
-        _fixture.Client.Received(1).CaptureEnvelope(
-            Arg.Is<Envelope>(envelope =>
-                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
-            )
-        );
-        hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
     }
 
     [Fact]

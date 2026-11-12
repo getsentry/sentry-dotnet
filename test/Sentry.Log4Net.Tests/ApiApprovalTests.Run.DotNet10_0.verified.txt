@@ -4,11 +4,10 @@ namespace Sentry.Log4Net
     public class SentryAppender : log4net.Appender.AppenderSkeleton
     {
         public SentryAppender() { }
+        [System.Obsolete(@"The Sentry appender no longer initializes the SDK, so a DSN can no longer be supplied to it. Initialize Sentry with SentrySdk.Init (or UseSentry via one of the integrations), and remove 'Dsn' and any other core SDK settings from the appender configuration.", true)]
         public string? Dsn { get; set; }
-        public string? Environment { get; set; }
         public log4net.Core.Level? MinimumEventLevel { get; set; }
         public bool SendIdentity { get; set; }
         protected override void Append(log4net.Core.LoggingEvent loggingEvent) { }
-        protected override void OnClose() { }
     }
 }

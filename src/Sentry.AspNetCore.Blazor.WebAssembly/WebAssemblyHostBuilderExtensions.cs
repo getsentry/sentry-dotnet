@@ -1,10 +1,15 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore.Blazor.WebAssembly.Internal;
 using Sentry.Extensions.Logging;
+using Sentry.Extensions.Logging.Extensions.DependencyInjection;
+using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Reflection;
 
 // ReSharper disable once CheckNamespace - Discoverability
 namespace Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -22,9 +27,27 @@ public static class WebAssemblyHostBuilderExtensions
     /// <returns></returns>
     public static WebAssemblyHostBuilder UseSentry(this WebAssemblyHostBuilder builder, Action<SentryBlazorOptions> configureOptions)
     {
-        builder.Logging.AddSentry<SentryBlazorOptions>(blazorOptions =>
+        builder.Logging.AddSentryBlazor(builder.Configuration, builder.HostEnvironment.Environment, configureOptions);
+        return builder;
+    }
+
+    internal static ILoggingBuilder AddSentryBlazor(
+        this ILoggingBuilder logging,
+        IConfiguration configuration,
+        string hostEnvironmentName,
+        Action<SentryBlazorOptions> configureOptions)
+    {
+        logging.AddConfiguration();
+
+        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>>(
+            new SentryHostOptionsSetup<SentryBlazorOptions>(configuration.GetSection("Sentry")));
+        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>>(
+            new SentryHostLoggingOptionsSetup<SentryBlazorOptions>(configuration));
+
+        logging.Services.Configure<SentryBlazorOptions>(blazorOptions =>
         {
             configureOptions(blazorOptions);
+            blazorOptions.SetEnvironment(hostEnvironmentName);
 
             // System.PlatformNotSupportedException: System.Diagnostics.Process is not supported on this platform.
             blazorOptions.DetectStartupTime = StartupTimeDetectionMode.Fast;
@@ -35,16 +58,47 @@ public static class WebAssemblyHostBuilderExtensions
             blazorOptions.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(blazorOptions));
         });
 
-        builder.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>, BlazorWasmOptionsSetup>();
+        logging.Services.AddSingleton<IConfigureOptions<SentryBlazorOptions>, BlazorWasmOptionsSetup>();
 
-        return builder;
+        HostLoggerProviders.Add(
+            logging.Services,
+            events: c => new SentryLoggerProvider(
+                c.GetRequiredService<IHub>(),
+                SystemClock.Clock,
+                c.GetRequiredService<IOptions<SentryBlazorOptions>>().Value.Logging),
+            structuredLogs: c => new SentryStructuredLoggerProvider(c.GetRequiredService<IHub>()));
+        logging.Services.AddSentry<SentryBlazorOptions>();
+
+        logging.AddFilter<SentryLoggerProvider>(_ => true);
+        logging.AddFilter<SentryStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
+
+        return logging;
     }
 }
 
 /// <summary>
 /// Sentry Blazor Options
 /// </summary>
-public class SentryBlazorOptions : SentryLoggingOptions
+public class SentryBlazorOptions : SentryHostOptions
 {
-    // Awesome Blazor specific options go here
+    /// <summary>
+    /// Creates a new instance of <see cref="SentryBlazorOptions"/>.
+    /// </summary>
+    public SentryBlazorOptions()
+    {
+        SetSdk(Sentry.AspNetCore.Blazor.WebAssembly.Constants.SdkName, typeof(SentryBlazorOptions).Assembly.GetNameAndVersion());
+    }
+
+    /// <summary>
+    /// Whether the <see cref="ILogger"/> integration that <c>UseSentry</c> adds sends log entries to Sentry as structured logs.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see langword="false"/>, including when the app also calls <c>AddSentry()</c> on its
+    /// <see cref="ILoggingBuilder"/>.
+    /// </remarks>
+    public bool EnableLogs
+    {
+        get => LogsEnabled;
+        set => LogsEnabled = value;
+    }
 }

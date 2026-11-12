@@ -34,11 +34,12 @@ namespace Sentry.Maui
         void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb);
         void UnBind(Microsoft.Maui.Controls.VisualElement element);
     }
-    public class SentryMauiOptions : Sentry.Extensions.Logging.SentryLoggingOptions
+    public class SentryMauiOptions : Sentry.Extensions.Logging.SentryHostOptions
     {
         public SentryMauiOptions() { }
         public bool AttachScreenshot { get; set; }
         public bool CreateElementEventsBreadcrumbs { get; set; }
+        public bool EnableLogs { get; set; }
         public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
         public bool IncludeTextInBreadcrumbs { get; set; }
         public bool IncludeTitleInBreadcrumbs { get; set; }

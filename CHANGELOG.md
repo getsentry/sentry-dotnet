@@ -1,5 +1,116 @@
 # Changelog
 
+## 7.0.0
+
+Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a single place to be initialized. It contains breaking changes, so read the upgrade notes below before you upgrade.
+
+### Highlights
+
+- **.NET 11.** The SDK targets `net11.0` alongside .NET 8, 9 and 10, including Android, iOS and Mac Catalyst apps on .NET 11, with support for .NET 11's Android assembly stores and Zstandard-compressed assemblies.
+- **One place to initialize Sentry.** The `Microsoft.Extensions.Logging`, Serilog, NLog and log4net integrations now only capture logs, breadcrumbs and events; they no longer start the SDK. Initialize Sentry with `SentrySdk.Init` or `UseSentry`, and configure it from the `Sentry` section of `appsettings.json`.
+- **`UseSentry` for generic host apps.** The new `Sentry.Extensions.Hosting` package adds `UseSentry` to `Host.CreateApplicationBuilder` and `IHostBuilder`, for worker services, console apps, Azure Functions (isolated) and Windows services.
+- **Less noise in tracing.** Requests that end in 301, 305–399 or 401–404 are no longer traced by default.
+- **The right environment everywhere.** ASP.NET Core, generic host apps, Blazor WebAssembly and Google Cloud Functions take the Sentry environment from the host environment, and logs, metrics, sessions and check-ins use an environment set on the scope.
+
+### Upgrading from 6.x
+
+#### Target frameworks
+
+- MAUI and Mobile targets require .NET 10 or later: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst` and `net9.0-windows` are no longer supported.
+- On .NET 11, the minimum Android API level is 24 (Android 7.0) and the minimum Mac Catalyst version is 17.0.
+- On .NET 11, the iOS and Mac Catalyst targets are `net11.0-ios27.2` and `net11.0-maccatalyst27.2`, which need Xcode 27.2 to build.
+- Other targets are unchanged: .NET 8 and later, .NET Standard 2.0 and 2.1, and .NET Framework 4.6.2.
+
+#### Initializing Sentry
+
+- Serilog's `WriteTo.Sentry(...)`, NLog's Sentry target, log4net's `SentryAppender` and `Logging.AddSentry(...)` no longer initialize the SDK. Initialize Sentry first with `SentrySdk.Init`, or `UseSentry` in ASP.NET Core, MAUI, Blazor WebAssembly and generic host apps, and move `Dsn`, `Release`, `Environment` and other SDK settings there. A DSN still set on one of these integrations fails with a message explaining what to change (to prevent SDK users being blind-sided by this change).
+- In ASP.NET Core and generic host apps, `UseSentry` starts Sentry when the host is built, so crashes before that aren't captured. Apps that relied on the Serilog sink, the NLog target or the log4net appender to capture startup crashes can also call `SentrySdk.Init` at the start of `Main`.
+- `Logging:Sentry` in `appsettings.json` now only sets log levels: `MinimumEventLevel`, `MinimumBreadcrumbLevel` and the `LogLevel` rules. Move any other key to the `Sentry` section; the app fails at startup until you do.
+- `SentryLoggingOptions`, `SentrySerilogOptions` and `SentryNLogOptions` no longer derive from `SentryOptions`. Serilog's `ApplySerilogScopeToEvents()` is renamed `UseSerilog()`.
+- NLog flushes Sentry using `SentryOptions.FlushTimeout`, which defaults to 2 seconds. The NLog target used to wait up to 15.
+- NLog sends entries at `Info` and above as logs. To send `Trace` and `Debug` entries as logs too, lower `MinimumLogLevel` on `SentryNLogOptions`, or `minimumLogLevel` on the target in XML config. `enableLogs="false"` still turns logs off, by setting `MinimumLogLevel` to `Off`.
+- `Logging.AddSentry()` no longer registers `IHub`, `ISentryClient` or `Func<IHub>` in the service collection; `UseSentry` does. An app that initializes Sentry with `SentrySdk.Init` and injects them now fails when they're resolved. Switch to `UseSentry`, or register `HubAdapter.Instance` for each type yourself.
+- In an app that calls both `UseSentry` and `Logging.AddSentry()`, the `Logging.AddSentry()` call now does nothing. Move its settings to the host's options, such as `SentryAspNetCoreOptions`, and remove the call. The exception is an app that calls `ClearProviders()` after `UseSentry`. Keep `Logging.AddSentry()` there, because it adds Sentry's logger providers back.
+- In MAUI, options set in the `UseSentry` callback now override `appsettings.json`, as they do in ASP.NET Core.
+
+#### Removed and changed APIs
+
+- `SentryOptions.EnableLogs` is removed. With `SentrySdk.Init` and the logging integrations, logs are always sent; drop them with `SetBeforeSendLog(_ => null)`. ASP.NET Core, MAUI and Blazor WebAssembly keep the opt-in: set `EnableLogs` on their options or in the `Sentry` section, as in 6.x.
+- `SentryOptions.EnableMetrics` is removed. Return `null` from `SetBeforeSendMetric` to drop metrics.
+- `Scope.Release`, `Scope.Distribution` and `SentryOptions.ApplyDefaultTags` are removed. Set `Release` and `Distribution` on `SentryOptions`. `DefaultTags` are still applied.
+- `SentryOptions.ScopeObserver`, `EnableScopeSync` and `CrashedLastRun` are now internal.
+- On iOS and Mac Catalyst, `SentryOptions.Native.EnableAppHangTrackingV2` is removed; use `EnableAppHangTracking`. `SentryOptions.Native.AddInAppExclude(string)`, which had no effect, is removed too.
+- `Envelope.FromEvent`, `Envelope.FromFeedback` and `Envelope.FromTransaction` take the `IDiagnosticLogger` as their last parameter.
+- The OTLP exporter no longer sets a global OpenTelemetry propagator, and its `defaultTextMapPropagator` parameter is removed. The propagator should be configured via the OpenTelemetry SDK instead.
+- `SentryClientExtensions.GetInternalSentryOptions` is removed. Integrations that need the SDK's diagnostic logger can call the new `GetDiagnosticLogger()` extension on `IHub`, in `Sentry.Extensibility`.
+- `ILoggerFactory.AddSentry()` is removed, and calls to it no longer compile. Use `ILoggingBuilder.AddSentry()` instead, for example `LoggerFactory.Create(builder => builder.AddSentry())`. Unlike the old method, it also sends `ILogger` entries as Sentry logs.
+
+#### Changes in behavior
+
+- Requests that end in 301, 305–399 or 401–404 are no longer traced. To trace them again, call `options.TraceIgnoreStatusCodes.Clear()`.
+- Apps that use the `ISentryBuilder` overloads of `UseSentry` (including gRPC apps), Blazor WebAssembly or Google Cloud Functions, and don't set an environment, now report the host environment, such as `development` or `staging`, instead of `production`. Update alerts and filters that rely on the old value.
+- Events, transactions, logs and metrics report the SDK name of the integration that initialized Sentry, such as `sentry.dotnet.aspnetcore`, rather than the logging integration that captured them.
+- On Android and iOS, `SENTRY_RELEASE` takes precedence over the release derived from the app package.
+- `SentryOptions.DecompressionMethods` now defaults to `GZip | Deflate`, leaving out Brotli. To accept Brotli responses again, set `options.DecompressionMethods |= DecompressionMethods.Brotli`.
+- The Serilog sink now adds the properties of the Serilog `LogContext` to events as tags, even when the app doesn't call `UseSerilog()`. In 6.x this only happened when the sink initialized the SDK or the app called `ApplySerilogScopeToEvents()`.
+
+### Breaking Changes 🛠
+
+- feat(mel)!: remove ILoggerFactory.AddSentry() in favour of ILoggingBuilder.AddSentry() by @jamescrosswell in [#5921](https://github.com/getsentry/sentry-dotnet/pull/5921)
+- Remove `GetInternalSentryOptions`, which was only meant for Sentry's own integrations. Integrations that need the SDK's diagnostic logger can call the new `GetDiagnosticLogger()` extension on `IHub`, in `Sentry.Extensibility`. by @jamescrosswell in [#5862](https://github.com/getsentry/sentry-dotnet/pull/5862)
+- Exclude Brotli from default SentryOptions.DecompressionMethods by @jamescrosswell and @claude in [#5816](https://github.com/getsentry/sentry-dotnet/pull/5816)
+- `builder.Logging.AddSentry()` no longer registers `IHub`, `ISentryClient` or `Func<IHub>` in the service collection. `UseSentry` registers them; apps that initialize Sentry with `SentrySdk.Init` and inject them now register them themselves by @jamescrosswell in [#5740](https://github.com/getsentry/sentry-dotnet/pull/5740)
+- fix(maui)!: options set in UseSentry now take precedence over appsettings.json by @jamescrosswell in [#5658](https://github.com/getsentry/sentry-dotnet/pull/5658)
+- The `Microsoft.Extensions.Logging` integration no longer initializes the SDK. Sentry must now be initialized separately from the logging integration (using `SentrySdk.Init` or `UseSentry`) by @jamescrosswell in [#5595](https://github.com/getsentry/sentry-dotnet/pull/5595)
+- Sentry's logging configuration section (`Logging:Sentry`) now only configures the logging integration. Core SDK settings there, such as `Dsn`, no longer have any effect and fail at startup with migration guidance: move them to the `Sentry` section, or pass them where Sentry is initialized by @jamescrosswell in [#5595](https://github.com/getsentry/sentry-dotnet/pull/5595)
+- feat(log4net)!: the Sentry appender no longer initializes the SDK by @jamescrosswell in [#5592](https://github.com/getsentry/sentry-dotnet/pull/5592)
+- feat(nlog)!: the Sentry target no longer initializes the SDK by @jamescrosswell in [#5585](https://github.com/getsentry/sentry-dotnet/pull/5585)
+- feat(serilog)!: the Sentry sink no longer initializes the SDK by @jamescrosswell in [#5573](https://github.com/getsentry/sentry-dotnet/pull/5573)
+- feat!: set the Sentry environment from the host environment in every ASP.NET Core UseSentry overload, Blazor WebAssembly and Google Cloud Functions by @jamescrosswell in [#5703](https://github.com/getsentry/sentry-dotnet/pull/5703)
+- fix!: apps that call both UseSentry and Logging.AddSentry() no longer capture each error, breadcrumb and log twice by @jamescrosswell in [#5694](https://github.com/getsentry/sentry-dotnet/pull/5694)
+- feat!: remove SentryOptions.EnableMetrics by @ric-oliv in [#5690](https://github.com/getsentry/sentry-dotnet/pull/5690)
+- feat!: EnableLogs moves from SentryOptions to ASP.NET Core, MAUI and Blazor, where logs are opt-in by @ric-oliv in [#5642](https://github.com/getsentry/sentry-dotnet/pull/5642)
+- `Scope.Release` and `Scope.Distribution` have been removed, and `Release` and `Distribution` have moved from `IEventLike` to `ITransactionData`. Set them on `SentryOptions` instead. by @jamescrosswell in [#5671](https://github.com/getsentry/sentry-dotnet/pull/5671)
+- `SentryOptions.ApplyDefaultTags` has been removed. Default tags set in `SentryOptions.DefaultTags` are still applied to events and transactions. by @jamescrosswell in [#5671](https://github.com/getsentry/sentry-dotnet/pull/5671)
+- Logs, metrics, sessions, check-ins and trace propagation now use an environment set on the scope, as events already did. Setting `Scope.Environment` to `null` clears the override. by @jamescrosswell in [#5671](https://github.com/getsentry/sentry-dotnet/pull/5671)
+- Events, transactions, logs and metrics all report the SDK name of the integration that initialized Sentry, such as `sentry.dotnet.aspnetcore`. Blazor WebAssembly now reports `sentry.dotnet.aspnetcore.blazor.webassembly`. by @jamescrosswell in [#5671](https://github.com/getsentry/sentry-dotnet/pull/5671)
+- On Android and iOS, `SENTRY_RELEASE` now takes precedence over the default release derived from the app package. by @jamescrosswell in [#5671](https://github.com/getsentry/sentry-dotnet/pull/5671)
+- `Envelope.FromEvent`, `Envelope.FromFeedback` and `Envelope.FromTransaction` now take the `IDiagnosticLogger` as their last parameter, after `attachments` (and `sessionUpdate`). This only affects code that creates envelopes directly and passes these arguments positionally; those calls no longer compile, so reorder the arguments or pass them by name. by @jamescrosswell in [#5669](https://github.com/getsentry/sentry-dotnet/pull/5669)
+  ```csharp
+  // Before
+  Envelope.FromEvent(@event, logger, attachments, sessionUpdate);
+  Envelope.FromTransaction(transaction, logger, attachments);
+  // After
+  Envelope.FromEvent(@event, attachments, sessionUpdate, logger);
+  Envelope.FromTransaction(transaction, attachments, logger);
+  ```
+- Removed `SentryOptions.Native.EnableAppHangTrackingV2` on iOS and Mac Catalyst (use `EnableAppHangTracking` instead) by @jamescrosswell in [#5654](https://github.com/getsentry/sentry-dotnet/pull/5654)
+- Removed `SentryOptions.Native.AddInAppExclude(string)` on iOS, which had no effect by @jamescrosswell in [#5654](https://github.com/getsentry/sentry-dotnet/pull/5654)
+- feat!: don't trace 301, 305-399 or 401-404 responses by default by @jamescrosswell in [#5632](https://github.com/getsentry/sentry-dotnet/pull/5632)
+- feat!: `SentryOptions.ScopeObserver`, `EnableScopeSync` and `CrashedLastRun` are now internal by @jamescrosswell in [#5631](https://github.com/getsentry/sentry-dotnet/pull/5631)
+- feat!: stop deserializing "critical" breadcrumb level by @jamescrosswell in [#5630](https://github.com/getsentry/sentry-dotnet/pull/5630)
+
+### Features ✨
+
+- feat(nlog): add MinimumLogLevel so Trace and Debug entries aren't sent as logs by default by @jamescrosswell and @claude in [#5913](https://github.com/getsentry/sentry-dotnet/pull/5913)
+- feat: add support for .NET 11 GA by @ric-oliv, @claude and @jamescrosswell in [#5902](https://github.com/getsentry/sentry-dotnet/pull/5902)
+- feat: add Sentry.Extensions.Hosting with UseSentry for generic host apps by @ric-oliv in [#5739](https://github.com/getsentry/sentry-dotnet/pull/5739)
+- feat: Support reading .NET 11 Android assembly stores by @jamescrosswell in [#5577](https://github.com/getsentry/sentry-dotnet/pull/5577)
+- feat: Support Zstandard-compressed assemblies on Android (.NET 11) by @jamescrosswell in [#5575](https://github.com/getsentry/sentry-dotnet/pull/5575)
+- Support for .NET 11 by @jamescrosswell in [#5529](https://github.com/getsentry/sentry-dotnet/pull/5529)
+- Mobile targets now require .NET 10 or later - `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst` and `net9.0-windows` have been dropped. by @jamescrosswell in [#5529](https://github.com/getsentry/sentry-dotnet/pull/5529)
+- On .NET 11 the minimum Android API level is now 24 (Android 7.0) and the minimum MacCatalyst version is 17.0. by @jamescrosswell in [#5529](https://github.com/getsentry/sentry-dotnet/pull/5529)
+- Non-mobile targets continue to support .NET 8 and later. by @jamescrosswell in [#5529](https://github.com/getsentry/sentry-dotnet/pull/5529)
+
+### Fixes 🐛
+
+- fix(otel): treat sentry-trace without a sampling flag as sampled in SentryPropagator by @jamescrosswell and @claude in [#5907](https://github.com/getsentry/sentry-dotnet/pull/5907)
+- fix(logging): warn when ClearProviders() removes the logger providers UseSentry added by @ric-oliv and @claude in [#5789](https://github.com/getsentry/sentry-dotnet/pull/5789)
+- fix(logging): make Logging.AddSentry() work after UseSentry and ClearProviders() by @ric-oliv and @claude in [#5776](https://github.com/getsentry/sentry-dotnet/pull/5776)
+- fix(hosting): start the SDK during Build() even when the app clears or replaces logger providers by @ric-oliv and @claude in [#5772](https://github.com/getsentry/sentry-dotnet/pull/5772)
+- fix(nlog): stack overflow when Debug is on and NLog handles ILogger by @jamescrosswell and @claude in [#5823](https://github.com/getsentry/sentry-dotnet/pull/5823)
+- fix(otlp): don't configure an automatic OTel propagator by @jamescrosswell in [#5319](https://github.com/getsentry/sentry-dotnet/pull/5319)
+
 ## 6.13.0
 
 ### Features ✨

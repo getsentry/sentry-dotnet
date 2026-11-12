@@ -80,12 +80,9 @@ runs:
       shell: bash
       run: sudo ./scripts/install-libssl1.sh
 
-    # See https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md#xcode
-    # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
-      shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_27.1.app
+      uses: ./.github/actions/pin-xcode
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21
@@ -100,7 +97,7 @@ runs:
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
-        packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
+        packages: platform-tools platforms;android-35 platforms;android-36 platforms;android-37.0 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
 
     - name: Install .NET SDK
@@ -110,6 +107,7 @@ runs:
         dotnet-version: |
           8.0.x
           9.0.310
+          10.0.x
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK

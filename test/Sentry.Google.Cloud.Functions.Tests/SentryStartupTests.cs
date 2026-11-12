@@ -5,8 +5,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
+using Sentry.Extensions.Logging;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 
@@ -85,6 +87,17 @@ public class SentryStartupTests
     }
 
     [Fact]
+    public void ConfigureLogging_SentryAspNetCoreOptions_SdkIsGoogleCloudFunction()
+    {
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
+        Assert.Equal("sentry.dotnet.google-cloud-function", option.Value.ScopeDefaults.Sdk.Name);
+    }
+
+    [Fact]
     public void ConfigureLogging_SentryAspNetCoreOptions_FlushOnCompletedRequestTrue()
     {
         var sut = new SentryStartup();
@@ -113,13 +126,59 @@ public class SentryStartupTests
                 Assert.Single(c, d => d.ServiceType == typeof(IHub)))};
         yield return new object[] {
             new Action<IServiceCollection>(c =>
-                Assert.Single(c, d => d.ImplementationType == typeof(SentryAspNetCoreLoggerProvider)))};
-        yield return new object[] {
-            new Action<IServiceCollection>(c =>
-                Assert.Single(c, d => d.ImplementationType == typeof(SentryAspNetCoreOptionsSetup)))};
+                Assert.Single(c, d => d.ServiceType == typeof(HostLoggerProviders)))};
         yield return new object[] {
             new Action<IServiceCollection>(c =>
                 Assert.Single(c, d => d.ImplementationType == typeof(AspNetCoreEventProcessor)))};
+    }
+
+    [Fact]
+    public void ConfigureLogging_SentrySection_BindsSdkSettings()
+    {
+        WebHostBuilderContext.Configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string> { ["Sentry:Environment"] = "production" })
+            .Build();
+
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        using var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        Assert.Equal("production", options.Environment);
+    }
+
+    [Fact]
+    public void ConfigureLogging_NoEnvironmentConfigured_UsesHostingEnvironment()
+    {
+        HostingEnvironment.EnvironmentName = "Staging";
+        LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(o => o.FakeSettings());
+
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        using var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        Assert.Equal("staging", options.Environment);
+    }
+
+    [Fact]
+    public void ConfigureLogging_LoggingSection_BindsLoggingSettings()
+    {
+        WebHostBuilderContext.Configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                ["Logging:Sentry:MinimumEventLevel"] = "Critical",
+                ["Logging:Sentry:MinimumBreadcrumbLevel"] = "Warning",
+            })
+            .Build();
+
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        using var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        Assert.Equal(LogLevel.Critical, options.MinimumEventLevel);
+        Assert.Equal(LogLevel.Warning, options.MinimumBreadcrumbLevel);
     }
 
     [Fact]
@@ -127,8 +186,7 @@ public class SentryStartupTests
     {
         LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
-            options.EnableLogs = true;
-            options.InitializeSdk = false;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         });
 
         var sut = new SentryStartup();
@@ -143,12 +201,33 @@ public class SentryStartupTests
     }
 
     [Fact]
+    public void ConfigureLogging_WithLoggingAddSentry_LoggingAddSentryProvidersDisabled()
+    {
+        LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
+        {
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
+        });
+
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+        LoggingBuilder.AddSentry();
+
+        using var serviceProvider = LoggingBuilder.Services.BuildServiceProvider();
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Select(p => p.GetType()).Should().Equal(
+            typeof(SentryAspNetCoreLoggerProvider),
+            typeof(SentryAspNetCoreStructuredLoggerProvider),
+            typeof(NullLoggerProvider),
+            typeof(NullLoggerProvider));
+    }
+
+    [Fact]
     public void ConfigureLogging_Logging_AddLoggerFilterRules()
     {
         LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(options =>
         {
-            options.EnableLogs = true;
-            options.InitializeSdk = false;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         });
 
         var sut = new SentryStartup();

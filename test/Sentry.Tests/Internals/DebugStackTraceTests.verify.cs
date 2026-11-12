@@ -55,9 +55,15 @@ public class DebugStackTraceTests
         var stackTrace = new StackTrace(exception);
         var frame = useEnhancedStackTrace ? EnhancedStackTrace.GetFrames(stackTrace)[0] : stackTrace.GetFrame(0);
 
-        // Sanity Check
+        // Sanity Check: the top frame must belong to a BCL type, but which one depends on
+        // how the runtime implements Convert.FromBase64String. .NET 10 surfaces
+        // System.Convert; .NET 11 surfaces System.Buffers.Text.Base64. What this test
+        // actually asserts - that a BCL frame is not in-app - is keyed off the namespace,
+        // so check that rather than one specific type.
         Assert.NotNull(frame);
-        Assert.Equal(typeof(Convert), frame.GetMethod()?.DeclaringType);
+        var declaringType = frame.GetMethod()?.DeclaringType;
+        Assert.NotNull(declaringType);
+        Assert.StartsWith("System.", declaringType.FullName);
 
         // Act
         var actual = sut.CreateFrame(new RealStackFrame(frame));
@@ -104,6 +110,23 @@ public class DebugStackTraceTests
 
         DebugStackTrace.DemangleAnonymousFunction(stackFrame);
         Assert.Null(stackFrame.Module);
+    }
+
+    [Theory]
+    [InlineData("<Unknown>", "Foo.dll")]
+    [InlineData("/data/app/Foo.dll", "/data/app/Foo.dll")]
+    public void GetManagedModuleDebugImage_AssemblyReader_ReadsByLocationOrScopeName(string fullyQualifiedName, string expectedName)
+    {
+        string? requestedName = null;
+        _fixture.SentryOptions.AssemblyReader = name =>
+        {
+            requestedName = name;
+            return null;
+        };
+
+        DebugStackTrace.GetManagedModuleDebugImage(new StubModule(fullyQualifiedName, "Foo.dll"), _fixture.SentryOptions);
+
+        requestedName.Should().Be(expectedName);
     }
 
     [Fact]
@@ -258,6 +281,14 @@ public class DebugStackTraceTests
             });
         }
     }
+    private class StubModule(string fullyQualifiedName, string scopeName) : Module
+    {
+        public override string FullyQualifiedName => fullyQualifiedName;
+        public override string Name => fullyQualifiedName;
+        public override string ScopeName => scopeName;
+        public override Guid ModuleVersionId { get; } = Guid.NewGuid();
+    }
+
     internal class StubNativeAOTStackFrame : IStackFrame
     {
         internal string? Function;

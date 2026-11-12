@@ -26,7 +26,11 @@ try
 {
     if (!$Tfm)
     {
-        $Tfm = 'net10.0'
+        $Tfm = dotnet msbuild Directory.Build.props -getProperty:LatestTfm
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw 'Failed to read LatestTfm from Directory.Build.props'
+        }
     }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')

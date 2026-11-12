@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
+using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Ben.BlockingDetector;
+using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Hosting;
@@ -49,13 +52,7 @@ public static class SentryWebHostBuilderExtensions
         this IWebHostBuilder builder,
         Action<WebHostBuilderContext, SentryAspNetCoreOptions>? configureOptions)
         => builder.UseSentry((context, sentryBuilder) =>
-        {
-            sentryBuilder.AddSentryOptions(options =>
-            {
-                configureOptions?.Invoke(context, options);
-                options.SetEnvironment(context.HostingEnvironment);
-            });
-        });
+            sentryBuilder.AddSentryOptions(options => configureOptions?.Invoke(context, options)));
 
     /// <summary>
     /// Uses Sentry integration.
@@ -81,17 +78,18 @@ public static class SentryWebHostBuilderExtensions
             logging.AddConfiguration();
 
             var section = context.Configuration.GetSection("Sentry");
-#if NETSTANDARD2_0
-            _ = logging.Services.Configure<SentryAspNetCoreOptions>(section);
-#else
             _ = logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(_ =>
                 new SentryAspNetCoreOptionsSetup(section)
             );
-#endif
-            _ = logging.Services
-                .AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
-            _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
-            _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
+            _ = logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(_ =>
+                new SentryHostLoggingOptionsSetup<SentryAspNetCoreOptions>(context.Configuration)
+            );
+            HostLoggerProviders.Add(
+                logging.Services,
+                events: c => new SentryAspNetCoreLoggerProvider(
+                    c.GetRequiredService<IOptions<SentryAspNetCoreOptions>>(), c.GetRequiredService<IHub>()),
+                structuredLogs: c => new SentryAspNetCoreStructuredLoggerProvider(c.GetRequiredService<IHub>()));
+            logging.Services.TryAddSingleton<HostIntegrationMarker>();
 
             // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
             _ = logging.AddFilter<SentryAspNetCoreLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
@@ -105,6 +103,7 @@ public static class SentryWebHostBuilderExtensions
 
             var sentryBuilder = logging.Services.AddSentry();
             configureSentry?.Invoke(context, sentryBuilder);
+            sentryBuilder.AddSentryOptions(options => options.SetEnvironment(context.HostingEnvironment.EnvironmentName));
         });
 
         _ = builder.ConfigureServices(c => _ =

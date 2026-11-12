@@ -2,7 +2,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
+using Sentry;
 using Sentry.Extensibility;
+using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
 using Sentry.Maui.Internal;
@@ -44,14 +46,19 @@ public static class SentryMauiAppBuilderExtensions
     {
         var services = builder.Services;
 
+        services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiConfigurationOptionsSetup>();
         if (configureOptions != null)
         {
             services.Configure(configureOptions);
         }
 
         services.AddLogging();
-        services.AddSingleton<ILoggerProvider, SentryMauiLoggerProvider>();
-        services.AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>();
+        HostLoggerProviders.Add(
+            services,
+            events: c => new SentryMauiLoggerProvider(
+                c.GetRequiredService<IOptions<SentryMauiOptions>>(), c.GetRequiredService<IHub>()),
+            structuredLogs: c => new SentryMauiStructuredLoggerProvider(c.GetRequiredService<IHub>()));
+        services.TryAddSingleton<HostIntegrationMarker>();
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
@@ -78,7 +85,7 @@ public static class SentryMauiAppBuilderExtensions
         // This is ultimately the class that enables all the MauiElementEventBinders above
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
 
-        services.AddSentry<SentryMauiOptions>();
+        services.AddSentry<SentryMauiOptions>(initializeSdk: false);
 
         builder.RegisterMauiEventsBinder();
 

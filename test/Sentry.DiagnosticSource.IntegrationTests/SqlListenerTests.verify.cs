@@ -62,7 +62,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
 
-        void ApplyOptions(SentryLoggingOptions sentryOptions)
+        void ApplyOptions(SentryOptions sentryOptions)
         {
             sentryOptions.AttachStacktrace = false;
             sentryOptions.TracesSampleRate = 1;
@@ -72,7 +72,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             sentryOptions.Debug = true;
         }
 
-        var options = new SentryLoggingOptions();
+        var options = new SentryOptions();
         ApplyOptions(options);
 
         await using var database = await _fixture.SqlInstance.Build();
@@ -87,7 +87,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             await dbContext.SaveChangesAsync();
         }
 
-        var loggerFactory = LoggerFactory.Create(_ => _.AddSentry(ApplyOptions));
+        var loggerFactory = LoggerFactory.Create(_ => _.AddSentry());
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");

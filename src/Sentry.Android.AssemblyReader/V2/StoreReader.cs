@@ -2,6 +2,8 @@
  * Adapted from https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.cs
  * Updated from https://github.com/dotnet/android/blob/64018e13e53cec7246e54866b520d3284de344e0/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.cs
  *     - Adding support for AssemblyStore v3 format that shipped in .NET 10 (https://github.com/dotnet/android/pull/10249)
+ * Updated from https://github.com/dotnet/android/blob/f1aecf9e6ae80fe3f3992ec1f52ef953dac7c06b/.github/skills/read-assembly-store/src/AssemblyStore/StoreReader_V2.cs
+ *     - Deriving the index entry size from the header rather than the ABI
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
@@ -10,13 +12,8 @@ namespace Sentry.Android.AssemblyReader.V2;
 internal partial class StoreReader : AssemblyStoreReader
 {
     // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
-#if NET9_0
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000002;
-#else
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000003; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000003;
-#endif
+    private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT_V3 = 0x80000003;
+    private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT_V3 = 0x00000003;
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK = 0xF0000000;
     private const uint ASSEMBLY_STORE_ABI_AARCH64 = 0x00010000;
     private const uint ASSEMBLY_STORE_ABI_ARM = 0x00020000;
@@ -88,10 +85,10 @@ internal partial class StoreReader : AssemblyStoreReader
         : base(store, path, logger)
     {
         supportedVersions = new HashSet<uint> {
-            ASSEMBLY_STORE_FORMAT_VERSION_64BIT | ASSEMBLY_STORE_ABI_AARCH64,
-            ASSEMBLY_STORE_FORMAT_VERSION_64BIT | ASSEMBLY_STORE_ABI_X64,
-            ASSEMBLY_STORE_FORMAT_VERSION_32BIT | ASSEMBLY_STORE_ABI_ARM,
-            ASSEMBLY_STORE_FORMAT_VERSION_32BIT | ASSEMBLY_STORE_ABI_X86,
+            ASSEMBLY_STORE_FORMAT_VERSION_64BIT_V3 | ASSEMBLY_STORE_ABI_AARCH64,
+            ASSEMBLY_STORE_FORMAT_VERSION_64BIT_V3 | ASSEMBLY_STORE_ABI_X64,
+            ASSEMBLY_STORE_FORMAT_VERSION_32BIT_V3 | ASSEMBLY_STORE_ABI_ARM,
+            ASSEMBLY_STORE_FORMAT_VERSION_32BIT_V3 | ASSEMBLY_STORE_ABI_X86,
         };
     }
 
@@ -187,25 +184,18 @@ internal partial class StoreReader : AssemblyStoreReader
             StoreStream.Seek((long)elfOffset + Header.NativeSize, SeekOrigin.Begin);
             using var reader = CreateReader();
 
+            var indexEntrySize = GetIndexEntrySize(header);
             var index = new List<IndexEntry>();
             for (uint i = 0; i < header.index_entry_count; i++)
             {
-                ulong name_hash;
-                if (Is64Bit)
+                var name_hash = indexEntrySize switch
                 {
-                    name_hash = reader.ReadUInt64();
-                }
-                else
-                {
-                    name_hash = (ulong)reader.ReadUInt32();
-                }
-
+                    IndexEntry.NativeSize64 => reader.ReadUInt64(),
+                    IndexEntry.NativeSize32 => reader.ReadUInt32(),
+                    _ => throw new InvalidOperationException($"Assembly store '{StorePath}' index entry size {indexEntrySize} is not supported.")
+                };
                 uint descriptor_index = reader.ReadUInt32();
-#if NET10_0_OR_GREATER
-            bool ignore = reader.ReadByte () != 0;
-#else
-                bool ignore = false;
-#endif
+                bool ignore = reader.ReadByte() != 0;
                 index.Add(new IndexEntry(name_hash, descriptor_index, ignore));
             }
 
@@ -266,5 +256,21 @@ internal partial class StoreReader : AssemblyStoreReader
             }
             Assemblies = storeItems.AsReadOnly();
         }
+    }
+
+    // Name hash width depends on the runtime, not the ABI: CoreCLR stores use 32-bit CRC32 hashes on every ABI
+    private uint GetIndexEntrySize(Header header)
+    {
+        if (header.index_entry_count == 0)
+        {
+            return 0;
+        }
+
+        if (header.index_size % header.index_entry_count != 0)
+        {
+            throw new InvalidOperationException($"Assembly store '{StorePath}' index is corrupted: index size {header.index_size} is not evenly divisible by entry count {header.index_entry_count}.");
+        }
+
+        return header.index_size / header.index_entry_count;
     }
 }

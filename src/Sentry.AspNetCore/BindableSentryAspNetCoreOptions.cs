@@ -8,13 +8,12 @@ using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 namespace Sentry.AspNetCore;
 
 /// <inheritdoc cref="BindableSentryOptions"/>
-internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
+internal class BindableSentryAspNetCoreOptions : BindableSentryHostOptions
 {
     public bool? IncludeActivityData { get; set; }
     public RequestSize? MaxRequestBodySize { get; set; }
     public bool? FlushOnCompletedRequest { get; set; }
     public bool? FlushBeforeRequestCompleted { get; set; }
-    public bool? AdjustStandardEnvironmentNameCasing { get; set; }
     public bool? AutoRegisterTracing { get; set; }
     public bool? CaptureBlockingCalls { get; set; }
     public bool? PreferTransactionNameProvider { get; set; }
@@ -26,7 +25,6 @@ internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
         options.MaxRequestBodySize = MaxRequestBodySize ?? options.MaxRequestBodySize;
         options.FlushOnCompletedRequest = FlushOnCompletedRequest ?? options.FlushOnCompletedRequest;
         options.FlushBeforeRequestCompleted = FlushBeforeRequestCompleted ?? options.FlushBeforeRequestCompleted;
-        options.AdjustStandardEnvironmentNameCasing = AdjustStandardEnvironmentNameCasing ?? options.AdjustStandardEnvironmentNameCasing;
         options.AutoRegisterTracing = AutoRegisterTracing ?? options.AutoRegisterTracing;
         options.CaptureBlockingCalls = CaptureBlockingCalls ?? options.CaptureBlockingCalls;
         options.PreferTransactionNameProvider = PreferTransactionNameProvider ?? options.PreferTransactionNameProvider;
