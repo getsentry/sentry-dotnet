@@ -18,6 +18,7 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 
 - Mobile targets require .NET 10 or later: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst` and `net9.0-windows` are no longer supported.
 - On .NET 11, the minimum Android API level is 24 (Android 7.0) and the minimum Mac Catalyst version is 17.0.
+- On .NET 11, the iOS and Mac Catalyst targets are `net11.0-ios27.2` and `net11.0-maccatalyst27.2`, which need Xcode 27.2 to build.
 - Other targets are unchanged: .NET 8 and later, .NET Standard 2.0 and 2.1, and .NET Framework 4.6.2.
 
 #### Initializing Sentry
@@ -26,6 +27,7 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 - `Logging:Sentry` in `appsettings.json` now only sets log levels: `MinimumEventLevel`, `MinimumBreadcrumbLevel` and the `LogLevel` rules. Move any other key to the `Sentry` section; the app fails at startup until you do.
 - `SentryLoggingOptions`, `SentrySerilogOptions` and `SentryNLogOptions` no longer derive from `SentryOptions`. Serilog's `ApplySerilogScopeToEvents()` is renamed `UseSerilog()`.
 - NLog flushes Sentry using `SentryOptions.FlushTimeout`, which defaults to 2 seconds. The NLog target used to wait up to 15.
+- NLog sends entries at `Info` and above as logs. To send `Trace` and `Debug` entries as logs too, lower `MinimumLogLevel` on `SentryNLogOptions`, or `minimumLogLevel` on the target in XML config. `enableLogs="false"` still turns logs off, by setting `MinimumLogLevel` to `Off`.
 - `Logging.AddSentry()` no longer registers `IHub`, `ISentryClient` or `Func<IHub>` in the service collection; `UseSentry` does. An app that initializes Sentry with `SentrySdk.Init` and injects them now fails when they're resolved. Switch to `UseSentry`, or register `HubAdapter.Instance` for each type yourself.
 - In an app that calls both `UseSentry` and `Logging.AddSentry()`, the `Logging.AddSentry()` call now does nothing. Move its settings to the host's options, such as `SentryAspNetCoreOptions`, and remove the call.
 - In MAUI, options set in the `UseSentry` callback now override `appsettings.json`, as they do in ASP.NET Core.
@@ -86,6 +88,8 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 
 ### Features ✨
 
+- feat(nlog): add MinimumLogLevel so Trace and Debug entries aren't sent as logs by default by @jamescrosswell and @claude in [#5913](https://github.com/getsentry/sentry-dotnet/pull/5913)
+- feat: add support for .NET 11 GA by @ric-oliv, @claude and @jamescrosswell in [#5902](https://github.com/getsentry/sentry-dotnet/pull/5902)
 - feat: add Sentry.Extensions.Hosting with UseSentry for generic host apps by @ric-oliv in [#5739](https://github.com/getsentry/sentry-dotnet/pull/5739)
 - feat: Support reading .NET 11 Android assembly stores by @jamescrosswell in [#5577](https://github.com/getsentry/sentry-dotnet/pull/5577)
 - feat: Support Zstandard-compressed assemblies on Android (.NET 11) by @jamescrosswell in [#5575](https://github.com/getsentry/sentry-dotnet/pull/5575)
@@ -97,6 +101,7 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 
 ### Fixes 🐛
 
+- fix(otel): treat sentry-trace without a sampling flag as sampled in SentryPropagator by @jamescrosswell and @claude in [#5907](https://github.com/getsentry/sentry-dotnet/pull/5907)
 - fix(logging): warn when ClearProviders() removes the logger providers UseSentry added by @ric-oliv and @claude in [#5789](https://github.com/getsentry/sentry-dotnet/pull/5789)
 - fix(logging): make Logging.AddSentry() work after UseSentry and ClearProviders() by @ric-oliv and @claude in [#5776](https://github.com/getsentry/sentry-dotnet/pull/5776)
 - fix(hosting): start the SDK during Build() even when the app clears or replaces logger providers by @ric-oliv and @claude in [#5772](https://github.com/getsentry/sentry-dotnet/pull/5772)
