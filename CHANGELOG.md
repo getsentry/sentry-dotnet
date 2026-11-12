@@ -16,10 +16,10 @@ Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a
 
 #### Target frameworks
 
-- Mobile targets require .NET 10 or later: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst` and `net9.0-windows` are no longer supported.
+- MAUI and Mobile targets require .NET 10 or later: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst` and `net9.0-windows` are no longer supported.
 - On .NET 11, the minimum Android API level is 24 (Android 7.0) and the minimum Mac Catalyst version is 17.0.
 - On .NET 11, the iOS and Mac Catalyst targets are `net11.0-ios27.2` and `net11.0-maccatalyst27.2`, which need Xcode 27.2 to build.
-- Other targets are unchanged: .NET 8 and later, .NET Standard 2.0 and 2.1, and .NET Framework 4.6.2. The exception is `Sentry.Maui`, which now targets `net10.0` and `net11.0` and drops plain `net9.0`.
+- Other targets are unchanged: .NET 8 and later, .NET Standard 2.0 and 2.1, and .NET Framework 4.6.2.
 
 #### Initializing Sentry
 
