@@ -9,6 +9,9 @@
     }
     public static class SentryLoggerFactoryExtensions
     {
+        [System.Obsolete("ILoggerFactory.AddSentry() is no longer supported. Add Sentry while building the " +
+            "logger factory instead, with LoggerFactory.Create(builder => builder.AddSentry()" +
+            ") or ILoggingBuilder.AddSentry(), which also sends structured logs.", true)]
         public static Microsoft.Extensions.Logging.ILoggerFactory AddSentry(this Microsoft.Extensions.Logging.ILoggerFactory factory, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration = null) { }
     }
 }
