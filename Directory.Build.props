@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.12.1</VersionPrefix>
+    <VersionPrefix>6.13.0</VersionPrefix>
     <LangVersion>14.0</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -39,7 +39,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Release' And '$(VersionSuffix)' == ''">
-    <VersionSuffix>dev</VersionSuffix>
+    <VersionSuffix></VersionSuffix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == '.generated.NoMobile'">
