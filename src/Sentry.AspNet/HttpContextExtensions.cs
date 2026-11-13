@@ -1,5 +1,7 @@
+using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.OpenTelemetry;
 using Sentry.Protocol;
 
@@ -123,9 +125,14 @@ public static class HttpContextExtensions
         SentrySdk.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
         httpContext.Items[HttpContextTransactionItemName] = transaction;
 
-        if (options?.SendDefaultPii is true)
+        if (options?.SendDefaultPii is true && transaction.IsSampled is true)
         {
-            transaction.Request.Cookies = string.Join("; ", httpContext.Request.Cookies.AllKeys.Select(x => $"{x}={httpContext.Request.Cookies[x]?.Value}"));
+            var cookies = httpContext.Request.GetFilteredCookies();
+            transaction.Request.Cookies = CookieFilter.ToEventCookies(cookies);
+            if (cookies.Length > 0)
+            {
+                transaction.SetData(CookieFilter.RequestCookieAttribute, cookies);
+            }
         }
 
         return transaction;

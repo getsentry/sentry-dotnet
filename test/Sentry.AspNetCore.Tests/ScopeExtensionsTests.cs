@@ -219,7 +219,35 @@ public partial class ScopeExtensionsTests
 
         Assert.Equal("[Filtered]", _sut.Request.Headers[firstKey]);
 
-        _sut.Request.Cookies.Should().Be(headers[firstKey]);
+        _sut.Request.Cookies.Should().Be("[Filtered]");
+    }
+
+    [Fact]
+    public void Populate_SendDefaultPiiTrueRequestCookies_FiltersEachCookie()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "Cookie", new StringValues("user_session=abc; theme=dark-mode;opaque-token") }
+        });
+
+        SentryAspNetCoreOptions.SendDefaultPii = true;
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode; [Filtered]");
+    }
+
+    [Fact]
+    public void Populate_SendDefaultPiiTrueLowercaseCookieHeader_FiltersEachCookie()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "cookie", new StringValues("user_session=abc; theme=dark-mode") }
+        });
+
+        SentryAspNetCoreOptions.SendDefaultPii = true;
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode");
     }
 
     [Theory]
@@ -250,21 +278,33 @@ public partial class ScopeExtensionsTests
         });
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Populate_LowercaseCookieHeader_FiltersValue(bool sendDefaultPii)
+    [Fact]
+    public void Populate_SendDefaultPiiTrueLowercaseCookieHeader_FiltersValue()
     {
-        var headers = new HeaderDictionary
+        _httpRequest.Headers.Returns(new HeaderDictionary
         {
             { "cookie", new StringValues("name=secret") }
-        };
-        _httpRequest.Headers.Returns(headers);
+        });
 
-        SentryAspNetCoreOptions.SendDefaultPii = sendDefaultPii;
+        SentryAspNetCoreOptions.SendDefaultPii = true;
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
         _sut.Request.Headers["cookie"].Should().Be("[Filtered]");
+    }
+
+    [Fact]
+    public void Populate_SendDefaultPiiFalseLowercaseCookieHeader_NotSetToScope()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "cookie", new StringValues("name=secret") }
+        });
+
+        SentryAspNetCoreOptions.SendDefaultPii = false;
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Headers.Should().NotContainKey("cookie");
+        _sut.Request.Cookies.Should().BeNull();
     }
 
     [Fact]

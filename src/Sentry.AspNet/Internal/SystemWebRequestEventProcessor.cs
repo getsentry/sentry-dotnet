@@ -65,6 +65,11 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProce
 
         if (_options.SendDefaultPii)
         {
+            if (context.Request.GetFilteredCookies() is { Length: > 0 } cookies)
+            {
+                @event.Request.Cookies = CookieFilter.ToEventCookies(cookies);
+            }
+
             if (@event.User.Username == Environment.UserName)
             {
                 // if SendDefaultPii is true, Sentry SDK will send the current logged on user
