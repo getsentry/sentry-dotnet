@@ -1436,6 +1436,10 @@ interface SentryObjCOptions
     [Export("initialScope", ArgumentSemantic.Copy)]
     Func<SentryObjCScope, SentryObjCScope> InitialScope { get; set; }
 
+    // @property (nonatomic) BOOL enableScopePersistence;
+    [Export("enableScopePersistence")]
+    bool EnableScopePersistence { get; set; }
+
     // @property (nonatomic) BOOL enableNetworkTracking;
     [Export("enableNetworkTracking")]
     bool EnableNetworkTracking { get; set; }
