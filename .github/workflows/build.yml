@@ -342,7 +342,7 @@ jobs:
       # ContainerBaseImage comes from the workflow-level env block at the top of this file.
       - name: Integration test
         if: matrix.rid == 'linux-arm64' || matrix.rid == 'macos'
-        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         # The MAUI cases run in the integration-test job, against packages built there. On release branches they run
         # here too, so the packages craft publishes are the ones tested.
         env:
@@ -353,7 +353,7 @@ jobs:
 
       - name: Integration test (musl)
         if: matrix.rid == 'linux-musl-x64' || matrix.rid == 'linux-musl-arm64'
-        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         env:
           ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_MUSL }}
         with:
@@ -384,7 +384,7 @@ jobs:
 
       - name: Test AOT on an unsupported runtime
         if: matrix.rid == 'linux-arm64' || matrix.rid == 'win-x64'
-        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         env:
           RuntimeIdentifier: ${{ matrix.rid == 'linux-arm64' && 'linux-arm' || 'win-x86' }}
           # The glibc tag covers linux/arm/v7; win-x86 skips the Container test.
@@ -478,7 +478,7 @@ jobs:
         run: dotnet pack ${{ matrix.slnf }} -c Release --no-build --nologo
 
       - name: Integration test
-        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         env:
           ContainerBaseImage: ${{ env.CONTAINER_BASE_IMAGE_GLIBC }}
         with:
@@ -524,7 +524,7 @@ jobs:
         run: msbuild samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj -restore -t:Build -p:Configuration=Release -m -nr:false --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:msbuild-maui.binlog
 
       - name: Test MSBuild
-        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         with:
           path: integration-test/msbuild.Tests.ps1
 
