@@ -266,6 +266,51 @@ public class DebugStackTraceTests
         Assert.NotNull(frame);
         return VerifyJson(frame.ToJsonString());
     }
+
+#if ANDROID
+    [Fact]
+    public void CreateFrame_ForNativeAOT_LoadedNativeImage_AddsDebugImage()
+    {
+        IO.Sentry.Ndk.SentryNdk.LoadNativeLibraries();
+        var image = Sentry.Android.NativeDebugImages.Load(_fixture.SentryOptions.DiagnosticLogger).Values
+            .First(i => !string.IsNullOrEmpty(i.CodeId));
+        var imageBase = (nint)image.ImageAddress!.Value;
+        var sut = _fixture.GetSut();
+
+        var frame = sut.CreateFrame(new StubNativeAOTStackFrame()
+        {
+            Function = "DoSomething(int, long)",
+            Module = "Foo.Bar",
+            ImageBase = imageBase,
+            IP = imageBase + 1,
+        });
+        var evt = new SentryEvent();
+        sut.MergeDebugImagesInto(evt);
+
+        Assert.Equal(image.ImageAddress, frame?.ImageAddress);
+        var debugImage = Assert.Single(evt.DebugImages!);
+        Assert.Equal("elf", debugImage.Type);
+        Assert.Equal(image.ImageAddress, debugImage.ImageAddress);
+        Assert.False(string.IsNullOrEmpty(debugImage.DebugId));
+        Assert.False(string.IsNullOrEmpty(debugImage.CodeFile));
+    }
+
+    [Fact]
+    public void CreateFrame_ForNativeAOT_NdkDisabled_AddsNoDebugImage()
+    {
+        IO.Sentry.Ndk.SentryNdk.LoadNativeLibraries();
+        var image = Sentry.Android.NativeDebugImages.Load(_fixture.SentryOptions.DiagnosticLogger).Values.First();
+        var imageBase = (nint)image.ImageAddress!.Value;
+        _fixture.SentryOptions.Native.EnableNdk = false;
+        var sut = _fixture.GetSut();
+
+        sut.CreateFrame(new StubNativeAOTStackFrame() { ImageBase = imageBase, IP = imageBase + 1 });
+        var evt = new SentryEvent();
+        sut.MergeDebugImagesInto(evt);
+
+        Assert.Null(evt.DebugImages);
+    }
+#endif
 #endif
 
     private class InjectableDebugStackTrace : DebugStackTrace
