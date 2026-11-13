@@ -6,6 +6,6 @@
     "allowPrerelease": false
   },
   "msbuild-sdks": {
-    "Azure.Functions.Sdk": "1.0.1"
+    "Azure.Functions.Sdk": "1.0.2"
   }
 }
