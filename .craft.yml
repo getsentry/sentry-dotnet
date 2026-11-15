@@ -58,7 +58,7 @@ targets:
         name: Sentry.Extensions.Hosting
         sdkName: sentry.dotnet.extensions.hosting
         packageUrl: https://www.nuget.org/packages/Sentry.Extensions.Hosting
-        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/
+        mainDocsUrl: https://docs.sentry.io/platforms/dotnet/guides/extensions-hosting/
       nuget:Sentry.Extensions.Logging:
         name: Sentry.Extensions.Logging
         packageUrl: https://www.nuget.org/packages/Sentry.Extensions.Logging
