@@ -278,12 +278,9 @@ public abstract class HttpTransportBase
         var rateLimitsEncoded = string.Join(",", rateLimitHeaderValues);
         _options.LogDebug("Parsing rate limit headers: {0}", rateLimitsEncoded);
 
-        // Parse and order by retry-after so that the longer rate limits are set last (and not overwritten)
-        var rateLimits = RateLimit.ParseMany(rateLimitsEncoded).OrderBy(rl => rl.RetryAfter);
-
-        // Persist rate limits
-        foreach (var rateLimit in rateLimits)
+        foreach (var rateLimit in RateLimit.ParseMany(rateLimitsEncoded))
         {
+            var resetAt = now + rateLimit.RetryAfter;
             foreach (var rateLimitCategory in rateLimit.Categories)
             {
                 if (string.Equals(rateLimitCategory.Name, "metric_bucket", StringComparison.OrdinalIgnoreCase)
@@ -292,7 +289,10 @@ public abstract class HttpTransportBase
                     // Currently we only back off for default/empty namespaces
                     continue;
                 }
-                CategoryLimitResets[rateLimitCategory] = now + rateLimit.RetryAfter;
+                CategoryLimitResets.AddOrUpdate(
+                    rateLimitCategory,
+                    resetAt,
+                    (_, existingResetAt) => existingResetAt > resetAt ? existingResetAt : resetAt);
             }
         }
     }

@@ -1003,6 +1003,42 @@ public partial class HttpTransportTests
     }
 
     [Fact]
+    public async Task SendEnvelopeAsync_ShorterRateLimitInLaterResponse_KeepsLongerRateLimit()
+    {
+        // Arrange
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        var requestCount = 0;
+        using var httpHandler = new FakeHttpMessageHandler(() =>
+        {
+            requestCount++;
+            return SentryResponses.GetRateLimitResponse(requestCount == 1 ? "60:error" : "10:error");
+        });
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                DiagnosticLogger = _testOutputLogger,
+                SendClientReports = false,
+                Debug = true
+            },
+            new HttpClient(httpHandler),
+            null,
+            clock: clock);
+
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        var transaction = new SentryTransaction("test", "test.op") { IsSampled = true };
+        await httpTransport.SendEnvelopeAsync(Envelope.FromTransaction(transaction));
+        clock.SetUtcNow(clock.GetUtcNow().AddSeconds(30));
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        requestCount.Should().Be(2);
+    }
+
+    [Fact]
     public async Task SendEnvelopeAsync_RateLimited_CallsBackpressureMonitor()
     {
         // Arrange
