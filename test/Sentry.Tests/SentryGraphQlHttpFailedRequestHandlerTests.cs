@@ -184,6 +184,119 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
+    public void HandleResponse_WithoutDataCollection_AttachesBodiesOnlyWithSendDefaultPii(bool sendDefaultPii)
+    {
+        var hub = Substitute.For<IHub>();
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            SendDefaultPii = sendDefaultPii
+        });
+
+        var @event = CaptureEvent(hub, sut, ResponseWithVariables());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Data.Should().Be(sendDefaultPii ? RequestBodyWithVariables : null);
+            (@event.Contexts.Response.Data?.ToString()).Should().Be(sendDefaultPii ? ErrorResponseJson : null);
+        }
+    }
+
+    [Theory]
+    [InlineData(false, true, true, RequestBodyWithVariables)]
+    [InlineData(false, true, false, """{"query":"query getNote($id: ID!) { note(id: $id) { id } }"}""")]
+    [InlineData(false, false, true, """{"variables":{"id":"secret"}}""")]
+    [InlineData(false, false, false, null)]
+    [InlineData(true, true, true, RequestBodyWithVariables)]
+    [InlineData(true, true, false, """{"query":"query getNote($id: ID!) { note(id: $id) { id } }"}""")]
+    [InlineData(true, false, true, """{"variables":{"id":"secret"}}""")]
+    [InlineData(true, false, false, null)]
+    public void HandleResponse_ConfiguredGraphQL_AttachesOnlyCollectedParts(
+        bool sendDefaultPii, bool document, bool variables, string expectedData)
+    {
+        var hub = Substitute.For<IHub>();
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.GraphQL.Document = document;
+            dataCollection.GraphQL.Variables = variables;
+        });
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
+
+        var @event = CaptureEvent(hub, sut, ResponseWithVariables());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Data.Should().Be(expectedData);
+            (@event.Contexts.Response.Data?.ToString()).Should().Be(ErrorResponseJson);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_ConfiguredWithoutOutgoingRequestBody_DoesNotAttachRequestBody(bool sendDefaultPii)
+    {
+        var hub = Substitute.For<IHub>();
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.HttpBodies = HttpBodyTypes.All & ~HttpBodyTypes.OutgoingRequest);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
+
+        var @event = CaptureEvent(hub, sut, ResponseWithVariables());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Data.Should().BeNull();
+            (@event.Contexts.Response.Data?.ToString()).Should().Be(ErrorResponseJson);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_ConfiguredWithoutIncomingResponseBody_DoesNotAttachResponseBody(bool sendDefaultPii)
+    {
+        var hub = Substitute.For<IHub>();
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.HttpBodies = HttpBodyTypes.All & ~HttpBodyTypes.IncomingResponse);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
+
+        var @event = CaptureEvent(hub, sut, ResponseWithVariables());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Data.Should().Be(RequestBodyWithVariables);
+            @event.Contexts.Response.Data.Should().BeNull();
+        }
+    }
+
+    private const string RequestBodyWithVariables =
+        """{"query":"query getNote($id: ID!) { note(id: $id) { id } }","variables":{"id":"secret"}}""";
+
+    private static string ErrorResponseJson =>
+        SentryGraphQlTestHelpers.ErrorContent("Bad query", "BAD_OP").ReadAsJson().ToString();
+
+    private HttpResponseMessage ResponseWithVariables()
+    {
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = SentryGraphQlTestHelpers.GetRequest(new StringContent(RequestBodyWithVariables), "http://foo/graphql");
+        response.RequestMessage.SetFused(new GraphQLRequestContent(RequestBodyWithVariables));
+        return response;
+    }
+
+    private static SentryEvent CaptureEvent(IHub hub, SentryGraphQLHttpFailedRequestHandler sut, HttpResponseMessage response)
+    {
+        SentryEvent @event = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+        return @event;
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
     public void HandleResponse_SensitiveQueryParameter_FiltersUrlAndQueryString(bool sendDefaultPii)
     {
         var hub = Substitute.For<IHub>();

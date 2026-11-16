@@ -65,6 +65,16 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             };
 
             var requestContent = request.GetFused<GraphQLRequestContent>();
+            var dataCollection = _options.DataCollectionResolver;
+            if (dataCollection.OutgoingRequestBody)
+            {
+                sentryRequest.Data = requestContent?.FilterRequestContent(dataCollection.GraphQLDocument, dataCollection.GraphQLVariables);
+            }
+            if (dataCollection.IncomingResponseBody)
+            {
+                responseContext.Data = json;
+            }
+
             if (!_options.SendDefaultPii)
             {
                 sentryRequest.Url = request.RequestUri?.FilteredHttpRequestUrl();
@@ -72,11 +82,9 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             else
             {
                 sentryRequest.Cookies = request.Headers.GetCookies();
-                sentryRequest.Data = requestContent?.RequestContent;
                 sentryRequest.Url = QueryStringFilter.FilterUrl(request.RequestUri?.AbsoluteUri);
                 sentryRequest.AddHeaders(request.Headers);
                 responseContext.Cookies = response.Headers.GetCookies();
-                responseContext.Data = json;
                 responseContext.AddHeaders(response.Headers);
             }
 
