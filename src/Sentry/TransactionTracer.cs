@@ -175,10 +175,6 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
 
-    private readonly Lazy<MetricsSummaryAggregator> _metricsSummary = new();
-    internal MetricsSummaryAggregator MetricsSummary => _metricsSummary.Value;
-    internal bool HasMetrics => _metricsSummary.IsValueCreated;
-
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
 
