@@ -71,6 +71,12 @@ public sealed class SentryRequest : ISentryJsonSerializable
     public string? QueryString { get; set; }
 
     /// <summary>
+    /// Gets or sets the fragment of the request URL, without the leading <c>#</c>.
+    /// </summary>
+    /// <value>The URL fragment.</value>
+    public string? Fragment { get; set; }
+
+    /// <summary>
     /// Gets or sets the cookies.
     /// </summary>
     /// <value>The cookies.</value>
@@ -142,6 +148,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
         request.Method ??= Method;
         request.Data ??= Data;
         request.QueryString ??= QueryString;
+        request.Fragment ??= Fragment;
         request.Cookies ??= Cookies;
 
         InternalEnv?.TryCopyTo(request.Env);
@@ -161,6 +168,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
         writer.WriteStringIfNotWhiteSpace("method", Method);
         writer.WriteDynamicIfNotNull("data", Data, logger);
         writer.WriteStringIfNotWhiteSpace("query_string", QueryString);
+        writer.WriteStringIfNotWhiteSpace("fragment", Fragment);
         writer.WriteStringIfNotWhiteSpace("cookies", Cookies);
 
         writer.WriteEndObject();
@@ -178,6 +186,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
         var method = json.GetPropertyOrNull("method")?.GetString();
         var data = json.GetPropertyOrNull("data")?.GetDynamicOrNull();
         var query = json.GetPropertyOrNull("query_string")?.GetString();
+        var fragment = json.GetPropertyOrNull("fragment")?.GetString();
         var cookies = json.GetPropertyOrNull("cookies")?.GetString();
 
         return new SentryRequest
@@ -189,6 +198,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
             Method = method,
             Data = data,
             QueryString = query,
+            Fragment = fragment,
             Cookies = cookies
         };
     }

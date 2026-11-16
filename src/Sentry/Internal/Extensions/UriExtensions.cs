@@ -12,4 +12,10 @@ internal static class UriExtensions
         return safeUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.Unescaped)
             + QueryStringFilter.Filter(safeUri.Query, queryParams);
     }
+
+    public static string? HttpRequestFragment(this Uri uri)
+    {
+        var fragment = new UriBuilder(uri).Fragment;
+        return fragment.Length > 1 ? fragment[1..] : null;
+    }
 }
