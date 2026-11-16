@@ -130,49 +130,100 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     public void HandleResponse_Error_FiltersCookies()
     {
         // Arrange
-        var hub = Substitute.For<IHub>();
         var options = new SentryOptions
         {
             CaptureFailedRequests = true,
             SendDefaultPii = true
         };
-        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = PreconditionFailedResponse();
         response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, "http://foo/bar/hello");
         response.RequestMessage!.SetFused(new GraphQLRequestContent(SentryGraphQlTestHelpers.WrapRequestContent(ValidQuery)));
         response.RequestMessage.Headers.Add("Cookie", "user_session=abc; theme=dark-mode;opaque-token");
-        response.Headers.Add("Cookie", "csrf_token=abc; lang=en");
+        response.Headers.Add("Set-Cookie", ["csrf_token=abc; Path=/; HttpOnly", "lang=en; Max-Age=3600", "opaque-token; Secure"]);
 
         // Act
-        SentryEvent @event = null;
-        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
-        sut.HandleResponse(response);
+        var @event = CaptureEvent(options, response);
 
         // Assert
         @event.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode; [Filtered]");
-        @event.Contexts.Response.Cookies.Should().Be("csrf_token=[Filtered]; lang=en");
+        @event.Contexts.Response.Cookies.Should().Be("csrf_token=[Filtered]; lang=en; [Filtered]");
+    }
+
+    [Fact]
+    public void HandleResponse_ErrorNoPii_SkipsCookies()
+    {
+        var @event = CaptureEvent(new SentryOptions { CaptureFailedRequests = true }, ResponseWithCookies());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Cookies.Should().BeNull();
+            @event.Contexts.Response.Cookies.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_ResponseCookieHeader_IsNotCollectedAsResponseCookies()
+    {
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, "http://foo/bar");
+        response.Headers.Add("Cookie", "lang=en");
+
+        var @event = CaptureEvent(new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = true }, response);
+
+        @event.Contexts.Response.Cookies.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_CookiesConfigured_IgnoresSendDefaultPii(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.Cookies = sendDefaultPii ? KeyValueCollectionBehavior.Off : KeyValueCollectionBehavior.DenyList("theme"));
+
+        var @event = CaptureEvent(options, ResponseWithCookies());
+
+        using (new AssertionScope())
+        {
+            if (sendDefaultPii)
+            {
+                @event.Request.Cookies.Should().BeNull();
+                @event.Contexts.Response.Cookies.Should().BeNull();
+            }
+            else
+            {
+                @event.Request.Cookies.Should().Be("user_session=[Filtered]; theme=[Filtered]");
+                @event.Contexts.Response.Cookies.Should().Be("theme=[Filtered]; lang=en");
+            }
+        }
+    }
+
+    private HttpResponseMessage ResponseWithCookies()
+    {
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, "http://foo/bar");
+        response.RequestMessage.Headers.Add("Cookie", "user_session=abc; theme=dark-mode");
+        response.Headers.Add("Set-Cookie", ["theme=light-mode; Path=/", "lang=en; HttpOnly"]);
+        return response;
     }
 
     [Fact]
     public void HandleResponse_Error_DontSendPii()
     {
         // Arrange
-        var hub = Substitute.For<IHub>();
         var options = new SentryOptions
         {
             CaptureFailedRequests = true
         };
-        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = PreconditionFailedResponse();
         var uri = new Uri("http://admin:1234@localhost/test/path?query=string#fragment");
         response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
         // Act
-        SentryEvent @event = null;
-        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
-        sut.HandleResponse(response);
+        var @event = CaptureEvent(options, response);
 
         // Assert
         @event.Request.Url.Should().Be("http://localhost/test/path?query=string"); // No admin:1234
@@ -182,18 +233,52 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     }
 
     [Theory]
+    [InlineData(false, "https://example.com/api/users")]
+    [InlineData(true, "https://example.com/api/users#top")]
+    public void HandleResponse_UrlQueryParamsOff_DropsQuery(bool sendDefaultPii, string expectedUrl)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection => dataCollection.UrlQueryParams = KeyValueCollectionBehavior.Off);
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/api/users?q=abc&page=5#top"));
+
+        var @event = CaptureEvent(options, response);
+
+        using (new AssertionScope())
+        {
+            @event.Request.Url.Should().Be(expectedUrl);
+            @event.Request.QueryString.Should().BeNull();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_UrlQueryParamsAllowList_FiltersOtherValues(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.UrlQueryParams = KeyValueCollectionBehavior.AllowList("page", "token"));
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/api/users?token=abc&q=abc&page=5"));
+
+        var @event = CaptureEvent(options, response);
+
+        using (new AssertionScope())
+        {
+            @event.Request.Url.Should().Be("https://example.com/api/users?token=[Filtered]&q=[Filtered]&page=5");
+            @event.Request.QueryString.Should().Be("?token=[Filtered]&q=[Filtered]&page=5");
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void HandleResponse_WithoutDataCollection_AttachesBodiesOnlyWithSendDefaultPii(bool sendDefaultPii)
     {
-        var hub = Substitute.For<IHub>();
-        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, new SentryOptions
-        {
-            CaptureFailedRequests = true,
-            SendDefaultPii = sendDefaultPii
-        });
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
 
-        var @event = CaptureEvent(hub, sut, ResponseWithVariables());
+        var @event = CaptureEvent(options, ResponseWithVariables());
 
         using (new AssertionScope())
         {
@@ -214,16 +299,14 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     public void HandleResponse_ConfiguredGraphQL_AttachesOnlyCollectedParts(
         bool sendDefaultPii, bool document, bool variables, string expectedData)
     {
-        var hub = Substitute.For<IHub>();
         var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
         options.ConfigureDataCollection(dataCollection =>
         {
             dataCollection.GraphQL.Document = document;
             dataCollection.GraphQL.Variables = variables;
         });
-        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
-        var @event = CaptureEvent(hub, sut, ResponseWithVariables());
+        var @event = CaptureEvent(options, ResponseWithVariables());
 
         using (new AssertionScope())
         {
@@ -237,13 +320,11 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     [InlineData(true)]
     public void HandleResponse_ConfiguredWithoutOutgoingRequestBody_DoesNotAttachRequestBody(bool sendDefaultPii)
     {
-        var hub = Substitute.For<IHub>();
         var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
         options.ConfigureDataCollection(dataCollection =>
             dataCollection.HttpBodies = HttpBodyTypes.All & ~HttpBodyTypes.OutgoingRequest);
-        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
-        var @event = CaptureEvent(hub, sut, ResponseWithVariables());
+        var @event = CaptureEvent(options, ResponseWithVariables());
 
         using (new AssertionScope())
         {
@@ -257,13 +338,11 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     [InlineData(true)]
     public void HandleResponse_ConfiguredWithoutIncomingResponseBody_DoesNotAttachResponseBody(bool sendDefaultPii)
     {
-        var hub = Substitute.For<IHub>();
         var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
         options.ConfigureDataCollection(dataCollection =>
             dataCollection.HttpBodies = HttpBodyTypes.All & ~HttpBodyTypes.IncomingResponse);
-        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
-        var @event = CaptureEvent(hub, sut, ResponseWithVariables());
+        var @event = CaptureEvent(options, ResponseWithVariables());
 
         using (new AssertionScope())
         {
@@ -286,11 +365,12 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         return response;
     }
 
-    private static SentryEvent CaptureEvent(IHub hub, SentryGraphQLHttpFailedRequestHandler sut, HttpResponseMessage response)
+    private static SentryEvent CaptureEvent(SentryOptions options, HttpResponseMessage response)
     {
+        var hub = Substitute.For<IHub>();
         SentryEvent @event = null;
         hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
-        sut.HandleResponse(response);
+        new SentryGraphQLHttpFailedRequestHandler(hub, options).HandleResponse(response);
         return @event;
     }
 
@@ -433,6 +513,51 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         sut.HandleResponse(response);
 
         // Assert
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().BeEmpty();
+            @event.Contexts.Response.Headers.Should().BeEmpty();
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_HeadersConfiguredWithoutSendDefaultPii_CollectsHeaders()
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = false };
+        options.ConfigureDataCollection(_ => { });
+
+        var @event = CaptureEvent(options, ResponseWithSensitiveHeaders());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Authorization", "[Filtered]" },
+                { "X-Api-Key", "[Filtered]" },
+                { "Cookie", "[Filtered]" },
+                { "Accept", "text/plain" }
+            });
+            @event.Contexts.Response.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Set-Cookie", "[Filtered]" },
+                { "X-Auth-Token", "[Filtered]" },
+                { "myHeader", "myValue" }
+            });
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_HeadersOffWithSendDefaultPii_SkipsHeaders()
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = true };
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.Off;
+            dataCollection.HttpHeaders.Response = KeyValueCollectionBehavior.Off;
+        });
+
+        var @event = CaptureEvent(options, ResponseWithSensitiveHeaders());
+
         using (new AssertionScope())
         {
             @event.Request.Headers.Should().BeEmpty();
