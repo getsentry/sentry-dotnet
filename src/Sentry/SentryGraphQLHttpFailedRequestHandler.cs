@@ -51,10 +51,9 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             var uri = request.RequestUri;
             var sentryRequest = new SentryRequest
             {
-                Url = _options.SendDefaultPii
-                    ? QueryStringFilter.FilterUrl(uri?.AbsoluteUri, queryParams)
-                    : uri?.FilteredHttpRequestUrl(queryParams),
+                Url = uri?.FilteredHttpRequestUrl(queryParams),
                 QueryString = QueryStringFilter.Filter(uri?.Query, queryParams),
+                Fragment = uri?.HttpRequestFragment(),
                 Method = request.Method.Method.ToUpperInvariant(),
                 Cookies = request.Headers.GetCookies(dataCollection.Cookies),
                 ApiTarget = "graphql"

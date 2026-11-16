@@ -233,9 +233,34 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     }
 
     [Theory]
-    [InlineData(false, "https://example.com/api/users")]
-    [InlineData(true, "https://example.com/api/users#top")]
-    public void HandleResponse_UrlQueryParamsOff_DropsQuery(bool sendDefaultPii, string expectedUrl)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void HandleResponse_UrlWithCredentials_AlwaysStripsCredentialsAndSeparatesFragment(bool sendDefaultPii, bool configureDataCollection)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        if (configureDataCollection)
+        {
+            options.ConfigureDataCollection(_ => { });
+        }
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("http://admin:1234@localhost/test/path?query=string#fragment"));
+
+        var @event = CaptureEvent(options, response);
+
+        using (new AssertionScope())
+        {
+            @event.Request.Url.Should().Be("http://localhost/test/path?query=string");
+            @event.Request.QueryString.Should().Be("?query=string");
+            @event.Request.Fragment.Should().Be("fragment");
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_UrlQueryParamsOff_DropsQuery(bool sendDefaultPii)
     {
         var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
         options.ConfigureDataCollection(dataCollection => dataCollection.UrlQueryParams = KeyValueCollectionBehavior.Off);
@@ -246,8 +271,9 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
 
         using (new AssertionScope())
         {
-            @event.Request.Url.Should().Be(expectedUrl);
+            @event.Request.Url.Should().Be("https://example.com/api/users");
             @event.Request.QueryString.Should().BeNull();
+            @event.Request.Fragment.Should().Be("top");
         }
     }
 
