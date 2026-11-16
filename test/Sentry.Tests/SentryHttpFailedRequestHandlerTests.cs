@@ -20,6 +20,14 @@ public class SentryHttpFailedRequestHandlerTests
     private static HttpResponseMessage InternalServerErrorResponse()
         => new(HttpStatusCode.InternalServerError);
 
+    private SentryEvent CaptureEvent(SentryOptions options, HttpResponseMessage response)
+    {
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        GetSut(options).HandleResponse(response);
+        return @event;
+    }
+
     [Fact]
     public void HandleResponse_Disabled_DontCapture()
     {
@@ -257,6 +265,45 @@ public class SentryHttpFailedRequestHandlerTests
         @event.Request.QueryString.Should().Be("?token=[Filtered]&q=a%20b%26c&page=5");
     }
 
+    [Theory]
+    [InlineData(false, "https://example.com/api/users")]
+    [InlineData(true, "https://example.com/api/users#top")]
+    public void HandleResponse_UrlQueryParamsOff_DropsQuery(bool sendDefaultPii, string expectedUrl)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection => dataCollection.UrlQueryParams = KeyValueCollectionBehavior.Off);
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/api/users?q=abc&page=5#top"));
+
+        var @event = CaptureEvent(options, response);
+
+        using (new AssertionScope())
+        {
+            @event.Request.Url.Should().Be(expectedUrl);
+            @event.Request.QueryString.Should().BeNull();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_UrlQueryParamsAllowList_FiltersOtherValues(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.UrlQueryParams = KeyValueCollectionBehavior.AllowList("page", "token"));
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/api/users?token=abc&q=abc&page=5"));
+
+        var @event = CaptureEvent(options, response);
+
+        using (new AssertionScope())
+        {
+            @event.Request.Url.Should().Be("https://example.com/api/users?token=[Filtered]&q=[Filtered]&page=5");
+            @event.Request.QueryString.Should().Be("?token=[Filtered]&q=[Filtered]&page=5");
+        }
+    }
+
     [Fact]
     public void HandleResponse_FailedRequest_HasRequestAndResponse()
     {
@@ -321,7 +368,7 @@ public class SentryHttpFailedRequestHandlerTests
         var response = InternalServerErrorResponse();
         response.RequestMessage = new HttpRequestMessage(HttpMethod.Post, "http://foo/bar");
         response.RequestMessage.Headers.Add("Cookie", "user_session=abc; theme=dark-mode;opaque-token");
-        response.Headers.Add("Cookie", "csrf_token=abc; lang=en");
+        response.Headers.Add("Set-Cookie", ["csrf_token=abc; Path=/; HttpOnly", "lang=en; Max-Age=3600", "opaque-token; Secure"]);
 
         // Act
         SentryEvent @event = null;
@@ -330,7 +377,83 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Assert
         @event.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode; [Filtered]");
-        @event.Contexts.Response.Cookies.Should().Be("csrf_token=[Filtered]; lang=en");
+        @event.Contexts.Response.Cookies.Should().Be("csrf_token=[Filtered]; lang=en; [Filtered]");
+    }
+
+    [Fact]
+    public void HandleResponse_FailedRequestNoPii_SkipsCookies()
+    {
+        var response = ResponseWithCookies();
+
+        var @event = CaptureEvent(new SentryOptions { CaptureFailedRequests = true }, response);
+
+        using (new AssertionScope())
+        {
+            @event.Request.Cookies.Should().BeNull();
+            @event.Contexts.Response.Cookies.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_ResponseCookieHeader_IsNotCollectedAsResponseCookies()
+    {
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://foo/bar");
+        response.Headers.Add("Cookie", "lang=en");
+
+        var @event = CaptureEvent(new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = true }, response);
+
+        @event.Contexts.Response.Cookies.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_CookiesConfigured_IgnoresSendDefaultPii(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.Cookies = sendDefaultPii ? KeyValueCollectionBehavior.Off : KeyValueCollectionBehavior.DenyList("theme"));
+
+        var @event = CaptureEvent(options, ResponseWithCookies());
+
+        using (new AssertionScope())
+        {
+            if (sendDefaultPii)
+            {
+                @event.Request.Cookies.Should().BeNull();
+                @event.Contexts.Response.Cookies.Should().BeNull();
+            }
+            else
+            {
+                @event.Request.Cookies.Should().Be("user_session=[Filtered]; theme=[Filtered]");
+                @event.Contexts.Response.Cookies.Should().Be("theme=[Filtered]; lang=en");
+            }
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_CookiesAllowList_KeepsOnlyMatchingValues()
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true };
+        options.ConfigureDataCollection(dataCollection => dataCollection.Cookies = KeyValueCollectionBehavior.AllowList("theme"));
+
+        var @event = CaptureEvent(options, ResponseWithCookies());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode");
+            @event.Contexts.Response.Cookies.Should().Be("theme=light-mode; lang=[Filtered]");
+        }
+    }
+
+    private static HttpResponseMessage ResponseWithCookies()
+    {
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://foo/bar");
+        response.RequestMessage.Headers.Add("Cookie", "user_session=abc; theme=dark-mode");
+        response.Headers.Add("Set-Cookie", ["theme=light-mode; Path=/", "lang=en; HttpOnly"]);
+        return response;
     }
 
     [Fact]
@@ -422,6 +545,81 @@ public class SentryHttpFailedRequestHandlerTests
         {
             @event.Request.Headers.Should().BeEmpty();
             @event.Contexts.Response.Headers.Should().BeEmpty();
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_HeadersConfiguredWithoutSendDefaultPii_CollectsHeaders()
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = false };
+        options.ConfigureDataCollection(_ => { });
+
+        var @event = CaptureEvent(options, ResponseWithSensitiveHeaders());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Authorization", "[Filtered]" },
+                { "X-Api-Key", "[Filtered]" },
+                { "Cookie", "[Filtered]" },
+                { "Accept", "text/plain" }
+            });
+            @event.Contexts.Response.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Set-Cookie", "[Filtered]" },
+                { "X-Auth-Token", "[Filtered]" },
+                { "myHeader", "myValue" }
+            });
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_HeadersOffWithSendDefaultPii_SkipsHeaders()
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = true };
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.Off;
+            dataCollection.HttpHeaders.Response = KeyValueCollectionBehavior.Off;
+        });
+
+        var @event = CaptureEvent(options, ResponseWithSensitiveHeaders());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().BeEmpty();
+            @event.Contexts.Response.Headers.Should().BeEmpty();
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_HeadersAllowList_KeepsOnlyMatchingNonSensitiveValues()
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true };
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("authorization");
+            dataCollection.HttpHeaders.Response = KeyValueCollectionBehavior.AllowList("myheader");
+        });
+
+        var @event = CaptureEvent(options, ResponseWithSensitiveHeaders());
+
+        using (new AssertionScope())
+        {
+            @event.Request.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Authorization", "[Filtered]" },
+                { "X-Api-Key", "[Filtered]" },
+                { "Cookie", "[Filtered]" },
+                { "Accept", "[Filtered]" }
+            });
+            @event.Contexts.Response.Headers.Should().Equal(new Dictionary<string, string>
+            {
+                { "Set-Cookie", "[Filtered]" },
+                { "X-Auth-Token", "[Filtered]" },
+                { "myHeader", "myValue" }
+            });
         }
     }
 
