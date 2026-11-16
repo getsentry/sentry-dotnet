@@ -247,6 +247,31 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void HandleResponse_UrlWithCredentials_AlwaysStripsCredentialsAndSeparatesFragment(bool sendDefaultPii, bool configureDataCollection)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
+        if (configureDataCollection)
+        {
+            options.ConfigureDataCollection(_ => { });
+        }
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("http://admin:1234@localhost/test/path?query=string#fragment"));
+
+        var @event = CaptureEvent(options, response);
+
+        using (new AssertionScope())
+        {
+            @event.Request.Url.Should().Be("http://localhost/test/path?query=string");
+            @event.Request.QueryString.Should().Be("?query=string");
+            @event.Request.Fragment.Should().Be("fragment");
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void HandleResponse_SensitiveQueryParameter_FiltersUrlAndQueryString(bool sendDefaultPii)
@@ -266,9 +291,9 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Theory]
-    [InlineData(false, "https://example.com/api/users")]
-    [InlineData(true, "https://example.com/api/users#top")]
-    public void HandleResponse_UrlQueryParamsOff_DropsQuery(bool sendDefaultPii, string expectedUrl)
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_UrlQueryParamsOff_DropsQuery(bool sendDefaultPii)
     {
         var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
         options.ConfigureDataCollection(dataCollection => dataCollection.UrlQueryParams = KeyValueCollectionBehavior.Off);
@@ -279,8 +304,9 @@ public class SentryHttpFailedRequestHandlerTests
 
         using (new AssertionScope())
         {
-            @event.Request.Url.Should().Be(expectedUrl);
+            @event.Request.Url.Should().Be("https://example.com/api/users");
             @event.Request.QueryString.Should().BeNull();
+            @event.Request.Fragment.Should().Be("top");
         }
     }
 
@@ -340,8 +366,9 @@ public class SentryHttpFailedRequestHandlerTests
 
             // Ensure the request properties are captured
             @event.Request.Method.Should().Be(HttpMethod.Post.ToString());
-            @event.Request.Url.Should().Be(absoluteUri);
+            @event.Request.Url.Should().Be($"{url}{queryString}");
             @event.Request.QueryString.Should().Be(queryString);
+            @event.Request.Fragment.Should().Be(fragment);
 
             // Ensure the response context is captured
             @event.Contexts.Should().Contain(x => x.Key == Response.Type && x.Value is Response);

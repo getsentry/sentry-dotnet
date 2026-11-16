@@ -58,6 +58,27 @@ public class UriExtensionsTests
         actual.Should().Be("https://example.com/api?[Filtered]");
     }
 
+    [Theory]
+    [InlineData("https://example.com/api?page=5#top", "top")]
+    [InlineData("https://example.com/api#a?b=c", "a?b=c")]
+    [InlineData("https://example.com/api#", null)]
+    [InlineData("https://example.com/api", null)]
+    public void HttpRequestFragment_ReturnsFragmentWithoutHash(string url, string expected)
+    {
+        new Uri(url).HttpRequestFragment().Should().Be(expected);
+    }
+
+    [Fact]
+    public void HttpRequestFragment_DangerousDisablePathAndQueryCanonicalization_DoesNotThrow()
+    {
+        var options = new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = true };
+        var uri = new Uri("https://www.contoso.com/a?b=c#top", options);
+
+        var act = () => uri.HttpRequestFragment();
+
+        act.Should().NotThrow();
+    }
+
     [Fact]
     public void FilteredHttpRequestUrl_DangerousDisablePathAndQueryCanonicalization_ReturnsHttpRequestUrl()
     {
