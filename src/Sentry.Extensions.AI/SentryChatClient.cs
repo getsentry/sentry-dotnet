@@ -158,7 +158,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
         var ficcActivity = SentryAIUtil.GetFICCActivity();
 
         // FICC invokes tools in this activity, so SentryInstrumentedFunction reads its recording options from here
-        ficcActivity?.SetFused(_sentryAIOptions);
+        ficcActivity?.SetAIOptions(_sentryAIOptions);
 
         // If we couldn't find the Activity, then FICC is not wrapping SentryChatClient. Return a new span from the hub
         return ficcActivity?.GetFICCSpan() ?? _hub.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation,

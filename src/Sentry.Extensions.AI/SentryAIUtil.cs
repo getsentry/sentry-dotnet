@@ -22,4 +22,10 @@ internal static class SentryAIUtil
 
     internal static ISpan? GetFICCSpan(this Activity ficcActivity) =>
         ficcActivity.GetFused<ISpan>(SentryAIConstants.SentryFICCSpanAttributeName);
+
+    internal static void SetAIOptions(this Activity ficcActivity, SentryAIOptions options) =>
+        ficcActivity.SetFused(options);
+
+    internal static SentryAIOptions? GetAIOptions(this Activity ficcActivity) =>
+        ficcActivity.GetFused<SentryAIOptions>();
 }

@@ -16,7 +16,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, IHub?
     {
         var ficcActivity = SentryAIUtil.GetFICCActivity();
         var agentSpan = ficcActivity?.GetFICCSpan();
-        var aiOptions = ficcActivity?.GetFused<SentryAIOptions>() ?? DefaultAIOptions;
+        var aiOptions = ficcActivity?.GetAIOptions() ?? DefaultAIOptions;
         var sentryOptions = _hub.GetSentryOptions();
 
         var toolSpan = InitToolSpan(agentSpan, arguments, aiOptions.Experimental.ShouldRecordInputs(sentryOptions));
