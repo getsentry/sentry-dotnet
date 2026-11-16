@@ -2390,14 +2390,20 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Ctor_AutoSessionTrackingEnabled_StartsSession()
+    public async Task Ctor_AutoSessionTrackingEnabled_StartsSession()
     {
         // Arrange
         _fixture.Options.AutoSessionTracking = true;
         _fixture.Options.Release = "release";
+        var sessionStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _fixture.Client
+            .When(client => client.CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial)))
+            .Do(_ => sessionStarted.TrySetResult(true));
 
         // Act
-        _ = _fixture.GetSut();
+        using var hub = _fixture.GetSut();
+        // On mobile, the app lifecycle tracker starts the session later, on the main thread
+        await Task.WhenAny(sessionStarted.Task, Task.Delay(TimeSpan.FromSeconds(5)));
 
         // Assert
         _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
