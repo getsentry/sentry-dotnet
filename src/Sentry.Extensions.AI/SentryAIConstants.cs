@@ -14,7 +14,6 @@ internal static class SentryAIConstants
     /// </summary>
     internal const string SentryFICCSpanAttributeName = "SentryFICCSpan";
 
-    // gen_ai.* attributes written by MCP instrumentation are gated by the spec's Mcp category, not GenAI.
     internal static class SpanAttributes
     {
         // Operations
