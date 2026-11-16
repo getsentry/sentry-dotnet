@@ -2,7 +2,6 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -66,9 +65,6 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         (_tags ??= new Dictionary<string, string>()).Remove(key);
 
     // Aka 'data'
-    private readonly MetricsSummary? _metricsSummary;
-
-
     private Dictionary<string, object?>? _data;
 
     /// <inheritdoc />
@@ -117,10 +113,6 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         {
             _measurements = spanTracer.InternalMeasurements?.ToDict();
             _tags = spanTracer.InternalTags?.ToDict();
-            if (spanTracer.HasMetrics)
-            {
-                _metricsSummary = new MetricsSummary(spanTracer.MetricsSummary);
-            }
         }
         else
         {
@@ -151,7 +143,6 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteDictionaryIfNotEmpty("data", _data!, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
-        writer.WriteSerializableIfNotNull("_metrics_summary", _metricsSummary, logger);
 
         writer.WriteEndObject();
     }

@@ -2,7 +2,6 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -187,7 +186,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
 
     // Not readonly because of deserialization
     private SentrySpan[] _spans = Array.Empty<SentrySpan>();
-    private readonly MetricsSummary? _metricsSummary;
 
     /// <summary>
     /// Flat list of spans within this transaction.
@@ -275,10 +273,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
             SampleRate = transactionTracer.SampleRate;
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
             TransactionProfiler = transactionTracer.TransactionProfiler;
-            if (transactionTracer.HasMetrics)
-            {
-                _metricsSummary = new MetricsSummary(transactionTracer.MetricsSummary);
-            }
         }
     }
 
@@ -409,7 +403,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteArrayIfNotEmpty("spans", _spans, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
-        writer.WriteSerializableIfNotNull("_metrics_summary", _metricsSummary, logger);
 
         writer.WriteEndObject();
     }
