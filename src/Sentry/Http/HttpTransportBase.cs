@@ -58,9 +58,7 @@ public abstract class HttpTransportBase
         _backpressureMonitor = backpressureMonitor;
     }
 
-    // Keep track of rate limits and their expiry dates.
-    // Internal for testing.
-    internal ConcurrentDictionary<RateLimitCategory, DateTimeOffset> CategoryLimitResets { get; } = new();
+    internal RateLimitResets CategoryLimitResets { get; } = new();
 
     /// <summary>
     /// Processes an envelope before sending.
@@ -110,9 +108,7 @@ public abstract class HttpTransportBase
 
     private void ProcessEnvelopeItem(DateTimeOffset now, EnvelopeItem item, List<EnvelopeItem> items)
     {
-        // Check if there is at least one matching category for this item that is rate-limited
-        var isRateLimited = CategoryLimitResets
-            .Any(kvp => kvp.Value > now && kvp.Key.Matches(item));
+        var isRateLimited = CategoryLimitResets.IsRateLimited(item, now);
 
         if (isRateLimited)
         {
@@ -280,7 +276,6 @@ public abstract class HttpTransportBase
 
         foreach (var rateLimit in RateLimit.ParseMany(rateLimitsEncoded))
         {
-            var resetAt = now + rateLimit.RetryAfter;
             foreach (var rateLimitCategory in rateLimit.Categories)
             {
                 if (string.Equals(rateLimitCategory.Name, "metric_bucket", StringComparison.OrdinalIgnoreCase)
@@ -289,10 +284,7 @@ public abstract class HttpTransportBase
                     // Currently we only back off for default/empty namespaces
                     continue;
                 }
-                CategoryLimitResets.AddOrUpdate(
-                    rateLimitCategory,
-                    resetAt,
-                    (_, existingResetAt) => existingResetAt > resetAt ? existingResetAt : resetAt);
+                CategoryLimitResets.Extend(rateLimitCategory, now + rateLimit.RetryAfter);
             }
         }
     }
