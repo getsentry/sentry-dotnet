@@ -199,6 +199,27 @@ public class SentryChatClientTests : IDisposable
     }
 
     [Fact]
+    public async Task CompleteAsync_WithToolsOutsideToolLoop_StartsAgentSpanFromHub()
+    {
+        // Arrange
+        var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
+        _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
+        _fixture.InnerClient.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok"))));
+        var sentryChatClient = _fixture.GetSut();
+        var chatOptions = new ChatOptions { Tools = [AIFunctionFactory.Create(() => "result", "TestFunction")] };
+
+        // Act
+        await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], chatOptions);
+
+        // Assert
+        var agentSpan = transaction.Spans.Single(s => s.Operation == SentryAIConstants.SpanAttributes.InvokeAgentOperation);
+        var chatSpan = transaction.Spans.Single(s => s.Operation == SentryAIConstants.SpanAttributes.ChatOperation);
+        agentSpan.IsFinished.Should().BeTrue();
+        chatSpan.ParentSpanId.Should().Be(agentSpan.SpanId);
+    }
+
+    [Fact]
     public async Task CompleteAsync_DataCollectionGenAIDisabled_DoesNotRecordContent()
     {
         // Arrange

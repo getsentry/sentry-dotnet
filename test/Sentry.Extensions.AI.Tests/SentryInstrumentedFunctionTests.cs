@@ -317,6 +317,38 @@ public class SentryInstrumentedFunctionTests
         toolSpan.Data.ContainsKey(SentryAIConstants.SpanAttributes.ToolOutput).Should().Be(recordOutputs);
     }
 
+    [Fact]
+    public async Task InvokeCoreAsync_InChildActivityOfToolLoop_UsesChatClientRecordingOptions()
+    {
+        // Arrange
+        using var hub = CreateHub(_ => { });
+        var transaction = StartTransaction(hub);
+        using var ficcActivity = StartFICCActivity(hub);
+
+        var innerClient = Substitute.For<IChatClient>();
+        innerClient.GetResponseAsync(Arg.Any<IEnumerable<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
+            .Returns(new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok")));
+        var chatClient = new SentryChatClient(null, hub, innerClient, options =>
+        {
+            options.Experimental.RecordInputs = false;
+            options.Experimental.RecordOutputs = false;
+        });
+        var sentryFunction = new SentryInstrumentedFunction(WeatherFunction(), hub);
+        await chatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], new ChatOptions { Tools = [sentryFunction] });
+
+        // Act
+        using (new Activity("execute_tool GetWeather").Start())
+        {
+            await sentryFunction.InvokeAsync(new AIFunctionArguments { ["city"] = "Paris" });
+        }
+
+        // Assert
+        var toolSpan = transaction.Spans.Single(s => s.Operation == SentryAIConstants.SpanAttributes.ToolCallOperation);
+        toolSpan.ParentSpanId.Should().Be(ficcActivity.GetFICCSpan()!.SpanId);
+        toolSpan.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ToolInput);
+        toolSpan.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ToolOutput);
+    }
+
     private static AIFunction WeatherFunction() =>
         AIFunctionFactory.Create((string city) => $"Sunny in {city}", "GetWeather", "Gets the weather for a city");
 
