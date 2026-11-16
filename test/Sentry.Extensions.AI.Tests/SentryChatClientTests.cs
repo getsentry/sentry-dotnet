@@ -45,7 +45,7 @@ public class SentryChatClientTests : IDisposable
 
         _fixture.InnerClient.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(chatResponse));
-        var sentryChatClient = _fixture.GetSut(RecordInputsAndOutputs);
+        var sentryChatClient = _fixture.GetSut();
 
         // Act
         var res = await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
@@ -123,7 +123,7 @@ public class SentryChatClientTests : IDisposable
         _fixture.InnerClient.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
                 Arg.Any<CancellationToken>())
             .Returns(CreateTestStreamingUpdatesAsync());
-        var sentryChatClient = _fixture.GetSut(RecordInputsAndOutputs);
+        var sentryChatClient = _fixture.GetSut();
         var results = new List<ChatResponseUpdate>();
 
         // Act
@@ -199,9 +199,10 @@ public class SentryChatClientTests : IDisposable
     }
 
     [Fact]
-    public async Task CompleteAsync_RecordingNotConfigured_DoesNotRecordContent()
+    public async Task CompleteAsync_DataCollectionGenAIDisabled_DoesNotRecordContent()
     {
         // Arrange
+        _fixture.Options.ConfigureDataCollection(DisableGenAI);
         var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
         _fixture.InnerClient.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
@@ -224,33 +225,10 @@ public class SentryChatClientTests : IDisposable
     }
 
     [Fact]
-    public async Task CompleteAsync_DataCollectionGenAIEnabled_RecordsContent()
+    public async Task CompleteStreamingAsync_DataCollectionGenAIDisabled_DoesNotRecordContent()
     {
         // Arrange
-        _fixture.Options.ConfigureDataCollection(dataCollection =>
-        {
-            dataCollection.GenAI.Inputs = true;
-            dataCollection.GenAI.Outputs = true;
-        });
-        var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
-        _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
-        _fixture.InnerClient.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok"))));
-        var sentryChatClient = _fixture.GetSut();
-
-        // Act
-        await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
-
-        // Assert
-        var chatSpan = transaction.Spans.Single(s => s.Operation == SentryAIConstants.SpanAttributes.ChatOperation);
-        chatSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestMessages);
-        chatSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseText).WhoseValue.Should().Be("ok");
-    }
-
-    [Fact]
-    public async Task CompleteStreamingAsync_RecordingNotConfigured_DoesNotRecordContent()
-    {
-        // Arrange
+        _fixture.Options.ConfigureDataCollection(DisableGenAI);
         var transaction = _fixture.Hub.StartTransaction("test-streaming", "test");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
         _fixture.InnerClient.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
@@ -269,10 +247,10 @@ public class SentryChatClientTests : IDisposable
         chatSpan.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ResponseText);
     }
 
-    private static void RecordInputsAndOutputs(SentryAIOptions options)
+    private static void DisableGenAI(DataCollectionOptions dataCollection)
     {
-        options.Experimental.RecordInputs = true;
-        options.Experimental.RecordOutputs = true;
+        dataCollection.GenAI.Inputs = false;
+        dataCollection.GenAI.Outputs = false;
     }
 
     private static async IAsyncEnumerable<ChatResponseUpdate> CreateFailingStreamingUpdatesAsync(Exception exception)

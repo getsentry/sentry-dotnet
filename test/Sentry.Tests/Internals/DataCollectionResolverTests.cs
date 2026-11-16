@@ -17,8 +17,6 @@ public class DataCollectionResolverTests
             resolver.DatabaseQueryData.Should().BeFalse();
             resolver.GraphQLDocument.Should().BeFalse();
             resolver.GraphQLVariables.Should().BeFalse();
-            resolver.GenAIInputs.Should().BeFalse();
-            resolver.GenAIOutputs.Should().BeFalse();
             resolver.OutgoingRequestBody.Should().BeFalse();
             resolver.IncomingResponseBody.Should().BeFalse();
             resolver.OutgoingResponseBody.Should().BeFalse();
@@ -77,6 +75,22 @@ public class DataCollectionResolverTests
         var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
 
         Resolver(options).IncomingRequestBody.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GenAI_WithoutDataCollection_IsCollectedRegardlessOfSendDefaultPii(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+
+        var resolver = Resolver(options);
+
+        using (new AssertionScope())
+        {
+            resolver.GenAIInputs.Should().BeTrue();
+            resolver.GenAIOutputs.Should().BeTrue();
+        }
     }
 
     [Fact]

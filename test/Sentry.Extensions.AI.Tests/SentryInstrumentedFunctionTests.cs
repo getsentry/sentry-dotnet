@@ -225,7 +225,8 @@ public class SentryInstrumentedFunctionTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task InvokeCoreAsync_OutsideToolLoop_FollowsSendDefaultPii(bool sendDefaultPii)
+    public async Task InvokeCoreAsync_OutsideToolLoopAndDataCollectionNotConfigured_RecordsRegardlessOfSendDefaultPii(
+        bool sendDefaultPii)
     {
         // Arrange
         using var hub = CreateHub(options => options.SendDefaultPii = sendDefaultPii);
@@ -238,9 +239,9 @@ public class SentryInstrumentedFunctionTests
         // Assert
         var toolSpan = transaction.Spans.Single(s => s.Operation == SentryAIConstants.SpanAttributes.ToolCallOperation);
         toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolName).WhoseValue.Should().Be("GetWeather");
-        toolSpan.Data.ContainsKey(SentryAIConstants.SpanAttributes.ToolDescription).Should().Be(sendDefaultPii);
-        toolSpan.Data.ContainsKey(SentryAIConstants.SpanAttributes.ToolInput).Should().Be(sendDefaultPii);
-        toolSpan.Data.ContainsKey(SentryAIConstants.SpanAttributes.ToolOutput).Should().Be(sendDefaultPii);
+        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolDescription);
+        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolInput);
+        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolOutput);
     }
 
     [Theory]
@@ -273,17 +274,24 @@ public class SentryInstrumentedFunctionTests
     }
 
     [Theory]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    public async Task InvokeCoreAsync_InsideToolLoop_ChatClientRecordingOptionsTakePrecedence(bool recordInputs,
-        bool recordOutputs)
+    [InlineData(true, false, true)]
+    [InlineData(false, true, true)]
+    [InlineData(false, false, false)]
+    public async Task InvokeCoreAsync_InsideToolLoop_UsesChatClientRecordingOptions(bool recordInputs,
+        bool recordOutputs, bool configureDataCollection)
     {
         // Arrange
-        using var hub = CreateHub(options => options.ConfigureDataCollection(dataCollection =>
+        using var hub = CreateHub(options =>
         {
-            dataCollection.GenAI.Inputs = !recordInputs;
-            dataCollection.GenAI.Outputs = !recordOutputs;
-        }));
+            if (configureDataCollection)
+            {
+                options.ConfigureDataCollection(dataCollection =>
+                {
+                    dataCollection.GenAI.Inputs = !recordInputs;
+                    dataCollection.GenAI.Outputs = !recordOutputs;
+                });
+            }
+        });
         var transaction = StartTransaction(hub);
         using var ficcActivity = StartFICCActivity(hub);
 

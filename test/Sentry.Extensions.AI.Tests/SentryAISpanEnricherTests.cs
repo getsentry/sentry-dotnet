@@ -64,7 +64,7 @@ public class SentryAISpanEnricherTests : IDisposable
         var span = _fixture.Hub.StartSpan(spanOp, spanDesc);
         var messages = TestMessages();
         var chatOptions = TestChatOptions();
-        var aiOptions = new SentryAIOptions { Experimental = { RecordInputs = true } };
+        var aiOptions = new SentryAIOptions();
 
         // Act
         SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions, _fixture.Options, SentryAIConstants.SpanOperations.Chat);
@@ -166,7 +166,7 @@ public class SentryAISpanEnricherTests : IDisposable
             },
             FinishReason = ChatFinishReason.ToolCalls
         };
-        var aiOptions = new SentryAIOptions { Experimental = { RecordOutputs = true } };
+        var aiOptions = new SentryAIOptions();
 
         // Act
         SentryAISpanEnricher.EnrichWithResponse(span, response, aiOptions, _fixture.Options);
@@ -295,7 +295,7 @@ public class SentryAISpanEnricherTests : IDisposable
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void EnrichWithRequest_RecordInputsNotSet_FollowsSendDefaultPii(bool sendDefaultPii)
+    public void EnrichWithRequest_DataCollectionNotConfigured_RecordsInputsRegardlessOfSendDefaultPii(bool sendDefaultPii)
     {
         // Arrange
         _fixture.Options.SendDefaultPii = sendDefaultPii;
@@ -306,10 +306,8 @@ public class SentryAISpanEnricherTests : IDisposable
             _fixture.Options, SentryAIConstants.SpanOperations.Chat);
 
         // Assert
-        span.Data.ContainsKey(SentryAIConstants.SpanAttributes.RequestMessages).Should().Be(sendDefaultPii);
-        span.Data.ContainsKey(SentryAIConstants.SpanAttributes.RequestAvailableTools).Should().Be(sendDefaultPii);
-        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestModel);
-        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.AgentName);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestMessages);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestAvailableTools);
     }
 
     [Theory]
@@ -329,6 +327,8 @@ public class SentryAISpanEnricherTests : IDisposable
         // Assert
         span.Data.ContainsKey(SentryAIConstants.SpanAttributes.RequestMessages).Should().Be(inputs);
         span.Data.ContainsKey(SentryAIConstants.SpanAttributes.RequestAvailableTools).Should().Be(inputs);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestModel);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.AgentName);
     }
 
     [Theory]
@@ -353,7 +353,7 @@ public class SentryAISpanEnricherTests : IDisposable
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void EnrichWithResponse_RecordOutputsNotSet_FollowsSendDefaultPii(bool sendDefaultPii)
+    public void EnrichWithResponse_DataCollectionNotConfigured_RecordsOutputsRegardlessOfSendDefaultPii(bool sendDefaultPii)
     {
         // Arrange
         _fixture.Options.SendDefaultPii = sendDefaultPii;
@@ -364,10 +364,8 @@ public class SentryAISpanEnricherTests : IDisposable
         SentryAISpanEnricher.EnrichWithResponse(span, ToolCallResponse(), new SentryAIOptions(), _fixture.Options);
 
         // Assert
-        span.Data.ContainsKey(SentryAIConstants.SpanAttributes.ResponseText).Should().Be(sendDefaultPii);
-        span.Data.ContainsKey(SentryAIConstants.SpanAttributes.ResponseToolCalls).Should().Be(sendDefaultPii);
-        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseModel);
-        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageTotalTokens);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseText);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseToolCalls);
     }
 
     [Theory]
@@ -387,6 +385,8 @@ public class SentryAISpanEnricherTests : IDisposable
         // Assert
         span.Data.ContainsKey(SentryAIConstants.SpanAttributes.ResponseText).Should().Be(outputs);
         span.Data.ContainsKey(SentryAIConstants.SpanAttributes.ResponseToolCalls).Should().Be(outputs);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseModel);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageTotalTokens);
     }
 
     [Theory]
