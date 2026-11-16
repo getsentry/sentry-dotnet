@@ -29,11 +29,9 @@ public class SentryAIOptions
         private bool? _recordOutputs;
 
         /// <summary>
-        /// Whether to include request messages in spans.
+        /// Whether to include AI inputs in spans: request messages, tool definitions and tool call arguments.
         /// <para>
-        /// Defaults to <c>true</c>. Once <see cref="SentryOptions.ConfigureDataCollection"/> has been called, this
-        /// also covers tool definitions and tool call arguments, and when not set,
-        /// <see cref="DataCollectionOptions.GenAIOptions.Inputs"/> decides instead.
+        /// When not set, <see cref="DataCollectionOptions.GenAIOptions.Inputs"/> decides, which defaults to <c>true</c>.
         /// </para>
         /// <para>This API is experimental, and it may change in the future.</para>
         /// </summary>
@@ -44,11 +42,9 @@ public class SentryAIOptions
         }
 
         /// <summary>
-        /// Whether to include response content in spans.
+        /// Whether to include AI outputs in spans: response text, response tool calls and tool call results.
         /// <para>
-        /// Defaults to <c>true</c>. Once <see cref="SentryOptions.ConfigureDataCollection"/> has been called, this
-        /// also covers response tool calls and tool call results, and when not set,
-        /// <see cref="DataCollectionOptions.GenAIOptions.Outputs"/> decides instead.
+        /// When not set, <see cref="DataCollectionOptions.GenAIOptions.Outputs"/> decides, which defaults to <c>true</c>.
         /// </para>
         /// <para>This API is experimental, and it may change in the future.</para>
         /// </summary>
@@ -69,11 +65,5 @@ public class SentryAIOptions
 
         internal bool ShouldRecordOutputs(SentryOptions? options) =>
             _recordOutputs ?? options?.DataCollectionResolver.GenAIOutputs ?? true;
-
-        internal bool ShouldRecordToolInputs(SentryOptions? options) =>
-            options?.DataCollection is null || ShouldRecordInputs(options);
-
-        internal bool ShouldRecordToolOutputs(SentryOptions? options) =>
-            options?.DataCollection is null || ShouldRecordOutputs(options);
     }
 }

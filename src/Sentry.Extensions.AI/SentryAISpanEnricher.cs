@@ -15,7 +15,6 @@ internal static class SentryAISpanEnricher
         SentryAIOptions aiOptions, SentryOptions? sentryOptions, string operationName)
     {
         var recordInputs = aiOptions.Experimental.ShouldRecordInputs(sentryOptions);
-        var recordToolInputs = aiOptions.Experimental.ShouldRecordToolInputs(sentryOptions);
 
         span.SetData(SentryAIConstants.SpanAttributes.OperationName, operationName);
         span.SetOrigin(SentryAIConstants.SpanAttributes.Origin);
@@ -38,7 +37,7 @@ internal static class SentryAISpanEnricher
             span.SetData(SentryAIConstants.SpanAttributes.RequestMessages, FormatRequestMessage(messages));
         }
 
-        if (recordToolInputs && options?.Tools is { } tools)
+        if (recordInputs && options?.Tools is { } tools)
         {
             span.SetData(SentryAIConstants.SpanAttributes.RequestAvailableTools, FormatAvailableTools(tools));
         }
@@ -97,7 +96,6 @@ internal static class SentryAISpanEnricher
         SentryAIOptions aiOptions, SentryOptions? sentryOptions)
     {
         var recordOutputs = aiOptions.Experimental.ShouldRecordOutputs(sentryOptions);
-        var recordToolOutputs = aiOptions.Experimental.ShouldRecordToolOutputs(sentryOptions);
         var inputTokenCount = 0L;
         var outputTokenCount = 0L;
         var finalText = new StringBuilder();
@@ -124,7 +122,7 @@ internal static class SentryAISpanEnricher
             }
 
             // Only set tool call info in chat spans
-            if (recordToolOutputs
+            if (recordOutputs
                 && message.FinishReason == ChatFinishReason.ToolCalls
                 && span.Operation == SentryAIConstants.SpanAttributes.ChatOperation)
             {

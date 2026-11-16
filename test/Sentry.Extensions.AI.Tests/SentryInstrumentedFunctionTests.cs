@@ -311,7 +311,7 @@ public class SentryInstrumentedFunctionTests
     }
 
     [Fact]
-    public async Task InvokeCoreAsync_InsideToolLoopWithoutDataCollection_RecordsRegardlessOfRecordingOptions()
+    public async Task InvokeCoreAsync_InsideToolLoop_UsesChatClientRecordingOptions()
     {
         // Arrange
         using var hub = CreateHub(_ => { });
@@ -334,16 +334,17 @@ public class SentryInstrumentedFunctionTests
 
         // Assert
         var toolSpan = transaction.Spans.Single(s => s.Operation == SentryAIConstants.SpanAttributes.ToolCallOperation);
-        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolDescription);
-        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolInput);
-        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolOutput);
+        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolName);
+        toolSpan.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ToolDescription);
+        toolSpan.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ToolInput);
+        toolSpan.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ToolOutput);
     }
 
     [Fact]
     public async Task InvokeCoreAsync_InChildActivityOfToolLoop_UsesChatClientRecordingOptions()
     {
         // Arrange
-        using var hub = CreateHub(options => options.ConfigureDataCollection(_ => { }));
+        using var hub = CreateHub(_ => { });
         var transaction = StartTransaction(hub);
         using var ficcActivity = StartFICCActivity(hub);
 
