@@ -233,11 +233,11 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     }
 
     [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(true, true)]
-    public void HandleResponse_UrlWithCredentials_AlwaysStripsCredentialsAndSeparatesFragment(bool sendDefaultPii, bool configureDataCollection)
+    [InlineData(false, false, null)]
+    [InlineData(true, false, "fragment")]
+    [InlineData(false, true, "fragment")]
+    [InlineData(true, true, "fragment")]
+    public void HandleResponse_UrlWithCredentials_AlwaysStripsCredentialsAndSeparatesFragment(bool sendDefaultPii, bool configureDataCollection, string expectedFragment)
     {
         var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
         if (configureDataCollection)
@@ -253,7 +253,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         {
             @event.Request.Url.Should().Be("http://localhost/test/path?query=string");
             @event.Request.QueryString.Should().Be("?query=string");
-            @event.Request.Fragment.Should().Be("fragment");
+            @event.Request.Fragment.Should().Be(expectedFragment);
         }
     }
 
