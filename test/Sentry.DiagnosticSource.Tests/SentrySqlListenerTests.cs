@@ -661,6 +661,33 @@ public class SentrySqlListenerTests
         Assert.Equal(query, commandSpan.Description);
     }
 
+    [Theory]
+    [MemberData(nameof(DatabaseQueryDataCases.SendDefaultPiiAndConfiguredValue_Collected), MemberType = typeof(DatabaseQueryDataCases))]
+    public void OnNext_CommandExecuted_DescriptionFollowsDatabaseQueryData(bool sendDefaultPii, bool? databaseQueryData, bool collected)
+    {
+        var fixture = new Fixture();
+        var options = new SentryOptions().WithDatabaseQueryData(sendDefaultPii, databaseQueryData);
+        var interceptor = new SentrySqlListener(fixture.Hub, options);
+        var query = "SELECT * FROM rentals WHERE name = 'Jane'";
+        var operationId = Guid.NewGuid();
+        var connectionId = Guid.NewGuid();
+
+        interceptor.OnNext(
+            new(SqlMicrosoftBeforeExecuteCommand,
+                new { OperationId = operationId, ConnectionId = connectionId }));
+        interceptor.OnNext(
+            new(SqlMicrosoftAfterExecuteCommand,
+                new { OperationId = operationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
+
+        var commandSpan = fixture.Spans.Should().ContainSingle().Subject;
+        using (new AssertionScope())
+        {
+            commandSpan.IsFinished.Should().BeTrue();
+            commandSpan.Description.Should().Be(collected ? query : null);
+            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem).Should().Be("sql");
+        }
+    }
+
     [Fact]
     public void OnNext_ThrowsException_ExceptionIsolated()
     {

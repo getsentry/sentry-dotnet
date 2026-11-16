@@ -41,7 +41,8 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     private void CreateSpan<T>(string key, string? command,
         DbCommandInterceptionContext<T> interceptionContext)
     {
-        if (_hub.GetSpan()?.StartChild(key, command) is { } span)
+        var description = _options.DataCollectionResolver.DatabaseQueryData ? command : null;
+        if (_hub.GetSpan()?.StartChild(key, description) is { } span)
         {
             span.SetOrigin(EntityFrameworkOrigin);
             interceptionContext.AttachSpan(span);

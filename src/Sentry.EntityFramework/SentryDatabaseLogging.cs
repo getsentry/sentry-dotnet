@@ -10,21 +10,21 @@ internal static class SentryDatabaseLogging
     private static InterlockedBoolean Init;
 
     internal static SentryCommandInterceptor? UseBreadcrumbs(
+        SentryOptions options,
         IQueryLogger? queryLogger = null,
-        bool initOnce = true,
-        IDiagnosticLogger? diagnosticLogger = null)
+        bool initOnce = true)
     {
         if (initOnce && Init.Exchange(true))
         {
-            diagnosticLogger?.LogWarning("{0}.{1} was already executed.",
+            options.LogWarning("{0}.{1} was already executed.",
                 nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
             return null;
         }
 
-        diagnosticLogger?.LogInfo("{0}.{1} adding interceptor.",
+        options.LogInfo("{0}.{1} adding interceptor.",
             nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
 
-        queryLogger ??= new SentryQueryLogger();
+        queryLogger ??= new SentryQueryLogger(options);
         var interceptor = new SentryCommandInterceptor(queryLogger);
         DbInterception.Add(interceptor);
         return interceptor;

@@ -196,6 +196,23 @@ public class SentryQueryPerformanceListenerTests
         span.Received(1).Finish(Arg.Is<SpanStatus>(status => status == SpanStatus.Ok));
     }
 
+    [Theory]
+    [MemberData(nameof(DatabaseQueryDataCases.SendDefaultPiiAndConfiguredValue_Collected), MemberType = typeof(DatabaseQueryDataCases))]
+    public void InterceptorInvoked_DescriptionFollowsDatabaseQueryData(bool sendDefaultPii, bool? databaseQueryData, bool collected)
+    {
+        var options = new SentryOptions().WithDatabaseQueryData(sendDefaultPii, databaseQueryData);
+        var interceptor = new SentryQueryPerformanceListener(_fixture.Hub, options);
+        var query = "SELECT * FROM rentals WHERE name = 'Jane'";
+        var command = new EffortCommand { CommandText = query };
+
+        interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
+        interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int>());
+        interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object>());
+
+        _fixture.Spans.Select(span => span.Operation).Should().BeEquivalentTo(DbReaderKey, DbNonQueryKey, DbScalarKey);
+        _fixture.Spans.Should().OnlyContain(span => span.Description == (collected ? query : null));
+    }
+
     [Fact]
     public void FirstOrDefault_FromDatabase_CapturesQuery()
     {

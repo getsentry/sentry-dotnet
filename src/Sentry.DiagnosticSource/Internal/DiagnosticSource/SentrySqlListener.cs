@@ -210,7 +210,11 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             }
         }
 
-        commandSpan.Description = value.GetStringProperty("Command.CommandText", _options.DiagnosticLogger);
+        if (_options.DataCollectionResolver.DatabaseQueryData)
+        {
+            commandSpan.Description = value.GetStringProperty("Command.CommandText", _options.DiagnosticLogger);
+        }
+
         commandSpan.Finish(spanStatus);
     }
 

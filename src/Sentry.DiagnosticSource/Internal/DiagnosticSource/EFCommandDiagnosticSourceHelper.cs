@@ -11,7 +11,7 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string Operation => "db.query";
 
-    protected override string GetDescription(object? diagnosticSourceValue) => FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
+    protected override string? GetDescription(object? diagnosticSourceValue) => GetQueryText(diagnosticSourceValue);
 
     private Guid? GetCommandId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("CommandId", Options.DiagnosticLogger);
 

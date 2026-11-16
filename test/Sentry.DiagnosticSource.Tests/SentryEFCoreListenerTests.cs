@@ -299,6 +299,41 @@ public class SentryEFCoreListenerTests
         ((SpanTracer)commandSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
     }
 
+    [Theory]
+    [MemberData(nameof(DatabaseQueryDataCases.SendDefaultPiiAndConfiguredValue_Collected), MemberType = typeof(DatabaseQueryDataCases))]
+    public void OnNext_QuerySpans_DescriptionFollowsDatabaseQueryData(bool sendDefaultPii, bool? databaseQueryData, bool collected)
+    {
+        var fixture = new Fixture();
+        fixture.Options.WithDatabaseQueryData(sendDefaultPii, databaseQueryData);
+        var interceptor = new SentryEFCoreListener(fixture.Hub, fixture.Options);
+        var expectedSql = "SELECT * FROM rentals WHERE name = N'Jane'";
+        var efSql = "ef Junk\r\n" + expectedSql;
+
+        var queryEventData = new FakeDiagnosticEventData(efSql);
+        var connectionEventData = new FakeDiagnosticConnectionEventData("db username : password");
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
+
+        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
+        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
+        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
+        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
+        interceptor.OnNext(new(EFCommandExecuted, commandEventData));
+        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
+
+        var compilerSpan = fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
+        var connectionSpan = fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
+        var commandSpan = fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
+        using (new AssertionScope())
+        {
+            compilerSpan.Description.Should().Be(collected ? expectedSql : null);
+            commandSpan.Description.Should().Be(collected ? expectedSql : null);
+            connectionSpan.Description.Should().Be("rentals");
+            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem).Should().Be("mssql");
+            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName).Should().Be("rentals");
+            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbServer).Should().Be("127.0.0.1");
+        }
+    }
+
     [Fact]
     public void OnNext_HappyPathInsideChildSpan_IsValid()
     {
