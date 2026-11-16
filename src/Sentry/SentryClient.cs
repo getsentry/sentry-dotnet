@@ -445,6 +445,8 @@ public class SentryClient : ISentryClient, IDisposable
             processedEvent.Redact();
         }
 
+        CaptureReplay(processedEvent);
+
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
         if (CaptureEnvelope(envelope))
@@ -455,6 +457,43 @@ public class SentryClient : ISentryClient, IDisposable
             return processedEvent.EventId;
         }
         return SentryId.Empty;
+    }
+
+    // Error events carry the id of the replay they were captured in, the replay session decides which one.
+    private void CaptureReplay(SentryEvent @event)
+    {
+        if (_options.ReplaySession is not { } replaySession || @event.SentryExceptions?.Any() != true)
+        {
+            return;
+        }
+
+        SentryId? replayId;
+        try
+        {
+            replayId = replaySession.CaptureReplay(@event);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failed to capture the replay for event '{0}'.", @event.EventId);
+            return;
+        }
+
+        if (@event.DynamicSamplingContext is not { } dsc)
+        {
+            return;
+        }
+
+        // The event's DSC is shared with the propagation context and queued envelopes, so the event gets its own copy.
+        dsc = dsc.Clone();
+        if (replayId is { } id && id != SentryId.Empty)
+        {
+            dsc.SetReplayId(id);
+        }
+        else
+        {
+            dsc.RemoveReplayId();
+        }
+        @event.DynamicSamplingContext = dsc;
     }
 
     private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception, out bool filterThrew)

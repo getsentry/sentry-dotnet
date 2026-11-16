@@ -70,7 +70,7 @@ internal class Hub : IHub, IDisposable
             _backpressureMonitor = backpressureMonitor ?? new BackpressureMonitor(_options.DiagnosticLogger, clock);
         }
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager, backpressureMonitor: _backpressureMonitor);
-        _replaySession = replaySession ?? ReplaySession.Instance;
+        _replaySession = replaySession ?? options.ReplaySession ?? ReplaySession.Instance;
         _sampleRandHelper = sampleRandHelper ?? new SampleRandHelperAdapter();
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
 

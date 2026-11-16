@@ -7,6 +7,12 @@ namespace Sentry.Internal;
 internal interface IReplaySession
 {
     public SentryId? ActiveReplayId { get; }
+
+    /// <summary>
+    /// Captures the replay for an error event that is about to be sent.
+    /// </summary>
+    /// <returns>The id of the replay the event belongs to, or null when the event has no replay.</returns>
+    public SentryId? CaptureReplay(SentryEvent @event);
 }
 
 internal class ReplaySession : IReplaySession
@@ -34,4 +40,6 @@ internal class ReplaySession : IReplaySession
 #endif
         }
     }
+
+    public SentryId? CaptureReplay(SentryEvent @event) => null;
 }
