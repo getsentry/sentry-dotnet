@@ -69,6 +69,34 @@ public class QueryStringFilterTests
         QueryStringFilter.FilterUrl(input).Should().BeSameAs(input);
 
     [Theory]
+    [InlineData("?page=5&q=abc")]
+    [InlineData("page=5")]
+    public void Filter_Off_ReturnsNull(string input) =>
+        QueryStringFilter.Filter(input, KeyValueCollectionBehavior.Off).Should().BeNull();
+
+    [Fact]
+    public void Filter_AllowList_KeepsOnlyMatchingNonSensitiveValues() =>
+        QueryStringFilter.Filter("?page=5&q=abc&token=xyz&flag", KeyValueCollectionBehavior.AllowList("page", "token"))
+            .Should().Be("?page=5&q=[Filtered]&token=[Filtered]&flag");
+
+    [Fact]
+    public void Filter_DenyListTerm_FiltersMatchingValues() =>
+        QueryStringFilter.Filter("page=5&tenant=acme", KeyValueCollectionBehavior.DenyList("tenant"))
+            .Should().Be("page=5&tenant=[Filtered]");
+
+    [Theory]
+    [InlineData("https://example.com/api/users?token=abc&page=5#top", "https://example.com/api/users#top")]
+    [InlineData("https://example.com/api/users?page=5", "https://example.com/api/users")]
+    [InlineData("https://example.com/api/users#a?page=5", "https://example.com/api/users#a?page=5")]
+    public void FilterUrl_Off_RemovesQuery(string input, string expected) =>
+        QueryStringFilter.FilterUrl(input, KeyValueCollectionBehavior.Off).Should().Be(expected);
+
+    [Fact]
+    public void FilterUrl_AllowList_KeepsOnlyMatchingValues() =>
+        QueryStringFilter.FilterUrl("https://example.com/?page=5&q=abc#top", KeyValueCollectionBehavior.AllowList("page"))
+            .Should().Be("https://example.com/?page=5&q=[Filtered]#top");
+
+    [Theory]
     [InlineData("https://example.com/api/users?token=abc&q=1", "https://example.com/api/users")]
     [InlineData("https://example.com/api/users#top", "https://example.com/api/users")]
     [InlineData("https://example.com/api/users?a=1#top", "https://example.com/api/users")]

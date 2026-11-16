@@ -70,6 +70,64 @@ public class DataCollectionResolverTests
     }
 
     [Theory]
+    [InlineData(false, KeyValueCollectionMode.Off)]
+    [InlineData(true, KeyValueCollectionMode.DenyList)]
+    public void HeadersWithLegacyPiiGate_WithoutDataCollection_FollowSendDefaultPii(bool sendDefaultPii, KeyValueCollectionMode expected)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+
+        var resolver = Resolver(options);
+
+        using (new AssertionScope())
+        {
+            resolver.RequestHeadersWithLegacyPiiGate.Mode.Should().Be(expected);
+            resolver.RequestHeadersWithLegacyPiiGate.Terms.Should().BeEmpty();
+            resolver.ResponseHeadersWithLegacyPiiGate.Mode.Should().Be(expected);
+            resolver.ResponseHeadersWithLegacyPiiGate.Terms.Should().BeEmpty();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HeadersWithLegacyPiiGate_ConfiguredDataCollection_IgnoresSendDefaultPii(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("accept");
+            dataCollection.HttpHeaders.Response = sendDefaultPii
+                ? KeyValueCollectionBehavior.Off
+                : KeyValueCollectionBehavior.DenyList("x-tenant-id");
+        });
+
+        var resolver = Resolver(options);
+
+        using (new AssertionScope())
+        {
+            resolver.RequestHeadersWithLegacyPiiGate.Mode.Should().Be(KeyValueCollectionMode.AllowList);
+            resolver.RequestHeadersWithLegacyPiiGate.Terms.Should().Equal("accept");
+            resolver.ResponseHeadersWithLegacyPiiGate.Mode.Should().Be(
+                sendDefaultPii ? KeyValueCollectionMode.Off : KeyValueCollectionMode.DenyList);
+        }
+    }
+
+    [Fact]
+    public void HeadersWithLegacyPiiGate_ConfiguredDataCollectionDefaults_AreDenyList()
+    {
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(_ => { });
+
+        var resolver = Resolver(options);
+
+        using (new AssertionScope())
+        {
+            resolver.RequestHeadersWithLegacyPiiGate.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            resolver.ResponseHeadersWithLegacyPiiGate.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void IncomingRequestBody_WithoutDataCollection_IsCollectedRegardlessOfSendDefaultPii(bool sendDefaultPii)

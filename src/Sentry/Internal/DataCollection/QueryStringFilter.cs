@@ -3,13 +3,20 @@ namespace Sentry.Internal.DataCollection;
 internal static class QueryStringFilter
 {
     private static readonly char[] QueryOrFragmentStart = ['?', '#'];
+    private static readonly KeyValueCollectionBehavior DefaultBehavior = KeyValueCollectionBehavior.DenyList();
 
     // Works on the raw string because the spec requires encoded parameters to be stored exactly as they appear in the URL.
-    internal static string? Filter(string? queryString)
+    internal static string? Filter(string? queryString, KeyValueCollectionBehavior? behavior = null)
     {
         if (string.IsNullOrEmpty(queryString))
         {
             return queryString;
+        }
+
+        behavior ??= DefaultBehavior;
+        if (behavior.Mode == KeyValueCollectionMode.Off)
+        {
+            return null;
         }
 
         var prefix = queryString[0] == '?' ? "?" : string.Empty;
@@ -25,9 +32,16 @@ internal static class QueryStringFilter
                 return prefix + SensitiveDataFilter.FilteredValue;
             }
 
-            if (separator >= 0 && SensitiveDataFilter.IsSensitiveKey(SensitiveDataFilter.DecodeKeyForMatching(name)))
+            if (separator < 0)
             {
-                parameters[i] = $"{name}={SensitiveDataFilter.FilteredValue}";
+                continue;
+            }
+
+            var value = parameter[(separator + 1)..];
+            var filteredValue = SensitiveDataFilter.FilterValue(SensitiveDataFilter.DecodeKeyForMatching(name), value, behavior);
+            if (!ReferenceEquals(filteredValue, value))
+            {
+                parameters[i] = $"{name}={filteredValue}";
                 filtered = true;
             }
         }
@@ -36,7 +50,7 @@ internal static class QueryStringFilter
     }
 
     [return: NotNullIfNotNull(nameof(url))]
-    internal static string? FilterUrl(string? url)
+    internal static string? FilterUrl(string? url, KeyValueCollectionBehavior? behavior = null)
     {
         if (url is null)
         {
@@ -51,8 +65,13 @@ internal static class QueryStringFilter
         }
 
         var queryEnd = fragmentStart < 0 ? url.Length : fragmentStart;
+        if (behavior?.Mode == KeyValueCollectionMode.Off)
+        {
+            return url[..queryStart] + url[queryEnd..];
+        }
+
         var query = url[(queryStart + 1)..queryEnd];
-        var filteredQuery = Filter(query);
+        var filteredQuery = Filter(query, behavior);
         return ReferenceEquals(filteredQuery, query) ? url : $"{url[..(queryStart + 1)]}{filteredQuery}{url[queryEnd..]}";
     }
 
