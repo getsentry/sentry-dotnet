@@ -87,12 +87,12 @@ public class SentryOptions
     /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
     /// NOTE: EnableScopeSync must be set true for the scope to be synced.
     /// </summary>
-    internal IScopeObserver? ScopeObserver { get; set; }
+    protected internal IScopeObserver? ScopeObserver { get; set; }
 
     /// <summary>
     /// If true, the SDK's scope will be synced with the observed scope.
     /// </summary>
-    internal bool EnableScopeSync { get; set; }
+    protected internal bool EnableScopeSync { get; set; }
 
     /// <summary>
     /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
