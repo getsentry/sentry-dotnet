@@ -1,23 +1,30 @@
 using Microsoft.Extensions.AI;
+using Sentry.Internal;
 
 namespace Sentry.Extensions.AI;
 
 internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, IHub? hub = null)
     : DelegatingAIFunction(innerFunction)
 {
+    private static readonly SentryAIOptions DefaultAIOptions = new();
+
     private readonly IHub _hub = hub ?? HubAdapter.Instance;
 
     protected override async ValueTask<object?> InvokeCoreAsync(
         AIFunctionArguments arguments,
         CancellationToken cancellationToken)
     {
-        var agentSpan = SentryAIUtil.GetFICCSpan();
-        var toolSpan = InitToolSpan(agentSpan, arguments);
+        var ficcActivity = SentryAIUtil.GetFICCActivity();
+        var agentSpan = ficcActivity?.GetFICCSpan();
+        var aiOptions = ficcActivity?.GetFused<SentryAIOptions>() ?? DefaultAIOptions;
+        var sentryOptions = _hub.GetSentryOptions();
+
+        var toolSpan = InitToolSpan(agentSpan, arguments, aiOptions.Experimental.ShouldRecordInputs(sentryOptions));
         try
         {
             var result = await base.InvokeCoreAsync(arguments, cancellationToken).ConfigureAwait(false);
 
-            if (result?.ToString() is { } resultString)
+            if (aiOptions.Experimental.ShouldRecordOutputs(sentryOptions) && result?.ToString() is { } resultString)
             {
                 toolSpan.SetData(SentryAIConstants.SpanAttributes.ToolOutput, resultString);
             }
@@ -39,7 +46,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, IHub?
         }
     }
 
-    private ISpan InitToolSpan(ISpan? agentSpan, AIFunctionArguments arguments)
+    private ISpan InitToolSpan(ISpan? agentSpan, AIFunctionArguments arguments, bool recordInputs)
     {
         var spanName = $"execute_tool {Name}";
 
@@ -51,8 +58,12 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, IHub?
 
         currSpan.SetData(SentryAIConstants.SpanAttributes.OperationName, "execute_tool");
         currSpan.SetData(SentryAIConstants.SpanAttributes.ToolName, Name);
-        currSpan.SetData(SentryAIConstants.SpanAttributes.ToolDescription, Description);
-        currSpan.SetData(SentryAIConstants.SpanAttributes.ToolInput, arguments);
+
+        if (recordInputs)
+        {
+            currSpan.SetData(SentryAIConstants.SpanAttributes.ToolDescription, Description);
+            currSpan.SetData(SentryAIConstants.SpanAttributes.ToolInput, arguments);
+        }
 
         return currSpan;
     }

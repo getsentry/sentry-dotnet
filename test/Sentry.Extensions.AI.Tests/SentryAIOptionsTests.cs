@@ -9,8 +9,8 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions();
 
         // Assert
-        Assert.True(options.Experimental.RecordInputs);
-        Assert.True(options.Experimental.RecordOutputs);
+        Assert.False(options.Experimental.RecordInputs);
+        Assert.False(options.Experimental.RecordOutputs);
         Assert.Equal("Agent", options.Experimental.AgentName);
     }
 
@@ -23,12 +23,12 @@ public class SentryAIOptionsTests
             // Act
             Experimental =
             {
-                RecordInputs = false
+                RecordInputs = true
             }
         };
 
         // Assert
-        Assert.False(options.Experimental.RecordInputs);
+        Assert.True(options.Experimental.RecordInputs);
     }
 
     [Fact]
@@ -40,12 +40,12 @@ public class SentryAIOptionsTests
             // Act
             Experimental =
             {
-                RecordOutputs = false
+                RecordOutputs = true
             }
         };
 
         // Assert
-        Assert.False(options.Experimental.RecordOutputs);
+        Assert.True(options.Experimental.RecordOutputs);
     }
 
     [Theory]
@@ -69,5 +69,86 @@ public class SentryAIOptionsTests
         // Assert
         Assert.Equal(includeRequest, options.Experimental.RecordInputs);
         Assert.Equal(includeResponse, options.Experimental.RecordOutputs);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ShouldRecord_NotSetAndDataCollectionNotConfigured_FollowsSendDefaultPii(bool sendDefaultPii)
+    {
+        var sentryOptions = new SentryOptions { SendDefaultPii = sendDefaultPii };
+        var aiOptions = new SentryAIOptions();
+
+        Assert.Equal(sendDefaultPii, aiOptions.Experimental.ShouldRecordInputs(sentryOptions));
+        Assert.Equal(sendDefaultPii, aiOptions.Experimental.ShouldRecordOutputs(sentryOptions));
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void ShouldRecord_NotSetAndDataCollectionConfigured_FollowsGenAI(bool inputs, bool outputs)
+    {
+        var sentryOptions = new SentryOptions { SendDefaultPii = !inputs };
+        sentryOptions.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.GenAI.Inputs = inputs;
+            dataCollection.GenAI.Outputs = outputs;
+        });
+        var aiOptions = new SentryAIOptions();
+
+        Assert.Equal(inputs, aiOptions.Experimental.ShouldRecordInputs(sentryOptions));
+        Assert.Equal(outputs, aiOptions.Experimental.ShouldRecordOutputs(sentryOptions));
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void ShouldRecord_SetExplicitly_TakesPrecedenceOverDataCollection(bool recordInputs, bool recordOutputs)
+    {
+        var sentryOptions = new SentryOptions();
+        sentryOptions.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.GenAI.Inputs = !recordInputs;
+            dataCollection.GenAI.Outputs = !recordOutputs;
+        });
+        var aiOptions = new SentryAIOptions
+        {
+            Experimental =
+            {
+                RecordInputs = recordInputs,
+                RecordOutputs = recordOutputs
+            }
+        };
+
+        Assert.Equal(recordInputs, aiOptions.Experimental.ShouldRecordInputs(sentryOptions));
+        Assert.Equal(recordOutputs, aiOptions.Experimental.ShouldRecordOutputs(sentryOptions));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ShouldRecord_SetExplicitly_TakesPrecedenceOverSendDefaultPii(bool record)
+    {
+        var sentryOptions = new SentryOptions { SendDefaultPii = !record };
+        var aiOptions = new SentryAIOptions
+        {
+            Experimental =
+            {
+                RecordInputs = record,
+                RecordOutputs = record
+            }
+        };
+
+        Assert.Equal(record, aiOptions.Experimental.ShouldRecordInputs(sentryOptions));
+        Assert.Equal(record, aiOptions.Experimental.ShouldRecordOutputs(sentryOptions));
+    }
+
+    [Fact]
+    public void ShouldRecord_NotSetAndNoSentryOptions_DoesNotRecord()
+    {
+        var aiOptions = new SentryAIOptions();
+
+        Assert.False(aiOptions.Experimental.ShouldRecordInputs(null));
+        Assert.False(aiOptions.Experimental.ShouldRecordOutputs(null));
     }
 }
