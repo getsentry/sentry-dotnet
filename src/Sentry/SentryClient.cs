@@ -459,10 +459,12 @@ public class SentryClient : ISentryClient, IDisposable
         return SentryId.Empty;
     }
 
-    // Error events carry the id of the replay they were captured in, the replay session decides which one.
+    // Events carry the id of the replay they were captured in, the replay session decides which one: error events
+    // capture theirs, other events get the replay that's active now. The DSC cached on the propagation context only
+    // has the replay that was active when it was created.
     private void CaptureReplay(SentryEvent @event)
     {
-        if (_options.ReplaySession is not { } replaySession || @event.SentryExceptions?.Any() != true)
+        if (_options.ReplaySession is not { } replaySession)
         {
             return;
         }
@@ -470,7 +472,9 @@ public class SentryClient : ISentryClient, IDisposable
         SentryId? replayId;
         try
         {
-            replayId = replaySession.CaptureReplay(@event);
+            replayId = @event.SentryExceptions?.Any() == true
+                ? replaySession.CaptureReplay(@event)
+                : replaySession.ActiveReplayId;
         }
         catch (Exception e)
         {
@@ -483,11 +487,18 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
+        var replayIdValue = replayId is { } id && id != SentryId.Empty ? id.ToString() : null;
+        dsc.Items.TryGetValue("replay_id", out var currentValue);
+        if (currentValue == replayIdValue)
+        {
+            return;
+        }
+
         // The event's DSC is shared with the propagation context and queued envelopes, so the event gets its own copy.
         dsc = dsc.Clone();
-        if (replayId is { } id && id != SentryId.Empty)
+        if (replayIdValue is not null)
         {
-            dsc.SetReplayId(id);
+            dsc.SetReplayId(replayId!.Value);
         }
         else
         {

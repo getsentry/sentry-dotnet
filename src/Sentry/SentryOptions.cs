@@ -1305,8 +1305,8 @@ public class SentryOptions
 
     /// <summary>
     /// An optional replay session supplied by an SDK that records replays itself (e.g. Unity on Android). The hub
-    /// uses it for the replay id of the dynamic sampling context, and the client captures the replay of each error
-    /// event through it.
+    /// uses it for the replay id of the dynamic sampling context. The client captures the replay of each error event
+    /// through it, and gives other events the replay that's active when they're sent.
     /// </summary>
     internal IReplaySession? ReplaySession { get; set; }
 

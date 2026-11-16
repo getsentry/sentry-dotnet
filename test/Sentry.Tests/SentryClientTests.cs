@@ -2515,14 +2515,53 @@ public partial class SentryClientTests : IDisposable
     [Fact]
     public void CaptureEvent_ReplaySessionWithoutException_DoesNotCaptureReplay()
     {
+        var activeReplayId = SentryId.Create();
         var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(activeReplayId);
         _fixture.SentryOptions.ReplaySession = replaySession;
-        var (@event, propagationContext) = ReplayEventFixture(SentryId.Create(), withException: false);
+        var (@event, propagationContext) = ReplayEventFixture(activeReplayId, withException: false);
 
         _ = _fixture.GetSut().CaptureEvent(@event);
 
         replaySession.DidNotReceive().CaptureReplay(Arg.Any<SentryEvent>());
         @event.DynamicSamplingContext.Should().BeSameAs(propagationContext.DynamicSamplingContext);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionWithoutException_SetsActiveReplayIdOnEventOnly()
+    {
+        var activeReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(activeReplayId);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(SentryId.Create(), withException: false);
+        var staleReplayId = propagationContext.DynamicSamplingContext!.Items["replay_id"];
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace["replay_id"].Should().Be(activeReplayId.ToString());
+        propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(staleReplayId);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionWithoutExceptionNoActiveReplay_RemovesStaleReplayIdFromEventOnly()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns((SentryId?)null);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(SentryId.Create(), withException: false);
+        var staleReplayId = propagationContext.DynamicSamplingContext!.Items["replay_id"];
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace.Should().NotContainKey("replay_id");
+        propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(staleReplayId);
     }
 
     [Fact]
