@@ -100,11 +100,17 @@ public sealed class SentryRequest : ISentryJsonSerializable
     /// <value>The other.</value>
     public IDictionary<string, string> Other => InternalOther ??= new Dictionary<string, string>();
 
-    internal void AddHeaders(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers)
+    internal void AddHeaders(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers,
+        KeyValueCollectionBehavior? behavior = null)
     {
+        if (behavior?.Mode == KeyValueCollectionMode.Off)
+        {
+            return;
+        }
+
         foreach (var header in headers)
         {
-            Headers.Add(header.Key, SensitiveDataFilter.FilterHeaderValue(header.Key, string.Join("; ", header.Value)));
+            Headers.Add(header.Key, SensitiveDataFilter.FilterHeaderValue(header.Key, string.Join("; ", header.Value), behavior));
         }
     }
 

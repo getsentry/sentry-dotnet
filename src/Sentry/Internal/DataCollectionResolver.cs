@@ -38,6 +38,12 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public KeyValueCollectionBehavior ResponseHeaders => Configured?.HttpHeaders.Response ?? DenyList;
 
+    public KeyValueCollectionBehavior RequestHeadersWithLegacyPiiGate =>
+        Configured?.HttpHeaders.Request ?? (SendDefaultPii ? DenyList : Off);
+
+    public KeyValueCollectionBehavior ResponseHeadersWithLegacyPiiGate =>
+        Configured?.HttpHeaders.Response ?? (SendDefaultPii ? DenyList : Off);
+
     public KeyValueCollectionBehavior UrlQueryParams => Configured?.UrlQueryParams ?? DenyList;
 
     public bool IncomingRequestBody => CollectsBody(HttpBodyTypes.IncomingRequest, legacyFallback: true);
