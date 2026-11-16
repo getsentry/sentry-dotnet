@@ -214,6 +214,19 @@ public class SentryQueryPerformanceListenerTests
     }
 
     [Fact]
+    public void InterceptorInvoked_NoActiveSpan_DoesNotAttachSpan()
+    {
+        _fixture.Hub.GetSpan().ReturnsNull();
+        var interceptor = _fixture.GetListener();
+        var context = new DbCommandInterceptionContext<DbDataReader>();
+
+        interceptor.ReaderExecuting(new EffortCommand { CommandText = "SELECT 1" }, context);
+
+        context.GetSpanFromContext().Should().BeNull();
+        _fixture.Spans.Should().BeEmpty();
+    }
+
+    [Fact]
     public void FirstOrDefault_FromDatabase_CapturesQuery()
     {
         // Arrange
