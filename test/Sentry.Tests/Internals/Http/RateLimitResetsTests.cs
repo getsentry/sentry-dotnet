@@ -41,6 +41,16 @@ public class RateLimitResetsTests
     }
 
     [Fact]
+    public void IsRateLimited_ResetReached_ReturnsFalse()
+    {
+        var resets = new RateLimitResets();
+
+        resets.Extend(ErrorCategory, Now.AddSeconds(1));
+
+        resets.IsRateLimited(ErrorItem, Now.AddSeconds(1)).Should().BeFalse();
+    }
+
+    [Fact]
     public void IsRateLimited_OtherCategory_ReturnsFalse()
     {
         var resets = new RateLimitResets();
