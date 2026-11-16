@@ -46,6 +46,8 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public KeyValueCollectionBehavior UrlQueryParams => Configured?.UrlQueryParams ?? DenyList;
 
+    public bool UrlFragmentWithLegacyPiiGate => Configured is not null || SendDefaultPii;
+
     public bool IncomingRequestBody => CollectsBody(HttpBodyTypes.IncomingRequest, legacyFallback: true);
 
     public bool OutgoingRequestBody => CollectsBody(HttpBodyTypes.OutgoingRequest, SendDefaultPii);
