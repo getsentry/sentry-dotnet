@@ -128,6 +128,22 @@ public class DataCollectionResolverTests
     }
 
     [Theory]
+    [InlineData(false, false, false)]
+    [InlineData(true, false, true)]
+    [InlineData(false, true, true)]
+    [InlineData(true, true, true)]
+    public void UrlFragmentWithLegacyPiiGate_FollowsSendDefaultPiiUnlessConfigured(bool sendDefaultPii, bool configureDataCollection, bool expected)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+        if (configureDataCollection)
+        {
+            options.ConfigureDataCollection(_ => { });
+        }
+
+        Resolver(options).UrlFragmentWithLegacyPiiGate.Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void IncomingRequestBody_WithoutDataCollection_IsCollectedRegardlessOfSendDefaultPii(bool sendDefaultPii)

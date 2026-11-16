@@ -66,7 +66,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
         {
             Url = uri?.FilteredHttpRequestUrl(queryParams),
             QueryString = QueryStringFilter.Filter(uri?.Query, queryParams),
-            Fragment = uri?.HttpRequestFragment(),
+            Fragment = dataCollection.UrlFragmentWithLegacyPiiGate ? uri?.HttpRequestFragment() : null,
             Method = response.RequestMessage?.Method.Method.ToUpperInvariant(),
             Cookies = request.Headers.GetCookies(dataCollection.Cookies)
         };
