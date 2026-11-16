@@ -54,7 +54,7 @@ $runnableTests = (Get-ChildItem test/*/*.Tests.csproj).FullName | Where-Object {
     (Split-Path $_ -LeafBase) -notin 'Sentry.AspNet.Tests', 'Sentry.Maui.CommunityToolkit.Mvvm.Tests', 'Sentry.Android.AssemblyReader.Tests'
 }
 
-Remove-Item StrykerOutput -Recurse -ErrorAction Ignore
+Remove-Item StrykerOutput -Recurse -Force -ErrorAction Ignore
 New-Item -ItemType Directory StrykerOutput | Out-Null
 $summary = "$PWD/StrykerOutput/summary.md"
 foreach ($project in $hunks | Group-Object { ($_.File -split '/')[1] })
