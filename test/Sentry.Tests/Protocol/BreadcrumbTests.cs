@@ -54,6 +54,20 @@ public class BreadcrumbTests
     }
 
     [Fact]
+    public void Redact_NoMessageOrData_ReturnsNull()
+    {
+        var breadcrumb = new Breadcrumb();
+
+        breadcrumb.Redact();
+
+        using (new AssertionScope())
+        {
+            breadcrumb.Message.Should().BeNull();
+            breadcrumb.Data.Should().BeNull();
+        }
+    }
+
+    [Fact]
     public void SerializeObject_ParameterlessConstructor_IncludesTimestamp()
     {
         var sut = new Breadcrumb("test", "unit");
