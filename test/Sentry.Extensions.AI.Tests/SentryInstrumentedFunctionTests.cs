@@ -274,24 +274,17 @@ public class SentryInstrumentedFunctionTests
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, true, true)]
-    [InlineData(false, false, false)]
-    public async Task InvokeCoreAsync_InsideToolLoop_UsesChatClientRecordingOptions(bool recordInputs,
-        bool recordOutputs, bool configureDataCollection)
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public async Task InvokeCoreAsync_InsideToolLoopWithDataCollection_ChatClientRecordingOptionsTakePrecedence(
+        bool recordInputs, bool recordOutputs)
     {
         // Arrange
-        using var hub = CreateHub(options =>
+        using var hub = CreateHub(options => options.ConfigureDataCollection(dataCollection =>
         {
-            if (configureDataCollection)
-            {
-                options.ConfigureDataCollection(dataCollection =>
-                {
-                    dataCollection.GenAI.Inputs = !recordInputs;
-                    dataCollection.GenAI.Outputs = !recordOutputs;
-                });
-            }
-        });
+            dataCollection.GenAI.Inputs = !recordInputs;
+            dataCollection.GenAI.Outputs = !recordOutputs;
+        }));
         var transaction = StartTransaction(hub);
         using var ficcActivity = StartFICCActivity(hub);
 
@@ -318,10 +311,39 @@ public class SentryInstrumentedFunctionTests
     }
 
     [Fact]
-    public async Task InvokeCoreAsync_InChildActivityOfToolLoop_UsesChatClientRecordingOptions()
+    public async Task InvokeCoreAsync_InsideToolLoopWithoutDataCollection_RecordsRegardlessOfRecordingOptions()
     {
         // Arrange
         using var hub = CreateHub(_ => { });
+        var transaction = StartTransaction(hub);
+        using var ficcActivity = StartFICCActivity(hub);
+
+        var innerClient = Substitute.For<IChatClient>();
+        innerClient.GetResponseAsync(Arg.Any<IEnumerable<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
+            .Returns(new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok")));
+        var chatClient = new SentryChatClient(null, hub, innerClient, options =>
+        {
+            options.Experimental.RecordInputs = false;
+            options.Experimental.RecordOutputs = false;
+        });
+        var sentryFunction = new SentryInstrumentedFunction(WeatherFunction(), hub);
+
+        // Act
+        await chatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], new ChatOptions { Tools = [sentryFunction] });
+        await sentryFunction.InvokeAsync(new AIFunctionArguments { ["city"] = "Paris" });
+
+        // Assert
+        var toolSpan = transaction.Spans.Single(s => s.Operation == SentryAIConstants.SpanAttributes.ToolCallOperation);
+        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolDescription);
+        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolInput);
+        toolSpan.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ToolOutput);
+    }
+
+    [Fact]
+    public async Task InvokeCoreAsync_InChildActivityOfToolLoop_UsesChatClientRecordingOptions()
+    {
+        // Arrange
+        using var hub = CreateHub(options => options.ConfigureDataCollection(_ => { }));
         var transaction = StartTransaction(hub);
         using var ficcActivity = StartFICCActivity(hub);
 

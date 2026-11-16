@@ -82,7 +82,7 @@ public class SentryAISpanEnricherTests : IDisposable
     }
 
     [Fact]
-    public void EnrichWithRequest_SetsData_WithoutInputs_WhenDisabled()
+    public void EnrichWithRequest_SetsData_WithoutRequestMessages_WhenDisabled()
     {
         // Arrange
         const string spanOp = "test_operation";
@@ -110,7 +110,7 @@ public class SentryAISpanEnricherTests : IDisposable
         span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestFrequencyPenalty).WhoseValue.Should().Be(0.5f);
         span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestPresencePenalty).WhoseValue.Should().Be(0.3f);
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestMessages);
-        span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestAvailableTools);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestAvailableTools).WhoseValue.Should().NotBeNull();
     }
 
 
@@ -408,10 +408,17 @@ public class SentryAISpanEnricherTests : IDisposable
         span.Data.ContainsKey(SentryAIConstants.SpanAttributes.ResponseToolCalls).Should().Be(recordOutputs);
     }
 
-    [Fact]
-    public void EnrichWithStreamingResponses_RecordOutputsDisabled_OmitsToolCalls()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void EnrichWithStreamingResponses_RecordOutputsDisabled_OmitsToolCallsOnlyWithDataCollection(
+        bool configureDataCollection)
     {
         // Arrange
+        if (configureDataCollection)
+        {
+            _fixture.Options.ConfigureDataCollection(_ => { });
+        }
         var transaction = _fixture.Hub.StartTransaction("test_transaction", "test");
         var span = transaction.StartChild(SentryAIConstants.SpanAttributes.ChatOperation, "test_desc");
         var streamingMessages = new List<ChatResponseUpdate>
@@ -428,7 +435,31 @@ public class SentryAISpanEnricherTests : IDisposable
         SentryAISpanEnricher.EnrichWithStreamingResponses(span, streamingMessages, aiOptions, _fixture.Options);
 
         // Assert
-        span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ResponseToolCalls);
+        span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ResponseText);
+        span.Data.ContainsKey(SentryAIConstants.SpanAttributes.ResponseToolCalls).Should().Be(!configureDataCollection);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void EnrichWithRequest_RecordInputsDisabled_OmitsToolDefinitionsOnlyWithDataCollection(
+        bool configureDataCollection)
+    {
+        // Arrange
+        if (configureDataCollection)
+        {
+            _fixture.Options.ConfigureDataCollection(_ => { });
+        }
+        var span = _fixture.Hub.StartSpan("test_operation", "test_description");
+        var aiOptions = new SentryAIOptions { Experimental = { RecordInputs = false } };
+
+        // Act
+        SentryAISpanEnricher.EnrichWithRequest(span, TestMessages(), TestChatOptions(), aiOptions, _fixture.Options,
+            SentryAIConstants.SpanOperations.Chat);
+
+        // Assert
+        span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestMessages);
+        span.Data.ContainsKey(SentryAIConstants.SpanAttributes.RequestAvailableTools).Should().Be(!configureDataCollection);
     }
 
     private static ChatResponse ToolCallResponse() =>

@@ -19,12 +19,12 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, IHub?
         var aiOptions = ficcActivity?.GetFused<SentryAIOptions>() ?? DefaultAIOptions;
         var sentryOptions = _hub.GetSentryOptions();
 
-        var toolSpan = InitToolSpan(agentSpan, arguments, aiOptions.Experimental.ShouldRecordInputs(sentryOptions));
+        var toolSpan = InitToolSpan(agentSpan, arguments, aiOptions.Experimental.ShouldRecordToolInputs(sentryOptions));
         try
         {
             var result = await base.InvokeCoreAsync(arguments, cancellationToken).ConfigureAwait(false);
 
-            if (aiOptions.Experimental.ShouldRecordOutputs(sentryOptions) && result?.ToString() is { } resultString)
+            if (aiOptions.Experimental.ShouldRecordToolOutputs(sentryOptions) && result?.ToString() is { } resultString)
             {
                 toolSpan.SetData(SentryAIConstants.SpanAttributes.ToolOutput, resultString);
             }

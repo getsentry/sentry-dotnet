@@ -29,11 +29,11 @@ public class SentryAIOptions
         private bool? _recordOutputs;
 
         /// <summary>
-        /// Whether to include AI inputs in spans: system instructions, request messages, tool definitions and tool
-        /// call arguments.
+        /// Whether to include request messages in spans.
         /// <para>
-        /// Defaults to <c>true</c>. When not set and <see cref="SentryOptions.ConfigureDataCollection"/> has been
-        /// called, <see cref="DataCollectionOptions.GenAIOptions.Inputs"/> decides instead.
+        /// Defaults to <c>true</c>. Once <see cref="SentryOptions.ConfigureDataCollection"/> has been called, this
+        /// also covers tool definitions and tool call arguments, and when not set,
+        /// <see cref="DataCollectionOptions.GenAIOptions.Inputs"/> decides instead.
         /// </para>
         /// <para>This API is experimental, and it may change in the future.</para>
         /// </summary>
@@ -44,10 +44,11 @@ public class SentryAIOptions
         }
 
         /// <summary>
-        /// Whether to include AI outputs in spans: response text, response tool calls and tool call results.
+        /// Whether to include response content in spans.
         /// <para>
-        /// Defaults to <c>true</c>. When not set and <see cref="SentryOptions.ConfigureDataCollection"/> has been
-        /// called, <see cref="DataCollectionOptions.GenAIOptions.Outputs"/> decides instead.
+        /// Defaults to <c>true</c>. Once <see cref="SentryOptions.ConfigureDataCollection"/> has been called, this
+        /// also covers response tool calls and tool call results, and when not set,
+        /// <see cref="DataCollectionOptions.GenAIOptions.Outputs"/> decides instead.
         /// </para>
         /// <para>This API is experimental, and it may change in the future.</para>
         /// </summary>
@@ -68,5 +69,11 @@ public class SentryAIOptions
 
         internal bool ShouldRecordOutputs(SentryOptions? options) =>
             _recordOutputs ?? options?.DataCollectionResolver.GenAIOutputs ?? true;
+
+        internal bool ShouldRecordToolInputs(SentryOptions? options) =>
+            options?.DataCollection is null || ShouldRecordInputs(options);
+
+        internal bool ShouldRecordToolOutputs(SentryOptions? options) =>
+            options?.DataCollection is null || ShouldRecordOutputs(options);
     }
 }
