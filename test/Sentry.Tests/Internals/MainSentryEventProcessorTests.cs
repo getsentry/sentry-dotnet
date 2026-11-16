@@ -175,6 +175,70 @@ public class MainSentryEventProcessorTests
         Assert.Null(evt.User.Username);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Process_DataCollectionNotConfigured_UserInfoFollowsSendDefaultPii(bool sendDefaultPii)
+    {
+        var evt = new SentryEvent();
+        _fixture.SentryOptions.SendDefaultPii = sendDefaultPii;
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+
+        using (new AssertionScope())
+        {
+            evt.User.Username.Should().Be(sendDefaultPii ? Environment.UserName : null);
+            evt.User.IpAddress.Should().Be(sendDefaultPii ? Enricher.DefaultIpAddress : null);
+        }
+    }
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void Process_UserInfoConfigured_OverridesSendDefaultPii(bool sendDefaultPii, bool userInfo)
+    {
+        var evt = new SentryEvent();
+        _fixture.SentryOptions.SendDefaultPii = sendDefaultPii;
+        _fixture.SentryOptions.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = userInfo);
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+
+        using (new AssertionScope())
+        {
+            evt.User.Username.Should().Be(userInfo ? Environment.UserName : null);
+            evt.User.IpAddress.Should().Be(userInfo ? Enricher.DefaultIpAddress : null);
+        }
+    }
+
+    [Fact]
+    public void Process_UserInfoDisabled_KeepsUserSetData()
+    {
+        var evt = new SentryEvent
+        {
+            User = new SentryUser
+            {
+                Id = "user-id",
+                Username = "jane",
+                Email = "jane@example.com",
+                IpAddress = "192.0.2.1"
+            }
+        };
+        _fixture.SentryOptions.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = false);
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+
+        evt.User.Should().BeEquivalentTo(new SentryUser
+        {
+            Id = "user-id",
+            Username = "jane",
+            Email = "jane@example.com",
+            IpAddress = "192.0.2.1"
+        });
+    }
+
     [Fact]
     public void Process_DefaultOptions_NoServerNameSet()
     {
