@@ -1002,8 +1002,10 @@ public partial class HttpTransportTests
         options.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Span, expectedDiscardedSpanCount);
     }
 
-    [Fact]
-    public async Task SendEnvelopeAsync_ShorterRateLimitInLaterResponse_KeepsLongerRateLimit()
+    [Theory]
+    [InlineData("60:error", "10:error")]
+    [InlineData("10:error", "60:error")]
+    public async Task SendEnvelopeAsync_RateLimitsInSuccessiveResponses_KeepsLongerRateLimit(string firstRateLimit, string secondRateLimit)
     {
         // Arrange
         var clock = new MockClock(DateTimeOffset.UtcNow);
@@ -1011,7 +1013,7 @@ public partial class HttpTransportTests
         using var httpHandler = new FakeHttpMessageHandler(() =>
         {
             requestCount++;
-            return SentryResponses.GetRateLimitResponse(requestCount == 1 ? "60:error" : "10:error");
+            return SentryResponses.GetRateLimitResponse(requestCount == 1 ? firstRateLimit : secondRateLimit);
         });
 
         var httpTransport = new HttpTransport(
