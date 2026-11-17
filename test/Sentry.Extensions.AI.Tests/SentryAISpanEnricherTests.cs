@@ -146,6 +146,20 @@ public class SentryAISpanEnricherTests : IDisposable
     }
 
     [Fact]
+    public void EnrichWithRequest_NoMessages_OmitsRequestMessages()
+    {
+        // Arrange
+        var span = _fixture.Hub.StartSpan("test_operation", "test_description");
+
+        // Act
+        SentryAISpanEnricher.EnrichWithRequest(span, [], TestChatOptions(), new SentryAIOptions(), _fixture.Options, SentryAIConstants.SpanOperations.Chat);
+
+        // Assert
+        span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestMessages);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestAvailableTools);
+    }
+
+    [Fact]
     public void ToolCallSpan_EnrichWithResponse_SetsData()
     {
         // Arrange
