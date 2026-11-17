@@ -33,6 +33,9 @@ public class DataCollectionOptions
     /// <see cref="SentryUser.Id"/>, <see cref="SentryUser.Email"/>, <see cref="SentryUser.Username"/> and the
     /// user's IP address. Defaults to <c>true</c>. A user you set yourself is never affected.
     /// </summary>
+    /// <remarks>
+    /// This option doesn't affect the SDK's installation ID, which still fills <see cref="SentryUser.Id"/> when no user ID is set.
+    /// </remarks>
     public bool UserInfo { get; set; } = true;
 
     /// <summary>

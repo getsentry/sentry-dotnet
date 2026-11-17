@@ -212,20 +212,21 @@ public class MainSentryEventProcessorTests
         }
     }
 
-    [Fact]
-    public void Process_UserInfoDisabled_KeepsUserSetData()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Process_UserSetData_IsNotChanged(bool userInfo)
     {
         var evt = new SentryEvent
         {
             User = new SentryUser
             {
                 Id = "user-id",
-                Username = "jane",
                 Email = "jane@example.com",
                 IpAddress = "192.0.2.1"
             }
         };
-        _fixture.SentryOptions.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = false);
+        _fixture.SentryOptions.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = userInfo);
         var sut = _fixture.GetSut();
 
         _ = sut.Process(evt);
@@ -233,7 +234,6 @@ public class MainSentryEventProcessorTests
         evt.User.Should().BeEquivalentTo(new SentryUser
         {
             Id = "user-id",
-            Username = "jane",
             Email = "jane@example.com",
             IpAddress = "192.0.2.1"
         });
