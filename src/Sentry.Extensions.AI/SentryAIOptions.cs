@@ -31,7 +31,9 @@ public class SentryAIOptions
         /// <summary>
         /// Whether to include AI inputs in spans: request messages, tool definitions and tool call arguments.
         /// <para>
-        /// When not set, <see cref="DataCollectionOptions.GenAIOptions.Inputs"/> decides, which defaults to <c>true</c>.
+        /// When set, this takes precedence over <see cref="DataCollectionOptions.GenAIOptions.Inputs"/> for this chat
+        /// client. When not set, <see cref="DataCollectionOptions.GenAIOptions.Inputs"/> decides, which defaults to
+        /// <c>true</c>.
         /// </para>
         /// <para>This API is experimental, and it may change in the future.</para>
         /// </summary>
@@ -44,7 +46,9 @@ public class SentryAIOptions
         /// <summary>
         /// Whether to include AI outputs in spans: response text, response tool calls and tool call results.
         /// <para>
-        /// When not set, <see cref="DataCollectionOptions.GenAIOptions.Outputs"/> decides, which defaults to <c>true</c>.
+        /// When set, this takes precedence over <see cref="DataCollectionOptions.GenAIOptions.Outputs"/> for this chat
+        /// client. When not set, <see cref="DataCollectionOptions.GenAIOptions.Outputs"/> decides, which defaults to
+        /// <c>true</c>.
         /// </para>
         /// <para>This API is experimental, and it may change in the future.</para>
         /// </summary>
