@@ -63,7 +63,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
     /// </summary>
     /// <param name="request">The <see cref="HttpRequestMessage"/></param>
     /// <param name="method">The request method (e.g. "GET")</param>
-    /// <param name="url">The request URL, with any credentials replaced by a placeholder</param>
+    /// <param name="url">The request URL, with any credentials redacted</param>
     /// <returns>An <see cref="ISpan"/></returns>
     protected internal abstract ISpan? ProcessRequest(HttpRequestMessage request, string method, string url);
 
@@ -73,7 +73,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
     /// <param name="response">The <see cref="HttpResponseMessage"/></param>
     /// <param name="span">The <see cref="ISpan"/> created in <see cref="ProcessRequest"/></param>
     /// <param name="method">The request method (e.g. "GET")</param>
-    /// <param name="url">The request URL, with any credentials replaced by a placeholder</param>
+    /// <param name="url">The request URL, with any credentials redacted</param>
     protected internal abstract void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url);
 
     /// <inheritdoc />
