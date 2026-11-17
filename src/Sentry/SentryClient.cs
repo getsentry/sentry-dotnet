@@ -243,7 +243,10 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        processedTransaction.Redact();
+        if (!_options.SendDefaultPii)
+        {
+            processedTransaction.Redact();
+        }
 
         // Keep null entries so the null-attachment guard in Envelope.FromTransaction handles them
         // (consistent with the event/feedback capture paths); dereferencing them here would throw.
@@ -437,7 +440,10 @@ public class SentryClient : ISentryClient, IDisposable
             _options.LogDebug("Event sampled in.");
         }
 
-        processedEvent.Redact();
+        if (!_options.SendDefaultPii)
+        {
+            processedEvent.Redact();
+        }
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromEvent(processedEvent, attachments, scope.SessionUpdate, _options.DiagnosticLogger);

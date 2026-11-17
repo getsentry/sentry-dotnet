@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -62,7 +63,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
     /// </summary>
     /// <param name="request">The <see cref="HttpRequestMessage"/></param>
     /// <param name="method">The request method (e.g. "GET")</param>
-    /// <param name="url">The request URL</param>
+    /// <param name="url">The request URL, with any credentials replaced by a placeholder</param>
     /// <returns>An <see cref="ISpan"/></returns>
     protected internal abstract ISpan? ProcessRequest(HttpRequestMessage request, string method, string url);
 
@@ -72,7 +73,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
     /// <param name="response">The <see cref="HttpResponseMessage"/></param>
     /// <param name="span">The <see cref="ISpan"/> created in <see cref="ProcessRequest"/></param>
     /// <param name="method">The request method (e.g. "GET")</param>
-    /// <param name="url">The request URL</param>
+    /// <param name="url">The request URL, with any credentials replaced by a placeholder</param>
     protected internal abstract void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url);
 
     /// <inheritdoc />
@@ -82,13 +83,14 @@ public abstract class SentryMessageHandler : DelegatingHandler
     {
         var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
+        var redactedUrl = url.RedactUrl();
 
-        var span = ProcessRequest(request, method, url);
+        var span = ProcessRequest(request, method, redactedUrl);
         try
         {
             PropagateTraceHeaders(request, url, span);
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            HandleResponse(response, span, method, url);
+            HandleResponse(response, span, method, redactedUrl);
             return response;
         }
         catch (Exception ex)
@@ -104,13 +106,14 @@ public abstract class SentryMessageHandler : DelegatingHandler
     {
         var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
+        var redactedUrl = url.RedactUrl();
 
-        var span = ProcessRequest(request, method, url);
+        var span = ProcessRequest(request, method, redactedUrl);
         try
         {
             PropagateTraceHeaders(request, url, span);
             var response = base.Send(request, cancellationToken);
-            HandleResponse(response, span, method, url);
+            HandleResponse(response, span, method, redactedUrl);
             return response;
         }
         catch (Exception ex)
