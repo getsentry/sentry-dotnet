@@ -116,7 +116,10 @@ public sealed class SentryRequest : ISentryJsonSerializable
 
         foreach (var header in headers)
         {
-            Headers.Add(header.Key, SensitiveDataFilter.FilterHeaderValue(header.Key, string.Join("; ", header.Value), behavior));
+            var value = string.Join("; ", header.Value);
+            Headers.Add(header.Key, behavior is null
+                ? SensitiveDataFilter.FilterHeaderValue(header.Key, value)
+                : SensitiveDataFilter.FilterHeaderValue(header.Key, value, behavior));
         }
     }
 

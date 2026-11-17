@@ -75,8 +75,11 @@ internal static class SensitiveDataFilter
 
     internal static bool IsSensitiveKey(string key) => MatchesAny(key, SensitiveKeyTerms);
 
-    internal static string FilterHeaderValue(string name, string value, KeyValueCollectionBehavior? behavior = null) =>
-        IsCookieHeader(name) ? FilteredValue : FilterValue(name, value, behavior ?? KeyValueCollectionBehavior.DenyList());
+    internal static string FilterHeaderValue(string name, string value) =>
+        IsSensitiveKey(name) || IsCookieHeader(name) ? FilteredValue : value;
+
+    internal static string FilterHeaderValue(string name, string value, KeyValueCollectionBehavior behavior) =>
+        IsCookieHeader(name) ? FilteredValue : FilterValue(name, value, behavior);
 
     // Exact match, because a "cookie" denylist term would also filter names such as X-Cookie-Debug
     private static bool IsCookieHeader(string name) =>
