@@ -38,14 +38,26 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public KeyValueCollectionBehavior ResponseHeaders => Configured?.HttpHeaders.Response ?? DenyList;
 
+    /// <summary>
+    /// Temporary bridge for call sites that only sent headers with <c>SendDefaultPii</c>; remove with it, see
+    /// https://github.com/getsentry/sentry-dotnet/issues/5439
+    /// </summary>
     public KeyValueCollectionBehavior RequestHeadersWithLegacyPiiGate =>
         Configured?.HttpHeaders.Request ?? (SendDefaultPii ? DenyList : Off);
 
+    /// <summary>
+    /// Temporary bridge for call sites that only sent headers with <c>SendDefaultPii</c>; remove with it, see
+    /// https://github.com/getsentry/sentry-dotnet/issues/5439
+    /// </summary>
     public KeyValueCollectionBehavior ResponseHeadersWithLegacyPiiGate =>
         Configured?.HttpHeaders.Response ?? (SendDefaultPii ? DenyList : Off);
 
     public KeyValueCollectionBehavior UrlQueryParams => Configured?.UrlQueryParams ?? DenyList;
 
+    /// <summary>
+    /// Temporary bridge for call sites that only sent the URL fragment with <c>SendDefaultPii</c>; remove with it, see
+    /// https://github.com/getsentry/sentry-dotnet/issues/5439
+    /// </summary>
     public bool UrlFragmentWithLegacyPiiGate => Configured is not null || SendDefaultPii;
 
     public bool IncomingRequestBody => CollectsBody(HttpBodyTypes.IncomingRequest, legacyFallback: true);
