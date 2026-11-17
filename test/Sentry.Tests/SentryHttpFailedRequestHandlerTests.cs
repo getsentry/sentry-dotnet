@@ -630,7 +630,10 @@ public class SentryHttpFailedRequestHandlerTests
             dataCollection.HttpHeaders.Response = KeyValueCollectionBehavior.AllowList("myheader");
         });
 
-        var @event = CaptureEvent(options, ResponseWithSensitiveHeaders());
+        var response = ResponseWithSensitiveHeaders();
+        response.Headers.Add("X-Request-ID", "abc");
+
+        var @event = CaptureEvent(options, response);
 
         using (new AssertionScope())
         {
@@ -645,7 +648,8 @@ public class SentryHttpFailedRequestHandlerTests
             {
                 { "Set-Cookie", "[Filtered]" },
                 { "X-Auth-Token", "[Filtered]" },
-                { "myHeader", "myValue" }
+                { "myHeader", "myValue" },
+                { "X-Request-ID", "[Filtered]" }
             });
         }
     }

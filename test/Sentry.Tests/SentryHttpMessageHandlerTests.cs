@@ -332,6 +332,29 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task SendAsync_UrlWithCredentials_FiltersSpanDescriptionAndBreadcrumbUrl()
+    {
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+        var transaction = new TransactionTracer(hub, "foo", "bar");
+        hub.GetSpan().ReturnsForAnyArgs(transaction);
+
+        using var innerHandler = new FakeHttpMessageHandler();
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+        using var client = new HttpClient(sentryHandler);
+
+        await client.GetAsync("https://admin:1234@localhost/api?q=1");
+
+        using (new AssertionScope())
+        {
+            transaction.Spans.Should().ContainSingle()
+                .Which.Description.Should().Be("GET https://[Filtered]:[Filtered]@localhost/api");
+            scope.Breadcrumbs.Single().Data.Should().Contain("url", "https://[Filtered]:[Filtered]@localhost/api?q=1");
+        }
+    }
+
+    [Fact]
     public async Task SendAsync_Executed_FailedRequestsCaptured()
     {
         // Arrange

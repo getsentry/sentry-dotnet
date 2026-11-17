@@ -41,6 +41,19 @@ public class RequestTests
         Assert.Equal(sut.Other.First().Value, clone.Other.First().Value);
     }
 
+    [Theory]
+    [InlineData(null, "source")]
+    [InlineData("target", "target")]
+    public void CopyTo_Fragment_CopiedOnlyWhenTargetHasNone(string targetFragment, string expected)
+    {
+        var sut = new SentryRequest { Fragment = "source" };
+        var target = new SentryRequest { Fragment = targetFragment };
+
+        sut.CopyTo(target);
+
+        target.Fragment.Should().Be(expected);
+    }
+
     [Fact]
     public void ToJson_Fragment_RoundTrips()
     {
