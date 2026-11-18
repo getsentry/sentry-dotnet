@@ -45,7 +45,6 @@ internal static class SqlSanitizer
                     return;
                 case 'N' or 'n' or 'X' or 'x' or 'B' or 'b' when next == '\'':
                     _position++;
-                    SkipString('\'', backslashEscapes: dialect == SqlDialect.MySql);
                     return;
                 case 'E' or 'e' when next == '\'':
                     _position++;
@@ -179,21 +178,25 @@ internal static class SqlSanitizer
 
         private void ScanDollar()
         {
-            var next = Peek();
-            if (dialect == SqlDialect.SqlServer && (IsDigit(next) || (next == '.' && IsDigit(Peek(2)))))
+            if (IsDigit(Peek()))
             {
-                _position++;
-                SkipNumber();
+                if (dialect == SqlDialect.SqlServer)
+                {
+                    _position++;
+                    SkipNumber();
+                }
+                else
+                {
+                    CopyWord();
+                }
+
                 return;
             }
 
             var tagEnd = _position + 1;
-            if (!IsDigit(next))
+            while (tagEnd < sql.Length && (char.IsLetterOrDigit(sql[tagEnd]) || sql[tagEnd] == '_'))
             {
-                while (tagEnd < sql.Length && (char.IsLetterOrDigit(sql[tagEnd]) || sql[tagEnd] == '_'))
-                {
-                    tagEnd++;
-                }
+                tagEnd++;
             }
 
             if (tagEnd < sql.Length && sql[tagEnd] == '$')

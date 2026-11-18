@@ -23,9 +23,12 @@ public class SqlSanitizerTests
     [Theory]
     [InlineData("SELECT 42", "SELECT ?")]
     [InlineData("SELECT -42", "SELECT -?")]
-    [InlineData("SELECT 3.14, .5, 1e10, 1.5E-3, 2e+8", "SELECT ?, ?, ?, ?, ?")]
+    [InlineData("SELECT 3.14, .5, 1e10, 1e5, 1.5E-3, 2e+8", "SELECT ?, ?, ?, ?, ?, ?")]
+    [InlineData("SELECT 9, 1999, 0.99", "SELECT ?, ?, ?")]
+    [InlineData(".5", "?")]
+    [InlineData("SELECT x.5", "SELECT x.?")]
     [InlineData("SELECT 1_000_000", "SELECT ?")]
-    [InlineData("SELECT 0xDEADBEEF, 0X1f, 0b1010, 0o17", "SELECT ?, ?, ?, ?")]
+    [InlineData("SELECT 0xDEADBEEF, 0X1f, 0xabcdef, 0b1010, 0o17", "SELECT ?, ?, ?, ?, ?")]
     [InlineData("SELECT * FROM t LIMIT 10 OFFSET 20", "SELECT * FROM t LIMIT ? OFFSET ?")]
     [InlineData("SELECT * FROM t WHERE id IN (1, 2, 3)", "SELECT * FROM t WHERE id IN (?, ?, ?)")]
     [InlineData("SELECT CHAR(13)", "SELECT CHAR(?)")]
@@ -38,6 +41,10 @@ public class SqlSanitizerTests
     [InlineData("-- TagWith: jane\n\nSELECT 1", "SELECT ?")]
     [InlineData("SELECT /* jane */ 1", "SELECT  ?")]
     [InlineData("SELECT/* jane */1", "SELECT ?")]
+    [InlineData("SELECT /* jane */1", "SELECT ?")]
+    [InlineData("SELECT/* jane */ 1", "SELECT ?")]
+    [InlineData("/* app */SELECT 1", "SELECT ?")]
+    [InlineData("SELECT 1/* jane */", "SELECT ?")]
     [InlineData("SELECT /*+ INDEX(t idx) */ * FROM t", "SELECT  * FROM t")]
     [InlineData("SELECT /* outer /* inner */ still a comment */ 1", "SELECT  ?")]
     [InlineData("SELECT 1 /* unterminated 'jane'", "SELECT ?")]
@@ -103,11 +110,12 @@ public class SqlSanitizerTests
     [Fact]
     public void Sanitize_SqlServerMoneyLiteral_IsReplaced() =>
         SqlSanitizer.Sanitize("SELECT $12.50, $.5 FROM t", SqlDialect.SqlServer)
-            .Should().Be("SELECT ?, ? FROM t");
+            .Should().Be("SELECT ?, $.? FROM t");
 
     [Theory]
     [InlineData("SELECT * FROM t WHERE name = \"jane\"", "SELECT * FROM t WHERE name = ?")]
     [InlineData("SELECT * FROM t WHERE name = 'it\\'s' AND x = 1", "SELECT * FROM t WHERE name = ? AND x = ?")]
+    [InlineData("SELECT * FROM t WHERE name = N'it\\'s' AND x = 1", "SELECT * FROM t WHERE name = ? AND x = ?")]
     [InlineData("SELECT * FROM t WHERE name = \"say \\\"hi\\\"\" AND x = 1", "SELECT * FROM t WHERE name = ? AND x = ?")]
     [InlineData("SELECT 1 # jane@example.com\nFROM t", "SELECT ? \nFROM t")]
     [InlineData("SELECT a# jane\nFROM t", "SELECT a\nFROM t")]

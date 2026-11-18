@@ -22,17 +22,7 @@ namespace Sentry.EntityFramework.Tests
     }
 }
 
-namespace Microsoft.Data.SqlClient
-{
-    internal class FakeSqlCommand : Sentry.EntityFramework.Tests.FakeDbCommand;
-}
-
 namespace MySql.Data.MySqlClient
 {
     internal class FakeMySqlCommand : Sentry.EntityFramework.Tests.FakeDbCommand;
-}
-
-namespace System.Data.SQLite
-{
-    internal class FakeSQLiteCommand : Sentry.EntityFramework.Tests.FakeDbCommand;
 }
