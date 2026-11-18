@@ -293,7 +293,7 @@ public class SentryHttpFailedRequestHandlerTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void HandleResponse_UrlQueryParamsOff_DropsQuery(bool sendDefaultPii)
+    public void HandleResponse_UrlQueryParamsOff_DropsQueryAndFragment(bool sendDefaultPii)
     {
         var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = sendDefaultPii };
         options.ConfigureDataCollection(dataCollection => dataCollection.UrlQueryParams = KeyValueCollectionBehavior.Off);
@@ -306,8 +306,26 @@ public class SentryHttpFailedRequestHandlerTests
         {
             @event.Request.Url.Should().Be("https://example.com/api/users");
             @event.Request.QueryString.Should().BeNull();
-            @event.Request.Fragment.Should().Be("top");
+            @event.Request.Fragment.Should().BeNull();
         }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HandleResponse_SensitiveFragmentParameter_FiltersFragment(bool configureDataCollection)
+    {
+        var options = new SentryOptions { CaptureFailedRequests = true, SendDefaultPii = true };
+        if (configureDataCollection)
+        {
+            options.ConfigureDataCollection(_ => { });
+        }
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/callback#access_token=abc123&state=xyz"));
+
+        var @event = CaptureEvent(options, response);
+
+        @event.Request.Fragment.Should().Be("access_token=[Filtered]&state=xyz");
     }
 
     [Theory]
@@ -319,7 +337,7 @@ public class SentryHttpFailedRequestHandlerTests
         options.ConfigureDataCollection(dataCollection =>
             dataCollection.UrlQueryParams = KeyValueCollectionBehavior.AllowList("page", "token"));
         var response = InternalServerErrorResponse();
-        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/api/users?token=abc&q=abc&page=5"));
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri("https://example.com/api/users?token=abc&q=abc&page=5#page=6&tab=bio"));
 
         var @event = CaptureEvent(options, response);
 
@@ -327,6 +345,7 @@ public class SentryHttpFailedRequestHandlerTests
         {
             @event.Request.Url.Should().Be("https://example.com/api/users?token=[Filtered]&q=[Filtered]&page=5");
             @event.Request.QueryString.Should().Be("?token=[Filtered]&q=[Filtered]&page=5");
+            @event.Request.Fragment.Should().Be("page=6&tab=[Filtered]");
         }
     }
 

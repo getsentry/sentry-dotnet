@@ -128,19 +128,37 @@ public class DataCollectionResolverTests
     }
 
     [Theory]
-    [InlineData(false, false, false)]
-    [InlineData(true, false, true)]
-    [InlineData(false, true, true)]
-    [InlineData(true, true, true)]
-    public void UrlFragmentWithLegacyPiiGate_FollowsSendDefaultPiiUnlessConfigured(bool sendDefaultPii, bool configureDataCollection, bool expected)
+    [InlineData(false, KeyValueCollectionMode.Off)]
+    [InlineData(true, KeyValueCollectionMode.DenyList)]
+    public void UrlFragmentWithLegacyPiiGate_WithoutDataCollection_FollowsSendDefaultPii(bool sendDefaultPii, KeyValueCollectionMode expected)
     {
         var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
-        if (configureDataCollection)
-        {
-            options.ConfigureDataCollection(_ => { });
-        }
 
-        Resolver(options).UrlFragmentWithLegacyPiiGate.Should().Be(expected);
+        var fragment = Resolver(options).UrlFragmentWithLegacyPiiGate;
+
+        using (new AssertionScope())
+        {
+            fragment.Mode.Should().Be(expected);
+            fragment.Terms.Should().BeEmpty();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void UrlFragmentWithLegacyPiiGate_ConfiguredDataCollection_FollowsUrlQueryParams(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.UrlQueryParams = KeyValueCollectionBehavior.AllowList("page"));
+
+        var fragment = Resolver(options).UrlFragmentWithLegacyPiiGate;
+
+        using (new AssertionScope())
+        {
+            fragment.Mode.Should().Be(KeyValueCollectionMode.AllowList);
+            fragment.Terms.Should().Equal("page");
+        }
     }
 
     [Theory]

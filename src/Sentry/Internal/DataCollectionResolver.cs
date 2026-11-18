@@ -58,7 +58,8 @@ internal sealed class DataCollectionResolver(SentryOptions options)
     /// Temporary bridge for call sites that only sent the URL fragment with <c>SendDefaultPii</c>; remove with it, see
     /// https://github.com/getsentry/sentry-dotnet/issues/5439
     /// </summary>
-    public bool UrlFragmentWithLegacyPiiGate => Configured is not null || SendDefaultPii;
+    public KeyValueCollectionBehavior UrlFragmentWithLegacyPiiGate =>
+        Configured?.UrlQueryParams ?? (SendDefaultPii ? DenyList : Off);
 
     public bool IncomingRequestBody => CollectsBody(HttpBodyTypes.IncomingRequest, legacyFallback: true);
 
