@@ -20,7 +20,7 @@ public class SentryCommandInterceptorTests
     [Fact]
     public void UseBreadCrumbs_SentryDatabaseLogging_AddsInterceptor()
     {
-        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(new SentryOptions(), _fixture.QueryLogger, initOnce: false);
+        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
         Assert.NotNull(interceptor);
     }
 
@@ -32,7 +32,7 @@ public class SentryCommandInterceptorTests
             Query = "Expected query string"
         };
 
-        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(new SentryOptions(), _fixture.QueryLogger, initOnce: false)!;
+        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false)!;
 
         var command = new EffortCommand
         {
@@ -51,7 +51,7 @@ public class SentryCommandInterceptorTests
             Query = "Expected query string"
         };
 
-        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(new SentryOptions(), _fixture.QueryLogger, initOnce: false)!;
+        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false)!;
 
         var command = new EffortCommand
         {
@@ -70,7 +70,7 @@ public class SentryCommandInterceptorTests
             Query = "Expected query string"
         };
 
-        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(new SentryOptions(), _fixture.QueryLogger, initOnce: false)!;
+        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false)!;
 
         var command = new EffortCommand
         {
@@ -89,7 +89,7 @@ public class SentryCommandInterceptorTests
             Query = "Expected query string"
         };
 
-        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(new SentryOptions(), _fixture.QueryLogger, initOnce: false)!;
+        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false)!;
 
         var command = new EffortCommand
         {
@@ -108,7 +108,7 @@ public class SentryCommandInterceptorTests
             Query = "Expected query string"
         };
 
-        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(new SentryOptions(), _fixture.QueryLogger, initOnce: false)!;
+        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false)!;
 
         var command = new EffortCommand
         {
@@ -127,7 +127,7 @@ public class SentryCommandInterceptorTests
             Query = "Expected query string"
         };
 
-        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(new SentryOptions(), _fixture.QueryLogger, initOnce: false)!;
+        var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false)!;
 
         var command = new EffortCommand
         {
@@ -141,7 +141,7 @@ public class SentryCommandInterceptorTests
     [Fact]
     public void FirstOrDefault_FromDatabase_CapturesQuery()
     {
-        _ = SentryDatabaseLogging.UseBreadcrumbs(new SentryOptions(), _fixture.QueryLogger, initOnce: false);
+        _ = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
         _ = _fixture.DbContext.TestTable.FirstOrDefault();
 

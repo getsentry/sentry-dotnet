@@ -14,6 +14,7 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeFalse();
+            resolver.DatabaseQueryData.Should().BeFalse();
             resolver.GraphQLDocument.Should().BeFalse();
             resolver.GraphQLVariables.Should().BeFalse();
             resolver.GenAIInputs.Should().BeFalse();
@@ -76,16 +77,6 @@ public class DataCollectionResolverTests
         var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
 
         Resolver(options).IncomingRequestBody.Should().BeTrue();
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void DatabaseQueryData_WithoutDataCollection_IsCollectedRegardlessOfSendDefaultPii(bool sendDefaultPii)
-    {
-        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
-
-        Resolver(options).DatabaseQueryData.Should().BeTrue();
     }
 
     [Fact]

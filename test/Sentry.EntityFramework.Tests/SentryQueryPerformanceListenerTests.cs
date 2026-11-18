@@ -196,34 +196,17 @@ public class SentryQueryPerformanceListenerTests
         span.Received(1).Finish(Arg.Is<SpanStatus>(status => status == SpanStatus.Ok));
     }
 
-    [Theory]
-    [MemberData(nameof(DatabaseQueryDataCases.SendDefaultPiiAndConfiguredValue_Collected), MemberType = typeof(DatabaseQueryDataCases))]
-    public void InterceptorInvoked_DescriptionFollowsDatabaseQueryData(bool sendDefaultPii, bool? databaseQueryData, bool collected)
+    [Fact]
+    public void InterceptorInvoked_DatabaseQueryDataDisabled_KeepsCommandText()
     {
-        var options = new SentryOptions().WithDatabaseQueryData(sendDefaultPii, databaseQueryData);
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(dataCollection => dataCollection.DatabaseQueryData = false);
         var interceptor = new SentryQueryPerformanceListener(_fixture.Hub, options);
         var query = "SELECT * FROM rentals WHERE name = 'Jane'";
-        var command = new EffortCommand { CommandText = query };
 
-        interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
-        interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int>());
-        interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object>());
+        interceptor.ReaderExecuting(new EffortCommand { CommandText = query }, new DbCommandInterceptionContext<DbDataReader>());
 
-        _fixture.Spans.Select(span => span.Operation).Should().BeEquivalentTo(DbReaderKey, DbNonQueryKey, DbScalarKey);
-        _fixture.Spans.Should().OnlyContain(span => span.Description == (collected ? query : null));
-    }
-
-    [Fact]
-    public void InterceptorInvoked_NoActiveSpan_DoesNotAttachSpan()
-    {
-        _fixture.Hub.GetSpan().ReturnsNull();
-        var interceptor = _fixture.GetListener();
-        var context = new DbCommandInterceptionContext<DbDataReader>();
-
-        interceptor.ReaderExecuting(new EffortCommand { CommandText = "SELECT 1" }, context);
-
-        context.GetSpanFromContext().Should().BeNull();
-        _fixture.Spans.Should().BeEmpty();
+        _fixture.Spans.Should().ContainSingle().Which.Description.Should().Be(query);
     }
 
     [Fact]

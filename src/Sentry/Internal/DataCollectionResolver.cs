@@ -21,7 +21,7 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public bool UserInfo => Configured?.UserInfo ?? SendDefaultPii;
 
-    public bool DatabaseQueryData => Configured?.DatabaseQueryData ?? true;
+    public bool DatabaseQueryData => Configured?.DatabaseQueryData ?? SendDefaultPii;
 
     public bool GraphQLDocument => Configured?.GraphQL.Document ?? SendDefaultPii;
 

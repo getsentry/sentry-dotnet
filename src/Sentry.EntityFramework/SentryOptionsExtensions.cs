@@ -23,7 +23,7 @@ public static class SentryOptionsExtensions
 
         try
         {
-            _ = SentryDatabaseLogging.UseBreadcrumbs(sentryOptions);
+            _ = SentryDatabaseLogging.UseBreadcrumbs(diagnosticLogger: sentryOptions.DiagnosticLogger);
         }
         catch (Exception e)
         {

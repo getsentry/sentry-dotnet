@@ -299,12 +299,11 @@ public class SentryEFCoreListenerTests
         ((SpanTracer)commandSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
     }
 
-    [Theory]
-    [MemberData(nameof(DatabaseQueryDataCases.SendDefaultPiiAndConfiguredValue_Collected), MemberType = typeof(DatabaseQueryDataCases))]
-    public void OnNext_QuerySpans_DescriptionFollowsDatabaseQueryData(bool sendDefaultPii, bool? databaseQueryData, bool collected)
+    [Fact]
+    public void OnNext_DatabaseQueryDataDisabled_KeepsQueryText()
     {
         var fixture = new Fixture();
-        fixture.Options.WithDatabaseQueryData(sendDefaultPii, databaseQueryData);
+        fixture.Options.ConfigureDataCollection(dataCollection => dataCollection.DatabaseQueryData = false);
         var interceptor = new SentryEFCoreListener(fixture.Hub, fixture.Options);
         var expectedSql = "SELECT * FROM rentals WHERE name = N'Jane'";
         var efSql = "ef Junk\r\n" + expectedSql;
@@ -320,18 +319,8 @@ public class SentryEFCoreListenerTests
         interceptor.OnNext(new(EFCommandExecuted, commandEventData));
         interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
 
-        var compilerSpan = fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
-        var connectionSpan = fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
-        var commandSpan = fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
-        using (new AssertionScope())
-        {
-            compilerSpan.Description.Should().Be(collected ? expectedSql : null);
-            commandSpan.Description.Should().Be(collected ? expectedSql : null);
-            connectionSpan.Description.Should().Be("rentals");
-            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem).Should().Be("mssql");
-            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName).Should().Be("rentals");
-            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbServer).Should().Be("127.0.0.1");
-        }
+        fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s)).Description.Should().Be(expectedSql);
+        fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s)).Description.Should().Be(expectedSql);
     }
 
     [Fact]

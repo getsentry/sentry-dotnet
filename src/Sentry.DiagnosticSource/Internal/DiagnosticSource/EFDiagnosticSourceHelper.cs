@@ -11,11 +11,6 @@ internal abstract class EFDiagnosticSourceHelper
 
     protected abstract string? GetDescription(object? diagnosticSourceValue);
 
-    protected string? GetQueryText(object? diagnosticSourceValue) =>
-        Options.DataCollectionResolver.DatabaseQueryData
-            ? FilterNewLineValue(diagnosticSourceValue) ?? string.Empty
-            : null;
-
     protected string? GetDatabaseName(object? diagnosticSourceValue) =>
         diagnosticSourceValue?.GetStringProperty("Connection.Database", Options.DiagnosticLogger);
 
