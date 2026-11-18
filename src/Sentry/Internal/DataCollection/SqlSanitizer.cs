@@ -15,6 +15,7 @@ internal static class SqlSanitizer
 
         internal string Run()
         {
+            CopyLeadingLineComments();
             while (_position < sql.Length)
             {
                 ScanToken();
@@ -26,6 +27,31 @@ internal static class SqlSanitizer
         private char Current => sql[_position];
 
         private char Peek(int offset = 1) => _position + offset < sql.Length ? sql[_position + offset] : '\0';
+
+        // EF Core writes TagWith() and TagWithCallSite() as "-- " lines ahead of the statement
+        private void CopyLeadingLineComments()
+        {
+            var commentEnd = 0;
+            while (_position < sql.Length)
+            {
+                if (char.IsWhiteSpace(Current))
+                {
+                    _position++;
+                }
+                else if (Current == '-' && Peek() == '-')
+                {
+                    SkipLineComment();
+                    commentEnd = _position;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            _output.Append(sql, 0, commentEnd);
+            _position = commentEnd;
+        }
 
         private void ScanToken()
         {
