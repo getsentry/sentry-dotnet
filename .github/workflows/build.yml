@@ -566,6 +566,18 @@ jobs:
         with:
           projects: test/Sentry.TrimTest/Sentry.TrimTest.csproj test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj
 
+      # See build-sentry
+      - name: Get Cocoa SDK cache key
+        id: cocoa-key
+        uses: ./.github/actions/cocoa-cache-key
+
+      - name: Restore Cocoa SDK
+        if: ${{ !startsWith(github.ref_name, 'release/') }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: modules/sentry-cocoa/Carthage
+          key: ${{ steps.cocoa-key.outputs.key }}
+
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
@@ -575,11 +587,8 @@ jobs:
       - name: Publish Test app (Android)
         run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-android36.0 -r android-arm64
 
-# We can't publish iOS applications on CI yet. We'd need a valid bundle identifier and to install the relevant
-# certificates/profiles on CI (presumably certs associated with the Sentry org).
-# See https://youtrack.jetbrains.com/issue/RIDER-17115/Could-not-find-any-available-provisioning-profiles-for-iOS
-#      - name: Publish Test app (iOS)
-#        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-ios26 -r ios-arm64
+      - name: Publish Test app (iOS)
+        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-ios26 -r ios-arm64
 
   # Nothing consumes the app samples, but their Release builds trim and AOT-compile each app, which made them the
   # last minutes of the Build step in the .NET legs. Here they build next to the legs instead of inside them.
