@@ -81,7 +81,7 @@ public class DataCollectionConfigurationTests
     public void Bind_SectionPresent_MergesIntoOptionsSetInCode()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection([new KeyValuePair<string, string>("DataCollection:DatabaseQueryData", "false")])
+            .AddInMemoryCollection([new KeyValuePair<string, string>("DataCollection:GraphQL:Document", "false")])
             .Build();
         var bindable = new BindableSentryOptions();
         config.Bind(bindable);
@@ -96,7 +96,7 @@ public class DataCollectionConfigurationTests
 
         options.DataCollection!.UserInfo.Should().BeFalse();
         options.DataCollection.Cookies.Mode.Should().Be(KeyValueCollectionMode.Off);
-        options.DataCollection.DatabaseQueryData.Should().BeFalse();
+        options.DataCollection.GraphQL.Document.Should().BeFalse();
     }
 
     [Fact]

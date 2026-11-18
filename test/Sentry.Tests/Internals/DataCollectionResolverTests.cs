@@ -14,7 +14,6 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeFalse();
-            resolver.DatabaseQueryData.Should().BeFalse();
             resolver.GraphQLDocument.Should().BeFalse();
             resolver.GraphQLVariables.Should().BeFalse();
             resolver.GenAIInputs.Should().BeFalse();
@@ -36,7 +35,6 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeTrue();
-            resolver.DatabaseQueryData.Should().BeTrue();
             resolver.GraphQLDocument.Should().BeTrue();
             resolver.GraphQLVariables.Should().BeTrue();
             resolver.GenAIInputs.Should().BeTrue();
@@ -90,7 +88,6 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeTrue();
-            resolver.DatabaseQueryData.Should().BeTrue();
             resolver.GraphQLDocument.Should().BeTrue();
             resolver.GraphQLVariables.Should().BeTrue();
             resolver.GenAIInputs.Should().BeTrue();
@@ -109,7 +106,6 @@ public class DataCollectionResolverTests
         var options = new SentryOptions { SendDefaultPii = true };
         options.ConfigureDataCollection(dataCollection =>
         {
-            dataCollection.DatabaseQueryData = false;
             dataCollection.HttpBodies = HttpBodyTypes.None;
             dataCollection.Cookies = KeyValueCollectionBehavior.Off;
             dataCollection.GraphQL.Document = false;
@@ -121,7 +117,6 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeTrue();
-            resolver.DatabaseQueryData.Should().BeFalse();
             resolver.GraphQLDocument.Should().BeFalse();
             resolver.GraphQLVariables.Should().BeTrue();
             resolver.GenAIInputs.Should().BeTrue();
