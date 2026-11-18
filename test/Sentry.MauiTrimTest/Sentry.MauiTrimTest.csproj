@@ -95,6 +95,11 @@
 		<ValidateXcodeVersion>false</ValidateXcodeVersion>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<!-- The Android SDK defaults to partial trimming, and then suppresses all trim analysis warnings -->
+		<TrimMode>full</TrimMode>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
 		<ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
