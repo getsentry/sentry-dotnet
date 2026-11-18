@@ -76,16 +76,6 @@ public class DataCollectionOptions
     public GenAIOptions GenAI { get; } = new();
 
     /// <summary>
-    /// Whether data associated with database queries is collected - bound query parameters, payloads for write
-    /// operations, and returned result data. Defaults to <c>true</c>.
-    /// </summary>
-    /// <remarks>
-    /// Sanitized query statements and structural metadata - the database system, query summary, operation name and
-    /// the table acted upon - are always collected.
-    /// </remarks>
-    public bool DatabaseQueryData { get; set; } = true;
-
-    /// <summary>
     /// How request and response headers are collected.
     /// </summary>
     public sealed class HttpHeaderOptions
