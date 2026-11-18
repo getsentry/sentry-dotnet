@@ -300,30 +300,6 @@ public class SentryEFCoreListenerTests
     }
 
     [Fact]
-    public void OnNext_DatabaseQueryDataDisabled_KeepsQueryText()
-    {
-        var fixture = new Fixture();
-        fixture.Options.ConfigureDataCollection(dataCollection => dataCollection.DatabaseQueryData = false);
-        var interceptor = new SentryEFCoreListener(fixture.Hub, fixture.Options);
-        var expectedSql = "SELECT * FROM rentals WHERE name = N'Jane'";
-        var efSql = "ef Junk\r\n" + expectedSql;
-
-        var queryEventData = new FakeDiagnosticEventData(efSql);
-        var connectionEventData = new FakeDiagnosticConnectionEventData("db username : password");
-        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
-
-        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
-        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
-        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
-        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
-        interceptor.OnNext(new(EFCommandExecuted, commandEventData));
-        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
-
-        fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s)).Description.Should().Be(expectedSql);
-        fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s)).Description.Should().Be(expectedSql);
-    }
-
-    [Fact]
     public void OnNext_HappyPathInsideChildSpan_IsValid()
     {
         // Arrange

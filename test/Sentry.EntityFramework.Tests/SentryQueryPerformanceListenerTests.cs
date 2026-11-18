@@ -197,19 +197,6 @@ public class SentryQueryPerformanceListenerTests
     }
 
     [Fact]
-    public void InterceptorInvoked_DatabaseQueryDataDisabled_KeepsCommandText()
-    {
-        var options = new SentryOptions();
-        options.ConfigureDataCollection(dataCollection => dataCollection.DatabaseQueryData = false);
-        var interceptor = new SentryQueryPerformanceListener(_fixture.Hub, options);
-        var query = "SELECT * FROM rentals WHERE name = 'Jane'";
-
-        interceptor.ReaderExecuting(new EffortCommand { CommandText = query }, new DbCommandInterceptionContext<DbDataReader>());
-
-        _fixture.Spans.Should().ContainSingle().Which.Description.Should().Be(query);
-    }
-
-    [Fact]
     public void FirstOrDefault_FromDatabase_CapturesQuery()
     {
         // Arrange

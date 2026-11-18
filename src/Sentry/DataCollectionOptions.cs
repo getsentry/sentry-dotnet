@@ -80,9 +80,8 @@ public class DataCollectionOptions
     /// operations, and returned result data. Defaults to <c>true</c>.
     /// </summary>
     /// <remarks>
-    /// Query statements and structural metadata - the database system, query summary, operation name and the table
-    /// acted upon - are always collected. The SDK doesn't collect query parameters, write payloads or result data yet,
-    /// so this setting currently has no effect.
+    /// Sanitized query statements and structural metadata - the database system, query summary, operation name and
+    /// the table acted upon - are always collected.
     /// </remarks>
     public bool DatabaseQueryData { get; set; } = true;
 

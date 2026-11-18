@@ -662,27 +662,6 @@ public class SentrySqlListenerTests
     }
 
     [Fact]
-    public void OnNext_DatabaseQueryDataDisabled_KeepsCommandText()
-    {
-        var fixture = new Fixture();
-        var options = new SentryOptions();
-        options.ConfigureDataCollection(dataCollection => dataCollection.DatabaseQueryData = false);
-        var interceptor = new SentrySqlListener(fixture.Hub, options);
-        var query = "SELECT * FROM rentals WHERE name = 'Jane'";
-        var operationId = Guid.NewGuid();
-        var connectionId = Guid.NewGuid();
-
-        interceptor.OnNext(
-            new(SqlMicrosoftBeforeExecuteCommand,
-                new { OperationId = operationId, ConnectionId = connectionId }));
-        interceptor.OnNext(
-            new(SqlMicrosoftAfterExecuteCommand,
-                new { OperationId = operationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
-
-        fixture.Spans.Should().ContainSingle().Which.Description.Should().Be(query);
-    }
-
-    [Fact]
     public void OnNext_ThrowsException_ExceptionIsolated()
     {
         // Arrange
