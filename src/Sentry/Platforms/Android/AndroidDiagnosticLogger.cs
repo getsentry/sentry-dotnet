@@ -9,6 +9,16 @@ internal class AndroidDiagnosticLogger : JavaObject, JavaSdk.ILogger
 
     public AndroidDiagnosticLogger(IDiagnosticLogger? logger) => _logger = logger;
 
+    // Without these, net10.0-android invokes the Java default methods non-virtually and throws AbstractMethodError
+    public void Log(JavaSdk.SentryLevel level, string message) =>
+        Log(level, message, Array.Empty<JavaObject>());
+
+    public void Log(JavaSdk.SentryLevel level, string message, JavaObject? arg) =>
+        Log(level, message, [arg!]);
+
+    public void Log(JavaSdk.SentryLevel level, string message, JavaObject? arg1, JavaObject? arg2) =>
+        Log(level, message, [arg1!, arg2!]);
+
     public void Log(JavaSdk.SentryLevel level, string message, JavaObject[]? args) =>
         _logger?.Log(level.ToSentryLevel(), "Android: " + FormatJavaString(message, args));
 
