@@ -40,9 +40,10 @@ public static class TracerProviderBuilderExtensions
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
     /// <remarks>
-    /// This integration doesn't apply <see cref="SentryOptions.ConfigureDataCollection"/>. It sets the user from
-    /// ASP.NET Core only when <see cref="SentryOptions.SendDefaultPii"/> is <c>true</c>, replaces sensitive URL query
-    /// values on spans using the default deny list, and sends all other span attributes as they are.
+    /// The user and span attributes this integration collects don't follow
+    /// <see cref="SentryOptions.ConfigureDataCollection"/>. It sets the user from ASP.NET Core only when
+    /// <see cref="SentryOptions.SendDefaultPii"/> is <c>true</c>, replaces sensitive URL query values on spans using the
+    /// default deny list, and sends all other span attributes as they are.
     /// </remarks>
     [Obsolete(ObsoleteAddSentry)]
     public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder,
