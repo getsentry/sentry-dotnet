@@ -2,10 +2,10 @@
 
 	<PropertyGroup>
 		<!-- This project deliberately isolates itself from the repo's Directory.Build.props /
-		     .targets (see the stubs alongside this file), so the centralized $(Previous*Tfm)
+		     .targets (see the stubs alongside this file), so the centralized $(Latest*Tfm) and $(Previous*Tfm)
 		     properties are NOT available here - they evaluate to empty and MSBuild then fails
 		     with MSB4006 (circular dependency in _GetRequiredWorkloads). Keep these literal. -->
-		<TargetFrameworks>net10.0-android36.0;net10.0-ios26</TargetFrameworks>
+		<TargetFrameworks>net10.0-android36.0;net11.0-android37.0;net10.0-ios26;net11.0-ios27.2</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net10.0-tizen</TargetFrameworks> -->
@@ -40,6 +40,7 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And $([MSBuild]::VersionGreaterThanOrEquals($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '11.0'))">24.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
@@ -87,6 +88,9 @@
 		<MSBuildWarningsAsErrors>$(MSBuildWarningsAsErrors);MT2387</MSBuildWarningsAsErrors>
 		<!-- Trimming and AOT compilation run before code signing, so the analysis needs no certificate -->
 		<EnableCodeSigning>false</EnableCodeSigning>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-ios26'">
 		<!-- The net10.0-ios26 pack only accepts Xcode 26.0, and CI builds with a newer Xcode -->
 		<ValidateXcodeVersion>false</ValidateXcodeVersion>
 	</PropertyGroup>
