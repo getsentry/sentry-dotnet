@@ -67,6 +67,10 @@ internal static class SqlSanitizer
                 case '.' when IsDigit(next) && !FollowsWord():
                     SkipNumber();
                     return;
+                case '@' or '#' when dialect == SqlDialect.Generic && IsDigit(next):
+                    _output.Append(current);
+                    _position++;
+                    return;
             }
 
             if (IsDigit(current))
@@ -261,8 +265,13 @@ internal static class SqlSanitizer
 
         private static bool IsWordStart(char c) => char.IsLetter(c) || c is '_' or '@' or '#';
 
-        private bool IsWordPart(char c) =>
-            char.IsLetterOrDigit(c) || c is '_' or '$' or '@' || (c == '#' && dialect != SqlDialect.MySql);
+        private bool IsWordPart(char c) => c switch
+        {
+            '_' or '$' => true,
+            '@' => dialect != SqlDialect.Generic,
+            '#' => dialect is SqlDialect.SqlServer or SqlDialect.Sqlite,
+            _ => char.IsLetterOrDigit(c)
+        };
 
         private static bool IsDigit(char c) => c is >= '0' and <= '9';
 

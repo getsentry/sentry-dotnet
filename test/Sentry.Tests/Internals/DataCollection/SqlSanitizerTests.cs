@@ -88,6 +88,18 @@ public class SqlSanitizerTests
         }
     }
 
+    [Theory]
+    [InlineData("SELECT @5, @ -5 FROM t", "SELECT @?, @ -? FROM t")]
+    [InlineData("SELECT 5 #3, 5#3, x#5 FROM t", "SELECT ? #?, ?#?, x#? FROM t")]
+    [InlineData("SELECT * FROM t WHERE a@1 = b", "SELECT * FROM t WHERE a@? = b")]
+    public void Sanitize_PostgreSqlOperatorsBeforeDigits_ReplaceTheNumber(string sql, string expected) =>
+        SqlSanitizer.Sanitize(sql).Should().Be(expected);
+
+    [Fact]
+    public void Sanitize_SqlServerAtAndHashBeforeDigits_AreIdentifiers() =>
+        SqlSanitizer.Sanitize("SELECT * FROM #1 JOIN t#2 ON @1 = 1", SqlDialect.SqlServer)
+            .Should().Be("SELECT * FROM #1 JOIN t#2 ON @1 = ?");
+
     [Fact]
     public void Sanitize_SqlServerMoneyLiteral_IsReplaced() =>
         SqlSanitizer.Sanitize("SELECT $12.50, $.5 FROM t", SqlDialect.SqlServer)
