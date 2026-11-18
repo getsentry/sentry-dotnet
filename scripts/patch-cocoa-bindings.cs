@@ -83,6 +83,7 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveProperty("SentryObjCOptions", "BeforeSendWithHint")
     .RemoveProperty("SentryObjCOptions", "BeforeBreadcrumbWithHint")
     .RemoveProperty("SentryObjCOptions", "ConfigureProfiling")
+    .RemoveProperty("SentryObjCOptions", "WebViewTracing")
     // Experimental MetricKit options; bind SentryObjCMetricKitOptions too if .NET ever exposes MetricKit.
     .RemoveProperty("SentryObjCExperimentalOptions", "Metrickit")
     // SentryObjCSDK is both the public entry point and the hybrid-SDK gateway (via `internal`).

@@ -893,6 +893,7 @@ namespace Sentry
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableBackpressureHandling { get; set; }
+        protected bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
@@ -917,6 +918,7 @@ namespace Sentry
         public bool RequestBodyCompressionBuffered { get; set; }
         public System.IO.Compression.CompressionLevel RequestBodyCompressionLevel { get; set; }
         public float? SampleRate { get; set; }
+        protected Sentry.IScopeObserver? ScopeObserver { get; set; }
         public bool SendClientReports { get; set; }
         public bool SendDefaultPii { get; set; }
         public Sentry.ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; }

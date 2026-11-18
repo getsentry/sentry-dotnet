@@ -1,0 +1,122 @@
+name: Mutation Testing
+
+on:
+  pull_request:
+    paths:
+      - 'src/**/*.cs'
+      - 'scripts/run-mutation-tests.ps1'
+      - '.github/workflows/mutation-testing.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  mutation-testing:
+    name: Mutation Testing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # This job builds and runs untrusted PR code, so the token stays read-only
+    permissions:
+      contents: read
+    outputs:
+      summary: ${{ steps.summary.outputs.summary }}
+    env:
+      NO_MOBILE: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+
+    steps:
+      # The pull request's merge commit and its first parent, the base branch, are all the diff needs
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+
+      - name: Check out the submodules the tests build
+        run: git submodule update --init --depth 1 modules/Ben.Demystifier modules/perfview
+
+      # The tests only run on the SDK global.json pins, so this skips the shared setup's older SDKs and workloads
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # Sentry.Maui.Tests is the only test project the script runs that needs a workload, maui-tizen on Linux. This also
+      # installs the workload version global.json pins, which every build needs
+      - name: Install the workloads the tests need
+        run: dotnet workload restore test/Sentry.Maui.Tests/Sentry.Maui.Tests.csproj --temp-dir "$RUNNER_TEMP" --skip-sign-check
+
+      - name: Install Stryker.NET
+        run: dotnet tool install --global dotnet-stryker --version 5.0.0
+
+      # Stryker failing or timing out on a big PR never fails the check; only the step below can
+      - name: Mutate the changed lines
+        id: mutate
+        continue-on-error: true
+        timeout-minutes: 25
+        shell: pwsh
+        run: scripts/run-mutation-tests.ps1 -Base HEAD^1
+
+      # A timeout leaves no report for the project Stryker was on, so the summary says not every line was checked
+      - name: Write the job summary
+        id: summary
+        if: always()
+        env:
+          MUTATE_OUTCOME: ${{ steps.mutate.outcome }}
+        run: |
+          if [[ "$MUTATE_OUTCOME" != success ]]; then
+            mkdir -p StrykerOutput
+            echo "### Stryker didn't finish, so not every changed line was checked. The job log has the details." >> StrykerOutput/summary.md
+          fi
+          tee -a "$GITHUB_STEP_SUMMARY" < StrykerOutput/summary.md
+          { echo 'summary<<EOF'; cat StrykerOutput/summary.md; echo 'EOF'; } >> "$GITHUB_OUTPUT"
+
+      # A surviving mutant only warns, because some can't be caught by any test, but a changed line no test runs fails
+      - name: Fail when no test runs a changed line
+        run: |
+          if grep -q '| NoCoverage |' StrykerOutput/summary.md 2>/dev/null; then
+            echo "::error::No test runs some of the lines this PR changes. The job summary lists them."
+            exit 1
+          fi
+
+      - name: Upload the reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mutation-reports
+          path: StrykerOutput/*/reports/mutation-report.html
+          if-no-files-found: ignore
+
+  comment:
+    name: Comment the mutants no test caught
+    needs: mutation-testing
+    # Runs when the check fails too, which is when the comment matters most. Fork PRs get a read-only token, so they only
+    # get the annotations
+    if: ${{ !cancelled() && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+
+    steps:
+      # Only starts a comment when a mutant survived or Stryker didn't run, but keeps an existing one up to date, so a
+      # fixed gap shows as fixed
+      - name: Comment on the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SUMMARY: ${{ needs.mutation-testing.outputs.summary }}
+        run: |
+          [[ -n "$SUMMARY" ]] || exit 0
+          marker='<!-- mutation-testing -->'
+          body="$marker
+          Mutation testing breaks the lines a PR changes on purpose, one mutation at a time, and checks that a test fails each time. A changed line no test runs fails the check, and a mutant that survives the tests only warns. [Full report]($RUN_URL)
+
+          $SUMMARY"
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)
+          if [[ -n "$id" ]]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
+          elif grep -q -E "\| (Survived|NoCoverage) \||Stryker (didn't finish|couldn't run)" <<< "$SUMMARY"; then
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "$body"
+          fi
