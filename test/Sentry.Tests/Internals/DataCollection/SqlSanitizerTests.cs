@@ -1,0 +1,180 @@
+using Sentry.Internal.DataCollection;
+
+namespace Sentry.Tests.Internals.DataCollection;
+
+public class SqlSanitizerTests
+{
+    [Theory]
+    [InlineData("SELECT * FROM users WHERE email = 'jane@example.com'", "SELECT * FROM users WHERE email = ?")]
+    [InlineData("SELECT * FROM users WHERE name = 'O''Brien' AND id = 1", "SELECT * FROM users WHERE name = ? AND id = ?")]
+    [InlineData("SELECT '' FROM t", "SELECT ? FROM t")]
+    [InlineData("SELECT 'a', 'b' FROM t", "SELECT ?, ? FROM t")]
+    [InlineData("SELECT 'C:\\' FROM t WHERE x = 'y'", "SELECT ? FROM t WHERE x = ?")]
+    [InlineData("SELECT 'multi\nline' FROM t", "SELECT ? FROM t")]
+    [InlineData("SELECT N'jane' FROM t", "SELECT ? FROM t")]
+    [InlineData("SELECT n'jane' FROM t", "SELECT ? FROM t")]
+    [InlineData("SELECT X'DEADBEEF', B'0101' FROM t", "SELECT ?, ? FROM t")]
+    [InlineData("SELECT E'it\\'s' FROM t WHERE x = 1", "SELECT ? FROM t WHERE x = ?")]
+    [InlineData("SELECT $$it's$$ FROM t", "SELECT ? FROM t")]
+    [InlineData("SELECT $tag$a $$ b$tag$ FROM t", "SELECT ? FROM t")]
+    public void Sanitize_StringLiterals_AreReplaced(string sql, string expected) =>
+        SqlSanitizer.Sanitize(sql).Should().Be(expected);
+
+    [Theory]
+    [InlineData("SELECT 42", "SELECT ?")]
+    [InlineData("SELECT -42", "SELECT -?")]
+    [InlineData("SELECT 3.14, .5, 1e10, 1.5E-3, 2e+8", "SELECT ?, ?, ?, ?, ?")]
+    [InlineData("SELECT 1_000_000", "SELECT ?")]
+    [InlineData("SELECT 0xDEADBEEF, 0X1f, 0b1010, 0o17", "SELECT ?, ?, ?, ?")]
+    [InlineData("SELECT * FROM t LIMIT 10 OFFSET 20", "SELECT * FROM t LIMIT ? OFFSET ?")]
+    [InlineData("SELECT * FROM t WHERE id IN (1, 2, 3)", "SELECT * FROM t WHERE id IN (?, ?, ?)")]
+    [InlineData("SELECT CHAR(13)", "SELECT CHAR(?)")]
+    public void Sanitize_NumericLiterals_AreReplaced(string sql, string expected) =>
+        SqlSanitizer.Sanitize(sql).Should().Be(expected);
+
+    [Theory]
+    [InlineData("SELECT 1 -- jane@example.com\nFROM t", "SELECT ? \nFROM t")]
+    [InlineData("SELECT 1 -- trailing", "SELECT ?")]
+    [InlineData("-- TagWith: jane\n\nSELECT 1", "SELECT ?")]
+    [InlineData("SELECT /* jane */ 1", "SELECT  ?")]
+    [InlineData("SELECT/* jane */1", "SELECT ?")]
+    [InlineData("SELECT /*+ INDEX(t idx) */ * FROM t", "SELECT  * FROM t")]
+    [InlineData("SELECT /* outer /* inner */ still a comment */ 1", "SELECT  ?")]
+    [InlineData("SELECT 1 /* unterminated 'jane'", "SELECT ?")]
+    [InlineData("SELECT '--not a comment', '/*nor this*/' FROM t", "SELECT ?, ? FROM t")]
+    public void Sanitize_Comments_AreRemoved(string sql, string expected) =>
+        SqlSanitizer.Sanitize(sql).Should().Be(expected);
+
+    [Theory]
+    [InlineData("SELECT \"u\".\"Id\", \"u\".\"Name\" FROM \"Users\" AS \"u\"")]
+    [InlineData("SELECT \"col \"\"1\"\"\" FROM t")]
+    [InlineData("SELECT `u`.`Id` FROM `Users` AS `u`")]
+    [InlineData("SELECT t1.col2, x9 FROM table3 AS t1")]
+    [InlineData("SELECT * FROM #temp JOIN ##global ON #temp.id = ##global.id")]
+    [InlineData("SELECT * FROM t WHERE a = @p0 AND b = @__name_1 AND c = @@ROWCOUNT")]
+    [InlineData("SELECT * FROM t WHERE a = :name AND b = ?")]
+    [InlineData("SELECT * FROM t WHERE a = $1 AND b = $2::int")]
+    [InlineData("OUTPUT $action, inserted.$IDENTITY")]
+    [InlineData("SELECT data->>'key' FROM t")]
+    public void Sanitize_IdentifiersAndPlaceholders_AreLeftAlone(string sql)
+    {
+        var expected = sql.Replace("'key'", "?");
+
+        SqlSanitizer.Sanitize(sql).Should().Be(expected);
+    }
+
+    [Fact]
+    public void Sanitize_SqlServerAndSqliteBrackets_AreIdentifiers()
+    {
+        const string sql = "SELECT [Order Details 2].[Unit's Price] FROM [dbo].[t]]1]";
+
+        using (new AssertionScope())
+        {
+            SqlSanitizer.Sanitize(sql, SqlDialect.SqlServer).Should().Be(sql);
+            SqlSanitizer.Sanitize(sql, SqlDialect.Sqlite).Should().Be(sql);
+        }
+    }
+
+    [Fact]
+    public void Sanitize_OtherDialectBrackets_AreNotIdentifiers()
+    {
+        const string sql = "SELECT ARRAY['jane'], tags[1] FROM t";
+        const string expected = "SELECT ARRAY[?], tags[?] FROM t";
+
+        using (new AssertionScope())
+        {
+            SqlSanitizer.Sanitize(sql, SqlDialect.Generic).Should().Be(expected);
+            SqlSanitizer.Sanitize(sql, SqlDialect.MySql).Should().Be(expected);
+        }
+    }
+
+    [Fact]
+    public void Sanitize_SqlServerMoneyLiteral_IsReplaced() =>
+        SqlSanitizer.Sanitize("SELECT $12.50, $.5 FROM t", SqlDialect.SqlServer)
+            .Should().Be("SELECT ?, ? FROM t");
+
+    [Theory]
+    [InlineData("SELECT * FROM t WHERE name = \"jane\"", "SELECT * FROM t WHERE name = ?")]
+    [InlineData("SELECT * FROM t WHERE name = 'it\\'s' AND x = 1", "SELECT * FROM t WHERE name = ? AND x = ?")]
+    [InlineData("SELECT * FROM t WHERE name = \"say \\\"hi\\\"\" AND x = 1", "SELECT * FROM t WHERE name = ? AND x = ?")]
+    [InlineData("SELECT 1 # jane@example.com\nFROM t", "SELECT ? \nFROM t")]
+    [InlineData("SELECT a# jane\nFROM t", "SELECT a\nFROM t")]
+    [InlineData("SELECT `Id` FROM `Users`", "SELECT `Id` FROM `Users`")]
+    public void Sanitize_MySql_UsesMySqlQuoting(string sql, string expected) =>
+        SqlSanitizer.Sanitize(sql, SqlDialect.MySql).Should().Be(expected);
+
+    [Fact]
+    public void Sanitize_DoubleQuotesOutsideMySql_AreIdentifiers()
+    {
+        const string sql = "SELECT \"Name\" FROM \"Users\" WHERE \"Id\" = 1";
+        const string expected = "SELECT \"Name\" FROM \"Users\" WHERE \"Id\" = ?";
+
+        using (new AssertionScope())
+        {
+            SqlSanitizer.Sanitize(sql, SqlDialect.Generic).Should().Be(expected);
+            SqlSanitizer.Sanitize(sql, SqlDialect.SqlServer).Should().Be(expected);
+            SqlSanitizer.Sanitize(sql, SqlDialect.Sqlite).Should().Be(expected);
+        }
+    }
+
+    [Theory]
+    [InlineData("SELECT * FROM t WHERE name = 'jane", "SELECT * FROM t WHERE name = ?")]
+    [InlineData("SELECT * FROM t WHERE name = 'jane'' AND id = 1", "SELECT * FROM t WHERE name = ?")]
+    [InlineData("SELECT * FROM t WHERE name = $$jane", "SELECT * FROM t WHERE name = ?")]
+    [InlineData("SELECT * FROM t WHERE name = $tag$jane$other$", "SELECT * FROM t WHERE name = ?")]
+    [InlineData("SELECT * FROM \"t WHERE name = 'jane'", "SELECT * FROM ?")]
+    [InlineData("SELECT * FROM `t WHERE name = 'jane'", "SELECT * FROM ?")]
+    [InlineData("SELECT * FROM t WHERE name = E'jane\\'", "SELECT * FROM t WHERE name = ?")]
+    public void Sanitize_UnterminatedLiteral_ReplacesTheRest(string sql, string expected) =>
+        SqlSanitizer.Sanitize(sql).Should().Be(expected);
+
+    [Fact]
+    public void Sanitize_UnterminatedDialectLiteral_ReplacesTheRest()
+    {
+        using (new AssertionScope())
+        {
+            SqlSanitizer.Sanitize("SELECT * FROM [t WHERE name = 'jane'", SqlDialect.SqlServer)
+                .Should().Be("SELECT * FROM ?");
+            SqlSanitizer.Sanitize("SELECT * FROM t WHERE name = \"jane\\\"", SqlDialect.MySql)
+                .Should().Be("SELECT * FROM t WHERE name = ?");
+        }
+    }
+
+    [Fact]
+    public void Sanitize_EfCoreSqliteCommand_KeepsStructure()
+    {
+        const string sql = """
+            SELECT "i"."Id", "i"."Name"
+            FROM "Items" AS "i"
+            WHERE "i"."Name" = 'jane@example.com' AND "i"."Id" > 42 AND "i"."Name" = @captured
+            LIMIT @p0 OFFSET @p
+            """;
+
+        SqlSanitizer.Sanitize(sql, SqlDialect.Sqlite).Should().Be("""
+            SELECT "i"."Id", "i"."Name"
+            FROM "Items" AS "i"
+            WHERE "i"."Name" = ? AND "i"."Id" > ? AND "i"."Name" = @captured
+            LIMIT @p0 OFFSET @p
+            """);
+    }
+
+    [Fact]
+    public void Sanitize_Null_ReturnsNull() =>
+        SqlSanitizer.Sanitize(null).Should().BeNull();
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("\r\n\t")]
+    [InlineData("-- only a comment")]
+    public void Sanitize_EmptyOrWhitespace_ReturnsEmpty(string sql) =>
+        SqlSanitizer.Sanitize(sql).Should().BeEmpty();
+
+    [Fact]
+    public void Sanitize_StatementWithoutLiterals_IsUnchanged()
+    {
+        const string sql = "UPDATE [Users] SET [Name] = @p0 WHERE [Id] = @p1;\nSELECT @@ROWCOUNT;";
+
+        SqlSanitizer.Sanitize(sql, SqlDialect.SqlServer).Should().Be(sql);
+    }
+}

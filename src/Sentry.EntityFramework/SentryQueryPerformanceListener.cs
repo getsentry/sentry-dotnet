@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 
 namespace Sentry.EntityFramework;
 
@@ -41,11 +42,17 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     private void CreateSpan<T>(string key, string? command,
         DbCommandInterceptionContext<T> interceptionContext)
     {
-        if (_hub.GetSpan()?.StartChild(key, command) is { } span)
+        if (_hub.GetSpan() is not { } parent)
         {
-            span.SetOrigin(EntityFrameworkOrigin);
-            interceptionContext.AttachSpan(span);
+            return;
         }
+
+        var description = _options.DataCollectionResolver.SanitizeDbStatements
+            ? SqlSanitizer.Sanitize(command)
+            : command;
+        var span = parent.StartChild(key, description);
+        span.SetOrigin(EntityFrameworkOrigin);
+        interceptionContext.AttachSpan(span);
     }
 
     /// <summary>

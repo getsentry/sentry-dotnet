@@ -1,3 +1,5 @@
+using Sentry.Internal.DataCollection;
+
 namespace Sentry.EntityFramework;
 
 internal class SentryQueryLogger : IQueryLogger
@@ -8,7 +10,9 @@ internal class SentryQueryLogger : IQueryLogger
 
     public void Log(string text, BreadcrumbLevel level = BreadcrumbLevel.Debug)
         => _hub.AddBreadcrumb(
-            message: text,
+            message: _hub.GetSentryOptions()?.DataCollectionResolver.SanitizeDbStatements == true
+                ? SqlSanitizer.Sanitize(text)
+                : text,
             category: "Entity Framework",
             type: null,
             data: null,

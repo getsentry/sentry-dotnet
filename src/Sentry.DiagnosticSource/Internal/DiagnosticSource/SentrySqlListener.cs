@@ -3,6 +3,7 @@
 #if !NETFRAMEWORK
 
 using Sentry.Extensibility;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal.DiagnosticSource;
@@ -210,7 +211,10 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             }
         }
 
-        commandSpan.Description = value.GetStringProperty("Command.CommandText", _options.DiagnosticLogger);
+        var commandText = value.GetStringProperty("Command.CommandText", _options.DiagnosticLogger);
+        commandSpan.Description = _options.DataCollectionResolver.SanitizeDbStatements
+            ? SqlSanitizer.Sanitize(commandText, SqlDialect.SqlServer)
+            : commandText;
         commandSpan.Finish(spanStatus);
     }
 

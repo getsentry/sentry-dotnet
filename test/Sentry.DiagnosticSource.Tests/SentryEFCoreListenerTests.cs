@@ -203,7 +203,7 @@ public class SentryEFCoreListenerTests
         {
             public class DatabaseInfo
             {
-                public string ProviderName { get; } = "Microsoft.EntityFrameworkCore.SqlServer";
+                public string ProviderName { get; set; } = "Microsoft.EntityFrameworkCore.SqlServer";
             }
             public DatabaseInfo Database { get; } = new();
         }
@@ -297,6 +297,53 @@ public class SentryEFCoreListenerTests
         ((SpanTracer)compilerSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
         ((SpanTracer)connectionSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
         ((SpanTracer)commandSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
+    }
+
+    [Fact]
+    public void OnNext_CommandExecuting_DataCollectionNotConfigured_DescriptionUnchanged()
+    {
+        // Arrange
+        const string sql = "SELECT [i].[Name] FROM [Items] AS [i] WHERE [i].[Name] = N'jane@example.com'";
+        var fixture = new Fixture();
+        var listener = new SentryEFCoreListener(fixture.Hub, fixture.Options);
+        var connection = new FakeDiagnosticConnectionEventData("connection");
+        var command = new FakeDiagnosticCommandEventData(connection, $"Executing DbCommand\r\n{sql}");
+
+        // Act
+        listener.OnNext(new(EFCommandExecuting, command));
+
+        // Assert
+        fixture.Spans.Single(s => s.Operation == "db.query").Description.Should().Be(sql);
+    }
+
+    [Theory]
+    [InlineData("Microsoft.EntityFrameworkCore.SqlServer",
+        "SELECT [Order 1].[Name] FROM [Order 1] WHERE [Name] = N'jane'",
+        "SELECT [Order 1].[Name] FROM [Order 1] WHERE [Name] = ?")]
+    [InlineData("Microsoft.EntityFrameworkCore.Sqlite",
+        "SELECT \"i\".\"Name\" FROM [Order 1] AS \"i\" WHERE \"i\".\"Name\" = 'jane' LIMIT 10",
+        "SELECT \"i\".\"Name\" FROM [Order 1] AS \"i\" WHERE \"i\".\"Name\" = ? LIMIT ?")]
+    [InlineData("Pomelo.EntityFrameworkCore.MySql",
+        "SELECT `i`.`Name` FROM `Items` AS `i` WHERE `i`.`Name` = \"jane\" OR `i`.`Name` = 'it\\'s'",
+        "SELECT `i`.`Name` FROM `Items` AS `i` WHERE `i`.`Name` = ? OR `i`.`Name` = ?")]
+    [InlineData("Npgsql.EntityFrameworkCore.PostgreSQL",
+        "SELECT \"i\".\"Name\" FROM \"Items\" AS \"i\" WHERE \"i\".\"Tags\" @> ARRAY['jane'] AND \"i\".\"Id\" = $1",
+        "SELECT \"i\".\"Name\" FROM \"Items\" AS \"i\" WHERE \"i\".\"Tags\" @> ARRAY[?] AND \"i\".\"Id\" = $1")]
+    public void OnNext_CommandExecuting_DataCollectionConfigured_SanitizesForProvider(string providerName, string sql, string expected)
+    {
+        // Arrange
+        var fixture = new Fixture();
+        fixture.Options.ConfigureDataCollection(_ => { });
+        var listener = new SentryEFCoreListener(fixture.Hub, fixture.Options);
+        var connection = new FakeDiagnosticConnectionEventData("connection");
+        var command = new FakeDiagnosticCommandEventData(connection, $"Executing DbCommand\r\n{sql}");
+        command.Context.Database.ProviderName = providerName;
+
+        // Act
+        listener.OnNext(new(EFCommandExecuting, command));
+
+        // Assert
+        fixture.Spans.Single(s => s.Operation == "db.query").Description.Should().Be(expected);
     }
 
     [Fact]
