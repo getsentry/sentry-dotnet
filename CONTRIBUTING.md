@@ -318,6 +318,47 @@ $ git add modules/sentry-cocoa   # otherwise the build restores the pinned commi
 $ dotnet build ...               # rebuilds the Cocoa SDK from the new ref
 ```
 
+## Bumping to a new sentry-cocoa major
+
+`Sentry.Bindings.Cocoa` fails the build when the submodule's major version doesn't match
+`SentryCocoaSupportedMajor` in `Sentry.Bindings.Cocoa.csproj`. The update workflow opens a
+`deps/modules/sentry-cocoa` PR for every new release, majors included, so a new major stops on that PR.
+Do the steps for that major on the PR, then raise `SentryCocoaSupportedMajor`. A new Cocoa major breaks
+the .NET SDK too, so it ships in a .NET major.
+
+To try a new major locally first, build with `-p:SentryCocoaSupportedMajor=<major>`.
+
+### sentry-cocoa 10
+
+This list comes from the V10 build of sentry-cocoa 9.35.0, before 10.0 was released. Check it against
+sentry-cocoa's `CHANGELOG_V10.md` and `develop-docs/KSCRASH_DOWNSTREAM_AUDIT.md` at the new version.
+
+- `sendDefaultPii` is gone, replaced by `dataCollection`
+  ([#5436](https://github.com/getsentry/sentry-dotnet/issues/5436)):
+  - Add `SentryObjCDataCollection*` to `KeepInterfaces` in `scripts/patch-cocoa-bindings.cs`. Don't drop
+    `SentryObjCOptions.DataCollection` with `RemoveProperty`.
+  - In the Cocoa `SentrySdk.ApplyDataCollection`, map the resolved `DataCollection` onto
+    `nativeOptions.DataCollection`, as `DataCollectionExtensions.ApplyTo` does on Android. Cocoa has no
+    GraphQL category.
+  - Always set `UserInfo`, even when `DataCollection` isn't configured. Cocoa's `userInfo` defaults to
+    `true`, so leaving it unset turns on IP inference and the installation-ID user for apps with
+    `SendDefaultPii = false`.
+- `crashedLastRun` and `onCrashedLastRun` are gone. Use `lastRunStatus` and `onLastRunStatusDetermined`,
+  which 9.x already has.
+- `enableAppHangTracking` is gone, with no replacement, so `SentryOptions.Native.EnableAppHangTracking`
+  needs a decision.
+- Session Replay's `maskAllText` and `maskAllImages` move to `options.privacy`.
+- `SentryObjCBreadcrumb.data` is read-only. `ToCocoaBreadcrumb` has to set each value with
+  `setDataValue:forKey:`.
+- KSCrash replaces SentryCrash. Keep `scripts/sentry-cocoa.xcconfig`, because KSCrash's managed signal
+  handling still reads `SENTRY_CRASH_MANAGED_RUNTIME`. Run the crash cases in
+  `integration-test/ios.Tests.ps1`: sentry-cocoa found duplicate `SIGABRT` events and spurious
+  `EXC_BAD_ACCESS` events for .NET
+  ([getsentry/sentry-cocoa#8797](https://github.com/getsentry/sentry-cocoa/issues/8797)).
+- These defaults change for apps that don't set them: MetricKit, scope persistence, the installation ID
+  as the fallback user ID, and file manager swizzling. For each, decide whether to keep Cocoa's new
+  default or set the 9.x one.
+
 ## Local Sentry Android SDK checkout
 
 Similarly, by default, `Sentry.Bindings.Android` downloads a pre-built Sentry Android SDK from
