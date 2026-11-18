@@ -78,7 +78,7 @@
 
   <Target Name="_EnsureSupportedCocoaMajor" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
     <PropertyGroup>
-      <_SentryCocoaVersioningFile>$(SentryCocoaCache)Sources\Configuration\Versioning.xcconfig</_SentryCocoaVersioningFile>
+      <_SentryCocoaVersioningFile>$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache)Sources/Configuration/Versioning.xcconfig))</_SentryCocoaVersioningFile>
       <_SentryCocoaMajor Condition="Exists('$(_SentryCocoaVersioningFile)')">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_SentryCocoaVersioningFile)')), `(?&lt;=MARKETING_VERSION\s*=\s*)\d+`).Value)</_SentryCocoaMajor>
     </PropertyGroup>
     <Error Condition="'$(_SentryCocoaMajor)' == ''"
