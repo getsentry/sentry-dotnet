@@ -346,8 +346,8 @@ public class SentryOptions
     /// <c>SendDefaultPii = false</c> to suppress user identity needs to set
     /// <see cref="DataCollectionOptions.UserInfo"/> to <c>false</c> here as well.
     /// <para>
-    /// The integrations are still being migrated onto these options. Until they are, <see cref="SendDefaultPii"/>
-    /// still decides what they collect, and setting a category here has no effect yet.
+    /// The integrations are still being migrated onto these options. Those that haven't moved yet still follow
+    /// <see cref="SendDefaultPii"/> and ignore the categories set here.
     /// </para>
     /// <para>Repeated calls build on the same options.</para>
     /// <para>This API is experimental, and it may change in the future.</para>

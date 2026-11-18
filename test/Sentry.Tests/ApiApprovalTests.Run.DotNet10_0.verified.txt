@@ -73,7 +73,6 @@ namespace Sentry
     public class DataCollectionOptions
     {
         public Sentry.KeyValueCollectionBehavior Cookies { get; set; }
-        public bool DatabaseQueryData { get; set; }
         public Sentry.DataCollectionOptions.GenAIOptions GenAI { get; }
         public Sentry.DataCollectionOptions.GraphQLOptions GraphQL { get; }
         public Sentry.HttpBodyTypes HttpBodies { get; set; }
