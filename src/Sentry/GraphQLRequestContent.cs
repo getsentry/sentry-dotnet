@@ -17,11 +17,14 @@ internal class GraphQLRequestContent
         RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase
         );
 
+    private readonly SentryOptions? _options;
+
     private IReadOnlyDictionary<string, object> Items { get; }
 
     public GraphQLRequestContent(string? requestContent, SentryOptions? options = null)
     {
         RequestContent = requestContent;
+        _options = options;
         if (requestContent is null)
         {
             Items = new Dictionary<string, object>().AsReadOnly();
@@ -80,9 +83,19 @@ internal class GraphQLRequestContent
         }
 
         var excludedKey = includeDocument ? VariablesKey : QueryKey;
+        var filtered = WithoutMember(RequestContent, excludedKey);
+        if (filtered is null)
+        {
+            _options?.LogDebug("Dropping the GraphQL request body, as it isn't a JSON GraphQL request that '{0}' can be removed from.", excludedKey);
+        }
+        return filtered;
+    }
+
+    private static string? WithoutMember(string requestContent, string excludedKey)
+    {
         try
         {
-            using var document = JsonDocument.Parse(RequestContent);
+            using var document = JsonDocument.Parse(requestContent);
             using var stream = new MemoryStream();
             using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }))
             {

@@ -59,13 +59,22 @@ public class GraphQlRequestContentTests
     [InlineData("not json")]
     [InlineData("\"query\"")]
     [InlineData("""[{"query":"{ a }"},1]""")]
-    public void FilterRequestContent_NotAGraphQLRequest_ReturnsNull(string requestBody)
+    public void FilterRequestContent_NotAGraphQLRequest_ReturnsNullAndLogs(string requestBody)
     {
-        var sut = new GraphQLRequestContent(requestBody);
+        var logger = new InMemoryDiagnosticLogger();
+        var options = new SentryOptions { Debug = true, DiagnosticLogger = logger };
+        var sut = new GraphQLRequestContent(requestBody, options);
 
         var result = sut.FilterRequestContent(includeDocument: true, includeVariables: false);
 
-        result.Should().BeNull();
+        using (new AssertionScope())
+        {
+            result.Should().BeNull();
+            logger.Entries.Should().Contain(entry =>
+                entry.Level == SentryLevel.Debug
+                && entry.Message.StartsWith("Dropping the GraphQL request body")
+                && entry.Args.Contains("variables"));
+        }
     }
 
     [Fact]

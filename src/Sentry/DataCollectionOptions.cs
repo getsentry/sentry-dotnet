@@ -124,6 +124,9 @@ public class DataCollectionOptions
         /// <summary>
         /// Whether the variables passed to GraphQL operations are collected. Defaults to <c>true</c>.
         /// </summary>
+        /// <remarks>
+        /// GraphQL servers may echo variable values in error messages and response bodies, which this option doesn't filter.
+        /// </remarks>
         public bool Variables { get; set; } = true;
     }
 
