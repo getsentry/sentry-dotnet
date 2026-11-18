@@ -273,4 +273,16 @@ public class SentryQueryPerformanceListenerTests
         // Assert
         _logger.DidNotReceiveWithAnyArgs().Log(default, default!);
     }
+
+    [Fact]
+    public void ReaderExecuting_NoActiveSpan_StartsNoSpan()
+    {
+        _fixture.Hub.GetSpan().ReturnsNull();
+        var context = new DbCommandInterceptionContext<DbDataReader>();
+
+        _fixture.GetListener().ReaderExecuting(new EffortCommand { CommandText = "SELECT 1" }, context);
+
+        _fixture.Spans.Should().BeEmpty();
+        context.GetSpanFromContext().Should().BeNull();
+    }
 }
