@@ -215,6 +215,19 @@ public class SentryQueryPerformanceListenerTests
     }
 
     [Fact]
+    public void ReaderExecuting_MySqlCommand_UsesMySqlQuoting()
+    {
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(_ => { });
+        var listener = new SentryQueryPerformanceListener(_fixture.Hub, options);
+        var command = new MySql.Data.MySqlClient.FakeMySqlCommand { CommandText = "SELECT * FROM Users WHERE Name = 'O\\'Brien'" };
+
+        listener.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
+
+        _fixture.Spans.Single().Description.Should().Be("SELECT * FROM Users WHERE Name = ?");
+    }
+
+    [Fact]
     public void FirstOrDefault_FromDatabase_CapturesQuery()
     {
         // Arrange

@@ -50,4 +50,23 @@ public class SentryQueryLoggerTests : IDisposable
 
         scope.Breadcrumbs.Single().Message.Should().Be(expectedMessage);
     }
+
+    [Fact]
+    public void Log_MySqlCommandThroughInterceptor_UsesMySqlQuoting()
+    {
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(_ => { });
+        SentryClientExtensions.SentryOptionsForTestingOnly = options;
+
+        var scope = new Scope(options);
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        hub.SubstituteConfigureScope(scope);
+        var interceptor = new SentryCommandInterceptor(new SentryQueryLogger(hub));
+        var command = new MySql.Data.MySqlClient.FakeMySqlCommand { CommandText = "SELECT * FROM Users WHERE Name = 'O\\'Brien'" };
+
+        interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
+
+        scope.Breadcrumbs.Single().Message.Should().Be("SELECT * FROM Users WHERE Name = ?");
+    }
 }
