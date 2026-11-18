@@ -44,6 +44,16 @@ public class AspNetCoreEnricherTests
         _scope.HasUser().Should().BeFalse();
     }
 
+    [Fact]
+    public void Enrich_NoOptions_NoUserOnScope()
+    {
+        // Act
+        Enrich(null!);
+
+        // Assert
+        _scope.HasUser().Should().BeFalse();
+    }
+
     [Theory]
     [InlineData(true, false)]
     [InlineData(false, true)]
