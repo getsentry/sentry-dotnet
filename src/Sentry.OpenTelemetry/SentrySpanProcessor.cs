@@ -10,6 +10,10 @@ namespace Sentry.OpenTelemetry;
 /// <summary>
 /// Sentry span processor for Open Telemetry.
 /// </summary>
+/// <remarks>
+/// This processor doesn't apply <see cref="SentryOptions.ConfigureDataCollection"/>. It replaces sensitive URL query
+/// values on spans using the default deny list, and sends all other span attributes as they are.
+/// </remarks>
 public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
