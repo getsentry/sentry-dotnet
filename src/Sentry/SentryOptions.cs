@@ -349,6 +349,11 @@ public class SentryOptions
     /// The integrations are still being migrated onto these options. Until they are, <see cref="SendDefaultPii"/>
     /// still decides what they collect, and setting a category here has no effect yet.
     /// </para>
+    /// <para>
+    /// On Android, calling this also turns on the native SDK's file path collection for file I/O spans, which has
+    /// no counterpart here. To turn it off, set the <c>io.sentry.data-collection.file-paths</c> metadata in
+    /// <c>AndroidManifest.xml</c> to <c>false</c>.
+    /// </para>
     /// <para>Repeated calls build on the same options.</para>
     /// <para>This API is experimental, and it may change in the future.</para>
     /// </remarks>
