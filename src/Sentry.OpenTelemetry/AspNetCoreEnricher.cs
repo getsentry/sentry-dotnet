@@ -8,7 +8,7 @@ internal class AspNetCoreEnricher : IOpenTelemetryEnricher
 
     public void Enrich(ISpan span, Activity activity, IHub hub, SentryOptions? options)
     {
-        if (options?.SendDefaultPii is true)
+        if (options?.DataCollectionResolver.UserInfo is true)
         {
             hub.ConfigureScope(static (scope, enricher) =>
             {

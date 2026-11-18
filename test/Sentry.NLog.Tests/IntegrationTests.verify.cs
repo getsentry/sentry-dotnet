@@ -71,6 +71,46 @@ public class IntegrationTests
     }
 
     [Fact]
+    public void UserLayouts_DataCollectionUserInfoDisabled_UserStillSent()
+    {
+        var transport = new RecordingTransport();
+
+        using (SentrySdk.Init(
+                   options =>
+                   {
+                       options.Transport = transport;
+                       options.Dsn = ValidDsn;
+                       options.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = false);
+                   }))
+        {
+            var configuration = new LoggingConfiguration();
+            configuration.AddSentry(
+                options => options.User = new SentryNLogUser
+                {
+                    Id = "myId",
+                    Username = "myUsername",
+                    Email = "me@example.com",
+                    IpAddress = "192.0.2.1",
+                });
+            LogManager.Configuration = configuration;
+
+            LogManager.GetLogger("MyApp.IntegrationTests").Error("message");
+            LogManager.Flush();
+        }
+
+        var user = transport.Payloads
+            .OfType<JsonSerializable>()
+            .Select(payload => payload.Source)
+            .OfType<SentryEvent>()
+            .Single()
+            .User;
+        user.Id.Should().Be("myId");
+        user.Username.Should().Be("myUsername");
+        user.Email.Should().Be("me@example.com");
+        user.IpAddress.Should().Be("192.0.2.1");
+    }
+
+    [Fact]
     public Task LoggingInsideTheContextOfLogging()
     {
         var transport = new RecordingTransport();
