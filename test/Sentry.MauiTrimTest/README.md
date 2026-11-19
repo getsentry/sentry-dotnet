@@ -7,7 +7,9 @@ The following commands can be used to test the bindings:
 
 ```bash
 dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-ios26 -r ios-arm64
+dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net11.0-ios27.2 -r ios-arm64
 dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-android36.0 -r android-arm64
+dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net11.0-android37.0 -r android-arm64
 ```
 
 The iOS app is published unsigned, so no certificate or provisioning profile is needed.

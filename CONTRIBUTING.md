@@ -254,7 +254,9 @@ they cost nothing, and the next LTS transition brings some of those versions bac
   `Directory.Build.props`/`.targets` stubs to isolate themselves from the repo's build
   customization. The centralized TFM properties are unavailable there — keep their TFMs literal.
   Using a property yields an empty `TargetFrameworks` and a confusing
-  `MSB4006: circular dependency ... _GetRequiredWorkloads`.
+  `MSB4006: circular dependency ... _GetRequiredWorkloads`. Bump their TFMs by hand, along with the
+  `SupportedOSPlatformVersion` values in `Sentry.MauiTrimTest`, and add a publish step to the
+  `trim-analysis` job for each new mobile TFM.
 - **`Sentry-CI-Build-macOS.slnf` is not every project.** A green build of it still leaves the
   Playwright test apps, `Sentry.AspNet.Tests`, `AndroidTestApp`, both trim tests and the
   integration-test app unbuilt. Build those separately.

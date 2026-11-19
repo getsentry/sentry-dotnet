@@ -550,11 +550,17 @@ jobs:
       - name: Publish Test app (macOS)
         run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64 -p:NO_MOBILE=true
 
-      - name: Publish Test app (Android)
+      - name: Publish Test app (Android, net10.0)
         run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-android36.0 -r android-arm64
 
-      - name: Publish Test app (iOS)
+      - name: Publish Test app (Android, net11.0)
+        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net11.0-android37.0 -r android-arm64
+
+      - name: Publish Test app (iOS, net10.0)
         run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net10.0-ios26 -r ios-arm64
+
+      - name: Publish Test app (iOS, net11.0)
+        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net11.0-ios27.2 -r ios-arm64
 
   # Nothing consumes the app samples, but their Release builds trim and AOT-compile each app, which made them the
   # last minutes of the Build step in the .NET legs. Here they build next to the legs instead of inside them.
