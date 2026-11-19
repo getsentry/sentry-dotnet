@@ -318,6 +318,17 @@ $ git add modules/sentry-cocoa   # otherwise the build restores the pinned commi
 $ dotnet build ...               # rebuilds the Cocoa SDK from the new ref
 ```
 
+## Bumping to a new sentry-cocoa major
+
+`Sentry.Bindings.Cocoa` fails the build when the submodule's major version doesn't match
+`SentryCocoaSupportedMajor` in `Sentry.Bindings.Cocoa.csproj`. The update workflow opens a
+`deps/modules/sentry-cocoa` PR for every new release, majors included, so a new major stops on that PR.
+Do the steps for that major on the PR, then raise `SentryCocoaSupportedMajor`. The steps for sentry-cocoa
+10 are in [#5972](https://github.com/getsentry/sentry-dotnet/issues/5972). A new Cocoa major breaks the
+.NET SDK too, so it ships in a .NET major.
+
+To try a new major locally first, build with `-p:SentryCocoaSupportedMajor=<major>`.
+
 ## Local Sentry Android SDK checkout
 
 Similarly, by default, `Sentry.Bindings.Android` downloads a pre-built Sentry Android SDK from

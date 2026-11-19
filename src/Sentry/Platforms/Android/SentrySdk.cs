@@ -58,9 +58,7 @@ public static partial class SentrySdk
             o.Release = defaults.Release;
             o.SampleRate = options.SampleRate.HasValue ? (JavaDouble)Convert.ToDouble(options.SampleRate.Value) : null;
             o.SendClientReports = options.SendClientReports;
-#pragma warning disable CS0618
-            o.SendDefaultPii = options.SendDefaultPii;
-#pragma warning restore CS0618
+            ApplyDataCollection(options, o);
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
@@ -219,6 +217,14 @@ public static partial class SentrySdk
         options.AddExceptionFilterForType<Java.Lang.RuntimeException>();
 
         // TODO: Pause/Resume
+    }
+
+    internal static void ApplyDataCollection(SentryOptions options, JavaSdk.SentryOptions nativeOptions)
+    {
+#pragma warning disable CS0618
+        nativeOptions.SendDefaultPii = options.SendDefaultPii;
+#pragma warning restore CS0618
+        options.DataCollection?.ApplyTo(nativeOptions.DataCollection);
     }
 
     internal static JavaSdk.SentryOptions.IBeforeSendCallback? CreateBeforeSendCallback(

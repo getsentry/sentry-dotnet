@@ -32,7 +32,7 @@ public static partial class SentrySdk
         nativeOptions.ReleaseName = defaults.Release;
         nativeOptions.SampleRate = options.SampleRate;
         nativeOptions.SendClientReports = options.SendClientReports;
-        nativeOptions.SendDefaultPii = options.SendDefaultPii;
+        ApplyDataCollection(options, nativeOptions);
         nativeOptions.SessionTrackingIntervalMillis = (nuint)options.AutoSessionTrackingInterval.TotalMilliseconds;
 
         nativeOptions.Environment = defaults.Environment;
@@ -197,6 +197,10 @@ public static partial class SentrySdk
         }
         // TODO: Pause/Resume
     }
+
+    // In sentry-cocoa 10, dataCollection.userInfo replaces sendDefaultPii and defaults to true, so always set it.
+    internal static void ApplyDataCollection(SentryOptions options, SentryCocoaSdkOptions nativeOptions) =>
+        nativeOptions.SendDefaultPii = options.DataCollectionResolver.UserInfo;
 
     internal static string GetDefaultReleaseString()
     {
