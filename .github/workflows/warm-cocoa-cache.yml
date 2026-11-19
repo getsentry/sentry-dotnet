@@ -32,25 +32,20 @@ jobs:
       - name: Pin the Xcode Version
         uses: ./.github/actions/pin-xcode
 
-      - name: Get Cocoa SDK cache key
-        id: cocoa-key
-        uses: ./.github/actions/cocoa-cache-key
-
       - name: Look up Cocoa SDK
-        id: cache-cocoa
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cocoa
+        uses: ./.github/actions/restore-cocoa-sdk
         with:
-          path: modules/sentry-cocoa/Carthage
-          key: ${{ steps.cocoa-key.outputs.key }}
+          restore-on-release: true
           lookup-only: true
 
       - name: Build Cocoa SDK
-        if: steps.cache-cocoa.outputs.cache-hit != 'true'
+        if: steps.cocoa.outputs.cache-hit != 'true'
         run: bash scripts/build-sentry-cocoa.sh
 
       - name: Save Cocoa SDK
-        if: steps.cache-cocoa.outputs.cache-hit != 'true'
+        if: steps.cocoa.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: modules/sentry-cocoa/Carthage
-          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
+          key: ${{ steps.cocoa.outputs.key }}
