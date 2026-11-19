@@ -59,6 +59,7 @@ public class GraphQlRequestContentTests
     [InlineData("not json")]
     [InlineData("\"query\"")]
     [InlineData("""[{"query":"{ a }"},1]""")]
+    [InlineData("""{"\ud83d":1,"query":"{ a }"}""")]
     public void FilterRequestContent_NotAGraphQLRequest_ReturnsNullAndLogs(string requestBody)
     {
         var logger = new InMemoryDiagnosticLogger();

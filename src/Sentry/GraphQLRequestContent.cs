@@ -123,7 +123,7 @@ internal class GraphQLRequestContent
             }
             return Encoding.UTF8.GetString(stream.ToArray());
         }
-        catch (JsonException)
+        catch (Exception)
         {
             return null;
         }
