@@ -207,7 +207,13 @@ internal enum SentryObjCMetricKitMetricReport : ulong
     MetalFramesPerSecond = 1uL << 49,
     MetalFrameCount = 1uL << 50,
     MetalActiveDrawingDuration = 1uL << 51,
-    All = (1uL << 52) - 0x1
+    LaunchTimeToFirstDraw = 1uL << 52,
+    LaunchResumeTime = 1uL << 53,
+    LaunchOptimizedTimeToFirstDraw = 1uL << 54,
+    LaunchExtended = 1uL << 55,
+    ResponsivenessHangTime = 1uL << 56,
+    CellularConditionTime = 1uL << 57,
+    All = (1uL << 58) - 0x1
 }
 
 [Native]

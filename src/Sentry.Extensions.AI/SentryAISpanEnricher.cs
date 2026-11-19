@@ -12,8 +12,10 @@ internal static class SentryAISpanEnricher
     /// Enriches a span with request information.
     /// </summary>
     internal static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options,
-        SentryAIOptions aiOptions, string operationName)
+        SentryAIOptions aiOptions, SentryOptions? sentryOptions, string operationName)
     {
+        var recordInputs = aiOptions.Experimental.ShouldRecordInputs(sentryOptions);
+
         span.SetData(SentryAIConstants.SpanAttributes.OperationName, operationName);
         span.SetOrigin(SentryAIConstants.SpanAttributes.Origin);
 
@@ -27,15 +29,15 @@ internal static class SentryAISpanEnricher
             span.SetData(SentryAIConstants.SpanAttributes.AgentName, agentName);
         }
 
-        if (messages is { Length: > 0 }
-            && aiOptions.Experimental.RecordInputs
+        if (recordInputs
+            && messages is { Length: > 0 }
             // Only add request messages if there is none currently
             && !span.Data.ContainsKey(SentryAIConstants.SpanAttributes.RequestMessages))
         {
             span.SetData(SentryAIConstants.SpanAttributes.RequestMessages, FormatRequestMessage(messages));
         }
 
-        if (options?.Tools is { } tools)
+        if (recordInputs && options?.Tools is { } tools)
         {
             span.SetData(SentryAIConstants.SpanAttributes.RequestAvailableTools, FormatAvailableTools(tools));
         }
@@ -76,9 +78,11 @@ internal static class SentryAISpanEnricher
     /// <param name="span">Span to enrich</param>
     /// <param name="response">Chat response containing usage and content data</param>
     /// <param name="aiOptions">AI-specific options</param>
-    internal static void EnrichWithResponse(ISpan span, ChatResponse response, SentryAIOptions aiOptions)
+    /// <param name="sentryOptions">The SDK options, for the data collection settings</param>
+    internal static void EnrichWithResponse(ISpan span, ChatResponse response, SentryAIOptions aiOptions,
+        SentryOptions? sentryOptions)
     {
-        EnrichWithStreamingResponses(span, [.. response.ToChatResponseUpdates()], aiOptions);
+        EnrichWithStreamingResponses(span, [.. response.ToChatResponseUpdates()], aiOptions, sentryOptions);
     }
 
     /// <summary>
@@ -87,9 +91,11 @@ internal static class SentryAISpanEnricher
     /// <param name="span">span to enrich</param>
     /// <param name="messages">a list of <see cref="ChatResponseUpdate"/></param>
     /// <param name="aiOptions">AI-specific options</param>
+    /// <param name="sentryOptions">The SDK options, for the data collection settings</param>
     internal static void EnrichWithStreamingResponses(ISpan span, List<ChatResponseUpdate> messages,
-        SentryAIOptions aiOptions)
+        SentryAIOptions aiOptions, SentryOptions? sentryOptions)
     {
+        var recordOutputs = aiOptions.Experimental.ShouldRecordOutputs(sentryOptions);
         var inputTokenCount = 0L;
         var outputTokenCount = 0L;
         var finalText = new StringBuilder();
@@ -110,20 +116,21 @@ internal static class SentryAISpanEnricher
                 span.SetData(SentryAIConstants.SpanAttributes.ResponseModel, modelId);
             }
 
-            if (message.Text is { } responseText)
+            if (recordOutputs && message.Text is { } responseText)
             {
                 finalText.Append(responseText);
             }
 
             // Only set tool call info in chat spans
-            if (message.FinishReason == ChatFinishReason.ToolCalls
+            if (recordOutputs
+                && message.FinishReason == ChatFinishReason.ToolCalls
                 && span.Operation == SentryAIConstants.SpanAttributes.ChatOperation)
             {
                 PopulateToolCallsInfo(message.Contents, span);
             }
         }
 
-        if (aiOptions.Experimental.RecordOutputs)
+        if (recordOutputs)
         {
             span.SetData(SentryAIConstants.SpanAttributes.ResponseText, finalText.ToString());
         }

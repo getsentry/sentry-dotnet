@@ -29,6 +29,19 @@ public class AutoSessionTrackingIntegrationTests
     }
 
     [Fact]
+    public void Register_AppLifecycleNotTracked_StartsSession()
+    {
+        // Arrange
+        var sut = new AutoSessionTrackingIntegration((_, _) => null);
+
+        // Act
+        sut.Register(_hub, new SentryOptions { AutoSessionTracking = true });
+
+        // Assert
+        _hub.Received(1).StartSession();
+    }
+
+    [Fact]
     public void Register_AppLifecycleTracked_RecoversPersistedSession()
     {
         // Arrange

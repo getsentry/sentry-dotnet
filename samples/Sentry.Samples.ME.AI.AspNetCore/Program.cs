@@ -26,13 +26,12 @@ if (openAiApiKey == null)
     throw new InvalidOperationException($"Environment variable for OpenAI API key '{varName}' is not set.");
 }
 
+// Prompts, responses and tool calls are recorded by default. To stop recording them for every chat client, set
+// GenAI.Inputs and GenAI.Outputs in options.ConfigureDataCollection. Setting options.Experimental.RecordInputs or
+// RecordOutputs in AddSentry overrides that for this chat client only.
 var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AsIChatClient()
-    .AddSentry(options =>
-    {
-        options.Experimental.RecordInputs = true;
-        options.Experimental.RecordOutputs = true;
-    });
+    .AddSentry();
 
 var client = new ChatClientBuilder(openAiClient)
     .UseFunctionInvocation()

@@ -780,12 +780,15 @@ public partial class HttpTransportTests
                 () => SentryResponses.GetRateLimitResponse("1:session")
             ));
 
+        var clock = new MockClock(DateTimeOffset.UtcNow);
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
                 Dsn = ValidDsn
             },
-            new HttpClient(httpHandler));
+            new HttpClient(httpHandler),
+            backpressureMonitor: null,
+            clock: clock);
 
         var session = new SentrySession("foo", "bar", "baz");
 
@@ -795,11 +798,7 @@ public partial class HttpTransportTests
         // Send session update with init=true
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
-        // Pretend the rate limit has already passed
-        foreach (var (category, _) in httpTransport.CategoryLimitResets)
-        {
-            httpTransport.CategoryLimitResets[category] = DateTimeOffset.Now - TimeSpan.FromDays(1);
-        }
+        clock.SetUtcNow(clock.GetUtcNow() + TimeSpan.FromDays(1));
 
         // Act
 
@@ -822,12 +821,15 @@ public partial class HttpTransportTests
                 () => SentryResponses.GetRateLimitResponse("1:session")
             ));
 
+        var clock = new MockClock(DateTimeOffset.UtcNow);
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
                 Dsn = ValidDsn
             },
-            new HttpClient(httpHandler));
+            new HttpClient(httpHandler),
+            backpressureMonitor: null,
+            clock: clock);
 
         var session = new SentrySession("foo", "bar", "baz");
 
@@ -837,11 +839,7 @@ public partial class HttpTransportTests
         // Send session update with init=true
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
-        // Pretend the rate limit has already passed
-        foreach (var (category, _) in httpTransport.CategoryLimitResets)
-        {
-            httpTransport.CategoryLimitResets[category] = DateTimeOffset.Now - TimeSpan.FromDays(1);
-        }
+        clock.SetUtcNow(clock.GetUtcNow() + TimeSpan.FromDays(1));
 
         // Act
 
@@ -981,7 +979,7 @@ public partial class HttpTransportTests
 
         var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
         var transactionCategory = new RateLimitCategory(EnvelopeItem.TypeValueTransaction);
-        httpTransport.CategoryLimitResets[transactionCategory] = DateTimeOffset.UtcNow.AddMonths(1);
+        httpTransport.CategoryLimitResets.Extend(transactionCategory, DateTimeOffset.UtcNow.AddMonths(1));
 
         var hub = Substitute.For<IHub>();
         var tracer = new TransactionTracer(hub, "name", "op");
@@ -1000,6 +998,44 @@ public partial class HttpTransportTests
         // 1 for each span + 1 for the transaction root span
         var expectedDiscardedSpanCount = transaction.Spans.Count + 1;
         options.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Span, expectedDiscardedSpanCount);
+    }
+
+    [Theory]
+    [InlineData("60:error", "10:error")]
+    [InlineData("10:error", "60:error")]
+    public async Task SendEnvelopeAsync_RateLimitsInSuccessiveResponses_KeepsLongerRateLimit(string firstRateLimit, string secondRateLimit)
+    {
+        // Arrange
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        var requestCount = 0;
+        using var httpHandler = new FakeHttpMessageHandler(() =>
+        {
+            requestCount++;
+            return SentryResponses.GetRateLimitResponse(requestCount == 1 ? firstRateLimit : secondRateLimit);
+        });
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                DiagnosticLogger = _testOutputLogger,
+                SendClientReports = false,
+                Debug = true
+            },
+            new HttpClient(httpHandler),
+            null,
+            clock: clock);
+
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        var transaction = new SentryTransaction("test", "test.op") { IsSampled = true };
+        await httpTransport.SendEnvelopeAsync(Envelope.FromTransaction(transaction));
+        clock.SetUtcNow(clock.GetUtcNow().AddSeconds(30));
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        requestCount.Should().Be(2);
     }
 
     [Fact]

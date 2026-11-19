@@ -82,6 +82,7 @@ internal class SentryMiddleware : IMiddleware
             // Resolve shared singletons to keep overhead constant - See #5378.
             _monitor = serviceProvider.GetRequiredService<IBlockingMonitor>();
             _listener = serviceProvider.GetRequiredService<TaskBlockingListener>();
+            _listener.Enable();
         }
     }
 

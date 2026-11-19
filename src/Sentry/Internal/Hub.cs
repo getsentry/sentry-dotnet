@@ -2,7 +2,6 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
@@ -819,45 +818,6 @@ internal class Hub : IHub, IDisposable
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture transaction: {0}", transaction.SpanId);
-        }
-    }
-
-    public void CaptureMetrics(IEnumerable<Metric> metrics)
-    {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        Metric[]? enumerable = null;
-        try
-        {
-            enumerable = metrics as Metric[] ?? metrics.ToArray();
-            _options.LogDebug("Capturing metrics.");
-            CurrentClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
-        }
-        catch (Exception e)
-        {
-            var metricEventIds = enumerable?.Select(m => m.EventId).ToArray() ?? [];
-            _options.LogError(e, "Failure to capture metrics: {0}", string.Join(",", metricEventIds));
-        }
-    }
-
-    public void CaptureCodeLocations(CodeLocations codeLocations)
-    {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        try
-        {
-            _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
-            CurrentClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failure to capture code locations");
         }
     }
 

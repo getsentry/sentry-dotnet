@@ -13,7 +13,6 @@ public class DataCollectionOptionsTests
         {
             options.DataCollection!.UserInfo.Should().BeTrue();
             options.DataCollection.HttpBodies.Should().Be(HttpBodyTypes.All);
-            options.DataCollection.DatabaseQueryData.Should().BeTrue();
             options.DataCollection.Cookies.Mode.Should().Be(KeyValueCollectionMode.DenyList);
             options.DataCollection.UrlQueryParams.Mode.Should().Be(KeyValueCollectionMode.DenyList);
             options.DataCollection.HttpHeaders.Request.Mode.Should().Be(KeyValueCollectionMode.DenyList);
@@ -52,12 +51,12 @@ public class DataCollectionOptionsTests
         var options = new SentryOptions();
 
         options.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = false);
-        options.ConfigureDataCollection(dataCollection => dataCollection.DatabaseQueryData = false);
+        options.ConfigureDataCollection(dataCollection => dataCollection.GraphQL.Document = false);
 
         using (new AssertionScope())
         {
             options.DataCollection!.UserInfo.Should().BeFalse();
-            options.DataCollection.DatabaseQueryData.Should().BeFalse();
+            options.DataCollection.GraphQL.Document.Should().BeFalse();
         }
     }
 }
