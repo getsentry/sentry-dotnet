@@ -11,6 +11,9 @@ namespace Sentry.Ben.BlockingDetector
 
         private readonly IBlockingMonitor _monitor;
         private readonly ITaskBlockingListenerState _state;
+        private readonly Lock _enableLock = new();
+        private EventSource? _tplEventSource;
+        private volatile bool _enabled;
 
         internal static StaticTaskBlockingListenerState DefaultState { get; } = new();
 
@@ -28,14 +31,49 @@ namespace Sentry.Ben.BlockingDetector
             _state = state ?? DefaultState;
         }
 
+        // The base constructor calls this before our constructor body runs
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
-            if (eventSource.Guid == s_tplGuid)
+            if (eventSource.Guid != s_tplGuid)
             {
-                // 3 == Task|TaskTransfer
-                EnableEvents(eventSource, EventLevel.Verbose, (EventKeywords)3);
+                return;
+            }
+
+            lock (_enableLock)
+            {
+                _tplEventSource = eventSource;
+                if (_enabled)
+                {
+                    EnableTplEvents(eventSource);
+                }
             }
         }
+
+        internal void Enable()
+        {
+            if (_enabled)
+            {
+                return;
+            }
+
+            lock (_enableLock)
+            {
+                if (_enabled)
+                {
+                    return;
+                }
+
+                _enabled = true;
+                if (_tplEventSource is { } tplEventSource)
+                {
+                    EnableTplEvents(tplEventSource);
+                }
+            }
+        }
+
+        // 3 == Task|TaskTransfer
+        private void EnableTplEvents(EventSource tplEventSource) =>
+            EnableEvents(tplEventSource, EventLevel.Verbose, (EventKeywords)3);
 
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {

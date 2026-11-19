@@ -4,6 +4,29 @@ namespace Sentry.Tests.Ben.BlockingDetector;
 
 public class TaskBlockingListenerTests
 {
+    [Fact]
+    public async Task Constructor_NotEnabled_IgnoresBlockingCalls()
+    {
+        var monitor = Substitute.For<IBlockingMonitor>();
+        using var listener = new TaskBlockingListener(monitor);
+
+        await Task.Run(() => Task.Delay(20).Wait());
+
+        monitor.DidNotReceiveWithAnyArgs().BlockingStart(default);
+    }
+
+    [Fact]
+    public async Task Enable_BlockingCall_BlockingStart()
+    {
+        var monitor = Substitute.For<IBlockingMonitor>();
+        using var listener = new TaskBlockingListener(monitor);
+
+        listener.Enable();
+        await Task.Run(() => Task.Delay(20).Wait());
+
+        monitor.Received().BlockingStart(DetectionSource.EventListener);
+    }
+
     [Theory]
     [InlineData(true, 0)]
     [InlineData(false, 1)]
