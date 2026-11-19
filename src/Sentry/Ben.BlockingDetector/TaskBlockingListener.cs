@@ -11,8 +11,7 @@ namespace Sentry.Ben.BlockingDetector
 
         private readonly IBlockingMonitor _monitor;
         private readonly ITaskBlockingListenerState _state;
-        private readonly Lock _enableLock = new();
-        private EventSource? _tplEventSource;
+        private volatile EventSource? _tplEventSource;
         private volatile bool _enabled;
 
         internal static StaticTaskBlockingListenerState DefaultState { get; } = new();
@@ -39,13 +38,10 @@ namespace Sentry.Ben.BlockingDetector
                 return;
             }
 
-            lock (_enableLock)
+            _tplEventSource = eventSource;
+            if (_enabled)
             {
-                _tplEventSource = eventSource;
-                if (_enabled)
-                {
-                    EnableTplEvents(eventSource);
-                }
+                EnableTplEvents(eventSource);
             }
         }
 
@@ -56,18 +52,10 @@ namespace Sentry.Ben.BlockingDetector
                 return;
             }
 
-            lock (_enableLock)
+            _enabled = true;
+            if (_tplEventSource is { } tplEventSource)
             {
-                if (_enabled)
-                {
-                    return;
-                }
-
-                _enabled = true;
-                if (_tplEventSource is { } tplEventSource)
-                {
-                    EnableTplEvents(tplEventSource);
-                }
+                EnableTplEvents(tplEventSource);
             }
         }
 
