@@ -13,8 +13,8 @@ internal class Enricher
         _options.ScopeDefaults.Apply(eventLike);
 
         // User
-        // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
-        if (_options.SendDefaultPii)
+        // Report local user if opted in to user info, no user was already set to event and feature not opted-out:
+        if (_options.DataCollectionResolver.UserInfo)
         {
             if (_options.IsEnvironmentUser && !eventLike.HasUser())
             {

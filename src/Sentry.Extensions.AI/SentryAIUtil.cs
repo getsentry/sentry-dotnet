@@ -4,14 +4,14 @@ namespace Sentry.Extensions.AI;
 
 internal static class SentryAIUtil
 {
-    internal static ISpan? GetFICCSpan()
+    internal static Activity? GetFICCActivity()
     {
         var currActivity = Activity.Current;
         while (currActivity != null)
         {
-            if (currActivity.GetFused<ISpan>(SentryAIConstants.SentryFICCSpanAttributeName) is { } span)
+            if (currActivity.GetFused<ISpan>(SentryAIConstants.SentryFICCSpanAttributeName) is not null)
             {
-                return span;
+                return currActivity;
             }
 
             currActivity = currActivity.Parent;
@@ -19,4 +19,13 @@ internal static class SentryAIUtil
 
         return null;
     }
+
+    internal static ISpan? GetFICCSpan(this Activity ficcActivity) =>
+        ficcActivity.GetFused<ISpan>(SentryAIConstants.SentryFICCSpanAttributeName);
+
+    internal static void SetAIOptions(this Activity ficcActivity, SentryAIOptions options) =>
+        ficcActivity.SetFused(options);
+
+    internal static SentryAIOptions? GetAIOptions(this Activity ficcActivity) =>
+        ficcActivity.GetFused<SentryAIOptions>();
 }

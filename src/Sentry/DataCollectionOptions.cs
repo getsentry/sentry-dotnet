@@ -6,8 +6,8 @@ namespace Sentry;
 /// Controls which categories of data the SDK's integrations collect automatically.
 /// </summary>
 /// <remarks>
-/// The integrations are still being migrated onto these options, so setting a category does not yet change what
-/// they collect; see <see cref="SentryOptions.ConfigureDataCollection"/>.
+/// The integrations are still being migrated onto these options, and those that haven't moved yet ignore these
+/// categories; see <see cref="SentryOptions.ConfigureDataCollection"/>.
 /// <para>
 /// Every category starts at the default from the data collection spec, which collects it - including user identity
 /// and HTTP bodies - with sensitive keys filtered out. Restrict an individual category by setting it.
@@ -33,6 +33,9 @@ public class DataCollectionOptions
     /// <see cref="SentryUser.Id"/>, <see cref="SentryUser.Email"/>, <see cref="SentryUser.Username"/> and the
     /// user's IP address. Defaults to <c>true</c>. A user you set yourself is never affected.
     /// </summary>
+    /// <remarks>
+    /// This option doesn't affect the SDK's installation ID, which still fills <see cref="SentryUser.Id"/> when no user ID is set.
+    /// </remarks>
     public bool UserInfo { get; set; } = true;
 
     /// <summary>

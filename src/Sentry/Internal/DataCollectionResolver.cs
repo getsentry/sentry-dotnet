@@ -25,9 +25,9 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public bool GraphQLVariables => Configured?.GraphQL.Variables ?? SendDefaultPii;
 
-    public bool GenAIInputs => Configured?.GenAI.Inputs ?? SendDefaultPii;
+    public bool GenAIInputs => Configured?.GenAI.Inputs ?? true;
 
-    public bool GenAIOutputs => Configured?.GenAI.Outputs ?? SendDefaultPii;
+    public bool GenAIOutputs => Configured?.GenAI.Outputs ?? true;
 
     public bool SanitizeDbStatements => Configured is not null;
 
