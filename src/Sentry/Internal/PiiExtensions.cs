@@ -8,7 +8,7 @@ internal static class PiiExtensions
 {
     internal const string RedactedText = "[Filtered]";
 
-    // Userinfo ends at the last '@' before the path, query or fragment, matching how sentry-java parses the authority
+    // Userinfo ends at the last '@' before the path, query or fragment, as sentry-python parses it
     private static readonly Regex UserInfoRegex = new(@"(?i)\b(https?://)([^\s/?#]*)@", RegexOptions.Compiled);
 
     /// <summary>
@@ -16,7 +16,7 @@ internal static class PiiExtensions
     /// </summary>
     public static string RedactUrl(this string data)
     {
-        if (string.IsNullOrWhiteSpace(data))
+        if (string.IsNullOrWhiteSpace(data) || data.IndexOf('@') < 0)
         {
             return data;
         }

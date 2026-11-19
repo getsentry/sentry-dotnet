@@ -9,7 +9,7 @@ internal static class UriExtensions
         // This is a safe way to get the HttpRequestUrl, even when DisablePathAndQueryCanonicalization is true
         // See https://github.com/getsentry/sentry-dotnet/issues/3387
         var safeUri = new UriBuilder(uri).Uri;
-        return safeUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.Unescaped)
+        return safeUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.SafeUnescaped)
             + QueryStringFilter.Filter(safeUri.Query, behavior);
     }
 

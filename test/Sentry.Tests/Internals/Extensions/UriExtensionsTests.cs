@@ -29,6 +29,16 @@ public class UriExtensionsTests
     }
 
     [Fact]
+    public void FilteredHttpRequestUrl_EncodedReservedCharactersInPath_StayEncoded()
+    {
+        var uri = new Uri("https://gitlab.com/api/v4/projects/group%2Fproject/files/a%3Ftoken%3Dsecret%23top");
+
+        var actual = uri.FilteredHttpRequestUrl();
+
+        actual.Should().Be("https://gitlab.com/api/v4/projects/group%2Fproject/files/a%3Ftoken%3Dsecret%23top");
+    }
+
+    [Fact]
     public void FilteredHttpRequestUrl_QueryParamsOff_DropsQuery()
     {
         var uri = new Uri("https://example.com/api/users?q=abc&page=5#top");

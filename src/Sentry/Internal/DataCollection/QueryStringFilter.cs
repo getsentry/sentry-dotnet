@@ -50,7 +50,7 @@ internal static class QueryStringFilter
     }
 
     [return: NotNullIfNotNull(nameof(url))]
-    internal static string? FilterUrl(string? url, KeyValueCollectionBehavior? behavior = null)
+    internal static string? FilterUrl(string? url)
     {
         if (url is null)
         {
@@ -65,13 +65,8 @@ internal static class QueryStringFilter
         }
 
         var queryEnd = fragmentStart < 0 ? url.Length : fragmentStart;
-        if (behavior?.Mode == KeyValueCollectionMode.Off)
-        {
-            return url[..queryStart] + url[queryEnd..];
-        }
-
         var query = url[(queryStart + 1)..queryEnd];
-        var filteredQuery = Filter(query, behavior);
+        var filteredQuery = Filter(query);
         return ReferenceEquals(filteredQuery, query) ? url : $"{url[..(queryStart + 1)]}{filteredQuery}{url[queryEnd..]}";
     }
 

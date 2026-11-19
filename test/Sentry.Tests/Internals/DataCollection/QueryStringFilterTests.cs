@@ -85,18 +85,6 @@ public class QueryStringFilterTests
             .Should().Be("page=5&tenant=[Filtered]");
 
     [Theory]
-    [InlineData("https://example.com/api/users?token=abc&page=5#top", "https://example.com/api/users#top")]
-    [InlineData("https://example.com/api/users?page=5", "https://example.com/api/users")]
-    [InlineData("https://example.com/api/users#a?page=5", "https://example.com/api/users#a?page=5")]
-    public void FilterUrl_Off_RemovesQuery(string input, string expected) =>
-        QueryStringFilter.FilterUrl(input, KeyValueCollectionBehavior.Off).Should().Be(expected);
-
-    [Fact]
-    public void FilterUrl_AllowList_KeepsOnlyMatchingValues() =>
-        QueryStringFilter.FilterUrl("https://example.com/?page=5&q=abc#top", KeyValueCollectionBehavior.AllowList("page"))
-            .Should().Be("https://example.com/?page=5&q=[Filtered]#top");
-
-    [Theory]
     [InlineData("https://example.com/api/users?token=abc&q=1", "https://example.com/api/users")]
     [InlineData("https://example.com/api/users#top", "https://example.com/api/users")]
     [InlineData("https://example.com/api/users?a=1#top", "https://example.com/api/users")]
