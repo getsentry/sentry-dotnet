@@ -198,7 +198,7 @@ public static partial class SentrySdk
         // TODO: Pause/Resume
     }
 
-    // sentry-cocoa 9 gates only user info on sendDefaultPii. For 10, see CONTRIBUTING.md#sentry-cocoa-10.
+    // In sentry-cocoa 10, dataCollection.userInfo replaces sendDefaultPii and defaults to true, so always set it.
     internal static void ApplyDataCollection(SentryOptions options, SentryCocoaSdkOptions nativeOptions) =>
         nativeOptions.SendDefaultPii = options.DataCollectionResolver.UserInfo;
 
