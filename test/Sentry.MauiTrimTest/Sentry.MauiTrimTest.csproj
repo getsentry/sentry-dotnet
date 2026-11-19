@@ -96,7 +96,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-		<!-- The Android SDK defaults to partial trimming, and then suppresses all trim analysis warnings -->
+		<!-- The Android SDK defaults to partial trimming -->
 		<TrimMode>full</TrimMode>
 	</PropertyGroup>
 
