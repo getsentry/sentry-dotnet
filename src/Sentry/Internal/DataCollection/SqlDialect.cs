@@ -2,7 +2,7 @@ namespace Sentry.Internal.DataCollection;
 
 internal enum SqlDialect
 {
-    Generic,
+    Generic,  // Postgres compatible
     SqlServer,
     MySql,
     Sqlite
