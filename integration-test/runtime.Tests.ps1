@@ -23,7 +23,18 @@ SentrySdk.Init(options =>
     options.Transport = new FakeTransport();
 });
 
-if (args.Length > 1 && !string.IsNullOrEmpty(args[1]))
+if (args.Length > 1 && args[1] == "CaughtNullReference")
+{
+    try
+    {
+        Console.WriteLine(Environment.GetEnvironmentVariable("SENTRY_UNDEFINED_VARIABLE")!.Length);
+    }
+    catch (NullReferenceException)
+    {
+        Console.WriteLine("Caught a NullReferenceException");
+    }
+}
+else if (args.Length > 1 && !string.IsNullOrEmpty(args[1]))
 {
 #pragma warning disable CS0618
     var crashType = (CrashType)Enum.Parse(typeof(CrashType), args[1]);
@@ -183,6 +194,18 @@ internal class FakeTransport : ITransport
         $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'True'"
         $type = $IsWindows ? 'EXCEPTION_ACCESS_VIOLATION' : 'SIGSEGV'
         $result.Envelopes() | Should -AnyElementMatch "`"exception`":{`"values`":\[{`"type`":`"$type`""
+    }
+
+    It 'Produces no spurious native crash (NullReferenceException)' {
+        runConsoleApp $true 'CaughtNullReference' | Should -AnyElementMatch 'Caught a NullReferenceException'
+
+        $result = Invoke-SentryServer {
+            Param([string]$url)
+            runConsoleApp $true '' ($url.Replace('http://', 'http://key@') + '/0')
+        }
+        $result.HasErrors() | Should -BeFalse
+        $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'False'"
+        $result.Envelopes() | Should -Not -AnyElementMatch '"exception":{"values":\[{"type":"(SIGSEGV|EXCEPTION_ACCESS_VIOLATION)"'
     }
 }
 
