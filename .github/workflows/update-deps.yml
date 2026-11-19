@@ -29,7 +29,7 @@ jobs:
           - name: CLI
             path: scripts/update-cli.ps1
     steps:
-      - uses: getsentry/github-workflows/updater@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+      - uses: getsentry/github-workflows/updater@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}

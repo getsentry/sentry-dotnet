@@ -1,5 +1,22 @@
 # Changelog
 
+## 7.0.1
+
+### Fixes 🐛
+
+- fix: keep the longer rate limit when a later response sends a shorter one by @ric-oliv with @sentry-junior in [#5946](https://github.com/getsentry/sentry-dotnet/pull/5946)
+- fix: Keep the transaction when `TransactionNameProvider` throws by @dingsdax with @sentry-junior in [#5941](https://github.com/getsentry/sentry-dotnet/pull/5941)
+- fix: SentryOptions subclasses can set ScopeObserver and EnableScopeSync again by @jamescrosswell and @claude in [#5930](https://github.com/getsentry/sentry-dotnet/pull/5930)
+- fix: Filter sensitive cookie values instead of sending raw cookies by @jamescrosswell and @claude in [#5894](https://github.com/getsentry/sentry-dotnet/pull/5894)
+- Values of sensitive URL query parameters, such as `token` or `session_id`, are now replaced with `[Filtered]` in events, spans and breadcrumbs, regardless of `SendDefaultPii`. Outbound HTTP and GraphQL span descriptions no longer include the query string or fragment. by @jamescrosswell and @claude in [#5891](https://github.com/getsentry/sentry-dotnet/pull/5891)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Cocoa SDK to v9.34.0 by @ric-oliv and @claude with @github-actions in [#5924](https://github.com/getsentry/sentry-dotnet/pull/5924)
+- chore(deps): update Java SDK to v8.64.0 by @ric-oliv and @claude with @github-actions in [#5923](https://github.com/getsentry/sentry-dotnet/pull/5923)
+
 ## 7.0.0
 
 Version 7 of the Sentry SDK for .NET adds support for .NET 11 and gives Sentry a single place to be initialized. It contains breaking changes, so read the upgrade notes below before you upgrade.

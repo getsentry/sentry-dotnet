@@ -62,4 +62,31 @@ public class AndroidDiagnosticLoggerTests
         androidLogger.Log(JavaSdk.SentryLevel.Debug, "test {value:%d}", new Java.Lang.Object[] { 123 });
         Assert.Contains("Debug: Android: test {value:123}", _fixture.TestLogger.Messages);
     }
+
+    private JavaSdk.DiagnosticLogger GetJavaLogger()
+    {
+        var options = new JavaSdk.SentryOptions { Debug = true, DiagnosticLevel = JavaSdk.SentryLevel.Debug };
+        return new JavaSdk.DiagnosticLogger(options, _fixture.GetSut());
+    }
+
+    [Fact]
+    public void Log_CalledFromJavaWithNoArgs_LogsMessage()
+    {
+        GetJavaLogger().Log(JavaSdk.SentryLevel.Debug, "test");
+        Assert.Contains("Debug: Android: test", _fixture.TestLogger.Messages);
+    }
+
+    [Fact]
+    public void Log_CalledFromJavaWithOneArg_FormatsMessage()
+    {
+        GetJavaLogger().Log(JavaSdk.SentryLevel.Debug, "test %s", (Java.Lang.Object)"foo");
+        Assert.Contains("Debug: Android: test foo", _fixture.TestLogger.Messages);
+    }
+
+    [Fact]
+    public void Log_CalledFromJavaWithTwoArgs_FormatsMessage()
+    {
+        GetJavaLogger().Log(JavaSdk.SentryLevel.Debug, "test %s, %d", (Java.Lang.Object)"foo", (Java.Lang.Object)2);
+        Assert.Contains("Debug: Android: test foo, 2", _fixture.TestLogger.Messages);
+    }
 }
