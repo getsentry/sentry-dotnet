@@ -47,7 +47,7 @@ internal class OtelPropagationContext : IExternalPropagationContext
         }
     }
 
-    public bool IsSampled => Current?.Recorded ?? false;
+    public bool? IsSampled => Current?.Recorded;
 
     /// <summary>
     /// th is a rejection threshold: T = (1 - sampling_probability) * 2^56, so we invert to get the sample rate.
