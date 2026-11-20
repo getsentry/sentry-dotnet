@@ -47,17 +47,6 @@ type = "pull_request"
 actions = ["opened", "synchronize", "reopened"]
 
 [[skills]]
-name = "sdk-review"
-paths = ["src/**", ".agents/skills/sdk-review/**"]
-ignorePaths = ["src/Sentry.Bindings.Cocoa/ApiDefinition.cs", "src/Sentry.Bindings.Cocoa/StructsAndEnums.cs"]
-incremental = true
-failOn = "off"
-
-[[skills.triggers]]
-type = "pull_request"
-actions = ["opened", "synchronize", "reopened"]
-
-[[skills]]
 name = "gha-security-review"
 incremental = true
 remote = "getsentry/skills"
