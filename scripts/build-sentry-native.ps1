@@ -135,12 +135,21 @@ try
         $transportFile = 'sentry-crash-transport' + ($IsWindows ? '.dll' : $IsMacOS ? '.dylib' : '.so')
         $transports = @(foreach ($rid in $rids)
         {
-            dotnet publish src/Sentry.Native.Transport -c Release -r $rid -o "$buildDir/transport/$rid" --nologo | Write-Host
+            # The transport uses no workloads, so it doesn't need the workload set that global.json pins
+            dotnet publish src/Sentry.Native.Transport -c Release -r $rid -o "$buildDir/transport/$rid" --nologo -p:MSBuildEnableWorkloadResolver=false | Write-Host
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "Failed to publish the transport for $rid"
+            }
             "$buildDir/transport/$rid/$transportFile"
         })
         if ($IsMacOS)
         {
             lipo -create @transports -output "$buildDir/transport/$transportFile"
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "Failed to combine the transports"
+            }
             $transports = @("$buildDir/transport/$transportFile")
         }
         Deploy-Library $transports[0] "$outDir/$transportFile"
