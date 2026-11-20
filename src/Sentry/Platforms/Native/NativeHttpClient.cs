@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 // Stryker disable all : only runs in Native AOT apps
 namespace Sentry.Native;
@@ -31,7 +32,8 @@ internal sealed class NativeHttpClient
 
     private void Send(IntPtr nativeRequest, IntPtr nativeResponse)
     {
-        using var request = CreateRequest(nativeRequest);
+        using var file = OpenBodyFile(nativeRequest);
+        using var request = CreateRequest(nativeRequest, file);
         _client ??= _options.GetHttpClient();
         // runs on the sentry-native transport thread, which has no synchronization context
         using var response = _client.SendAsync(request, _shutdown.Token).GetAwaiter().GetResult();
@@ -43,13 +45,19 @@ internal sealed class NativeHttpClient
         }
     }
 
-    private HttpRequestMessage CreateRequest(IntPtr nativeRequest)
+    private Stream? OpenBodyFile(IntPtr nativeRequest)
+    {
+        var path = sentry_http_request_get_body_file_path(nativeRequest, out _);
+        return path == IntPtr.Zero ? null : _options.FileSystem.OpenFileForReading(Marshal.PtrToStringUTF8(path)!);
+    }
+
+    private static HttpRequestMessage CreateRequest(IntPtr nativeRequest, Stream? file)
     {
         var method = Marshal.PtrToStringUTF8(sentry_http_request_get_method(nativeRequest))!;
         var url = Marshal.PtrToStringUTF8(sentry_http_request_get_url(nativeRequest))!;
         var request = new HttpRequestMessage(new HttpMethod(method), url)
         {
-            Content = CreateContent(nativeRequest)
+            Content = CreateContent(nativeRequest, file)
         };
 
         var count = (int)sentry_http_request_get_header_count(nativeRequest);
@@ -78,7 +86,7 @@ internal sealed class NativeHttpClient
         return request;
     }
 
-    private unsafe HttpContent? CreateContent(IntPtr nativeRequest)
+    private static unsafe HttpContent? CreateContent(IntPtr nativeRequest, Stream? file)
     {
         // only valid until SendRequest returns
         var body = sentry_http_request_get_body(nativeRequest, out var length);
@@ -87,10 +95,11 @@ internal sealed class NativeHttpClient
             return new StreamContent(new UnmanagedMemoryStream((byte*)body, (long)length));
         }
 
-        var path = sentry_http_request_get_body_file_path(nativeRequest, out _);
-        if (path != IntPtr.Zero)
+        if (file is not null)
         {
-            return new StreamContent(_options.FileSystem.OpenFileForReading(Marshal.PtrToStringUTF8(path)!));
+            sentry_http_request_get_body_file_path(nativeRequest, out length);
+            var offset = sentry_http_request_get_body_file_offset(nativeRequest);
+            return new StreamContent(new PartialStream(file, (long)offset, (long)length));
         }
 
         return null;
@@ -181,6 +190,9 @@ internal sealed class NativeHttpClient
 
     [DllImport("sentry-native")]
     private static extern IntPtr sentry_http_request_get_body_file_path(IntPtr request, out UIntPtr length);
+
+    [DllImport("sentry-native")]
+    private static extern UIntPtr sentry_http_request_get_body_file_offset(IntPtr request);
 
     [DllImport("sentry-native")]
     private static extern void sentry_http_response_set_status_code(IntPtr response, int statusCode);
