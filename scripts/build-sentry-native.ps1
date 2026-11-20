@@ -1,4 +1,4 @@
-param([switch] $Clean)
+param([switch] $Clean, [ValidateSet('inproc', 'native')] [string] $Backend = 'inproc')
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -8,7 +8,7 @@ try
     $submodule = 'modules/sentry-native'
     $sourceDir = 'src/Sentry/Platforms/Native'
     $outDir = 'src/Sentry/Platforms/Native/sentry-native'
-    $buildDir = "$submodule/build"
+    $buildDir = $Backend -eq 'native' ? "$submodule/build-native" : "$submodule/build"
     $actualBuildDir = "$buildDir/sentry-native"
 
     $additionalArgs = @()
@@ -72,6 +72,12 @@ try
         throw "Unsupported platform"
     }
 
+    $rids = $IsMacOS ? @('osx-arm64', 'osx-x64') : @(Split-Path -Leaf $outDir)
+    if ($Backend -eq 'native')
+    {
+        $outDir += '/native'
+    }
+
     git submodule update --init --recursive $submodule
 
     if ($Clean)
@@ -85,7 +91,7 @@ try
         -D CMAKE_BUILD_TYPE=RelWithDebInfo `
         -D SENTRY_SDK_NAME=sentry.native.dotnet `
         -D SENTRY_BUILD_SHARED_LIBS=0 `
-        -D SENTRY_BACKEND=inproc `
+        -D SENTRY_BACKEND=$Backend `
         -D SENTRY_TRANSPORT=custom `
         $additionalArgs
 
@@ -116,6 +122,28 @@ try
     if ($IsLinux)
     {
         Deploy-Library "$actualBuildDir/vendor/libunwind/${libPrefix}unwind$libExtension" "$outDir/${libPrefix}unwind$libExtension"
+    }
+    if ($Backend -eq 'native')
+    {
+        $exeExtension = $IsWindows ? '.exe' : ''
+        Deploy-Library "$actualBuildDir/sentry-crash$exeExtension" "$outDir/sentry-crash$exeExtension"
+        if ($IsWindows)
+        {
+            Deploy-Library "$actualBuildDir/sentry-wer.dll" "$outDir/sentry-wer.dll"
+        }
+
+        $transportFile = 'sentry-crash-transport' + ($IsWindows ? '.dll' : $IsMacOS ? '.dylib' : '.so')
+        $transports = @(foreach ($rid in $rids)
+        {
+            dotnet publish src/Sentry.Native.Transport -c Release -r $rid -o "$buildDir/transport/$rid" --nologo | Write-Host
+            "$buildDir/transport/$rid/$transportFile"
+        })
+        if ($IsMacOS)
+        {
+            lipo -create @transports -output "$buildDir/transport/$transportFile"
+            $transports = @("$buildDir/transport/$transportFile")
+        }
+        Deploy-Library $transports[0] "$outDir/$transportFile"
     }
 }
 finally

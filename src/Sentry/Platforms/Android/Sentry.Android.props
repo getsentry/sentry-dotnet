@@ -26,4 +26,9 @@
     <Using Include="Java.Util.HashMap" Alias="JavaHashMap" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- The Android SDK would take sentry-crash-transport.so for an Android native library -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);Platforms\Native\sentry-native\**</DefaultItemExcludes>
+  </PropertyGroup>
+
 </Project>
