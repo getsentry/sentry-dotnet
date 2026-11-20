@@ -106,6 +106,13 @@ internal static class C
             sentry_options_set_sample_rate(cOptions, options.SampleRate.Value);
         }
 
+        // for the sentry-crash daemon of the native backend
+        if (options.HttpProxy is WebProxy { Address: { } proxy })
+        {
+            options.DiagnosticLogger?.LogDebug("Setting Proxy: {0}", proxy);
+            sentry_options_set_proxy(cOptions, proxy.ToString());
+        }
+
         // Disabling the native in favor of the C# layer for now
         options.DiagnosticLogger?.LogDebug("Disabling native auto session tracking");
         sentry_options_set_auto_session_tracking(cOptions, 0);
@@ -358,6 +365,9 @@ internal static class C
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_environment(IntPtr options, string environment);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_options_set_proxy(IntPtr options, string proxy);
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_sample_rate(IntPtr options, double rate);

@@ -52,7 +52,7 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/CMakeLists.txt', 'src/Sentry/Platforms/Native/*.c') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1', 'src/Sentry/Platforms/Native/CMakeLists.txt', 'src/Sentry/Platforms/Native/*.c', 'src/Sentry/Platforms/Native/NativeHttpClient.cs', 'src/Sentry/Internal/PartialStream.cs', 'src/Sentry.Native.Transport/**') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
       - name: Build sentry-native (cache miss)
