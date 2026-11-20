@@ -196,6 +196,37 @@ public class SentryQueryPerformanceListenerTests
         span.Received(1).Finish(Arg.Is<SpanStatus>(status => status == SpanStatus.Ok));
     }
 
+    [Theory]
+    [InlineData(false, "SELECT * FROM Users WHERE Email = 'jane@example.com'")]
+    [InlineData(true, "SELECT * FROM Users WHERE Email = ?")]
+    public void ReaderExecuting_DataCollection_SanitizesOnlyWhenConfigured(bool configureDataCollection, string expectedDescription)
+    {
+        var options = new SentryOptions();
+        if (configureDataCollection)
+        {
+            options.ConfigureDataCollection(_ => { });
+        }
+        var listener = new SentryQueryPerformanceListener(_fixture.Hub, options);
+        var command = new EffortCommand { CommandText = "SELECT * FROM Users WHERE Email = 'jane@example.com'" };
+
+        listener.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
+
+        _fixture.Spans.Single().Description.Should().Be(expectedDescription);
+    }
+
+    [Fact]
+    public void ReaderExecuting_MySqlCommand_UsesMySqlQuoting()
+    {
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(_ => { });
+        var listener = new SentryQueryPerformanceListener(_fixture.Hub, options);
+        var command = new MySql.Data.MySqlClient.FakeMySqlCommand { CommandText = "SELECT * FROM Users WHERE Name = 'O\\'Brien'" };
+
+        listener.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
+
+        _fixture.Spans.Single().Description.Should().Be("SELECT * FROM Users WHERE Name = ?");
+    }
+
     [Fact]
     public void FirstOrDefault_FromDatabase_CapturesQuery()
     {
@@ -241,5 +272,17 @@ public class SentryQueryPerformanceListenerTests
 
         // Assert
         _logger.DidNotReceiveWithAnyArgs().Log(default, default!);
+    }
+
+    [Fact]
+    public void ReaderExecuting_NoActiveSpan_StartsNoSpan()
+    {
+        _fixture.Hub.GetSpan().ReturnsNull();
+        var context = new DbCommandInterceptionContext<DbDataReader>();
+
+        _fixture.GetListener().ReaderExecuting(new EffortCommand { CommandText = "SELECT 1" }, context);
+
+        _fixture.Spans.Should().BeEmpty();
+        context.GetSpanFromContext().Should().BeNull();
     }
 }

@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal.DiagnosticSource;
@@ -11,7 +12,21 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string Operation => "db.query";
 
-    protected override string GetDescription(object? diagnosticSourceValue) => FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
+    protected override string GetDescription(object? diagnosticSourceValue)
+    {
+        var commandText = FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
+        return Options.DataCollectionResolver.SanitizeDbStatements
+            ? SqlSanitizer.Sanitize(commandText, GetSqlDialect(diagnosticSourceValue))
+            : commandText;
+    }
+
+    private SqlDialect GetSqlDialect(object? diagnosticSourceValue) => GetDatabaseSystem(diagnosticSourceValue) switch
+    {
+        "mssql" or "mssqlcompact" => SqlDialect.SqlServer,
+        "mysql" or "spanner" => SqlDialect.MySql,
+        "sqlite" => SqlDialect.Sqlite,
+        _ => SqlDialect.Generic
+    };
 
     private Guid? GetCommandId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("CommandId", Options.DiagnosticLogger);
 

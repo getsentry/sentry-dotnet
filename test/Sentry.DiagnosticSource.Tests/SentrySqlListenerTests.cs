@@ -587,6 +587,40 @@ public class SentrySqlListenerTests
         fixture.Logger.Entries.Should().BeEmpty();
     }
 
+    [Theory]
+    [InlineData(false, "SELECT * FROM [Order Details 2] WHERE [Email] = N'jane@example.com' AND [Id] > 42")]
+    [InlineData(true, "SELECT * FROM [Order Details 2] WHERE [Email] = ? AND [Id] > ?")]
+    public void OnNext_DataCollection_SanitizesCommandTextOnlyWhenConfigured(bool configureDataCollection, string expectedDescription)
+    {
+        // Arrange
+        var fixture = new Fixture();
+        var options = new SentryOptions();
+        if (configureDataCollection)
+        {
+            options.ConfigureDataCollection(_ => { });
+        }
+        var listener = new SentrySqlListener(fixture.Hub, options);
+        var operationId = Guid.NewGuid();
+        var connectionId = Guid.NewGuid();
+
+        // Act
+        listener.OnNext(new(SqlMicrosoftBeforeExecuteCommand, new { OperationId = operationId, ConnectionId = connectionId }));
+        listener.OnNext(
+            new(SqlMicrosoftAfterExecuteCommand,
+                new
+                {
+                    OperationId = operationId,
+                    ConnectionId = connectionId,
+                    Command = new
+                    {
+                        CommandText = "SELECT * FROM [Order Details 2] WHERE [Email] = N'jane@example.com' AND [Id] > 42"
+                    }
+                }));
+
+        // Assert
+        fixture.Spans.Single().Description.Should().Be(expectedDescription);
+    }
+
     [Fact]
     public void OnNext_HappyPathWithError_TransactionWithErroredCommand()
     {
