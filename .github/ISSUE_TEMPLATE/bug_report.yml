@@ -21,6 +21,7 @@ body:
         - Sentry.DiagnosticSource
         - Sentry.EntityFramework
         - Sentry.Extensions.AI
+        - Sentry.Extensions.Hosting
         - Sentry.Extensions.Logging
         - Sentry.Google.Cloud.Functions
         - Sentry.Hangfire

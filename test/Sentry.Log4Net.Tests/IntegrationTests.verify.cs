@@ -104,12 +104,9 @@ public class IntegrationTests
         tracer.ActivateOptions();
         hierarchy.Root.AddAppender(tracer);
 
-        var appender = new SentryAppender(
-            _ => Substitute.For<IDisposable>(),
-            hub)
+        var appender = new SentryAppender(hub)
         {
             Layout = layout,
-            Dsn = ValidDsn,
             SendIdentity = true
         };
         appender.ActivateOptions();

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
-    <SentryAndroidSdkVersion>8.62.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>8.65.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <!-- This gets resolved by the DownloadSentryAndroidSdk unless using local maven references -->
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
@@ -76,6 +76,15 @@
   <!-- Dependencies for AndroidMavenLibrary references
        Matching what was shipped in the 10.0.100 workloads to avoid NU1608 warnings
        -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v11.0'">
+    <!-- These track what MAUI 11 resolves indirectly; mismatches surface as NU1608. -->
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.11.0.1" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.11.0.1" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.17.0" />
+    <!-- See the net10.0 group below for why this version is pinned the way it is -->
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.2.20" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetFrameworkVersion)' == 'v10.0'">
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.9.2.1" />
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.9.2.1" />
@@ -124,7 +133,12 @@
 
   <!-- A light-weight replacement for protobuf-javalite (see https://github.com/getsentry/sentry-java/pull/5157) -->
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.1.1" Bind="false" />
+    <AndroidMavenLibrary Include="com.abovevacant:epitaph" Version="0.2.0" Bind="false" />
+  </ItemGroup>
+
+  <!-- Transforms/**/*.xml is included for every TFM -->
+  <ItemGroup Condition="'$(TargetFramework)' != '' And $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '11.0'))">
+    <TransformFile Remove="Transforms\Metadata.Net11OrGreater.xml" />
   </ItemGroup>
 
   <ItemGroup>

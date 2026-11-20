@@ -52,7 +52,7 @@ internal class SdkComposer
         // Wrap the transport with the Spotlight one that double sends the envelope: Sentry + Spotlight
         if (_options.EnableSpotlight)
         {
-            var environment = _options.SettingLocator.GetEnvironment(true);
+            var environment = _options.ScopeDefaults.Environment;
             if (string.Equals(environment, Constants.ProductionEnvironmentSetting, StringComparison.OrdinalIgnoreCase))
             {
                 _options.LogWarning("""

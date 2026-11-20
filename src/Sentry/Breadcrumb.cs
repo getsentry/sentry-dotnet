@@ -13,8 +13,8 @@ public sealed class Breadcrumb : ISentryJsonSerializable
     private readonly IReadOnlyDictionary<string, string>? _data;
     private readonly string? _message;
 
-    private bool _sendDefaultPii = true;
-    internal void Redact() => _sendDefaultPii = false;
+    private bool _redacted;
+    internal void Redact() => _redacted = true;
 
     /// <summary>
     /// A timestamp representing when the breadcrumb occurred.
@@ -30,7 +30,7 @@ public sealed class Breadcrumb : ISentryJsonSerializable
     /// </summary>
     public string? Message
     {
-        get => _sendDefaultPii ? _message : _message?.RedactUrl();
+        get => _redacted ? _message?.RedactUrl() : _message;
         private init => _message = value;
     }
 
@@ -52,12 +52,12 @@ public sealed class Breadcrumb : ISentryJsonSerializable
     /// </remarks>
     public IReadOnlyDictionary<string, string>? Data
     {
-        get => _sendDefaultPii
-            ? _data
-            : _data?.ToDictionary(
+        get => _redacted
+            ? _data?.ToDictionary(
                 x => x.Key,
                 x => x.Value.RedactUrl()
             )
+            : _data
         ;
         private init => _data = value;
     }
@@ -165,8 +165,6 @@ public sealed class Breadcrumb : ISentryJsonSerializable
             "INFO" => BreadcrumbLevel.Info,
             "WARNING" => BreadcrumbLevel.Warning,
             "ERROR" => BreadcrumbLevel.Error,
-            // Renamed in v6 but kept here to avoid issues with cached envelopes. Can be safely removed in the future.
-            "CRITICAL" => BreadcrumbLevel.Fatal,
             "FATAL" => BreadcrumbLevel.Fatal,
             _ => default
         };

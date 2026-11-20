@@ -6,39 +6,31 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.AspNetCore.Tests;
 
-public class SentryAspNetCoreStructuredLoggerProviderTests
+public class SentryAspNetCoreStructuredLoggerProviderTests : IDisposable
 {
     private class Fixture
     {
-        public IOptions<SentryAspNetCoreOptions> Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
-        public SdkVersion Sdk { get; }
 
         public Fixture()
         {
-            var loggingOptions = new SentryAspNetCoreOptions();
-            loggingOptions.EnableLogs = true;
-
-            Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
+            SentryClientExtensions.SentryOptionsForTestingOnly = new SentryAspNetCoreOptions { EnableLogs = true };
             Clock = new MockClock();
-            Sdk = new SdkVersion
-            {
-                Name = "SDK Name",
-                Version = "SDK Version",
-            };
 
             Hub.IsEnabled.Returns(true);
         }
 
         public SentryAspNetCoreStructuredLoggerProvider GetSut()
         {
-            return new SentryAspNetCoreStructuredLoggerProvider(Options.Value, Hub, Clock, Sdk);
+            return new SentryAspNetCoreStructuredLoggerProvider(Hub, Clock);
         }
     }
 
     private readonly Fixture _fixture = new();
+
+    public void Dispose() => SentryClientExtensions.SentryOptionsForTestingOnly = null;
 
     [Fact]
     public void Type_CustomAttributes_HasProviderAliasAttribute()
@@ -56,7 +48,6 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
         using var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>()
-            .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
@@ -76,6 +67,17 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
     }
 
     [Fact]
+    public void CreateLogger_DefaultOptions_IsNotEnabled()
+    {
+        using var hub = new Hub(new SentryAspNetCoreOptions { Dsn = ValidDsn }, Substitute.For<ISentryClient>());
+        var provider = new SentryAspNetCoreStructuredLoggerProvider(hub);
+
+        var logger = provider.CreateLogger("CategoryName");
+
+        logger.IsEnabled(LogLevel.Critical).Should().BeFalse();
+    }
+
+    [Fact]
     public void CreateLogger_DependencyInjection_CanLog()
     {
         SentryLog? capturedLog = null;
@@ -85,7 +87,6 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
         using var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>()
-            .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 

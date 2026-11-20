@@ -46,13 +46,4 @@ public class SentryWebHostBuilderExtensionsIntegrationTests : AspNetSentrySdkTes
 
         Assert.False(SentrySdk.IsEnabled);
     }
-
-    [Fact]
-    public void UseSentry_OptionsNotInitializeSdk_DisabledSdk()
-    {
-        _ = _webHostBuilder.UseSentry(o => o.InitializeSdk = false)
-            .Build();
-
-        Assert.False(SentrySdk.IsEnabled);
-    }
 }

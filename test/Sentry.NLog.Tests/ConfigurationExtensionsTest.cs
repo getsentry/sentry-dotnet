@@ -12,21 +12,55 @@ public class ConfigurationExtensionsTest
     [Fact]
     public void AddSentry_ConfigCallback_CallbackInvoked()
     {
-        var expected = TimeSpan.FromDays(1);
-        var actual = new LoggingConfiguration().AddSentry(o => o.FlushTimeout = expected);
+        var actual = new LoggingConfiguration().AddSentry(o => o.MinimumEventLevel = LogLevel.Warn);
         var sentryTarget = Assert.IsType<SentryTarget>(actual.AllTargets[0]);
-        Assert.Equal(expected.TotalSeconds, sentryTarget.FlushTimeoutSeconds);
+        Assert.Equal(LogLevel.Warn.ToString(), sentryTarget.MinimumEventLevel);
     }
 
     [Fact]
-    public void AddSentry_DsnAndConfigCallback_CallbackInvokedAndDsnUsed()
+    public void AddSentry_TargetName_TargetNamed()
     {
-        var expectedTimeout = TimeSpan.FromDays(1);
-        var expectedDsn = "https://a@sentry.io/1";
-        var actual = new LoggingConfiguration().AddSentry(expectedDsn, o => o.FlushTimeout = expectedTimeout);
-        var sentryTarget = Assert.IsType<SentryTarget>(actual.AllTargets[0]);
-        Assert.Equal(expectedTimeout.TotalSeconds, sentryTarget.FlushTimeoutSeconds);
-        Assert.Equal(expectedDsn, sentryTarget.Options.Dsn);
+        var actual = new LoggingConfiguration().AddSentry(targetName: "custom");
+        Assert.Equal("custom", actual.AllTargets[0].Name);
+    }
+
+    [Fact]
+    public void AddSentry_DefaultOptions_RuleStartsAtInfo()
+    {
+        var actual = new LoggingConfiguration().AddSentry();
+
+        Assert.Equal(new[] { LogLevel.Info, LogLevel.Warn, LogLevel.Error, LogLevel.Fatal },
+            Assert.Single(actual.LoggingRules).Levels);
+    }
+
+    [Theory]
+    [InlineData("Trace", "Info", "Info", "Trace")]
+    [InlineData("Info", "Debug", "Info", "Debug")]
+    [InlineData("Info", "Info", "Trace", "Trace")]
+    [InlineData("Off", "Off", "Warn", "Warn")]
+    public void AddSentry_RuleStartsAtLowestMinimumLevel(string eventLevel, string breadcrumbLevel, string logLevel, string expected)
+    {
+        var actual = new LoggingConfiguration().AddSentry(o =>
+        {
+            o.MinimumEventLevel = LogLevel.FromString(eventLevel);
+            o.MinimumBreadcrumbLevel = LogLevel.FromString(breadcrumbLevel);
+            o.MinimumLogLevel = LogLevel.FromString(logLevel);
+        });
+
+        Assert.Equal(LogLevel.FromString(expected), Assert.Single(actual.LoggingRules).Levels.Min());
+    }
+
+    [Fact]
+    public void AddSentry_AllMinimumLevelsNull_RuleHasNoLevels()
+    {
+        var actual = new LoggingConfiguration().AddSentry(o =>
+        {
+            o.MinimumEventLevel = null;
+            o.MinimumBreadcrumbLevel = null;
+            o.MinimumLogLevel = null;
+        });
+
+        Assert.Empty(Assert.Single(actual.LoggingRules).Levels);
     }
 
     [Fact]

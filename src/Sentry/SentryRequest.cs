@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -70,6 +71,12 @@ public sealed class SentryRequest : ISentryJsonSerializable
     public string? QueryString { get; set; }
 
     /// <summary>
+    /// Gets or sets the fragment of the request URL, without the leading <c>#</c>.
+    /// </summary>
+    /// <value>The URL fragment.</value>
+    public string? Fragment { get; set; }
+
+    /// <summary>
     /// Gets or sets the cookies.
     /// </summary>
     /// <value>The cookies.</value>
@@ -99,17 +106,20 @@ public sealed class SentryRequest : ISentryJsonSerializable
     /// <value>The other.</value>
     public IDictionary<string, string> Other => InternalOther ??= new Dictionary<string, string>();
 
-    internal void AddHeaders(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers)
+    internal void AddHeaders(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers,
+        KeyValueCollectionBehavior? behavior = null)
     {
+        if (behavior?.Mode == KeyValueCollectionMode.Off)
+        {
+            return;
+        }
+
         foreach (var header in headers)
         {
-            // Always redact the Authorization header
-            if (header.Key.Equals("Authorization", StringComparison.OrdinalIgnoreCase))
-            {
-                Headers.Add(header.Key, PiiExtensions.RedactedText);
-                continue;
-            }
-            Headers.Add(header.Key, string.Join("; ", header.Value));
+            var value = string.Join("; ", header.Value);
+            Headers.Add(header.Key, behavior is null
+                ? SensitiveDataFilter.FilterHeaderValue(header.Key, value)
+                : SensitiveDataFilter.FilterHeaderValue(header.Key, value, behavior));
         }
     }
 
@@ -141,6 +151,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
         request.Method ??= Method;
         request.Data ??= Data;
         request.QueryString ??= QueryString;
+        request.Fragment ??= Fragment;
         request.Cookies ??= Cookies;
 
         InternalEnv?.TryCopyTo(request.Env);
@@ -160,6 +171,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
         writer.WriteStringIfNotWhiteSpace("method", Method);
         writer.WriteDynamicIfNotNull("data", Data, logger);
         writer.WriteStringIfNotWhiteSpace("query_string", QueryString);
+        writer.WriteStringIfNotWhiteSpace("fragment", Fragment);
         writer.WriteStringIfNotWhiteSpace("cookies", Cookies);
 
         writer.WriteEndObject();
@@ -177,6 +189,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
         var method = json.GetPropertyOrNull("method")?.GetString();
         var data = json.GetPropertyOrNull("data")?.GetDynamicOrNull();
         var query = json.GetPropertyOrNull("query_string")?.GetString();
+        var fragment = json.GetPropertyOrNull("fragment")?.GetString();
         var cookies = json.GetPropertyOrNull("cookies")?.GetString();
 
         return new SentryRequest
@@ -188,6 +201,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
             Method = method,
             Data = data,
             QueryString = query,
+            Fragment = fragment,
             Cookies = cookies
         };
     }

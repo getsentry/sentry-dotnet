@@ -1,7 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry.Protocol.Envelopes;
 
@@ -23,7 +22,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     internal const string TypeValueClientReport = "client_report";
     internal const string TypeValueProfile = "profile";
     internal const string TypeValueMetric = "statsd";
-    internal const string TypeValueCodeLocations = "metric_meta";
     internal const string TypeValueLog = "log";
     internal const string TypeValueTraceMetric = "trace_metric";
 
@@ -291,34 +289,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         };
 
         return new EnvelopeItem(header, new JsonSerializable(transaction));
-    }
-
-    /// <summary>
-    /// Creates an <see cref="EnvelopeItem"/> from one or more <paramref name="codeLocations"/>.
-    /// </summary>
-    internal static EnvelopeItem FromCodeLocations(CodeLocations codeLocations)
-    {
-        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-        {
-            [TypeKey] = TypeValueCodeLocations
-        };
-
-        // Note that metrics are serialized using statsd encoding (not JSON)
-        return new EnvelopeItem(header, new JsonSerializable(codeLocations));
-    }
-
-    /// <summary>
-    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="metric"/>.
-    /// </summary>
-    internal static EnvelopeItem FromMetric(Metric metric)
-    {
-        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-        {
-            [TypeKey] = TypeValueMetric
-        };
-
-        // Note that metrics are serialized using statsd encoding (not JSON)
-        return new EnvelopeItem(header, metric);
     }
 
     /// <summary>

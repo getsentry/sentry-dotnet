@@ -203,6 +203,31 @@ public class ServerFilterTests
     }
 
     [Fact]
+    public void OnPerforming_LoggerNotGiven_UsesDiagnosticLoggerConfiguredAfterConstruction()
+    {
+        // Arrange
+        var fixture = new RecurringJobFixture { Cron = "0 2 * * *", Job = ReportJob("eu") };
+        fixture.OtherRecurringJobs.Add(("report-us", "0 8 * * *", null, ReportJob("us")));
+        fixture.GetSut();
+        var filter = new SentryServerFilter(fixture.Hub, null, fixture.Options, fixture.Clock);
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions { Debug = true, DiagnosticLogger = fixture.Logger };
+
+        // Act
+        try
+        {
+            filter.OnPerforming(fixture.PerformingContext);
+        }
+        finally
+        {
+            SentryClientExtensions.SentryOptionsForTestingOnly = null;
+        }
+
+        // Assert
+        fixture.Logger.Received(1).Log(SentryLevel.Debug, Arg.Is<string>(m => m.Contains("with a different schedule")),
+            null, Arg.Any<object[]>());
+    }
+
+    [Fact]
     public void OnPerforming_RecurringJobsShareSlugWithDifferentTimeZone_SendsCheckInWithoutMonitorConfig()
     {
         // Arrange

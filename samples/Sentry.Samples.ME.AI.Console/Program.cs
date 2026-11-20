@@ -27,15 +27,13 @@ SentrySdk.Init(options =>
     options.TracesSampleRate = 1;
 });
 
-// Create OpenAI API client and wrap it with Sentry instrumentation
+// Create OpenAI API client and wrap it with Sentry instrumentation.
+// Prompts, responses and tool calls are recorded by default. To stop recording them for every chat client, set
+// GenAI.Inputs and GenAI.Outputs in options.ConfigureDataCollection. Setting options.Experimental.RecordInputs or
+// RecordOutputs in AddSentry overrides that for this chat client only.
 var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AsIChatClient()
-    .AddSentry(options =>
-    {
-        // AI-specific settings
-        options.Experimental.RecordInputs = true;
-        options.Experimental.RecordOutputs = true;
-    });
+    .AddSentry();
 
 var client = new ChatClientBuilder(openAiClient)
     .UseFunctionInvocation()

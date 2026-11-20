@@ -28,7 +28,7 @@
               Message: message = {arg},
               Formatted: message = "arg value"
             },
-            Logger: Sentry.NLog.Tests.IntegrationTests,
+            Logger: MyApp.IntegrationTests,
             Platform: csharp,
             SentryExceptions: [
               {
@@ -40,8 +40,8 @@
                       FileName: IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
-                      LineNumber: 52,
-                      ColumnNumber: 17,
+                      LineNumber: 57,
+                      ColumnNumber: 21,
                       AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
                       ContextLine: null,
                       InApp: false,
@@ -99,8 +99,29 @@
               arg: arg value
             },
             Tags: {
-              logger: Sentry.NLog.Tests.IntegrationTests
+              logger: MyApp.IntegrationTests
             }
+          }
+        }
+      }
+    ]
+  },
+  {
+    Header: {
+      sdk: {
+        name: sentry.dotnet
+      }
+    },
+    Items: [
+      {
+        Header: {
+          content_type: application/vnd.sentry.items.log+json,
+          item_count: 1,
+          type: log
+        },
+        Payload: {
+          Source: {
+            Length: 1
           }
         }
       }

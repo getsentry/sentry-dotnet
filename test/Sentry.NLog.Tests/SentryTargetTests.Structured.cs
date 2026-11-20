@@ -7,11 +7,10 @@ public partial class SentryTargetTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Write_StructuredLogging_UseHubOptionsOverTargetOptions(bool isEnabled)
+    public void Write_StructuredLogging_RequiresHubOptions(bool isEnabled)
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         if (!isEnabled)
         {
@@ -41,13 +40,56 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
+        _fixture.Options.MinimumLogLevel = LogLevel.Trace;
 
         var logger = _fixture.GetLogger();
 
         logger.Log(level, "Message");
 
         capturer.Logs.Should().ContainSingle().Which.Level.Should().Be(expected);
+    }
+
+    public static TheoryData<string?, string[]> MinimumLogLevelData => new()
+    {
+        { null, ["Info message"] },
+        { "Debug", ["Debug message", "Info message"] },
+        { "Warn", [] },
+        { "Off", [] },
+    };
+
+    [Theory]
+    [MemberData(nameof(MinimumLogLevelData))]
+    public void Write_StructuredLogging_MinimumLogLevel(string? minimumLogLevel, string[] expectedMessages)
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        if (minimumLogLevel is not null)
+        {
+            _fixture.Options.MinimumLogLevel = LogLevel.FromString(minimumLogLevel);
+        }
+
+        var logger = _fixture.GetLogger();
+
+        logger.Debug("Debug message");
+        logger.Info("Info message");
+
+        capturer.Logs.Select(log => log.Message).Should().Equal(expectedMessages);
+    }
+
+    [Fact]
+    public void Write_BelowMinimumLogLevel_StillAddsBreadcrumb()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Trace;
+        _fixture.Options.MinimumLogLevel = LogLevel.Info;
+
+        var logger = _fixture.GetLogger();
+
+        logger.Trace(DefaultMessage);
+
+        capturer.Logs.Should().BeEmpty();
+        _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be(DefaultMessage);
     }
 
     [Theory]
@@ -57,9 +99,8 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
-        _fixture.Options.Environment = "test-environment";
-        _fixture.Options.Release = "test-release";
+        _fixture.SentryOptions.Environment = "test-environment";
+        _fixture.SentryOptions.Release = "test-release";
 
         if (withActiveSpan)
         {
@@ -101,8 +142,8 @@ public partial class SentryTargetTests
         log.Attributes.ShouldContain("sentry.environment", "test-environment");
         log.Attributes.ShouldContain("sentry.release", "test-release");
         log.Attributes.ShouldContain("sentry.origin", "auto.log.nlog");
-        log.Attributes.ShouldContain("sentry.sdk.name", Constants.SdkName);
-        log.Attributes.ShouldContain("sentry.sdk.version", SentryTarget.NameAndVersion.Version);
+        log.Attributes.ShouldContain("sentry.sdk.name", SdkVersion.Instance.Name!);
+        log.Attributes.ShouldContain("sentry.sdk.version", SdkVersion.Instance.Version!);
         log.Attributes.ShouldContain("category.name", "sentry");
 
         log.Attributes.ShouldContain("property.Text-Property-Key", "Text-Property-Value");
@@ -125,7 +166,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -144,7 +184,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -163,7 +202,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -179,7 +217,6 @@ public partial class SentryTargetTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
 
@@ -195,7 +232,6 @@ public partial class SentryTargetTests
     {
         // Force the structured-log capture to fail.
         _fixture.Hub.Logger.Returns(_ => throw new InvalidOperationException("structured logging failed"));
-        _fixture.Options.EnableLogs = true;
 
         var logger = _fixture.GetLogger();
         // Surface any exception that escapes the target, so an unguarded failure would fail this test.

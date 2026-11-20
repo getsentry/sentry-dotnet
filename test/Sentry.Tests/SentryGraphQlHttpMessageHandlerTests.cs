@@ -72,6 +72,38 @@ public class SentryGraphQlHttpMessageHandlerTests
         returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
     }
 
+    [Fact]
+    public void ProcessRequest_UrlWithQuery_ExcludedFromSpanDescription()
+    {
+        var hub = Substitute.For<IHub>();
+        var parentSpan = Substitute.For<ISpan>();
+        var childSpan = Substitute.For<ISpan>();
+        hub.GetSpan().Returns(parentSpan);
+        parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);
+        var sut = new SentryGraphQLHttpMessageHandler(hub, new SentryOptions());
+        const string url = "http://foo/bar?token=abc123";
+
+        var span = sut.ProcessRequest(SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, url), "POST", url);
+
+        span!.Description.Should().Be("POST http://foo/bar");
+    }
+
+    [Fact]
+    public void HandleResponse_UrlWithSensitiveParameter_FiltersBreadcrumbUrl()
+    {
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+        const string url = "http://foo/bar?token=abc123&q=a%20b%26c";
+        var request = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, url);
+        var response = new HttpResponseMessage { Content = ValidResponseContent, StatusCode = HttpStatusCode.OK, RequestMessage = request };
+        var sut = new SentryGraphQLHttpMessageHandler(hub, new SentryOptions());
+
+        sut.HandleResponse(response, null, "POST", url);
+
+        scope.Breadcrumbs.Single().Data.Should().Contain("url", "http://foo/bar?token=[Filtered]&q=a%20b%26c");
+    }
+
     // [Theory]
     // [InlineData(ValidQuery)]
     [Fact]

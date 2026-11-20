@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 using Sentry.Infrastructure;
 
@@ -11,22 +10,13 @@ namespace Sentry.AspNetCore;
 [ProviderAlias("Sentry")]
 internal sealed class SentryAspNetCoreStructuredLoggerProvider : SentryStructuredLoggerProvider
 {
-    public SentryAspNetCoreStructuredLoggerProvider(IOptions<SentryAspNetCoreOptions> options, IHub hub)
-        : this(options.Value, hub, SystemClock.Clock, CreateSdkVersion())
+    public SentryAspNetCoreStructuredLoggerProvider(IHub hub)
+        : this(hub, SystemClock.Clock)
     {
     }
 
-    internal SentryAspNetCoreStructuredLoggerProvider(SentryAspNetCoreOptions options, IHub hub, ISystemClock clock, SdkVersion sdk)
-        : base(options, hub, clock, sdk)
+    internal SentryAspNetCoreStructuredLoggerProvider(IHub hub, ISystemClock clock)
+        : base(hub, clock)
     {
-    }
-
-    private static SdkVersion CreateSdkVersion()
-    {
-        return new SdkVersion
-        {
-            Name = Constants.SdkName,
-            Version = SentryMiddleware.NameAndVersion.Version,
-        };
     }
 }

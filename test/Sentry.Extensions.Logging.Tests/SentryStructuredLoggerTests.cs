@@ -5,50 +5,43 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging.Tests;
 
+[Collection(nameof(SentrySdkCollection))]
 public class SentryStructuredLoggerTests : IDisposable
 {
     private class Fixture
     {
         public string CategoryName { get; internal set; }
-        public IOptions<SentryLoggingOptions> Options { get; }
+        public SentryOptions Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
-        public SdkVersion Sdk { get; }
 
         public Queue<SentryLog> CapturedLogs { get; } = new();
         public InMemoryDiagnosticLogger DiagnosticLogger { get; } = new();
 
         public Fixture()
         {
-            var loggingOptions = new SentryLoggingOptions
+            Options = new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
                 Environment = "my-environment",
                 Release = "my-release",
             };
+            Options.SetSdk("SDK Name", new SdkVersion { Name = "SDK Package", Version = "SDK Version" });
+            SentryClientExtensions.SentryOptionsForTestingOnly = Options;
 
             CategoryName = nameof(CategoryName);
-            Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
-            Hub.SubstituteConfigureScope(new Scope(loggingOptions));
+            Hub.SubstituteConfigureScope(new Scope(Options));
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
-            Sdk = new SdkVersion
-            {
-                Name = "SDK Name",
-                Version = "SDK Version",
-            };
-
             var logger = Substitute.For<Sentry.SentryStructuredLogger>();
             logger.CaptureLog(Arg.Do<SentryLog>(log => CapturedLogs.Enqueue(log)));
             Hub.Logger.Returns(logger);
 
             EnableHub(true);
-            EnableLogs(true);
         }
 
         public void EnableHub(bool isEnabled) => Hub.IsEnabled.Returns(isEnabled);
-        public void EnableLogs(bool isEnabled) => Options.Value.EnableLogs = isEnabled;
 
         public void WithActiveSpan(SentryId traceId, SpanId spanId)
         {
@@ -60,7 +53,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
         public SentryStructuredLogger GetSut()
         {
-            return new SentryStructuredLogger(CategoryName, Options.Value, Hub, Clock, Sdk);
+            return new SentryStructuredLogger(CategoryName, Hub, Clock);
         }
     }
 
@@ -68,6 +61,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
     public void Dispose()
     {
+        SentryClientExtensions.SentryOptionsForTestingOnly = null;
         _fixture.CapturedLogs.Should().BeEmpty();
         _fixture.DiagnosticLogger.Entries.Should().BeEmpty();
     }
@@ -131,7 +125,7 @@ public class SentryStructuredLoggerTests : IDisposable
     [Fact]
     public void Log_WithoutActiveSpan_CaptureLog()
     {
-        var scope = new Scope(_fixture.Options.Value);
+        var scope = new Scope(_fixture.Options);
         _fixture.Hub.GetSpan().Returns((ISpan?)null);
         _fixture.Hub.SubstituteConfigureScope(scope);
         var logger = _fixture.GetSut();
@@ -250,14 +244,12 @@ public class SentryStructuredLoggerTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, true, LogLevel.Information, true)]
-    [InlineData(false, true, LogLevel.Information, false)]
-    [InlineData(true, false, LogLevel.Information, false)]
-    [InlineData(true, true, LogLevel.None, false)]
-    public void IsEnabled_HubAndOptions_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel logLevel, bool expectedIsEnabled)
+    [InlineData(true, LogLevel.Information, true)]
+    [InlineData(false, LogLevel.Information, false)]
+    [InlineData(true, LogLevel.None, false)]
+    public void IsEnabled_Hub_Returns(bool isHubEnabled, LogLevel logLevel, bool expectedIsEnabled)
     {
         _fixture.EnableHub(isHubEnabled);
-        _fixture.EnableLogs(isLogsEnabled);
         var logger = _fixture.GetSut();
 
         var isEnabled = logger.IsEnabled(logLevel);
@@ -269,6 +261,19 @@ public class SentryStructuredLoggerTests : IDisposable
             _fixture.CapturedLogs.Dequeue().Message.Should().Be("message");
         }
     }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void IsEnabled_HostOptions_ReturnsEnableLogs(bool enableLogs, bool expectedIsEnabled)
+    {
+        using var hub = new Hub(new HostOptions { Dsn = ValidDsn, LogsEnabled = enableLogs }, Substitute.For<ISentryClient>());
+        var logger = new SentryStructuredLogger(_fixture.CategoryName, hub, _fixture.Clock);
+
+        logger.IsEnabled(LogLevel.Information).Should().Be(expectedIsEnabled);
+    }
+
+    private class HostOptions : SentryHostOptions;
 
     [Fact]
     public void BeginScope_Dispose_NoOp()

@@ -139,12 +139,6 @@ public class Scope : IEventLike
     }
 
     /// <inheritdoc />
-    public string? Release { get; set; }
-
-    /// <inheritdoc />
-    public string? Distribution { get; set; }
-
-    /// <inheritdoc />
     public string? Environment
     {
         get;
@@ -155,17 +149,9 @@ public class Scope : IEventLike
                 return;
             }
 
-            if (value is null)
-            {
-                Options.LogDebug("Environment cannot be null. Reverting to default value from the options.");
-                field = Options.Environment;
-            }
-            else
-            {
-                field = value;
-            }
+            field = value;
 
-            ScopeObserver?.SetEnvironment(field);
+            ScopeObserver?.SetEnvironment(value ?? Options.ScopeDefaults.Environment);
         }
     }
 
@@ -428,8 +414,6 @@ public class Scope : IEventLike
         Request = new();
         _contexts?.Clear();
         User = new();
-        Release = default;
-        Distribution = default;
         Environment = default;
         TransactionName = default;
         Transaction = default;
@@ -515,13 +499,23 @@ public class Scope : IEventLike
         Request.CopyTo(other.Request);
         User.CopyTo(other.User);
 
-        other.Release ??= Release;
-        other.Distribution ??= Distribution;
         other.Environment ??= Environment;
         other.TransactionName ??= TransactionName;
         other.Level ??= Level;
 
-        _sdk?.CopyTo(other.Sdk);
+        if (_sdk is { } sdk)
+        {
+            if (other.Sdk.Name is null && other.Sdk.Version is null)
+            {
+                other.Sdk.Name = sdk.Name;
+                other.Sdk.Version = sdk.Version;
+            }
+
+            foreach (var package in sdk.InternalPackages)
+            {
+                other.Sdk.AddPackage(package);
+            }
+        }
     }
 
     /// <summary>
@@ -566,8 +560,6 @@ public class Scope : IEventLike
             ScopeSyncEnabled = false,
             OnEvaluating = OnEvaluating,
             Level = Level,
-            Release = Release,
-            Distribution = Distribution,
             Environment = Environment,
             TransactionName = TransactionName,
             Transaction = Transaction,

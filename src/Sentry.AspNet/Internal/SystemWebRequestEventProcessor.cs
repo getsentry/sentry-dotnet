@@ -1,14 +1,11 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Reflection;
+using Sentry.Internal.DataCollection;
 
 namespace Sentry.AspNet.Internal;
 
 internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProcessor
 {
-    private static readonly SdkVersion SdkVersion =
-        typeof(SystemWebRequestEventProcessor).Assembly.GetNameAndVersion();
-
     private readonly SentryOptions _options;
     internal IRequestPayloadExtractor PayloadExtractor { get; }
 
@@ -42,12 +39,11 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProce
         }
 
         @event.Request.Method = context.Request.HttpMethod;
-        @event.Request.Url = context.Request.Url.AbsoluteUri;
+        @event.Request.Url = context.Request.Url.GetLeftPart(UriPartial.Path);
 
         try
         {
-            // ReSharper disable once ConstantConditionalAccessQualifier
-            @event.Request.QueryString = context.Request.QueryString?.ToString();
+            @event.Request.QueryString = QueryStringFilter.Filter(GetRawQueryString(context.Request.Unvalidated.RawUrl));
         }
         catch (NullReferenceException)
         {
@@ -64,11 +60,16 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProce
                 continue;
             }
 
-            @event.Request.Headers[key] = context.Request.Headers[key];
+            @event.Request.Headers[key] = SensitiveDataFilter.FilterHeaderValue(key, context.Request.Headers[key]);
         }
 
         if (_options.SendDefaultPii)
         {
+            if (context.Request.GetFilteredCookies() is { Length: > 0 } cookies)
+            {
+                @event.Request.Cookies = CookieFilter.ToEventCookies(cookies);
+            }
+
             if (@event.User.Username == Environment.UserName)
             {
                 // if SendDefaultPii is true, Sentry SDK will send the current logged on user
@@ -99,10 +100,13 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor, ISdkProce
             @event.Request.Data = body;
         }
 
-        // Always set the SDK info
-        @event.Sdk.Name = "sentry.dotnet.aspnet";
-        @event.Sdk.Version = SdkVersion.Version;
-        @event.Sdk.AddPackage($"nuget:{SdkVersion.Name}", SdkVersion.Version);
         return @event;
+    }
+
+    // HttpRequest.QueryString.ToString() re-encodes the parameters, so read them from the raw URL.
+    private static string? GetRawQueryString(string rawUrl)
+    {
+        var queryStart = rawUrl.IndexOf('?');
+        return queryStart < 0 ? null : rawUrl[(queryStart + 1)..];
     }
 }

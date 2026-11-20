@@ -15,4 +15,11 @@ public class SentryNLogOptionsTests
         var options = new SentryNLogOptions();
         Assert.Equal(LogLevel.Error, options.MinimumEventLevel);
     }
+
+    [Fact]
+    public void Ctor_MinimumLogLevel_Info()
+    {
+        var options = new SentryNLogOptions();
+        Assert.Equal(LogLevel.Info, options.MinimumLogLevel);
+    }
 }

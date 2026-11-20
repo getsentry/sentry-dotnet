@@ -23,6 +23,7 @@ docs/docfx.zip
 *.received.*
 mono_crash.*.json
 test_output/
+StrykerOutput/
 test/**/*.apk
 /tools/
 *.log

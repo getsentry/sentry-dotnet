@@ -156,6 +156,40 @@ public partial class IntegrationsTests
         Assert.DoesNotContain(events, IsBlockingCallDetectorEvent);
     }
 
+    [Fact]
+    public async Task InvokeAsync_BlockingCallDetectionDisabled_ListenerResolvedElsewhere_DoesNotCapture()
+    {
+        var events = new ConcurrentQueue<SentryEvent>();
+        Configure = options =>
+        {
+            options.CaptureBlockingCalls = false;
+            options.SetBeforeSend(@event =>
+            {
+                events.Enqueue(@event);
+                return @event;
+            });
+        };
+        Handlers =
+        [
+            new RequestHandler
+            {
+                Path = "/blocking",
+                Handler = _ =>
+                {
+                    Task.Delay(25).Wait();
+                    return Task.CompletedTask;
+                }
+            }
+        ];
+
+        Build();
+        _ = ServiceProvider.GetRequiredService<TaskBlockingListener>();
+
+        _ = await HttpClient.GetAsync("/blocking");
+
+        Assert.DoesNotContain(events, IsBlockingCallDetectorEvent);
+    }
+
     private void ConfigureCountingBlockingDetectionServices(
         Action middlewareCreated,
         Action monitorCreated,
