@@ -12,12 +12,15 @@ internal sealed class NativeHttpClient
     private readonly CancellationTokenSource _shutdown = new();
     private HttpClient? _client;
 
+    // sentry_transport_new_default() takes no arguments, so set before sentry_options_new()
+    internal static SentryOptions? DefaultOptions { get; set; }
+
     private NativeHttpClient(SentryOptions options)
     {
         _options = options;
     }
 
-    internal static unsafe IntPtr CreateTransport(SentryOptions options)
+    private static unsafe IntPtr CreateTransport(SentryOptions options)
     {
         var handle = GCHandle.Alloc(new NativeHttpClient(options));
         // sentry-native frees the handle through FreeClient, also when this fails
@@ -105,6 +108,22 @@ internal sealed class NativeHttpClient
     }
 
     private static NativeHttpClient FromHandle(IntPtr client) => (NativeHttpClient)GCHandle.FromIntPtr(client).Target!;
+
+    [UnmanagedCallersOnly(EntryPoint = "sentry_transport_new_default")]
+    private static IntPtr CreateDefaultTransport()
+    {
+        var options = DefaultOptions;
+        try
+        {
+            return options is null ? IntPtr.Zero : CreateTransport(options);
+        }
+        catch (Exception e)
+        {
+            // never allow an exception back to native code - it would crash the app
+            options?.DiagnosticLogger?.LogError(e, "Failed to create the sentry-native transport.");
+            return IntPtr.Zero;
+        }
+    }
 
     [UnmanagedCallersOnly]
     private static IntPtr CreateClient(IntPtr handle) => handle;

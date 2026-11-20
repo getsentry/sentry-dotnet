@@ -41,6 +41,11 @@
                                     Trim="true" />
   </ItemGroup>
 
+  <!-- sentry-native is built with SENTRY_TRANSPORT=custom, and Sentry exports its sentry_transport_new_default() -->
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true'">
+    <UnmanagedEntryPointsAssembly Include="Sentry" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64')">
     <DirectPInvoke Include="sentry-native" />
     <!-- See: https://github.com/getsentry/sentry-dotnet/pull/4111 -->
