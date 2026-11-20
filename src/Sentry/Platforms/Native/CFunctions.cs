@@ -144,13 +144,11 @@ internal static class C
 
     public static void Close() => sentry_close();
 
-    // Call after native init() to check if the application has crashed in the previous run and clear the status.
-    // Because the file is removed, the result will change on subsequent calls so it must be cached for the current runtime.
+    // Call after native init() to check if the application has crashed in the previous run.
+    // Because init() consumes the status, a later init() reports no crash, so it must be cached for the current runtime.
     internal static bool HandleCrashedLastRun(SentryOptions options)
     {
-        var result = sentry_get_crashed_last_run() == 1;
-        sentry_clear_crashed_last_run();
-        return result;
+        return sentry_get_crashed_last_run() == 1;
     }
 
     internal static string GetCacheDirectory(SentryOptions options)
@@ -346,9 +344,6 @@ internal static class C
 
     [DllImport("sentry-native")]
     private static extern int sentry_get_crashed_last_run();
-
-    [DllImport("sentry-native")]
-    private static extern int sentry_clear_crashed_last_run();
 
     [DllImport("sentry-native")]
     private static extern IntPtr sentry_options_new();
