@@ -69,6 +69,22 @@ public class QueryStringFilterTests
         QueryStringFilter.FilterUrl(input).Should().BeSameAs(input);
 
     [Theory]
+    [InlineData("?page=5&q=abc")]
+    [InlineData("page=5")]
+    public void Filter_Off_ReturnsNull(string input) =>
+        QueryStringFilter.Filter(input, KeyValueCollectionBehavior.Off).Should().BeNull();
+
+    [Fact]
+    public void Filter_AllowList_KeepsOnlyMatchingNonSensitiveValues() =>
+        QueryStringFilter.Filter("?page=5&q=abc&token=xyz&flag", KeyValueCollectionBehavior.AllowList("page", "token"))
+            .Should().Be("?page=5&q=[Filtered]&token=[Filtered]&flag");
+
+    [Fact]
+    public void Filter_DenyListTerm_FiltersMatchingValues() =>
+        QueryStringFilter.Filter("page=5&tenant=acme", KeyValueCollectionBehavior.DenyList("tenant"))
+            .Should().Be("page=5&tenant=[Filtered]");
+
+    [Theory]
     [InlineData("https://example.com/api/users?token=abc&q=1", "https://example.com/api/users")]
     [InlineData("https://example.com/api/users#top", "https://example.com/api/users")]
     [InlineData("https://example.com/api/users?a=1#top", "https://example.com/api/users")]

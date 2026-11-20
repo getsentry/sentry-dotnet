@@ -984,6 +984,7 @@ namespace Sentry
         public string? Cookies { get; set; }
         public object? Data { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Env { get; }
+        public string? Fragment { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Headers { get; }
         public string? Method { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Other { get; }

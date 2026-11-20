@@ -364,10 +364,13 @@ public partial class SentryClientTests : IDisposable
         @event.User.Id.Should().NotBeNullOrWhiteSpace();
     }
 
-    [Fact]
-    public void CaptureEvent_Redact_Breadcrumbs()
+    [Theory]
+    [InlineData(false, "Visited https://[Filtered]@sentry.io in session")]
+    [InlineData(true, "Visited https://user@sentry.io in session")]
+    public void CaptureEvent_Redact_Breadcrumbs(bool sendDefaultPii, string expected)
     {
         // Act
+        _fixture.SentryOptions.SendDefaultPii = sendDefaultPii;
         var scope = new Scope(_fixture.SentryOptions);
         scope.AddBreadcrumb("Visited https://user@sentry.io in session");
         var @event = new SentryEvent();
@@ -384,7 +387,7 @@ public partial class SentryClientTests : IDisposable
         var actual = (SentryEvent)(envelope.Items[0].Payload as JsonSerializable)?.Source;
         actual.Should().NotBeNull();
         actual?.Breadcrumbs.Count.Should().Be(1);
-        actual?.Breadcrumbs.ToArray()[0].Message.Should().Be($"Visited https://{PiiExtensions.RedactedText}@sentry.io in session");
+        actual?.Breadcrumbs.ToArray()[0].Message.Should().Be(expected);
     }
 
     [Fact]
@@ -1603,11 +1606,13 @@ public partial class SentryClientTests : IDisposable
             });
     }
 
-    [Fact]
-    public void CaptureTransaction_Redact_Description()
+    [Theory]
+    [InlineData(false, "The URL: https://[Filtered]@sentry.io has PII data in it")]
+    [InlineData(true, "The URL: https://user@sentry.io has PII data in it")]
+    public void CaptureTransaction_Redact_Description(bool sendDefaultPii, string expected)
     {
         // Arrange
-        _fixture.SentryOptions.SendDefaultPii = false;
+        _fixture.SentryOptions.SendDefaultPii = sendDefaultPii;
         var client = _fixture.GetSut();
         var original = new SentryTransaction(
             "test name",
@@ -1630,7 +1635,7 @@ public partial class SentryClientTests : IDisposable
         var actual = (envelope.Items[0].Payload as JsonSerializable)?.Source as SentryTransaction;
         actual?.Name.Should().Be(original.Name);
         actual?.Operation.Should().Be(original.Operation);
-        actual?.Description.Should().Be(original.Description.RedactUrl()); // Should be redacted
+        actual?.Description.Should().Be(expected);
     }
 
     [Fact]

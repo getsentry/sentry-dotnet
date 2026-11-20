@@ -59,16 +59,23 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
         var @event = new SentryEvent(exception);
         var hint = new SentryHint(HintTypes.HttpResponseMessage, response);
 
+        var dataCollection = Options.DataCollectionResolver;
+        var queryParams = dataCollection.UrlQueryParams;
         var uri = response.RequestMessage?.RequestUri;
         var sentryRequest = new SentryRequest
         {
-            QueryString = QueryStringFilter.Filter(uri?.Query),
-            Method = response.RequestMessage?.Method.Method.ToUpperInvariant()
+            Url = uri?.FilteredHttpRequestUrl(queryParams),
+            QueryString = QueryStringFilter.Filter(uri?.Query, queryParams),
+            Fragment = QueryStringFilter.Filter(uri?.HttpRequestFragment(), dataCollection.UrlFragmentWithLegacyPiiGate),
+            Method = response.RequestMessage?.Method.Method.ToUpperInvariant(),
+            Cookies = request.Headers.GetCookies(dataCollection.Cookies)
         };
+        sentryRequest.AddHeaders(request.Headers, dataCollection.RequestHeadersWithLegacyPiiGate);
 
         var responseContext = new Response
         {
             StatusCode = (short)response.StatusCode,
+            Cookies = response.Headers.GetSetCookies(dataCollection.Cookies),
 #if NET5_0_OR_GREATER
             // Starting with .NET 5, the content and headers are guaranteed to not be null.
             BodySize = response.Content.Headers.ContentLength
@@ -78,19 +85,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
             BodySize = response.Content?.Headers?.ContentLength
 #endif
         };
-
-        if (!Options.SendDefaultPii)
-        {
-            sentryRequest.Url = uri?.FilteredHttpRequestUrl();
-        }
-        else
-        {
-            sentryRequest.Url = QueryStringFilter.FilterUrl(uri?.AbsoluteUri);
-            sentryRequest.Cookies = request.Headers.GetCookies();
-            sentryRequest.AddHeaders(request.Headers);
-            responseContext.Cookies = response.Headers.GetCookies();
-            responseContext.AddHeaders(response.Headers);
-        }
+        responseContext.AddHeaders(response.Headers, dataCollection.ResponseHeadersWithLegacyPiiGate);
 
         @event.Request = sentryRequest;
         @event.Contexts[Response.Type] = responseContext;

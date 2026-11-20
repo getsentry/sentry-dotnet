@@ -3,13 +3,20 @@ namespace Sentry.Internal.DataCollection;
 internal static class QueryStringFilter
 {
     private static readonly char[] QueryOrFragmentStart = ['?', '#'];
+    private static readonly KeyValueCollectionBehavior DefaultBehavior = KeyValueCollectionBehavior.DenyList();
 
     // Works on the raw string because the spec requires encoded parameters to be stored exactly as they appear in the URL.
-    internal static string? Filter(string? queryString)
+    internal static string? Filter(string? queryString, KeyValueCollectionBehavior? behavior = null)
     {
         if (string.IsNullOrEmpty(queryString))
         {
             return queryString;
+        }
+
+        behavior ??= DefaultBehavior;
+        if (behavior.Mode == KeyValueCollectionMode.Off)
+        {
+            return null;
         }
 
         var prefix = queryString[0] == '?' ? "?" : string.Empty;
@@ -25,9 +32,16 @@ internal static class QueryStringFilter
                 return prefix + SensitiveDataFilter.FilteredValue;
             }
 
-            if (separator >= 0 && SensitiveDataFilter.IsSensitiveKey(SensitiveDataFilter.DecodeKeyForMatching(name)))
+            if (separator < 0)
             {
-                parameters[i] = $"{name}={SensitiveDataFilter.FilteredValue}";
+                continue;
+            }
+
+            var value = parameter[(separator + 1)..];
+            var filteredValue = SensitiveDataFilter.FilterValue(SensitiveDataFilter.DecodeKeyForMatching(name), value, behavior);
+            if (!ReferenceEquals(filteredValue, value))
+            {
+                parameters[i] = $"{name}={filteredValue}";
                 filtered = true;
             }
         }

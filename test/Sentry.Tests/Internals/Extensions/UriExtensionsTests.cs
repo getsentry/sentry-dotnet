@@ -29,6 +29,36 @@ public class UriExtensionsTests
     }
 
     [Fact]
+    public void FilteredHttpRequestUrl_EncodedReservedCharactersInPath_StayEncoded()
+    {
+        var uri = new Uri("https://gitlab.com/api/v4/projects/group%2Fproject/files/a%3Ftoken%3Dsecret%23top");
+
+        var actual = uri.FilteredHttpRequestUrl();
+
+        actual.Should().Be("https://gitlab.com/api/v4/projects/group%2Fproject/files/a%3Ftoken%3Dsecret%23top");
+    }
+
+    [Fact]
+    public void FilteredHttpRequestUrl_QueryParamsOff_DropsQuery()
+    {
+        var uri = new Uri("https://example.com/api/users?q=abc&page=5#top");
+
+        var actual = uri.FilteredHttpRequestUrl(KeyValueCollectionBehavior.Off);
+
+        actual.Should().Be("https://example.com/api/users");
+    }
+
+    [Fact]
+    public void FilteredHttpRequestUrl_QueryParamsAllowList_FiltersOtherValues()
+    {
+        var uri = new Uri("https://example.com/api/users?q=abc&page=5");
+
+        var actual = uri.FilteredHttpRequestUrl(KeyValueCollectionBehavior.AllowList("page"));
+
+        actual.Should().Be("https://example.com/api/users?q=[Filtered]&page=5");
+    }
+
+    [Fact]
     public void FilteredHttpRequestUrl_UnparseableQuery_KeepsQueryMarker()
     {
         var uri = new Uri("https://example.com/api?page=5&=abc");
@@ -36,6 +66,27 @@ public class UriExtensionsTests
         var actual = uri.FilteredHttpRequestUrl();
 
         actual.Should().Be("https://example.com/api?[Filtered]");
+    }
+
+    [Theory]
+    [InlineData("https://example.com/api?page=5#top", "top")]
+    [InlineData("https://example.com/api#a?b=c", "a?b=c")]
+    [InlineData("https://example.com/api#", null)]
+    [InlineData("https://example.com/api", null)]
+    public void HttpRequestFragment_ReturnsFragmentWithoutHash(string url, string expected)
+    {
+        new Uri(url).HttpRequestFragment().Should().Be(expected);
+    }
+
+    [Fact]
+    public void HttpRequestFragment_DangerousDisablePathAndQueryCanonicalization_DoesNotThrow()
+    {
+        var options = new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = true };
+        var uri = new Uri("https://www.contoso.com/a?b=c#top", options);
+
+        var act = () => uri.HttpRequestFragment();
+
+        act.Should().NotThrow();
     }
 
     [Fact]
