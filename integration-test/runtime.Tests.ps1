@@ -93,13 +93,19 @@ internal class FakeTransport : ITransport
             }
         }
 
-        function publishConsoleApp([bool]$SentryNative = $true)
+        function publishConsoleApp([bool]$SentryNative = $true, [string]$Backend = 'inproc')
         {
+            if ($Backend -eq 'native')
+            {
+                # The native link doesn't rerun when only the backend's libraries change
+                Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "console-app/obj/Release/$framework/*/native"
+            }
             dotnet publish console-app `
                 -c Release `
                 --nologo `
                 --framework $framework `
                 -p:SentryNative=$($SentryNative.ToString().ToLower()) `
+                -p:SentryNativeBackend=$Backend `
             | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
@@ -205,6 +211,41 @@ internal class FakeTransport : ITransport
         }
         $result.HasErrors() | Should -BeFalse
         $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'False'"
+        $result.Envelopes() | Should -Not -AnyElementMatch '"exception":{"values":\[{"type":"(SIGSEGV|EXCEPTION_ACCESS_VIOLATION)"'
+    }
+
+    It 'publish directory contains expected files (native backend)' {
+        publishConsoleApp $true 'native'
+        $path = getConsoleAppPath
+        $items = Get-ChildItem -Path (Get-Item $path).DirectoryName
+        $exeExtension = $IsWindows ? '.exe' : ''
+        $debugExtension = $IsWindows ? '.pdb' : $IsMacOS ? '.dSYM' : '.dbg'
+        $libraryExtension = $IsWindows ? '.dll' : $IsMacOS ? '.dylib' : '.so'
+        $expected = @("console-app$exeExtension", "console-app$debugExtension", "sentry-crash$exeExtension", "sentry-crash-transport$libraryExtension")
+        if ($IsWindows)
+        {
+            $expected += 'sentry-wer.dll'
+        }
+        $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be ($expected | Sort-Object -Unique)
+    }
+
+    It 'Sends the native crash in the crashing run (native backend)' {
+        $result = Invoke-SentryServer {
+            Param([string]$url)
+            runConsoleApp $true 'Native' ($url.Replace('http://', 'http://key@') + '/0')
+        }
+        # sentry-server.py can't print the envelope, because its minidump isn't valid UTF-8
+        $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
+        $result.ScriptOutput | Should -Not -AnyElementMatch 'crash has been captured'
+    }
+
+    It 'Does not report a caught NullReferenceException as a native crash (native backend)' {
+        $result = Invoke-SentryServer {
+            Param([string]$url)
+            runConsoleApp $true 'CaughtNullReference' ($url.Replace('http://', 'http://key@') + '/0')
+        }
+        $result.HasErrors() | Should -BeFalse
+        $result.ScriptOutput | Should -AnyElementMatch 'Caught a NullReferenceException'
         $result.Envelopes() | Should -Not -AnyElementMatch '"exception":{"values":\[{"type":"(SIGSEGV|EXCEPTION_ACCESS_VIOLATION)"'
     }
 }
