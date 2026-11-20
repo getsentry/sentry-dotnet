@@ -81,6 +81,7 @@ internal static class C
 
     public static bool Init(SentryOptions options)
     {
+        NativeHttpClient.DefaultOptions = options;
         var cOptions = sentry_options_new();
 
         // Note: DSN is not null because options.IsValid() must have returned true for this to be called.
@@ -135,9 +136,6 @@ internal static class C
                 sentry_options_set_logger(cOptions, &nativeLog, IntPtr.Zero);
             }
         }
-
-        // Stryker disable once all : covered by the Native AOT integration tests
-        sentry_options_set_transport(cOptions, NativeHttpClient.CreateTransport(options));
 
         options.DiagnosticLogger?.LogDebug("Initializing sentry native");
         return 0 == sentry_init(cOptions);
@@ -372,9 +370,6 @@ internal static class C
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_auto_session_tracking(IntPtr options, int debug);
-
-    [DllImport("sentry-native")]
-    private static extern void sentry_options_set_transport(IntPtr options, IntPtr transport);
 
     [DllImport("sentry-native")]
     private static extern unsafe void sentry_options_set_logger(IntPtr options, delegate* unmanaged/*[Cdecl]*/<int, IntPtr, IntPtr, IntPtr, void> logger, IntPtr userData);
