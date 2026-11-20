@@ -1,4 +1,3 @@
-using Sentry.Extensibility;
 using Sentry.Internal;
 
 namespace Sentry.Native;
@@ -6,23 +5,23 @@ namespace Sentry.Native;
 /// <summary>
 /// Executes the HTTP requests of the sentry-native transport with an <see cref="HttpClient"/>.
 /// </summary>
-internal sealed class NativeHttpClient
+/// <remarks>
+/// Shared by the app and the sentry-crash transport library, which provide the host-specific parts.
+/// </remarks>
+internal sealed partial class NativeHttpClient
 {
-    private readonly SentryOptions _options;
     private readonly CancellationTokenSource _shutdown = new();
     private HttpClient? _client;
 
-    // sentry_transport_new_default() takes no arguments, so set before sentry_options_new()
-    internal static SentryOptions? DefaultOptions { get; set; }
+    private partial HttpClient CreateHttpClient(IntPtr nativeOptions);
 
-    private NativeHttpClient(SentryOptions options)
-    {
-        _options = options;
-    }
+    private partial Stream OpenFile(string path);
 
-    private static unsafe IntPtr CreateTransport(SentryOptions options)
+    private partial void LogError(Exception exception, string message);
+
+    private unsafe IntPtr CreateTransport()
     {
-        var handle = GCHandle.Alloc(new NativeHttpClient(options));
+        var handle = GCHandle.Alloc(this);
         // sentry-native frees the handle through FreeClient, also when this fails
         var transport = sentry_http_transport_new(&CreateClient, GCHandle.ToIntPtr(handle), &SendRequest, &FreeClient);
         if (transport != IntPtr.Zero)
@@ -50,7 +49,7 @@ internal sealed class NativeHttpClient
     private Stream? OpenBodyFile(IntPtr nativeRequest)
     {
         var path = sentry_http_request_get_body_file_path(nativeRequest, out _);
-        return path == IntPtr.Zero ? null : _options.FileSystem.OpenFileForReading(Marshal.PtrToStringUTF8(path)!);
+        return path == IntPtr.Zero ? null : OpenFile(Marshal.PtrToStringUTF8(path)!);
     }
 
     private static HttpRequestMessage CreateRequest(IntPtr nativeRequest, Stream? file)
@@ -109,22 +108,6 @@ internal sealed class NativeHttpClient
 
     private static NativeHttpClient FromHandle(IntPtr client) => (NativeHttpClient)GCHandle.FromIntPtr(client).Target!;
 
-    [UnmanagedCallersOnly(EntryPoint = "sentry_transport_new_default")]
-    private static IntPtr CreateDefaultTransport()
-    {
-        var options = DefaultOptions;
-        try
-        {
-            return options is null ? IntPtr.Zero : CreateTransport(options);
-        }
-        catch (Exception e)
-        {
-            // never allow an exception back to native code - it would crash the app
-            options?.DiagnosticLogger?.LogError(e, "Failed to create the sentry-native transport.");
-            return IntPtr.Zero;
-        }
-    }
-
     [UnmanagedCallersOnly]
     private static IntPtr CreateClient(IntPtr handle) => handle;
 
@@ -134,13 +117,13 @@ internal sealed class NativeHttpClient
         var self = FromHandle(client);
         try
         {
-            self._client = self._options.GetHttpClient();
+            self._client = self.CreateHttpClient(nativeOptions);
             return 0;
         }
         catch (Exception e)
         {
             // never allow an exception back to native code - it would crash the app
-            self._options.DiagnosticLogger?.LogError(e, "Failed to create the HTTP client for sentry-native.");
+            self.LogError(e, "Failed to create the HTTP client for sentry-native.");
             return 1;
         }
     }
@@ -157,7 +140,7 @@ internal sealed class NativeHttpClient
         catch (Exception e)
         {
             // never allow an exception back to native code - it would crash the app
-            self._options.DiagnosticLogger?.LogError(e, "Failed to send a sentry-native request.");
+            self.LogError(e, "Failed to send a sentry-native request.");
             return 0;
         }
     }
@@ -173,7 +156,7 @@ internal sealed class NativeHttpClient
         catch (Exception e)
         {
             // never allow an exception back to native code - it would crash the app
-            self._options.DiagnosticLogger?.LogError(e, "Failed to cancel the sentry-native requests.");
+            self.LogError(e, "Failed to cancel the sentry-native requests.");
         }
     }
 
@@ -190,51 +173,11 @@ internal sealed class NativeHttpClient
         catch (Exception e)
         {
             // never allow an exception back to native code - it would crash the app
-            self._options.DiagnosticLogger?.LogError(e, "Failed to dispose the HTTP client for sentry-native.");
+            self.LogError(e, "Failed to dispose the HTTP client for sentry-native.");
         }
         finally
         {
             handle.Free();
         }
     }
-
-    [DllImport("sentry-native")]
-    private static extern unsafe IntPtr sentry_http_transport_new(
-        delegate* unmanaged<IntPtr, IntPtr> factory,
-        IntPtr factoryData,
-        delegate* unmanaged<IntPtr, IntPtr, IntPtr, int> sendFunc,
-        delegate* unmanaged<IntPtr, void> clientFreeFunc);
-
-    [DllImport("sentry-native")]
-    private static extern unsafe void sentry_http_transport_set_client_start_func(IntPtr transport, delegate* unmanaged<IntPtr, IntPtr, int> startFunc);
-
-    [DllImport("sentry-native")]
-    private static extern unsafe void sentry_http_transport_set_client_shutdown_func(IntPtr transport, delegate* unmanaged<IntPtr, void> shutdownFunc);
-
-    [DllImport("sentry-native")]
-    private static extern IntPtr sentry_http_request_get_method(IntPtr request);
-
-    [DllImport("sentry-native")]
-    private static extern IntPtr sentry_http_request_get_url(IntPtr request);
-
-    [DllImport("sentry-native")]
-    private static extern UIntPtr sentry_http_request_get_header_count(IntPtr request);
-
-    [DllImport("sentry-native")]
-    private static extern int sentry_http_request_get_header(IntPtr request, UIntPtr index, out IntPtr key, out IntPtr value);
-
-    [DllImport("sentry-native")]
-    private static extern IntPtr sentry_http_request_get_body(IntPtr request, out UIntPtr length);
-
-    [DllImport("sentry-native")]
-    private static extern IntPtr sentry_http_request_get_body_file_path(IntPtr request, out UIntPtr length);
-
-    [DllImport("sentry-native")]
-    private static extern UIntPtr sentry_http_request_get_body_file_offset(IntPtr request);
-
-    [DllImport("sentry-native")]
-    private static extern void sentry_http_response_set_status_code(IntPtr response, int statusCode);
-
-    [DllImport("sentry-native")]
-    private static extern void sentry_http_response_set_header(IntPtr response, string key, string value);
 }
