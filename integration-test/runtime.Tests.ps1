@@ -168,6 +168,9 @@ internal class FakeTransport : ITransport
     }
 
     It 'Produces the expected exception (Native)' {
+        # Drop crashes left over by earlier tests
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue .sentry-native
+
         # The first run triggers a native error. This error is captured by sentry-native and stored stored for the next run.
         runConsoleApp $true 'Native' | Should -AnyElementMatch 'Triggering a deliberate exception'
 
