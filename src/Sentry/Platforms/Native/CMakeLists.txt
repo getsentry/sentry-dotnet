@@ -1,4 +1,6 @@
-# Builds sentry-native with the preload object. Configure as
+# Builds sentry-native with the preload object and, for the native backend, the
+# sentry-crash daemon, which sends crashes through the sentry-crash-transport
+# library. Configure with SENTRY_TRANSPORT=custom, as
 # scripts/build-sentry-native.ps1 does.
 cmake_minimum_required(VERSION 3.18)
 project(sentry-dotnet-native LANGUAGES C CXX)
@@ -11,4 +13,12 @@ if(NOT WIN32)
 	set_target_properties(sentry-preload PROPERTIES POSITION_INDEPENDENT_CODE ON)
 	# an object file, because nothing would pull its constructor out of an archive
 	install(FILES $<TARGET_OBJECTS:sentry-preload> DESTINATION . COMPONENT sentry-preload RENAME sentry-preload.o)
+endif()
+
+if(TARGET sentry-crash)
+	target_sources(sentry-crash PRIVATE sentry-crash-transport.c)
+	if(TARGET sentry-preload)
+		target_link_libraries(sentry-crash PRIVATE sentry-preload)
+	endif()
+	target_link_libraries(sentry-crash PRIVATE ${CMAKE_DL_LIBS})
 endif()
