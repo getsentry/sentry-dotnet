@@ -99,6 +99,11 @@
   </ItemGroup>
 
   <!-- Packaging the native backend variant -->
+  <PropertyGroup>
+    <!-- sentry-wer.dll and sentry-crash-transport.dll are native libraries for sentry-crash, not references -->
+    <NoWarn>$(NoWarn);NU5100</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'win-x64'">
     <None Include="$(SentryNativeOutputDirectory-win-x64)native\$(SentryNativeLibraryName).lib;$(SentryNativeOutputDirectory-win-x64)native\sentry-crash.exe;$(SentryNativeOutputDirectory-win-x64)native\sentry-wer.dll;$(SentryNativeOutputDirectory-win-x64)native\sentry-crash-transport.dll">
       <Pack>true</Pack>
