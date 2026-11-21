@@ -159,7 +159,7 @@ public sealed class Breadcrumb : ISentryJsonSerializable
         var category = json.GetPropertyOrNull("category")?.GetString();
 
         var levelString = json.GetPropertyOrNull("level")?.GetString();
-        var level = levelString?.ToUpper() switch
+        var level = levelString?.ToUpperInvariant() switch
         {
             "DEBUG" => BreadcrumbLevel.Debug,
             "INFO" => BreadcrumbLevel.Info,
