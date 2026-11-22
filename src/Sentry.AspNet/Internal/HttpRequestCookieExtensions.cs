@@ -4,7 +4,7 @@ namespace Sentry.AspNet.Internal;
 
 internal static class HttpRequestCookieExtensions
 {
-    internal static string[] GetFilteredCookies(this HttpRequest request)
+    internal static string[] GetFilteredCookies(this HttpRequest request, KeyValueCollectionBehavior behavior)
     {
         // Unvalidated, because Request.Cookies throws HttpRequestValidationException for values like "<script>"
         var cookies = request.Unvalidated.Cookies;
@@ -14,6 +14,6 @@ internal static class HttpRequestCookieExtensions
             pairs[i] = new KeyValuePair<string?, string?>(cookies[i].Name, cookies[i].Value);
         }
 
-        return CookieFilter.FilterCookiePairs(pairs);
+        return CookieFilter.FilterCookiePairs(pairs, behavior);
     }
 }
