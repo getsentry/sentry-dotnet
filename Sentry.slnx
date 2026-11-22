@@ -31,7 +31,6 @@
     <File Path=".github/workflows/playwright-blazor-wasm.yml" />
     <File Path=".github/workflows/release.yml" />
     <File Path=".github/workflows/update-deps.yml" />
-    <File Path=".github/workflows/validate-pr.yml" />
     <File Path=".github/workflows/vulnerabilities.yml" />
     <File Path=".github/workflows/watch-upstream.yml" />
     <File Path=".github/workflows/pr-classifiers.yml" />
