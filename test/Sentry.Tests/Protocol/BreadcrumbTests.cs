@@ -138,6 +138,26 @@ public class BreadcrumbTests
         Assert.Equal(expected, actual.Level);
     }
 
+    [Theory]
+    [InlineData("warning", BreadcrumbLevel.Warning)]
+    [InlineData("debug", BreadcrumbLevel.Debug)]
+    public void FromJson_Level_UnderTurkishCulture_ParsesExpectedLevel(string level, BreadcrumbLevel expected)
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+
+            var actual = Json.Parse($$"""{"timestamp":"9999-12-31T23:59:59.999Z","level":"{{level}}"}""", Breadcrumb.FromJson);
+
+            Assert.Equal(expected, actual.Level);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
+    }
+
     public static IEnumerable<object[]> TestCases()
     {
         yield return new object[] { (new Breadcrumb(DateTimeOffset.MaxValue), """{"timestamp":"9999-12-31T23:59:59.999Z"}""") };

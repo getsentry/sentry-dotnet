@@ -14,7 +14,7 @@ internal class NativeScopeObserver : ScopeObserver
     {
         // see https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/
         var crumb = C.sentry_value_new_breadcrumb(breadcrumb.Type, breadcrumb.Message);
-        C.sentry_value_set_by_key(crumb, "level", C.sentry_value_new_string(breadcrumb.Level.ToString().ToLower()));
+        C.sentry_value_set_by_key(crumb, "level", C.sentry_value_new_string(breadcrumb.Level.ToString().ToLowerInvariant()));
         C.sentry_value_set_by_key(crumb, "timestamp", C.sentry_value_new_string(GetTimestamp(breadcrumb.Timestamp)));
         C.SetValueIfNotNull(crumb, "category", breadcrumb.Category);
         C.sentry_add_breadcrumb(crumb);

@@ -190,7 +190,7 @@ public class SentryMonitorOptions : ISentryJsonSerializable
                 Debug.Assert(_interval != null, "The provided 'interval' cannot be null.");
                 writer.WriteNumberIfNotNull("value", _interval);
                 Debug.Assert(_unit != null, "The provided 'unit' cannot be null.");
-                writer.WriteStringIfNotWhiteSpace("unit", _unit.ToString()!.ToLower());
+                writer.WriteStringIfNotWhiteSpace("unit", _unit.ToString()!.ToLowerInvariant());
                 break;
             default:
                 logger?.LogError("Invalid MonitorScheduleType: '{0}'", _type.ToString());
