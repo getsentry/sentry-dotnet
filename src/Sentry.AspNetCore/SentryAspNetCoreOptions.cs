@@ -47,6 +47,9 @@ public class SentryAspNetCoreOptions : SentryHostOptions
     /// </remarks>
     public RequestSize MaxRequestBodySize { get; set; }
 
+    internal bool CollectsRequestBody =>
+        MaxRequestBodySize != RequestSize.None && DataCollectionResolver.IncomingRequestBody;
+
     /// <summary>
     /// Flush on completed request
     /// </summary>

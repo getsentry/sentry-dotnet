@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.RequestDecompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.RequestDecompression;
-using Sentry.Extensibility;
 
 namespace Sentry.AspNetCore;
 
@@ -21,7 +20,7 @@ public class SentryStartupFilter : IStartupFilter
         // If we are capturing request bodies and the user has configured request body decompression, we need to
         // ensure that the RequestDecompression middleware gets called before Sentry's middleware.
         var options = app.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>();
-        if (options?.Value is { } o && o.MaxRequestBodySize != RequestSize.None
+        if (options?.Value is { CollectsRequestBody: true }
             && app.ApplicationServices.GetService<IRequestDecompressionProvider>() is not null)
         {
             app.UseMiddleware<RequestDecompressionMiddleware>();

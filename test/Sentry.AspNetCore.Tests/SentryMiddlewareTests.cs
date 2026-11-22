@@ -468,6 +468,23 @@ public class SentryMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_DataCollectionExcludesIncomingRequest_CanNotSeekStream()
+    {
+        _fixture.Options.MaxRequestBodySize = RequestSize.Always;
+        _fixture.Options.ConfigureDataCollection(dataCollection => dataCollection.HttpBodies = HttpBodyTypes.OutgoingRequest);
+        var sut = _fixture.GetSut();
+        var request = Substitute.For<HttpRequest>();
+        var stream = Substitute.For<Stream>();
+        _ = request.Body.Returns(stream);
+        _ = _fixture.HttpContext.Request.Returns(request);
+        _ = request.HttpContext.Returns(_fixture.HttpContext);
+
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
+
+        request.DidNotReceive().Body = Arg.Any<Stream>();
+    }
+
+    [Fact]
     public void NameAndVersion_Name_NotNull() => Assert.NotNull(SentryMiddleware.NameAndVersion.Name);
 
     [Fact]
