@@ -302,7 +302,7 @@ public static partial class SentrySdk
             // Normally the event processors would be invoked by the SentryClient, but the Cocoa SDK has its own client,
             // so we need to manually invoke any managed event processors here to apply them to Native events.
             var manualProcessors = GetEventProcessors(hub)
-                .Where(p => p is not MainSentryEventProcessor)
+                .Where(p => p is not ISdkProcessor)
                 .ToArray();
             if (manualProcessors.Length == 0 && options.BeforeSendInternal is null)
             {
@@ -330,7 +330,7 @@ public static partial class SentrySdk
         catch (Exception ex)
         {
             options.LogError(ex, "Error running managed event processors for native event");
-            return evt;
+            return null;
         }
 
         static IEnumerable<ISentryEventProcessor> GetEventProcessors(IHub hub)
