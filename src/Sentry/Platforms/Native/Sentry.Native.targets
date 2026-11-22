@@ -4,7 +4,11 @@
     <SentryNativeSourceDirectory>$(MSBuildThisFileDirectory)..\..\..\..\modules\sentry-native\</SentryNativeSourceDirectory>
     <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
     <SentryNativeBuildScript>$(MSBuildThisFileDirectory)..\..\..\..\scripts\build-sentry-native.ps1</SentryNativeBuildScript>
-    <SentryNativeBuildInputs>$(MSBuildThisFileDirectory)..\..\..\..\.git\modules\modules\sentry-native/HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript)</SentryNativeBuildInputs>
+    <_SentryNativeDotGit>$(SentryNativeSourceDirectory).git</_SentryNativeDotGit>
+    <_SentryNativeGitDir Condition="Exists('$(_SentryNativeDotGit)\HEAD')">$(_SentryNativeDotGit)\</_SentryNativeGitDir>
+    <_SentryNativeGitDir Condition="'$(_SentryNativeGitDir)' == '' and Exists('$(_SentryNativeDotGit)')">$([MSBuild]::NormalizeDirectory('$(SentryNativeSourceDirectory)', $([System.IO.File]::ReadAllText('$(_SentryNativeDotGit)').Replace('gitdir:', '').Trim())))</_SentryNativeGitDir>
+    <_SentryNativeGitHead Condition="'$(_SentryNativeGitDir)' != ''">$(_SentryNativeGitDir)HEAD</_SentryNativeGitHead>
+    <SentryNativeBuildInputs>$(_SentryNativeGitHead);$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript)</SentryNativeBuildInputs>
     <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)sentry-native\</SentryNativeOutputDirectory>
     <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
     <NativeLibRelativePath-win-x64>win-x64</NativeLibRelativePath-win-x64>
