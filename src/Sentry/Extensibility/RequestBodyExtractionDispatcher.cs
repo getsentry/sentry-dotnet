@@ -42,6 +42,12 @@ public class RequestBodyExtractionDispatcher : IRequestPayloadExtractor
             return null;
         }
 
+        if (!_options.DataCollectionResolver.IncomingRequestBody)
+        {
+            _options.LogDebug("Skipping request body extraction because DataCollection.HttpBodies excludes IncomingRequest.");
+            return null;
+        }
+
         var size = _sizeSwitch();
 
         switch (size)

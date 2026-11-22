@@ -65,6 +65,39 @@ public class RequestBodyExtractionDispatcherTests
         Assert.Equal(readBody, sut.ExtractPayload(_fixture.HttpRequest) != null);
     }
 
+    [Theory]
+    [InlineData(HttpBodyTypes.All, true)]
+    [InlineData(HttpBodyTypes.IncomingRequest, true)]
+    [InlineData(HttpBodyTypes.OutgoingRequest | HttpBodyTypes.IncomingResponse | HttpBodyTypes.OutgoingResponse, false)]
+    [InlineData(HttpBodyTypes.None, false)]
+    public void ExtractPayload_DataCollectionHttpBodies_GatesExtraction(HttpBodyTypes httpBodies, bool readBody)
+    {
+        _fixture.RequestSize = RequestSize.Always;
+        _fixture.SentryOptions.ConfigureDataCollection(dataCollection => dataCollection.HttpBodies = httpBodies);
+        var sut = _fixture.GetSut();
+
+        Assert.Equal(readBody, sut.ExtractPayload(_fixture.HttpRequest) != null);
+    }
+
+    [Fact]
+    public void ExtractPayload_DataCollectionIncludesIncomingRequest_RequestSizeStillApplies()
+    {
+        _fixture.RequestSize = RequestSize.None;
+        _fixture.SentryOptions.ConfigureDataCollection(dataCollection => dataCollection.HttpBodies = HttpBodyTypes.All);
+        var sut = _fixture.GetSut();
+
+        Assert.Null(sut.ExtractPayload(_fixture.HttpRequest));
+    }
+
+    [Fact]
+    public void ExtractPayload_DataCollectionNotConfigured_DoesNotRequireSendDefaultPii()
+    {
+        _fixture.SentryOptions.SendDefaultPii = false;
+        var sut = _fixture.GetSut();
+
+        Assert.Same("Result", sut.ExtractPayload(_fixture.HttpRequest));
+    }
+
     [Fact]
     public void ExtractPayload_NullRequest_ReturnsNull()
     {

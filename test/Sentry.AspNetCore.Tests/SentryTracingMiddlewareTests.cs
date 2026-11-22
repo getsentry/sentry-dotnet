@@ -463,14 +463,57 @@ public class SentryTracingMiddlewareTests
     [InlineData(false)]
     public async Task Transaction_cookie_attribute_is_filtered_and_gated_on_SendDefaultPii(bool sendDefaultPii)
     {
-        // Arrange
+        var transaction = await GetTransactionForRequestWithCookies(options => options.SendDefaultPii = sendDefaultPii);
+
+        transaction.Should().NotBeNull();
+        if (sendDefaultPii)
+        {
+            var cookies = transaction.Data[CookieFilter.RequestCookieAttribute].Should().BeOfType<string[]>().Subject;
+            cookies.Should().Equal("user_session=[Filtered]", "theme=dark-mode", "[Filtered]");
+        }
+        else
+        {
+            transaction.Data.Should().NotContainKey(CookieFilter.RequestCookieAttribute);
+        }
+    }
+
+    [Fact]
+    public async Task Transaction_cookie_attribute_follows_DataCollection_Cookies_over_SendDefaultPii()
+    {
+        var transaction = await GetTransactionForRequestWithCookies(options =>
+        {
+            options.SendDefaultPii = false;
+            options.ConfigureDataCollection(dataCollection =>
+                dataCollection.Cookies = KeyValueCollectionBehavior.DenyList("theme"));
+        });
+
+        transaction.Should().NotBeNull();
+        var cookies = transaction.Data[CookieFilter.RequestCookieAttribute].Should().BeOfType<string[]>().Subject;
+        cookies.Should().Equal("user_session=[Filtered]", "theme=[Filtered]", "[Filtered]");
+    }
+
+    [Fact]
+    public async Task Transaction_cookie_attribute_not_set_when_DataCollection_Cookies_off()
+    {
+        var transaction = await GetTransactionForRequestWithCookies(options =>
+        {
+            options.SendDefaultPii = true;
+            options.ConfigureDataCollection(dataCollection => dataCollection.Cookies = KeyValueCollectionBehavior.Off);
+        });
+
+        transaction.Should().NotBeNull();
+        transaction.Data.Should().NotContainKey(CookieFilter.RequestCookieAttribute);
+    }
+
+    private static async Task<ITransactionData> GetTransactionForRequestWithCookies(Action<SentryAspNetCoreOptions> configureOptions)
+    {
         ITransactionData transaction = null;
 
         var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 });
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
-            .UseSentry(options => options.SendDefaultPii = sendDefaultPii)
+            .UseSentry(configureOptions)
             .ConfigureServices(services =>
             {
                 services.AddRouting();
@@ -494,22 +537,11 @@ public class SentryTracingMiddlewareTests
 
         var client = server.CreateClient();
 
-        // Act
         using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13");
         request.Headers.Add("Cookie", "user_session=abc; theme=dark-mode;opaque-token");
         await client.SendAsync(request);
 
-        // Assert
-        transaction.Should().NotBeNull();
-        if (sendDefaultPii)
-        {
-            var cookies = transaction.Data[CookieFilter.RequestCookieAttribute].Should().BeOfType<string[]>().Subject;
-            cookies.Should().Equal("user_session=[Filtered]", "theme=dark-mode", "[Filtered]");
-        }
-        else
-        {
-            transaction.Data.Should().NotContainKey(CookieFilter.RequestCookieAttribute);
-        }
+        return transaction;
     }
 
     [Fact]
