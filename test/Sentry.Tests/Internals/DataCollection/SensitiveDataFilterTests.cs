@@ -56,6 +56,27 @@ public class SensitiveDataFilterTests
     }
 
     [Theory]
+    [InlineData("Accept", "text/plain")]
+    [InlineData("X-Tenant-Id", "[Filtered]")]
+    [InlineData("Authorization", "[Filtered]")]
+    [InlineData("Cookie", "[Filtered]")]
+    public void FilterHeaderValue_AllowList_KeepsOnlyMatchingNonSensitiveHeaders(string name, string expected)
+    {
+        var behavior = KeyValueCollectionBehavior.AllowList("accept", "authorization", "cookie");
+
+        SensitiveDataFilter.FilterHeaderValue(name, "text/plain", behavior).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("X-Tenant-Id", "[Filtered]")]
+    [InlineData("Accept", "text/plain")]
+    public void FilterHeaderValue_DenyListTerm_FiltersMatchingHeaders(string name, string expected)
+    {
+        SensitiveDataFilter.FilterHeaderValue(name, "text/plain", KeyValueCollectionBehavior.DenyList("tenant"))
+            .Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("Cookie")]
     [InlineData("Set-Cookie")]
     public void IsSensitiveKey_CookieHeaderNames_ReturnsFalse(string name)

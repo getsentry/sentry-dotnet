@@ -1,0 +1,32 @@
+name: Restore Cocoa SDK
+description: Restores the Cocoa SDK that Sentry.Bindings.Cocoa builds from the sentry-cocoa submodule. That build takes ~15 minutes on a hosted runner, and build-sentry-cocoa.sh skips it when the restored stamp matches.
+inputs:
+  restore-on-release:
+    description: Restore on release branches too. By default release builds build the Cocoa SDK from source, because it ships in the Sentry.Bindings.Cocoa package.
+    default: 'false'
+  lookup-only:
+    description: Only check whether the cache exists, without downloading it
+    default: 'false'
+outputs:
+  key:
+    description: The key to save the cache under. It covers the selected Xcode, build-sentry-cocoa.sh, sentry-cocoa.xcconfig and the submodule commit, and it's empty when the restore was skipped.
+    value: ${{ steps.restore.outputs.cache-primary-key }}
+  cache-hit:
+    description: Whether the cache had an exact match
+    value: ${{ steps.restore.outputs.cache-hit }}
+runs:
+  using: composite
+
+  steps:
+    - id: key
+      if: inputs.restore-on-release == 'true' || !startsWith(github.ref_name, 'release/')
+      shell: bash
+      run: echo "key=sentry-cocoa-$(xcodebuild -version | tr -cs '[:alnum:].' '-')-${{ hashFiles('scripts/build-sentry-cocoa.sh', 'scripts/sentry-cocoa.xcconfig') }}-${{ hashFiles('.git/modules/modules/sentry-cocoa/HEAD') }}" >> "$GITHUB_OUTPUT"
+
+    - id: restore
+      if: steps.key.outputs.key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: modules/sentry-cocoa/Carthage
+        key: ${{ steps.key.outputs.key }}
+        lookup-only: ${{ inputs.lookup-only }}

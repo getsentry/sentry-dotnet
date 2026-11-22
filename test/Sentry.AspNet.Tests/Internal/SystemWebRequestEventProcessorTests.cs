@@ -47,6 +47,21 @@ public class SystemWebRequestEventProcessorTests :
     }
 
     [Fact]
+    public void Process_QueryStringWithSensitiveParameter_FiltersValueAndPreservesEncoding()
+    {
+        const string query = "token=abc123&q=a%20b%26c&page=5";
+        Context = new HttpContext(
+            new HttpRequest("test", $"http://test/the/path?{query}", query),
+            new HttpResponse(TextWriter.Null));
+        var evt = new SentryEvent();
+
+        _fixture.GetSut().Process(evt);
+
+        Assert.Equal("token=[Filtered]&q=a%20b%26c&page=5", evt.Request.QueryString);
+        Assert.Equal("http://test/the/path", evt.Request.Url);
+    }
+
+    [Fact]
     public void Process_NoHttpContext_NoRequestData()
     {
         Context = null;
@@ -86,6 +101,49 @@ public class SystemWebRequestEventProcessorTests :
 
         var processedEvt = sut.Process(evt);
         Assert.Equal(userIp, processedEvt?.User.IpAddress);
+    }
+
+    [Fact]
+    public void Process_SendDefaultPiiTrue_FiltersCookies()
+    {
+        Context = HttpContextBuilder.BuildWithCookies(new[]
+        {
+            new HttpCookie("user_session", "abc"),
+            new HttpCookie("theme", "dark-mode")
+        });
+        Context.User = new GenericPrincipal(new GenericIdentity("TestUser"), null);
+        _fixture.SentryOptions.SendDefaultPii = true;
+
+        var processedEvt = _fixture.GetSut().Process(new SentryEvent());
+
+        processedEvt?.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode");
+    }
+
+    [Fact]
+    public void Process_SendDefaultPiiTrue_KeepsEachCookieWithDuplicateName()
+    {
+        Context = HttpContextBuilder.BuildWithCookies(new[]
+        {
+            new HttpCookie("theme", "dark-mode"),
+            new HttpCookie("theme", "light-mode")
+        });
+        Context.User = new GenericPrincipal(new GenericIdentity("TestUser"), null);
+        _fixture.SentryOptions.SendDefaultPii = true;
+
+        var processedEvt = _fixture.GetSut().Process(new SentryEvent());
+
+        processedEvt?.Request.Cookies.Should().Be("theme=dark-mode; theme=light-mode");
+    }
+
+    [Fact]
+    public void Process_SendDefaultPiiFalse_DoesNotSetCookies()
+    {
+        Context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("theme", "dark-mode") });
+        _fixture.SentryOptions.SendDefaultPii = false;
+
+        var processedEvt = _fixture.GetSut().Process(new SentryEvent());
+
+        processedEvt?.Request.Cookies.Should().BeNull();
     }
 
     [Theory]

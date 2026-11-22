@@ -2,7 +2,6 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry.Protocol.Envelopes;
 
@@ -235,9 +234,9 @@ public sealed class Envelope : ISerializable, IDisposable
     /// </summary>
     public static Envelope FromEvent(
         SentryEvent @event,
-        IDiagnosticLogger? logger = null,
         IReadOnlyCollection<SentryAttachment>? attachments = null,
-        SessionUpdate? sessionUpdate = null)
+        SessionUpdate? sessionUpdate = null,
+        IDiagnosticLogger? logger = null)
     {
         var eventId = @event.EventId;
         var header = CreateHeader(eventId, @event.DynamicSamplingContext);
@@ -340,9 +339,9 @@ public sealed class Envelope : ISerializable, IDisposable
     /// </summary>
     public static Envelope FromFeedback(
         SentryEvent @event,
-        IDiagnosticLogger? logger = null,
         IReadOnlyCollection<SentryAttachment>? attachments = null,
-        SessionUpdate? sessionUpdate = null)
+        SessionUpdate? sessionUpdate = null,
+        IDiagnosticLogger? logger = null)
     {
         if (@event.Contexts.Feedback == null)
         {
@@ -385,8 +384,8 @@ public sealed class Envelope : ISerializable, IDisposable
     /// </summary>
     public static Envelope FromTransaction(
         SentryTransaction transaction,
-        IDiagnosticLogger? logger = null,
-        IReadOnlyCollection<SentryAttachment>? attachments = null)
+        IReadOnlyCollection<SentryAttachment>? attachments = null,
+        IDiagnosticLogger? logger = null)
     {
         var eventId = transaction.EventId;
         var header = CreateHeader(eventId, transaction.DynamicSamplingContext);
@@ -422,35 +421,6 @@ public sealed class Envelope : ISerializable, IDisposable
         }
 
         return new Envelope(eventId, header, items);
-    }
-
-    /// <summary>
-    /// Creates an envelope that contains one or more <see cref="CodeLocations"/>
-    /// </summary>
-    internal static Envelope FromCodeLocations(CodeLocations codeLocations)
-    {
-        var header = DefaultHeader;
-
-        var items = new List<EnvelopeItem>(1);
-        items.Add(EnvelopeItem.FromCodeLocations(codeLocations));
-
-        return new Envelope(header, items);
-    }
-
-    /// <summary>
-    /// Creates an envelope that contains one or more Metrics
-    /// </summary>
-    internal static Envelope FromMetrics(IEnumerable<Metric> metrics)
-    {
-        var header = DefaultHeader;
-
-        List<EnvelopeItem> items = new();
-        foreach (var metric in metrics)
-        {
-            items.Add(EnvelopeItem.FromMetric(metric));
-        }
-
-        return new Envelope(header, items);
     }
 
     /// <summary>

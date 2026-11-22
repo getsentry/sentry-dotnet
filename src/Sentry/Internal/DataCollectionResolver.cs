@@ -21,15 +21,13 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public bool UserInfo => Configured?.UserInfo ?? SendDefaultPii;
 
-    public bool DatabaseQueryData => Configured?.DatabaseQueryData ?? SendDefaultPii;
-
     public bool GraphQLDocument => Configured?.GraphQL.Document ?? SendDefaultPii;
 
     public bool GraphQLVariables => Configured?.GraphQL.Variables ?? SendDefaultPii;
 
-    public bool GenAIInputs => Configured?.GenAI.Inputs ?? SendDefaultPii;
+    public bool GenAIInputs => Configured?.GenAI.Inputs ?? true;
 
-    public bool GenAIOutputs => Configured?.GenAI.Outputs ?? SendDefaultPii;
+    public bool GenAIOutputs => Configured?.GenAI.Outputs ?? true;
 
     public KeyValueCollectionBehavior Cookies =>
         Configured?.Cookies ?? (SendDefaultPii ? DenyList : Off);
@@ -38,7 +36,28 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public KeyValueCollectionBehavior ResponseHeaders => Configured?.HttpHeaders.Response ?? DenyList;
 
+    /// <summary>
+    /// Temporary bridge for call sites that only sent headers with <c>SendDefaultPii</c>; remove with it, see
+    /// https://github.com/getsentry/sentry-dotnet/issues/5439
+    /// </summary>
+    public KeyValueCollectionBehavior RequestHeadersWithLegacyPiiGate =>
+        Configured?.HttpHeaders.Request ?? (SendDefaultPii ? DenyList : Off);
+
+    /// <summary>
+    /// Temporary bridge for call sites that only sent headers with <c>SendDefaultPii</c>; remove with it, see
+    /// https://github.com/getsentry/sentry-dotnet/issues/5439
+    /// </summary>
+    public KeyValueCollectionBehavior ResponseHeadersWithLegacyPiiGate =>
+        Configured?.HttpHeaders.Response ?? (SendDefaultPii ? DenyList : Off);
+
     public KeyValueCollectionBehavior UrlQueryParams => Configured?.UrlQueryParams ?? DenyList;
+
+    /// <summary>
+    /// Temporary bridge for call sites that only sent the URL fragment with <c>SendDefaultPii</c>; remove with it, see
+    /// https://github.com/getsentry/sentry-dotnet/issues/5439
+    /// </summary>
+    public KeyValueCollectionBehavior UrlFragmentWithLegacyPiiGate =>
+        Configured?.UrlQueryParams ?? (SendDefaultPii ? DenyList : Off);
 
     public bool IncomingRequestBody => CollectsBody(HttpBodyTypes.IncomingRequest, legacyFallback: true);
 

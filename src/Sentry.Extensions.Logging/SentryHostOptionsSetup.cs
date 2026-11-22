@@ -1,0 +1,25 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+
+namespace Sentry.Extensions.Logging;
+
+internal sealed class SentryHostOptionsSetup<TOptions> : IConfigureOptions<TOptions>
+    where TOptions : SentryHostOptions
+{
+    private readonly IConfiguration _config;
+
+    public SentryHostOptionsSetup(IConfiguration section)
+    {
+        ArgumentNullException.ThrowIfNull(section);
+        _config = section;
+    }
+
+    public void Configure(TOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        var bindable = new BindableSentryHostOptions();
+        _config.Bind(bindable);
+        bindable.ApplyTo(options);
+    }
+}

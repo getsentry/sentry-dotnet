@@ -20,7 +20,7 @@ public abstract partial class SentryMetric
         };
 
         scope ??= hub.GetScope();
-        metric.Attributes.SetDefaultAttributes(options, scope?.Sdk ?? SdkVersion.Instance);
+        metric.Attributes.SetDefaultAttributes(options, scope);
 
         return metric;
     }

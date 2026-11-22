@@ -34,6 +34,25 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
+    public void Shell_Navigating_FiltersSensitiveQueryParameters()
+    {
+        // Arrange
+        var shell = new Shell();
+        _fixture.Binder.HandleShellEvents(shell);
+
+        var current = new ShellNavigationState("login?session_id=abc");
+        var target = new ShellNavigationState("details?token=abc&page=5");
+
+        // Act
+        shell.RaiseEvent(nameof(Shell.Navigating), new ShellNavigatingEventArgs(current, target, ShellNavigationSource.Push, false));
+
+        // Assert
+        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+        crumb.Data.Should().Contain("from", "login?session_id=[Filtered]");
+        crumb.Data.Should().Contain("to", "details?token=[Filtered]&page=5");
+    }
+
+    [Fact]
     public void Shell_UnbindNavigating_DoesNotAddBreadcrumb()
     {
         // Arrange
@@ -86,6 +105,25 @@ public partial class MauiEventsBinderTests
         crumb.Data.Should().Contain($"from", "foo");
         crumb.Data.Should().Contain($"to", "bar");
         crumb.Data.Should().Contain($"Source", "Push");
+    }
+
+    [Fact]
+    public void Shell_Navigated_FiltersSensitiveQueryParameters()
+    {
+        // Arrange
+        var shell = new Shell();
+        _fixture.Binder.HandleShellEvents(shell);
+
+        var previous = new ShellNavigationState("login?session_id=abc");
+        var current = new ShellNavigationState("details?token=abc&page=5");
+
+        // Act
+        shell.RaiseEvent(nameof(Shell.Navigated), new ShellNavigatedEventArgs(previous, current, ShellNavigationSource.Push));
+
+        // Assert
+        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+        crumb.Data.Should().Contain("from", "login?session_id=[Filtered]");
+        crumb.Data.Should().Contain("to", "details?token=[Filtered]&page=5");
     }
 
     [Fact]

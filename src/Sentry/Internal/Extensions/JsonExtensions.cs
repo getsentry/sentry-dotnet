@@ -503,6 +503,10 @@ internal static class JsonExtensions
         {
             writer.WriteStringValue(str);
         }
+        else if (value is string[] strings)
+        {
+            writer.WriteArrayValue(strings, logger);
+        }
         else if (value is bool b)
         {
             writer.WriteBooleanValue(b);

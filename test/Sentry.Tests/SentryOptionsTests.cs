@@ -7,10 +7,10 @@ using Sentry.Cocoa;
 public partial class SentryOptionsTests
 {
     [Fact]
-    public void DecompressionMethods_ByDefault_AllBitsSet()
+    public void DecompressionMethods_ByDefault_GZipAndDeflate()
     {
         var sut = new SentryOptions();
-        Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
+        Assert.Equal(DecompressionMethods.GZip | DecompressionMethods.Deflate, sut.DecompressionMethods);
     }
 
     [Fact]
@@ -18,13 +18,6 @@ public partial class SentryOptionsTests
     {
         var sut = new SentryOptions();
         sut.EnableBackpressureHandling.Should().BeTrue();
-    }
-
-    [Fact]
-    public void EnableLogs_Default_False()
-    {
-        var sut = new SentryOptions();
-        sut.EnableLogs.Should().BeFalse();
     }
 
     [Fact]
@@ -476,6 +469,22 @@ public partial class SentryOptionsTests
         sut.AddEventProcessors(new[] { first, second });
         Assert.Contains(sut.EventProcessors, actual => actual.Lazy.Value == first);
         Assert.Contains(sut.EventProcessors, actual => actual.Lazy.Value == second);
+    }
+
+    [Fact]
+    public void AddEventProcessor_WhileProcessorsAreBeingEnumerated_DoesNotThrow()
+    {
+        // SentryEventHelper.ProcessEvent enumerates these lazily for the whole duration of a capture,
+        // so registering a processor from another thread must not invalidate an in-flight enumeration.
+        var sut = new SentryOptions();
+        using var inFlightCapture = sut.GetAllEventProcessors().GetEnumerator();
+        inFlightCapture.MoveNext();
+
+        sut.AddEventProcessor(Substitute.For<ISentryEventProcessor>());
+
+        var exception = Record.Exception(() => inFlightCapture.MoveNext());
+
+        Assert.Null(exception);
     }
 
     [Fact]

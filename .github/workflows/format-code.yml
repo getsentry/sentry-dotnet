@@ -41,7 +41,11 @@ jobs:
         # We exclude `test/Sentry.Tests/AttributeReaderTests.cs` because dotnet-format tries to
         # delete assertions in there.
         # - see https://github.com/getsentry/sentry-dotnet/pull/4911#discussion_r2795717887
-        run: dotnet format Sentry.slnx --no-restore --report ./dotnet-format-report --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs
+        #
+        # We exclude `test/Sentry.MauiTrimTest/Platforms` because dotnet-format adds an Android
+        # JNI constructor to the iOS, MacCatalyst and Tizen `Program` types, which don't have an
+        # Android base type - breaking those TFMs.
+        run: dotnet format Sentry.slnx --no-restore --report ./dotnet-format-report --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs ./test/Sentry.MauiTrimTest/Platforms
 
       - name: Upload Format Report
         if: ${{ always() }}
@@ -68,7 +72,7 @@ jobs:
           if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
             if [[ $(git status) != *"nothing to commit"* ]]; then
               echo "::error::Formatting issues found. Please run the following command locally and push the result:"
-              echo "::error::  dotnet format Sentry.slnx --no-restore --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs"
+              echo "::error::  dotnet format Sentry.slnx --no-restore --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs ./test/Sentry.MauiTrimTest/Platforms"
               exit 1
             fi
             echo "All code formatted correctly."

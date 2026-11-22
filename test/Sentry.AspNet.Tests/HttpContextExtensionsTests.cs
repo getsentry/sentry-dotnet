@@ -1,3 +1,4 @@
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.OpenTelemetry;
 using HttpCookie = System.Web.HttpCookie;
 
@@ -78,7 +79,7 @@ public class HttpContextExtensionsTests
     }
 
     [Fact]
-    public void StartSentryTransaction_SendDefaultPii_set_to_true_sets_cookies()
+    public void StartSentryTransaction_SendDefaultPii_set_to_true_filters_cookies()
     {
         // Arrange
         using var _ = SentrySdk.UseHub(new Hub(
@@ -90,13 +91,19 @@ public class HttpContextExtensionsTests
             },
             Substitute.For<ISentryClient>()
         ));
-        var context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("foo", "bar") });
+        var context = HttpContextBuilder.BuildWithCookies(new[]
+        {
+            new HttpCookie("user_session", "abc"),
+            new HttpCookie("theme", "dark-mode")
+        });
 
         // Act
         var transaction = context.StartSentryTransaction();
 
         // Assert
-        transaction.Request.Cookies.Should().Be("foo=bar");
+        transaction.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode");
+        var attribute = transaction.Data[CookieFilter.RequestCookieAttribute].Should().BeOfType<string[]>().Subject;
+        attribute.Should().Equal("user_session=[Filtered]", "theme=dark-mode");
     }
 
     [Fact]

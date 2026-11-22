@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 using Sentry.Internal;
@@ -15,9 +14,8 @@ internal sealed class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationO
     /// <summary>
     /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
     /// </summary>
-    public SentryAspNetCoreOptionsSetup(
-        ILoggerProviderConfiguration<SentryAspNetCoreStructuredLoggerProvider> providerConfiguration)
-        : base(providerConfiguration.Configuration)
+    public SentryAspNetCoreOptionsSetup(IConfiguration config)
+        : base(config)
     {
     }
 
@@ -41,15 +39,7 @@ internal sealed class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAsp
     /// <summary>
     /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
     /// </summary>
-    public SentryAspNetCoreOptionsSetup(ILoggerProviderConfiguration<SentryAspNetCoreStructuredLoggerProvider> providerConfiguration)
-        : this(providerConfiguration.Configuration)
-    {
-    }
-
-    /// <summary>
-    /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
-    /// </summary>
-    internal SentryAspNetCoreOptionsSetup(IConfiguration config)
+    public SentryAspNetCoreOptionsSetup(IConfiguration config)
     {
         ArgumentNullException.ThrowIfNull(config);
         _config = config;

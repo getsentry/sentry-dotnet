@@ -6,8 +6,8 @@ namespace Sentry;
 /// Controls which categories of data the SDK's integrations collect automatically.
 /// </summary>
 /// <remarks>
-/// The integrations are still being migrated onto these options, so setting a category does not yet change what
-/// they collect; see <see cref="SentryOptions.ConfigureDataCollection"/>.
+/// The integrations are still being migrated onto these options, and those that haven't moved yet ignore these
+/// categories; see <see cref="SentryOptions.ConfigureDataCollection"/>.
 /// <para>
 /// Every category starts at the default from the data collection spec, which collects it - including user identity
 /// and HTTP bodies - with sensitive keys filtered out. Restrict an individual category by setting it.
@@ -33,6 +33,9 @@ public class DataCollectionOptions
     /// <see cref="SentryUser.Id"/>, <see cref="SentryUser.Email"/>, <see cref="SentryUser.Username"/> and the
     /// user's IP address. Defaults to <c>true</c>. A user you set yourself is never affected.
     /// </summary>
+    /// <remarks>
+    /// This option doesn't affect the SDK's installation ID, which still fills <see cref="SentryUser.Id"/> when no user ID is set.
+    /// </remarks>
     public bool UserInfo { get; set; } = true;
 
     /// <summary>
@@ -76,16 +79,6 @@ public class DataCollectionOptions
     public GenAIOptions GenAI { get; } = new();
 
     /// <summary>
-    /// Whether data associated with database queries is collected - bound query parameters, payloads for write
-    /// operations, and returned result data. Defaults to <c>true</c>.
-    /// </summary>
-    /// <remarks>
-    /// Sanitized query statements and structural metadata - the database system, query summary, operation name and
-    /// the table acted upon - are always collected.
-    /// </remarks>
-    public bool DatabaseQueryData { get; set; } = true;
-
-    /// <summary>
     /// How request and response headers are collected.
     /// </summary>
     public sealed class HttpHeaderOptions
@@ -124,6 +117,9 @@ public class DataCollectionOptions
         /// <summary>
         /// Whether the variables passed to GraphQL operations are collected. Defaults to <c>true</c>.
         /// </summary>
+        /// <remarks>
+        /// GraphQL servers may echo variable values in error messages and response bodies, which this option doesn't filter.
+        /// </remarks>
         public bool Variables { get; set; } = true;
     }
 

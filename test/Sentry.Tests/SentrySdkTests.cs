@@ -1064,7 +1064,7 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Implements_ClientExtensions()
     {
-        string[] excludedMembers = [nameof(SentryClientExtensions.GetSentryOptions), nameof(SentryClientExtensions.GetInternalSentryOptions)];
+        string[] excludedMembers = [nameof(SentryClientExtensions.GetSentryOptions)];
         var clientExtensions = typeof(SentryClientExtensions)
             .GetMembers(BindingFlags.Public | BindingFlags.Static)
             .Where(x => !excludedMembers.Contains(x.Name))

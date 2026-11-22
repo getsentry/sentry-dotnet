@@ -2,7 +2,6 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
@@ -63,7 +62,7 @@ internal class Hub : IHub, IDisposable
 
         _options = options;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
-        _sessionManager = sessionManager ?? new GlobalSessionManager(options);
+        _sessionManager = sessionManager ?? new GlobalSessionManager(options, getCurrentScope: () => CurrentScope);
         _clock = clock ?? SystemClock.Clock;
         if (_options.EnableBackpressureHandling)
         {
@@ -269,7 +268,7 @@ internal class Hub : IHub, IDisposable
             };
             // If no DSC was provided, create one based on this transaction.
             // Must be done AFTER the sampling decision has been made (the DSC propagates sampling decisions).
-            unsampledTransaction.DynamicSamplingContext ??= unsampledTransaction.CreateDynamicSamplingContext(_options, _replaySession);
+            unsampledTransaction.DynamicSamplingContext ??= unsampledTransaction.CreateDynamicSamplingContext(_options, _replaySession, CurrentScope);
             return unsampledTransaction;
         }
 
@@ -281,7 +280,7 @@ internal class Hub : IHub, IDisposable
         };
         // If no DSC was provided, create one based on this transaction.
         // Must be done AFTER the sampling decision has been made (the DSC propagates sampling decisions).
-        transaction.DynamicSamplingContext ??= transaction.CreateDynamicSamplingContext(_options, _replaySession);
+        transaction.DynamicSamplingContext ??= transaction.CreateDynamicSamplingContext(_options, _replaySession, CurrentScope);
 
         if (_options.TransactionProfilerFactory is { } profilerFactory &&
             _randomValuesFactory.NextBool(_options.ProfilesSampleRate ?? 0.0))
@@ -341,8 +340,8 @@ internal class Hub : IHub, IDisposable
             return dsc.ToBaggageHeader();
         }
 
-        var propagationContext = CurrentScope.PropagationContext;
-        return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession).ToBaggageHeader();
+        var scope = CurrentScope;
+        return scope.PropagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession, scope).ToBaggageHeader();
     }
 
     public W3CTraceparentHeader? GetTraceparentHeader()
@@ -558,20 +557,21 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, SentryPropagationContext propagationContext)
+    private void ApplyTraceContextToEvent(SentryEvent evt, Scope scope)
     {
+        var propagationContext = scope.PropagationContext;
         evt.Contexts.Trace.TraceId = propagationContext.TraceId;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
+        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession, scope);
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, IExternalPropagationContext propagationContext)
+    private void ApplyTraceContextToEvent(SentryEvent evt, IExternalPropagationContext propagationContext, Scope scope)
     {
         evt.Contexts.Trace.TraceId = propagationContext.TraceId ?? default;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId ?? default;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        evt.DynamicSamplingContext = propagationContext.GetDynamicSamplingContext(_options, _replaySession);
+        evt.DynamicSamplingContext = propagationContext.GetDynamicSamplingContext(_options, _replaySession, scope);
     }
 
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
@@ -673,7 +673,7 @@ internal class Hub : IHub, IDisposable
             // propagation context
             if (_options.ExternalPropagationContext?.Snapshot() is { TraceId: not null } externalPropagationContext)
             {
-                ApplyTraceContextToEvent(evt, externalPropagationContext);
+                ApplyTraceContextToEvent(evt, externalPropagationContext, scope);
             }
             else if ((GetLinkedSpan(evt) ?? scope.Span) is { } span)
             {
@@ -682,7 +682,7 @@ internal class Hub : IHub, IDisposable
             else
             {
                 // If there is no span on the scope (and not just no sampled one), fall back to the propagation context
-                ApplyTraceContextToEvent(evt, scope.PropagationContext);
+                ApplyTraceContextToEvent(evt, scope);
             }
 
             // Now capture the event with the Sentry client on the current scope.
@@ -818,45 +818,6 @@ internal class Hub : IHub, IDisposable
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture transaction: {0}", transaction.SpanId);
-        }
-    }
-
-    public void CaptureMetrics(IEnumerable<Metric> metrics)
-    {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        Metric[]? enumerable = null;
-        try
-        {
-            enumerable = metrics as Metric[] ?? metrics.ToArray();
-            _options.LogDebug("Capturing metrics.");
-            CurrentClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
-        }
-        catch (Exception e)
-        {
-            var metricEventIds = enumerable?.Select(m => m.EventId).ToArray() ?? [];
-            _options.LogError(e, "Failure to capture metrics: {0}", string.Join(",", metricEventIds));
-        }
-    }
-
-    public void CaptureCodeLocations(CodeLocations codeLocations)
-    {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        try
-        {
-            _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
-            CurrentClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failure to capture code locations");
         }
     }
 

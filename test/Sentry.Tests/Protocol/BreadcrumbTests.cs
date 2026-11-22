@@ -54,6 +54,20 @@ public class BreadcrumbTests
     }
 
     [Fact]
+    public void Redact_NoMessageOrData_ReturnsNull()
+    {
+        var breadcrumb = new Breadcrumb();
+
+        breadcrumb.Redact();
+
+        using (new AssertionScope())
+        {
+            breadcrumb.Message.Should().BeNull();
+            breadcrumb.Data.Should().BeNull();
+        }
+    }
+
+    [Fact]
     public void SerializeObject_ParameterlessConstructor_IncludesTimestamp()
     {
         var sut = new Breadcrumb("test", "unit");
@@ -107,6 +121,21 @@ public class BreadcrumbTests
         var actual = @case.breadcrumb.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
+    }
+
+    [Theory]
+    [InlineData("debug", BreadcrumbLevel.Debug)]
+    [InlineData("info", BreadcrumbLevel.Info)]
+    [InlineData("warning", BreadcrumbLevel.Warning)]
+    [InlineData("error", BreadcrumbLevel.Error)]
+    [InlineData("fatal", BreadcrumbLevel.Fatal)]
+    [InlineData("FATAL", BreadcrumbLevel.Fatal)]
+    [InlineData("critical", BreadcrumbLevel.Info)]
+    public void FromJson_Level_ParsesExpectedLevel(string level, BreadcrumbLevel expected)
+    {
+        var actual = Json.Parse($$"""{"timestamp":"9999-12-31T23:59:59.999Z","level":"{{level}}"}""", Breadcrumb.FromJson);
+
+        Assert.Equal(expected, actual.Level);
     }
 
     public static IEnumerable<object[]> TestCases()

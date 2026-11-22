@@ -13,7 +13,6 @@ internal partial class BindableSentryOptions
         public KeyValueBehavior UrlQueryParams { get; } = new();
         public GraphQLOptions GraphQL { get; } = new();
         public GenAIOptions GenAI { get; } = new();
-        public bool? DatabaseQueryData { get; set; }
 
         public void ApplyTo(Sentry.DataCollectionOptions options)
         {
@@ -21,7 +20,6 @@ internal partial class BindableSentryOptions
             options.Cookies = Cookies.ToBehavior() ?? options.Cookies;
             options.HttpBodies = ParseHttpBodies() ?? options.HttpBodies;
             options.UrlQueryParams = UrlQueryParams.ToBehavior() ?? options.UrlQueryParams;
-            options.DatabaseQueryData = DatabaseQueryData ?? options.DatabaseQueryData;
             HttpHeaders.ApplyTo(options.HttpHeaders);
             GraphQL.ApplyTo(options.GraphQL);
             GenAI.ApplyTo(options.GenAI);

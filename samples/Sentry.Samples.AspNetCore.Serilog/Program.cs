@@ -1,3 +1,4 @@
+using Sentry.Serilog;
 using Serilog;
 using Serilog.Events;
 
@@ -5,7 +6,40 @@ namespace Sentry.Samples.AspNetCore.Serilog;
 
 public class Program
 {
-    public static void Main(string[] args) => BuildWebApp(args).Run();
+    public static int Main(string[] args)
+    {
+        // UseSentry below only starts Sentry once the app is running. Initializing it here as well captures crashes
+        // during startup, until UseSentry takes over: https://docs.sentry.io/platforms/dotnet/guides/serilog/#capturing-startup-crashes
+        using var _ = SentrySdk.Init(o =>
+        {
+#if !SENTRY_DSN_DEFINED_IN_ENV
+            o.Dsn = SamplesShared.Dsn;
+#else
+            o.Dsn = EnvironmentVariables.Dsn;
+#endif
+            o.UseSerilog();
+        });
+
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.Sentry()
+            .CreateBootstrapLogger();
+
+        try
+        {
+            BuildWebApp(args).Run();
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application terminated unexpectedly");
+            return 1;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
 
     public static WebApplication BuildWebApp(string[] args)
     {
@@ -14,28 +48,28 @@ public class Program
             c.Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                // Add Sentry integration with Serilog
+                // Configure Serilog to send logs to Sentry. This only configures the sink: it does not initialize Sentry.
                 .WriteTo.Sentry(s =>
                 {
                     // Sets the minimum log level required to add a log message as breadcrumb
                     s.MinimumBreadcrumbLevel = LogEventLevel.Debug;
                     // Set the minimum level for messages to be sent out as events to Sentry
                     s.MinimumEventLevel = LogEventLevel.Error;
-                    // When configuring Sentry's Serilog integration in combination with other integrations that
-                    // initialize the Sentry SDK (like ASP.NET Core or MAUI) we need to tell it not to reinitialize
-                    // Sentry... we just want it to set up the Serilog sink
-                    s.InitializeSdk = false;
                 }));
 
-        // Add Sentry integration
-        // It can be defined via configuration (including `appsettings.json`)
-        // or coded explicitly, via parameter like:
-        // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
+        // Add the Sentry integration.
+        // Most options can be defined via binding configuration (including `appsettings.json` as we do here)
+        // or coded explicitly, in the options callback below (as we do with the DSN and Serilog log context)
+        builder.UseSentry(o =>
+        {
 #if !SENTRY_DSN_DEFINED_IN_ENV
-        builder.UseSentry(SamplesShared.Dsn);
+            o.Dsn = SamplesShared.Dsn;
 #else
-        builder.UseSentry(EnvironmentVariables.Dsn);
+            o.Dsn = EnvironmentVariables.Dsn;
 #endif
+            // Apply properties from the Serilog LogContext to Sentry events
+            o.UseSerilog();
+        });
 
         // The App:
         var webApplication = builder.Build();

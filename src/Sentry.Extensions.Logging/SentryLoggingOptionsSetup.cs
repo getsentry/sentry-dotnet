@@ -17,9 +17,6 @@ internal sealed class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggin
     public void Configure(SentryLoggingOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-
-        var bindable = new BindableSentryLoggingOptions();
-        _config.Bind(bindable);
-        bindable.ApplyTo(options);
+        SentryLoggingConfiguration.ApplyTo(_config, options);
     }
 }

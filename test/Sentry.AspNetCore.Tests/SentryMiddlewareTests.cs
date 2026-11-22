@@ -474,15 +474,13 @@ public class SentryMiddlewareTests
     public void NameAndVersion_Version_NotNull() => Assert.NotNull(SentryMiddleware.NameAndVersion.Version);
 
     [Fact]
-    public void PopulateScope_Sdk_ContainNameAndVersion()
+    public void Options_Sdk_ContainNameVersionAndPackage()
     {
-        var scope = new Scope();
+        var options = new SentryAspNetCoreOptions();
 
-        var sut = _fixture.GetSut();
-        sut.PopulateScope(_fixture.HttpContext, scope);
-
-        Assert.Equal(Constants.SdkName, scope.Sdk.Name);
-        Assert.Equal(SentryMiddleware.NameAndVersion.Version, scope.Sdk.Version);
+        Assert.Equal(Constants.SdkName, options.ScopeDefaults.Sdk.Name);
+        Assert.Equal(SentryMiddleware.NameAndVersion.Version, options.ScopeDefaults.Sdk.Version);
+        Assert.Contains(options.ScopeDefaults.Sdk.Packages, p => p.Name == "nuget:" + SentryMiddleware.NameAndVersion.Name);
     }
 
     [Fact]

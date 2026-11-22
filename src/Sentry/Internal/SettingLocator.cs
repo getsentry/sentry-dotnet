@@ -75,6 +75,25 @@ internal class SettingLocator
         return _options.Dsn!;
     }
 
+    /// <summary>
+    /// Probes the same sources as <see cref="GetDsn"/> without throwing or assigning to the options. Returns
+    /// <see langword="null"/> when nothing is configured, or when the nearest source disables Sentry with an empty DSN.
+    /// </summary>
+    internal string? TryGetDsn()
+    {
+        if (_options.Dsn is { } optionsDsn)
+        {
+            return optionsDsn.NullIfWhitespace();
+        }
+
+        if (GetEnvironmentVariable(Constants.DsnEnvironmentVariable) is { } environmentDsn)
+        {
+            return environmentDsn.NullIfWhitespace();
+        }
+
+        return AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn.NullIfWhitespace();
+    }
+
     public string GetEnvironment() => GetEnvironment(true)!;
 
     public string? GetEnvironment(bool useDefaultIfNotFound)

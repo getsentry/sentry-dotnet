@@ -14,11 +14,8 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeFalse();
-            resolver.DatabaseQueryData.Should().BeFalse();
             resolver.GraphQLDocument.Should().BeFalse();
             resolver.GraphQLVariables.Should().BeFalse();
-            resolver.GenAIInputs.Should().BeFalse();
-            resolver.GenAIOutputs.Should().BeFalse();
             resolver.OutgoingRequestBody.Should().BeFalse();
             resolver.IncomingResponseBody.Should().BeFalse();
             resolver.OutgoingResponseBody.Should().BeFalse();
@@ -36,7 +33,6 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeTrue();
-            resolver.DatabaseQueryData.Should().BeTrue();
             resolver.GraphQLDocument.Should().BeTrue();
             resolver.GraphQLVariables.Should().BeTrue();
             resolver.GenAIInputs.Should().BeTrue();
@@ -70,6 +66,98 @@ public class DataCollectionResolverTests
     }
 
     [Theory]
+    [InlineData(false, KeyValueCollectionMode.Off)]
+    [InlineData(true, KeyValueCollectionMode.DenyList)]
+    public void HeadersWithLegacyPiiGate_WithoutDataCollection_FollowSendDefaultPii(bool sendDefaultPii, KeyValueCollectionMode expected)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+
+        var resolver = Resolver(options);
+
+        using (new AssertionScope())
+        {
+            resolver.RequestHeadersWithLegacyPiiGate.Mode.Should().Be(expected);
+            resolver.RequestHeadersWithLegacyPiiGate.Terms.Should().BeEmpty();
+            resolver.ResponseHeadersWithLegacyPiiGate.Mode.Should().Be(expected);
+            resolver.ResponseHeadersWithLegacyPiiGate.Terms.Should().BeEmpty();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HeadersWithLegacyPiiGate_ConfiguredDataCollection_IgnoresSendDefaultPii(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+        {
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("accept");
+            dataCollection.HttpHeaders.Response = sendDefaultPii
+                ? KeyValueCollectionBehavior.Off
+                : KeyValueCollectionBehavior.DenyList("x-tenant-id");
+        });
+
+        var resolver = Resolver(options);
+
+        using (new AssertionScope())
+        {
+            resolver.RequestHeadersWithLegacyPiiGate.Mode.Should().Be(KeyValueCollectionMode.AllowList);
+            resolver.RequestHeadersWithLegacyPiiGate.Terms.Should().Equal("accept");
+            resolver.ResponseHeadersWithLegacyPiiGate.Mode.Should().Be(
+                sendDefaultPii ? KeyValueCollectionMode.Off : KeyValueCollectionMode.DenyList);
+        }
+    }
+
+    [Fact]
+    public void HeadersWithLegacyPiiGate_ConfiguredDataCollectionDefaults_AreDenyList()
+    {
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(_ => { });
+
+        var resolver = Resolver(options);
+
+        using (new AssertionScope())
+        {
+            resolver.RequestHeadersWithLegacyPiiGate.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+            resolver.ResponseHeadersWithLegacyPiiGate.Mode.Should().Be(KeyValueCollectionMode.DenyList);
+        }
+    }
+
+    [Theory]
+    [InlineData(false, KeyValueCollectionMode.Off)]
+    [InlineData(true, KeyValueCollectionMode.DenyList)]
+    public void UrlFragmentWithLegacyPiiGate_WithoutDataCollection_FollowsSendDefaultPii(bool sendDefaultPii, KeyValueCollectionMode expected)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+
+        var fragment = Resolver(options).UrlFragmentWithLegacyPiiGate;
+
+        using (new AssertionScope())
+        {
+            fragment.Mode.Should().Be(expected);
+            fragment.Terms.Should().BeEmpty();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void UrlFragmentWithLegacyPiiGate_ConfiguredDataCollection_FollowsUrlQueryParams(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+        options.ConfigureDataCollection(dataCollection =>
+            dataCollection.UrlQueryParams = KeyValueCollectionBehavior.AllowList("page"));
+
+        var fragment = Resolver(options).UrlFragmentWithLegacyPiiGate;
+
+        using (new AssertionScope())
+        {
+            fragment.Mode.Should().Be(KeyValueCollectionMode.AllowList);
+            fragment.Terms.Should().Equal("page");
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void IncomingRequestBody_WithoutDataCollection_IsCollectedRegardlessOfSendDefaultPii(bool sendDefaultPii)
@@ -77,6 +165,22 @@ public class DataCollectionResolverTests
         var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
 
         Resolver(options).IncomingRequestBody.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GenAI_WithoutDataCollection_IsCollectedRegardlessOfSendDefaultPii(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+
+        var resolver = Resolver(options);
+
+        using (new AssertionScope())
+        {
+            resolver.GenAIInputs.Should().BeTrue();
+            resolver.GenAIOutputs.Should().BeTrue();
+        }
     }
 
     [Fact]
@@ -90,7 +194,6 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeTrue();
-            resolver.DatabaseQueryData.Should().BeTrue();
             resolver.GraphQLDocument.Should().BeTrue();
             resolver.GraphQLVariables.Should().BeTrue();
             resolver.GenAIInputs.Should().BeTrue();
@@ -109,7 +212,6 @@ public class DataCollectionResolverTests
         var options = new SentryOptions { SendDefaultPii = true };
         options.ConfigureDataCollection(dataCollection =>
         {
-            dataCollection.DatabaseQueryData = false;
             dataCollection.HttpBodies = HttpBodyTypes.None;
             dataCollection.Cookies = KeyValueCollectionBehavior.Off;
             dataCollection.GraphQL.Document = false;
@@ -121,7 +223,6 @@ public class DataCollectionResolverTests
         using (new AssertionScope())
         {
             resolver.UserInfo.Should().BeTrue();
-            resolver.DatabaseQueryData.Should().BeFalse();
             resolver.GraphQLDocument.Should().BeFalse();
             resolver.GraphQLVariables.Should().BeTrue();
             resolver.GenAIInputs.Should().BeTrue();

@@ -98,35 +98,22 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
         this[key] = new SentryAttribute(value, "integer");
     }
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
+    internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion? sdk = null)
     {
-        var environment = options.SettingLocator.GetEnvironment();
-        SetAttribute("sentry.environment", environment);
+        var defaults = options.ScopeDefaults;
+        SetAttribute("sentry.environment", defaults.GetEffectiveEnvironment(scope));
 
-        var release = options.SettingLocator.GetRelease();
-        if (release is not null)
+        if (defaults.Release is { } release)
         {
             SetAttribute("sentry.release", release);
         }
 
-        var sdkName = sdk.Name;
-        var sdkVersion = sdk.Version;
-
-        // The scope's Sdk is only populated by framework integrations (e.g. ASP.NET Core), so console
-        // apps leave both Name and Version null. Fall back to the SDK instance only when the SDK is
-        // entirely unset, so an integration that sets just the name (its Version can be null) keeps its
-        // own name rather than being relabelled with the default (see #5352).
-        if (sdkName is null && sdkVersion is null)
-        {
-            sdkName = Constants.SdkName;
-            sdkVersion = SdkVersion.Instance.Version;
-        }
-
-        if (sdkName is { } name)
+        sdk ??= defaults.GetEffectiveSdk(scope);
+        if (sdk.Name is { } name)
         {
             SetAttribute("sentry.sdk.name", name);
         }
-        if (sdkVersion is { } version)
+        if (sdk.Version is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
         }

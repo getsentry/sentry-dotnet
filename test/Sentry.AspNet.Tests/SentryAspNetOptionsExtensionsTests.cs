@@ -35,6 +35,14 @@ public class SentryAspNetOptionsExtensionsTests :
     }
 
     [Fact]
+    public void AddAspNet_Sdk_IsAspNet()
+    {
+        var options = new SentryOptions();
+        options.AddAspNet();
+        Assert.Equal("sentry.dotnet.aspnet", options.ScopeDefaults.Sdk.Name);
+    }
+
+    [Fact]
     public void AddAspNet_UsedMoreThanOnce_RegisterOnce()
     {
         var options = new SentryOptions();

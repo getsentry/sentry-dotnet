@@ -12,9 +12,7 @@ public static partial class SentrySdk
     {
         options.LogDebug("Initializing native SDK");
 
-        // Set default release and distribution
-        options.Release ??= GetDefaultReleaseString();
-        options.Distribution ??= GetDefaultDistributionString();
+        var defaults = options.ScopeDefaults;
 
         // Set options for the Cocoa SDK
         var nativeOptions = new SentryCocoaSdkOptions();
@@ -31,16 +29,13 @@ public static partial class SentrySdk
         nativeOptions.MaxAttachmentSize = (nuint)options.MaxAttachmentSize;
         nativeOptions.MaxBreadcrumbs = (nuint)options.MaxBreadcrumbs;
         nativeOptions.MaxCacheItems = (nuint)options.MaxCacheItems;
-        nativeOptions.ReleaseName = options.Release;
+        nativeOptions.ReleaseName = defaults.Release;
         nativeOptions.SampleRate = options.SampleRate;
         nativeOptions.SendClientReports = options.SendClientReports;
-        nativeOptions.SendDefaultPii = options.SendDefaultPii;
+        ApplyDataCollection(options, nativeOptions);
         nativeOptions.SessionTrackingIntervalMillis = (nuint)options.AutoSessionTrackingInterval.TotalMilliseconds;
 
-        if (options.Environment is { } environment)
-        {
-            nativeOptions.Environment = environment;
-        }
+        nativeOptions.Environment = defaults.Environment;
 
         // These options are not available in the Sentry Cocoa SDK
         // nativeOptions.? = options.InitCacheFlushTimeout;
@@ -134,10 +129,8 @@ public static partial class SentrySdk
         nativeOptions.AttachScreenshot = options.Native.AttachScreenshot;
         nativeOptions.AppHangTimeoutInterval = options.Native.AppHangTimeoutInterval.TotalSeconds;
         nativeOptions.IdleTimeout = options.Native.IdleTimeout.TotalSeconds;
-        nativeOptions.Dist = options.Distribution;
-#pragma warning disable CS0618 // Type or member is obsolete
-        nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking || options.Native.EnableAppHangTrackingV2;
-#pragma warning restore CS0618 // Type or member is obsolete
+        nativeOptions.Dist = defaults.Distribution;
+        nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking;
         nativeOptions.EnableAutoBreadcrumbTracking = options.Native.EnableAutoBreadcrumbTracking;
         nativeOptions.EnableAutoPerformanceTracing = options.Native.EnableAutoPerformanceTracing;
         nativeOptions.EnableCoreDataTracing = options.Native.EnableCoreDataTracing;
@@ -205,7 +198,11 @@ public static partial class SentrySdk
         // TODO: Pause/Resume
     }
 
-    private static string GetDefaultReleaseString()
+    // In sentry-cocoa 10, dataCollection.userInfo replaces sendDefaultPii and defaults to true, so always set it.
+    internal static void ApplyDataCollection(SentryOptions options, SentryCocoaSdkOptions nativeOptions) =>
+        nativeOptions.SendDefaultPii = options.DataCollectionResolver.UserInfo;
+
+    internal static string GetDefaultReleaseString()
     {
         var packageName = GetBundleValue("CFBundleIdentifier");
         var packageVersion = GetBundleValue("CFBundleShortVersionString");
@@ -214,9 +211,10 @@ public static partial class SentrySdk
         return $"{packageName}@{packageVersion}+{buildVersion}";
     }
 
-    private static string GetDefaultDistributionString() => GetBundleValue("CFBundleVersion");
+    internal static string GetDefaultDistributionString() => GetBundleValue("CFBundleVersion");
 
-    private static string GetBundleValue(string key) => NSBundle.MainBundle.ObjectForInfoDictionary(key).ToString();
+    private static string GetBundleValue(string key) =>
+        NSBundle.MainBundle.ObjectForInfoDictionary(key)?.ToString() ?? string.Empty;
 
     private static CocoaSdk.SentryObjCHttpStatusCodeRange[] GetFailedRequestStatusCodes(IList<HttpStatusCodeRange> httpStatusCodeRanges)
     {

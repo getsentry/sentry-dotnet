@@ -3,7 +3,7 @@
   <PropertyGroup>
     <IsTestProject>false</IsTestProject>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <LangVersion>11</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
     <PublishSingleFile>true</PublishSingleFile>

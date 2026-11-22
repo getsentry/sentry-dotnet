@@ -17,15 +17,18 @@ BeforeDiscovery {
     $script:emulator = Get-AndroidEmulatorId
 }
 
+# CoreCLR runs on every framework we still support. Mono is tested only where it is supported:
+# as of .NET 11 preview 6 CoreCLR is the only runtime for MAUI mobile apps and the UseMonoRuntime
+# property was removed, so net11.0 is CoreCLR-only. See
+# https://devblogs.microsoft.com/dotnet/coreclr-progress-and-mono-timeline-dotnet-maui/
 $cases = @(
-    @{ configuration = 'Release'; runtime = 'mono' }
-    @{ configuration = 'Debug';   runtime = 'mono' }
+    @{ configuration = 'Release'; runtime = 'coreclr' }
+    @{ configuration = 'Debug';   runtime = 'coreclr' }
 )
-# CoreCLR on Android requires .NET 10 or later
-if ($dotnet_version -ne 'net9.0') {
+if ([version]($dotnet_version -replace '^net', '') -lt [version]'11.0') {
     $cases += @(
-        @{ configuration = 'Release'; runtime = 'coreclr' }
-        @{ configuration = 'Debug';   runtime = 'coreclr' }
+        @{ configuration = 'Release'; runtime = 'mono' }
+        @{ configuration = 'Debug';   runtime = 'mono' }
     )
 }
 Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cases -Skip:(-not $script:emulator) {
@@ -33,7 +36,10 @@ Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cas
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
+        # Note: maui-device, not maui-app. cli.Tests.ps1 generates a fresh app from the
+        # MAUI template at integration-test/maui-app and deletes whatever is there first, so
+        # this source app must not share that name.
+        Copy-Item -Path "$PSScriptRoot/maui-device" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
 
         # replace {{SENTRY_DSN}} in MauiProgram.cs
@@ -46,11 +52,24 @@ Describe 'MAUI app (<dotnet_version>, <configuration>, <runtime>)' -ForEach $cas
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
         $useMonoRuntime = if ($runtime -eq 'mono') { 'true' } else { 'false' }
+        # Set UseMonoRuntime on the app project, scoped to the framework under test, rather than
+        # passing it with -p. As a global property it reaches every framework in the graph during
+        # restore, and it has to be set at restore time so the right runtime pack is downloaded
+        # (NETSDK1112).
+        #
+        # Set UseMonoRuntime on the app project, scoped to the framework under test, rather than
+        # passing it with -p. As a global property it reaches every framework in the graph during
+        # restore - including net11.0-android, where the SDK rejects it (NETSDK1242) - and it has
+        # to be set at restore time so the right runtime pack is downloaded (NETSDK1112).
+        (Get-Content Sentry.Maui.Device.IntegrationTestApp.csproj) `
+            -replace '<UseMaui>true</UseMaui>', ("<UseMaui>true</UseMaui>`n    " + `
+                "<UseMonoRuntime Condition=`"'`$(TargetFramework)' == '$tfm'`">$useMonoRuntime</UseMonoRuntime>") `
+        | Set-Content Sentry.Maui.Device.IntegrationTestApp.csproj
+
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
             --configuration $configuration `
             --framework $tfm `
-            --runtime $rid `
-            -p:UseMonoRuntime=$useMonoRuntime
+            --runtime $rid
         | ForEach-Object { Write-Host $_ }
         Write-Host '::endgroup::'
         $LASTEXITCODE | Should -Be 0

@@ -25,6 +25,8 @@ internal class SentryServerFilter : IServerFilter
 
     internal SentryHangfireOptions Options => _options;
 
+    private IDiagnosticLogger? Logger => _logger ?? _hub.GetDiagnosticLogger();
+
     public SentryServerFilter() : this(null, null)
     { }
 
@@ -34,9 +36,7 @@ internal class SentryServerFilter : IServerFilter
         _hub = hub ?? HubAdapter.Instance;
         _options = options ?? new SentryHangfireOptions();
         _clock = clock ?? SystemClock.Clock;
-#pragma warning disable CS0618 // Type or member is obsolete
-        _logger = logger ?? _hub.GetInternalSentryOptions()?.DiagnosticLogger;
-#pragma warning restore CS0618 // Type or member is obsolete
+        _logger = logger;
     }
 
     public void OnPerforming(PerformingContext context)
@@ -46,9 +46,9 @@ internal class SentryServerFilter : IServerFilter
         {
             var jobType = context.BackgroundJob.Job.Type;
             var jobMethod = context.BackgroundJob.Job.Method;
-            _logger?.LogDebug("Skipping creating a check-in for '{0}.{1}'. " +
-                                "Failed to find Monitor Slug for the job. You can set the monitor slug " +
-                                "by setting the 'SentryMonitorSlug' attribute.", jobType, jobMethod);
+            Logger?.LogDebug("Skipping creating a check-in for '{0}.{1}'. " +
+                               "Failed to find Monitor Slug for the job. You can set the monitor slug " +
+                               "by setting the 'SentryMonitorSlug' attribute.", jobType, jobMethod);
             return;
         }
 
@@ -58,8 +58,8 @@ internal class SentryServerFilter : IServerFilter
             : null;
         if (monitoredByDefault && schedule is null)
         {
-            _logger?.LogDebug("Skipping creating a check-in for recurring job '{0}'. MonitorAllRecurringJobs only " +
-                              "monitors jobs whose schedule Sentry supports.", recurringJobId);
+            Logger?.LogDebug("Skipping creating a check-in for recurring job '{0}'. MonitorAllRecurringJobs only " +
+                             "monitors jobs whose schedule Sentry supports.", recurringJobId);
             return;
         }
 
@@ -90,7 +90,7 @@ internal class SentryServerFilter : IServerFilter
         }
         catch (Exception e)
         {
-            _logger?.LogError(e, "Failed to read the recurring job ID of job '{0}'.", context.BackgroundJob.Id);
+            Logger?.LogError(e, "Failed to read the recurring job ID of job '{0}'.", context.BackgroundJob.Id);
             return (null, null);
         }
     }
@@ -127,7 +127,7 @@ internal class SentryServerFilter : IServerFilter
             var recurringJob = context.Connection.GetRecurringJobs([recurringJobId]).SingleOrDefault();
             if (recurringJob is null || recurringJob.Removed)
             {
-                _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. The job no longer exists.", recurringJobId);
+                Logger?.LogDebug("Not sending the schedule of recurring job '{0}'. The job no longer exists.", recurringJobId);
                 return null;
             }
 
@@ -135,8 +135,8 @@ internal class SentryServerFilter : IServerFilter
             var timeZone = ToIanaTimeZoneId(recurringJob.TimeZoneId);
             if (crontab is null || timeZone is null)
             {
-                _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. Sentry doesn't support " +
-                                  "the cron expression '{1}' with time zone '{2}'.", recurringJobId, recurringJob.Cron, recurringJob.TimeZoneId);
+                Logger?.LogDebug("Not sending the schedule of recurring job '{0}'. Sentry doesn't support " +
+                                 "the cron expression '{1}' with time zone '{2}'.", recurringJobId, recurringJob.Cron, recurringJob.TimeZoneId);
                 return null;
             }
 
@@ -144,8 +144,8 @@ internal class SentryServerFilter : IServerFilter
                 .WithDifferentSchedule(monitorSlug, recurringJobId!, recurringJob.Cron, recurringJob.TimeZoneId);
             if (conflicting.Count > 0)
             {
-                _logger?.LogDebug("Not sending the schedule of recurring job '{0}'. Recurring jobs '{1}' use the same " +
-                                  "monitor slug '{2}' with a different schedule. Give each its own monitor slug.",
+                Logger?.LogDebug("Not sending the schedule of recurring job '{0}'. Recurring jobs '{1}' use the same " +
+                                 "monitor slug '{2}' with a different schedule. Give each its own monitor slug.",
                     recurringJobId, string.Join("', '", conflicting), monitorSlug);
                 return null;
             }
@@ -154,7 +154,7 @@ internal class SentryServerFilter : IServerFilter
         }
         catch (Exception e)
         {
-            _logger?.LogError(e, "Failed to read the schedule of recurring job '{0}'.", recurringJobId);
+            Logger?.LogError(e, "Failed to read the schedule of recurring job '{0}'.", recurringJobId);
             return null;
         }
     }

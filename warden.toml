@@ -39,13 +39,12 @@ reportOn = "medium"
 
 [[skills]]
 name = "code-review"
+ignorePaths = ["src/Sentry.Bindings.Cocoa/ApiDefinition.cs", "src/Sentry.Bindings.Cocoa/StructsAndEnums.cs", "benchmarks/**"]
 incremental = true
 
 [[skills.triggers]]
 type = "pull_request"
-actions = ["opened", "synchronize", "reopened", "labeled"]
-draft = false
-labels = ["Warden"]
+actions = ["opened", "synchronize", "reopened"]
 
 [[skills]]
 name = "gha-security-review"

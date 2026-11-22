@@ -579,6 +579,18 @@ public class DynamicSamplingContextTests
     }
 
     [Fact]
+    public void CreateFromPropagationContext_ScopeOverridesEnvironment_UsesScopeEnvironment()
+    {
+        var options = new SentryOptions { Dsn = "https://a@sentry.io/1", Environment = "default" };
+        var propagationContext = new SentryPropagationContext(SentryId.Create(), SpanId.Create());
+        var scope = new Scope(options) { Environment = "override" };
+
+        var dsc = propagationContext.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession, scope);
+
+        Assert.Equal("override", Assert.Contains("environment", dsc.Items));
+    }
+
+    [Fact]
     public void CreateFromPropagationContext_TraceId_Empty_Throws()
     {
         var options = new SentryOptions { Dsn = "https://a@sentry.io/1" };
@@ -649,5 +661,23 @@ public class DynamicSamplingContextTests
 
         Assert.NotNull(dsc);
         Assert.DoesNotContain("org_id", dsc.Items);
+    }
+
+    [Fact]
+    public void CreateFromExternalPropagationContext_ScopeOverridesEnvironment_UsesScopeEnvironment()
+    {
+        var options = new SentryOptions { Dsn = ValidDsn, Environment = "default" };
+
+        var propagationContext = Substitute.For<IExternalPropagationContext>();
+        propagationContext.TraceId.Returns(SentryId.Create());
+        propagationContext.IsSampled.Returns(true);
+        propagationContext.SampleRate.Returns(1.0);
+        propagationContext.SampleRand.Returns(0.5);
+        var scope = new Scope(options) { Environment = "override" };
+
+        var dsc = propagationContext.CreateDynamicSamplingContext(options, _fixture.InactiveReplaySession, scope);
+
+        Assert.NotNull(dsc);
+        Assert.Equal("override", Assert.Contains("environment", dsc.Items));
     }
 }

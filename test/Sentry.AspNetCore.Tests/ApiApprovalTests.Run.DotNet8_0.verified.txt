@@ -46,12 +46,12 @@ namespace Sentry.AspNetCore
         public static string? TryGetHttpPath(this Sentry.TransactionSamplingContext samplingContext) { }
         public static string? TryGetHttpRoute(this Sentry.TransactionSamplingContext samplingContext) { }
     }
-    public class SentryAspNetCoreOptions : Sentry.Extensions.Logging.SentryLoggingOptions
+    public class SentryAspNetCoreOptions : Sentry.Extensions.Logging.SentryHostOptions
     {
         public SentryAspNetCoreOptions() { }
-        public bool AdjustStandardEnvironmentNameCasing { get; set; }
         public bool AutoRegisterTracing { get; set; }
         public bool CaptureBlockingCalls { get; set; }
+        public bool EnableLogs { get; set; }
         public bool FlushOnCompletedRequest { get; set; }
         public bool IncludeActivityData { get; set; }
         public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }

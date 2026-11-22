@@ -35,4 +35,14 @@ public static class SentryLoggingOptionsExtensions
         this SentryLoggingOptions options,
         Func<string, LogLevel, EventId, Exception?, bool> filter)
         => options.AddLogEntryFilter(new DelegateLogEntryFilter(filter));
+
+    /// <inheritdoc cref="AddLogEntryFilter(SentryLoggingOptions, ILogEntryFilter)"/>
+    public static void AddLogEntryFilter(this SentryHostOptions options, ILogEntryFilter filter)
+        => options.Logging.AddLogEntryFilter(filter);
+
+    /// <inheritdoc cref="AddLogEntryFilter(SentryLoggingOptions, Func{string, LogLevel, EventId, Exception?, bool})"/>
+    public static void AddLogEntryFilter(
+        this SentryHostOptions options,
+        Func<string, LogLevel, EventId, Exception?, bool> filter)
+        => options.Logging.AddLogEntryFilter(filter);
 }

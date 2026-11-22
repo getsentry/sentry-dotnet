@@ -859,41 +859,50 @@ public class ScopeExtensionsTests
     }
 
     [Fact]
-    public void Apply_Sdk_DoesNotCopyNameWithoutVersion()
+    public void Apply_Sdk_TargetHasNone_CopiesNameAndVersion()
     {
-        const string expectedName = "original name";
-        const string expectedVersion = "original version";
         var sut = _fixture.GetSut();
-        sut.Sdk.Name = expectedName;
-        sut.Sdk.Version = expectedVersion;
+        sut.Sdk.Name = "scope name";
+        sut.Sdk.Version = "scope version";
 
         var target = _fixture.GetSut();
-        target.Sdk.Name = null;
+
+        sut.Apply(target);
+
+        Assert.Equal("scope name", target.Sdk.Name);
+        Assert.Equal("scope version", target.Sdk.Version);
+    }
+
+    [Fact]
+    public void Apply_Sdk_TargetHasVersionOnly_KeepsTarget()
+    {
+        var sut = _fixture.GetSut();
+        sut.Sdk.Name = "scope name";
+        sut.Sdk.Version = "scope version";
+
+        var target = _fixture.GetSut();
         target.Sdk.Version = "1.0";
 
         sut.Apply(target);
 
-        Assert.Equal(expectedName, target.Sdk.Name);
-        Assert.Equal(expectedVersion, target.Sdk.Version);
+        Assert.Null(target.Sdk.Name);
+        Assert.Equal("1.0", target.Sdk.Version);
     }
 
     [Fact]
-    public void Apply_Sdk_DoesNotCopyVersionWithoutName()
+    public void Apply_Sdk_TargetHasNameOnly_KeepsTarget()
     {
-        const string expectedName = "original name";
-        const string expectedVersion = "original version";
         var sut = _fixture.GetSut();
-        sut.Sdk.Name = expectedName;
-        sut.Sdk.Version = expectedVersion;
+        sut.Sdk.Name = "scope name";
+        sut.Sdk.Version = "scope version";
 
         var target = _fixture.GetSut();
-        target.Sdk.Name = "some scoped name";
-        target.Sdk.Version = null;
+        target.Sdk.Name = "target name";
 
         sut.Apply(target);
 
-        Assert.Equal(expectedName, target.Sdk.Name);
-        Assert.Equal(expectedVersion, target.Sdk.Version);
+        Assert.Equal("target name", target.Sdk.Name);
+        Assert.Null(target.Sdk.Version);
     }
 
     [Fact]

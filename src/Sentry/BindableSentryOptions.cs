@@ -8,7 +8,6 @@ namespace Sentry;
 internal partial class BindableSentryOptions
 {
     public bool? IsGlobalModeEnabled { get; set; }
-    public bool? EnableScopeSync { get; set; }
     public bool? EnableBackpressureHandling { get; set; }
     public List<string>? TagFilters { get; set; }
     public List<string>? IgnoreTransactions { get; set; }
@@ -22,8 +21,6 @@ internal partial class BindableSentryOptions
     public string? Distribution { get; set; }
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
-    public bool? EnableLogs { get; set; }
-    public bool? EnableMetrics { get; set; }
     public int? MaxQueueItems { get; set; }
     public int? MaxCacheItems { get; set; }
     public TimeSpan? ShutdownTimeout { get; set; }
@@ -63,7 +60,6 @@ internal partial class BindableSentryOptions
     public void ApplyTo(SentryOptions options)
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
-        options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
         options.EnableBackpressureHandling = EnableBackpressureHandling ?? options.EnableBackpressureHandling;
         options.TagFilters = TagFilters?.Select(s => new StringOrRegex(s)).ToList() ?? options.TagFilters;
         options.IgnoreTransactions = IgnoreTransactions?.Select(s => new StringOrRegex(s)).ToList() ?? options.IgnoreTransactions;
@@ -77,10 +73,6 @@ internal partial class BindableSentryOptions
         options.Distribution = Distribution ?? options.Distribution;
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
-        options.EnableLogs = EnableLogs ?? options.EnableLogs;
-#pragma warning disable CS0618 // Bound so existing configuration keys still resolve; the value is ignored.
-        options.EnableMetrics = EnableMetrics ?? options.EnableMetrics;
-#pragma warning restore CS0618
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;

@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
@@ -45,16 +46,24 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             var @event = new SentryEvent(exception);
             var hint = new SentryHint(HintTypes.HttpResponseMessage, response);
 
+            var dataCollection = _options.DataCollectionResolver;
+            var queryParams = dataCollection.UrlQueryParams;
+            var uri = request.RequestUri;
             var sentryRequest = new SentryRequest
             {
-                QueryString = request.RequestUri?.Query,
+                Url = uri?.FilteredHttpRequestUrl(queryParams),
+                QueryString = QueryStringFilter.Filter(uri?.Query, queryParams),
+                Fragment = QueryStringFilter.Filter(uri?.HttpRequestFragment(), dataCollection.UrlFragmentWithLegacyPiiGate),
                 Method = request.Method.Method.ToUpperInvariant(),
+                Cookies = request.Headers.GetCookies(dataCollection.Cookies),
                 ApiTarget = "graphql"
             };
+            sentryRequest.AddHeaders(request.Headers, dataCollection.RequestHeadersWithLegacyPiiGate);
 
             var responseContext = new Response
             {
                 StatusCode = (short)response.StatusCode,
+                Cookies = response.Headers.GetSetCookies(dataCollection.Cookies),
 #if NET5_0_OR_GREATER
                 // Starting with .NET 5, the content and headers are guaranteed to not be null.
                 BodySize = response.Content?.Headers.ContentLength,
@@ -62,21 +71,16 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
                 BodySize = response.Content?.Headers?.ContentLength,
 #endif
             };
+            responseContext.AddHeaders(response.Headers, dataCollection.ResponseHeadersWithLegacyPiiGate);
 
             var requestContent = request.GetFused<GraphQLRequestContent>();
-            if (!_options.SendDefaultPii)
+            if (dataCollection.OutgoingRequestBody)
             {
-                sentryRequest.Url = request.RequestUri?.HttpRequestUrl();
+                sentryRequest.Data = requestContent?.FilterRequestContent(dataCollection.GraphQLDocument, dataCollection.GraphQLVariables);
             }
-            else
+            if (dataCollection.IncomingResponseBody)
             {
-                sentryRequest.Cookies = request.Headers.GetCookies();
-                sentryRequest.Data = requestContent?.RequestContent;
-                sentryRequest.Url = request.RequestUri?.AbsoluteUri;
-                sentryRequest.AddHeaders(request.Headers);
-                responseContext.Cookies = response.Headers.GetCookies();
                 responseContext.Data = json;
-                responseContext.AddHeaders(response.Headers);
             }
 
             @event.Request = sentryRequest;
