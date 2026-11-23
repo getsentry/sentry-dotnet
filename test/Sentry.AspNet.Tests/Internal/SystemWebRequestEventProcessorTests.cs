@@ -322,6 +322,20 @@ public class SystemWebRequestEventProcessorTests :
     }
 
     [Fact]
+    public void Process_DataCollectionRequestHeadersOff_StillCapturesCookies()
+    {
+        Context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("theme", "dark-mode") });
+        _fixture.SentryOptions.ConfigureDataCollection(dataCollection =>
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.Off);
+        var evt = new SentryEvent();
+
+        _fixture.GetSut().Process(evt);
+
+        Assert.Empty(evt.Request.Headers);
+        Assert.Equal("theme=dark-mode", evt.Request.Cookies);
+    }
+
+    [Fact]
     public void Process_DataCollectionRequestHeadersAllowList_FiltersHeadersNotAllowed()
     {
         Context = HttpContextBuilder.BuildWithHeaders(["X-Request-Id", "abc"], ["X-Tenant", "acme"]);
