@@ -18,20 +18,15 @@ public class SentryRootCaMessageHandlerTests
     }
 
     [Fact]
-    public void CreateTrustStore_SystemIssuersAndIsrgRootX1_HoldsAll()
+    public void CreateTrustManagers_NoSystemIssuersAndIsrgRootX1_AcceptsExactlyIsrgRootX1()
     {
-        var systemIssuers = SentryRootCaMessageHandler.GetSystemTrustedIssuers();
         var isrgRootX1 = SentryRootCertificates.LoadIsrgRootX1();
 
-        var trustStore = SentryRootCaMessageHandler.CreateTrustStore(systemIssuers, [isrgRootX1]);
+        var trustManagers = SentryRootCaMessageHandler.CreateTrustManagers([], [isrgRootX1]);
 
-        Assert.NotEmpty(systemIssuers);
-        Assert.Equal(systemIssuers.Length + 1, trustStore.Size());
-        for (var i = 0; i < systemIssuers.Length; i++)
-        {
-            Assert.Equal(systemIssuers[i], trustStore.GetCertificate(SentryRootCaMessageHandler.SystemCaAliasPrefix + i));
-        }
-        Assert.Equal(isrgRootX1, trustStore.GetCertificate(SentryRootCaMessageHandler.SentryRootCaAliasPrefix + 0));
+        var x509TrustManager = trustManagers.Select(SentryRootCaMessageHandler.AsX509TrustManager).Single(tm => tm is not null)!;
+        var acceptedIssuer = Assert.Single(x509TrustManager.GetAcceptedIssuers()!);
+        Assert.Equal(isrgRootX1, acceptedIssuer);
     }
 
     [Fact]

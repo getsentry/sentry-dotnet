@@ -17,8 +17,8 @@ namespace Sentry.Android;
 /// </remarks>
 internal sealed class SentryRootCaMessageHandler : AndroidMessageHandler
 {
-    internal const string SystemCaAliasPrefix = "system-ca-";
-    internal const string SentryRootCaAliasPrefix = "sentry-root-ca-";
+    private const string SystemCaAliasPrefix = "system-ca-";
+    private const string SentryRootCaAliasPrefix = "sentry-root-ca-";
 
     private static SSLSocketFactory? CachedSocketFactory;
     private static bool SocketFactoryInitialized;
@@ -47,15 +47,11 @@ internal sealed class SentryRootCaMessageHandler : AndroidMessageHandler
     {
         try
         {
-            var trustStore = CreateTrustStore(GetSystemTrustedIssuers(), extraRoots());
-
-            var trustManagerFactory = TrustManagerFactory.GetInstance(TrustManagerFactory.DefaultAlgorithm)
-                                      ?? throw new InvalidOperationException("No default TrustManagerFactory available.");
-            trustManagerFactory.Init(trustStore);
+            var trustManagers = CreateTrustManagers(GetSystemTrustedIssuers(), extraRoots());
 
             var sslContext = SSLContext.GetInstance("TLS")
                              ?? throw new InvalidOperationException("No TLS SSLContext available.");
-            sslContext.Init(null, trustManagerFactory.GetTrustManagers(), null);
+            sslContext.Init(null, trustManagers, null);
             return sslContext.SocketFactory
                    ?? throw new InvalidOperationException("The SSLContext has no socket factory.");
         }
@@ -66,7 +62,18 @@ internal sealed class SentryRootCaMessageHandler : AndroidMessageHandler
         }
     }
 
-    internal static JavaX509Certificate[] GetSystemTrustedIssuers()
+    internal static ITrustManager[] CreateTrustManagers(
+        IEnumerable<JavaX509Certificate> systemTrustedIssuers,
+        IEnumerable<JavaX509Certificate> extraRoots)
+    {
+        var trustManagerFactory = TrustManagerFactory.GetInstance(TrustManagerFactory.DefaultAlgorithm)
+                                  ?? throw new InvalidOperationException("No default TrustManagerFactory available.");
+        trustManagerFactory.Init(CreateTrustStore(systemTrustedIssuers, extraRoots));
+        return trustManagerFactory.GetTrustManagers()
+               ?? throw new InvalidOperationException("The TrustManagerFactory has no trust managers.");
+    }
+
+    private static JavaX509Certificate[] GetSystemTrustedIssuers()
     {
         var trustManagerFactory = TrustManagerFactory.GetInstance(TrustManagerFactory.DefaultAlgorithm)
                                   ?? throw new InvalidOperationException("No default TrustManagerFactory available.");
@@ -83,7 +90,7 @@ internal sealed class SentryRootCaMessageHandler : AndroidMessageHandler
         throw new InvalidOperationException("No default X509TrustManager available.");
     }
 
-    private static IX509TrustManager? AsX509TrustManager(ITrustManager trustManager)
+    internal static IX509TrustManager? AsX509TrustManager(ITrustManager trustManager)
     {
         try
         {
@@ -95,7 +102,7 @@ internal sealed class SentryRootCaMessageHandler : AndroidMessageHandler
         }
     }
 
-    internal static KeyStore CreateTrustStore(
+    private static KeyStore CreateTrustStore(
         IEnumerable<JavaX509Certificate> systemTrustedIssuers,
         IEnumerable<JavaX509Certificate> extraRoots)
     {
