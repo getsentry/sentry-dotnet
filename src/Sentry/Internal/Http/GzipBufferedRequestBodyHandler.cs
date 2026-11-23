@@ -56,7 +56,9 @@ internal class GzipBufferedRequestBodyHandler : DelegatingHandler
             }
             memoryStream.Position = 0;
 
-            request.Content = new BufferedStreamContent(memoryStream, memoryStream.Length, request.Content.Headers);
+            var content = request.Content;
+            request.Content = new BufferedStreamContent(memoryStream, memoryStream.Length, content.Headers);
+            content.Dispose();
         }
 
         return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);

@@ -81,4 +81,18 @@ public class GzipRequestBodyHandlerTests
             () => new GzipRequestBodyHandler(Substitute.For<HttpMessageHandler>(),
                 CompressionLevel.NoCompression));
     }
+
+    [Fact]
+    public async Task Dispose_OriginalContent_Disposed()
+    {
+        var stream = new MemoryStream(new byte[Fixture.MessageCharCount]);
+        _fixture.Message.Content = new StreamContent(stream);
+
+        var sut = _fixture.GetSut();
+
+        _ = await sut.SendAsync(_fixture.Message, None);
+        _fixture.Message.Dispose();
+
+        Assert.False(stream.CanRead);
+    }
 }
