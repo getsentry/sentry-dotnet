@@ -2,6 +2,7 @@ using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Reflection;
 
 namespace Sentry.AspNet;
 
@@ -35,6 +36,7 @@ public static class SentryAspNetOptionsExtensions
 
         options.DiagnosticLogger ??= new TraceDiagnosticLogger(options.DiagnosticLevel);
         options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
+        options.SetSdk(Constants.SdkName, typeof(SentryAspNetOptionsExtensions).Assembly.GetNameAndVersion());
         options.AddEventProcessor(eventProcessor);
         options.AddDiagnosticSourceIntegration();
         options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));

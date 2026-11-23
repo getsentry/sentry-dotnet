@@ -109,6 +109,30 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void SetDefaultAttributes_InitPathSetsSdk_UsesInitPathSdk()
+    {
+        var options = new SentryOptions();
+        options.SetSdk("sentry.dotnet.test", new SdkVersion { Name = "Sentry.Test", Version = "1.2.3" });
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        log.Attributes.ShouldContain("sentry.sdk.name", "sentry.dotnet.test");
+        log.Attributes.ShouldContain("sentry.sdk.version", "1.2.3");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_ScopeEnvironment_OverridesDefault()
+    {
+        var options = new SentryOptions { Environment = "default" };
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, new Scope(options) { Environment = "override" });
+
+        log.Attributes.ShouldContain("sentry.environment", "override");
+    }
+
+    [Fact]
     public void SetDefaultAttributes_OptionsServerName_SetsServerAddress()
     {
         var options = new SentryOptions { ServerName = "my-server" };

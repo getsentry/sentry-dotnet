@@ -10,6 +10,7 @@ using System;
 using Foundation;
 using ObjCRuntime;
 using UIKit;
+using WebKit;
 
 namespace Sentry.CocoaSdk;
 
@@ -456,6 +457,11 @@ interface SentryObjCSpanId
 [Internal]
 interface SentryObjCTraceHeader
 {
+    // @property (readonly, copy, nonatomic, class) NSString * _Nonnull httpHeaderField;
+    [Static]
+    [Export("httpHeaderField")]
+    string HttpHeaderField { get; }
+
     // @property (readonly, nonatomic, strong) SentryObjCId * _Nonnull traceId;
     [Export("traceId", ArgumentSemantic.Strong)]
     SentryObjCId TraceId { get; }
@@ -1429,6 +1435,10 @@ interface SentryObjCOptions
     // @property (copy, nonatomic) SentryObjCScope * _Nonnull (^ _Nonnull)(SentryObjCScope * _Nonnull) initialScope;
     [Export("initialScope", ArgumentSemantic.Copy)]
     Func<SentryObjCScope, SentryObjCScope> InitialScope { get; set; }
+
+    // @property (nonatomic) BOOL enableScopePersistence;
+    [Export("enableScopePersistence")]
+    bool EnableScopePersistence { get; set; }
 
     // @property (nonatomic) BOOL enableNetworkTracking;
     [Export("enableNetworkTracking")]

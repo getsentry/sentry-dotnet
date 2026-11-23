@@ -187,7 +187,7 @@ internal class DynamicSamplingContext
         return new DynamicSamplingContext(items);
     }
 
-    public static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
     {
         // These should already be set on the transaction.
         var publicKey = options.ParsedDsn.PublicKey;
@@ -197,9 +197,8 @@ internal class DynamicSamplingContext
         var sampleRand = transaction.SampleRand;
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
 
-        // These two may not have been set yet on the transaction, but we can get them directly.
-        var release = options.SettingLocator.GetRelease();
-        var environment = options.SettingLocator.GetEnvironment();
+        var release = options.ScopeDefaults.Release;
+        var environment = options.ScopeDefaults.GetEffectiveEnvironment(scope);
 
         return new DynamicSamplingContext(traceId,
             publicKey,
@@ -213,7 +212,7 @@ internal class DynamicSamplingContext
             orgId: options.GetEffectiveOrgId());
     }
 
-    public static DynamicSamplingContext CreateFromUnsampledTransaction(UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext CreateFromUnsampledTransaction(UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
     {
         // These should already be set on the transaction.
         var publicKey = options.ParsedDsn.PublicKey;
@@ -223,9 +222,8 @@ internal class DynamicSamplingContext
         var sampleRand = transaction.SampleRand;
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
 
-        // These two may not have been set yet on the transaction, but we can get them directly.
-        var release = options.SettingLocator.GetRelease();
-        var environment = options.SettingLocator.GetEnvironment();
+        var release = options.ScopeDefaults.Release;
+        var environment = options.ScopeDefaults.GetEffectiveEnvironment(scope);
 
         return new DynamicSamplingContext(traceId,
             publicKey,
@@ -239,12 +237,12 @@ internal class DynamicSamplingContext
             orgId: options.GetEffectiveOrgId());
     }
 
-    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
     {
         var traceId = propagationContext.TraceId;
         var publicKey = options.ParsedDsn.PublicKey;
-        var release = options.SettingLocator.GetRelease();
-        var environment = options.SettingLocator.GetEnvironment();
+        var release = options.ScopeDefaults.Release;
+        var environment = options.ScopeDefaults.GetEffectiveEnvironment(scope);
 
         return new DynamicSamplingContext(
             traceId,
@@ -258,15 +256,15 @@ internal class DynamicSamplingContext
     }
 
     public static DynamicSamplingContext? CreateFromExternalPropagationContext(
-        IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+        IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
     {
         if (propagationContext.TraceId is not { } traceId || traceId == SentryId.Empty)
         {
             return null;
         }
         var publicKey = options.ParsedDsn.PublicKey;
-        var release = options.SettingLocator.GetRelease();
-        var environment = options.SettingLocator.GetEnvironment();
+        var release = options.ScopeDefaults.Release;
+        var environment = options.ScopeDefaults.GetEffectiveEnvironment(scope);
 
         return new DynamicSamplingContext(
             traceId,
@@ -287,15 +285,15 @@ internal static class DynamicSamplingContextExtensions
     public static DynamicSamplingContext? CreateDynamicSamplingContext(this BaggageHeader baggage, IReplaySession? replaySession = null)
         => DynamicSamplingContext.CreateFromBaggageHeader(baggage, replaySession);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession)
-        => DynamicSamplingContext.CreateFromTransaction(transaction, options, replaySession);
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
+        => DynamicSamplingContext.CreateFromTransaction(transaction, options, replaySession, scope);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
-        => DynamicSamplingContext.CreateFromUnsampledTransaction(transaction, options, replaySession);
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
+        => DynamicSamplingContext.CreateFromUnsampledTransaction(transaction, options, replaySession, scope);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
-        => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
+        => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession, scope);
 
-    public static DynamicSamplingContext? CreateDynamicSamplingContext(this IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
-        => DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, replaySession);
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this IExternalPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession, Scope? scope = null)
+        => DynamicSamplingContext.CreateFromExternalPropagationContext(propagationContext, options, replaySession, scope);
 }

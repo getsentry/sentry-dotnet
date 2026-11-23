@@ -74,8 +74,8 @@ public class SentryPropagator : BaggagePropagator
         var activityContext = new ActivityContext(
             sentryTraceHeader.TraceId.AsActivityTraceId(),
             sentryTraceHeader.SpanId.AsActivitySpanId(),
-            // NOTE: Our Java and JavaScript SDKs set sentryTraceHeader.IsSampled = true if any trace header is present.
-            sentryTraceHeader.IsSampled is true ? ActivityTraceFlags.Recorded : ActivityTraceFlags.None,
+            // A deferred sampling decision (no flag) is treated as sampled, matching sentry-java.
+            sentryTraceHeader.IsSampled is false ? ActivityTraceFlags.None : ActivityTraceFlags.Recorded,
             traceState: null, // See https://www.w3.org/TR/trace-context/#design-overview
             isRemote: true
             );

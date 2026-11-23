@@ -182,6 +182,22 @@ public class OtelPropagationContextTests : ActivitySourceTests
     }
 
     [Fact]
+    public void GetDynamicSamplingContext_ScopeOverridesEnvironment_UsesScopeEnvironment()
+    {
+        // Arrange
+        using var activity = Tracer.StartActivity();
+        var sut = new OtelPropagationContext();
+        var scope = new Scope(_fixture.SentryOptions) { Environment = "override" };
+
+        // Act
+        var result = sut.GetDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession, scope);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Items.Should().Contain(kvp => kvp.Key == "environment" && kvp.Value == "override");
+    }
+
+    [Fact]
     public void SampleRate_NoActivity_ReturnsNull()
     {
         Activity.Current = null;

@@ -64,10 +64,14 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
     /// </summary>
     public string? ServerName { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// The release version of the application.
+    /// </summary>
     public string? Release { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// The release distribution of the application.
+    /// </summary>
     public string? Distribution { get; set; }
 
     internal SentryValues<SentryException>? SentryExceptionValues { get; set; }

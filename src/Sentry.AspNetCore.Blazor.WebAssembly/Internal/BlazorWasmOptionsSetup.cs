@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
+using Sentry.Internal.DataCollection;
 
 namespace Sentry.AspNetCore.Blazor.WebAssembly.Internal;
 
@@ -35,10 +36,7 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
         var previousUrl = _navigationManager.Uri;
 
         // Set the initial scope request URL
-        _hub.ConfigureScope(scope =>
-        {
-            scope.Request.Url = ToRelativePath(previousUrl);
-        });
+        _hub.ConfigureScope(static (scope, url) => scope.Request.Url = url, ToRelativePath(previousUrl));
 
         _navigationManager.LocationChanged += (_, args) =>
         {
@@ -61,10 +59,10 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
                         { "to", to }
                     }));
 
-            _hub.ConfigureScope(scope =>
+            _hub.ConfigureScope(static (scope, to) =>
             {
                 scope.Request.Url = to;
-            });
+            }, to);
 
             previousUrl = args.Location;
         };
@@ -73,6 +71,6 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
     private string ToRelativePath(string url)
     {
         var relative = _navigationManager.ToBaseRelativePath(url);
-        return "/" + relative;
+        return "/" + QueryStringFilter.FilterUrl(relative);
     }
 }

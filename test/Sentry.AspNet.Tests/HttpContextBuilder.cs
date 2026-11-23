@@ -1,3 +1,5 @@
+using System.Web.Hosting;
+
 namespace Sentry.AspNet.Tests;
 
 public static class HttpContextBuilder
@@ -34,4 +36,12 @@ public static class HttpContextBuilder
         };
     }
 
+    public static HttpContext BuildWithHeaders(params string[][] headers) =>
+        new(new WorkerRequestWithHeaders(headers));
+
+    private class WorkerRequestWithHeaders(string[][] headers)
+        : SimpleWorkerRequest("/", AppDomain.CurrentDomain.BaseDirectory, "page", string.Empty, TextWriter.Null)
+    {
+        public override string[][] GetUnknownRequestHeaders() => headers;
+    }
 }

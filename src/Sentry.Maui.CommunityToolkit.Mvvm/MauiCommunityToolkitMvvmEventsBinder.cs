@@ -149,7 +149,7 @@ internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEven
             var span = hub.StartSpan(SpanName, SpanOp);
             if (span is ITransactionTracer transaction)
             {
-                hub.ConfigureScope(scope => scope.Transaction = transaction);
+                hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
             }
 
             relay.SetFused(span);

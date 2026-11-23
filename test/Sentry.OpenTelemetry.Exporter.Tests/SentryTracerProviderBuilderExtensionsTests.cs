@@ -1,3 +1,5 @@
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Trace;
 
@@ -33,6 +35,24 @@ public class SentryTracerProviderBuilderExtensionsTests
         // Assert
         result.Should().BeSameAs(tracerProviderBuilder);
         tracerProviderBuilder.DidNotReceive().AddInstrumentation(Arg.Any<Func<object>>());
+    }
+
+    [Fact]
+    public void AddSentryOtlpExporter_DoesNotConfigureDefaultPropagator()
+    {
+        // Arrange
+        // The OTLP integration spec requires that we MUST NOT set up an automatic propagator. Cross-service trace
+        // propagation is left to the propagateTraceparent option or to user-configured OTel propagators.
+        // See https://develop.sentry.dev/sdk/telemetry/traces/otlp/#integration-spec
+        var sentinel = new TraceContextPropagator();
+        Sdk.SetDefaultTextMapPropagator(sentinel);
+        var tracerProviderBuilder = Substitute.For<TracerProviderBuilder>();
+
+        // Act
+        tracerProviderBuilder.AddSentryOtlpExporter("https://examplePublicKey@o0.ingest.sentry.io/123456");
+
+        // Assert
+        Propagators.DefaultTextMapPropagator.Should().BeSameAs(sentinel);
     }
 
     [Fact]

@@ -28,10 +28,12 @@ on:
       - 'test/Sentry.Testing/**'
       - 'test/Sentry.Testing.CrashableApp/**'
       - 'test/AndroidTestApp/**'
+      # Referenced by Sentry.Maui.Tests
+      - 'src/Sentry.Extensions.Hosting/**'
       # Integration tests
       - 'integration-test/android.Tests.ps1'
       - 'integration-test/ios.Tests.ps1'
-      - 'integration-test/net9-maui/**'
+      - 'integration-test/maui-device/**'
       - 'integration-test/common.ps1'
       - 'integration-test/Directory.Build.*'
       # Native libraries and modules
@@ -77,27 +79,14 @@ jobs:
         with:
           projects: test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj
 
-      # See build.yml
-      - name: Get Cocoa SDK cache key
-        id: cocoa-key
-        uses: ./.github/actions/cocoa-cache-key
-
       - name: Restore Cocoa SDK
-        id: cache-cocoa
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cocoa
+        uses: ./.github/actions/restore-cocoa-sdk
         with:
-          path: modules/sentry-cocoa/Carthage
-          key: ${{ steps.cocoa-key.outputs.key }}
+          restore-on-release: true
 
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
-
-      - name: Save Cocoa SDK
-        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: modules/sentry-cocoa/Carthage
-          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}
 
       - name: Run Tests
         id: first-test-run
@@ -134,18 +123,13 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
         with:
-          projects: integration-test/net9-maui/Sentry.Maui.Device.IntegrationTestApp.csproj
-
-      - name: Get Cocoa SDK cache key
-        id: cocoa-key
-        uses: ./.github/actions/cocoa-cache-key
+          projects: integration-test/maui-device/Sentry.Maui.Device.IntegrationTestApp.csproj
 
       - name: Restore Cocoa SDK
-        id: cache-cocoa
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cocoa
+        uses: ./.github/actions/restore-cocoa-sdk
         with:
-          path: modules/sentry-cocoa/Carthage
-          key: ${{ steps.cocoa-key.outputs.key }}
+          restore-on-release: true
 
       # ios.Tests.ps1 skips every case unless a simulator is already booted. In the ios-tests job, xharness boots it.
       - name: Boot the iOS Simulator
@@ -162,20 +146,13 @@ jobs:
         id: first-integration-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         with:
           path: integration-test/ios.Tests.ps1
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@959162c159b866489d3fabe93327f48f9b8cb7ee # 3.4.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         with:
           path: integration-test/ios.Tests.ps1
-
-      - name: Save Cocoa SDK
-        if: ${{ !cancelled() && steps.cache-cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: modules/sentry-cocoa/Carthage
-          key: ${{ steps.cache-cocoa.outputs.cache-primary-key }}

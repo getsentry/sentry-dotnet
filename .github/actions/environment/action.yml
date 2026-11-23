@@ -80,17 +80,14 @@ runs:
       shell: bash
       run: sudo ./scripts/install-libssl1.sh
 
-    # See https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md#xcode
-    # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
-      shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_27.app
+      uses: ./.github/actions/pin-xcode
 
     # Java 21 is needed by .NET Android
     - name: Install Java 21
       if: ${{ !matrix.container && env.NO_MOBILE != 'true' }}
-      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
       with:
         distribution: temurin
         java-version: '21'
@@ -100,21 +97,22 @@ runs:
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
-        packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
+        packages: platform-tools platforms;android-35 platforms;android-36 platforms;android-37.0 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
 
     - name: Install .NET SDK
-      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
       with:
         global-json-file: global.json
         dotnet-version: |
           8.0.x
           9.0.310
+          10.0.x
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
       if: ${{ runner.os != 'macOS' || runner.arch != 'ARM64' }}
-      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
       with:
         dotnet-version: 5.0.x
 

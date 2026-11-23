@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.AspNetCore;
@@ -14,6 +16,7 @@ internal class SentryTracingMiddleware
 {
     private const string OperationName = "http.server";
     internal const string AspNetCoreOrigin = "auto.http.aspnetcore";
+    private const string UnlabeledTransactionName = "<unlabeled transaction>";
 
     private readonly RequestDelegate _next;
     private readonly Func<IHub> _getHub;
@@ -87,6 +90,15 @@ internal class SentryTracingMiddleware
                 transaction.TraceId);
 
             transaction?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, context.Request.Method);
+
+            if (_options.SendDefaultPii && transaction is { IsSampled: true })
+            {
+                var cookies = CookieFilter.FilterCookieHeaders(context.Request.Headers[HeaderNames.Cookie]);
+                if (cookies.Length > 0)
+                {
+                    transaction.SetData(CookieFilter.RequestCookieAttribute, cookies);
+                }
+            }
 
             return transaction;
         }
@@ -179,7 +191,20 @@ internal class SentryTracingMiddleware
 
                 // If no Name was found for Transaction, then we don't have the route.
                 // Also, run this block if the caller has opted into always calling the TransactionNameProvider.
-                var customName = new Lazy<string?>(context.TryGetCustomTransactionName, LazyThreadSafetyMode.None);
+                var customNameFailed = false;
+                var customName = new Lazy<string?>(() =>
+                {
+                    try
+                    {
+                        return context.TryGetCustomTransactionName();
+                    }
+                    catch (Exception e)
+                    {
+                        _options.LogError(e, "Failed to get the transaction name from the TransactionNameProvider.");
+                        customNameFailed = true;
+                        return null;
+                    }
+                }, LazyThreadSafetyMode.None);
                 var forceCustomName = _options.PreferTransactionNameProvider && customName.Value is not null;
                 if (transaction.Name == string.Empty || forceCustomName)
                 {
@@ -189,6 +214,11 @@ internal class SentryTracingMiddleware
                     if (customName.Value is { } customTransactionName)
                     {
                         transaction.Name = $"{method} {customTransactionName}";
+                        tracer.NameSource = TransactionNameSource.Custom;
+                    }
+                    else if (customNameFailed)
+                    {
+                        transaction.Name = UnlabeledTransactionName;
                         tracer.NameSource = TransactionNameSource.Custom;
                     }
                     else

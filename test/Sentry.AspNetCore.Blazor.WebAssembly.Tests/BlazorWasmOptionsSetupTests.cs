@@ -107,6 +107,39 @@ public class BlazorWasmOptionsSetupTests
     }
 
     [Fact]
+    public void Navigation_SensitiveQueryParameter_FiltersRequestUrlAndBreadcrumb()
+    {
+        // Arrange
+        _sut.Configure(new SentryBlazorOptions());
+
+        // Act
+        _navigationManager.NavigateTo("/reset?token=abc123&page=5");
+        _navigationManager.NavigateTo("/home");
+
+        // Assert
+        var breadcrumbs = _scope.Breadcrumbs.ToList();
+        breadcrumbs[0].Data.Should().ContainKey("to").WhoseValue.Should().Be("/reset?token=[Filtered]&page=5");
+        breadcrumbs[1].Data.Should().ContainKey("from").WhoseValue.Should().Be("/reset?token=[Filtered]&page=5");
+        _scope.Request.Url.Should().Be("/home");
+    }
+
+    [Fact]
+    public void Configure_SensitiveQueryParameter_FiltersInitialRequestUrl()
+    {
+        // Arrange
+        var nav = new FakeNavigationManager(
+            baseUri: "https://localhost:5001/",
+            initialUri: "https://localhost:5001/reset?token=abc123");
+        var sut = new BlazorWasmOptionsSetup(nav, _hub);
+
+        // Act
+        sut.Configure(new SentryBlazorOptions());
+
+        // Assert
+        _scope.Request.Url.Should().Be("/reset?token=[Filtered]");
+    }
+
+    [Fact]
     public void MultipleNavigations_TrackFromCorrectly()
     {
         // Arrange

@@ -87,12 +87,12 @@ public class SentryOptions
     /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
     /// NOTE: EnableScopeSync must be set true for the scope to be synced.
     /// </summary>
-    public IScopeObserver? ScopeObserver { get; set; }
+    protected internal IScopeObserver? ScopeObserver { get; set; }
 
     /// <summary>
     /// If true, the SDK's scope will be synced with the observed scope.
     /// </summary>
-    public bool EnableScopeSync { get; set; }
+    protected internal bool EnableScopeSync { get; set; }
 
     /// <summary>
     /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
@@ -134,32 +134,32 @@ public class SentryOptions
     /// <summary>
     /// A list of exception processors
     /// </summary>
-    internal List<(Type Type, Lazy<ISentryEventExceptionProcessor> Lazy)> ExceptionProcessors { get; set; }
+    internal ConcurrentBagLite<(Type Type, Lazy<ISentryEventExceptionProcessor> Lazy)> ExceptionProcessors { get; set; }
 
     /// <summary>
     /// A list of transaction processors
     /// </summary>
-    internal List<ISentryTransactionProcessor>? TransactionProcessors { get; set; }
+    internal ConcurrentBagLite<ISentryTransactionProcessor>? TransactionProcessors { get; set; }
 
     /// <summary>
     /// A list of event processors
     /// </summary>
-    internal List<(Type Type, Lazy<ISentryEventProcessor> Lazy)> EventProcessors { get; set; }
+    internal ConcurrentBagLite<(Type Type, Lazy<ISentryEventProcessor> Lazy)> EventProcessors { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
+    internal ConcurrentBagLite<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryTransactionProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryTransactionProcessor>>> TransactionProcessorsProviders { get; set; }
+    internal ConcurrentBagLite<Func<IEnumerable<ISentryTransactionProcessor>>> TransactionProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
+    internal ConcurrentBagLite<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
 
     private DefaultIntegrations _defaultIntegrations;
 
@@ -333,6 +333,54 @@ public class SentryOptions
     public bool SendDefaultPii { get; set; }
 
     /// <summary>
+    /// Configures which categories of data the SDK's integrations collect automatically, the successor to
+    /// <see cref="SendDefaultPii"/>: per-category control instead of a single all-or-nothing switch.
+    /// </summary>
+    /// <param name="configure">
+    /// Receives the options with every category at its default from the data collection spec. Restrict a category
+    /// by setting it; nothing on the object is ever <c>null</c>, so nested categories can be set directly.
+    /// </param>
+    /// <remarks>
+    /// Calling this replaces <see cref="SendDefaultPii"/> for every integration that has moved onto these options,
+    /// which then ignore it. The spec defaults collect every category, so an application relying on
+    /// <c>SendDefaultPii = false</c> to suppress user identity needs to set
+    /// <see cref="DataCollectionOptions.UserInfo"/> to <c>false</c> here as well.
+    /// <para>
+    /// The integrations are still being migrated onto these options. Those that haven't moved yet still follow
+    /// <see cref="SendDefaultPii"/> and ignore the categories set here.
+    /// </para>
+    /// <para>
+    /// On Android, calling this also turns on the native SDK's file path collection for file I/O spans, which has
+    /// no counterpart here. To turn it off, set the <c>io.sentry.data-collection.file-paths</c> metadata in
+    /// <c>AndroidManifest.xml</c> to <c>false</c>.
+    /// </para>
+    /// <para>Repeated calls build on the same options.</para>
+    /// <para>This API is experimental, and it may change in the future.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// options.ConfigureDataCollection(dataCollection =>
+    /// {
+    ///     dataCollection.UserInfo = false;
+    ///     dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("x-tenant-id");
+    /// });
+    /// </code>
+    /// </example>
+    /// <seealso href="https://develop.sentry.dev/sdk/foundations/client/data-collection/"/>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public void ConfigureDataCollection(Action<DataCollectionOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        DataCollection ??= new DataCollectionOptions();
+        configure(DataCollection);
+    }
+
+    internal DataCollectionOptions? DataCollection { get; set; }
+
+    internal DataCollectionResolver DataCollectionResolver { get; }
+
+    /// <summary>
     /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.
     /// </summary>
     /// <remarks>
@@ -443,7 +491,7 @@ public class SentryOptions
     /// <remarks>
     /// This value can also be set via environment variable: SENTRY_ENVIRONMENT
     /// In some cases you don't need to set this manually since integrations, when possible, automatically fill this value.
-    /// For ASP.NET Core which can read from IHostingEnvironment
+    /// ASP.NET Core, Blazor WebAssembly and Google Cloud Functions read it from the host environment.
     /// </remarks>
     /// <example>
     /// Production, Staging
@@ -607,18 +655,6 @@ public class SentryOptions
         _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
     }
 
-    /// <summary>
-    /// When set to <see langword="true"/>, logs captured by the logging integrations
-    /// (<c>Sentry.Extensions.Logging</c>, <c>Sentry.Serilog</c>, <c>Sentry.NLog</c>, <c>Sentry.Log4Net</c>)
-    /// are sent to Sentry. Defaults to <see langword="false"/>.
-    /// </summary>
-    /// <remarks>
-    /// This option does not apply to logs created directly via <see cref="SentryStructuredLogger"/>
-    /// (typically <c>SentrySdk.Logger</c>), which are always sent.
-    /// </remarks>
-    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-    public bool EnableLogs { get; set; } = false;
-
     private Func<SentryLog, SentryLog?>? _beforeSendLog;
 
     internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
@@ -635,25 +671,6 @@ public class SentryOptions
     public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
     {
         _beforeSendLog = beforeSendLog;
-    }
-
-    internal const string ObsoleteEnableMetrics =
-        "Metrics are always enabled. This option is ignored and will be removed in version 7.0.0. " +
-        "To drop metrics, use SetBeforeSendMetric and return null.";
-
-    /// <summary>
-    /// Metrics are always sent to Sentry via <see cref="SentrySdk.Metrics"/>.
-    /// </summary>
-    /// <remarks>
-    /// This option no longer has any effect. The getter always returns <see langword="true"/> and the setter is ignored.
-    /// To filter or drop metrics, use <see cref="SetBeforeSendMetric(Func{SentryMetric, SentryMetric})"/> and return <see langword="null"/>.
-    /// </remarks>
-    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
-    [Obsolete(ObsoleteEnableMetrics)]
-    public bool EnableMetrics
-    {
-        get => true;
-        set { }
     }
 
     private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
@@ -804,11 +821,11 @@ public class SentryOptions
     /// Decompression methods accepted
     /// </summary>
     /// <remarks>
-    /// By default accepts all available compression methods supported by the platform
+    /// Defaults to <see cref="DecompressionMethods.GZip"/> and <see cref="DecompressionMethods.Deflate"/>.
+    /// Brotli is not enabled by default; add it explicitly if your Sentry endpoint requires it.
     /// </remarks>
     public DecompressionMethods DecompressionMethods { get; set; }
-    // Note the ~ enabling all bits
-        = ~DecompressionMethods.None;
+        = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
     /// <summary>
     /// The level of which to compress the <see cref="SentryEvent"/> before sending to Sentry
@@ -939,9 +956,15 @@ public class SentryOptions
 
     /// <summary>
     /// <para>Transactions will be dropped if the HTTP Response status code matches any of the configured ranges.</para>
-    /// <para>Defaults to an empty collection (all transactions are captured regardless of status code).</para>
+    /// <para>Defaults to 301, 305-399 and 401-404. 302 and 303 are traced, as they commonly redirect after a successful form POST.</para>
+    /// <para>Clear the collection to capture transactions regardless of status code.</para>
     /// </summary>
-    public IList<HttpStatusCodeRange> TraceIgnoreStatusCodes { get; set; } = [];
+    public IList<HttpStatusCodeRange> TraceIgnoreStatusCodes { get; set; } = new List<HttpStatusCodeRange>
+    {
+        301,
+        (305, 399),
+        (401, 404)
+    };
 
     // The default failed request target list will match anything, but adding to the list should clear that.
     private Lazy<IList<StringOrRegex>> _failedRequestTargets = new(() =>
@@ -1240,8 +1263,8 @@ public class SentryOptions
 
 #if __MOBILE__
     /// <summary>
-    /// Whether the SDK should start a session automatically when it's initialized and
-    /// end the session when it's closed.
+    /// Whether the SDK should start a session automatically when the app comes to the foreground,
+    /// and end it once the app has been in the background for longer than <see cref="AutoSessionTrackingInterval"/>.
     /// On mobile application platforms, this is enabled by default.
     /// </summary>
     public bool AutoSessionTracking { get; set; } = true;
@@ -1270,7 +1293,7 @@ public class SentryOptions
     /// <summary>
     /// Delegate which is used to check whether the application crashed during last run.
     /// </summary>
-    public Func<bool>? CrashedLastRun { get; set; }
+    internal Func<bool>? CrashedLastRun { get; set; }
 
 #if IOS || MACCATALYST
     // this event currently isn't being pushed from Android
@@ -1416,6 +1439,28 @@ public class SentryOptions
 
     internal SettingLocator SettingLocator { get; set; }
 
+    internal ScopeDefaults ScopeDefaults
+    {
+        get => field ??= new ScopeDefaults(this);
+        set;
+    }
+
+    internal SdkVersion Sdk { get; } = new()
+    {
+        Name = SdkVersion.Instance.Name,
+        Version = SdkVersion.Instance.Version
+    };
+
+    internal void SetSdk(string name, SdkVersion package)
+    {
+        Sdk.Name = name;
+        Sdk.Version = package.Version;
+        if (package.Version is { } version)
+        {
+            Sdk.AddPackage("nuget:" + package.Name, version);
+        }
+    }
+
     /// <summary>
     /// Controls whether the native SDKs (Android, Cocoa, etc.) will be initialized (when applicable).
     /// Should be set <c>false</c> (disabled) only when testing, and then only if the test initializes the managed SDK.
@@ -1435,6 +1480,7 @@ public class SentryOptions
     public SentryOptions()
     {
         SettingLocator = new SettingLocator(this);
+        DataCollectionResolver = new DataCollectionResolver(this);
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 
         TransactionProcessorsProviders = [() => TransactionProcessors ?? []];
@@ -1772,7 +1818,7 @@ public class SentryOptions
     {
         if (TransactionProcessors == null)
         {
-            TransactionProcessors = processors.ToList();
+            TransactionProcessors = new(processors);
         }
         else
         {
@@ -1792,7 +1838,7 @@ public class SentryOptions
     /// </summary>
     /// <param name="processorProvider">The transaction processor provider.</param>
     public void AddTransactionProcessorProvider(Func<IEnumerable<ISentryTransactionProcessor>> processorProvider)
-        => TransactionProcessorsProviders = TransactionProcessorsProviders.Concat(new[] { processorProvider }).ToList();
+        => TransactionProcessorsProviders.Add(processorProvider);
 
     /// <summary>
     /// Add the exception processor provider.
@@ -1840,18 +1886,6 @@ public class SentryOptions
 
         SentryStackTraceFactory = sentryStackTraceFactory;
         return this;
-    }
-
-    /// <summary>
-    /// Applies the default tags to an event without resetting existing tags.
-    /// </summary>
-    /// <param name="hasTags">The event to apply the tags to.</param>
-    public void ApplyDefaultTags(IHasTags hasTags)
-    {
-        foreach (var defaultTag in DefaultTags.Where(t => !hasTags.Tags.TryGetValue(t.Key, out _)))
-        {
-            hasTags.SetTag(defaultTag.Key, defaultTag.Value);
-        }
     }
 
     /// <summary>

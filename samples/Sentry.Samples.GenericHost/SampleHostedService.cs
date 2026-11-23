@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.GenericHost;
 
+// UseSentry registers IHub in DI, so services can send to Sentry directly.
 internal class SampleHostedService(IHub hub, ILogger<SampleHostedService> logger) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)

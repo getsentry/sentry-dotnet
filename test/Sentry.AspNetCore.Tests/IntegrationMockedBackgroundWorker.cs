@@ -37,7 +37,11 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     [Fact]
     public async Task DisabledSdk_UnhandledException_NoEventCaptured()
     {
-        Configure = o => o.InitializeSdk = false;
+        Configure = o =>
+        {
+            o.FakeSettings();
+            o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
+        };
 
         Build();
         _ = await HttpClient.GetAsync("/throw");
@@ -49,7 +53,11 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     [Fact]
     public void DisabledSdk_WithLogger_NoEventCaptured()
     {
-        Configure = o => o.InitializeSdk = false;
+        Configure = o =>
+        {
+            o.FakeSettings();
+            o.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
+        };
 
         Build();
         var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
@@ -288,7 +296,6 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         Assert.True(options.IncludeActivityData);
         Assert.Equal(LogLevel.Error, options.MinimumBreadcrumbLevel);
         Assert.Equal(LogLevel.Critical, options.MinimumEventLevel);
-        Assert.False(options.InitializeSdk);
         Assert.Equal(999, options.MaxBreadcrumbs);
         Assert.Equal(1, options.SampleRate);
         Assert.Equal("7f5d9a1", options.Release);
@@ -364,4 +371,114 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
                 .Environment == expected
         ));
     }
+
+    [Fact]
+    public async Task NotFoundRequest_ByDefault_NoTransactionCaptured()
+    {
+        Configure = o => o.TracesSampleRate = 1;
+        ConfigureApp = app => app.UseSentryTracing();
+
+        Build();
+        _ = await HttpClient.GetAsync("/");
+        _ = await HttpClient.GetAsync("/missing");
+
+        _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e => HasTransaction(e, "GET /")));
+        _ = Worker.DidNotReceive().EnqueueEnvelope(Arg.Is<Envelope>(e => HasTransaction(e, "GET /missing")));
+    }
+
+    [Fact]
+    public async Task NotFoundRequest_TraceIgnoreStatusCodesCleared_TransactionCaptured()
+    {
+        Configure = o =>
+        {
+            o.TracesSampleRate = 1;
+            o.TraceIgnoreStatusCodes.Clear();
+        };
+        ConfigureApp = app => app.UseSentryTracing();
+
+        Build();
+        _ = await HttpClient.GetAsync("/missing");
+
+        _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e => HasTransaction(e, "GET /missing")));
+    }
+
+    [Fact]
+    public void LogWarning_ByDefault_NoLogSent()
+    {
+        var logs = CaptureLogs();
+
+        Build();
+        ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>().LogWarning("test");
+
+        logs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void LogWarning_EnableLogs_LogSent()
+    {
+        var logs = CaptureLogs(o => o.EnableLogs = true);
+
+        Build();
+        ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>().LogWarning("test");
+
+        logs.Should().ContainSingle().Which.Message.Should().Be("test");
+    }
+
+    [Fact]
+    public void LogWarning_EnableLogsInConfiguration_LogSent()
+    {
+        var logs = CaptureLogs();
+        var configureWebHost = ConfigureWebHost;
+        ConfigureWebHost = builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string> { ["Sentry:EnableLogs"] = "true" }));
+            configureWebHost(builder);
+        };
+
+        Build();
+        ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>().LogWarning("test");
+
+        logs.Should().ContainSingle().Which.Message.Should().Be("test");
+    }
+
+    [Fact]
+    public void LogWarning_ExplicitLoggingAddSentry_NoLogSent()
+    {
+        var logs = CaptureLogs();
+        var configureWebHost = ConfigureWebHost;
+        ConfigureWebHost = builder =>
+        {
+            builder.ConfigureLogging(logging => logging.AddSentry());
+            configureWebHost(builder);
+        };
+
+        Build();
+        ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>().LogWarning("test");
+
+        logs.Should().BeEmpty();
+    }
+
+    private List<SentryLog> CaptureLogs(Action<SentryAspNetCoreOptions> configure = null)
+    {
+        var logs = new List<SentryLog>();
+        Configure = o =>
+        {
+            o.SetBeforeSendLog(log =>
+            {
+                logs.Add(log);
+                return null;
+            });
+            configure?.Invoke(o);
+        };
+        return logs;
+    }
+
+    private static bool HasTransaction(Envelope envelope, string name) =>
+        envelope.Items
+            .Select(i => i.Payload)
+            .OfType<JsonSerializable>()
+            .Select(i => i.Source)
+            .OfType<SentryTransaction>()
+            .Any(t => t.Name == name);
 }

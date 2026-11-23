@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(TargetFrameworks);net10.0-android36.0;net11.0-android37.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net11.0-ios</TargetFrameworks>
+
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Sentry.Maui.Device.IntegrationTestApp</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <!-- ReadyToRun can't target Android - crossgen2 fails with "Target OS 'android' is
+         not supported" - but .NET 11 turns it on by default (NETSDK1096). -->
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <SingleProject>true</SingleProject>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SelfContained>true</SelfContained>
+
+    <!-- Speed up CI build -->
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <EnableAssemblyILStripping>false</EnableAssemblyILStripping>
+
+    <!-- https://github.com/dotnet/android/wiki/Diagnose-Fast-Deployment-Issues -->
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+
+    <!-- Display name -->
+    <ApplicationTitle>Sentry.Maui.Device.IntegrationTestApp</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>io.sentry.dotnet.maui.device.integrationtestapp</ApplicationId>
+
+    <!-- Versions -->
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- App Icon -->
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+    <!-- Splash Screen -->
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+    <!-- Images -->
+    <MauiImage Include="Resources\Images\*" />
+    <MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
+    <!-- Custom Fonts -->
+    <MauiFont Include="Resources\Fonts\*" />
+
+    <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
+  </ItemGroup>
+
+  <!-- Needed for SetAndroidNdkPreload (buildTransitive doesn't apply via ProjectReference) -->
+  <ImportGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <Import Project="..\..\src\Sentry\buildTransitive\Sentry.props" Condition="Exists('..\..\src\Sentry\buildTransitive\Sentry.props')" />
+    <Import Project="..\..\src\Sentry\buildTransitive\Sentry.targets" Condition="Exists('..\..\src\Sentry\buildTransitive\Sentry.targets')" />
+  </ImportGroup>
+
+</Project>

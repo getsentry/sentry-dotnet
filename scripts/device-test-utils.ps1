@@ -1,12 +1,19 @@
 function Install-XHarness
 {
-    if (!(Get-Command xharness -ErrorAction SilentlyContinue))
+    $package = 'Microsoft.DotNet.XHarness.CLI'
+    $version = '11.0.0-prerelease.26506.3'
+    $installed = dotnet tool list --global $package | Select-String "\s$([regex]::Escape($version))\s"
+    if (!$installed)
     {
         $CI = Test-Path env:CI
         Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/tmp')
-        dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '11.0.0-prerelease.26506.3' `
+        dotnet tool update $package --global --version $version --allow-downgrade `
             --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
         Pop-Location
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "Failed to install XHarness $version"
+        }
     }
 }
 
@@ -29,7 +36,7 @@ function Get-AndroidEmulatorId
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
-        [string]$IosVersion = '27.0',
+        [string]$IosVersion,
         [string[]]$PreferredDeviceTypes = @(
             'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
             'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
@@ -39,6 +46,9 @@ function Get-IosSimulatorUdid {
     )
 
     try {
+        if (-not $IosVersion) {
+            $IosVersion = & xcrun --sdk iphonesimulator --show-sdk-version
+        }
         $simDevices = & xcrun simctl list devices --json | ConvertFrom-Json
     } catch {
         Write-Verbose "Failed to query simctl: $($_.Exception.Message)"

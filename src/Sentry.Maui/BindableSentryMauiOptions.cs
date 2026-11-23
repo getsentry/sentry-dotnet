@@ -3,12 +3,12 @@ using Sentry.Extensions.Logging;
 namespace Sentry.Maui;
 
 /// <inheritdoc cref="BindableSentryOptions"/>
-internal class BindableSentryMauiOptions : BindableSentryLoggingOptions
+internal class BindableSentryMauiOptions : BindableSentryHostOptions
 {
     public bool? IncludeTextInBreadcrumbs { get; set; }
     public bool? IncludeTitleInBreadcrumbs { get; set; }
     public bool? IncludeBackgroundingStateInBreadcrumbs { get; set; }
-    public bool? CreateElementEventsBreadcrumbs { get; set; } = false;
+    public bool? CreateElementEventsBreadcrumbs { get; set; }
     public bool? AttachScreenshot { get; set; }
 
     public void ApplyTo(SentryMauiOptions options)

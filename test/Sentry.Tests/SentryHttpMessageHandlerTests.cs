@@ -332,6 +332,29 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task SendAsync_UrlWithCredentials_FiltersSpanDescriptionAndBreadcrumbUrl()
+    {
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+        var transaction = new TransactionTracer(hub, "foo", "bar");
+        hub.GetSpan().ReturnsForAnyArgs(transaction);
+
+        using var innerHandler = new FakeHttpMessageHandler();
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+        using var client = new HttpClient(sentryHandler);
+
+        await client.GetAsync("https://admin:1234@localhost/api?q=1");
+
+        using (new AssertionScope())
+        {
+            transaction.Spans.Should().ContainSingle()
+                .Which.Description.Should().Be("GET https://[Filtered]:[Filtered]@localhost/api");
+            scope.Breadcrumbs.Single().Data.Should().Contain("url", "https://[Filtered]:[Filtered]@localhost/api?q=1");
+        }
+    }
+
+    [Fact]
     public async Task SendAsync_Executed_FailedRequestsCaptured()
     {
         // Arrange
@@ -376,6 +399,36 @@ public class SentryHttpMessageHandlerTests
         returnedSpan!.Operation.Should().Be("http.client");
         returnedSpan.Description.Should().Be($"{method} {url}");
         returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+    }
+
+    [Fact]
+    public void ProcessRequest_UrlWithQueryAndFragment_ExcludedFromSpanDescription()
+    {
+        var hub = Substitute.For<IHub>();
+        var parentSpan = Substitute.For<ISpan>();
+        var childSpan = Substitute.For<ISpan>();
+        hub.GetSpan().Returns(parentSpan);
+        parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);
+        var sut = new SentryHttpMessageHandler(hub, null);
+        const string url = "https://example.com/api/users?token=abc123&q=1#top";
+
+        var span = sut.ProcessRequest(new HttpRequestMessage(HttpMethod.Get, url), "GET", url);
+
+        span!.Description.Should().Be("GET https://example.com/api/users");
+    }
+
+    [Fact]
+    public void HandleResponse_UrlWithSensitiveParameter_FiltersBreadcrumbUrl()
+    {
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var sut = new SentryHttpMessageHandler(hub, null, null, failedRequestHandler);
+
+        sut.HandleResponse(new HttpResponseMessage(HttpStatusCode.OK), null, "GET", "https://example.com/api/users?token=abc123&q=a%20b%26c&page=5");
+
+        scope.Breadcrumbs.Single().Data.Should().Contain("url", "https://example.com/api/users?token=[Filtered]&q=a%20b%26c&page=5");
     }
 
     [Fact]

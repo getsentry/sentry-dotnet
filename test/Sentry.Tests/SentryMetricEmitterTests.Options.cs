@@ -5,20 +5,6 @@ namespace Sentry.Tests;
 public partial class SentryMetricEmitterTests
 {
     [Fact]
-    public void EnableMetrics_IsObsoleteAndAlwaysEnabled()
-    {
-        var options = new SentryOptions();
-
-#pragma warning disable CS0618 // Type or member is obsolete
-        options.EnableMetrics.Should().BeTrue();
-
-        options.EnableMetrics = false;
-
-        options.EnableMetrics.Should().BeTrue();
-#pragma warning restore CS0618
-    }
-
-    [Fact]
     public void BeforeSendMetric_Default_Null()
     {
         var options = new SentryOptions();

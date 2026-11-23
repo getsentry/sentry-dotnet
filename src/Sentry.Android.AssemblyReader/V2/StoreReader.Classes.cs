@@ -2,6 +2,8 @@
  * Adapted from https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.Classes.cs
  * Updated from https://github.com/dotnet/android/blob/64018e13e53cec7246e54866b520d3284de344e0/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.Classes.cs
  *     - Adding support for AssemblyStore v3 format that shipped in .NET 10 (https://github.com/dotnet/android/pull/10249)
+ * Updated from https://github.com/dotnet/android/blob/f1aecf9e6ae80fe3f3992ec1f52ef953dac7c06b/.github/skills/read-assembly-store/src/AssemblyStore/StoreReader_V2.Classes.cs
+ *     - Adding the 32-bit and 64-bit name hash index entry sizes
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
@@ -33,6 +35,9 @@ internal partial class StoreReader
 
     internal sealed class IndexEntry
     {
+        public const uint NativeSize32 = 2 * sizeof(uint) + sizeof(byte);
+        public const uint NativeSize64 = sizeof(ulong) + sizeof(uint) + sizeof(byte);
+
         public readonly ulong name_hash;
         public readonly uint descriptor_index;
         public readonly bool ignore;

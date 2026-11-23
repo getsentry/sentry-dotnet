@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol;
@@ -65,17 +66,20 @@ public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IU
     /// <value>The HTTP method.</value>
     public short? StatusCode { get; set; }
 
-    internal void AddHeaders(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers)
+    internal void AddHeaders(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers,
+        KeyValueCollectionBehavior? behavior = null)
     {
+        if (behavior?.Mode == KeyValueCollectionMode.Off)
+        {
+            return;
+        }
+
         foreach (var header in headers)
         {
-            // Always redact the Authorization header
-            if (header.Key.Equals("Authorization", StringComparison.OrdinalIgnoreCase))
-            {
-                Headers.Add(header.Key, PiiExtensions.RedactedText);
-                continue;
-            }
-            Headers.Add(header.Key, string.Join("; ", header.Value));
+            var value = string.Join("; ", header.Value);
+            Headers.Add(header.Key, behavior is null
+                ? SensitiveDataFilter.FilterHeaderValue(header.Key, value)
+                : SensitiveDataFilter.FilterHeaderValue(header.Key, value, behavior));
         }
     }
 

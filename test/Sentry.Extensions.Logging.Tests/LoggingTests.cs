@@ -24,15 +24,18 @@ public class LoggingTests
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 
+        using var sentry = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.BackgroundWorker = worker;
+            o.InitNativeSdks = false;
+        });
+
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddLogging(builder => builder.AddSentry(o =>
         {
-            o.Dsn = ValidDsn;
             o.MinimumBreadcrumbLevel = LogLevel.None;
             o.MinimumEventLevel = logLevel;
-            o.BackgroundWorker = worker;
-            o.InitNativeSdks = false;
-            o.EnableLogs = false;
         }));
         serviceCollection.Configure<LoggerFilterOptions>(options => options.AddFilter<SentryStructuredLoggerProvider>(CategoryName, LogLevel.None));
         using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -71,15 +74,18 @@ public class LoggingTests
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 
+        using var sentry = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.BackgroundWorker = worker;
+            o.InitNativeSdks = false;
+        });
+
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddLogging(builder => builder.AddSentry(o =>
         {
-            o.Dsn = ValidDsn;
             o.MinimumBreadcrumbLevel = logLevel;
             o.MinimumEventLevel = LogLevel.None;
-            o.BackgroundWorker = worker;
-            o.InitNativeSdks = false;
-            o.EnableLogs = false;
         }));
         serviceCollection.Configure<LoggerFilterOptions>(options => options.AddFilter<SentryStructuredLoggerProvider>(CategoryName, LogLevel.None));
         using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -90,8 +96,7 @@ public class LoggingTests
         var logger = loggerFactory.CreateLogger(CategoryName);
         logger.Log(logLevel, message);
 
-        var hub = serviceProvider.GetRequiredService<IHub>();
-        hub.CaptureEvent(new SentryEvent());
+        SentrySdk.CaptureEvent(new SentryEvent());
 
         // Assert
         worker.Received(1).EnqueueEnvelope(
@@ -123,15 +128,18 @@ public class LoggingTests
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 
+        using var sentry = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.BackgroundWorker = worker;
+            o.InitNativeSdks = false;
+        });
+
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddLogging(builder => builder.AddSentry(o =>
         {
-            o.Dsn = ValidDsn;
             o.MinimumBreadcrumbLevel = LogLevel.None;
             o.MinimumEventLevel = LogLevel.None;
-            o.BackgroundWorker = worker;
-            o.InitNativeSdks = false;
-            o.EnableLogs = true;
         }));
         serviceCollection.Configure<LoggerFilterOptions>(options => options.AddFilter<SentryStructuredLoggerProvider>(CategoryName, logLevel));
         using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -142,8 +150,7 @@ public class LoggingTests
         var logger = loggerFactory.CreateLogger(CategoryName);
         logger.Log(logLevel, message);
 
-        var hub = serviceProvider.GetRequiredService<IHub>();
-        hub.Logger.Flush();
+        SentrySdk.Logger.Flush();
 
         // Assert
         worker.Received(1).EnqueueEnvelope(
@@ -167,15 +174,19 @@ public class LoggingTests
         var envelopes = new List<Envelope>(2);
         worker.EnqueueEnvelope(Arg.Do<Envelope>(envelope => envelopes.Add(envelope)));
 
+        using var sentry = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.BackgroundWorker = worker;
+            o.InitNativeSdks = false;
+            o.AutoSessionTracking = false;
+        });
+
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddLogging(builder => builder.AddSentry(o =>
         {
-            o.Dsn = ValidDsn;
             o.MinimumBreadcrumbLevel = LogLevel.Information;
             o.MinimumEventLevel = LogLevel.Warning;
-            o.BackgroundWorker = worker;
-            o.InitNativeSdks = false;
-            o.EnableLogs = true;
         }));
         serviceCollection.Configure<LoggerFilterOptions>(options => options.AddFilter<SentryStructuredLoggerProvider>(CategoryName, LogLevel.Error));
         using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -186,8 +197,7 @@ public class LoggingTests
         logger.Log(LogLevel.Information, "test breadcrumb");
         logger.Log(LogLevel.Warning, "test event");
 
-        var hub = serviceProvider.GetRequiredService<IHub>();
-        hub.Logger.Flush();
+        SentrySdk.Logger.Flush();
 
         // Assert
         Assert.Collection(envelopes,

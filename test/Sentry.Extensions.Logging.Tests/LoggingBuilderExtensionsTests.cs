@@ -1,21 +1,22 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging.Tests;
 
-public class LoggingBuilderExtensionsTests
+[Collection(nameof(SentrySdkCollection))]
+public sealed class LoggingBuilderExtensionsTests : IDisposable
 {
+    public void Dispose() => SentrySdk.Close();
+
     [Fact]
     public void AddSentry_LoggingBuilder_AddLoggerProviders()
     {
         // Arrange
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry(options =>
-        {
-            options.EnableLogs = true;
-            options.InitializeSdk = false;
-        }));
+        serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry());
         using var serviceProvider = serviceCollection.BuildServiceProvider();
         using var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
@@ -29,15 +30,57 @@ public class LoggingBuilderExtensionsTests
     }
 
     [Fact]
+    public void AddSentry_HostLoggerProvidersRegistered_AddsNullLoggerProviders()
+    {
+        var serviceCollection = new ServiceCollection();
+        var events = Substitute.For<ILoggerProvider>();
+        var structuredLogs = Substitute.For<ILoggerProvider>();
+        HostLoggerProviders.Add(serviceCollection, _ => events, _ => structuredLogs);
+        serviceCollection.AddLogging(builder => builder.AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Should().Equal(events, structuredLogs, NullLoggerProvider.Instance, NullLoggerProvider.Instance);
+    }
+
+    [Fact]
+    public void AddSentry_HostLoggerProvidersCleared_AddsHostLoggerProvidersBack()
+    {
+        var serviceCollection = new ServiceCollection();
+        var events = Substitute.For<ILoggerProvider>();
+        var structuredLogs = Substitute.For<ILoggerProvider>();
+        HostLoggerProviders.Add(serviceCollection, _ => events, _ => structuredLogs);
+        serviceCollection.AddLogging(builder => builder.ClearProviders().AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Should().Equal(events, structuredLogs);
+    }
+
+    [Fact]
+    public void AddSentry_HostLoggerProvidersThatStandDownCleared_AddsBackTheOtherHostLoggerProviders()
+    {
+        var serviceCollection = new ServiceCollection();
+        var events = Substitute.For<ILoggerProvider>();
+        var structuredLogs = Substitute.For<ILoggerProvider>();
+        HostLoggerProviders.Add(serviceCollection, _ => NullLoggerProvider.Instance, _ => NullLoggerProvider.Instance);
+        HostLoggerProviders.Add(serviceCollection, _ => events, _ => structuredLogs);
+        serviceCollection.AddLogging(builder => builder.ClearProviders().AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>();
+
+        providers.Should().Equal(events, structuredLogs);
+    }
+
+    [Fact]
     public void AddSentry_LoggingBuilder_AddLoggerFilterRules()
     {
         // Arrange
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry(options =>
-        {
-            options.EnableLogs = true;
-            options.InitializeSdk = false;
-        }));
+        serviceCollection.AddLogging((ILoggingBuilder builder) => builder.AddSentry());
         using var serviceProvider = serviceCollection.BuildServiceProvider();
         using var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
@@ -64,60 +107,80 @@ public class LoggingBuilderExtensionsTests
     }
 
     [Fact]
-    public void AddSentry_DerivedOptions_LoggerUsesLogEntryFilters()
+    public void AddSentry_CategoryLogLevelInSentrySection_StillCapturesEvents()
     {
-        // Arrange
-        var hub = CreateHub();
-        using var serviceProvider = CreateServiceProvider(hub,
-            options => options.AddLogEntryFilter((category, _, _, _) => category == "Filtered"));
-        var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+        var worker = Substitute.For<IBackgroundWorker>();
+        InitSdk(worker);
+        var loggingConfiguration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string> { ["Sentry:LogLevel:Noisy"] = "None" })
+            .Build();
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder => builder.AddConfiguration(loggingConfiguration).AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+        var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Noisy.Thing");
 
-        // Act
-        loggerFactory.CreateLogger("Filtered").LogError("filtered");
-        loggerFactory.CreateLogger("Allowed").LogError("allowed");
+        logger.LogError("error");
 
-        // Assert
-        _ = hub.DidNotReceive().CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == "Filtered"));
-        _ = hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == "Allowed"));
+        worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+            e.Items
+                .Select(i => i.Payload).OfType<JsonSerializable>()
+                .Select(i => i.Source).OfType<SentryEvent>()
+                .Any(evt => evt.Message!.Message == "error")));
     }
 
     [Fact]
-    public void AddSentry_DerivedOptions_StructuredLoggerUsesEnableLogs()
-    {
-        // Arrange
-        var hub = CreateHub();
-        SentryLog capturedLog = null;
-        hub.Logger.CaptureLog(Arg.Do<SentryLog>(log => capturedLog = log));
-        using var serviceProvider = CreateServiceProvider(hub, options => options.EnableLogs = true);
-        var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("App");
-
-        // Act
-        logger.LogInformation("message");
-
-        // Assert
-        capturedLog.Should().NotBeNull();
-        capturedLog.Message.Should().Be("message");
-    }
-
-    private class DerivedSentryLoggingOptions : SentryLoggingOptions;
-
-    private static IHub CreateHub()
-    {
-        var hub = Substitute.For<IHub>();
-        hub.IsEnabled.Returns(true);
-        hub.Logger.Returns(Substitute.For<Sentry.SentryStructuredLogger>());
-        return hub;
-    }
-
-    private static ServiceProvider CreateServiceProvider(IHub hub, Action<DerivedSentryLoggingOptions> configureOptions)
+    public void AddSentry_LoggingBuilder_RegistersNoHub()
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSingleton(hub);
-        serviceCollection.AddLogging(builder => builder.AddSentry<DerivedSentryLoggingOptions>(options =>
-        {
-            options.InitializeSdk = false;
-            configureOptions(options);
-        }));
-        return serviceCollection.BuildServiceProvider();
+        serviceCollection.AddLogging(builder => builder.AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        serviceProvider.GetService<IHub>().Should().BeNull();
+        serviceProvider.GetService<ISentryClient>().Should().BeNull();
+        serviceProvider.GetService<Func<IHub>>().Should().BeNull();
     }
+
+    [Fact]
+    public void AddSentry_SdkReinitializedAfterLoggerCreated_LoggerUsesNewHub()
+    {
+        var firstWorker = Substitute.For<IBackgroundWorker>();
+        var secondWorker = Substitute.For<IBackgroundWorker>();
+        InitSdk(firstWorker);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder => builder.AddSentry());
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+        var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("test");
+
+        InitSdk(secondWorker);
+        logger.LogError("error");
+
+        firstWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        secondWorker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+            e.Items
+                .Select(i => i.Payload).OfType<JsonSerializable>()
+                .Select(i => i.Source).OfType<SentryEvent>()
+                .Any(evt => evt.Message!.Message == "error")));
+    }
+
+    [Fact]
+    public void AddSentry_LoggingBuilder_AddsSentryHttpMessageHandler()
+    {
+        InitSdk(Substitute.For<IBackgroundWorker>());
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder => builder.AddSentry());
+        serviceCollection.AddHttpClient("test");
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var client = serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("test");
+
+        client.GetMessageHandlers().OfType<SentryHttpMessageHandler>().Should().ContainSingle();
+    }
+
+    private static void InitSdk(IBackgroundWorker worker) => SentrySdk.Init(o =>
+    {
+        o.Dsn = ValidDsn;
+        o.BackgroundWorker = worker;
+        o.AutoSessionTracking = false;
+        o.InitNativeSdks = false;
+    });
 }

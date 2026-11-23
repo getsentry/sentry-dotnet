@@ -5,9 +5,12 @@
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">$(PreviousIosTfm)</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">$(PreviousMacCatalystTfm)</TargetFrameworks>
     <IsBindingProject>true</IsBindingProject>
+    <!-- The iOS SDK only rewrites our block trampolines for NativeAOT when the assembly is trimmable. See https://github.com/getsentry/sentry-dotnet/issues/5855 -->
+    <IsTrimmable>true</IsTrimmable>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
     <SentryCocoaCache>..\..\modules\sentry-cocoa\</SentryCocoaCache>
+    <SentryCocoaSupportedMajor>9</SentryCocoaSupportedMajor>
     <!-- SentrySpan.g.cs: error CS0108: 'ISentrySpan.Serialize()' hides inherited member 'ISentrySerializable.Serialize()'. Use the new keyword if hiding was intended -->
     <NoWarn>$(NoWarn);CS0108</NoWarn>
   </PropertyGroup>
@@ -73,8 +76,19 @@
            Text="The modules/sentry-cocoa submodule is missing. Run 'git submodule update --init modules/sentry-cocoa' - the Cocoa SDK is built from source (see getsentry/sentry-dotnet#5492)." />
   </Target>
 
+  <Target Name="_EnsureSupportedCocoaMajor" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <PropertyGroup>
+      <_SentryCocoaVersioningFile>$([MSBuild]::NormalizePath($(MSBuildThisFileDirectory), $(SentryCocoaCache)Sources/Configuration/Versioning.xcconfig))</_SentryCocoaVersioningFile>
+      <_SentryCocoaMajor Condition="Exists('$(_SentryCocoaVersioningFile)')">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_SentryCocoaVersioningFile)')), `(?&lt;=MARKETING_VERSION\s*=\s*)\d+`).Value)</_SentryCocoaMajor>
+    </PropertyGroup>
+    <Error Condition="'$(_SentryCocoaMajor)' == ''"
+           Text="Couldn't read the sentry-cocoa version from $(_SentryCocoaVersioningFile), so can't check it against SentryCocoaSupportedMajor ($(SentryCocoaSupportedMajor))." />
+    <Error Condition="'$(_SentryCocoaMajor)' != '' And '$(_SentryCocoaMajor)' != '$(SentryCocoaSupportedMajor)'"
+           Text="modules/sentry-cocoa is on major version $(_SentryCocoaMajor), but SentryCocoaSupportedMajor is $(SentryCocoaSupportedMajor). Follow CONTRIBUTING.md#bumping-to-a-new-sentry-cocoa-major before raising it." />
+  </Target>
+
   <Target Name="_SetupCocoaSDK"
-          DependsOnTargets="_EnsureCocoaSubmodule;_BuildCocoaSDK;_GenerateSentryCocoaBindings"
+          DependsOnTargets="_EnsureCocoaSubmodule;_EnsureSupportedCocoaMajor;_BuildCocoaSDK;_GenerateSentryCocoaBindings"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
   <!-- Outer build (multi-TFM): runs _SetupCocoaSDK once before MSBuild fans out to inner per-TFM builds.  -->

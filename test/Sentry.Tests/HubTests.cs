@@ -1033,14 +1033,16 @@ public partial class HubTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, 0.4f, "backpressure")]
-    [InlineData(true, 0.6f, "sample_rate")]
-    [InlineData(false, 0.4f, "backpressure")]
-    [InlineData(false, 0.6f, "sample_rate")]
-    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, double sampleRand, string discardReason)
+    [InlineData(true, null, 0.4f, "backpressure")]
+    [InlineData(true, null, 0.6f, "sample_rate")]
+    [InlineData(false, null, 0.4f, "backpressure")]
+    [InlineData(false, null, 0.6f, "sample_rate")]
+    [InlineData(true, false, 0.4f, "backpressure")]
+    [InlineData(false, false, 0.4f, "sample_rate")]
+    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, bool? isSampledUpstream, double sampleRand, string discardReason)
     {
         // Arrange
-        var transactionContext = new TransactionContext("name", "operation");
+        var transactionContext = new TransactionContext("name", "operation", isSampled: isSampledUpstream);
 
         var clock = new MockClock(DateTimeOffset.UtcNow);
         _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
@@ -1886,7 +1888,7 @@ public partial class HubTests : IDisposable
             {"sentry-public_key", "49d0f7386ad645858ae85020e393bef3"},
             {"sentry-sample_rate", "1.0"}
         }).CreateDynamicSamplingContext(_fixture.ReplaySession);
-        externalContext.GetDynamicSamplingContext(Arg.Any<SentryOptions>(), Arg.Any<IReplaySession>())
+        externalContext.GetDynamicSamplingContext(Arg.Any<SentryOptions>(), Arg.Any<IReplaySession>(), Arg.Any<Scope>())
             .Returns(dynamicSamplingContext);
 
         _fixture.Options.ExternalPropagationContext = externalContext;
@@ -2189,27 +2191,6 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Logger_EnableLogsDisabled_StillCapturesLog()
-    {
-        // Arrange
-        // EnableLogs gates the logging integrations. Logs created directly via this API are always captured.
-        Assert.False(_fixture.Options.EnableLogs);
-        var hub = _fixture.GetSut();
-
-        // Act
-        hub.Logger.LogWarning("Message");
-        hub.Logger.Flush();
-
-        // Assert
-        _fixture.Client.Received(1).CaptureEnvelope(
-            Arg.Is<Envelope>(envelope =>
-                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
-            )
-        );
-        hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
-    }
-
-    [Fact]
     public void Logger_DoesCaptureLog()
     {
         // Arrange
@@ -2424,14 +2405,20 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
-    public void Ctor_AutoSessionTrackingEnabled_StartsSession()
+    public async Task Ctor_AutoSessionTrackingEnabled_StartsSession()
     {
         // Arrange
         _fixture.Options.AutoSessionTracking = true;
         _fixture.Options.Release = "release";
+        var sessionStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _fixture.Client
+            .When(client => client.CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial)))
+            .Do(_ => sessionStarted.TrySetResult(true));
 
         // Act
-        _ = _fixture.GetSut();
+        using var hub = _fixture.GetSut();
+        // On mobile, the app lifecycle tracker starts the session later, on the main thread
+        await Task.WhenAny(sessionStarted.Task, Task.Delay(TimeSpan.FromSeconds(5)));
 
         // Assert
         _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
@@ -2861,7 +2848,9 @@ public partial class HubTests : IDisposable
             Dsn = ValidDsn,
             AutoSessionTracking = false,
             IsGlobalModeEnabled = true,
-            Transport = transport
+            Transport = transport,
+            // The default of 2 seconds isn't always enough to flush on a busy CI runner
+            ShutdownTimeout = TimeSpan.FromSeconds(10)
         };
 
         if (cachingEnabled)
@@ -2870,6 +2859,8 @@ public partial class HubTests : IDisposable
         }
 
         var hub = new Hub(options);
+        // The hub doesn't dispose the client, so stop the cache worker before the temp directory is deleted
+        using var cachingTransport = options.Transport as CachingTransport;
         var id = hub.CaptureEvent(new SentryEvent());
 
         // Act

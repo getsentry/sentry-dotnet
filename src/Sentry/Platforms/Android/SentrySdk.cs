@@ -25,9 +25,7 @@ public static partial class SentrySdk
 
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
-        // Set default release and distribution
-        options.Release ??= GetDefaultReleaseString();
-        options.Distribution ??= GetDefaultDistributionString();
+        var defaults = options.ScopeDefaults;
 
         // Make sure we capture managed exceptions from the Android environment
         AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
@@ -47,22 +45,20 @@ public static partial class SentrySdk
             o.AttachStacktrace = options.AttachStacktrace;
             o.Debug = options.Debug;
             o.DiagnosticLevel = options.DiagnosticLevel.ToJavaSentryLevel();
-            o.Dist = options.Distribution;
+            o.Dist = defaults.Distribution;
             o.Dsn = options.Dsn;
             // Hardcode to false because .NET SDK manages sessions itself
             o.EnableAutoSessionTracking = false;
-            o.Environment = options.Environment;
+            o.Environment = defaults.Environment;
             o.FlushTimeoutMillis = (long)options.InitCacheFlushTimeout.TotalMilliseconds;
             o.MaxAttachmentSize = options.MaxAttachmentSize;
             o.MaxBreadcrumbs = options.MaxBreadcrumbs;
             o.MaxCacheItems = options.MaxCacheItems;
             o.MaxQueueSize = options.MaxQueueItems;
-            o.Release = options.Release;
+            o.Release = defaults.Release;
             o.SampleRate = options.SampleRate.HasValue ? (JavaDouble)Convert.ToDouble(options.SampleRate.Value) : null;
             o.SendClientReports = options.SendClientReports;
-#pragma warning disable CS0618
-            o.SendDefaultPii = options.SendDefaultPii;
-#pragma warning restore CS0618
+            ApplyDataCollection(options, o);
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
@@ -129,10 +125,7 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Android.SuppressSegfaults || (options.Native.EnableBeforeSend && options.BeforeSendInternal != null))
-            {
-                o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper(options), options, o);
-            }
+            o.BeforeSend = CreateBeforeSendCallback(options, o);
 
             // These options are from SentryAndroidOptions
             o.AttachScreenshot = options.Native.AttachScreenshot;
@@ -226,25 +219,31 @@ public static partial class SentrySdk
         // TODO: Pause/Resume
     }
 
-    internal static Func<SentryEvent, SentryHint, SentryEvent?> BeforeSendWrapper(SentryOptions options)
+    internal static void ApplyDataCollection(SentryOptions options, JavaSdk.SentryOptions nativeOptions)
+    {
+#pragma warning disable CS0618
+        nativeOptions.SendDefaultPii = options.SendDefaultPii;
+#pragma warning restore CS0618
+        options.DataCollection?.ApplyTo(nativeOptions.DataCollection);
+    }
+
+    internal static JavaSdk.SentryOptions.IBeforeSendCallback? CreateBeforeSendCallback(
+        SentryOptions options, JavaSdk.SentryOptions javaOptions)
+    {
+        JavaSdk.SentryOptions.IBeforeSendCallback? callback = null;
+        if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+        {
+            callback = new BeforeSendCallback(BeforeSendWrapper(options, beforeSend), options, javaOptions);
+        }
+
+        return options.Android.SuppressSegfaults ? new SegfaultSuppressionCallback(callback) : callback;
+    }
+
+    private static Func<SentryEvent, SentryHint, SentryEvent?> BeforeSendWrapper(
+        SentryOptions options, Func<SentryEvent, SentryHint, SentryEvent?> beforeSend)
     {
         return (evt, hint) =>
         {
-            // Suppress SIGSEGV errors.
-            // See: https://github.com/getsentry/sentry-dotnet/pull/3903
-            if (options.Android.SuppressSegfaults
-                && evt.SentryExceptions?.FirstOrDefault() is { Type: "SIGSEGV", Value: "Segfault" })
-            {
-                options.LogDebug("Suppressing SIGSEGV (this will be thrown as a managed exception instead)");
-                return null;
-            }
-
-            // Call the user defined BeforeSend callback, if it's defined - otherwise return the event as-is
-            if (!options.Native.EnableBeforeSend || options.BeforeSendInternal is not { } beforeSend)
-            {
-                return evt;
-            }
-
             try
             {
                 return beforeSend(evt, hint);
@@ -276,7 +275,7 @@ public static partial class SentrySdk
         }
     }
 
-    private static string? GetDefaultReleaseString()
+    internal static string? GetDefaultReleaseString()
     {
         var packageName = AppContext.PackageName;
         if (packageName == null)
@@ -290,7 +289,7 @@ public static partial class SentrySdk
         return packageInfo == null ? null : $"{packageName}@{packageInfo.VersionName}+{packageInfo.GetVersionCode()}";
     }
 
-    private static string? GetDefaultDistributionString() => GetAndroidPackageVersionCode()?.ToString();
+    internal static string? GetDefaultDistributionString() => GetAndroidPackageVersionCode()?.ToString();
 
     private static long? GetAndroidPackageVersionCode()
     {
