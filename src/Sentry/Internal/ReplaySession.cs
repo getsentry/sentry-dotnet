@@ -1,5 +1,9 @@
+using System.Runtime.ExceptionServices;
+using Sentry.Extensibility;
 #if __ANDROID__
-using Sentry.Android.Extensions;
+using Java.Interop;
+#elif __IOS__
+using CoreFoundation;
 #endif
 
 namespace Sentry.Internal;
@@ -19,6 +23,15 @@ internal class ReplaySession : IReplaySession
 {
     public static readonly IReplaySession Instance = new ReplaySession();
 
+    internal static IReplaySession? PlatformDefault =>
+#if __ANDROID__ || __IOS__
+        Instance;
+#else
+        null;
+#endif
+
+    internal static readonly TimeSpan MainThreadCaptureTimeout = TimeSpan.FromSeconds(1);
+
     private ReplaySession()
     {
     }
@@ -28,18 +41,181 @@ internal class ReplaySession : IReplaySession
         get
         {
 #if __ANDROID__
-            // Check to see if a Replay ID is available
-            var replayId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.ReplayId?.ToSentryId();
-            return (replayId is { } id && id != SentryId.Empty) ? id : null;
+            try
+            {
+                return JavaScopes.ReadReplayId();
+            }
+            catch (Exception e)
+            {
+                SentrySdk.CurrentOptions?.LogError(e, "Failed to read the replay id from the Java scope.");
+                return null;
+            }
 #elif __IOS__
             string? nativeId = null;
             Sentry.Cocoa.CocoaScope.Configure(scope => nativeId = scope.ReplayId);
-            return (nativeId is { } id) ? SentryId.Parse(id) : null;
+            return ToReplayId(nativeId);
 #else
             return null;
 #endif
         }
     }
 
-    public SentryId? CaptureReplay(SentryEvent @event) => null;
+    public SentryId? CaptureReplay(SentryEvent @event)
+    {
+#if __ANDROID__
+        var capturedId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.CaptureReplay(JavaBoolean.ValueOf(IsCrash(@event)));
+        return ToReplayId(capturedId?.ToString()) ?? ActiveReplayId;
+#elif __IOS__
+        return CaptureOnMainThread(
+            CaptureCocoaReplay,
+            NSThread.IsMain,
+            work => DispatchQueue.MainQueue.DispatchAsync(work),
+            MainThreadCaptureTimeout,
+            SentrySdk.CurrentOptions);
+#else
+        return null;
+#endif
+    }
+
+    internal static SentryId? ToReplayId(string? nativeId) =>
+        Guid.TryParse(nativeId, out var guid) && guid != Guid.Empty ? new SentryId(guid) : null;
+
+    internal static bool IsCrash(SentryEvent @event) =>
+        @event.SentryExceptions?.Any(exception => exception.Mechanism is { } mechanism && (
+            mechanism.Terminal == true ||
+            mechanism is { Handled: false, Type: "AppDomain.UnhandledException" or "UnhandledExceptionRaiser" })) ?? false;
+
+    internal static SentryId? CaptureOnMainThread(
+        Func<SentryId?> capture,
+        bool isMainThread,
+        Action<Action> dispatchToMainThread,
+        TimeSpan timeout,
+        SentryOptions? options)
+    {
+        if (isMainThread)
+        {
+            return capture();
+        }
+
+        SentryId? replayId = null;
+        Exception? error = null;
+        // Not disposed: after a timeout the dispatched capture still runs and sets it.
+        var captured = new ManualResetEventSlim();
+        dispatchToMainThread(() =>
+        {
+            try
+            {
+                replayId = capture();
+            }
+            catch (Exception e)
+            {
+                error = e;
+            }
+            finally
+            {
+                captured.Set();
+            }
+        });
+
+        if (!captured.Wait(timeout))
+        {
+            options?.LogWarning("Capturing the replay on the main thread timed out after {0}. The event is sent without a replay.", timeout);
+            return null;
+        }
+
+        if (error is not null)
+        {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
+
+        return replayId;
+    }
+
+#if __IOS__
+    private static SentryId? CaptureCocoaReplay()
+    {
+        var replay = SentryCocoaHybridSdk.Internal.Replay;
+        return replay.Capture() ? ToReplayId(replay.ReplayId) : null;
+    }
+#endif
+
+#if __ANDROID__
+    // The binding doesn't generate io.sentry.IScope, so the scopes are read through JNI,
+    // in the order Java's CombinedScopeView reads them.
+    private static class JavaScopes
+    {
+        private const string ScopeSignature = "()Lio/sentry/IScope;";
+
+        private static readonly JniType ScopesType = new("io/sentry/IScopes");
+        private static readonly JniType ScopeType = new("io/sentry/IScope");
+        private static readonly JniType ObjectType = new("java/lang/Object");
+
+        private static readonly JniMethodInfo[] ScopeGetters =
+        [
+            ScopesType.GetInstanceMethod("getScope", ScopeSignature),
+            ScopesType.GetInstanceMethod("getIsolationScope", ScopeSignature),
+            ScopesType.GetInstanceMethod("getGlobalScope", ScopeSignature),
+        ];
+
+        private static readonly JniMethodInfo GetReplayId =
+            ScopeType.GetInstanceMethod("getReplayId", "()Lio/sentry/protocol/SentryId;");
+
+        private static readonly JniMethodInfo ObjectToString =
+            ObjectType.GetInstanceMethod("toString", "()Ljava/lang/String;");
+
+        internal static SentryId? ReadReplayId()
+        {
+            var currentScopes = JavaSdk.Sentry.CurrentScopes;
+            var scopes = new JniObjectReference(currentScopes.Handle);
+            try
+            {
+                foreach (var getScope in ScopeGetters)
+                {
+                    var scope = JniEnvironment.InstanceMethods.CallObjectMethod(scopes, getScope);
+                    try
+                    {
+                        if (ReadReplayId(scope) is { } replayId)
+                        {
+                            return replayId;
+                        }
+                    }
+                    finally
+                    {
+                        JniObjectReference.Dispose(ref scope);
+                    }
+                }
+
+                return null;
+            }
+            finally
+            {
+                GC.KeepAlive(currentScopes);
+            }
+        }
+
+        private static SentryId? ReadReplayId(JniObjectReference scope)
+        {
+            if (!scope.IsValid)
+            {
+                return null;
+            }
+
+            var replayId = JniEnvironment.InstanceMethods.CallObjectMethod(scope, GetReplayId);
+            try
+            {
+                if (!replayId.IsValid)
+                {
+                    return null;
+                }
+
+                var text = JniEnvironment.InstanceMethods.CallObjectMethod(replayId, ObjectToString);
+                return ToReplayId(JniEnvironment.Strings.ToString(ref text, JniObjectReferenceOptions.CopyAndDispose));
+            }
+            finally
+            {
+                JniObjectReference.Dispose(ref replayId);
+            }
+        }
+    }
+#endif
 }

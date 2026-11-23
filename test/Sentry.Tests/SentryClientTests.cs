@@ -2646,6 +2646,7 @@ public partial class SentryClientTests : IDisposable
         replaySession.DidNotReceive().CaptureReplay(Arg.Any<SentryEvent>());
     }
 
+#if !__ANDROID__ && !__IOS__
     [Fact]
     public void CaptureEvent_NoReplaySession_KeepsEventDsc()
     {
@@ -2655,4 +2656,20 @@ public partial class SentryClientTests : IDisposable
 
         @event.DynamicSamplingContext.Should().BeSameAs(propagationContext.DynamicSamplingContext);
     }
+#else
+    [Fact]
+    public void CaptureEvent_NoReplaySessionNoNativeReplay_RemovesReplayIdFromEventOnly()
+    {
+        var staleReplayId = SentryId.Create();
+        var (@event, propagationContext) = ReplayEventFixture(staleReplayId);
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace.Should().NotContainKey("replay_id");
+        propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(staleReplayId.ToString());
+    }
+#endif
 }
