@@ -10,7 +10,8 @@ public class MauiDeviceDataTests
     {
         // Arrange
         var device = new Device();
-        var metrics = global::Android.App.Application.Context.Resources!.DisplayMetrics!;
+        var resources = global::Android.App.Application.Context.Resources!;
+        var metrics = resources.DisplayMetrics!;
 
         // Act
         device.ApplyMauiDeviceData(null, null);
@@ -19,7 +20,9 @@ public class MauiDeviceDataTests
         device.ScreenResolution.Should().Be($"{metrics.WidthPixels}x{metrics.HeightPixels}");
         device.ScreenDensity.Should().Be(metrics.Density);
         device.ScreenDpi.Should().Be((int)metrics.DensityDpi);
-        device.Orientation.Should().NotBeNull();
+        device.Orientation.Should().Be(resources.Configuration!.Orientation == global::Android.Content.Res.Orientation.Landscape
+            ? DeviceOrientation.Landscape
+            : DeviceOrientation.Portrait);
     }
 
     [Fact]
