@@ -48,7 +48,7 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
         }
 
         var description = _options.DataCollectionResolver.SanitizeDbStatements
-            ? SqlSanitizer.Sanitize(command.CommandText, command.GetSqlDialect())
+            ? SqlSanitizer.Sanitize(command.CommandText, command.GetDbSystem())
             : command.CommandText;
         var span = parent.StartChild(key, description);
         span.SetOrigin(EntityFrameworkOrigin);

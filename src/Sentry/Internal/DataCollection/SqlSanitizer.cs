@@ -3,8 +3,22 @@ namespace Sentry.Internal.DataCollection;
 internal static class SqlSanitizer
 {
     [return: NotNullIfNotNull(nameof(sql))]
-    internal static string? Sanitize(string? sql, SqlDialect dialect = SqlDialect.Generic) =>
-        sql is null ? null : new Scanner(sql, dialect).Run();
+    internal static string? Sanitize(string? sql, string? dbSystem = null) =>
+        sql is null ? null : new Scanner(sql, DialectFor(dbSystem)).Run();
+
+    private static SqlDialect DialectFor(string? dbSystem) => dbSystem switch
+    {
+        "mssql" or "mssqlcompact" or "sqlite" => SqlDialect.SqlServer,
+        "mysql" or "spanner" => SqlDialect.MySql,
+        _ => SqlDialect.Generic
+    };
+
+    private enum SqlDialect
+    {
+        Generic,  // Postgres compatible
+        SqlServer,
+        MySql
+    }
 
     private sealed class Scanner(string sql, SqlDialect dialect)
     {
@@ -72,7 +86,7 @@ internal static class SqlSanitizer
                 case 'N' or 'n' or 'X' or 'x' or 'B' or 'b' when next == '\'':
                     _position++;
                     return;
-                case 'E' or 'e' when next == '\'':
+                case 'E' or 'e' when next == '\'' && dialect == SqlDialect.Generic:
                     _position++;
                     SkipString('\'', backslashEscapes: true);
                     return;
@@ -83,7 +97,7 @@ internal static class SqlSanitizer
                 case '`':
                     CopyQuotedIdentifier(current);
                     return;
-                case '[' when dialect is SqlDialect.SqlServer or SqlDialect.Sqlite:
+                case '[' when dialect == SqlDialect.SqlServer:
                     CopyQuotedIdentifier(']');
                     return;
                 case '$':
@@ -298,7 +312,7 @@ internal static class SqlSanitizer
         {
             '_' or '$' => true,
             '@' => dialect != SqlDialect.Generic,
-            '#' => dialect is SqlDialect.SqlServer or SqlDialect.Sqlite,
+            '#' => dialect == SqlDialect.SqlServer,
             _ => char.IsLetterOrDigit(c)
         };
 

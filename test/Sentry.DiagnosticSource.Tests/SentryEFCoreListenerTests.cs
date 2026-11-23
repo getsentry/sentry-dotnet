@@ -225,6 +225,12 @@ public class SentryEFCoreListenerTests
 
         public Guid ConnectionId { get; set; }
         public Guid CommandId { get; set; } = Guid.NewGuid();
+
+        public class CommandInfo
+        {
+            public string CommandText { get; set; }
+        }
+        public CommandInfo Command { get; set; }
     }
 
     [Fact]
@@ -344,6 +350,44 @@ public class SentryEFCoreListenerTests
 
         // Assert
         fixture.Spans.Single(s => s.Operation == "db.query").Description.Should().Be(expected);
+    }
+
+    [Fact]
+    public void OnNext_CommandExecuting_CommandAvailable_DescriptionIsItsText()
+    {
+        // Arrange
+        const string sql = "SELECT [i].[Name] FROM [Items] AS [i] WHERE [i].[Name] = @p0";
+        var fixture = new Fixture();
+        var listener = new SentryEFCoreListener(fixture.Hub, fixture.Options);
+        var connection = new FakeDiagnosticConnectionEventData("connection");
+        var command = new FakeDiagnosticCommandEventData(connection,
+            $"Executing DbCommand [Parameters=[@p0='line one\nline two' (Size = 17)], CommandType='Text']\n{sql}")
+        {
+            Command = new() { CommandText = sql + "\r\n" }
+        };
+
+        // Act
+        listener.OnNext(new(EFCommandExecuting, command));
+
+        // Assert
+        fixture.Spans.Single(s => s.Operation == "db.query").Description.Should().Be(sql);
+    }
+
+    [Fact]
+    public void OnNext_QueryCompiling_DataCollectionConfigured_DescriptionIsDbSystem()
+    {
+        // Arrange
+        var fixture = new Fixture();
+        fixture.Options.ConfigureDataCollection(_ => { });
+        var listener = new SentryEFCoreListener(fixture.Hub, fixture.Options);
+        var query = new FakeDiagnosticEventData(
+            "Compiling query expression: \n'DbSet<Item>().FromSql(SELECT * FROM Items WHERE Email = 'jane@example.com', @p)'");
+
+        // Act
+        listener.OnNext(new(EFQueryCompiling, query));
+
+        // Assert
+        fixture.Spans.Single(s => s.Operation == "db.query.compile").Description.Should().Be("mssql");
     }
 
     [Fact]

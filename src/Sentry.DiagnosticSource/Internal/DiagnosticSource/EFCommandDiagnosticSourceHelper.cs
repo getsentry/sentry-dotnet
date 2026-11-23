@@ -14,19 +14,12 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string GetDescription(object? diagnosticSourceValue)
     {
-        var commandText = FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
+        var commandText = diagnosticSourceValue?.GetStringProperty("Command.CommandText", Options.DiagnosticLogger)?.TrimEnd()
+            ?? FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
         return Options.DataCollectionResolver.SanitizeDbStatements
-            ? SqlSanitizer.Sanitize(commandText, GetSqlDialect(diagnosticSourceValue))
+            ? SqlSanitizer.Sanitize(commandText, GetDatabaseSystem(diagnosticSourceValue))
             : commandText;
     }
-
-    private SqlDialect GetSqlDialect(object? diagnosticSourceValue) => GetDatabaseSystem(diagnosticSourceValue) switch
-    {
-        "mssql" or "mssqlcompact" => SqlDialect.SqlServer,
-        "mysql" or "spanner" => SqlDialect.MySql,
-        "sqlite" => SqlDialect.Sqlite,
-        _ => SqlDialect.Generic
-    };
 
     private Guid? GetCommandId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("CommandId", Options.DiagnosticLogger);
 

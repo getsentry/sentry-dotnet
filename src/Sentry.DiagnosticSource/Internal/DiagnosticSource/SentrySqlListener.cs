@@ -213,7 +213,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
         var commandText = value.GetStringProperty("Command.CommandText", _options.DiagnosticLogger);
         commandSpan.Description = _options.DataCollectionResolver.SanitizeDbStatements
-            ? SqlSanitizer.Sanitize(commandText, SqlDialect.SqlServer)
+            ? SqlSanitizer.Sanitize(commandText, "mssql")
             : commandText;
         commandSpan.Finish(spanStatus);
     }

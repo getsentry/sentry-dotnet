@@ -59,7 +59,7 @@ public class SentryCommandInterceptor : IDbCommandInterceptor
         var level = interceptionContext.Exception == null ? BreadcrumbLevel.Debug : BreadcrumbLevel.Error;
         if (_queryLogger is SentryQueryLogger sentryQueryLogger)
         {
-            sentryQueryLogger.Log(command.CommandText, command.GetSqlDialect(), level);
+            sentryQueryLogger.Log(command.CommandText, command.GetDbSystem(), level);
         }
         else
         {

@@ -3,28 +3,28 @@ namespace Sentry.EntityFramework.Tests;
 public class DbCommandExtensionsTests
 {
     [Theory]
-    [InlineData("System.Data.SqlClient", "SqlServer")]
-    [InlineData("Microsoft.Data.SqlClient", "SqlServer")]
-    [InlineData("System.Data.SqlServerCe", "SqlServer")]
-    [InlineData("MySql.Data.MySqlClient", "MySql")]
-    [InlineData("MySqlConnector", "MySql")]
-    [InlineData("Devart.Data.MySql", "MySql")]
-    [InlineData("System.Data.SQLite", "Sqlite")]
-    [InlineData("Microsoft.Data.Sqlite", "Sqlite")]
-    [InlineData("Devart.Data.SQLite", "Sqlite")]
-    [InlineData("Npgsql", "Generic")]
-    [InlineData("Effort.Provider", "Generic")]
-    [InlineData(null, "Generic")]
-    public void SqlDialectForNamespace_ProviderNamespace_MapsToDialect(string commandNamespace, string expectedDialect) =>
-        DbCommandExtensions.SqlDialectForNamespace(commandNamespace).ToString().Should().Be(expectedDialect);
+    [InlineData("System.Data.SqlClient", "mssql")]
+    [InlineData("Microsoft.Data.SqlClient", "mssql")]
+    [InlineData("System.Data.SqlServerCe", "mssqlcompact")]
+    [InlineData("MySql.Data.MySqlClient", "mysql")]
+    [InlineData("MySqlConnector", "mysql")]
+    [InlineData("Devart.Data.MySql", "mysql")]
+    [InlineData("System.Data.SQLite", "sqlite")]
+    [InlineData("Microsoft.Data.Sqlite", "sqlite")]
+    [InlineData("Devart.Data.SQLite", "sqlite")]
+    [InlineData("Npgsql", null)]
+    [InlineData("Effort.Provider", null)]
+    [InlineData(null, null)]
+    public void DbSystemForNamespace_ProviderNamespace_MapsToDbSystem(string commandNamespace, string expectedDbSystem) =>
+        DbCommandExtensions.DbSystemForNamespace(commandNamespace).Should().Be(expectedDbSystem);
 
     [Fact]
-    public void GetSqlDialect_Command_UsesItsTypeNamespace()
+    public void GetDbSystem_Command_UsesItsTypeNamespace()
     {
         using (new AssertionScope())
         {
-            new MySql.Data.MySqlClient.FakeMySqlCommand().GetSqlDialect().ToString().Should().Be("MySql");
-            new EffortCommand().GetSqlDialect().ToString().Should().Be("Generic");
+            new MySql.Data.MySqlClient.FakeMySqlCommand().GetDbSystem().Should().Be("mysql");
+            new EffortCommand().GetDbSystem().Should().BeNull();
         }
     }
 }
