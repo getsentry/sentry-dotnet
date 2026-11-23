@@ -5,6 +5,7 @@
 *.sh eol=lf
 .githooks/* eol=lf
 *.ps1 eol=lf
+src/Sentry/Platforms/Native/** eol=lf
 CHANGELOG.md merge=union
 
 
