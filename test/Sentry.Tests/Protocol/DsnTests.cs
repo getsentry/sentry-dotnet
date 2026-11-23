@@ -312,6 +312,41 @@ public class DsnTests
         Assert.Null(dsn.OrgId);
     }
 
+    [Theory]
+    [InlineData("sentry.io")]
+    [InlineData("o1.ingest.us.sentry.io")]
+    [InlineData("SENTRY.IO")]
+    [InlineData("sentry.io.")]
+    public void IsSentrySaasHost_SentryIoOrSubdomain_True(string host)
+    {
+        Assert.True(Dsn.IsSentrySaasHost(host));
+    }
+
+    [Theory]
+    [InlineData("fake-sentry.io")]
+    [InlineData("notsentry.io")]
+    [InlineData("sentry.io.evil.com")]
+    [InlineData("localhost")]
+    [InlineData("sentry.example.com")]
+    public void IsSentrySaasHost_OtherHost_False(string host)
+    {
+        Assert.False(Dsn.IsSentrySaasHost(host));
+    }
+
+    [Fact]
+    public void Parse_SaasDsn_IsSentrySaas()
+    {
+        var dsn = Dsn.Parse("https://key@o1.ingest.us.sentry.io/123");
+        Assert.True(dsn.IsSentrySaas);
+    }
+
+    [Fact]
+    public void Parse_SelfHostedDsn_IsNotSentrySaas()
+    {
+        var dsn = Dsn.Parse("https://key@sentry.example.com/123");
+        Assert.False(dsn.IsSentrySaas);
+    }
+
     private static void AssertEqual(DsnTestCase @case, Dsn dsn)
     {
         Assert.NotNull(@case);

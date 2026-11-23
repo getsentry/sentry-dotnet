@@ -44,6 +44,11 @@ internal sealed class Dsn
     /// </summary>
     public string? OrgId { get; internal set; }
 
+    /// <summary>
+    /// Whether the DSN's host is <c>sentry.io</c> or one of its subdomains.
+    /// </summary>
+    public bool IsSentrySaas { get; }
+
     private Dsn(
         string source,
         string projectId,
@@ -51,7 +56,8 @@ internal sealed class Dsn
         string? secretKey,
         string publicKey,
         Uri apiBaseUri,
-        string? orgId = null)
+        string? orgId = null,
+        bool isSentrySaas = false)
     {
         Source = source;
         ProjectId = projectId;
@@ -60,6 +66,7 @@ internal sealed class Dsn
         PublicKey = publicKey;
         ApiBaseUri = apiBaseUri;
         OrgId = orgId;
+        IsSentrySaas = isSentrySaas;
     }
 
     public Uri GetStoreEndpointUri() => new(ApiBaseUri, "store/");
@@ -72,6 +79,17 @@ internal sealed class Dsn
 
     public static bool IsDisabled(string? dsn) =>
         SentryConstants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
+
+    internal static bool IsSentrySaasHost(string host)
+    {
+        if (host.EndsWith(".", StringComparison.Ordinal))
+        {
+            host = host.Substring(0, host.Length - 1);
+        }
+
+        return host.Equals("sentry.io", StringComparison.OrdinalIgnoreCase)
+               || host.EndsWith(".sentry.io", StringComparison.OrdinalIgnoreCase);
+    }
 
     public static Dsn Parse(string dsn)
     {
@@ -131,7 +149,8 @@ internal sealed class Dsn
             secretKey,
             publicKey,
             apiBaseUri,
-            orgId);
+            orgId,
+            IsSentrySaasHost(uri.DnsSafeHost));
     }
 
     public static Dsn? TryParse(string? dsn)

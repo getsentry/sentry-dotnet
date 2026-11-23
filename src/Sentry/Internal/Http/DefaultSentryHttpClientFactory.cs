@@ -9,6 +9,13 @@ namespace Sentry.Internal.Http;
 /// <inheritdoc />
 internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
 {
+#if ANDROID
+    // Android 7.1 (API 25) added ISRG Root X1, but some vendor builds of it lack the root.
+    private const int LastAndroidSdkIntWithoutIsrgRootX1 = 25;
+
+    internal int AndroidSdkInt { get; init; } = (int)AndroidBuild.VERSION.SdkInt;
+#endif
+
     /// <summary>
     /// Creates an <see cref="T:System.Net.Http.HttpClient" /> configure to call Sentry for the specified <see cref="T:Sentry.Dsn" />
     /// </summary>
@@ -17,7 +24,7 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        var handler = options.CreateHttpMessageHandler?.Invoke() ?? new HttpClientHandler();
+        var handler = options.CreateHttpMessageHandler?.Invoke() ?? CreateDefaultHandler(options);
         if (handler is HttpClientHandler httpClientHandler)
         {
             if (options.HttpProxy is not null)
@@ -127,6 +134,25 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
         }
 
         return client;
+    }
+
+    private HttpMessageHandler CreateDefaultHandler(SentryOptions options)
+    {
+#if ANDROID
+        if (AndroidSdkInt <= LastAndroidSdkIntWithoutIsrgRootX1 && Dsn.TryParse(options.Dsn) is { IsSentrySaas: true })
+        {
+            var handler = new Sentry.Android.SentryRootCaMessageHandler(options.DiagnosticLogger);
+            if (options.HttpProxy is not null)
+            {
+                handler.Proxy = options.HttpProxy;
+                options.LogInfo("Using Proxy: {0}", options.HttpProxy);
+            }
+            handler.AutomaticDecompression = options.DecompressionMethods;
+            options.LogDebug("Using 'SentryRootCaMessageHandler' to trust the bundled Sentry root CAs.");
+            return handler;
+        }
+#endif
+        return new HttpClientHandler();
     }
 
     private static bool SupportsAutomaticDecompression(HttpClientHandler handler)
