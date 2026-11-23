@@ -459,9 +459,7 @@ public class SentryClient : ISentryClient, IDisposable
         return SentryId.Empty;
     }
 
-    // Events carry the id of the replay they were captured in, the replay session decides which one: error events
-    // capture theirs, other events get the replay that's active now. The DSC cached on the propagation context only
-    // has the replay that was active when it was created.
+    // The DSC cached on the propagation context only has the replay that was active when it was created.
     private void CaptureReplay(SentryEvent @event)
     {
         if (_options.ReplaySession is not { } replaySession)

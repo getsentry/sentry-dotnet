@@ -2513,6 +2513,41 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_ReplaySessionThrows_SendsEventWithoutChangingDsc()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(_ => throw new InvalidOperationException("replay failed"));
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(SentryId.Create());
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        var id = _fixture.GetSut().CaptureEvent(@event);
+
+        id.Should().Be(@event.EventId);
+        envelope.Should().NotBeNull();
+        @event.DynamicSamplingContext.Should().BeSameAs(propagationContext.DynamicSamplingContext);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesEmptyId_RemovesReplayIdFromEventOnly()
+    {
+        var activeReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(SentryId.Empty);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(activeReplayId);
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace.Should().NotContainKey("replay_id");
+        propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(activeReplayId.ToString());
+    }
+
+    [Fact]
     public void CaptureEvent_ReplaySessionWithoutException_DoesNotCaptureReplay()
     {
         var activeReplayId = SentryId.Create();

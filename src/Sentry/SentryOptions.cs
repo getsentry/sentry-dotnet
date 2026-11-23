@@ -1304,9 +1304,7 @@ public class SentryOptions
     internal IExternalPropagationContext? ExternalPropagationContext { get; set; }
 
     /// <summary>
-    /// An optional replay session supplied by an SDK that records replays itself (e.g. Unity on Android). The hub
-    /// uses it for the replay id of the dynamic sampling context. The client captures the replay of each error event
-    /// through it, and gives other events the replay that's active when they're sent.
+    /// Supplied by an SDK that records replays itself, such as Unity. It gives events their replay id.
     /// </summary>
     internal IReplaySession? ReplaySession { get; set; }
 

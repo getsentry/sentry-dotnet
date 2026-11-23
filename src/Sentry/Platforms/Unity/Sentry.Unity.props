@@ -12,6 +12,8 @@
     <InternalsVisibleTo Include="Sentry.Unity.Tests" />
     <InternalsVisibleTo Include="Sentry.Unity.Android" />
     <InternalsVisibleTo Include="Sentry.Unity.Android.Tests" />
+    <InternalsVisibleTo Include="Sentry.Unity.iOS" />
+    <InternalsVisibleTo Include="Sentry.Unity.iOS.Tests" />
   </ItemGroup>
 
 </Project>

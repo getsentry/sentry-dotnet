@@ -1206,6 +1206,21 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void StartTransaction_OptionsReplaySession_UsesItsActiveReplayId()
+    {
+        var activeReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(activeReplayId);
+        _fixture.Options.ReplaySession = replaySession;
+        using var hub = new Hub(_fixture.Options, _fixture.Client);
+
+        var transaction = hub.StartTransaction(new TransactionContext("name", "operation"), new Dictionary<string, object>());
+
+        var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+        transactionTracer.DynamicSamplingContext!.Items["replay_id"].Should().Be(activeReplayId.ToString());
+    }
+
+    [Fact]
     public void StartTransaction_NoDynamicSamplingContext_GeneratesSampleRand()
     {
         // Arrange
