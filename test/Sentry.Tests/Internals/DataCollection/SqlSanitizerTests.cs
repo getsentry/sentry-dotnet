@@ -38,6 +38,8 @@ public class SqlSanitizerTests
     [Theory]
     [InlineData("SELECT 1 -- jane@example.com\nFROM t", "SELECT ? \nFROM t")]
     [InlineData("SELECT 1 -- trailing", "SELECT ?")]
+    [InlineData("-- TagWith: jane\n\nSELECT 1", "SELECT ?")]
+    [InlineData("\r\n-- GetOrders\r\n-- File: Orders.cs:42\r\n\r\nSELECT 1", "SELECT ?")]
     [InlineData("/* jane */\nSELECT 1", "SELECT ?")]
     [InlineData("SELECT /* jane */ 1", "SELECT  ?")]
     [InlineData("SELECT/* jane */1", "SELECT ?")]
@@ -50,18 +52,6 @@ public class SqlSanitizerTests
     [InlineData("SELECT 1 /* unterminated 'jane'", "SELECT ?")]
     [InlineData("SELECT '--not a comment', '/*nor this*/' FROM t", "SELECT ?, ? FROM t")]
     public void Sanitize_Comments_AreRemoved(string sql, string expected) =>
-        SqlSanitizer.Sanitize(sql).Should().Be(expected);
-
-    [Theory]
-    [InlineData("-- GetOrders\n\nSELECT 1", "-- GetOrders\n\nSELECT ?")]
-    [InlineData("\r\n-- GetOrders\r\n-- File: Orders.cs:42\r\n\r\nSELECT 1", "-- GetOrders\r\n-- File: Orders.cs:42\r\n\r\nSELECT ?")]
-    [InlineData("-- GetOrders\nSELECT 1 -- jane\n-- jane\nFROM t", "-- GetOrders\nSELECT ? \n\nFROM t")]
-    [InlineData("-- GetOrders\n/* jane */\n-- jane\nSELECT 1", "-- GetOrders\n\n\nSELECT ?")]
-    [InlineData("/* jane */\n-- jane\nSELECT 1", "SELECT ?")]
-    [InlineData("-- GetOrders", "-- GetOrders")]
-    [InlineData("-- GetOrders\n  ", "-- GetOrders")]
-    [InlineData("- 1", "- ?")]
-    public void Sanitize_LineCommentsBeforeTheStatement_AreKept(string sql, string expected) =>
         SqlSanitizer.Sanitize(sql).Should().Be(expected);
 
     [Fact]
@@ -206,6 +196,7 @@ public class SqlSanitizerTests
     [InlineData("   ")]
     [InlineData("\r\n\t")]
     [InlineData("/* only a comment */")]
+    [InlineData("-- only a comment")]
     public void Sanitize_EmptyOrWhitespace_ReturnsEmpty(string sql) =>
         SqlSanitizer.Sanitize(sql).Should().BeEmpty();
 
