@@ -139,7 +139,9 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     private HttpMessageHandler CreateDefaultHandler(SentryOptions options)
     {
 #if ANDROID
-        if (AndroidSdkInt <= LastAndroidSdkIntWithoutIsrgRootX1 && Dsn.TryParse(options.Dsn) is { IsSentrySaas: true })
+        if (AndroidSdkInt <= LastAndroidSdkIntWithoutIsrgRootX1
+            && Dsn.TryParse(options.Dsn) is { } dsn
+            && Dsn.IsSentrySaasHost(dsn.GetEnvelopeEndpointUri().DnsSafeHost))
         {
             var handler = new Sentry.Android.SentryRootCaMessageHandler(options.DiagnosticLogger);
             if (options.HttpProxy is not null)

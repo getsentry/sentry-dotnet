@@ -330,14 +330,6 @@ public class DsnTests
         Assert.False(Dsn.IsSentrySaasHost(host));
     }
 
-    [Theory]
-    [InlineData("https://key@o1.ingest.us.sentry.io/123", true)]
-    [InlineData(ValidDsn, false)]
-    public void Parse_Host_SetsIsSentrySaas(string dsn, bool expected)
-    {
-        Assert.Equal(expected, Dsn.Parse(dsn).IsSentrySaas);
-    }
-
     private static void AssertEqual(DsnTestCase @case, Dsn dsn)
     {
         Assert.NotNull(@case);

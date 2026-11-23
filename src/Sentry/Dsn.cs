@@ -44,11 +44,6 @@ internal sealed class Dsn
     /// </summary>
     public string? OrgId { get; internal set; }
 
-    /// <summary>
-    /// Whether the DSN's host is <c>sentry.io</c> or one of its subdomains.
-    /// </summary>
-    public bool IsSentrySaas { get; }
-
     private Dsn(
         string source,
         string projectId,
@@ -56,8 +51,7 @@ internal sealed class Dsn
         string? secretKey,
         string publicKey,
         Uri apiBaseUri,
-        string? orgId = null,
-        bool isSentrySaas = false)
+        string? orgId = null)
     {
         Source = source;
         ProjectId = projectId;
@@ -66,7 +60,6 @@ internal sealed class Dsn
         PublicKey = publicKey;
         ApiBaseUri = apiBaseUri;
         OrgId = orgId;
-        IsSentrySaas = isSentrySaas;
     }
 
     public Uri GetStoreEndpointUri() => new(ApiBaseUri, "store/");
@@ -149,8 +142,7 @@ internal sealed class Dsn
             secretKey,
             publicKey,
             apiBaseUri,
-            orgId,
-            IsSentrySaasHost(uri.DnsSafeHost));
+            orgId);
     }
 
     public static Dsn? TryParse(string? dsn)
