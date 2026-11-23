@@ -130,19 +130,6 @@ internal static class CocoaExtensions
         return result;
     }
 
-    public static Dictionary<string, object?>? ToNullableObjectDictionary<TValue>(
-        this NSDictionary<NSString, TValue>? dict,
-        IDiagnosticLogger? logger = null)
-        where TValue : NSObject
-    {
-        if (dict is null || dict.Count == 0)
-        {
-            return null;
-        }
-
-        return dict.ToObjectDictionary(logger);
-    }
-
     public static NSDictionary<NSString, NSObject> ToNSDictionary<TValue>(
         this IEnumerable<KeyValuePair<string, TValue>> dict)
     {
