@@ -14,7 +14,9 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string GetDescription(object? diagnosticSourceValue)
     {
-        var commandText = diagnosticSourceValue?.GetStringProperty("Command.CommandText", Options.DiagnosticLogger)?.TrimEnd()
+        // EF Core 10 redacts sensitive inlined values in LogCommandText only; older versions don't redact
+        var commandText = (diagnosticSourceValue?.GetStringProperty("LogCommandText", Options.DiagnosticLogger)
+                ?? diagnosticSourceValue?.GetStringProperty("Command.CommandText", Options.DiagnosticLogger))?.TrimEnd()
             ?? FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
         return Options.DataCollectionResolver.SanitizeDbStatements
             ? SqlSanitizer.Sanitize(commandText, GetDatabaseSystem(diagnosticSourceValue))

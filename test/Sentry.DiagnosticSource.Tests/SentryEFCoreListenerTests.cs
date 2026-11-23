@@ -231,6 +231,7 @@ public class SentryEFCoreListenerTests
             public string CommandText { get; set; }
         }
         public CommandInfo Command { get; set; }
+        public string LogCommandText { get; set; }
     }
 
     [Fact]
@@ -371,6 +372,27 @@ public class SentryEFCoreListenerTests
 
         // Assert
         fixture.Spans.Single(s => s.Operation == "db.query").Description.Should().Be(sql);
+    }
+
+    [Fact]
+    public void OnNext_CommandExecuting_LogCommandTextAvailable_PreferredOverCommandText()
+    {
+        // Arrange
+        const string redacted = "SELECT [i].[Name] FROM [Items] AS [i] WHERE [i].[Email] IN (?)";
+        var fixture = new Fixture();
+        var listener = new SentryEFCoreListener(fixture.Hub, fixture.Options);
+        var connection = new FakeDiagnosticConnectionEventData("connection");
+        var command = new FakeDiagnosticCommandEventData(connection, $"Executing DbCommand\n{redacted}")
+        {
+            Command = new() { CommandText = "SELECT [i].[Name] FROM [Items] AS [i] WHERE [i].[Email] IN (N'jane@example.com')" },
+            LogCommandText = redacted + "\r\n"
+        };
+
+        // Act
+        listener.OnNext(new(EFCommandExecuting, command));
+
+        // Assert
+        fixture.Spans.Single(s => s.Operation == "db.query").Description.Should().Be(redacted);
     }
 
     [Fact]
