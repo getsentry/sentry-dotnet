@@ -175,7 +175,8 @@
       and '$(PublishAot)' == 'true'
       and '$(_IsPublishing)' == 'true'
       and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'
-      and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'maccatalyst'">
+      and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'maccatalyst'
+      and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'android'">
     <SentryCLIUploadNativeAOT>true</SentryCLIUploadNativeAOT>
     <SentryCLIUploadDirectory>$(PublishDir)</SentryCLIUploadDirectory>
     <!-- We must run after "_CopyAotSymbols" (not "Publish"), because that is the one that actually copies debug symbols to the publish directory. -->

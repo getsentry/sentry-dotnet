@@ -99,6 +99,24 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 
+    # Linux only, to keep the macOS and Windows legs short
+    It "uploads the native debug file for an Android Native AOT build" -Skip:(!$IsLinux) {
+        $aotName = 'android-aot-app'
+        DotnetNew 'android' $aotName "$framework-android"
+        @'
+<Project>
+  <PropertyGroup>
+    <PublishAot>true</PublishAot>
+    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+</Project>
+'@ | Out-File $aotName/Directory.Build.props
+        AddPackageReference $aotName 'Sentry'
+
+        $result = RunDotnetWithSentryCLI 'build' $aotName $True $False "$framework-android"
+        $result.UploadedDebugFiles() | Should -Contain "lib$aotName.dbg.so"
+    }
+
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios$iosTpv"
         Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
