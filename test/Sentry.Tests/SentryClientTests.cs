@@ -2646,6 +2646,87 @@ public partial class SentryClientTests : IDisposable
         replaySession.DidNotReceive().CaptureReplay(Arg.Any<SentryEvent>());
     }
 
+    private (Scope Scope, TransactionTracer Transaction) ReplayTransactionFixture(SentryId? transactionReplayId)
+    {
+        var activeSession = Substitute.For<IReplaySession>();
+        activeSession.ActiveReplayId.Returns(transactionReplayId);
+        var transaction = new TransactionTracer(Substitute.For<IHub>(), "name", "operation")
+        {
+            DynamicSamplingContext = new SentryPropagationContext().GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, activeSession)
+        };
+        var scope = new Scope(_fixture.SentryOptions) { Transaction = transaction };
+        return (scope, transaction);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayInTransaction_SetsReplayIdOnTransactionCopy()
+    {
+        var capturedReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(capturedReplayId);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (scope, transaction) = ReplayTransactionFixture(transactionReplayId: null);
+        var originalDsc = transaction.DynamicSamplingContext;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+        transaction.DynamicSamplingContext!.Items["replay_id"].Should().Be(capturedReplayId.ToString());
+        originalDsc!.Items.Should().NotContainKey("replay_id");
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayInTransactionWithReplayId_KeepsTransactionDsc()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(SentryId.Create());
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var transactionReplayId = SentryId.Create();
+        var (scope, transaction) = ReplayTransactionFixture(transactionReplayId);
+        var originalDsc = transaction.DynamicSamplingContext;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().BeSameAs(originalDsc);
+        originalDsc!.Items["replay_id"].Should().Be(transactionReplayId.ToString());
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionWithoutExceptionInTransaction_KeepsTransactionDsc()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(SentryId.Create());
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (scope, transaction) = ReplayTransactionFixture(transactionReplayId: null);
+        var originalDsc = transaction.DynamicSamplingContext;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null, withException: false);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().BeSameAs(originalDsc);
+        originalDsc!.Items.Should().NotContainKey("replay_id");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CaptureEvent_ReplaySessionCapturesNoReplayInTransaction_KeepsTransactionDsc(bool capturesEmptyId)
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(capturesEmptyId ? SentryId.Empty : null);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (scope, transaction) = ReplayTransactionFixture(transactionReplayId: null);
+        var originalDsc = transaction.DynamicSamplingContext;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().BeSameAs(originalDsc);
+        originalDsc!.Items.Should().NotContainKey("replay_id");
+    }
+
     [Fact]
     public void CaptureEvent_NoReplaySession_KeepsEventDsc()
     {

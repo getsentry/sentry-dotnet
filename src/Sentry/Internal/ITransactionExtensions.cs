@@ -14,4 +14,16 @@ internal static class TransactionExtensions
         }
         return null;
     }
+
+    public static void SetDynamicSamplingContext(this ITransactionTracer transaction, DynamicSamplingContext dsc)
+    {
+        if (transaction is UnsampledTransaction unsampledTransaction)
+        {
+            unsampledTransaction.DynamicSamplingContext = dsc;
+        }
+        else if (transaction is TransactionTracer transactionTracer)
+        {
+            transactionTracer.DynamicSamplingContext = dsc;
+        }
+    }
 }
