@@ -67,8 +67,8 @@ public class ReplaySessionTests
         var replayId = SentryId.Create();
         var dispatched = false;
 
-        var result = ReplaySession.CaptureOnMainThread(() => replayId, isMainThread: true, _ => dispatched = true,
-            TimeSpan.Zero, null);
+        var result = ReplaySession.CaptureOnMainThread(() => replayId, () => null, isMainThread: true,
+            _ => dispatched = true, TimeSpan.Zero, null);
 
         result.Should().Be(replayId);
         dispatched.Should().BeFalse();
@@ -80,30 +80,41 @@ public class ReplaySessionTests
         var replayId = SentryId.Create();
         var dispatched = false;
 
-        var result = ReplaySession.CaptureOnMainThread(() => replayId, isMainThread: false, work =>
-        {
-            dispatched = true;
-            work();
-        }, TimeSpan.Zero, null);
+        var result = ReplaySession.CaptureOnMainThread(() => replayId, () => SentryId.Create(), isMainThread: false,
+            work =>
+            {
+                dispatched = true;
+                work();
+            }, TimeSpan.Zero, null);
 
         result.Should().Be(replayId);
         dispatched.Should().BeTrue();
     }
 
     [Fact]
-    public void CaptureOnMainThread_MainThreadBusy_LogsAndReturnsNull()
+    public void CaptureOnMainThread_MainThreadBusy_LogsAndReturnsFallback()
     {
         var logger = new InMemoryDiagnosticLogger();
         var options = new SentryOptions { Debug = true, DiagnosticLogger = logger };
+        var activeReplayId = SentryId.Create();
         Action pendingCapture = null;
 
-        var result = ReplaySession.CaptureOnMainThread(() => SentryId.Create(), isMainThread: false,
-            work => pendingCapture = work, TimeSpan.Zero, options);
+        var result = ReplaySession.CaptureOnMainThread(() => SentryId.Create(), () => activeReplayId,
+            isMainThread: false, work => pendingCapture = work, TimeSpan.Zero, options);
 
-        result.Should().BeNull();
+        result.Should().Be(activeReplayId);
         logger.Entries.Should().Contain(entry => entry.Level == SentryLevel.Warning);
         pendingCapture.Should().NotBeNull();
         pendingCapture();
+    }
+
+    [Fact]
+    public void CaptureOnMainThread_CapturesNoReplay_ReturnsNullNotFallback()
+    {
+        var result = ReplaySession.CaptureOnMainThread(() => null, () => SentryId.Create(), isMainThread: false,
+            work => work(), TimeSpan.Zero, null);
+
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -111,7 +122,7 @@ public class ReplaySessionTests
     {
         var exception = new InvalidOperationException();
 
-        var act = () => ReplaySession.CaptureOnMainThread(() => throw exception, isMainThread: false,
+        var act = () => ReplaySession.CaptureOnMainThread(() => throw exception, () => null, isMainThread: false,
             work => work(), TimeSpan.Zero, null);
 
         act.Should().Throw<InvalidOperationException>().Which.Should().BeSameAs(exception);

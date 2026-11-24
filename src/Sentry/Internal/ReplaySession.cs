@@ -66,12 +66,7 @@ internal class ReplaySession : IReplaySession
         var capturedId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.CaptureReplay(JavaBoolean.ValueOf(IsCrash(@event)));
         return ToReplayId(capturedId?.ToString()) ?? ActiveReplayId;
 #elif __IOS__
-        return CaptureOnMainThread(
-            CaptureCocoaReplay,
-            NSThread.IsMain,
-            work => DispatchQueue.MainQueue.DispatchAsync(work),
-            MainThreadCaptureTimeout,
-            SentrySdk.CurrentOptions);
+        return CaptureCocoaReplay(SentrySdk.CurrentOptions, NSThread.IsMain, work => DispatchQueue.MainQueue.DispatchAsync(work));
 #else
         return null;
 #endif
@@ -87,6 +82,7 @@ internal class ReplaySession : IReplaySession
 
     internal static SentryId? CaptureOnMainThread(
         Func<SentryId?> capture,
+        Func<SentryId?> timedOutFallback,
         bool isMainThread,
         Action<Action> dispatchToMainThread,
         TimeSpan timeout,
@@ -119,8 +115,8 @@ internal class ReplaySession : IReplaySession
 
         if (!captured.Wait(timeout))
         {
-            options?.LogWarning("Capturing the replay on the main thread timed out after {0}. The event is sent without a replay.", timeout);
-            return null;
+            options?.LogWarning("Capturing the replay on the main thread timed out after {0}. The event is sent with the active replay id, if any.", timeout);
+            return timedOutFallback();
         }
 
         if (error is not null)
@@ -132,7 +128,23 @@ internal class ReplaySession : IReplaySession
     }
 
 #if __IOS__
-    private static SentryId? CaptureCocoaReplay()
+    internal SentryId? CaptureCocoaReplay(SentryOptions? options, bool isMainThread, Action<Action> dispatchToMainThread)
+    {
+        if (options?.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled != true)
+        {
+            return null;
+        }
+
+        return CaptureOnMainThread(
+            CaptureNativeReplay,
+            () => ActiveReplayId,
+            isMainThread,
+            dispatchToMainThread,
+            MainThreadCaptureTimeout,
+            options);
+    }
+
+    private static SentryId? CaptureNativeReplay()
     {
         var replay = SentryCocoaHybridSdk.Internal.Replay;
         return replay.Capture() ? ToReplayId(replay.ReplayId) : null;
