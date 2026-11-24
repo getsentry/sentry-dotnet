@@ -60,17 +60,18 @@ internal class ReplaySession : IReplaySession
         }
     }
 
+#if __ANDROID__
     public SentryId? CaptureReplay(SentryEvent @event)
     {
-#if __ANDROID__
         var capturedId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.CaptureReplay(JavaBoolean.ValueOf(IsCrash(@event)));
         return ToReplayId(capturedId?.ToString()) ?? ActiveReplayId;
-#elif __IOS__
-        return CaptureCocoaReplay(SentrySdk.CurrentOptions, NSThread.IsMain, work => DispatchQueue.MainQueue.DispatchAsync(work));
-#else
-        return null;
-#endif
     }
+#elif __IOS__
+    public SentryId? CaptureReplay(SentryEvent @event) =>
+        CaptureCocoaReplay(SentrySdk.CurrentOptions, NSThread.IsMain, work => DispatchQueue.MainQueue.DispatchAsync(work));
+#else
+    public SentryId? CaptureReplay(SentryEvent @event) => null;
+#endif
 
     internal static SentryId? ToReplayId(string? nativeId) =>
         Guid.TryParse(nativeId, out var guid) && guid != Guid.Empty ? new SentryId(guid) : null;
@@ -154,7 +155,7 @@ internal class ReplaySession : IReplaySession
 #if __ANDROID__
     // The binding doesn't generate io.sentry.IScope, so the scopes are read through JNI,
     // in the order Java's CombinedScopeView reads them.
-    private static class JavaScopes
+    internal static class JavaScopes
     {
         private const string ScopeSignature = "()Lio/sentry/IScope;";
 

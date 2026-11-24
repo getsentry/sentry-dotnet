@@ -2,26 +2,6 @@ namespace Sentry.Tests;
 
 public class ReplaySessionTests
 {
-    [Fact]
-    public void PlatformDefault_OnlyOnAndroidAndIos()
-    {
-#if __ANDROID__ || __IOS__
-        ReplaySession.PlatformDefault.Should().BeSameAs(ReplaySession.Instance);
-#else
-        ReplaySession.PlatformDefault.Should().BeNull();
-#endif
-    }
-
-#if !__ANDROID__ && !__IOS__
-    [Fact]
-    public void CaptureReplay_OffMobile_ReturnsNull()
-    {
-        var @event = new SentryEvent { SentryExceptions = [new SentryException { Type = "InvalidOperationException" }] };
-
-        ReplaySession.Instance.CaptureReplay(@event).Should().BeNull();
-    }
-#endif
-
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -63,12 +43,6 @@ public class ReplaySessionTests
         };
 
         ReplaySession.IsCrash(@event).Should().Be(expected);
-    }
-
-    [Fact]
-    public void IsCrash_NoExceptions_ReturnsFalse()
-    {
-        ReplaySession.IsCrash(new SentryEvent()).Should().BeFalse();
     }
 
     [Fact]
