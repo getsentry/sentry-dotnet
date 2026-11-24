@@ -161,20 +161,19 @@ internal static class ScopeExtensions
         var cookieBehavior = dataCollection.Cookies;
         foreach (var header in headers)
         {
-            var isCookieHeader = string.Equals(header.Key, HeaderNames.Cookie, StringComparison.OrdinalIgnoreCase);
-            if (isCookieHeader && cookieBehavior.Mode == KeyValueCollectionMode.Off)
+            if (string.Equals(header.Key, HeaderNames.Cookie, StringComparison.OrdinalIgnoreCase))
             {
-                continue;
+                if (cookieBehavior.Mode == KeyValueCollectionMode.Off)
+                {
+                    continue;
+                }
+
+                scope.Request.Cookies = CookieFilter.ToEventCookies(CookieFilter.FilterCookieHeaders(header.Value, cookieBehavior));
             }
 
             if (headerBehavior.Mode != KeyValueCollectionMode.Off)
             {
                 scope.Request.Headers[header.Key] = SensitiveDataFilter.FilterHeaderValue(header.Key, header.Value!, headerBehavior);
-            }
-
-            if (isCookieHeader)
-            {
-                scope.Request.Cookies = CookieFilter.ToEventCookies(CookieFilter.FilterCookieHeaders(header.Value, cookieBehavior));
             }
         }
     }
