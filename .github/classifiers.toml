@@ -3,7 +3,7 @@
 rubric = "sdk"
 
 [[area]]
-paths = ["src/Sentry/**"]
+paths = ["src/Sentry/**", "src/Sentry.DiagnosticSource/Internal/**"]
 families = ["server", "mobile-native", "hybrid", "browser"]
 shared_core = true
 
