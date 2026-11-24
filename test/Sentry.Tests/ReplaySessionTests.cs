@@ -12,6 +12,16 @@ public class ReplaySessionTests
 #endif
     }
 
+#if !__ANDROID__ && !__IOS__
+    [Fact]
+    public void CaptureReplay_OffMobile_ReturnsNull()
+    {
+        var @event = new SentryEvent { SentryExceptions = [new SentryException { Type = "InvalidOperationException" }] };
+
+        ReplaySession.Instance.CaptureReplay(@event).Should().BeNull();
+    }
+#endif
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]

@@ -78,7 +78,7 @@ internal class ReplaySession : IReplaySession
     internal static bool IsCrash(SentryEvent @event) =>
         @event.SentryExceptions?.Any(exception => exception.Mechanism is { } mechanism && (
             mechanism.Terminal == true ||
-            mechanism is { Handled: false, Type: "AppDomain.UnhandledException" or "UnhandledExceptionRaiser" })) ?? false;
+            mechanism is { Handled: false, Type: "AppDomain.UnhandledException" or "UnhandledExceptionRaiser" })) == true;
 
     internal static SentryId? CaptureOnMainThread(
         Func<SentryId?> capture,
