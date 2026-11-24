@@ -24,7 +24,6 @@ internal sealed class NativeHttpClient
         var transport = sentry_http_transport_new(&CreateClient, GCHandle.ToIntPtr(handle), &SendRequest, &FreeClient);
         if (transport != IntPtr.Zero)
         {
-            sentry_http_transport_set_client_start_func(transport, &StartClient);
             sentry_http_transport_set_client_shutdown_func(transport, &ShutdownClient);
         }
         return transport;
@@ -33,8 +32,9 @@ internal sealed class NativeHttpClient
     private void Send(IntPtr nativeRequest, IntPtr nativeResponse)
     {
         using var request = CreateRequest(nativeRequest);
+        _client ??= _options.GetHttpClient();
         // runs on the sentry-native transport thread, which has no synchronization context
-        using var response = _client!.SendAsync(request, _shutdown.Token).GetAwaiter().GetResult();
+        using var response = _client.SendAsync(request, _shutdown.Token).GetAwaiter().GetResult();
 
         sentry_http_response_set_status_code(nativeResponse, (int)response.StatusCode);
         foreach (var header in response.Headers.Concat(response.Content.Headers))
@@ -102,23 +102,6 @@ internal sealed class NativeHttpClient
     private static IntPtr CreateClient(IntPtr handle) => handle;
 
     [UnmanagedCallersOnly]
-    private static int StartClient(IntPtr client, IntPtr nativeOptions)
-    {
-        var self = FromHandle(client);
-        try
-        {
-            self._client = self._options.GetHttpClient();
-            return 0;
-        }
-        catch (Exception e)
-        {
-            // never allow an exception back to native code - it would crash the app
-            self._options.DiagnosticLogger?.LogError(e, "Failed to create the HTTP client for sentry-native.");
-            return 1;
-        }
-    }
-
-    [UnmanagedCallersOnly]
     private static int SendRequest(IntPtr client, IntPtr request, IntPtr response)
     {
         var self = FromHandle(client);
@@ -177,9 +160,6 @@ internal sealed class NativeHttpClient
         IntPtr factoryData,
         delegate* unmanaged<IntPtr, IntPtr, IntPtr, int> sendFunc,
         delegate* unmanaged<IntPtr, void> clientFreeFunc);
-
-    [DllImport("sentry-native")]
-    private static extern unsafe void sentry_http_transport_set_client_start_func(IntPtr transport, delegate* unmanaged<IntPtr, IntPtr, int> startFunc);
 
     [DllImport("sentry-native")]
     private static extern unsafe void sentry_http_transport_set_client_shutdown_func(IntPtr transport, delegate* unmanaged<IntPtr, void> shutdownFunc);
