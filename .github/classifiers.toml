@@ -1,0 +1,87 @@
+# getsentry/sentry-dotnet 217898c4a4815f04dc86dc8cd54b459dd6138422
+
+rubric = "sdk"
+
+[[area]]
+paths = ["src/Sentry/**"]
+families = ["server", "mobile-native", "hybrid", "browser"]
+shared_core = true
+
+[[area]]
+paths = [
+  "src/Sentry.AspNet/**", "src/Sentry.AspNetCore/**", "src/Sentry.AspNetCore.Grpc/**",
+  "src/Sentry.DiagnosticSource/**", "src/Sentry.EntityFramework*/**", "src/Sentry.Extensions.*/**",
+  "src/Sentry.Google.Cloud.Functions/**", "src/Sentry.Hangfire/**", "src/Sentry.Log4Net/**",
+  "src/Sentry.NLog/**", "src/Sentry.Serilog/**", "src/Sentry.OpenTelemetry*/**",
+  "src/Sentry.Profiling/**", "src/Sentry.Quartz*/**",
+]
+families = ["server"]
+
+[[area]]
+paths = ["src/Sentry.Extensions.Logging/**"]
+families = ["hybrid", "browser"]
+
+[[area]]
+paths = ["src/Sentry.AspNetCore.Blazor.WebAssembly/**"]
+families = ["browser"]
+
+[[area]]
+paths = [
+  "src/Sentry.Maui*/**", "src/Sentry.Bindings.*/**", "src/Sentry.Android.*/**", "lib/**",
+]
+families = ["mobile-native", "hybrid"]
+
+[[area]]
+paths = ["src/Sentry.Analyzers/**", "src/Sentry.Compiler.Extensions/**"]
+families = ["tooling"]
+
+[[area]]
+paths = ["src/*"]
+families = ["server", "mobile-native", "hybrid", "browser"]
+
+# Submodules compiled into the Sentry package (Ben.Demystifier source, sentry-native for Native AOT),
+# the build-wide Directory.Build.props, and .gitmodules.
+[[area]]
+paths = ["modules/Ben.Demystifier", "modules/sentry-native", "Directory.Build.props", ".gitmodules"]
+families = ["server", "mobile-native", "hybrid", "browser"]
+shared_core = true
+
+# perfview (TraceEvent) is compiled into Sentry.Profiling.
+[[area]]
+paths = ["modules/perfview"]
+families = ["server"]
+
+# sentry-cocoa is bundled by Sentry.Bindings.Cocoa.
+[[area]]
+paths = ["modules/sentry-cocoa"]
+families = ["mobile-native", "hybrid"]
+
+[[kind]]
+paths = ["test/**/ApiApprovalTests.*.verified.txt"]
+kind = "public-api-record"
+
+[[kind]]
+paths = ["modules/**", "lib/**/bin/**"]
+kind = "dependencies"
+
+[[kind]]
+paths = ["samples/**"]
+kind = "samples"
+
+[[kind]]
+paths = ["test/**", "integration-test/**", "benchmarks/**", "CodeCoverage.runsettings"]
+kind = "tests"
+
+[[kind]]
+paths = [
+  "**/*.csproj", "**/*.props", "**/*.targets", "**/*.slnx", "**/*.slnf", "**/*.sln",
+  "**/build.sh", "**/build.cmd", "scripts/**", "global.json", "nuget.config", "GlobalUsings.cs",
+  ".config/**", ".assets/**", "**/make-internal.sh", "**/CMakeLists.txt", "**/Transforms/**", "**/*proguard*.cfg",
+]
+kind = "build-release"
+
+[[kind]]
+paths = [
+  "*.DotSettings", "src/*/*.DotSettings", ".codecov.yml", "dev.cs", "agents.toml",
+]
+kind = "dev-tooling"
