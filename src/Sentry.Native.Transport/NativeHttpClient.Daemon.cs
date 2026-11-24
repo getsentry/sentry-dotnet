@@ -17,7 +17,7 @@ internal sealed partial class NativeHttpClient
             handler.UseProxy = _proxy.Length > 0;
             if (handler.UseProxy)
             {
-                handler.Proxy = new WebProxy(_proxy);
+                handler.Proxy = CreateProxy(_proxy);
             }
         }
 
@@ -27,6 +27,18 @@ internal sealed partial class NativeHttpClient
             client.DefaultRequestHeaders.UserAgent.TryParseAdd(_userAgent);
         }
         return client;
+    }
+
+    private static WebProxy CreateProxy(string address)
+    {
+        var url = new UriBuilder(address);
+        NetworkCredential? credentials = null;
+        if (url.UserName.Length > 0)
+        {
+            credentials = new NetworkCredential(Uri.UnescapeDataString(url.UserName), Uri.UnescapeDataString(url.Password));
+            url.UserName = url.Password = string.Empty;
+        }
+        return new WebProxy(url.Uri) { Credentials = credentials };
     }
 
     private partial Stream OpenFile(string path) => File.OpenRead(path);

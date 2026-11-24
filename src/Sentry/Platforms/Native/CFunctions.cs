@@ -107,10 +107,16 @@ internal static class C
         }
 
         // for the sentry-crash daemon of the native backend
-        if (options.HttpProxy is WebProxy { Address: { } proxy })
+        if (options.HttpProxy is WebProxy { Address: { } address } proxy)
         {
-            options.DiagnosticLogger?.LogDebug("Setting Proxy: {0}", proxy);
-            sentry_options_set_proxy(cOptions, proxy.ToString());
+            options.DiagnosticLogger?.LogDebug("Setting Proxy: {0}", address);
+            var url = new UriBuilder(address);
+            if (proxy.Credentials is NetworkCredential { UserName.Length: > 0 } credentials)
+            {
+                url.UserName = Uri.EscapeDataString(credentials.UserName);
+                url.Password = Uri.EscapeDataString(credentials.Password);
+            }
+            sentry_options_set_proxy(cOptions, url.Uri.AbsoluteUri);
         }
 
         // Disabling the native in favor of the C# layer for now
