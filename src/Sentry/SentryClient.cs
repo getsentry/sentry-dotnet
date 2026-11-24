@@ -489,7 +489,7 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        if (@event.DynamicSamplingContext is not { } dsc)
+        if (@event.DynamicSamplingContext is not { IsEmpty: false } dsc)
         {
             return;
         }
@@ -517,7 +517,7 @@ public class SentryClient : ISentryClient, IDisposable
     // Envelopes of earlier errors in the transaction may still hold its DSC, so the transaction gets a copy.
     private static void SetMissingReplayId(ITransactionTracer? transaction, SentryId replayId)
     {
-        if (transaction?.GetDynamicSamplingContext() is not { } dsc || dsc.Items.ContainsKey("replay_id"))
+        if (transaction?.GetDynamicSamplingContext() is not { IsEmpty: false } dsc || dsc.Items.ContainsKey("replay_id"))
         {
             return;
         }

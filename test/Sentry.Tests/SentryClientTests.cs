@@ -2728,6 +2728,42 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayInFrozenTransaction_KeepsEmptyTransactionDsc()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(SentryId.Create());
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var frozenDsc = DynamicSamplingContext.Empty();
+        var transaction = new TransactionTracer(Substitute.For<IHub>(), "name", "operation") { DynamicSamplingContext = frozenDsc };
+        var scope = new Scope(_fixture.SentryOptions) { Transaction = transaction };
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().BeSameAs(frozenDsc);
+        frozenDsc.IsEmpty.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayForEventWithEmptyDsc_SendsNoReplayId()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(SentryId.Create());
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var frozenDsc = DynamicSamplingContext.Empty();
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+        @event.DynamicSamplingContext = frozenDsc;
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace.Should().NotContainKey("replay_id");
+        @event.DynamicSamplingContext.Should().BeSameAs(frozenDsc);
+    }
+
+    [Fact]
     public void CaptureEvent_NoReplaySession_KeepsEventDsc()
     {
         var (@event, propagationContext) = ReplayEventFixture(SentryId.Create());
