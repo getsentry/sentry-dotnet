@@ -73,6 +73,17 @@ internal sealed class Dsn
     public static bool IsDisabled(string? dsn) =>
         SentryConstants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
 
+    internal static bool IsSentrySaasHost(string host)
+    {
+        if (host.EndsWith(".", StringComparison.Ordinal))
+        {
+            host = host.Substring(0, host.Length - 1);
+        }
+
+        return host.Equals("sentry.io", StringComparison.OrdinalIgnoreCase)
+               || host.EndsWith(".sentry.io", StringComparison.OrdinalIgnoreCase);
+    }
+
     public static Dsn Parse(string dsn)
     {
         var uri = new Uri(dsn);

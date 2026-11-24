@@ -46,14 +46,6 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(decision), decision, null)
         };
 
-    public static CocoaSdk.SentryObjCSampleDecision ToCocoaSampleDecision(this bool? decision) =>
-        decision switch
-        {
-            true => CocoaSdk.SentryObjCSampleDecision.Yes,
-            false => CocoaSdk.SentryObjCSampleDecision.No,
-            null => CocoaSdk.SentryObjCSampleDecision.Undecided
-        };
-
     public static SpanStatus? ToSpanStatus(this CocoaSdk.SentryObjCSpanStatus status) =>
         status switch
         {
@@ -78,33 +70,7 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
         };
 
-    public static CocoaSdk.SentryObjCSpanStatus ToCocoaSpanStatus(this SpanStatus? status) =>
-        status switch
-        {
-            null => CocoaSdk.SentryObjCSpanStatus.Undefined,
-            SpanStatus.Ok => CocoaSdk.SentryObjCSpanStatus.Ok,
-            SpanStatus.Cancelled => CocoaSdk.SentryObjCSpanStatus.Cancelled,
-            SpanStatus.InternalError => CocoaSdk.SentryObjCSpanStatus.InternalError,
-            SpanStatus.UnknownError => CocoaSdk.SentryObjCSpanStatus.UnknownError,
-            SpanStatus.InvalidArgument => CocoaSdk.SentryObjCSpanStatus.InvalidArgument,
-            SpanStatus.DeadlineExceeded => CocoaSdk.SentryObjCSpanStatus.DeadlineExceeded,
-            SpanStatus.NotFound => CocoaSdk.SentryObjCSpanStatus.NotFound,
-            SpanStatus.AlreadyExists => CocoaSdk.SentryObjCSpanStatus.AlreadyExists,
-            SpanStatus.PermissionDenied => CocoaSdk.SentryObjCSpanStatus.PermissionDenied,
-            SpanStatus.ResourceExhausted => CocoaSdk.SentryObjCSpanStatus.ResourceExhausted,
-            SpanStatus.FailedPrecondition => CocoaSdk.SentryObjCSpanStatus.FailedPrecondition,
-            SpanStatus.Aborted => CocoaSdk.SentryObjCSpanStatus.Aborted,
-            SpanStatus.OutOfRange => CocoaSdk.SentryObjCSpanStatus.OutOfRange,
-            SpanStatus.Unimplemented => CocoaSdk.SentryObjCSpanStatus.Unimplemented,
-            SpanStatus.Unavailable => CocoaSdk.SentryObjCSpanStatus.Unavailable,
-            SpanStatus.DataLoss => CocoaSdk.SentryObjCSpanStatus.DataLoss,
-            SpanStatus.Unauthenticated => CocoaSdk.SentryObjCSpanStatus.Unauthenticated,
-            _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
-        };
-
     // These align, so we can just cast
     public static TransactionNameSource ToTransactionNameSource(this CocoaSdk.SentryObjCTransactionNameSource source) =>
         (TransactionNameSource)source;
-    public static CocoaSdk.SentryObjCTransactionNameSource ToCocoaTransactionNameSource(this TransactionNameSource source) =>
-        (CocoaSdk.SentryObjCTransactionNameSource)source;
 }

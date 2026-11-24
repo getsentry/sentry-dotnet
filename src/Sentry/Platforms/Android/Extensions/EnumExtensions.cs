@@ -70,29 +70,6 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(status), status.Name(), message: default)
         };
 
-    public static JavaSdk.SpanStatus ToJavaSpanStatus(this SpanStatus status) =>
-        status switch
-        {
-            SpanStatus.Ok => JavaSdk.SpanStatus.Ok,
-            SpanStatus.Cancelled => JavaSdk.SpanStatus.Cancelled,
-            SpanStatus.InternalError => JavaSdk.SpanStatus.InternalError,
-            SpanStatus.UnknownError => JavaSdk.SpanStatus.UnknownError,
-            SpanStatus.InvalidArgument => JavaSdk.SpanStatus.InvalidArgument,
-            SpanStatus.DeadlineExceeded => JavaSdk.SpanStatus.DeadlineExceeded,
-            SpanStatus.NotFound => JavaSdk.SpanStatus.NotFound,
-            SpanStatus.AlreadyExists => JavaSdk.SpanStatus.AlreadyExists,
-            SpanStatus.PermissionDenied => JavaSdk.SpanStatus.PermissionDenied,
-            SpanStatus.ResourceExhausted => JavaSdk.SpanStatus.ResourceExhausted,
-            SpanStatus.FailedPrecondition => JavaSdk.SpanStatus.FailedPrecondition,
-            SpanStatus.Aborted => JavaSdk.SpanStatus.Aborted,
-            SpanStatus.OutOfRange => JavaSdk.SpanStatus.OutOfRange,
-            SpanStatus.Unimplemented => JavaSdk.SpanStatus.Unimplemented,
-            SpanStatus.Unavailable => JavaSdk.SpanStatus.Unavailable,
-            SpanStatus.DataLoss => JavaSdk.SpanStatus.DataLoss,
-            SpanStatus.Unauthenticated => JavaSdk.SpanStatus.Unauthenticated,
-            _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
-        };
-
     public static TransactionNameSource ToTransactionNameSource(this JavaSdk.Protocol.TransactionNameSource source) =>
         source.Name() switch
         {
@@ -103,17 +80,5 @@ internal static class EnumExtensions
             "TASK" => TransactionNameSource.Task,
             "COMPONENT" => TransactionNameSource.Component,
             _ => throw new ArgumentOutOfRangeException(nameof(source), source.Name(), message: default)
-        };
-
-    public static JavaSdk.Protocol.TransactionNameSource ToJavaTransactionNameSource(this TransactionNameSource source) =>
-        source switch
-        {
-            TransactionNameSource.Custom => JavaSdk.Protocol.TransactionNameSource.Custom,
-            TransactionNameSource.Url => JavaSdk.Protocol.TransactionNameSource.Url,
-            TransactionNameSource.Route => JavaSdk.Protocol.TransactionNameSource.Route,
-            TransactionNameSource.View => JavaSdk.Protocol.TransactionNameSource.View,
-            TransactionNameSource.Task => JavaSdk.Protocol.TransactionNameSource.Task,
-            TransactionNameSource.Component => JavaSdk.Protocol.TransactionNameSource.Component,
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, message: default)
         };
 }

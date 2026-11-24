@@ -97,12 +97,7 @@ internal static class MauiDeviceData
                 resetEvent.Wait();
             }
 #elif ANDROID
-            // DeviceDisplay.Current is not threadsafe on Android.
-            // See: https://github.com/getsentry/sentry-dotnet/issues/3627
-            lock (JniLock)
-            {
-                CaptureDisplayInfo();
-            }
+            device.ApplyAndroidDisplayInfo();
 #else
             CaptureDisplayInfo();
 #endif
@@ -144,6 +139,7 @@ internal static class MauiDeviceData
             logger?.LogError(ex, "Error getting MAUI device information.");
         }
 
+#if !ANDROID
         void CaptureDisplayInfo(ManualResetEventSlim? resetEvent = null)
         {
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
@@ -161,5 +157,28 @@ internal static class MauiDeviceData
             // ? = display.Rotation;
             resetEvent?.Set();
         }
+#endif
     }
+
+#if ANDROID
+    // MAUI's DeviceDisplay can abort the process when read concurrently: https://github.com/dotnet/maui/issues/40510
+    private static void ApplyAndroidDisplayInfo(this Device device)
+    {
+        var resources = global::Android.App.Application.Context.Resources;
+        if (resources?.DisplayMetrics is not { } metrics)
+        {
+            return;
+        }
+
+        device.ScreenResolution ??= $"{metrics.WidthPixels}x{metrics.HeightPixels}";
+        device.ScreenDensity ??= metrics.Density;
+        device.ScreenDpi ??= (int)metrics.DensityDpi;
+        device.Orientation ??= resources.Configuration?.Orientation switch
+        {
+            global::Android.Content.Res.Orientation.Portrait => DeviceOrientation.Portrait,
+            global::Android.Content.Res.Orientation.Landscape => DeviceOrientation.Landscape,
+            _ => null
+        };
+    }
+#endif
 }
