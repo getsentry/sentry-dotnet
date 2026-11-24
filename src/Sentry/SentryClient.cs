@@ -445,7 +445,7 @@ public class SentryClient : ISentryClient, IDisposable
             processedEvent.Redact();
         }
 
-        CaptureReplay(processedEvent);
+        CaptureReplay(processedEvent, scope);
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromEvent(processedEvent, attachments, scope.SessionUpdate, _options.DiagnosticLogger);
@@ -460,7 +460,7 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     // The DSC cached on the propagation context only has the replay that was active when it was created.
-    private void CaptureReplay(SentryEvent @event)
+    private void CaptureReplay(SentryEvent @event, Scope scope)
     {
         var replaySession = _options.ReplaySession ?? ReplaySession.PlatformDefault;
         if (replaySession is null)
@@ -471,9 +471,18 @@ public class SentryClient : ISentryClient, IDisposable
         SentryId? replayId;
         try
         {
-            replayId = @event.SentryExceptions?.Any() == true
-                ? replaySession.CaptureReplay(@event)
-                : replaySession.ActiveReplayId;
+            if (@event.SentryExceptions?.Any() == true)
+            {
+                replayId = replaySession.CaptureReplay(@event);
+                if (replayId is { } capturedId && capturedId != SentryId.Empty)
+                {
+                    SetMissingReplayId(scope.Transaction, capturedId);
+                }
+            }
+            else
+            {
+                replayId = replaySession.ActiveReplayId;
+            }
         }
         catch (Exception e)
         {
@@ -481,7 +490,7 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        if (@event.DynamicSamplingContext is not { } dsc)
+        if (@event.DynamicSamplingContext is not { IsEmpty: false } dsc)
         {
             return;
         }
@@ -504,6 +513,19 @@ public class SentryClient : ISentryClient, IDisposable
             dsc.RemoveReplayId();
         }
         @event.DynamicSamplingContext = dsc;
+    }
+
+    // Envelopes of earlier errors in the transaction may still hold its DSC, so the transaction gets a copy.
+    private static void SetMissingReplayId(ITransactionTracer? transaction, SentryId replayId)
+    {
+        if (transaction?.GetDynamicSamplingContext() is not { IsEmpty: false } dsc || dsc.Items.ContainsKey("replay_id"))
+        {
+            return;
+        }
+
+        dsc = dsc.Clone();
+        dsc.SetReplayId(replayId);
+        transaction.SetDynamicSamplingContext(dsc);
     }
 
     private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception, out bool filterThrew)
