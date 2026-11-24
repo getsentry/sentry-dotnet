@@ -2473,4 +2473,327 @@ public partial class SentryClientTests : IDisposable
         _fixture.SessionManager.Received(1).MarkSessionAsUnhandled();
         _fixture.SessionManager.DidNotReceive().EndSession(SessionEndStatus.Crashed);
     }
+
+    private (SentryEvent Event, SentryPropagationContext PropagationContext) ReplayEventFixture(
+        SentryId? activeReplayId, bool withException = true)
+    {
+        var activeSession = Substitute.For<IReplaySession>();
+        activeSession.ActiveReplayId.Returns(activeReplayId);
+        var propagationContext = new SentryPropagationContext();
+        var @event = new SentryEvent
+        {
+            DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, activeSession)
+        };
+        if (withException)
+        {
+            @event.SentryExceptions = [new SentryException { Type = "InvalidOperationException", Value = "test" }];
+        }
+
+        return (@event, propagationContext);
+    }
+
+    private static object TraceHeader(Envelope envelope) => envelope.Header["trace"];
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplay_SetsReplayIdOnEventOnly()
+    {
+        var capturedReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(capturedReplayId);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(activeReplayId: null);
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        replaySession.Received(1).CaptureReplay(@event);
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace["replay_id"].Should().Be(capturedReplayId.ToString());
+        propagationContext.DynamicSamplingContext!.Items.Should().NotContainKey("replay_id");
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesNoReplay_RemovesReplayIdFromEventOnly()
+    {
+        var activeReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns((SentryId?)null);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(activeReplayId);
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        replaySession.Received(1).CaptureReplay(@event);
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace.Should().NotContainKey("replay_id");
+        trace["trace_id"].Should().Be(propagationContext.TraceId.ToString());
+        propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(activeReplayId.ToString());
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionThrows_SendsEventWithoutChangingDsc()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(_ => throw new InvalidOperationException("replay failed"));
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(SentryId.Create());
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        var id = _fixture.GetSut().CaptureEvent(@event);
+
+        id.Should().Be(@event.EventId);
+        envelope.Should().NotBeNull();
+        @event.DynamicSamplingContext.Should().BeSameAs(propagationContext.DynamicSamplingContext);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesEmptyId_RemovesReplayIdFromEventOnly()
+    {
+        var activeReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(SentryId.Empty);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(activeReplayId);
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace.Should().NotContainKey("replay_id");
+        propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(activeReplayId.ToString());
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionWithoutException_DoesNotCaptureReplay()
+    {
+        var activeReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(activeReplayId);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(activeReplayId, withException: false);
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        replaySession.DidNotReceive().CaptureReplay(Arg.Any<SentryEvent>());
+        @event.DynamicSamplingContext.Should().BeSameAs(propagationContext.DynamicSamplingContext);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionWithoutException_SetsActiveReplayIdOnEventOnly()
+    {
+        var activeReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(activeReplayId);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(SentryId.Create(), withException: false);
+        var staleReplayId = propagationContext.DynamicSamplingContext!.Items["replay_id"];
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace["replay_id"].Should().Be(activeReplayId.ToString());
+        propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(staleReplayId);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionWithoutExceptionNoActiveReplay_RemovesStaleReplayIdFromEventOnly()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns((SentryId?)null);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (@event, propagationContext) = ReplayEventFixture(SentryId.Create(), withException: false);
+        var staleReplayId = propagationContext.DynamicSamplingContext!.Items["replay_id"];
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace.Should().NotContainKey("replay_id");
+        propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(staleReplayId);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionEventDroppedByBeforeSend_DoesNotCaptureReplay()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        _fixture.SentryOptions.SetBeforeSend((_, _) => null);
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        replaySession.DidNotReceive().CaptureReplay(Arg.Any<SentryEvent>());
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionEventSampledOut_DoesNotCaptureReplay()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        _fixture.SentryOptions.SampleRate = float.Epsilon;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        replaySession.DidNotReceive().CaptureReplay(Arg.Any<SentryEvent>());
+    }
+
+    private (Scope Scope, TransactionTracer Transaction) ReplayTransactionFixture(SentryId? transactionReplayId)
+    {
+        var activeSession = Substitute.For<IReplaySession>();
+        activeSession.ActiveReplayId.Returns(transactionReplayId);
+        var transaction = new TransactionTracer(Substitute.For<IHub>(), "name", "operation")
+        {
+            DynamicSamplingContext = new SentryPropagationContext().GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, activeSession)
+        };
+        var scope = new Scope(_fixture.SentryOptions) { Transaction = transaction };
+        return (scope, transaction);
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayInTransaction_SetsReplayIdOnTransactionCopy()
+    {
+        var capturedReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(capturedReplayId);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (scope, transaction) = ReplayTransactionFixture(transactionReplayId: null);
+        var originalDsc = transaction.DynamicSamplingContext;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+        transaction.DynamicSamplingContext!.Items["replay_id"].Should().Be(capturedReplayId.ToString());
+        originalDsc!.Items.Should().NotContainKey("replay_id");
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayInUnsampledTransaction_SetsReplayIdOnTransactionCopy()
+    {
+        var capturedReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(capturedReplayId);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var inactiveSession = Substitute.For<IReplaySession>();
+        inactiveSession.ActiveReplayId.Returns((SentryId?)null);
+        var originalDsc = new SentryPropagationContext().GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, inactiveSession);
+        var transaction = new UnsampledTransaction(Substitute.For<IHub>(), new TransactionContext("name", "operation"))
+        {
+            DynamicSamplingContext = originalDsc
+        };
+        var scope = new Scope(_fixture.SentryOptions) { Transaction = transaction };
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+        transaction.DynamicSamplingContext!.Items["replay_id"].Should().Be(capturedReplayId.ToString());
+        originalDsc.Items.Should().NotContainKey("replay_id");
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayInTransactionWithReplayId_KeepsTransactionDsc()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(SentryId.Create());
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var transactionReplayId = SentryId.Create();
+        var (scope, transaction) = ReplayTransactionFixture(transactionReplayId);
+        var originalDsc = transaction.DynamicSamplingContext;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().BeSameAs(originalDsc);
+        originalDsc!.Items["replay_id"].Should().Be(transactionReplayId.ToString());
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionWithoutExceptionInTransaction_KeepsTransactionDsc()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(SentryId.Create());
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (scope, transaction) = ReplayTransactionFixture(transactionReplayId: null);
+        var originalDsc = transaction.DynamicSamplingContext;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null, withException: false);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().BeSameAs(originalDsc);
+        originalDsc!.Items.Should().NotContainKey("replay_id");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CaptureEvent_ReplaySessionCapturesNoReplayInTransaction_KeepsTransactionDsc(bool capturesEmptyId)
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(capturesEmptyId ? SentryId.Empty : null);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var (scope, transaction) = ReplayTransactionFixture(transactionReplayId: null);
+        var originalDsc = transaction.DynamicSamplingContext;
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().BeSameAs(originalDsc);
+        originalDsc!.Items.Should().NotContainKey("replay_id");
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayInFrozenTransaction_KeepsEmptyTransactionDsc()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(SentryId.Create());
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var frozenDsc = DynamicSamplingContext.Empty();
+        var transaction = new TransactionTracer(Substitute.For<IHub>(), "name", "operation") { DynamicSamplingContext = frozenDsc };
+        var scope = new Scope(_fixture.SentryOptions) { Transaction = transaction };
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().BeSameAs(frozenDsc);
+        frozenDsc.IsEmpty.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayForEventWithEmptyDsc_SendsNoReplayId()
+    {
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(SentryId.Create());
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var frozenDsc = DynamicSamplingContext.Empty();
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+        @event.DynamicSamplingContext = frozenDsc;
+        Envelope envelope = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        var trace = TraceHeader(envelope).Should().BeAssignableTo<IReadOnlyDictionary<string, string>>().Subject;
+        trace.Should().NotContainKey("replay_id");
+        @event.DynamicSamplingContext.Should().BeSameAs(frozenDsc);
+    }
+
+    [Fact]
+    public void CaptureEvent_NoReplaySession_KeepsEventDsc()
+    {
+        var (@event, propagationContext) = ReplayEventFixture(SentryId.Create());
+
+        _ = _fixture.GetSut().CaptureEvent(@event);
+
+        @event.DynamicSamplingContext.Should().BeSameAs(propagationContext.DynamicSamplingContext);
+    }
 }

@@ -445,6 +445,8 @@ public class SentryClient : ISentryClient, IDisposable
             processedEvent.Redact();
         }
 
+        CaptureReplay(processedEvent, scope);
+
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromEvent(processedEvent, attachments, scope.SessionUpdate, _options.DiagnosticLogger);
         if (CaptureEnvelope(envelope))
@@ -455,6 +457,74 @@ public class SentryClient : ISentryClient, IDisposable
             return processedEvent.EventId;
         }
         return SentryId.Empty;
+    }
+
+    // The DSC cached on the propagation context only has the replay that was active when it was created.
+    private void CaptureReplay(SentryEvent @event, Scope scope)
+    {
+        if (_options.ReplaySession is not { } replaySession)
+        {
+            return;
+        }
+
+        SentryId? replayId;
+        try
+        {
+            if (@event.SentryExceptions?.Any() == true)
+            {
+                replayId = replaySession.CaptureReplay(@event);
+                if (replayId is { } capturedId && capturedId != SentryId.Empty)
+                {
+                    SetMissingReplayId(scope.Transaction, capturedId);
+                }
+            }
+            else
+            {
+                replayId = replaySession.ActiveReplayId;
+            }
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failed to capture the replay for event '{0}'.", @event.EventId);
+            return;
+        }
+
+        if (@event.DynamicSamplingContext is not { IsEmpty: false } dsc)
+        {
+            return;
+        }
+
+        var replayIdValue = replayId is { } id && id != SentryId.Empty ? id.ToString() : null;
+        dsc.Items.TryGetValue("replay_id", out var currentValue);
+        if (currentValue == replayIdValue)
+        {
+            return;
+        }
+
+        // The event's DSC is shared with the propagation context and queued envelopes, so the event gets its own copy.
+        dsc = dsc.Clone();
+        if (replayIdValue is not null)
+        {
+            dsc.SetReplayId(replayId!.Value);
+        }
+        else
+        {
+            dsc.RemoveReplayId();
+        }
+        @event.DynamicSamplingContext = dsc;
+    }
+
+    // Envelopes of earlier errors in the transaction may still hold its DSC, so the transaction gets a copy.
+    private static void SetMissingReplayId(ITransactionTracer? transaction, SentryId replayId)
+    {
+        if (transaction?.GetDynamicSamplingContext() is not { IsEmpty: false } dsc || dsc.Items.ContainsKey("replay_id"))
+        {
+            return;
+        }
+
+        dsc = dsc.Clone();
+        dsc.SetReplayId(replayId);
+        transaction.SetDynamicSamplingContext(dsc);
     }
 
     private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception, out bool filterThrew)
