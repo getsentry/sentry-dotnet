@@ -2677,6 +2677,30 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_ReplaySessionCapturesReplayInUnsampledTransaction_SetsReplayIdOnTransactionCopy()
+    {
+        var capturedReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(capturedReplayId);
+        _fixture.SentryOptions.ReplaySession = replaySession;
+        var inactiveSession = Substitute.For<IReplaySession>();
+        inactiveSession.ActiveReplayId.Returns((SentryId?)null);
+        var originalDsc = new SentryPropagationContext().GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, inactiveSession);
+        var transaction = new UnsampledTransaction(Substitute.For<IHub>(), new TransactionContext("name", "operation"))
+        {
+            DynamicSamplingContext = originalDsc
+        };
+        var scope = new Scope(_fixture.SentryOptions) { Transaction = transaction };
+        var (@event, _) = ReplayEventFixture(activeReplayId: null);
+
+        _ = _fixture.GetSut().CaptureEvent(@event, scope);
+
+        transaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+        transaction.DynamicSamplingContext!.Items["replay_id"].Should().Be(capturedReplayId.ToString());
+        originalDsc.Items.Should().NotContainKey("replay_id");
+    }
+
+    [Fact]
     public void CaptureEvent_ReplaySessionCapturesReplayInTransactionWithReplayId_KeepsTransactionDsc()
     {
         var replaySession = Substitute.For<IReplaySession>();
