@@ -5,7 +5,7 @@
     - links sentry-native dependencies
   See https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/interop for more details.
 
-  Note:Target framework conditions should be kept synchronized with src/Sentry/buildTransitive/Sentry.Native.targets -->
+  Note: Keep the net8.0 minimum in step with src/Sentry/buildTransitive/Sentry.targets -->
 <Project>
 
   <!-- Helpful properties copied from Sentry.props -->
