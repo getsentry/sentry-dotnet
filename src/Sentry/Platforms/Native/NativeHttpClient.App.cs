@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 
+// Stryker disable all : only runs in Native AOT apps
 namespace Sentry.Native;
 
 internal sealed partial class NativeHttpClient
