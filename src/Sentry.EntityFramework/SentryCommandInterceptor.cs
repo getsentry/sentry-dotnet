@@ -56,13 +56,14 @@ public class SentryCommandInterceptor : IDbCommandInterceptor
             return;
         }
 
-        if (interceptionContext.Exception == null)
+        var level = interceptionContext.Exception == null ? BreadcrumbLevel.Debug : BreadcrumbLevel.Error;
+        if (_queryLogger is SentryQueryLogger sentryQueryLogger)
         {
-            _queryLogger.Log(command.CommandText);
+            sentryQueryLogger.Log(command.CommandText, command.GetDbSystem(), level);
         }
         else
         {
-            _queryLogger.Log(command.CommandText, BreadcrumbLevel.Error);
+            _queryLogger.Log(command.CommandText, level);
         }
     }
 }
