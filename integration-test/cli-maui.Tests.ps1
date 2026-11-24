@@ -100,7 +100,7 @@ Describe 'MAUI (<framework>)' -ForEach @(
     }
 
     # Linux only, to keep the macOS and Windows legs short
-    It "uploads the native debug file for an Android Native AOT build" -Skip:(!$IsLinux) {
+    It "uploads the native debug file and preloads the NDK for an Android Native AOT build without --framework" -Skip:(!$IsLinux) {
         $aotName = 'android-aot-app'
         DotnetNew 'android' $aotName "$framework-android"
         @'
@@ -113,8 +113,10 @@ Describe 'MAUI (<framework>)' -ForEach @(
 '@ | Out-File $aotName/Directory.Build.props
         AddPackageReference $aotName 'Sentry'
 
-        $result = RunDotnetWithSentryCLI 'build' $aotName $True $False "$framework-android"
+        $result = RunDotnetWithSentryCLI 'build' $aotName $True $False "$framework-android" -OmitFrameworkArgument
         $result.UploadedDebugFiles() | Should -Contain "lib$aotName.dbg.so"
+        Get-Content "$aotName/obj/Release/$framework-android/android-arm64/android/AndroidManifest.xml" `
+        | Should -AnyElementMatch 'io\.sentry\.ndk\.preload'
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {

@@ -170,7 +170,8 @@
               See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993
       Note 2: Target framework conditions should be kept synchronized with src/Sentry/Platforms/Native/buildTransitive/Sentry.Native.targets -->
   <PropertyGroup Condition="
-      '$(_SentryIsNet8OrGreater)' == 'true'
+      '$(TargetFramework)' != ''
+      and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))
       and '$(PublishDir)' != ''
       and '$(PublishAot)' == 'true'
       and '$(_IsPublishing)' == 'true'
@@ -189,7 +190,7 @@
          and the SDK picks that per TargetFramework (KnownILCompilerPack) - so net8/9/10 keep it
          even when built with the .NET 11 SDK. Details:
          https://github.com/getsentry/sentry-dotnet/pull/5529#discussion_r3974672374 -->
-    <SentryCLIUploadAfterTargets Condition="'$(_SentryIsNet11OrGreater)' == 'true'">Publish</SentryCLIUploadAfterTargets>
+    <SentryCLIUploadAfterTargets Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net11.0'))">Publish</SentryCLIUploadAfterTargets>
   </PropertyGroup>
   <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
     <SentryCLIUploadSymbolType Include="pdb" />
@@ -304,7 +305,7 @@
           BeforeTargets="GetAssemblyAttributes"
           Condition="'$(AndroidApplication)' == 'True'
             and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'
-            and '$(_SentryIsNet10OrGreater)' == 'true'
+            and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))
             and '$(UseMonoRuntime)' != 'true'">
     <ItemGroup>
       <AssemblyAttribute Include="Android.App.MetaData">
