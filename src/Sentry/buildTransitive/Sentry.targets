@@ -168,7 +168,7 @@
   <!-- Native AOT publishing
       Note 1: While '_IsPublishing' looks a bit "private", it's also OK if it suddenly stops working and this step runs anyway.
               See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993
-      Note 2: Target framework conditions should be kept synchronized with src/Sentry/Platforms/Native/buildTransitive/Sentry.Native.targets -->
+      Note 2: Keep the net8.0 minimum in step with src/Sentry/Platforms/Native/buildTransitive/Sentry.Native.targets -->
   <PropertyGroup Condition="
       '$(TargetFramework)' != ''
       and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))
