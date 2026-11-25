@@ -17,13 +17,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <Using Include="Android.App.Activity" Alias="Activity" />
-
-    <!--
-      The NuGet package the containing the binding comes with a .targets that sets the ProguardConfiguration
-      Since we're referencing the project itself we're grabbing the ProguardConfiguration from project directly.
-    -->
-    <ProguardConfiguration Include="..\..\src\Sentry.Bindings.Android\sentry-proguard.cfg" />
   </ItemGroup>
+
+  <!--
+    The Sentry.Bindings.Android NuGet package adds its ProGuard rules through this .targets file.
+    It doesn't apply through a ProjectReference, so we import it directly.
+  -->
+  <Import Project="..\..\src\Sentry.Bindings.Android\build\Sentry.Bindings.Android.targets" />
 
   <!--
     For this demo app, let's upload sources and symbols to Sentry on every build, regardless of configuration.
