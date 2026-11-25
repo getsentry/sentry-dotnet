@@ -462,7 +462,8 @@ public class SentryClient : ISentryClient, IDisposable
     // The DSC cached on the propagation context only has the replay that was active when it was created.
     private void CaptureReplay(SentryEvent @event, Scope scope)
     {
-        if (_options.ReplaySession is not { } replaySession)
+        var replaySession = _options.ReplaySession ?? ReplaySession.PlatformDefault;
+        if (replaySession is null)
         {
             return;
         }

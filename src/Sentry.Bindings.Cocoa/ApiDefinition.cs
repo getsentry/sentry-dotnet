@@ -1709,6 +1709,10 @@ interface SentryObjCInternalApi
     [Export("serializer")]
     SentryObjCInternalSerializerApi Serializer { get; }
 
+    // @property (readonly, nonatomic) SentryObjCInternalReplayApi * _Nonnull replay;
+    [Export("replay")]
+    SentryObjCInternalReplayApi Replay { get; }
+
     // @property (readonly, nonatomic) SentryObjCInternalProfilingApi * _Nonnull profiling;
     [Export("profiling")]
     SentryObjCInternalProfilingApi Profiling { get; }
@@ -1754,6 +1758,22 @@ interface SentryObjCInternalProfilingApi
     // -(void)discardFor:(SentryObjCId * _Nonnull)traceId;
     [Export("discardFor:")]
     void DiscardFor(SentryObjCId traceId);
+}
+
+// @interface SentryObjCInternalReplayApi : NSObject
+[BaseType(typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryObjCInternalReplayApi
+{
+
+    // -(BOOL)capture;
+    [Export("capture")]
+    bool Capture();
+
+    // @property (readonly, nonatomic) NSString * _Nullable replayId;
+    [NullAllowed, Export("replayId")]
+    string ReplayId { get; }
 }
 
 // @interface SentryObjCInternalScopeApi : NSObject

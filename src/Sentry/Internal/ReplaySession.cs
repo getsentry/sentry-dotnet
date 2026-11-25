@@ -1,5 +1,7 @@
-#if __ANDROID__
-using Sentry.Android.Extensions;
+using System.Runtime.ExceptionServices;
+using Sentry.Extensibility;
+#if __IOS__
+using CoreFoundation;
 #endif
 
 namespace Sentry.Internal;
@@ -19,6 +21,15 @@ internal class ReplaySession : IReplaySession
 {
     public static readonly IReplaySession Instance = new ReplaySession();
 
+    internal static IReplaySession? PlatformDefault =>
+#if __ANDROID__ || __IOS__
+        Instance;
+#else
+        null;
+#endif
+
+    internal static readonly TimeSpan MainThreadCaptureTimeout = TimeSpan.FromSeconds(1);
+
     private ReplaySession()
     {
     }
@@ -27,19 +38,142 @@ internal class ReplaySession : IReplaySession
     {
         get
         {
+#if __ANDROID__ || __IOS__
+            if (SentrySdk.CurrentOptions?.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled != true)
+            {
+                return null;
+            }
+#endif
 #if __ANDROID__
-            // Check to see if a Replay ID is available
-            var replayId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.ReplayId?.ToSentryId();
-            return (replayId is { } id && id != SentryId.Empty) ? id : null;
+            try
+            {
+                return ReadJavaScopeReplayId();
+            }
+            catch (Exception e)
+            {
+                SentrySdk.CurrentOptions?.LogError(e, "Failed to read the replay id from the Java scope.");
+                return null;
+            }
 #elif __IOS__
             string? nativeId = null;
             Sentry.Cocoa.CocoaScope.Configure(scope => nativeId = scope.ReplayId);
-            return (nativeId is { } id) ? SentryId.Parse(id) : null;
+            return ToReplayId(nativeId);
 #else
             return null;
 #endif
         }
     }
 
+#if __ANDROID__
+    public SentryId? CaptureReplay(SentryEvent @event)
+    {
+        if (SentrySdk.CurrentOptions?.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled != true)
+        {
+            return null;
+        }
+
+        var capturedId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.CaptureReplay(JavaBoolean.ValueOf(IsCrash(@event)));
+        return ToReplayId(capturedId?.ToString()) ?? ActiveReplayId;
+    }
+#elif __IOS__
+    public SentryId? CaptureReplay(SentryEvent @event) =>
+        CaptureCocoaReplay(SentrySdk.CurrentOptions, NSThread.IsMain, work => DispatchQueue.MainQueue.DispatchAsync(work));
+#else
     public SentryId? CaptureReplay(SentryEvent @event) => null;
+#endif
+
+    internal static SentryId? ToReplayId(string? nativeId) =>
+        Guid.TryParse(nativeId, out var guid) && guid != Guid.Empty ? new SentryId(guid) : null;
+
+    // Narrower than HasUnhandledTerminalException(): Java defers a terminating capture's replay to the next launch and stops the replay from ever switching to session mode.
+    internal static bool IsCrash(SentryEvent @event) =>
+        @event.SentryExceptions?.Any(exception => exception.Mechanism is { } mechanism && (
+            mechanism.Terminal == true ||
+            mechanism is { Handled: false, Type: "AppDomain.UnhandledException" or "UnhandledExceptionRaiser" })) == true;
+
+    internal static SentryId? CaptureOnMainThread(
+        Func<SentryId?> capture,
+        Func<SentryId?> timedOutFallback,
+        bool isMainThread,
+        Action<Action> dispatchToMainThread,
+        TimeSpan timeout,
+        SentryOptions? options)
+    {
+        if (isMainThread)
+        {
+            return capture();
+        }
+
+        SentryId? replayId = null;
+        Exception? error = null;
+        // Not disposed: after a timeout the dispatched capture still runs and sets it.
+        var captured = new ManualResetEventSlim();
+        dispatchToMainThread(() =>
+        {
+            try
+            {
+                replayId = capture();
+            }
+            catch (Exception e)
+            {
+                error = e;
+            }
+            finally
+            {
+                captured.Set();
+            }
+        });
+
+        if (!captured.Wait(timeout))
+        {
+            options?.LogWarning("Capturing the replay on the main thread timed out after {0}. The event is sent with the active replay id, if any.", timeout);
+            return timedOutFallback();
+        }
+
+        if (error is not null)
+        {
+            ExceptionDispatchInfo.Capture(error).Throw();
+        }
+
+        return replayId;
+    }
+
+#if __IOS__
+    internal SentryId? CaptureCocoaReplay(SentryOptions? options, bool isMainThread, Action<Action> dispatchToMainThread)
+    {
+        if (options?.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled != true)
+        {
+            return null;
+        }
+
+        return CaptureOnMainThread(
+            CaptureNativeReplay,
+            () => ActiveReplayId,
+            isMainThread,
+            dispatchToMainThread,
+            MainThreadCaptureTimeout,
+            options);
+    }
+
+    private static SentryId? CaptureNativeReplay()
+    {
+        var replay = SentryCocoaHybridSdk.Internal.Replay;
+        return replay.Capture() ? ToReplayId(replay.ReplayId) : null;
+    }
+#endif
+
+#if __ANDROID__
+    // In the order Java's CombinedScopeView reads them.
+    internal static SentryId? ReadJavaScopeReplayId()
+    {
+        if (JavaSdk.ScopesAdapter.Instance is not { } scopes)
+        {
+            return null;
+        }
+
+        return ToReplayId(scopes.Scope.ReplayId.ToString())
+            ?? ToReplayId(scopes.IsolationScope.ReplayId.ToString())
+            ?? ToReplayId(scopes.GlobalScope.ReplayId.ToString());
+    }
+#endif
 }

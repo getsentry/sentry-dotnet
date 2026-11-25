@@ -50,6 +50,7 @@ var nodes = tree.GetCompilationUnitRoot()
     .PropertyToMethod("SentryObjCSpan", "ToTraceHeader")
     .PropertyToMethod("SentryObjCTraceContext", "ToBaggage")
     .PropertyToMethod("SentryObjCInternalScopeApi", "CreateScope")
+    .PropertyToMethod("SentryObjCInternalReplayApi", "Capture")
     // Verify the rest
     .VerifyProperty("*Sentry*", "*", "MethodToProperty") // TODO: replace broad patterns with one-by-one verification
     .VerifyProperty("SentryObjCOptions", "*Targets", "StronglyTypedNSArray")
@@ -91,9 +92,11 @@ var nodes = tree.GetCompilationUnitRoot()
     // signatures reference SentryObjC* types we don't whitelist.
     .KeepMethods("SentryObjCSDK", "StartWithOptions", "ConfigureScope", "Crash")
     .KeepProperties("SentryObjCSDK", "Internal", "CrashedLastRun")
-    // SentryObjCInternalApi: keep only the sub-APIs the .NET SDK uses (sdk, profiling, debug).
-    .KeepProperties("SentryObjCInternalApi", "Sdk", "Profiling", "Debug", "Scope", "Serializer")
+    // SentryObjCInternalApi: keep only the sub-APIs the .NET SDK uses.
+    .KeepProperties("SentryObjCInternalApi", "Sdk", "Profiling", "Debug", "Scope", "Serializer", "Replay")
     .KeepMethods("SentryObjCInternalApi", "SetTrace", "IgnoreNextSignal")
+    .KeepMethods("SentryObjCInternalReplayApi", "Capture")
+    .KeepProperties("SentryObjCInternalReplayApi", "ReplayId")
     .KeepInterfaces(
         "SentryObjCAttachment",
         "SentryObjCBreadcrumb",
@@ -108,6 +111,7 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryObjCInternalApi",
         "SentryObjCInternalDebugApi",
         "SentryObjCInternalProfilingApi",
+        "SentryObjCInternalReplayApi",
         "SentryObjCInternalScopeApi",
         "SentryObjCInternalSdkApi",
         "SentryObjCInternalSerializerApi",
