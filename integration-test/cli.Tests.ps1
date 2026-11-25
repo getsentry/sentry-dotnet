@@ -224,9 +224,9 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         }
     }
 
-    It "uploads symbols" {
-        $result = RunDotnetWithSentryCLI 'publish' 'console-app' $True $False $framework
-        $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
+    It "uploads symbols without --framework" {
+        $result = RunDotnetWithSentryCLI 'publish' 'console-app' $True $False $framework -OmitFrameworkArgument
+        $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app' \(Release/$framework\): collecting debug symbols from .*/publish/"
         if ($IsWindows)
         {
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("console-app.pdb")

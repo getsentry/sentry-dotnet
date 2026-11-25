@@ -8,7 +8,10 @@ internal class EFQueryCompilerDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string Operation => "db.query.compile";
 
-    protected override string GetDescription(object? diagnosticSourceValue) => FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
+    protected override string? GetDescription(object? diagnosticSourceValue) =>
+        Options.DataCollectionResolver.SanitizeDbStatements
+            ? GetDatabaseSystem(diagnosticSourceValue)
+            : FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
 
     /// <summary>
     /// We don't have a correlation id for compiled query events. We just return the first unfinished query compile span.
