@@ -7,6 +7,11 @@ on:
       - 'test/Sentry.Testing/ApiExtensions.cs'
       - '.github/workflows/verify-api.yml'
 
+# A superseded run's commit job can't push, and joining pr-auto-commit would cancel a pending Format Code job
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   run-api-tests:
     name: Run API Approval Tests (${{ matrix.rid }})

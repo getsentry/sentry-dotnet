@@ -7,6 +7,10 @@ on:
       - 'samples/**'
       - '.github/workflows/format-code.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   format-code:
     name: Format Code
