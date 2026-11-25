@@ -249,6 +249,101 @@ public partial class DebugStackTraceTests
         Assert.Null(frame.Package);
     }
 
+#if NET9_0_OR_GREATER
+    [Fact]
+    public void CreateFrame_ForNativeAOT_UsesDiagnosticMethodInfo()
+    {
+        var sut = _fixture.GetSut();
+        var frame = sut.CreateFrame(new StubNativeAOTStackFrame
+        {
+            RawToString = "SampleNativeAotMethod at offset 44 in file:line:column <filename unknown>:0:0",
+            DiagnosticMethodInfo = DiagnosticMethodInfo.Create(SampleNativeAotMethod),
+            FileName = "DebugStackTraceTests.cs",
+            LineNumber = 42,
+            ImageBase = 0x1000,
+            IP = 0x102c,
+        });
+
+        Assert.NotNull(frame);
+        Assert.Equal(typeof(DebugStackTraceTests).FullName, frame.Module);
+        Assert.Equal(nameof(SampleNativeAotMethod), frame.Function);
+        Assert.Equal(typeof(DebugStackTraceTests).Assembly.FullName, frame.Package);
+        Assert.Equal("DebugStackTraceTests.cs", frame.FileName);
+        Assert.Equal(42, frame.LineNumber);
+        Assert.True(frame.InApp);
+    }
+
+    [Fact]
+    public async Task CreateFrame_ForNativeAOT_AsyncStateMachine_DemanglesFunctionAndModule()
+    {
+        var sut = _fixture.GetSut();
+        var asyncMethodInfo = await CaptureAsyncDiagnosticMethodInfo();
+        var frame = sut.CreateFrame(new StubNativeAOTStackFrame
+        {
+            RawToString = "MoveNext at offset 120 in file:line:column <filename unknown>:0:0",
+            DiagnosticMethodInfo = asyncMethodInfo,
+            ImageBase = 0x1000,
+            IP = 0x1078,
+        });
+
+        Assert.NotNull(frame);
+        Assert.Equal(typeof(DebugStackTraceTests).FullName, frame.Module);
+        Assert.Equal(nameof(CaptureAsyncDiagnosticMethodInfo), frame.Function);
+        Assert.Equal(typeof(DebugStackTraceTests).Assembly.FullName, frame.Package);
+    }
+
+    [Fact]
+    public void CreateFrames_ForNativeAOT_SkipsLeadingSentryFrames()
+    {
+        var sut = _fixture.GetSut();
+        IStackFrame[] inputFrames =
+        [
+            new StubNativeAOTStackFrame
+            {
+                RawToString = "Close at offset 16 in file:line:column <filename unknown>:0:0",
+                DiagnosticMethodInfo = DiagnosticMethodInfo.Create(SentrySdk.Close),
+                ImageBase = 0x1000,
+                IP = 0x1010,
+            },
+            new StubNativeAOTStackFrame
+            {
+                RawToString = "SampleNativeAotMethod at offset 32 in file:line:column <filename unknown>:0:0",
+                DiagnosticMethodInfo = DiagnosticMethodInfo.Create(SampleNativeAotMethod),
+                ImageBase = 0x2000,
+                IP = 0x2020,
+            }
+        ];
+
+        var result = sut.CreateFrames(inputFrames, isCurrentStackTrace: true, info => info?.StartsWith("Sentry", StringComparison.Ordinal) is true).ToList();
+
+        var single = Assert.Single(result);
+        Assert.Equal(typeof(DebugStackTraceTests).FullName, single.Module);
+        Assert.Equal(nameof(SampleNativeAotMethod), single.Function);
+    }
+
+    [Fact]
+    public void RealStackFrame_GetDiagnosticMethodInfo_ReturnsCurrentMethodMetadata()
+    {
+        var realFrame = new RealStackFrame(new StackFrame());
+
+        var info = realFrame.GetDiagnosticMethodInfo();
+
+        Assert.NotNull(info);
+        Assert.Equal(nameof(RealStackFrame_GetDiagnosticMethodInfo_ReturnsCurrentMethodMetadata), info.Name);
+        Assert.Contains(nameof(DebugStackTraceTests), info.DeclaringTypeName);
+    }
+
+    private static void SampleNativeAotMethod()
+    {
+    }
+
+    private static async Task<DiagnosticMethodInfo?> CaptureAsyncDiagnosticMethodInfo()
+    {
+        await Task.Yield();
+        return DiagnosticMethodInfo.Create(new StackFrame());
+    }
+#endif
+
 #if ANDROID
     [Fact]
     public void CreateFrame_ForNativeAOT_LoadedNativeImage_AddsDebugImage()
@@ -320,20 +415,30 @@ public partial class DebugStackTraceTests
     {
         internal string? Function;
         internal string? Module;
+        internal string? RawToString;
+        internal string? FileName;
+        internal int LineNumber;
         internal nint ImageBase;
         internal nint IP;
+#if NET9_0_OR_GREATER
+        internal DiagnosticMethodInfo? DiagnosticMethodInfo;
+#endif
 
         public StackFrame? Frame => null;
 
         public int GetFileColumnNumber() => 0;
 
-        public int GetFileLineNumber() => 0;
+        public int GetFileLineNumber() => LineNumber;
 
-        public string? GetFileName() => null;
+        public string? GetFileName() => FileName;
 
         public int GetILOffset() => StackFrame.OFFSET_UNKNOWN;
 
         public MethodBase? GetMethod() => null;
+
+#if NET9_0_OR_GREATER
+        public DiagnosticMethodInfo? GetDiagnosticMethodInfo() => DiagnosticMethodInfo;
+#endif
 
         public nint GetNativeImageBase() => ImageBase;
 
@@ -343,6 +448,10 @@ public partial class DebugStackTraceTests
 
         public override string ToString()
         {
+            if (RawToString is not null)
+            {
+                return RawToString;
+            }
             if (Function is not null && Module is not null)
             {
                 return $"{Module}.{Function} + 0x{ImageBase:x} at offset 0x{IP - ImageBase:x} in file:line:column <filename unknown>:0:0";

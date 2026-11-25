@@ -79,6 +79,13 @@ internal interface IStackFrame
     /// </returns>
     public MethodBase? GetMethod();
 
+#if NET9_0_OR_GREATER
+    /// <summary>
+    /// Gets reflection-free method metadata for the stack frame when available.
+    /// </summary>
+    public DiagnosticMethodInfo? GetDiagnosticMethodInfo();
+#endif
+
     /// <summary>
     /// Builds a readable representation of the stack trace.
     /// </summary>
@@ -129,5 +136,9 @@ internal class RealStackFrame : IStackFrame
     public nint GetNativeIP() => default;
 
     public bool HasNativeImage() => false;
+#endif
+
+#if NET9_0_OR_GREATER
+    public DiagnosticMethodInfo? GetDiagnosticMethodInfo() => DiagnosticMethodInfo.Create(_frame);
 #endif
 }
