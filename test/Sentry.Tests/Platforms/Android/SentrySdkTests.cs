@@ -250,6 +250,26 @@ public class SentrySdkTests
         ReplaySnapshot(javaOptions.SessionReplay).Should().BeEquivalentTo(expected);
     }
 
+    [Fact]
+    public void TryAddIgnoredExceptionForType_ExistingThrowableClass_AddsToIgnoredExceptionsForType()
+    {
+        using var javaOptions = new JavaSdk.SentryOptions();
+
+        SentrySdk.TryAddIgnoredExceptionForType(javaOptions, "java/lang/RuntimeException");
+
+        javaOptions.IgnoredExceptionsForType.Should().Contain(Java.Lang.Class.ForName("java.lang.RuntimeException"));
+    }
+
+    [Fact]
+    public void TryAddIgnoredExceptionForType_MissingClass_DoesNotThrowOrAdd()
+    {
+        using var javaOptions = new JavaSdk.SentryOptions();
+
+        SentrySdk.TryAddIgnoredExceptionForType(javaOptions, "non/existent/JavaProxyThrowable");
+
+        javaOptions.IgnoredExceptionsForType.Should().BeEmpty();
+    }
+
     private static void AssertBehavior(
         JavaSdk.KeyValueCollectionBehavior behavior, string expectedMode, IEnumerable<string> expectedTerms = null)
     {

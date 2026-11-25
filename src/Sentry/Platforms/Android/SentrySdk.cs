@@ -181,7 +181,8 @@ public static partial class SentrySdk
             //o.MaxSpans             // See https://github.com/getsentry/sentry-dotnet/discussions/1698
 
             // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
-            o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
+            TryAddIgnoredExceptionForType(o, "android/runtime/JavaProxyThrowable");
+            TryAddIgnoredExceptionForType(o, "net/dot/jni/internal/JavaProxyThrowable");
 
             // Deliver network and system event breadcrumbs in the main thread
             // See https://github.com/getsentry/sentry-dotnet/issues/3828
@@ -225,6 +226,15 @@ public static partial class SentrySdk
         nativeOptions.SendDefaultPii = options.SendDefaultPii;
 #pragma warning restore CS0618
         options.DataCollection?.ApplyTo(nativeOptions.DataCollection);
+    }
+
+    internal static void TryAddIgnoredExceptionForType(JavaSdk.SentryOptions nativeOptions, string jniClassName)
+    {
+        if (Java.Interop.JniEnvironment.Types.TryFindClass(jniClassName, out var classRef) &&
+            JavaObject.GetObject<JavaClass>(classRef.Handle, JniHandleOwnership.TransferLocalRef) is { } javaClass)
+        {
+            nativeOptions.AddIgnoredExceptionForType(javaClass);
+        }
     }
 
     internal static JavaSdk.SentryOptions.IBeforeSendCallback? CreateBeforeSendCallback(
