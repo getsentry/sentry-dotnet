@@ -218,49 +218,54 @@ internal class FakeTransport : ITransport
         $result.Envelopes() | Should -Not -AnyElementMatch '"exception":{"values":\[{"type":"(SIGSEGV|EXCEPTION_ACCESS_VIOLATION)"'
     }
 
-    It 'publish directory contains expected files (native backend)' {
-        publishConsoleApp $true 'native'
-        $path = getConsoleAppPath
-        $items = Get-ChildItem -Path (Get-Item $path).DirectoryName
-        $exeExtension = $IsWindows ? '.exe' : ''
-        $debugExtension = $IsWindows ? '.pdb' : $IsMacOS ? '.dSYM' : '.dbg'
-        $libraryExtension = $IsWindows ? '.dll' : $IsMacOS ? '.dylib' : '.so'
-        $expected = @("console-app$exeExtension", "console-app$debugExtension", "sentry-crash$exeExtension", "sentry-crash-transport$libraryExtension")
-        if ($IsWindows)
-        {
-            $expected += 'sentry-wer.dll'
+    Context 'native backend' {
+        BeforeAll {
+            publishConsoleApp $true 'native'
         }
-        $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be ($expected | Sort-Object -Unique)
-    }
 
-    It 'Sends the native crash in the crashing run (native backend)' {
-        $result = Invoke-SentryServer {
-            Param([string]$url)
-            runConsoleApp $true 'Native' ($url.Replace('http://', 'http://key@') + '/0')
+        It 'publish directory contains expected files (native backend)' {
+            $path = getConsoleAppPath
+            $items = Get-ChildItem -Path (Get-Item $path).DirectoryName
+            $exeExtension = $IsWindows ? '.exe' : ''
+            $debugExtension = $IsWindows ? '.pdb' : $IsMacOS ? '.dSYM' : '.dbg'
+            $libraryExtension = $IsWindows ? '.dll' : $IsMacOS ? '.dylib' : '.so'
+            $expected = @("console-app$exeExtension", "console-app$debugExtension", "sentry-crash$exeExtension", "sentry-crash-transport$libraryExtension")
+            if ($IsWindows)
+            {
+                $expected += 'sentry-wer.dll'
+            }
+            $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be ($expected | Sort-Object -Unique)
         }
-        # sentry-server.py can't print the envelope, because its minidump isn't valid UTF-8
-        $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
-        $result.ScriptOutput | Should -Not -AnyElementMatch 'crash has been captured'
-    }
 
-    # Local only: WER doesn't work on the GitHub Actions Windows images
-    It 'Sends the fast-fail crash in the crashing run (native backend)' -Skip:(!$IsWindows -or (Test-Path env:CI)) {
-        $result = Invoke-SentryServer {
-            Param([string]$url)
-            runConsoleApp $true 'FailFast' ($url.Replace('http://', 'http://key@') + '/0')
+        It 'Sends the native crash in the crashing run (native backend)' {
+            $result = Invoke-SentryServer {
+                Param([string]$url)
+                runConsoleApp $true 'Native' ($url.Replace('http://', 'http://key@') + '/0')
+            }
+            # sentry-server.py can't print the envelope, because its minidump isn't valid UTF-8
+            $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
+            $result.ScriptOutput | Should -Not -AnyElementMatch 'crash has been captured'
         }
-        $result.ScriptOutput | Should -AnyElementMatch 'Process terminated. Failing fast deliberately'
-        $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
-    }
 
-    It 'Produces no spurious native crash (NullReferenceException, native backend)' {
-        $result = Invoke-SentryServer {
-            Param([string]$url)
-            runConsoleApp $true 'CaughtNullReference' ($url.Replace('http://', 'http://key@') + '/0')
+        # Local only: WER doesn't work on the GitHub Actions Windows images
+        It 'Sends the fast-fail crash in the crashing run (native backend)' -Skip:(!$IsWindows -or (Test-Path env:CI)) {
+            $result = Invoke-SentryServer {
+                Param([string]$url)
+                runConsoleApp $true 'FailFast' ($url.Replace('http://', 'http://key@') + '/0')
+            }
+            $result.ScriptOutput | Should -AnyElementMatch 'Process terminated. Failing fast deliberately'
+            $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
         }
-        $result.HasErrors() | Should -BeFalse
-        $result.ScriptOutput | Should -AnyElementMatch 'Caught a NullReferenceException'
-        $result.ServerStdOut | Should -Not -AnyElementMatch 'POST /api/0/envelope/'
+
+        It 'Produces no spurious native crash (NullReferenceException, native backend)' {
+            $result = Invoke-SentryServer {
+                Param([string]$url)
+                runConsoleApp $true 'CaughtNullReference' ($url.Replace('http://', 'http://key@') + '/0')
+            }
+            $result.HasErrors() | Should -BeFalse
+            $result.ScriptOutput | Should -AnyElementMatch 'Caught a NullReferenceException'
+            $result.ServerStdOut | Should -Not -AnyElementMatch 'POST /api/0/envelope/'
+        }
     }
 }
 
