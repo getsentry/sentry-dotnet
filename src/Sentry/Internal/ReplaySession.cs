@@ -63,6 +63,11 @@ internal class ReplaySession : IReplaySession
 #if __ANDROID__
     public SentryId? CaptureReplay(SentryEvent @event)
     {
+        if (SentrySdk.CurrentOptions?.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled != true)
+        {
+            return null;
+        }
+
         var capturedId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.CaptureReplay(JavaBoolean.ValueOf(IsCrash(@event)));
         return ToReplayId(capturedId?.ToString()) ?? ActiveReplayId;
     }
@@ -76,6 +81,7 @@ internal class ReplaySession : IReplaySession
     internal static SentryId? ToReplayId(string? nativeId) =>
         Guid.TryParse(nativeId, out var guid) && guid != Guid.Empty ? new SentryId(guid) : null;
 
+    // Narrower than HasUnhandledTerminalException(): Java takes a terminating capture as a crash, leaving the replay for the next launch and sending no more segments in this process.
     internal static bool IsCrash(SentryEvent @event) =>
         @event.SentryExceptions?.Any(exception => exception.Mechanism is { } mechanism && (
             mechanism.Terminal == true ||
