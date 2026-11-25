@@ -99,6 +99,27 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 
+    It "passes the Sentry ProGuard rules to R8 for an Android build" {
+        $r8Configuration = "$PWD/maui-app/obj/r8-configuration.txt".Replace('\', '/')
+        "-printconfiguration $r8Configuration" | Out-File maui-app/print-r8-configuration.cfg
+        @'
+<Project>
+  <ItemGroup>
+    <ProguardConfiguration Include="print-r8-configuration.cfg" />
+  </ItemGroup>
+</Project>
+'@ | Out-File maui-app/Directory.Build.targets
+        try
+        {
+            RunDotnetWithSentryCLI 'build' 'maui-app' $False $False "$framework-android$androidTpv" | Out-Null
+            Get-Content $r8Configuration | Should -AnyElementMatch 'io\.sentry\.protocol\.\*\*'
+        }
+        finally
+        {
+            Remove-Item maui-app/print-r8-configuration.cfg, maui-app/Directory.Build.targets, $r8Configuration -ErrorAction SilentlyContinue
+        }
+    }
+
     # Linux only, to keep the macOS and Windows legs short
     It "uploads the native debug file and preloads the NDK for an Android Native AOT build without --framework" -Skip:(!$IsLinux) {
         $aotName = 'android-aot-app'

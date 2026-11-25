@@ -190,6 +190,8 @@
   <ItemGroup>
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
+    <None Include="buildTransitive\sentry-proguard.cfg" Pack="true" PackagePath="buildTransitive\sentry-proguard.cfg" />
+    <None Include="buildTransitive\sentry-proguard.cfg" Pack="true" PackagePath="build\sentry-proguard.cfg" />
   </ItemGroup>
 
   <ItemGroup>
