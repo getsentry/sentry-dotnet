@@ -81,7 +81,7 @@ internal class ReplaySession : IReplaySession
     internal static SentryId? ToReplayId(string? nativeId) =>
         Guid.TryParse(nativeId, out var guid) && guid != Guid.Empty ? new SentryId(guid) : null;
 
-    // Narrower than HasUnhandledTerminalException(): Java takes a terminating capture as a crash, leaving the replay for the next launch and sending no more segments in this process.
+    // Narrower than HasUnhandledTerminalException(): Java defers a terminating capture's replay to the next launch and stops the replay from ever switching to session mode.
     internal static bool IsCrash(SentryEvent @event) =>
         @event.SentryExceptions?.Any(exception => exception.Mechanism is { } mechanism && (
             mechanism.Terminal == true ||
