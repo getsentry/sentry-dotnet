@@ -116,6 +116,7 @@ internal static class C
                 url.UserName = Uri.EscapeDataString(credentials.UserName);
                 url.Password = Uri.EscapeDataString(credentials.Password);
             }
+            // Stryker disable once all : only runs in Native AOT apps
             sentry_options_set_proxy(cOptions, url.Uri.AbsoluteUri);
         }
 
@@ -160,6 +161,7 @@ internal static class C
     // Because init() consumes the status, a later init() reports no crash, so it must be cached for the current runtime.
     internal static bool HandleCrashedLastRun(SentryOptions options)
     {
+        // Stryker disable once all : covered by the Native AOT integration tests
         return sentry_get_crashed_last_run() == 1;
     }
 

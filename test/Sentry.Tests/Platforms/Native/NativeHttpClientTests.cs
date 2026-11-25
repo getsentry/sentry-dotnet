@@ -26,6 +26,17 @@ public class NativeHttpClientTests
     }
 
     [Fact]
+    public void AddHeader_ContentType_KeepsContent()
+    {
+        var content = new ByteArrayContent(new byte[3]);
+        using var request = new HttpRequestMessage { Content = content };
+
+        NativeHttpClient.AddHeader(request, "content-type", "application/x-sentry-envelope");
+
+        Assert.Same(content, request.Content);
+    }
+
+    [Fact]
     public void GetHeaders_RateLimited_ReturnsRateLimits()
     {
         using var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
