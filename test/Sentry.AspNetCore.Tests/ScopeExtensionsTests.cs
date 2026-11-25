@@ -333,6 +333,169 @@ public partial class ScopeExtensionsTests
         Assert.Equal(expected, _sut.Request.Env["REMOTE_ADDR"]);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Populate_RemoteIp_DataCollectionUserInfo_OverridesSendDefaultPii(bool userInfo)
+    {
+        var connection = Substitute.For<ConnectionInfo>();
+        connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
+        _httpContext.Connection.Returns(connection);
+
+        SentryAspNetCoreOptions.SendDefaultPii = !userInfo;
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = userInfo);
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Env.ContainsKey("REMOTE_ADDR").Should().Be(userInfo);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Populate_UserFactory_SendDefaultPii_GatesUser(bool sendDefaultPii)
+    {
+        var user = new SentryUser { Id = "user-id" };
+        var userFactory = Substitute.For<ISentryUserFactory>();
+        userFactory.Create().Returns(user);
+        _provider.GetService(typeof(ISentryUserFactory)).Returns(userFactory);
+
+        SentryAspNetCoreOptions.SendDefaultPii = sendDefaultPii;
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.HasUser().Should().Be(sendDefaultPii);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Populate_UserFactory_DataCollectionUserInfo_OverridesSendDefaultPii(bool userInfo)
+    {
+        var user = new SentryUser { Id = "user-id" };
+        var userFactory = Substitute.For<ISentryUserFactory>();
+        userFactory.Create().Returns(user);
+        _provider.GetService(typeof(ISentryUserFactory)).Returns(userFactory);
+
+        SentryAspNetCoreOptions.SendDefaultPii = !userInfo;
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection => dataCollection.UserInfo = userInfo);
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.HasUser().Should().Be(userInfo);
+    }
+
+    [Fact]
+    public void Populate_DataCollectionUrlQueryParamsOff_QueryStringNotSet()
+    {
+        _httpContext.Request.QueryString.Returns(new QueryString("?q=search&page=5"));
+
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection =>
+            dataCollection.UrlQueryParams = KeyValueCollectionBehavior.Off);
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.QueryString.Should().BeNull();
+    }
+
+    [Fact]
+    public void Populate_DataCollectionUrlQueryParamsAllowList_FiltersOtherParameters()
+    {
+        _httpContext.Request.QueryString.Returns(new QueryString("?token=abc123&q=search&page=5"));
+
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection =>
+            dataCollection.UrlQueryParams = KeyValueCollectionBehavior.AllowList("page", "token"));
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.QueryString.Should().Be("?token=[Filtered]&q=[Filtered]&page=5");
+    }
+
+    [Fact]
+    public void Populate_DataCollectionRequestHeadersOff_HeadersNotSetButCookiesAre()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "Accept", new StringValues("text/plain") },
+            { "Cookie", new StringValues("theme=dark-mode") }
+        });
+
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection =>
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.Off);
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Headers.Should().BeEmpty();
+        _sut.Request.Cookies.Should().Be("theme=dark-mode");
+    }
+
+    [Fact]
+    public void Populate_DataCollectionRequestHeadersAllowList_FiltersOtherHeaders()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "Accept", new StringValues("text/plain") },
+            { "User-Agent", new StringValues("Mozilla/5.0") },
+            { "X-Api-Key", new StringValues("secret") }
+        });
+
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection =>
+            dataCollection.HttpHeaders.Request = KeyValueCollectionBehavior.AllowList("Accept", "X-Api-Key"));
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Headers.Should().Equal(new Dictionary<string, string>
+        {
+            { "Accept", "text/plain" },
+            { "User-Agent", "[Filtered]" },
+            { "X-Api-Key", "[Filtered]" }
+        });
+    }
+
+    [Fact]
+    public void Populate_DataCollectionCookiesDenyList_IgnoresSendDefaultPii()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "Cookie", new StringValues("theme=dark-mode; locale=en") }
+        });
+
+        SentryAspNetCoreOptions.SendDefaultPii = false;
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection =>
+            dataCollection.Cookies = KeyValueCollectionBehavior.DenyList("locale"));
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Headers["Cookie"].Should().Be("[Filtered]");
+        _sut.Request.Cookies.Should().Be("theme=dark-mode; locale=[Filtered]");
+    }
+
+    [Fact]
+    public void Populate_DataCollectionCookiesOff_IgnoresSendDefaultPii()
+    {
+        _httpRequest.Headers.Returns(new HeaderDictionary
+        {
+            { "Accept", new StringValues("text/plain") },
+            { "Cookie", new StringValues("theme=dark-mode") }
+        });
+
+        SentryAspNetCoreOptions.SendDefaultPii = true;
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection =>
+            dataCollection.Cookies = KeyValueCollectionBehavior.Off);
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        _sut.Request.Headers.Should().Equal(new Dictionary<string, string> { { "Accept", "text/plain" } });
+        _sut.Request.Cookies.Should().BeNull();
+    }
+
+    [Fact]
+    public void Populate_DataCollectionHttpBodiesExcludesIncomingRequest_NoBodyRead()
+    {
+        var extractor = Substitute.For<IRequestPayloadExtractor>();
+        _httpContext.RequestServices
+            .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
+            .Returns(new[] { extractor });
+
+        SentryAspNetCoreOptions.ConfigureDataCollection(dataCollection =>
+            dataCollection.HttpBodies = HttpBodyTypes.OutgoingRequest);
+        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+        extractor.DidNotReceive().ExtractPayload(Arg.Any<IHttpRequest>());
+        _sut.Request.Data.Should().BeNull();
+    }
+
     [Fact]
     public void Populate_LocalPort_SetToEnv()
     {

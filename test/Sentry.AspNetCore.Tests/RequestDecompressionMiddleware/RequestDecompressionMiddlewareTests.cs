@@ -16,6 +16,7 @@ public class RequestDecompressionMiddlewareTests : IDisposable
         private HttpClient _client;
         private IRequestDecompressionProvider _provider;
         public Exception LastException { get; private set; }
+        public Action<SentryAspNetCoreOptions> ConfigureOptions { get; set; } = _ => { };
 
         private IWebHostBuilder GetBuilder()
         {
@@ -44,6 +45,7 @@ public class RequestDecompressionMiddlewareTests : IDisposable
                     o.MaxRequestBodySize = RequestSize.Always;
                     o.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
                     o.AddExceptionProcessor(exceptionProcessor);
+                    ConfigureOptions(o);
                 })
                 .Configure(app =>
                 {
@@ -157,6 +159,24 @@ public class RequestDecompressionMiddlewareTests : IDisposable
             _fixture.LastException.Should().NotBeNull();
             _fixture.LastException?.Message.Should().Be("Flaky decompression error");
         }
+    }
+
+    [Fact]
+    public async Task DataCollectionExcludesIncomingRequest_DecompressionMiddlewareNotAdded()
+    {
+        _fixture.UseFakeDecompressionProvider();
+        _fixture.ConfigureOptions = o =>
+            o.ConfigureDataCollection(dataCollection => dataCollection.HttpBodies = HttpBodyTypes.OutgoingRequest);
+        var client = _fixture.GetSut();
+
+        var content = new ByteArrayContent(CompressGzip("{\"Foo\":\"Bar\"}"));
+        content.Headers.Add("Content-Encoding", "gzip");
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+        var response = await client.PostAsync("/echo", content);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        _fixture.LastException.Should().BeNull();
     }
 
     private static byte[] CompressGzip(string str)

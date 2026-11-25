@@ -38,7 +38,7 @@ internal static class ScopeExtensions
             scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
         }
 
-        if (options.SendDefaultPii && !scope.HasUser())
+        if (options.DataCollectionResolver.UserInfo && !scope.HasUser())
         {
             // Although the compiler suggests context.RequestServices cannot be null, in practice it can be, so we
             // have a null check here.
@@ -134,26 +134,13 @@ internal static class ScopeExtensions
         scope.Request.Url = $"{context.Request.Scheme}://{host}{context.Request.Path}";
         scope.UnsetTag("RequestPath");
 
-        scope.Request.QueryString = QueryStringFilter.Filter(context.Request.QueryString.ToString());
-        foreach (var requestHeader in context.Request.Headers)
-        {
-            var isCookieHeader = string.Equals(requestHeader.Key, HeaderNames.Cookie, StringComparison.OrdinalIgnoreCase);
-            if (!options.SendDefaultPii && isCookieHeader)
-            {
-                continue;
-            }
-
-            scope.Request.Headers[requestHeader.Key] = SensitiveDataFilter.FilterHeaderValue(requestHeader.Key, requestHeader.Value!);
-
-            if (isCookieHeader)
-            {
-                scope.Request.Cookies = CookieFilter.ToEventCookies(CookieFilter.FilterCookieHeaders(requestHeader.Value));
-            }
-        }
+        var dataCollection = options.DataCollectionResolver;
+        scope.Request.QueryString = QueryStringFilter.Filter(context.Request.QueryString.ToString(), dataCollection.UrlQueryParams);
+        SetHeaders(scope, context.Request.Headers, dataCollection);
 
         // TODO: Hide these 'Env' behind some extension method as
         // these might be reported in a non CGI, old-school way
-        if (options.SendDefaultPii
+        if (dataCollection.UserInfo
             && context.Connection.RemoteIpAddress?.ToString() is { } ipAddress)
         {
             scope.Request.Env["REMOTE_ADDR"] = ipAddress;
@@ -165,6 +152,29 @@ internal static class ScopeExtensions
         if (context.Response.Headers.TryGetValue("Server", out var server))
         {
             scope.Request.Env["SERVER_SOFTWARE"] = server!;
+        }
+    }
+
+    private static void SetHeaders(Scope scope, IHeaderDictionary headers, DataCollectionResolver dataCollection)
+    {
+        var headerBehavior = dataCollection.RequestHeaders;
+        var cookieBehavior = dataCollection.Cookies;
+        foreach (var header in headers)
+        {
+            if (string.Equals(header.Key, HeaderNames.Cookie, StringComparison.OrdinalIgnoreCase))
+            {
+                if (cookieBehavior.Mode == KeyValueCollectionMode.Off)
+                {
+                    continue;
+                }
+
+                scope.Request.Cookies = CookieFilter.ToEventCookies(CookieFilter.FilterCookieHeaders(header.Value, cookieBehavior));
+            }
+
+            if (headerBehavior.Mode != KeyValueCollectionMode.Off)
+            {
+                scope.Request.Headers[header.Key] = SensitiveDataFilter.FilterHeaderValue(header.Key, header.Value!, headerBehavior);
+            }
         }
     }
 

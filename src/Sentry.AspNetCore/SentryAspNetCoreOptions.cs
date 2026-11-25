@@ -40,8 +40,15 @@ public class SentryAspNetCoreOptions : SentryHostOptions
     /// <remarks>
     /// No truncation is done by the SDK.
     /// If the request body is larger than the accepted size, nothing is sent.
+    /// <para>
+    /// If you call <see cref="SentryOptions.ConfigureDataCollection"/>, request bodies are only collected when
+    /// <see cref="DataCollectionOptions.HttpBodies"/> includes <see cref="HttpBodyTypes.IncomingRequest"/>.
+    /// </para>
     /// </remarks>
     public RequestSize MaxRequestBodySize { get; set; }
+
+    internal bool CollectsRequestBody =>
+        MaxRequestBodySize != RequestSize.None && DataCollectionResolver.IncomingRequestBody;
 
     /// <summary>
     /// Flush on completed request
