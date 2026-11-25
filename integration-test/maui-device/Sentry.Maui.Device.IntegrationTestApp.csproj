@@ -66,7 +66,6 @@
 
   <!-- Needed for SetAndroidNdkPreload (buildTransitive doesn't apply via ProjectReference) -->
   <ImportGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-    <Import Project="..\..\src\Sentry\buildTransitive\Sentry.props" Condition="Exists('..\..\src\Sentry\buildTransitive\Sentry.props')" />
     <Import Project="..\..\src\Sentry\buildTransitive\Sentry.targets" Condition="Exists('..\..\src\Sentry\buildTransitive\Sentry.targets')" />
   </ImportGroup>
 
