@@ -17,6 +17,7 @@
     <NoWarn>$(NoWarn);IL2026;IL2070;IL2075;IL2090</NoWarn>
 
     <!-- Visual tests need net9.0+ mobile and are flaky when using the headless runner on CI -->
+    <!-- Single-target projects never get this: their TargetFramework is still empty when Directory.Build.props is evaluated -->
     <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
     <EnableMauiDeviceTestVisualRunner Condition="'$(TargetFramework)' != '' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0')) AND '$(PlatformIsMobile)' == 'true' AND '$(ContinuousIntegrationBuild)' != 'true'">true</EnableMauiDeviceTestVisualRunner>
   </PropertyGroup>
