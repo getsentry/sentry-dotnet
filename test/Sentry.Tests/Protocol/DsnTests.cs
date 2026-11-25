@@ -312,6 +312,24 @@ public class DsnTests
         Assert.Null(dsn.OrgId);
     }
 
+    [Theory]
+    [InlineData("sentry.io")]
+    [InlineData("o1.ingest.us.sentry.io")]
+    [InlineData("SENTRY.IO")]
+    [InlineData("sentry.io.")]
+    public void IsSentrySaasHost_SentryIoOrSubdomain_True(string host)
+    {
+        Assert.True(Dsn.IsSentrySaasHost(host));
+    }
+
+    [Theory]
+    [InlineData("fake-sentry.io")]
+    [InlineData("sentry.io.evil.com")]
+    public void IsSentrySaasHost_OtherHost_False(string host)
+    {
+        Assert.False(Dsn.IsSentrySaasHost(host));
+    }
+
     private static void AssertEqual(DsnTestCase @case, Dsn dsn)
     {
         Assert.NotNull(@case);

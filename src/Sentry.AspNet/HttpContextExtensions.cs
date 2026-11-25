@@ -125,9 +125,10 @@ public static class HttpContextExtensions
         SentrySdk.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
         httpContext.Items[HttpContextTransactionItemName] = transaction;
 
-        if (options?.SendDefaultPii is true && transaction.IsSampled is true)
+        if (options?.DataCollectionResolver.Cookies is { Mode: not KeyValueCollectionMode.Off } cookieBehavior &&
+            transaction.IsSampled is true)
         {
-            var cookies = httpContext.Request.GetFilteredCookies();
+            var cookies = httpContext.Request.GetFilteredCookies(cookieBehavior);
             transaction.Request.Cookies = CookieFilter.ToEventCookies(cookies);
             if (cookies.Length > 0)
             {

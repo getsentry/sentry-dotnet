@@ -4,7 +4,11 @@
     <SentryNativeSourceDirectory>$(MSBuildThisFileDirectory)..\..\..\..\modules\sentry-native\</SentryNativeSourceDirectory>
     <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
     <SentryNativeBuildScript>$(MSBuildThisFileDirectory)..\..\..\..\scripts\build-sentry-native.ps1</SentryNativeBuildScript>
-    <SentryNativeBuildInputs>$(MSBuildThisFileDirectory)..\..\..\..\.git\modules\modules\sentry-native/HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript)</SentryNativeBuildInputs>
+    <_SentryNativeDotGit>$(SentryNativeSourceDirectory).git</_SentryNativeDotGit>
+    <_SentryNativeGitDir Condition="Exists('$(_SentryNativeDotGit)\HEAD')">$(_SentryNativeDotGit)\</_SentryNativeGitDir>
+    <_SentryNativeGitDir Condition="'$(_SentryNativeGitDir)' == '' and Exists('$(_SentryNativeDotGit)')">$([MSBuild]::NormalizeDirectory('$(SentryNativeSourceDirectory)', $([System.IO.File]::ReadAllText('$(_SentryNativeDotGit)').Replace('gitdir:', '').Trim())))</_SentryNativeGitDir>
+    <_SentryNativeGitHead Condition="'$(_SentryNativeGitDir)' != ''">$(_SentryNativeGitDir)HEAD</_SentryNativeGitHead>
+    <SentryNativeBuildInputs>$(_SentryNativeGitHead);$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript);$(MSBuildThisFileDirectory)CMakeLists.txt;$(MSBuildThisFileDirectory)sentry-preload.c</SentryNativeBuildInputs>
     <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)sentry-native\</SentryNativeOutputDirectory>
     <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
     <NativeLibRelativePath-win-x64>win-x64</NativeLibRelativePath-win-x64>
@@ -23,11 +27,11 @@
     <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)\</SentryNativeOutputDirectory-osx>
     <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-x64'">$(SentryNativeOutputDirectory-win-x64)lib$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-arm64'">$(SentryNativeOutputDirectory-win-arm64)lib$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
-    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-x64'">$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\libunwind.a</SentryNativeBuildOutputs>
-    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-musl-x64'">$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\libunwind.a</SentryNativeBuildOutputs>
-    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\libunwind.a</SentryNativeBuildOutputs>
-    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-musl-arm64'">$(SentryNativeOutputDirectory-linux-musl-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\libunwind.a</SentryNativeBuildOutputs>
-    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-x64'">$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\libunwind.a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\sentry-preload.o</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-musl-x64'">$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\libunwind.a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\sentry-preload.o</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\libunwind.a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\sentry-preload.o</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-musl-arm64'">$(SentryNativeOutputDirectory-linux-musl-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\libunwind.a;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\sentry-preload.o</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-osx)sentry-preload.o</SentryNativeBuildOutputs>
   </PropertyGroup>
 
   <!-- Packaging -->
@@ -52,41 +56,41 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-x64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-x64)libunwind.a">
+    <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-x64)libunwind.a;$(SentryNativeOutputDirectory-linux-x64)sentry-preload.o">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-x64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-musl-x64)libunwind.a">
+    <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-musl-x64)libunwind.a;$(SentryNativeOutputDirectory-linux-musl-x64)sentry-preload.o">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-x64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-arm64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-arm64)libunwind.a">
+    <None Include="$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-arm64)libunwind.a;$(SentryNativeOutputDirectory-linux-arm64)sentry-preload.o">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-arm64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-arm64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-musl-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-musl-arm64)libunwind.a">
+    <None Include="$(SentryNativeOutputDirectory-linux-musl-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-musl-arm64)libunwind.a;$(SentryNativeOutputDirectory-linux-musl-arm64)sentry-preload.o">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-arm64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('OSX'))">
-    <None Include="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
+    <None Include="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-osx)sentry-preload.o">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-osx)</PackagePath>
     </None>
   </ItemGroup>
 
-  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(_SentryIsNet8OrGreater)' == 'true'">
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' != '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <Message Text="Inside Custom Clean" Importance="high"/>
     <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
     <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
@@ -101,16 +105,8 @@
     <Exec Command="pwsh $(SentryNativeBuildScript) -Clean" />
   </Target>
 
-  <!-- We want to build the sentry-native only once, BEFORE building TFM specific verions of the SDK -->
-  <!-- How to run a target exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once-->
-  <Target Name="_BuildSentryNativeSDKBeforeOuterBuild"
-    Condition="'$(_SentryIsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
-    DependsOnTargets="_BuildSentryNativeSDK"
-    BeforeTargets="DispatchToInnerBuilds">
-  </Target>
-
   <Target Name="_BuildSentryNativeSDKBeforeInnerBuild"
-    Condition="'$(_SentryIsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
+    Condition="'$(TargetFramework)' != '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and '$(CI)' != 'true'"
     BeforeTargets="BeforeBuild">
     <MSBuild Projects="$(MSBuildProjectFullPath)"
       Targets="_BuildSentryNativeSDK"

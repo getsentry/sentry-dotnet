@@ -1327,6 +1327,11 @@ public class SentryOptions
     internal IExternalPropagationContext? ExternalPropagationContext { get; set; }
 
     /// <summary>
+    /// Supplied by an SDK that records replays itself, such as Unity. It gives events their replay id.
+    /// </summary>
+    internal IReplaySession? ReplaySession { get; set; }
+
+    /// <summary>
     /// <para>
     /// Set to `true` to prevents Sentry from automatically registering <see cref="SentryHttpMessageHandler"/>.
     /// </para>

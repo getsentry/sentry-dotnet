@@ -147,6 +147,47 @@ public class HttpContextExtensionsTests
     }
 
     [Fact]
+    public void StartSentryTransaction_DataCollectionCookiesOff_DoesNotSetCookies()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            SendDefaultPii = true
+        };
+        options.ConfigureDataCollection(dataCollection => dataCollection.Cookies = KeyValueCollectionBehavior.Off);
+        using var _ = SentrySdk.UseHub(new Hub(options, Substitute.For<ISentryClient>()));
+        var context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("theme", "dark-mode") });
+
+        var transaction = context.StartSentryTransaction();
+
+        transaction.Request.Cookies.Should().BeNull();
+        transaction.Data.Should().NotContainKey(CookieFilter.RequestCookieAttribute);
+    }
+
+    [Fact]
+    public void StartSentryTransaction_DataCollectionCookiesDenyList_FiltersCookiesWithoutSendDefaultPii()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            SendDefaultPii = false
+        };
+        options.ConfigureDataCollection(_ => { });
+        using var _ = SentrySdk.UseHub(new Hub(options, Substitute.For<ISentryClient>()));
+        var context = HttpContextBuilder.BuildWithCookies(new[]
+        {
+            new HttpCookie("user_session", "abc"),
+            new HttpCookie("theme", "dark-mode")
+        });
+
+        var transaction = context.StartSentryTransaction();
+
+        transaction.Request.Cookies.Should().Be("user_session=[Filtered]; theme=dark-mode");
+    }
+
+    [Fact]
     public void StartSentryTransaction_missing_options_does_not_set_cookies()
     {
         // Arrange

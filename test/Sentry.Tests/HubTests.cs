@@ -1208,6 +1208,38 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void StartTransaction_OptionsReplaySession_UsesItsActiveReplayId()
+    {
+        var activeReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(activeReplayId);
+        _fixture.Options.ReplaySession = replaySession;
+        using var hub = new Hub(_fixture.Options, _fixture.Client);
+
+        var transaction = hub.StartTransaction(new TransactionContext("name", "operation"), new Dictionary<string, object>());
+
+        var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+        transactionTracer.DynamicSamplingContext!.Items["replay_id"].Should().Be(activeReplayId.ToString());
+    }
+
+    [Fact]
+    public void GetBaggage_ErrorInTransactionCapturesReplay_CarriesCapturedReplayId()
+    {
+        var capturedReplayId = SentryId.Create();
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns((SentryId?)null);
+        replaySession.CaptureReplay(Arg.Any<SentryEvent>()).Returns(capturedReplayId);
+        _fixture.Options.ReplaySession = replaySession;
+        using var hub = new Hub(_fixture.Options, new SentryClient(_fixture.Options, Substitute.For<IBackgroundWorker>()));
+        var transaction = hub.StartTransaction("name", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        hub.CaptureException(new InvalidOperationException("test"));
+
+        hub.GetBaggage().GetSentryMembers()["replay_id"].Should().Be(capturedReplayId.ToString());
+    }
+
+    [Fact]
     public void StartTransaction_NoDynamicSamplingContext_GeneratesSampleRand()
     {
         // Arrange

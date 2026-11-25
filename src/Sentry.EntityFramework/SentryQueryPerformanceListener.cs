@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Internal.DataCollection;
 
 namespace Sentry.EntityFramework;
 
@@ -21,31 +22,37 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     }
 
     public void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
-        => CreateSpan(DbReaderKey, command.CommandText, interceptionContext);
+        => CreateSpan(DbReaderKey, command, interceptionContext);
 
     public void ReaderExecuted(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
         => Finish(DbReaderKey, interceptionContext);
 
     public void NonQueryExecuting(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
-        => CreateSpan(DbNonQueryKey, command.CommandText, interceptionContext);
+        => CreateSpan(DbNonQueryKey, command, interceptionContext);
 
     public void NonQueryExecuted(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
         => Finish(DbNonQueryKey, interceptionContext);
 
     public void ScalarExecuting(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
-        => CreateSpan(DbScalarKey, command.CommandText, interceptionContext);
+        => CreateSpan(DbScalarKey, command, interceptionContext);
 
     public void ScalarExecuted(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
         => Finish(DbScalarKey, interceptionContext);
 
-    private void CreateSpan<T>(string key, string? command,
+    private void CreateSpan<T>(string key, DbCommand command,
         DbCommandInterceptionContext<T> interceptionContext)
     {
-        if (_hub.GetSpan()?.StartChild(key, command) is { } span)
+        if (_hub.GetSpan() is not { } parent)
         {
-            span.SetOrigin(EntityFrameworkOrigin);
-            interceptionContext.AttachSpan(span);
+            return;
         }
+
+        var description = _options.DataCollectionResolver.SanitizeDbStatements
+            ? SqlSanitizer.Sanitize(command.CommandText, command.GetDbSystem())
+            : command.CommandText;
+        var span = parent.StartChild(key, description);
+        span.SetOrigin(EntityFrameworkOrigin);
+        interceptionContext.AttachSpan(span);
     }
 
     /// <summary>

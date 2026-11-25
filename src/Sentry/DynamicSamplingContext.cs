@@ -120,6 +120,10 @@ internal class DynamicSamplingContext
         }
     }
 
+    public void SetReplayId(SentryId replayId) => _items["replay_id"] = replayId.ToString();
+
+    public void RemoveReplayId() => _items.Remove("replay_id");
+
     public static DynamicSamplingContext? CreateFromBaggageHeader(BaggageHeader baggage, IReplaySession? replaySession)
     {
         var items = baggage.GetSentryMembers();
