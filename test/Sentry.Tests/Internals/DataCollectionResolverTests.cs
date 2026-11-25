@@ -183,6 +183,25 @@ public class DataCollectionResolverTests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SanitizeDbStatements_WithoutDataCollection_IsFalseRegardlessOfSendDefaultPii(bool sendDefaultPii)
+    {
+        var options = new SentryOptions { SendDefaultPii = sendDefaultPii };
+
+        Resolver(options).SanitizeDbStatements.Should().BeFalse();
+    }
+
+    [Fact]
+    public void SanitizeDbStatements_WithDataCollection_IsTrue()
+    {
+        var options = new SentryOptions();
+        options.ConfigureDataCollection(_ => { });
+
+        Resolver(options).SanitizeDbStatements.Should().BeTrue();
+    }
+
     [Fact]
     public void ConfiguredDataCollection_WithoutSendDefaultPii_UsesSpecDefaults()
     {

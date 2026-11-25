@@ -113,9 +113,10 @@ BeforeAll {
         RegisterLocalPackage 'Sentry'
     }
 
-    function RunDotnetWithSentryCLI([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework)
+    function RunDotnetWithSentryCLI([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework, [switch]$OmitFrameworkArgument)
     {
         $rootDir = $PSScriptRoot
+        $frameworkArgs = $OmitFrameworkArgument ? @() : @('--framework', $TargetFramework)
 
         $result = Invoke-SentryServer {
             Param([string]$url)
@@ -125,7 +126,7 @@ BeforeAll {
                 dotnet $action $project `
                     -c Release `
                     --nologo `
-                    --framework $TargetFramework `
+                    @frameworkArgs `
                     /p:SentryUploadSymbols=$Symbols `
                     /p:SentryUploadSources=$Sources `
                     /p:SentryOrg=org `

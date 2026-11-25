@@ -29,6 +29,8 @@ internal sealed class DataCollectionResolver(SentryOptions options)
 
     public bool GenAIOutputs => Configured?.GenAI.Outputs ?? true;
 
+    public bool SanitizeDbStatements => Configured is not null;
+
     public KeyValueCollectionBehavior Cookies =>
         Configured?.Cookies ?? (SendDefaultPii ? DenyList : Off);
 
