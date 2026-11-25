@@ -105,14 +105,6 @@
     <Exec Command="pwsh $(SentryNativeBuildScript) -Clean" />
   </Target>
 
-  <!-- We want to build the sentry-native only once, BEFORE building TFM specific verions of the SDK -->
-  <!-- How to run a target exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once-->
-  <Target Name="_BuildSentryNativeSDKBeforeOuterBuild"
-    Condition="'$(TargetFramework)' != '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and '$(CI)' != 'true'"
-    DependsOnTargets="_BuildSentryNativeSDK"
-    BeforeTargets="DispatchToInnerBuilds">
-  </Target>
-
   <Target Name="_BuildSentryNativeSDKBeforeInnerBuild"
     Condition="'$(TargetFramework)' != '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and '$(CI)' != 'true'"
     BeforeTargets="BeforeBuild">
