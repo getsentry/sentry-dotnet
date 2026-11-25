@@ -107,8 +107,8 @@
   <!-- Same issue (CS0538) for the empty marker interface SentryEventProcessor, which inherits EventProcessor's default methods. -->
   <remove-node path="/api/package[@name='io.sentry.internal.eventprocessor']/interface[@name='SentryEventProcessor']" />
 
-  <!-- Remove problematic deprecated methods in the IScopes interface -->
-  <remove-node path="/api/package[@name='io.sentry']/interface[@name='IScopes']/method[@deprecated]" />
+  <!-- The generator drops an interface, and every member that uses it, when one of its methods has an unbound type (BG8503). -->
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='IScopes']/method" />
 
   <!--
     TODO: If we need this, figure out how to multi-target or late bind.
