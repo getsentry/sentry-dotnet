@@ -6,9 +6,10 @@ Push-Location $PSScriptRoot/..
 try
 {
     $submodule = 'modules/sentry-native'
+    $sourceDir = 'src/Sentry/Platforms/Native'
     $outDir = 'src/Sentry/Platforms/Native/sentry-native'
     $buildDir = "$submodule/build"
-    $actualBuildDir = $buildDir
+    $actualBuildDir = "$buildDir/sentry-native"
 
     $additionalArgs = @()
     $libPrefix = 'lib'
@@ -21,7 +22,7 @@ try
     }
     elseif ($IsWindows)
     {
-        $actualBuildDir = "$buildDir/RelWithDebInfo"
+        $actualBuildDir += '/RelWithDebInfo'
         $libPrefix = ''
         $libExtension = '.lib'
 
@@ -79,7 +80,7 @@ try
     }
 
     cmake `
-        -S $submodule `
+        -S $sourceDir `
         -B $buildDir `
         -D CMAKE_BUILD_TYPE=RelWithDebInfo `
         -D SENTRY_SDK_NAME=sentry.native.dotnet `
@@ -90,9 +91,14 @@ try
 
     cmake `
         --build $buildDir `
-        --target sentry `
         --config RelWithDebInfo `
         --parallel
+
+    cmake `
+        --install $buildDir `
+        --config RelWithDebInfo `
+        --component sentry-preload `
+        --prefix $outDir
 
     function Deploy-Library($srcFile, $outFile)
     {

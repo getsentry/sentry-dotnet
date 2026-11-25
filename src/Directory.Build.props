@@ -35,7 +35,8 @@
   </PropertyGroup>
 
   <!-- Centralise logic for enabling `IsAotCompatible`. We use this to disable Aot for the device tests, for example -->
-  <PropertyGroup Condition="'$(EnableAot)' == '' And '$(_SentryIsNet8OrGreater)' == 'true'">
+  <!-- Single-target projects only get this when built with -f: otherwise their TargetFramework is still empty when Directory.Build.props is evaluated -->
+  <PropertyGroup Condition="'$(EnableAot)' == '' And '$(TargetFramework)' != '' And $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <EnableAot>true</EnableAot>
   </PropertyGroup>
 

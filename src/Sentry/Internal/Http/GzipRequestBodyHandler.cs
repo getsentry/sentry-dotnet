@@ -83,5 +83,14 @@ internal class GzipRequestBodyHandler : DelegatingHandler
                 await _content.CopyToAsync(gzipStream).ConfigureAwait(false);
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _content.Dispose();
+            }
+            base.Dispose(disposing);
+        }
     }
 }
