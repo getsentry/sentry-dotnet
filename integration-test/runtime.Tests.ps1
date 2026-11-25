@@ -243,7 +243,8 @@ internal class FakeTransport : ITransport
         $result.ScriptOutput | Should -Not -AnyElementMatch 'crash has been captured'
     }
 
-    It 'Sends the fast-fail crash in the crashing run (native backend)' -Skip:(!$IsWindows) {
+    # Local only: WER doesn't work on the GitHub Actions Windows images
+    It 'Sends the fast-fail crash in the crashing run (native backend)' -Skip:(!$IsWindows -or (Test-Path env:CI)) {
         $result = Invoke-SentryServer {
             Param([string]$url)
             runConsoleApp $true 'FailFast' ($url.Replace('http://', 'http://key@') + '/0')
