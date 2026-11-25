@@ -80,11 +80,25 @@ Console.WriteLine("Hello, Sentry!");
         $LASTEXITCODE | Should -Be 0
     }
 
-    It 'Container' -Skip:(!$IsLinux -or !(Get-Command docker -ErrorAction SilentlyContinue)) {
-        dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer | Write-Host
+    It 'Container (<_>)' -ForEach @('inproc', 'native') -Skip:(!$IsLinux -or !(Get-Command docker -ErrorAction SilentlyContinue)) {
+        if ($_ -eq 'native' -and $env:RuntimeIdentifier -eq 'linux-arm')
+        {
+            Set-ItResult -Skipped -Because 'linux-arm has no native SDK'
+        }
+
+        # The native link doesn't rerun when only the backend's libraries change
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue obj/Release/*/*/native
+        dotnet publish -p:EnableSdkContainerSupport=true -p:SentryNativeBackend=$_ -t:PublishContainer | Write-Host
         $LASTEXITCODE | Should -Be 0
 
-        docker run --rm hello-sentry | Write-Host
+        # The image's non-root user can't write the default database path in /app
+        $output = docker run --rm --workdir /tmp hello-sentry
+        $output | Write-Host
         $LASTEXITCODE | Should -Be 0
+        $output | Out-String | Should -Not -Match 'Sentry native initialization failed'
+        if ($_ -eq 'native')
+        {
+            $output | Out-String | Should -Match 'native backend started successfully'
+        }
     }
 }
