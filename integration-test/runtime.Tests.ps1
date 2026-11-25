@@ -260,7 +260,7 @@ internal class FakeTransport : ITransport
         }
         $result.HasErrors() | Should -BeFalse
         $result.ScriptOutput | Should -AnyElementMatch 'Caught a NullReferenceException'
-        $result.Envelopes() | Should -Not -AnyElementMatch '"exception":{"values":\[{"type":"(SIGSEGV|EXCEPTION_ACCESS_VIOLATION)"'
+        $result.ServerStdOut | Should -Not -AnyElementMatch 'POST /api/0/envelope/'
     }
 }
 
