@@ -102,7 +102,7 @@ internal class SentryMiddleware : IMiddleware
 
         using (hub.PushAndLockScope())
         {
-            if (_options.MaxRequestBodySize != RequestSize.None)
+            if (_options.CollectsRequestBody)
             {
                 context.Request.EnableBuffering();
             }

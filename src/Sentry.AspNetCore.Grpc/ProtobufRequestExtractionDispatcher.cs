@@ -46,6 +46,13 @@ public class ProtobufRequestExtractionDispatcher : IProtobufRequestPayloadExtrac
             return null;
         }
 
+        if (!_options.DataCollectionResolver.IncomingRequestBody)
+        {
+            _options.Log(SentryLevel.Debug,
+                "Skipping request body extraction because DataCollection.HttpBodies excludes IncomingRequest.");
+            return null;
+        }
+
         var size = _sizeSwitch();
 
         switch (size)
