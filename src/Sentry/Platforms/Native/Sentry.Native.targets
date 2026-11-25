@@ -90,7 +90,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(_SentryIsNet8OrGreater)' == 'true'">
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' != '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <Message Text="Inside Custom Clean" Importance="high"/>
     <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
     <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
@@ -108,13 +108,13 @@
   <!-- We want to build the sentry-native only once, BEFORE building TFM specific verions of the SDK -->
   <!-- How to run a target exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once-->
   <Target Name="_BuildSentryNativeSDKBeforeOuterBuild"
-    Condition="'$(_SentryIsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
+    Condition="'$(TargetFramework)' != '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and '$(CI)' != 'true'"
     DependsOnTargets="_BuildSentryNativeSDK"
     BeforeTargets="DispatchToInnerBuilds">
   </Target>
 
   <Target Name="_BuildSentryNativeSDKBeforeInnerBuild"
-    Condition="'$(_SentryIsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
+    Condition="'$(TargetFramework)' != '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and '$(CI)' != 'true'"
     BeforeTargets="BeforeBuild">
     <MSBuild Projects="$(MSBuildProjectFullPath)"
       Targets="_BuildSentryNativeSDK"
