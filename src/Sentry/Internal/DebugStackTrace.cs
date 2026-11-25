@@ -186,11 +186,16 @@ internal class DebugStackTrace : SentryStackTrace
             _options.LogDebug("No stack frames found. AttachStacktrace: '{0}', isCurrentStackTrace: '{1}'",
                 _options.AttachStacktrace, isCurrentStackTrace);
 
-            yield break;
+            return Enumerable.Empty<SentryStackFrame>();
         }
 
         Debug.Assert(frames != null);
 
+        return CreateFrames(frames, isCurrentStackTrace, skipFrame);
+    }
+
+    internal IEnumerable<SentryStackFrame> CreateFrames(IEnumerable<IStackFrame> frames, bool isCurrentStackTrace, Func<string?, bool> skipFrame)
+    {
         var firstFrame = true;
         foreach (var stackFrame in frames)
         {
@@ -204,17 +209,15 @@ internal class DebugStackTrace : SentryStackTrace
             // Remove the frames until the call for capture with the SDK
             if (firstFrame && isCurrentStackTrace)
             {
-                string? frameInfo = null;
-                if (stackFrame.GetMethod() is { } method)
-                {
-                    frameInfo = method.DeclaringType?.AssemblyQualifiedName;
-                }
-
-                // Native AOT currently only exposes some method info at runtime via ToString().
-                // See https://github.com/dotnet/runtime/issues/92869
+                var frameInfo = stackFrame.GetMethod()?.DeclaringType?.AssemblyQualifiedName;
                 if (frameInfo is null && stackFrame.HasNativeImage())
                 {
-                    frameInfo = stackFrame.ToString();
+#if NET9_0_OR_GREATER
+                    frameInfo = stackFrame.GetDiagnosticMethodInfo()?.DeclaringTypeName;
+#endif
+                    // Prior to .NET 9, Native AOT only exposed method info at runtime via ToString().
+                    // See https://github.com/dotnet/runtime/issues/92869
+                    frameInfo ??= stackFrame.ToString();
                 }
 
                 if (skipFrame(frameInfo))
@@ -251,7 +254,27 @@ internal class DebugStackTrace : SentryStackTrace
 
         _options.LogDebug("Attempting to get debug image for native AOT Frame");
         var imageAddress = stackFrame.GetNativeImageBase();
-        var frame = ParseNativeAOTToString(stackFrame.ToString());
+        SentryStackFrame frame;
+#if NET9_0_OR_GREATER
+        if (stackFrame.GetDiagnosticMethodInfo() is { } methodInfo)
+        {
+            frame = new SentryStackFrame
+            {
+                Module = methodInfo.DeclaringTypeName,
+                Function = methodInfo.Name,
+                Package = methodInfo.DeclaringAssemblyName
+            };
+        }
+        else
+#endif
+        {
+            frame = ParseNativeAOTToString(stackFrame.ToString());
+        }
+
+        if (stackFrame.GetFileName() is { Length: > 0 } frameFileName)
+        {
+            frame.FileName = frameFileName;
+        }
         frame.ImageAddress = imageAddress;
         frame.InstructionAddress = stackFrame.GetNativeIP();
 
@@ -278,9 +301,10 @@ internal class DebugStackTrace : SentryStackTrace
         return frame;
     }
 
-    // Method info is currently only exposed by ToString(), see https://github.com/dotnet/runtime/issues/92869
-    // We only care about the case where the method is available (`StackTraceSupport` property is the default `true`):
-    // https://github.com/dotnet/runtime/blob/254230253da143a082f47cfaf8711627c0bf2faf/src/coreclr/nativeaot/System.Private.CoreLib/src/Internal/DeveloperExperience/DeveloperExperience.cs#L42
+    // Fallback for .NET 8 where Native AOT only exposed method info at runtime via ToString()
+    // (DiagnosticMethodInfo was added in .NET 9: https://github.com/dotnet/runtime/issues/92869).
+    // On .NET 11+, StackFrame.ToString() only outputs the method name without declaring type or offset
+    // (https://github.com/dotnet/runtime/pull/122227).
     internal static SentryStackFrame ParseNativeAOTToString(string info)
     {
         var frame = new SentryStackFrame();
