@@ -136,6 +136,7 @@ internal static class C
             }
         }
 
+        // Stryker disable once all : covered by the Native AOT integration tests
         sentry_options_set_transport(cOptions, NativeHttpClient.CreateTransport(options));
 
         options.DiagnosticLogger?.LogDebug("Initializing sentry native");
