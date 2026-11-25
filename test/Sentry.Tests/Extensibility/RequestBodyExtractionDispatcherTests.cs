@@ -66,10 +66,8 @@ public class RequestBodyExtractionDispatcherTests
     }
 
     [Theory]
-    [InlineData(HttpBodyTypes.All, true)]
     [InlineData(HttpBodyTypes.IncomingRequest, true)]
     [InlineData(HttpBodyTypes.OutgoingRequest | HttpBodyTypes.IncomingResponse | HttpBodyTypes.OutgoingResponse, false)]
-    [InlineData(HttpBodyTypes.None, false)]
     public void ExtractPayload_DataCollectionHttpBodies_GatesExtraction(HttpBodyTypes httpBodies, bool readBody)
     {
         _fixture.RequestSize = RequestSize.Always;

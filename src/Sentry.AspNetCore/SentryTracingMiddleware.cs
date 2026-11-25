@@ -91,9 +91,10 @@ internal class SentryTracingMiddleware
 
             transaction?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, context.Request.Method);
 
-            if (transaction is { IsSampled: true })
+            if (transaction is { IsSampled: true } &&
+                _options.DataCollectionResolver.Cookies is { Mode: not KeyValueCollectionMode.Off } cookieBehavior)
             {
-                var cookies = CookieFilter.FilterCookieHeaders(context.Request.Headers[HeaderNames.Cookie], _options.DataCollectionResolver.Cookies);
+                var cookies = CookieFilter.FilterCookieHeaders(context.Request.Headers[HeaderNames.Cookie], cookieBehavior);
                 if (cookies.Length > 0)
                 {
                     transaction.SetData(CookieFilter.RequestCookieAttribute, cookies);
