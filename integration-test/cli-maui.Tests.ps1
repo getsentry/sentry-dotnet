@@ -99,25 +99,17 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 
-    It "passes the Sentry ProGuard rules to R8 for an Android build" {
-        $r8Configuration = "$PWD/maui-app/obj/r8-configuration.txt".Replace('\', '/')
-        "-printconfiguration $r8Configuration" | Out-File maui-app/print-r8-configuration.cfg
-        @'
-<Project>
-  <ItemGroup>
-    <ProguardConfiguration Include="print-r8-configuration.cfg" />
-  </ItemGroup>
-</Project>
-'@ | Out-File maui-app/Directory.Build.targets
-        try
+    It "adds the Sentry ProGuard rules to untrimmed Android builds only" {
+        function SentryProguardItem([string[]] $extraArgs)
         {
-            RunDotnetWithSentryCLI 'build' 'maui-app' $False $False "$framework-android$androidTpv" | Out-Null
-            Get-Content $r8Configuration | Should -AnyElementMatch 'io\.sentry\.protocol\.\*\*'
+            $json = dotnet msbuild maui-app/maui-app.csproj -getItem:ProguardConfiguration -p:Configuration=Release -p:TargetFramework=$framework-android$androidTpv @extraArgs
+            ($json | ConvertFrom-Json).Items.ProguardConfiguration | Where-Object { $_.Filename -eq 'sentry-proguard' }
         }
-        finally
-        {
-            Remove-Item maui-app/print-r8-configuration.cfg, maui-app/Directory.Build.targets, $r8Configuration -ErrorAction SilentlyContinue
-        }
+
+        $untrimmed = SentryProguardItem @('-p:PublishTrimmed=false')
+        $untrimmed | Should -Not -BeNullOrEmpty
+        $untrimmed.FullPath | Should -Exist
+        SentryProguardItem @() | Should -BeNullOrEmpty
     }
 
     # Linux only, to keep the macOS and Windows legs short

@@ -25,7 +25,7 @@
     <_SentryAfterBuildTargets>Build;_PublishOptimizedBuildAlternative</_SentryAfterBuildTargets>
   </PropertyGroup>
 
-  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' AND '$(AndroidApplication)' == 'true' AND '$(PublishTrimmed)' != 'true'">
     <ProguardConfiguration Include="$(MSBuildThisFileDirectory)sentry-proguard.cfg" />
   </ItemGroup>
 
