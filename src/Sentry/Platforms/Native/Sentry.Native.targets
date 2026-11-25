@@ -36,7 +36,7 @@
 
   <!-- The native backend variant, built with build-sentry-native.ps1 -Backend native -->
   <PropertyGroup>
-    <SentryNativeBuildInputs>$(SentryNativeBuildInputs);$(MSBuildThisFileDirectory)sentry-crash-transport.c;$(MSBuildThisFileDirectory)NativeHttpClient.cs;$(MSBuildThisFileDirectory)..\..\..\Sentry.Native.Transport\NativeHttpClient.Daemon.cs</SentryNativeBuildInputs>
+    <SentryNativeBuildInputs>$(SentryNativeBuildInputs);$(MSBuildThisFileDirectory)sentry-crash-transport.c;$(MSBuildThisFileDirectory)NativeHttpClient.cs;$(MSBuildThisFileDirectory)..\..\Internal\PartialStream.cs;$(MSBuildThisFileDirectory)..\..\..\Sentry.Native.Transport\Sentry.Native.Transport.csproj;$(MSBuildThisFileDirectory)..\..\..\Sentry.Native.Transport\NativeHttpClient.Daemon.cs</SentryNativeBuildInputs>
     <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64'">$(SentryNativeBuildOutputs);$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\native\sentry-crash.exe;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\native\sentry-crash-transport.dll</SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="$(RuntimeIdentifier.StartsWith('linux-'))">$(SentryNativeBuildOutputs);$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\native\sentry-crash;$(SentryNativeOutputDirectory)$(RuntimeIdentifier)\native\sentry-crash-transport.so</SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(SentryNativeBuildOutputs);$(SentryNativeOutputDirectory-osx)native\sentry-crash;$(SentryNativeOutputDirectory-osx)native\sentry-crash-transport.dylib</SentryNativeBuildOutputs>
