@@ -126,6 +126,12 @@
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AndroidProfiler']" />
 
   <!--
+    ISentryClient isn't bound, because some of its methods take the profiling types removed above.
+    Without these two IScope members, the generator can bind IScope and the members that return or take it.
+  -->
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='IScope']/method[@return='io.sentry.ISentryClient' or parameter[@type='io.sentry.ISentryClient']]" />
+
+  <!--
     The BackfillingEventProcessor interface creates a stack overflow during code generation, which appears as:
       error MSB6006: "dotnet" exited with code 134
     We currently don't need to use this via C# bindings.
