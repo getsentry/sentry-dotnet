@@ -1,8 +1,6 @@
 using System.Runtime.ExceptionServices;
 using Sentry.Extensibility;
-#if __ANDROID__
-using Java.Interop;
-#elif __IOS__
+#if __IOS__
 using CoreFoundation;
 #endif
 
@@ -49,7 +47,7 @@ internal class ReplaySession : IReplaySession
 #if __ANDROID__
             try
             {
-                return JavaScopes.ReadReplayId();
+                return ReadJavaScopeReplayId();
             }
             catch (Exception e)
             {
@@ -165,82 +163,17 @@ internal class ReplaySession : IReplaySession
 #endif
 
 #if __ANDROID__
-    // The binding doesn't generate io.sentry.IScope, so the scopes are read through JNI,
-    // in the order Java's CombinedScopeView reads them.
-    internal static class JavaScopes
+    // In the order Java's CombinedScopeView reads them.
+    internal static SentryId? ReadJavaScopeReplayId()
     {
-        private const string ScopeSignature = "()Lio/sentry/IScope;";
-
-        private static readonly JniType ScopesType = new("io/sentry/IScopes");
-        private static readonly JniType ScopeType = new("io/sentry/IScope");
-        private static readonly JniType ObjectType = new("java/lang/Object");
-
-        private static readonly JniMethodInfo[] ScopeGetters =
-        [
-            ScopesType.GetInstanceMethod("getScope", ScopeSignature),
-            ScopesType.GetInstanceMethod("getIsolationScope", ScopeSignature),
-            ScopesType.GetInstanceMethod("getGlobalScope", ScopeSignature),
-        ];
-
-        private static readonly JniMethodInfo GetReplayId =
-            ScopeType.GetInstanceMethod("getReplayId", "()Lio/sentry/protocol/SentryId;");
-
-        private static readonly JniMethodInfo ObjectToString =
-            ObjectType.GetInstanceMethod("toString", "()Ljava/lang/String;");
-
-        internal static SentryId? ReadReplayId()
+        if (JavaSdk.ScopesAdapter.Instance is not { } scopes)
         {
-            var currentScopes = JavaSdk.Sentry.CurrentScopes;
-            var scopes = new JniObjectReference(currentScopes.Handle);
-            try
-            {
-                foreach (var getScope in ScopeGetters)
-                {
-                    var scope = JniEnvironment.InstanceMethods.CallObjectMethod(scopes, getScope);
-                    try
-                    {
-                        if (ReadReplayId(scope) is { } replayId)
-                        {
-                            return replayId;
-                        }
-                    }
-                    finally
-                    {
-                        JniObjectReference.Dispose(ref scope);
-                    }
-                }
-
-                return null;
-            }
-            finally
-            {
-                GC.KeepAlive(currentScopes);
-            }
+            return null;
         }
 
-        private static SentryId? ReadReplayId(JniObjectReference scope)
-        {
-            if (!scope.IsValid)
-            {
-                return null;
-            }
-
-            var replayId = JniEnvironment.InstanceMethods.CallObjectMethod(scope, GetReplayId);
-            try
-            {
-                if (!replayId.IsValid)
-                {
-                    return null;
-                }
-
-                var text = JniEnvironment.InstanceMethods.CallObjectMethod(replayId, ObjectToString);
-                return ToReplayId(JniEnvironment.Strings.ToString(ref text, JniObjectReferenceOptions.CopyAndDispose));
-            }
-            finally
-            {
-                JniObjectReference.Dispose(ref replayId);
-            }
-        }
+        return ToReplayId(scopes.Scope.ReplayId.ToString())
+            ?? ToReplayId(scopes.IsolationScope.ReplayId.ToString())
+            ?? ToReplayId(scopes.GlobalScope.ReplayId.ToString());
     }
 #endif
 }
