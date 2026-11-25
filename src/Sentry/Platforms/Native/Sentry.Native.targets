@@ -105,7 +105,6 @@
     <Exec Command="pwsh $(SentryNativeBuildScript) -Clean" />
   </Target>
 
-  <!-- Removing TargetFramework makes every inner build share one project instance, so _BuildSentryNativeSDK runs once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
   <Target Name="_BuildSentryNativeSDKBeforeInnerBuild"
     Condition="'$(_SentryIsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
     BeforeTargets="BeforeBuild">
