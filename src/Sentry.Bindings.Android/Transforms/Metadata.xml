@@ -126,8 +126,8 @@
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AndroidProfiler']" />
 
   <!--
-    ISentryClient isn't bound, because some of its methods take the profiling types removed above.
-    Without these two IScope members, the generator can bind IScope and the members that return or take it.
+    Remove the IScope members that use ISentryClient, which isn't bound because of the profiling types removed above.
+    One invalid member makes the generator drop the whole interface.
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='IScope']/method[@return='io.sentry.ISentryClient' or parameter[@type='io.sentry.ISentryClient']]" />
 
