@@ -41,9 +41,9 @@ internal sealed partial class NativeHttpClient
         using var response = _client.SendAsync(request, _shutdown.Token).GetAwaiter().GetResult();
 
         sentry_http_response_set_status_code(nativeResponse, (int)response.StatusCode);
-        foreach (var header in response.Headers.Concat(response.Content.Headers))
+        foreach (var header in GetHeaders(response))
         {
-            sentry_http_response_set_header(nativeResponse, header.Key, string.Join(", ", header.Value));
+            sentry_http_response_set_header(nativeResponse, header.Key, header.Value);
         }
     }
 
@@ -72,17 +72,7 @@ internal sealed partial class NativeHttpClient
 
             var key = Marshal.PtrToStringUTF8(keyPtr)!;
             var value = Marshal.PtrToStringUTF8(valuePtr);
-            // HttpClient computes the length of the content, which a handler may compress
-            if (key.Equals("content-length", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            if (!request.Headers.TryAddWithoutValidation(key, value))
-            {
-                request.Content ??= new ByteArrayContent(Array.Empty<byte>());
-                request.Content.Headers.TryAddWithoutValidation(key, value);
-            }
+            AddHeader(request, key, value);
         }
 
         return request;
@@ -164,4 +154,24 @@ internal sealed partial class NativeHttpClient
             handle.Free();
         }
     }
+
+    // Stryker restore all
+    internal static void AddHeader(HttpRequestMessage request, string key, string? value)
+    {
+        // HttpClient computes the length of the content, which a handler may compress
+        if (key.Equals("content-length", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (!request.Headers.TryAddWithoutValidation(key, value))
+        {
+            request.Content ??= new ByteArrayContent(Array.Empty<byte>());
+            request.Content.Headers.TryAddWithoutValidation(key, value);
+        }
+    }
+
+    internal static IEnumerable<KeyValuePair<string, string>> GetHeaders(HttpResponseMessage response) =>
+        response.Headers.Concat(response.Content.Headers)
+            .Select(header => new KeyValuePair<string, string>(header.Key, string.Join(", ", header.Value)));
 }
