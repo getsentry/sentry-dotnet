@@ -34,6 +34,10 @@ if (args.Length > 1 && args[1] == "CaughtNullReference")
         Console.WriteLine("Caught a NullReferenceException");
     }
 }
+else if (args.Length > 1 && args[1] == "FailFast")
+{
+    Environment.FailFast("Failing fast deliberately");
+}
 else if (args.Length > 1 && !string.IsNullOrEmpty(args[1]))
 {
 #pragma warning disable CS0618
@@ -237,6 +241,15 @@ internal class FakeTransport : ITransport
         # sentry-server.py can't print the envelope, because its minidump isn't valid UTF-8
         $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
         $result.ScriptOutput | Should -Not -AnyElementMatch 'crash has been captured'
+    }
+
+    It 'Sends the fast-fail crash in the crashing run (native backend)' -Skip:(!$IsWindows) {
+        $result = Invoke-SentryServer {
+            Param([string]$url)
+            runConsoleApp $true 'FailFast' ($url.Replace('http://', 'http://key@') + '/0')
+        }
+        $result.ScriptOutput | Should -AnyElementMatch 'Process terminated. Failing fast deliberately'
+        $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
     }
 
     It 'Produces no spurious native crash (NullReferenceException, native backend)' {
