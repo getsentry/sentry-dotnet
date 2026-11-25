@@ -59,6 +59,7 @@
           Condition="'$(SentryNativeBackend)' == 'native'"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest"
+          Link="%(Filename)%(Extension)"
           Visible="false" />
   </ItemGroup>
 
@@ -72,6 +73,7 @@
           Condition="'$(SentryNativeBackend)' == 'native'"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest"
+          Link="%(Filename)%(Extension)"
           Visible="false" />
   </ItemGroup>
 
@@ -84,6 +86,7 @@
           Condition="'$(SentryNativeBackend)' == 'native'"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest"
+          Link="%(Filename)%(Extension)"
           Visible="false" />
   </ItemGroup>
 </Project>
