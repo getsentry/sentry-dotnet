@@ -99,6 +99,19 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 
+    It "adds the Sentry ProGuard rules to untrimmed Android builds only" {
+        function SentryProguardItem([string[]] $extraArgs)
+        {
+            $json = dotnet msbuild maui-app/maui-app.csproj -getItem:ProguardConfiguration -p:Configuration=Release -p:TargetFramework=$framework-android$androidTpv @extraArgs
+            ($json | ConvertFrom-Json).Items.ProguardConfiguration | Where-Object { $_.Filename -eq 'sentry-proguard' }
+        }
+
+        $untrimmed = SentryProguardItem @('-p:PublishTrimmed=false')
+        $untrimmed | Should -Not -BeNullOrEmpty
+        $untrimmed.FullPath | Should -Exist
+        SentryProguardItem @() | Should -BeNullOrEmpty
+    }
+
     # Linux only, to keep the macOS and Windows legs short
     It "uploads the native debug file and preloads the NDK for an Android Native AOT build without --framework" -Skip:(!$IsLinux) {
         $aotName = 'android-aot-app'

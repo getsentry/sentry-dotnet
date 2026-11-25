@@ -10,4 +10,4 @@ For .NET SDK contributors, most of the classes in this package are generated aut
 
 - Post generation transformations are controlled via various XML files stored in the `/Transforms` directory  (see [Java Bindings Metadata documentation](https://learn.microsoft.com/en-gb/previous-versions/xamarin/android/platform/binding-java-library/customizing-bindings/java-bindings-metadata) for details).
 
-- Proguard configuration is defined in `sentry-proguard.cfg` (see [Proguard usage](https://www.guardsquare.com/manual/configuration/usage))
+- Proguard configuration is defined in `src/Sentry/buildTransitive/sentry-proguard.cfg`, which ships in the `Sentry` package (see [Proguard usage](https://www.guardsquare.com/manual/configuration/usage))
