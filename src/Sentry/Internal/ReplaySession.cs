@@ -40,6 +40,12 @@ internal class ReplaySession : IReplaySession
     {
         get
         {
+#if __ANDROID__ || __IOS__
+            if (SentrySdk.CurrentOptions?.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled != true)
+            {
+                return null;
+            }
+#endif
 #if __ANDROID__
             try
             {
