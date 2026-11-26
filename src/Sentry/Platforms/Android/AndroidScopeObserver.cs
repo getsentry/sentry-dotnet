@@ -1,3 +1,4 @@
+using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
@@ -116,7 +117,7 @@ internal sealed class AndroidScopeObserver : IScopeObserver
     {
         try
         {
-            // TODO: Missing corresponding scope-level functionality on the Android SDK
+            JavaSdk.Sentry.ConfigureScope(new ScopeCallback(scope => scope.Environment = environment));
         }
         finally
         {
