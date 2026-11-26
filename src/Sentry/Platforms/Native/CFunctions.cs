@@ -178,7 +178,8 @@ internal static class C
     internal static string GetProxyUrl(Uri address, ICredentials? credentials)
     {
         var url = new UriBuilder(address);
-        if (credentials is NetworkCredential { UserName.Length: > 0 } credential)
+        var credential = credentials as NetworkCredential;
+        if (credential?.UserName.Length > 0)
         {
             url.UserName = Uri.EscapeDataString(credential.UserName);
             url.Password = Uri.EscapeDataString(credential.Password);
