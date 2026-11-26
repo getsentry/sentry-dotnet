@@ -117,7 +117,8 @@ internal sealed class AndroidScopeObserver : IScopeObserver
     {
         try
         {
-            JavaSdk.Sentry.ConfigureScope(new ScopeCallback(scope => scope.Environment = environment));
+            using var callback = new ScopeCallback(scope => scope.Environment = environment);
+            JavaSdk.Sentry.ConfigureScope(callback);
         }
         finally
         {
