@@ -245,6 +245,10 @@ jobs:
         id: build
         run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
+      - name: Check Android keep rules
+        if: matrix.rid == 'linux-x64'
+        run: dotnet run scripts/check-android-keep-rules.cs
+
       # Only a completed Cocoa build writes the stamp, so a failed one is never cached.
       - name: Save Cocoa SDK
         if: ${{ !cancelled() && steps.cocoa.outputs.key != '' && steps.cocoa.outputs.cache-hit != 'true' && hashFiles('modules/sentry-cocoa/Carthage/.built-from-sha') != '' }}
