@@ -84,7 +84,10 @@ public interface ISentryClient
     /// <summary>
     /// Captures a Checkin.
     /// </summary>
-    /// <param name="monitorSlug"></param>
+    /// <param name="monitorSlug">
+    /// The slug of the monitor. When you create a monitor in Sentry, its slug is derived from the monitor name.
+    /// If no monitor has this slug and <paramref name="configureMonitorOptions"/> is provided, Sentry creates one.
+    /// </param>
     /// <param name="status"></param>
     /// <param name="sentryId"></param>
     /// <param name="duration"></param>
