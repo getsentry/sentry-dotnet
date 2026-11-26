@@ -887,7 +887,15 @@ static partial class SentrySdk
     /// Continues a trace based on HTTP header values provided as strings.
     /// </summary>
     /// <remarks>
-    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// <para>
+    /// The trace is stored in the scope's propagation context, so subsequent events carry the same trace ID and
+    /// outgoing requests propagate it, even when tracing is disabled. This method does not start a transaction:
+    /// to record one, pass the returned context to <see cref="StartTransaction(ITransactionContext)"/>.
+    /// </para>
+    /// <para>
+    /// A new trace with a random trace ID and span ID is started if no "sentry-trace" header is provided, or if the
+    /// baggage header's org ID doesn't match <see cref="SentryOptions.OrgId"/> (see <see cref="SentryOptions.StrictTraceContinuation"/>).
+    /// </para>
     /// </remarks>
     [DebuggerStepThrough]
     public static TransactionContext ContinueTrace(
@@ -901,7 +909,15 @@ static partial class SentrySdk
     /// Continues a trace based on HTTP header values.
     /// </summary>
     /// <remarks>
-    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// <para>
+    /// The trace is stored in the scope's propagation context, so subsequent events carry the same trace ID and
+    /// outgoing requests propagate it, even when tracing is disabled. This method does not start a transaction:
+    /// to record one, pass the returned context to <see cref="StartTransaction(ITransactionContext)"/>.
+    /// </para>
+    /// <para>
+    /// A new trace with a random trace ID and span ID is started if no "sentry-trace" header is provided, or if the
+    /// baggage header's org ID doesn't match <see cref="SentryOptions.OrgId"/> (see <see cref="SentryOptions.StrictTraceContinuation"/>).
+    /// </para>
     /// </remarks>
     [DebuggerStepThrough]
     public static TransactionContext ContinueTrace(

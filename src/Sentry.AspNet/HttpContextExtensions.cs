@@ -62,8 +62,14 @@ public static class HttpContextExtensions
     }
 
     /// <summary>
-    /// Starts or continues a Sentry trace.
+    /// Starts or continues a Sentry trace from the incoming request's "sentry-trace" and "baggage" headers,
+    /// without starting a transaction.
     /// </summary>
+    /// <remarks>
+    /// The trace is stored in the scope's propagation context, so events captured while handling the request
+    /// carry the same trace ID and outgoing requests propagate it, even when tracing is disabled.
+    /// To also record a transaction for the request, use <see cref="StartSentryTransaction"/> instead.
+    /// </remarks>
     public static void StartOrContinueTrace(this HttpContext httpContext)
     {
         var options = SentrySdk.CurrentOptions;
