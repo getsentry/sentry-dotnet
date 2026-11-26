@@ -4,7 +4,7 @@
   </ItemGroup>
 
   <Target BeforeTargets="BeforeBuild" Name="CheckPlatformSupport">
-    <Error Text="Package Sentry.Profiling is not supported on platform '$(TargetPlatformIdentifier)'."
+    <Error Text="Package Sentry.Profiling is not supported on platform '$(TargetPlatformIdentifier)'. See https://docs.sentry.io/platforms/dotnet/profiling/troubleshooting/ for details."
            Condition="'$(TargetPlatformIdentifier)' == 'android'" />
     <Error Text="Package Sentry.Profiling is not supported on platform '$(TargetPlatformIdentifier)'. The profiler is already part of the main Sentry package."
            Condition="'$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
