@@ -1,4 +1,3 @@
-#if NET6_0_OR_GREATER
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -90,4 +89,3 @@ public class SentryConfigurationSectionTests : IDisposable
         Assert.Single(options.Logging.Filters);
     }
 }
-#endif

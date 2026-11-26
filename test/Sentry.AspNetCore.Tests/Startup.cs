@@ -1,12 +1,7 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
-#if NETCOREAPP3_1_OR_GREATER
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#endif
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -23,7 +18,7 @@ public class Startup
     {
     }
 
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
     }
 }

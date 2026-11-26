@@ -1,4 +1,3 @@
-#if NET6_0_OR_GREATER
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -244,4 +243,3 @@ public class UseSentryWithLoggingAddSentryTests : IDisposable
         }
     }
 }
-#endif

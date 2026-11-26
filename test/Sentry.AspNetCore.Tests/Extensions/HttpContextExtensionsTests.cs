@@ -1,4 +1,3 @@
-#if NETCOREAPP3_1_OR_GREATER
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Sentry.AspNetCore.Extensions;
@@ -94,4 +93,3 @@ public class HttpContextExtensionsTests
         Assert.Null(header);
     }
 }
-#endif

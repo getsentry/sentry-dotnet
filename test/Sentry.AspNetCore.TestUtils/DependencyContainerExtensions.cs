@@ -8,8 +8,6 @@ public static class DependencyContainerExtensions
     {
         options.ValidateScopes = enable;
 
-#if NETCOREAPP3_1_OR_GREATER
         options.ValidateOnBuild = enable;
-#endif
     }
 }

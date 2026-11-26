@@ -6,12 +6,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 
-#if NETCOREAPP3_1_OR_GREATER
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#endif
-
 namespace Sentry.AspNetCore.Tests;
 
 public class SentryWebHostBuilderExtensionsTests
@@ -19,7 +13,7 @@ public class SentryWebHostBuilderExtensionsTests
     public IWebHostBuilder WebHostBuilder { get; set; } = Substitute.For<IWebHostBuilder>();
     public ServiceCollection Services { get; set; } = new();
     public IConfiguration Configuration { get; set; } = Substitute.For<IConfiguration>();
-    public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
+    public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
 
     public SentryWebHostBuilderExtensionsTests()
     {

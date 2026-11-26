@@ -1,4 +1,3 @@
-#if NETCOREAPP3_1_OR_GREATER
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -82,4 +81,3 @@ public class SentryHttpMessageHandlerBuilderFilterTests
         request.Headers.Should().Contain(header => header.Key == "sentry-trace");
     }
 }
-#endif
