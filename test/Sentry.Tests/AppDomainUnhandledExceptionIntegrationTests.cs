@@ -96,4 +96,28 @@ public class AppDomainUnhandledExceptionIntegrationTests
 
         _fixture.AppDomain.Received().UnhandledException += sut.Handle;
     }
+
+    [Fact]
+    public void Handle_TerminatingTrue_IsTerminalTrue()
+    {
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+
+        var exception = new Exception();
+        sut.Handle(this, new UnhandledExceptionEventArgs(exception, true));
+
+        Assert.Equal(true, exception.Data[Mechanism.TerminalKey]);
+    }
+
+    [Fact]
+    public void Handle_TerminatingFalse_IsTerminalUnset()
+    {
+        var sut = _fixture.GetSut();
+        sut.Register(_fixture.Hub, SentryOptions);
+
+        var exception = new Exception();
+        sut.Handle(this, new UnhandledExceptionEventArgs(exception, false));
+
+        Assert.False(exception.Data.Contains(Mechanism.TerminalKey));
+    }
 }

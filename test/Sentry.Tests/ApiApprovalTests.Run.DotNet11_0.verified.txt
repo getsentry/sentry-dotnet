@@ -879,6 +879,7 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
         public bool CaptureFailedRequests { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
+        public string? CrashReporterPath { get; set; }
         public System.Func<System.Net.Http.HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
         public bool Debug { get; set; }
         public System.Net.DecompressionMethods DecompressionMethods { get; set; }

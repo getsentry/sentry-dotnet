@@ -15,12 +15,22 @@ using Sentry;
 using Sentry.Extensibility;
 using Sentry.Protocol.Envelopes;
 
+// Act as a crash reporter that keeps the envelope for the test to inspect.
+if (args.Length == 1 && args[0].EndsWith(".envelope"))
+{
+    var report = Path.Combine(Directory.CreateDirectory("crash-reports").FullName, Path.GetFileName(args[0]));
+    File.Copy(args[0], report + ".tmp", overwrite: true);
+    File.Move(report + ".tmp", report, overwrite: true);
+    return;
+}
+
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>
 {
     options.Dsn = args[0];
     options.Debug = true;
     options.Transport = new FakeTransport();
+    options.CrashReporterPath = Environment.GetEnvironmentVariable("CRASH_REPORTER");
 });
 
 if (args.Length > 1 && args[1] == "CaughtNullReference")
@@ -105,6 +115,35 @@ internal class FakeTransport : ITransport
             {
                 throw 'Failed to publish the test app project.'
             }
+        }
+
+        function runConsoleAppWithCrashReporter([bool]$IsAOT = $true, [string]$CrashType = 'Managed')
+        {
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue ./crash-reports
+            $reporter = getConsoleAppPath
+            If (!(Test-Path $reporter))
+            {
+                publishConsoleApp
+            }
+            $env:CRASH_REPORTER = (Resolve-Path $reporter).Path
+            try
+            {
+                runConsoleApp $IsAOT $CrashType
+            }
+            finally
+            {
+                Remove-Item env:CRASH_REPORTER
+            }
+        }
+
+        function getCrashReports()
+        {
+            $timeout = (Get-Date).AddSeconds(30)
+            while (!(Test-Path ./crash-reports/*.envelope) -and (Get-Date) -lt $timeout)
+            {
+                Start-Sleep -Milliseconds 100
+            }
+            Get-ChildItem ./crash-reports/*.envelope -ErrorAction SilentlyContinue | Get-Content
         }
 
         function runConsoleApp([bool]$IsAOT = $true, [string]$CrashType = 'Managed', [string]$Dsn = 'http://key@127.0.0.1:9999/123')
@@ -206,6 +245,27 @@ internal class FakeTransport : ITransport
         $result.HasErrors() | Should -BeFalse
         $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'False'"
         $result.Envelopes() | Should -Not -AnyElementMatch '"exception":{"values":\[{"type":"(SIGSEGV|EXCEPTION_ACCESS_VIOLATION)"'
+    }
+
+    It 'Launches the crash reporter (Managed, AOT=<_>)' -ForEach @($true, $false) {
+        runConsoleAppWithCrashReporter $_ 'Managed' | Should -AnyElementMatch 'Launched crash reporter'
+
+        $reports = getCrashReports
+        $reports | Should -AnyElementMatch '"dsn":"http://key@127.0.0.1:9999/123"'
+        $reports | Should -AnyElementMatch '{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Managed\)."'
+    }
+
+    It 'Launches the crash reporter (Native)' {
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue .sentry-native
+
+        runConsoleAppWithCrashReporter $true 'Native' | Should -AnyElementMatch 'Triggering a deliberate exception'
+
+        $reports = getCrashReports
+        $reports | Should -AnyElementMatch '"dsn":"http://key@127.0.0.1:9999/123"'
+        $type = $IsWindows ? 'EXCEPTION_ACCESS_VIOLATION' : 'SIGSEGV'
+        $reports | Should -AnyElementMatch "`"exception`":{`"values`":\[{`"type`":`"$type`""
+
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue .sentry-native
     }
 }
 

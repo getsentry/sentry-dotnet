@@ -23,6 +23,10 @@ public class SentryClient : ISentryClient, IDisposable
 
     internal IBackgroundWorker Worker { get; }
 
+#if PLATFORM_NEUTRAL
+    internal CrashReporter CrashReporter { get; set; }
+#endif
+
     internal SentryOptions Options => _options;
 
     /// <summary>
@@ -52,6 +56,9 @@ public class SentryClient : ISentryClient, IDisposable
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _enricher = new Enricher(options);
+#if PLATFORM_NEUTRAL
+        CrashReporter = new CrashReporter(options);
+#endif
 
         options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
@@ -449,7 +456,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromEvent(processedEvent, attachments, scope.SessionUpdate, _options.DiagnosticLogger);
-        if (CaptureEnvelope(envelope))
+        if (TryLaunchCrashReporter(processedEvent, envelope) || CaptureEnvelope(envelope))
         {
 #if SENTRY_UNITY
             @event.IsCaptured = true; // See SentryEvent.Unity.cs for more details.
@@ -513,6 +520,15 @@ public class SentryClient : ISentryClient, IDisposable
             dsc.RemoveReplayId();
         }
         @event.DynamicSamplingContext = dsc;
+    }
+
+    private bool TryLaunchCrashReporter(SentryEvent @event, Envelope envelope)
+    {
+#if PLATFORM_NEUTRAL
+        return @event.HasExplicitlyTerminalException() && CrashReporter.TryLaunch(envelope);
+#else
+        return false;
+#endif
     }
 
     // Envelopes of earlier errors in the transaction may still hold its DSC, so the transaction gets a copy.
