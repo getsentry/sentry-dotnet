@@ -663,7 +663,10 @@ static partial class SentrySdk
     /// Capturing a check-in returns an ID. The ID can be used to update the status. I.e. to update a check-in you
     /// captured from `CheckInStatus.InProgress` to `CheckInStatus.Ok`.
     /// </remarks>
-    /// <param name="monitorSlug">The monitor slug of the check-in.</param>
+    /// <param name="monitorSlug">
+    /// The slug of the monitor. When you create a monitor in Sentry, its slug is derived from the monitor name.
+    /// If no monitor has this slug and <paramref name="configureMonitorOptions"/> is provided, Sentry creates one.
+    /// </param>
     /// <param name="status">The status of the check-in.</param>
     /// <param name="sentryId">The <see cref="SentryId"/> associated with the check-in.</param>
     /// <param name="duration">The duration of the check-in.</param>
