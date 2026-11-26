@@ -1,5 +1,58 @@
 # Changelog
 
+## 7.1.0
+
+### Features ✨
+
+- feat: DataCollection now gates the user, client IP, headers, cookies, query string and request body that ASP.NET Core captures by @jamescrosswell and @claude in [#5980](https://github.com/getsentry/sentry-dotnet/pull/5980)
+- feat: DataCollection now sanitizes SQL statements on SqlClient, EF Core and EF6 spans and breadcrumbs by @jamescrosswell and @claude in [#5966](https://github.com/getsentry/sentry-dotnet/pull/5966)
+- feat: Sentry.AspNet now follows DataCollection for user info, cookies, headers, query strings and request bodies by @jamescrosswell and @claude in [#5983](https://github.com/getsentry/sentry-dotnet/pull/5983)
+- feat: DataCollection now gates GraphQL error events, with separate document and variables options by @jamescrosswell and @claude in [#5934](https://github.com/getsentry/sentry-dotnet/pull/5934)
+- feat: DataCollection now configures the native Android SDK, and UserInfo the native Cocoa SDK by @jamescrosswell and @claude in [#5960](https://github.com/getsentry/sentry-dotnet/pull/5960)
+- `Sentry.Extensions.AI` now honours `DataCollection.GenAI`: `GenAI.Inputs` controls whether prompts, tool definitions and tool call arguments are recorded on AI spans, and `GenAI.Outputs` controls responses, tool calls and tool results. Both default to `true`. `SentryAIOptions.Experimental.RecordInputs` and `RecordOutputs`, when set, override them for that chat client, and now cover tool content too. by @jamescrosswell and @claude in [#5931](https://github.com/getsentry/sentry-dotnet/pull/5931)
+- feat: DataCollection.UserInfo now gates the environment username and inferred IP address by @jamescrosswell and @claude in [#5932](https://github.com/getsentry/sentry-dotnet/pull/5932)
+
+### Fixes 🐛
+
+#### Android
+
+- fix(android): Native AOT apps no longer report each managed crash twice by @andrew-kulikov and @jamescrosswell in [#6015](https://github.com/getsentry/sentry-dotnet/pull/6015)
+- fix(android): SentrySdk.Init no longer crashes in apps that run R8 without trimming by @ric-oliv with @sentry-junior in [#6019](https://github.com/getsentry/sentry-dotnet/pull/6019)
+- fix(android): keep sending events from Android 7.1 and older to sentry.io once it uses Let's Encrypt certificates by @bitsandfoxes and @claude in [#5991](https://github.com/getsentry/sentry-dotnet/pull/5991)
+- fix(android): symbolicate managed exceptions from NativeAOT apps by @charlesroddie, @claude and @jamescrosswell in [#5916](https://github.com/getsentry/sentry-dotnet/pull/5916)
+
+#### Maui
+
+- fix(maui): capture the error replay for exceptions captured in C# by @bitsandfoxes, @claude and @jamescrosswell in [#6001](https://github.com/getsentry/sentry-dotnet/pull/6001)
+- fix(maui): capturing an event on Android no longer aborts the app when it also reads DeviceDisplay by @jamescrosswell and @claude in [#5981](https://github.com/getsentry/sentry-dotnet/pull/5981)
+
+#### Other
+
+- fix(aspnetcore): blocking-call detection no longer runs when CaptureBlockingCalls is false by @jamescrosswell and @claude in [#5970](https://github.com/getsentry/sentry-dotnet/pull/5970)
+- fix(cocoa): drop native events when managed processing fails by @osamashtayat and @codex in [#5943](https://github.com/getsentry/sentry-dotnet/pull/5943)
+- fix(native): implement HTTP client interface by @jpnurmi, @claude and @jamescrosswell in [#5987](https://github.com/getsentry/sentry-dotnet/pull/5987)
+- Native AOT apps on .NET 11 now include function and module names in stack traces. Frame names change on .NET 9 and 10 too: parameter lists are dropped, and async methods and lambdas show the method they belong to, so some existing issues from Native AOT apps may be grouped as new issues. by @andrew-kulikov in [#6014](https://github.com/getsentry/sentry-dotnet/pull/6014)
+- fix: prevent false native crash reports from handled exceptions in Native AOT apps on Linux and macOS by @jpnurmi and @claude in [#5989](https://github.com/getsentry/sentry-dotnet/pull/5989)
+- fix: Native AOT symbol upload and Android NDK preload without `-f`, and debug file upload for Android Native AOT builds by @ric-oliv, @claude and @jamescrosswell in [#6002](https://github.com/getsentry/sentry-dotnet/pull/6002)
+- fix: parse breadcrumb levels with the invariant culture by @menes97, @claude and @jamescrosswell in [#5977](https://github.com/getsentry/sentry-dotnet/pull/5977)
+- URL credentials (`user:pass@`) are no longer sent in outgoing HTTP spans, breadcrumbs or failed HTTP request events from `SentryHttpMessageHandler`, even with `SendDefaultPii = true`. Custom `SentryMessageHandler` subclasses now receive the URL with credentials replaced by `[Filtered]` in `ProcessRequest` and `HandleResponse`. by @jamescrosswell and @claude in [#5935](https://github.com/getsentry/sentry-dotnet/pull/5935)
+- With `ConfigureDataCollection`, failed HTTP request events follow its `HttpHeaders`, `Cookies` and `UrlQueryParams` settings, and `UrlQueryParams` applies to the URL fragment as well as the query. Without it, they still follow `SendDefaultPii`. by @jamescrosswell and @claude in [#5935](https://github.com/getsentry/sentry-dotnet/pull/5935)
+- Failed HTTP request events send the URL fragment in `request.fragment` instead of `request.url`, with sensitive values such as `#access_token=...` replaced by `[Filtered]`, and `request.url` has the same path format whatever `SendDefaultPii` is, with encoded reserved characters such as `%2F` and `%3F` kept encoded. by @jamescrosswell and @claude in [#5935](https://github.com/getsentry/sentry-dotnet/pull/5935)
+- With `SendDefaultPii = true`, failed HTTP request events now include the response's `Set-Cookie` cookies, filtered, in `contexts.response.cookies`. by @jamescrosswell and @claude in [#5935](https://github.com/getsentry/sentry-dotnet/pull/5935)
+
+### Dependencies ⬆️
+
+#### Deps
+
+- chore(deps): update Native SDK to v0.17.7 by @github-actions in [#6009](https://github.com/getsentry/sentry-dotnet/pull/6009)
+- chore(deps): update Java SDK to v8.65.1 by @github-actions in [#5997](https://github.com/getsentry/sentry-dotnet/pull/5997)
+- chore(deps): update Java SDK to v8.65.0 by @jamescrosswell and @claude with @github-actions in [#5958](https://github.com/getsentry/sentry-dotnet/pull/5958)
+- chore(deps): update Cocoa SDK to v9.35.0 by @ric-oliv with @github-actions and @sentry-junior in [#5949](https://github.com/getsentry/sentry-dotnet/pull/5949)
+
+### Other
+
+- ref: remove the experimental DataCollectionOptions.DatabaseQueryData until .NET collects query data by @jamescrosswell and @claude in [#5933](https://github.com/getsentry/sentry-dotnet/pull/5933)
+
 ## 7.0.1
 
 ### Fixes 🐛
