@@ -4,8 +4,8 @@ using Sentry.Extensibility;
 namespace Sentry.Quartz;
 
 /// <summary>
-/// A Quartz.NET job listener that sends a Sentry check-in each time a job with
-/// <see cref="SentryMonitorSlugAttribute"/> runs.
+/// A Quartz.NET job listener that sends a Sentry check-in each time a job runs that has
+/// <see cref="SentryMonitorSlugAttribute"/> or that <see cref="SentryQuartzOptions.MonitorAllJobs"/> covers.
 /// </summary>
 public class SentryJobListener : IJobListener
 {

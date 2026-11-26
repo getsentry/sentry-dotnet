@@ -36,9 +36,10 @@ public class SentryQuartzOptions
     public IList<StringOrRegex> ExcludedJobs { get; set; } = new List<StringOrRegex>();
 
     /// <summary>
-    /// When enabled, the in-progress check-in of each job with <see cref="SentryMonitorSlugAttribute"/> includes
-    /// the schedule of the trigger that fired the job as the monitor config, so Sentry creates the monitor or updates
-    /// its schedule. Defaults to <c>true</c>.
+    /// When enabled, the in-progress check-in of each monitored job, whether it has
+    /// <see cref="SentryMonitorSlugAttribute"/> or is monitored through <see cref="MonitorAllJobs"/>, includes the
+    /// schedule of the trigger that fired the job as the monitor config, so Sentry creates the monitor or updates its
+    /// schedule. Defaults to <c>true</c>.
     /// </summary>
     /// <remarks>
     /// <para>
