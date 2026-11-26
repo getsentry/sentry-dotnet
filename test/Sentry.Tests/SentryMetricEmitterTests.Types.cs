@@ -210,6 +210,77 @@ public partial class SentryMetricEmitterTests
         entry.Args.Should().BeEquivalentTo([typeof(StringComparison)]);
     }
 
+#if NET
+    [Theory]
+    [InlineData(SentryMetricType.Counter)]
+    [InlineData(SentryMetricType.Gauge)]
+    [InlineData(SentryMetricType.Distribution)]
+    public void Emit_TagList_CapturesEnvelope(SentryMetricType type)
+    {
+        var metrics = _fixture.GetSut();
+
+        Envelope envelope = null!;
+        _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
+
+        var attributes = new TagList { { "attribute-key", "attribute-value" } };
+        metrics.EmitTagList<int>(type, 1, attributes);
+        metrics.Flush();
+
+        _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
+        _fixture.AssertEnvelope<int>(envelope, type);
+    }
+
+    [Theory]
+    [InlineData(SentryMetricType.Counter)]
+    [InlineData(SentryMetricType.Gauge)]
+    [InlineData(SentryMetricType.Distribution)]
+    public void Emit_TagListBeyondInlineCapacity_CapturesAllAttributes(SentryMetricType type)
+    {
+        SentryMetric captured = null!;
+        _fixture.Options.SetBeforeSendMetric(metric =>
+        {
+            captured = metric;
+            return metric;
+        });
+        var metrics = _fixture.GetSut();
+
+        var attributes = new TagList();
+        for (var i = 0; i < 10; i++)
+        {
+            attributes.Add($"key-{i}", i);
+        }
+        attributes.Add("null-key", null);
+
+        metrics.EmitTagList<int>(type, 1, attributes);
+
+        for (var i = 0; i < 10; i++)
+        {
+            captured.TryGetAttribute($"key-{i}", out int value).Should().BeTrue();
+            value.Should().Be(i);
+        }
+        captured.TryGetAttribute("null-key", out object? _).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(SentryMetricType.Counter)]
+    [InlineData(SentryMetricType.Gauge)]
+    [InlineData(SentryMetricType.Distribution)]
+    public void Emit_TagListWithDecimal_DoesNotCaptureEnvelope(SentryMetricType type)
+    {
+        var metrics = _fixture.GetSut();
+
+        var attributes = new TagList { { "attribute-key", "attribute-value" } };
+        metrics.EmitTagList<decimal>(type, 1m, attributes);
+        metrics.Flush();
+
+        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
+        var entry = _fixture.DiagnosticLogger.Dequeue();
+        entry.Level.Should().Be(SentryLevel.Warning);
+        entry.Args.Should().BeEquivalentTo([typeof(decimal)]);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
+    }
+#endif
+
     [Theory]
     [InlineData(SentryMetricType.Counter, nameof(SentryMetricType.Counter), typeof(int))]
     [InlineData(SentryMetricType.Gauge, nameof(SentryMetricType.Gauge), typeof(int))]
@@ -332,6 +403,26 @@ file static class SentryMetricEmitterExtensions
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
+
+#if NET
+    public static void EmitTagList<T>(this SentryMetricEmitter metrics, SentryMetricType type, T value, TagList attributes) where T : struct
+    {
+        switch (type)
+        {
+            case SentryMetricType.Counter:
+                metrics.EmitCounter<T>("sentry_tests.sentry_trace_metrics_tests.counter", value, in attributes);
+                break;
+            case SentryMetricType.Gauge:
+                metrics.EmitGauge<T>("sentry_tests.sentry_trace_metrics_tests.counter", value, "measurement_unit", in attributes);
+                break;
+            case SentryMetricType.Distribution:
+                metrics.EmitDistribution<T>("sentry_tests.sentry_trace_metrics_tests.counter", value, "measurement_unit", in attributes);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
+#endif
 
     public static void Emit<T>(this SentryMetricEmitter metrics, SentryMetricType type, string name, T value) where T : struct
     {
