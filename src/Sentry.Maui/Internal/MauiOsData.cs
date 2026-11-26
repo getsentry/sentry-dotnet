@@ -6,12 +6,14 @@ namespace Sentry.Maui.Internal;
 
 internal static class MauiOsData
 {
-    public static void ApplyMauiOsData(this OperatingSystem os, IDiagnosticLogger? logger)
+    public static void ApplyMauiOsData(this OperatingSystem os, IDiagnosticLogger? logger) =>
+        os.ApplyMauiOsData(DeviceInfo.Current, logger);
+
+    public static void ApplyMauiOsData(this OperatingSystem os, IDeviceInfo deviceInfo, IDiagnosticLogger? logger)
     {
         try
         {
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/information
-            var deviceInfo = DeviceInfo.Current;
             if (deviceInfo.Platform == DevicePlatform.Unknown)
             {
                 // return early so we don't get NotImplementedExceptions (i.e., in unit tests, etc.)

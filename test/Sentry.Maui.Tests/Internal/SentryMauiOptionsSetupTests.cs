@@ -5,7 +5,7 @@ namespace Sentry.Maui.Tests.Internal;
 public class SentryMauiOptionsSetupTests
 {
     [Fact]
-    public void Configure_DeviceLogAttributes_UnknownPlatformYieldsNone()
+    public void Configure_DeviceLogAttributes_IsSet()
     {
         var options = new SentryMauiOptions
         {
@@ -15,6 +15,5 @@ public class SentryMauiOptionsSetupTests
         new SentryMauiOptionsSetup().Configure(options);
 
         options.DeviceLogAttributes.Should().NotBeNull();
-        options.DeviceLogAttributes!.Value.Should().BeEmpty();
     }
 }

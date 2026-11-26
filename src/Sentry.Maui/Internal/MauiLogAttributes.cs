@@ -5,22 +5,28 @@ namespace Sentry.Maui.Internal;
 
 internal static class MauiLogAttributes
 {
-    public static IReadOnlyList<KeyValuePair<string, string>> Create(IDiagnosticLogger? logger)
+    public static IReadOnlyList<KeyValuePair<string, string>> Create(IDiagnosticLogger? logger) =>
+        Create(DeviceInfo.Current, logger);
+
+    internal static IReadOnlyList<KeyValuePair<string, string>> Create(IDeviceInfo deviceInfo, IDiagnosticLogger? logger)
     {
         var attributes = new List<KeyValuePair<string, string>>();
         try
         {
-            var deviceInfo = DeviceInfo.Current;
             if (deviceInfo.Platform == DevicePlatform.Unknown)
             {
                 return attributes;
             }
 
             var os = new OperatingSystem();
-            os.ApplyMauiOsData(logger);
+            os.ApplyMauiOsData(deviceInfo, logger);
             Add(attributes, "os.name", os.Name);
             Add(attributes, "os.version", os.Version);
+#if ANDROID
+            Add(attributes, "device.brand", global::Android.OS.Build.Brand);
+#else
             Add(attributes, "device.brand", deviceInfo.Manufacturer);
+#endif
             Add(attributes, "device.model", deviceInfo.Model);
         }
         catch (Exception ex)
