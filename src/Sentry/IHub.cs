@@ -84,7 +84,8 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// to record one, pass the returned context to <see cref="HubExtensions.StartTransaction(IHub, ITransactionContext)"/>.
     /// </para>
     /// <para>
-    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// A new trace with a random trace ID and span ID is started if no "sentry-trace" header is provided, or if the
+    /// baggage header's org ID doesn't match <see cref="SentryOptions.OrgId"/> (see <see cref="SentryOptions.StrictTraceContinuation"/>).
     /// </para>
     /// </remarks>
     public TransactionContext ContinueTrace(
@@ -103,7 +104,8 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// to record one, pass the returned context to <see cref="HubExtensions.StartTransaction(IHub, ITransactionContext)"/>.
     /// </para>
     /// <para>
-    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// A new trace with a random trace ID and span ID is started if no "sentry-trace" header is provided, or if the
+    /// baggage header's org ID doesn't match <see cref="SentryOptions.OrgId"/> (see <see cref="SentryOptions.StrictTraceContinuation"/>).
     /// </para>
     /// </remarks>
     public TransactionContext ContinueTrace(
