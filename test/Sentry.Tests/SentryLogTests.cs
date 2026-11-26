@@ -122,6 +122,37 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void SetDefaultAttributes_DeviceLogAttributes_SetsDeviceAttributes()
+    {
+        var options = new SentryOptions
+        {
+            DeviceLogAttributes = new(() =>
+            [
+                new("os.name", "Android"),
+                new("device.model", "Pixel 9"),
+            ])
+        };
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        log.Attributes.ShouldContain("os.name", "Android");
+        log.Attributes.ShouldContain("device.model", "Pixel 9");
+    }
+
+    [Fact]
+    public void SetDefaultAttributes_NoDeviceLogAttributes_OmitsDeviceAttributes()
+    {
+        var options = new SentryOptions();
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Info, "message");
+
+        log.SetDefaultAttributes(options, new Scope(options));
+
+        log.Attributes.ShouldNotContain<string>("os.name");
+        log.Attributes.ShouldNotContain<string>("device.model");
+    }
+
+    [Fact]
     public void SetDefaultAttributes_ScopeEnvironment_OverridesDefault()
     {
         var options = new SentryOptions { Environment = "default" };

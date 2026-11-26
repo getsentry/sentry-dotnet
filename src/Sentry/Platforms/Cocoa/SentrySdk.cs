@@ -186,6 +186,7 @@ public static partial class SentrySdk
 
         // Set options for the managed SDK that depend on the Cocoa SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new CocoaEventProcessor());
+        options.DeviceLogAttributes = new(() => CocoaDeviceLogAttributes.Create(options.DiagnosticLogger));
         options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;
         options.ScopeObserver = new CocoaScopeObserver(options);
