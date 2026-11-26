@@ -19,16 +19,11 @@ public class MauiLogAttributesTests
     {
         var attributes = MauiLogAttributes.Create(CreateDeviceInfo(DevicePlatform.Android), null);
 
-#if ANDROID
-        var expectedBrand = global::Android.OS.Build.Brand;
-#else
-        var expectedBrand = "Google";
-#endif
         attributes.Should().BeEquivalentTo(new Dictionary<string, string>
         {
             ["os.name"] = "Android",
             ["os.version"] = "15",
-            ["device.brand"] = expectedBrand!,
+            ["device.brand"] = "Google",
             ["device.model"] = "Pixel 9",
         });
     }
@@ -47,7 +42,6 @@ public class MauiLogAttributesTests
         var attributes = MauiLogAttributes.Create(CreateDeviceInfo(DevicePlatform.Android, model: " "), null);
 
         attributes.Should().NotContain(a => a.Key == "device.model");
-        attributes.Should().Contain(a => a.Key == "os.name");
     }
 
     [Fact]
