@@ -78,7 +78,14 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// Continues a trace based on HTTP header values provided as strings.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// The trace is stored in the scope's propagation context, so subsequent events carry the same trace ID and
+    /// outgoing requests propagate it, even when tracing is disabled. This method does not start a transaction:
+    /// to record one, pass the returned context to <see cref="HubExtensions.StartTransaction(IHub, ITransactionContext)"/>.
+    /// </para>
+    /// <para>
     /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// </para>
     /// </remarks>
     public TransactionContext ContinueTrace(
         string? traceHeader,
@@ -90,7 +97,14 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// Continues a trace based on HTTP header values.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// The trace is stored in the scope's propagation context, so subsequent events carry the same trace ID and
+    /// outgoing requests propagate it, even when tracing is disabled. This method does not start a transaction:
+    /// to record one, pass the returned context to <see cref="HubExtensions.StartTransaction(IHub, ITransactionContext)"/>.
+    /// </para>
+    /// <para>
     /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// </para>
     /// </remarks>
     public TransactionContext ContinueTrace(
         SentryTraceHeader? traceHeader,
