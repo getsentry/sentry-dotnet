@@ -51,6 +51,7 @@
       "src\\Sentry.Hangfire\\Sentry.Hangfire.csproj",
       "src\\Sentry.Log4Net\\Sentry.Log4Net.csproj",
       "src\\Sentry.Native.Transport\\Sentry.Native.Transport.csproj",
+      "src\\Sentry.Native\\Sentry.Native.csproj",
       "src\\Sentry.NLog\\Sentry.NLog.csproj",
       "src\\Sentry.OpenTelemetry.Exporter\\Sentry.OpenTelemetry.Exporter.csproj",
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",

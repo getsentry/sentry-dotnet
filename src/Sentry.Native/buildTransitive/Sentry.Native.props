@@ -1,0 +1,8 @@
+<!--
+  Selects sentry-native's out-of-process native backend instead of the inproc one that Sentry ships.
+  See src/Sentry/Platforms/Native/buildTransitive/Sentry.Native.targets for how the files are used. -->
+<Project>
+  <PropertyGroup>
+    <_SentryNativePackageDirectory>$(MSBuildThisFileDirectory)..\sentry-native\</_SentryNativePackageDirectory>
+  </PropertyGroup>
+</Project>

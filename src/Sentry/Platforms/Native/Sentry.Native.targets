@@ -98,61 +98,6 @@
     </None>
   </ItemGroup>
 
-  <!-- Packaging the native backend variant -->
-  <PropertyGroup>
-    <!-- sentry-wer.dll and sentry-crash-transport.dll are native libraries for sentry-crash, not references -->
-    <NoWarn>$(NoWarn);NU5100</NoWarn>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'win-x64'">
-    <None Include="$(SentryNativeOutputDirectory-win-x64)native\$(SentryNativeLibraryName).lib;$(SentryNativeOutputDirectory-win-x64)native\sentry-crash.exe;$(SentryNativeOutputDirectory-win-x64)native\sentry-wer.dll;$(SentryNativeOutputDirectory-win-x64)native\sentry-crash-transport.dll">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)\native</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'win-arm64'">
-    <None Include="$(SentryNativeOutputDirectory-win-arm64)native\$(SentryNativeLibraryName).lib;$(SentryNativeOutputDirectory-win-arm64)native\sentry-crash.exe;$(SentryNativeOutputDirectory-win-arm64)native\sentry-wer.dll;$(SentryNativeOutputDirectory-win-arm64)native\sentry-crash-transport.dll">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-win-arm64)\native</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-x64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-x64)native\lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-x64)native\libunwind.a;$(SentryNativeOutputDirectory-linux-x64)native\sentry-preload.o;$(SentryNativeOutputDirectory-linux-x64)native\sentry-crash;$(SentryNativeOutputDirectory-linux-x64)native\sentry-crash-transport.so">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)\native</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-x64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)native\lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-musl-x64)native\libunwind.a;$(SentryNativeOutputDirectory-linux-musl-x64)native\sentry-preload.o;$(SentryNativeOutputDirectory-linux-musl-x64)native\sentry-crash;$(SentryNativeOutputDirectory-linux-musl-x64)native\sentry-crash-transport.so">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-x64)\native</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-arm64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-arm64)native\lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-arm64)native\libunwind.a;$(SentryNativeOutputDirectory-linux-arm64)native\sentry-preload.o;$(SentryNativeOutputDirectory-linux-arm64)native\sentry-crash;$(SentryNativeOutputDirectory-linux-arm64)native\sentry-crash-transport.so">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-arm64)\native</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-arm64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-musl-arm64)native\lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-musl-arm64)native\libunwind.a;$(SentryNativeOutputDirectory-linux-musl-arm64)native\sentry-preload.o;$(SentryNativeOutputDirectory-linux-musl-arm64)native\sentry-crash;$(SentryNativeOutputDirectory-linux-musl-arm64)native\sentry-crash-transport.so">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-arm64)\native</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('OSX'))">
-    <None Include="$(SentryNativeOutputDirectory-osx)native\lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-osx)native\sentry-preload.o;$(SentryNativeOutputDirectory-osx)native\sentry-crash;$(SentryNativeOutputDirectory-osx)native\sentry-crash-transport.dylib">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-osx)\native</PackagePath>
-    </None>
-  </ItemGroup>
-
   <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' != '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <Message Text="Inside Custom Clean" Importance="high"/>
     <RemoveDir Directories="$(SentryNativeOutputDirectory)" />

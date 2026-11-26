@@ -6,6 +6,7 @@
       "src\\Sentry.Bindings.Android\\Sentry.Bindings.Android.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
       "src\\Sentry.Maui\\Sentry.Maui.csproj",
+      "src\\Sentry.Native\\Sentry.Native.csproj",
       "src\\Sentry\\Sentry.csproj"
     ]
   }

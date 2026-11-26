@@ -97,19 +97,13 @@ internal class FakeTransport : ITransport
             }
         }
 
-        function publishConsoleApp([bool]$SentryNative = $true, [string]$Backend = 'inproc')
+        function publishConsoleApp([bool]$SentryNative = $true)
         {
-            if ($Backend -eq 'native')
-            {
-                # The native link doesn't rerun when only the backend's libraries change
-                Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "console-app/obj/Release/$framework/*/native"
-            }
             dotnet publish console-app `
                 -c Release `
                 --nologo `
                 --framework $framework `
                 -p:SentryNative=$($SentryNative.ToString().ToLower()) `
-                -p:SentryNativeBackend=$Backend `
             | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
@@ -220,7 +214,11 @@ internal class FakeTransport : ITransport
 
     Context 'native backend' {
         BeforeAll {
-            publishConsoleApp $true 'native'
+            RegisterLocalPackage 'Sentry.Native'
+            AddPackageReference $path 'Sentry.Native'
+            # The native link doesn't rerun when only the backend's libraries change
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "console-app/obj/Release/$framework/*/native"
+            publishConsoleApp
         }
 
         It 'publish directory contains expected files (native backend)' {

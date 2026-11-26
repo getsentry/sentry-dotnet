@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Opts Native AOT apps into sentry-native's out-of-process native backend -->
+  <PropertyGroup>
+    <TargetFrameworks>$(CurrentTfms)</TargetFrameworks>
+    <PackageTags>$(PackageTags);Native;AOT</PackageTags>
+    <Description>Out-of-process native crash handling for Native AOT apps with Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <!-- the package ships no assembly, only its dependency on Sentry -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <!-- sentry-wer.dll and sentry-crash-transport.dll are native libraries for sentry-crash, not references -->
+    <NoWarn>$(NoWarn);NU5100</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <!-- Packaging -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Native.props" Pack="true" PackagePath="buildTransitive\Sentry.Native.props" />
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Native.props" Pack="true" PackagePath="build\Sentry.Native.props" />
+  </ItemGroup>
+
+  <!-- The native backend variant that build-sentry-native.ps1 -Backend native builds, for each runtime that is present -->
+  <ItemGroup>
+    <_SentryNativeBackendFile Include="..\Sentry\Platforms\Native\sentry-native\*\native\*" />
+    <!-- the transform drops RecursiveDir, which NuGet would otherwise append to the package path -->
+    <None Include="@(_SentryNativeBackendFile->'%(FullPath)')"
+          Pack="true"
+          PackagePath="sentry-native\$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName($([System.IO.Path]::GetDirectoryName('%(FullPath)'))))))\"
+          Visible="false" />
+  </ItemGroup>
+
+</Project>

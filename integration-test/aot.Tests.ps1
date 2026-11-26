@@ -20,6 +20,7 @@ Describe 'Publish' {
         $localPackages = Join-Path $tempDir "packages"
         New-Item -ItemType Directory -Path $localPackages -Force | Out-Null
         Copy-Item $package $localPackages
+        Get-ChildItem -Path "$PSScriptRoot/../src/Sentry.Native/bin/Release/Sentry.Native.*.nupkg" -File | Copy-Item -Destination $localPackages
         $localConfig = Join-Path $tempDir "nuget.config"
         Copy-Item $PSScriptRoot/nuget.config $localConfig
         (Get-Content $localConfig) -replace '\./packages', $localPackages | Set-Content $localConfig
@@ -86,9 +87,13 @@ Console.WriteLine("Hello, Sentry!");
             Set-ItResult -Skipped -Because 'linux-arm has no native SDK'
         }
 
+        if ($_ -eq 'native')
+        {
+            dotnet add package Sentry.Native --prerelease --source $localPackages | Write-Host
+        }
         # The native link doesn't rerun when only the backend's libraries change
         Remove-Item -Recurse -Force -ErrorAction SilentlyContinue obj/Release/*/*/native
-        dotnet publish -p:EnableSdkContainerSupport=true -p:SentryNativeBackend=$_ -t:PublishContainer | Write-Host
+        dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer | Write-Host
         $LASTEXITCODE | Should -Be 0
 
         # The image's non-root user can't write the default database path in /app
