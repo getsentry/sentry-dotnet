@@ -31,6 +31,7 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
 
         // We'll use an event processor to set things like SDK name
         options.AddEventProcessor(new SentryMauiEventProcessor(options));
+        options.DeviceLogAttributes = new(() => MauiLogAttributes.Create(options.DiagnosticLogger));
 
         if (options.AttachScreenshot)
         {

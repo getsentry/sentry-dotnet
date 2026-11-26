@@ -655,6 +655,8 @@ public class SentryOptions
         _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
     }
 
+    internal Lazy<IReadOnlyList<KeyValuePair<string, string>>>? DeviceLogAttributes { get; set; }
+
     private Func<SentryLog, SentryLog?>? _beforeSendLog;
 
     internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;

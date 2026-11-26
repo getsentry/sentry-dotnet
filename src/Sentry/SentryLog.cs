@@ -152,6 +152,15 @@ public sealed partial class SentryLog
         // Core Attributes
         Attributes.SetDefaultAttributes(options, scope, sdk);
 
+        // Mobile, Desktop, and Native SDK Attributes
+        if (options.DeviceLogAttributes is { } deviceAttributes)
+        {
+            foreach (var attribute in deviceAttributes.Value)
+            {
+                Attributes.SetAttribute(attribute.Key, attribute.Value);
+            }
+        }
+
         // Server Attributes
         if (!string.IsNullOrEmpty(options.ServerName))
         {
