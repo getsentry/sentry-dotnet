@@ -121,6 +121,7 @@ internal static class C
             sentry_options_set_database_path(cOptions, dir);
         }
 
+        // Stryker disable once all : covered by the Native AOT integration tests
         if (options.CrashReporterPath is { } crashReporterPath)
         {
             if (System.OperatingSystem.IsWindows())

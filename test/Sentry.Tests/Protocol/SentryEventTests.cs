@@ -268,4 +268,57 @@ public partial class SentryEventTests
 
         evt.Breadcrumbs.Select(b => b.Message).Should().Equal("first", "second");
     }
+
+    [Fact]
+    public void HasExplicitlyTerminalException_NoException_ReturnsFalse()
+    {
+        var evt = new SentryEvent();
+
+        Assert.False(evt.HasExplicitlyTerminalException());
+    }
+
+    [Fact]
+    public void HasExplicitlyTerminalException_TerminalException_ReturnsTrue()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: false, terminal: true);
+        var evt = new SentryEvent(exception);
+
+        Assert.True(evt.HasExplicitlyTerminalException());
+    }
+
+    [Fact]
+    public void HasExplicitlyTerminalException_UnhandledException_ReturnsFalse()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: false);
+        var evt = new SentryEvent(exception);
+
+        Assert.False(evt.HasExplicitlyTerminalException());
+    }
+
+    [Fact]
+    public void HasExplicitlyTerminalException_HandledTerminalException_ReturnsFalse()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: true, terminal: true);
+        var evt = new SentryEvent(exception);
+
+        Assert.False(evt.HasExplicitlyTerminalException());
+    }
+
+    [Fact]
+    public void HasExplicitlyTerminalException_TerminalExceptionViaSentryExceptions_ReturnsTrue()
+    {
+        var evt = new SentryEvent
+        {
+            SentryExceptions =
+            [
+                new SentryException { Mechanism = new Mechanism { Handled = true } },
+                new SentryException { Mechanism = new Mechanism { Handled = false, Terminal = true } }
+            ]
+        };
+
+        Assert.True(evt.HasExplicitlyTerminalException());
+    }
 }

@@ -65,6 +65,7 @@ public class CrashReporterTests
         _fixture.FileSystem.FileExists(file).Should().BeTrue();
         var startInfo = _fixture.Started.Should().ContainSingle().Subject;
         startInfo.FileName.Should().Be(_fixture.Options.CrashReporterPath);
+        startInfo.UseShellExecute.Should().BeFalse();
         GetArguments(startInfo).Should().Be($"\"{file}\"");
     }
 
@@ -106,6 +107,20 @@ public class CrashReporterTests
         result.Should().BeFalse();
     }
 
+    [Fact]
+    public void TryLaunch_WriteFails_ReturnsFalse()
+    {
+        var fileSystem = Substitute.For<IFileSystem>();
+        fileSystem.FileExists(_fixture.Options.CrashReporterPath!).Returns(true);
+        _fixture.Options.FileSystem = fileSystem;
+        var sut = _fixture.GetSut();
+
+        var result = sut.TryLaunch(Envelope.FromEvent(new SentryEvent()));
+
+        result.Should().BeFalse();
+        _fixture.Started.Should().BeEmpty();
+    }
+
     [PlatformFact(Platform.MacOS)]
     public void TryLaunch_Bundle_OpensBundle()
     {
@@ -120,6 +135,20 @@ public class CrashReporterTests
         var startInfo = _fixture.Started.Should().ContainSingle().Subject;
         startInfo.FileName.Should().Be("/usr/bin/open");
         GetArguments(startInfo).Should().Be($"\"-a\" \"{_fixture.Options.CrashReporterPath}\" \"--args\" \"{file}\"");
+    }
+
+    [SkippableFact]
+    public void TryLaunch_AppNotOnMacOS_LaunchesApp()
+    {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
+        _fixture.Options.CrashReporterPath = Path.Combine(Path.GetTempPath(), "Crash Reporter.app");
+        _fixture.FileSystem.WriteAllTextToFile(_fixture.Options.CrashReporterPath, "");
+        var sut = _fixture.GetSut();
+
+        sut.TryLaunch(Envelope.FromEvent(new SentryEvent()));
+
+        var startInfo = _fixture.Started.Should().ContainSingle().Subject;
+        startInfo.FileName.Should().Be(_fixture.Options.CrashReporterPath);
     }
 
     private static string GetArguments(ProcessStartInfo startInfo) =>
