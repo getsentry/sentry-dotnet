@@ -72,14 +72,10 @@ public class SentryTunnelMiddleware : IMiddleware
 
         try
         {
-#if NETSTANDARD2_0
-            var headerJson = JsonSerializer.Deserialize<Dictionary<string, object>>(header);
-#else
             var headerJson = JsonSerializer.Deserialize(
                 header,
                 SentryJsonContext.Default.DictionaryStringObject
                 );
-#endif
             if (headerJson == null)
             {
                 response.StatusCode = StatusCodes.Status400BadRequest;
