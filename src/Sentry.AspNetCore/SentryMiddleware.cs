@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,6 @@ using Sentry.Ben.BlockingDetector;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Reflection;
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 
 namespace Sentry.AspNetCore;
 
@@ -23,7 +23,7 @@ internal class SentryMiddleware : IMiddleware
 
     private readonly Func<IHub> _getHub;
     private readonly SentryAspNetCoreOptions _options;
-    private readonly IHostingEnvironment _hostingEnvironment;
+    private readonly IWebHostEnvironment _hostingEnvironment;
     private readonly ILogger<SentryMiddleware> _logger;
     private readonly IEnumerable<ISentryEventExceptionProcessor> _eventExceptionProcessors;
     private readonly IEnumerable<ISentryEventProcessor> _eventProcessors;
@@ -60,7 +60,7 @@ internal class SentryMiddleware : IMiddleware
     public SentryMiddleware(
         Func<IHub> getHub,
         IOptions<SentryAspNetCoreOptions> options,
-        IHostingEnvironment hostingEnvironment,
+        IWebHostEnvironment hostingEnvironment,
         ILogger<SentryMiddleware> logger,
         IEnumerable<ISentryEventExceptionProcessor> eventExceptionProcessors,
         IEnumerable<ISentryEventProcessor> eventProcessors,
@@ -190,14 +190,12 @@ internal class SentryMiddleware : IMiddleware
                         "This exception was caught by an ASP.NET Core custom error handler. " +
                         "The web server likely returned a customized error page as a result of this exception.";
 
-#if NET6_0_OR_GREATER
                     hub.ConfigureScope(static (scope, arg) =>
                     {
                         scope.ExceptionProcessors.Add(
                             new ExceptionHandlerFeatureProcessor(arg.originalMethod, arg.exceptionFeature)
                             );
                     }, (originalMethod, exceptionFeature));
-#endif
                     CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description);
                 }
 
