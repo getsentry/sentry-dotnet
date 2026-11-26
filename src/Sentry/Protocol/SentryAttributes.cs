@@ -156,6 +156,30 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
         }
     }
 
+#if NET
+#pragma warning disable RCS1242
+    internal void SetAttributes(in TagList attributes)
+    {
+        if (attributes.Count == 0)
+        {
+            return;
+        }
+
+        _ = EnsureCapacity(Count + attributes.Count);
+
+        // Not foreach: TagList only exposes its enumerator boxed as an interface
+        for (var i = 0; i < attributes.Count; i++)
+        {
+            var attribute = attributes[i];
+            if (attribute.Value is not null)
+            {
+                this[attribute.Key] = new SentryAttribute(attribute.Value);
+            }
+        }
+    }
+#pragma warning restore RCS1242
+#endif
+
     /// <inheritdoc cref="ISentryJsonSerializable.WriteTo(Utf8JsonWriter, IDiagnosticLogger)" />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {

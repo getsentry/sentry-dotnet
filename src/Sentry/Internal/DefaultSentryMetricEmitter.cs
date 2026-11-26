@@ -25,17 +25,8 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
     /// <inheritdoc />
     private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, IEnumerable<KeyValuePair<string, object>>? attributes, Scope? scope) where T : struct
     {
-        if (!SentryMetric.IsSupported(typeof(T)))
+        if (!IsValid<T>(type, name))
         {
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
-            _options.DiagnosticLogger?.LogWarning("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.", typeof(T));
-            return;
-        }
-
-        if (string.IsNullOrEmpty(name))
-        {
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
-            _options.DiagnosticLogger?.LogWarning("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}", type.ToString(), typeof(T));
             return;
         }
 
@@ -46,22 +37,46 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
     /// <inheritdoc />
     private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, ReadOnlySpan<KeyValuePair<string, object>> attributes, Scope? scope) where T : struct
     {
+        if (!IsValid<T>(type, name))
+        {
+            return;
+        }
+
+        var metric = SentryMetric.Create(_hub, _options, _clock, type, name, value, unit, attributes, scope);
+        CaptureMetric(metric);
+    }
+
+#if NET
+    /// <inheritdoc />
+    private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, in TagList attributes, Scope? scope) where T : struct
+    {
+        if (!IsValid<T>(type, name))
+        {
+            return;
+        }
+
+        var metric = SentryMetric.Create(_hub, _options, _clock, type, name, value, unit, in attributes, scope);
+        CaptureMetric(metric);
+    }
+#endif
+
+    private bool IsValid<T>(SentryMetricType type, string name) where T : struct
+    {
         if (!SentryMetric.IsSupported(typeof(T)))
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
             _options.DiagnosticLogger?.LogWarning("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.", typeof(T));
-            return;
+            return false;
         }
 
         if (string.IsNullOrEmpty(name))
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.Invalid, DataCategory.TraceMetric);
             _options.DiagnosticLogger?.LogWarning("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}", type.ToString(), typeof(T));
-            return;
+            return false;
         }
 
-        var metric = SentryMetric.Create(_hub, _options, _clock, type, name, value, unit, attributes, scope);
-        CaptureMetric(metric);
+        return true;
     }
 
     /// <inheritdoc />

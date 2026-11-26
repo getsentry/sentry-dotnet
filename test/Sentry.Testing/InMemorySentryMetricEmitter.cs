@@ -19,6 +19,23 @@ public sealed class InMemorySentryMetricEmitter : SentryMetricEmitter
         Entries.Add(MetricEntry.Create(type, name, value, unit, attributes.ToArray(), scope));
     }
 
+#if NET
+    /// <inheritdoc />
+    private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, in TagList attributes, Scope? scope) where T : struct
+    {
+        var entries = new List<KeyValuePair<string, object>>(attributes.Count);
+        for (var i = 0; i < attributes.Count; i++)
+        {
+            if (attributes[i] is { Value: not null } attribute)
+            {
+                entries.Add(new KeyValuePair<string, object>(attribute.Key, attribute.Value));
+            }
+        }
+
+        Entries.Add(MetricEntry.Create(type, name, value, unit, entries, scope));
+    }
+#endif
+
     /// <inheritdoc />
     private protected override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
     {

@@ -39,6 +39,17 @@ public abstract partial class SentryMetric
         return metric;
     }
 
+#if NET
+#pragma warning disable RCS1242
+    internal static SentryMetric<T> Create<T>(IHub hub, SentryOptions options, ISystemClock clock, SentryMetricType type, string name, T value, string? unit, in TagList attributes, Scope? scope) where T : struct
+    {
+        var metric = CreateCore<T>(hub, options, clock, type, name, value, unit, scope);
+        metric.Attributes.SetAttributes(in attributes);
+        return metric;
+    }
+#pragma warning restore RCS1242
+#endif
+
     private static bool IsSupported<T>() where T : struct
     {
         var valueType = typeof(T);
