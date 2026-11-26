@@ -107,17 +107,11 @@ internal static class C
         }
 
         // for the sentry-crash daemon of the native backend
+        // Stryker disable once all : only runs in Native AOT apps
         if (options.HttpProxy is WebProxy { Address: { } address } proxy)
         {
             options.DiagnosticLogger?.LogDebug("Setting Proxy: {0}", address);
-            var url = new UriBuilder(address);
-            if (proxy.Credentials is NetworkCredential { UserName.Length: > 0 } credentials)
-            {
-                url.UserName = Uri.EscapeDataString(credentials.UserName);
-                url.Password = Uri.EscapeDataString(credentials.Password);
-            }
-            // Stryker disable once all : only runs in Native AOT apps
-            sentry_options_set_proxy(cOptions, url.Uri.AbsoluteUri);
+            sentry_options_set_proxy(cOptions, GetProxyUrl(address, proxy.Credentials));
         }
 
         // Disabling the native in favor of the C# layer for now
@@ -179,6 +173,17 @@ internal static class C
         {
             return Path.Combine(options.CacheDirectoryPath, "SentryNative");
         }
+    }
+
+    internal static string GetProxyUrl(Uri address, ICredentials? credentials)
+    {
+        var url = new UriBuilder(address);
+        if (credentials is NetworkCredential { UserName.Length: > 0 } credential)
+        {
+            url.UserName = Uri.EscapeDataString(credential.UserName);
+            url.Password = Uri.EscapeDataString(credential.Password);
+        }
+        return url.Uri.AbsoluteUri;
     }
 
     [DllImport("sentry-native")]
