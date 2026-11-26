@@ -1,15 +1,10 @@
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.Ben.BlockingDetector;
-
-#if NETCOREAPP3_1_OR_GREATER
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#endif
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -21,7 +16,7 @@ public class SentryMiddlewareTests
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public Func<IHub> HubAccessor { get; set; }
         public SentryAspNetCoreOptions Options { get; set; } = new();
-        public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
+        public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
         public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
         public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
         public IEnumerable<ISentryEventProcessor> EventProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventProcessor>>();

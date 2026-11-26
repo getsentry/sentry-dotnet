@@ -56,12 +56,7 @@ internal static class ScopeExtensions
         {
             SetBody(scope, context, options);
         }
-#if NET5_0_OR_GREATER
         catch (BadHttpRequestException) when (context.RequestAborted.IsCancellationRequested)
-#else
-        catch (IOException e) when (context.RequestAborted.IsCancellationRequested &&
-                                    e.GetType().Name == "BadHttpRequestException")
-#endif
         {
             options.LogDebug("Failed to extract body because the request was aborted.");
         }

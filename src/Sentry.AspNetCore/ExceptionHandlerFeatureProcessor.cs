@@ -5,7 +5,6 @@ using Sentry.Internal;
 
 namespace Sentry.AspNetCore;
 
-#if NET6_0_OR_GREATER
 internal class ExceptionHandlerFeatureProcessor : ISentryEventExceptionProcessor, ISdkProcessor
 {
     private readonly string _originalMethod;
@@ -83,4 +82,3 @@ internal class ExceptionHandlerFeatureProcessor : ISentryEventExceptionProcessor
         return RouteUtils.LegacyRouteFormat(routeValues);
     }
 }
-#endif

@@ -1,4 +1,3 @@
-#if !NETFRAMEWORK
 using Microsoft.Extensions.Configuration;
 
 namespace Sentry.AspNetCore.Tests;
@@ -27,4 +26,3 @@ public class BindableSentryAspNetCoreOptionsTests : BindableTests<SentryAspNetCo
         AssertContainsExpectedPropertyValues(actual);
     }
 }
-#endif

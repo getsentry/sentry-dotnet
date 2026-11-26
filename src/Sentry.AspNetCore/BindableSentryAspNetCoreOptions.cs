@@ -1,10 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 
-#if NETSTANDARD2_0
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#endif
-
 namespace Sentry.AspNetCore;
 
 /// <inheritdoc cref="BindableSentryOptions"/>

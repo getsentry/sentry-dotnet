@@ -1,9 +1,7 @@
-#if NET6_0_OR_GREATER
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
-#endif
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.AspNetCore.TestUtils;
@@ -13,7 +11,6 @@ namespace Sentry.AspNetCore.Tests;
 [Collection(nameof(SentrySdkCollection))]
 public partial class IntegrationsTests : AspNetSentrySdkTestFixture
 {
-#if NET6_0_OR_GREATER
     [Fact]
     public async Task CaptureException_UseExceptionHandler_SetTransactionNameFromInitialRequest()
     {
@@ -141,7 +138,6 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
             throw new Exception("This is an example exception");
         }
     }
-#endif
 
     [Fact]
     public async Task UnhandledException_AvailableThroughLastExceptionFilter()

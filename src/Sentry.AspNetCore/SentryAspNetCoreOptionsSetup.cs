@@ -8,30 +8,6 @@ namespace Sentry.AspNetCore;
 /// <summary>
 /// Sets up ASP.NET Core option for Sentry.
 /// </summary>
-#if NETSTANDARD2_0
-internal sealed class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
-{
-    /// <summary>
-    /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
-    /// </summary>
-    public SentryAspNetCoreOptionsSetup(IConfiguration config)
-        : base(config)
-    {
-    }
-
-    /// <summary>
-    /// Configures the <see cref="SentryAspNetCoreOptions"/>.
-    /// </summary>
-    public override void Configure(SentryAspNetCoreOptions options)
-    {
-        base.Configure(options);
-        options.AddDiagnosticSourceIntegration();
-        options.DeduplicateUnhandledException();
-        options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));
-    }
-}
-
-#else
 internal sealed class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAspNetCoreOptions>
 {
     private readonly IConfiguration _config;
@@ -60,7 +36,6 @@ internal sealed class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAsp
         options.AddTransactionProcessor(new TraceIgnoreStatusCodeTransactionProcessor(options));
     }
 }
-#endif
 
 internal static class SentryAspNetCoreOptionsExtensions
 {

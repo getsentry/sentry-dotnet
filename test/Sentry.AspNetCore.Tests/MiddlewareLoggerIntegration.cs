@@ -1,13 +1,8 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
-
-#if NETCOREAPP3_1_OR_GREATER
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#endif
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -22,7 +17,7 @@ public class MiddlewareLoggerIntegration : IDisposable
         public Func<IHub> HubAccessor { get; set; }
         public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
         public SentryAspNetCoreOptions Options { get; set; } = new();
-        public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
+        public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
         public ILogger<SentryMiddleware> MiddlewareLogger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
         public ILogger SentryLogger { get; set; }
         public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();

@@ -1,4 +1,3 @@
-#if NETCOREAPP3_0_OR_GREATER
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -131,4 +130,3 @@ public class SentryTracingBuilderTests
         logger.Received(1).LogWarning(SentryTracingMiddlewareExtensions.AlreadyRegisteredWarning);
     }
 }
-#endif
