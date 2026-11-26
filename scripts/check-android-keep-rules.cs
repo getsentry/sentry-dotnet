@@ -7,19 +7,20 @@
 // sentry-proguard.cfg is the only thing keeping them. R8 removes or inlines any class member nothing keeps, and the
 // call then fails at run time with NoSuchMethodError or NoSuchFieldError (see #6019 and #6031).
 //
-// The check reads the built Sentry, Sentry.Maui and Sentry.Bindings.Android assemblies for each Android target
-// framework, follows every member they use from a binding assembly to the Java member the binding calls, and fails
-// when no rule in the cfg keeps it, or when it can't tell which Java member a binding member calls.
-// Not checked, because R8 always keeps them or never shrinks them:
+// The check reads the built Sentry, Sentry.Maui and Sentry.Bindings.Android assemblies for every Android target
+// framework in Directory.Build.props, follows every member they use from a binding assembly to the Java member the
+// binding calls, and fails when no rule in the cfg keeps it, or when it can't tell which Java member a binding member
+// calls. It doesn't rely on the keep rules .NET Android or the AndroidX packages add, which change between versions.
+// Not checked:
 // - io.sentry.** classes, as long as the cfg keeps them whole (the check fails if it doesn't)
-// - interfaces, which .NET Android's own config keeps with their public and protected members
 // - the BCL, Mono.Android and Java.Interop: platform and runtime classes come from the device or are kept by .NET
 //   Android's own config
 //
 // Limits: only member references are followed. A binding class used only as a type (JavaCast<T>, typeof) or a Java
 // class looked up by name (JniEnvironment.Types.TryFindClass) isn't seen.
 //
-// Usage, from the repository root after building Sentry.Maui for the Android target frameworks:
+// Usage, from the repository root after building Sentry.Maui for the Android target frameworks (it runs
+// `dotnet msbuild` to read them):
 //   dotnet run scripts/check-android-keep-rules.cs -- [--configuration Release] [--verbose]
 //
 // --verbose lists every Java member the check found and whether the cfg keeps it.
@@ -75,18 +76,19 @@ if (!rules.KeepsWhole("io.sentry.android.core.SentryAndroid"))
     return 2;
 }
 
+if (AndroidTargetFrameworks() is not { Count: > 0 } tfms)
+{
+    Console.Error.WriteLine("Couldn't read LatestAndroidTfm and PreviousAndroidTfm from Directory.Build.props.");
+    return 2;
+}
+
 var targets = new[] { "Sentry", "Sentry.Maui", "Sentry.Bindings.Android" }
-    .SelectMany(project => Directory.Exists($"src/{project}/bin/{configuration}")
-        ? Directory.GetDirectories($"src/{project}/bin/{configuration}", "net*-android*")
-            .Where(dir => Regex.IsMatch(Path.GetFileName(dir), @"-android\d"))
-            .Select(dir => (Project: project, Tfm: Path.GetFileName(dir), Dll: Path.Combine(dir, project + ".dll")))
-        : [])
-    .Where(t => File.Exists(t.Dll))
+    .SelectMany(project => tfms.Select(tfm => (Project: project, Tfm: tfm, Dll: $"src/{project}/bin/{configuration}/{tfm}/{project}.dll")))
     .ToList();
 
-if (!targets.Any(t => t.Project == "Sentry"))
+if (targets.Where(t => !File.Exists(t.Dll)).Select(t => t.Dll).ToList() is { Count: > 0 } notBuilt)
 {
-    Console.Error.WriteLine($"No Android build of Sentry under src/Sentry/bin/{configuration}. Build Sentry.Maui for the Android target frameworks first.");
+    Console.Error.WriteLine($"Not built: {string.Join(", ", notBuilt)}. Build Sentry.Maui for {string.Join(" and ", tfms)} first.");
     return 2;
 }
 
@@ -180,6 +182,29 @@ if (unmapped.Count > 0 || missing.Count > 0)
 Console.WriteLine($"{cfgPath} keeps all {checkedCount} Java member uses found in {targets.Count} Android assemblies ({string.Join(", ", targets.Select(t => $"{t.Project} {t.Tfm}"))}).");
 return 0;
 
+static List<string>? AndroidTargetFrameworks()
+{
+    var startInfo = new System.Diagnostics.ProcessStartInfo("dotnet", ["msbuild", "Directory.Build.props", "-getProperty:LatestAndroidTfm", "-getProperty:PreviousAndroidTfm"])
+    {
+        RedirectStandardOutput = true,
+    };
+    using var process = System.Diagnostics.Process.Start(startInfo)!;
+    var output = process.StandardOutput.ReadToEnd();
+    process.WaitForExit();
+    if (process.ExitCode != 0)
+    {
+        return null;
+    }
+    using var json = JsonDocument.Parse(output);
+    var tfms = json.RootElement.GetProperty("Properties").EnumerateObject()
+        .Select(p => p.Value.GetString())
+        .Where(tfm => !string.IsNullOrEmpty(tfm))
+        .Select(tfm => tfm!)
+        .Distinct()
+        .ToList();
+    return tfms.Count == 2 ? tfms : null;
+}
+
 static bool IsNotABinding(string assembly) =>
     assembly is "mscorlib" or "netstandard" or "Mono.Android" or "Java.Interop" or "_Microsoft.Android.Resource.Designer"
     || assembly.StartsWith("System", StringComparison.Ordinal)
@@ -204,7 +229,7 @@ sealed class KeepRules
     {
         var rules = new KeepRules();
         var text = string.Join("\n", lines.Select(l => Regex.Replace(l, "#.*$", "")));
-        var rule = new Regex(@"-keep\s+(?<type>class|enum)\s+(?<name>[\w.$*]+)\s*\{(?<body>[^}]*)\}");
+        var rule = new Regex(@"-keep\s+(?<type>class|enum|interface)\s+(?<name>[\w.$*]+)\s*\{(?<body>[^}]*)\}");
         var position = 0;
         foreach (Match m in rule.Matches(text))
         {
@@ -370,13 +395,16 @@ sealed class BindingType(MetadataReader md, PEReader pe, TypeDefinition type)
     private static readonly Regex JniField = new(@"^(?<name>[\w$]+)\.(?<sig>\[*(L[^;]+;|[ZBCSIJFD]))$");
     private static readonly Regex JniConstructor = new(@"^\(.*\)V$");
 
-    // The Java members a binding member calls. Empty for members of interfaces and of managed-only types, and for
-    // io.sentry classes, which the cfg keeps whole. Null when the member belongs to a Java class but the check can't
-    // find which Java member it calls.
+    // The Java members a binding member calls. Empty for io.sentry classes, which the cfg keeps whole. Null when the
+    // check can't tell: the type has no Java name, or the member has no JNI string and no [Register].
     public IReadOnlyList<JavaMember>? JavaMembers(string memberName)
     {
-        var javaClass = Register(type.GetCustomAttributes())?.Name;
-        if (javaClass is null || (type.Attributes & TypeAttributes.Interface) != 0 || javaClass.StartsWith("io/sentry/", StringComparison.Ordinal))
+        var javaClass = JavaTypeName();
+        if (javaClass is null)
+        {
+            return null;
+        }
+        if (javaClass.StartsWith("io/sentry/", StringComparison.Ordinal))
         {
             return [];
         }
@@ -395,7 +423,43 @@ sealed class BindingType(MetadataReader md, PEReader pe, TypeDefinition type)
                 result.Add(new JavaMember(javaClass, register.Name == ".ctor" ? "<init>" : register.Name, register.Signature ?? ""));
             }
         }
+
+        // Interface members have no body, and the generator puts [Register] on an interface property, not its accessors.
+        if (result.Count == 0)
+        {
+            foreach (var property in type.GetProperties().Select(md.GetPropertyDefinition))
+            {
+                var accessors = property.GetAccessors();
+                var accessorNames = new[] { accessors.Getter, accessors.Setter }
+                    .Where(a => !a.IsNil)
+                    .Select(a => md.GetString(md.GetMethodDefinition(a).Name));
+                if (accessorNames.Contains(memberName) && Register(property.GetCustomAttributes()) is { Signature: not null } register)
+                {
+                    result.Add(new JavaMember(javaClass, register.Name, register.Signature));
+                }
+            }
+        }
         return result.Count > 0 ? result : null;
+    }
+
+    // "androidx/lifecycle/Lifecycle" from [Register] or, for Java.Interop-style bindings, [JniTypeSignature].
+    private string? JavaTypeName()
+    {
+        if (Register(type.GetCustomAttributes()) is { } register)
+        {
+            return register.Name;
+        }
+        foreach (var handle in type.GetCustomAttributes())
+        {
+            var attribute = md.GetCustomAttribute(handle);
+            if (Metadata.AttributeTypeName(md, attribute) == "Java.Interop.JniTypeSignatureAttribute")
+            {
+                var value = md.GetBlobReader(attribute.Value);
+                value.ReadUInt16();
+                return value.ReadSerializedString();
+            }
+        }
+        return null;
     }
 
     // Binding bodies pass the JNI member to JniPeerMembers as a string: "get.()Landroidx/lifecycle/LifecycleOwner;",
