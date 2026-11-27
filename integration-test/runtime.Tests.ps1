@@ -245,8 +245,13 @@ internal class FakeTransport : ITransport
             $result.ScriptOutput | Should -Not -AnyElementMatch 'crash has been captured'
         }
 
-        # Local only: WER doesn't work on the GitHub Actions Windows images
-        It 'Sends the fast-fail crash in the crashing run (native backend)' -Skip:(!$IsWindows -or (Test-Path env:CI)) {
+        It 'Sends the fast-fail crash in the crashing run (native backend)' -Skip:(!$IsWindows) {
+            # WER ignores crashes in processes that inherit SEM_NOGPFAULTERRORBOX
+            $kernel32 = Add-Type -PassThru -Name Kernel32 -Namespace Win32 -MemberDefinition '
+                [DllImport("kernel32.dll")] public static extern uint GetErrorMode();
+                [DllImport("kernel32.dll")] public static extern uint SetErrorMode(uint mode);'
+            $kernel32::SetErrorMode($kernel32::GetErrorMode() -band -bnot 0x2) | Out-Null
+
             $result = Invoke-SentryServer {
                 Param([string]$url)
                 runConsoleApp $true 'FailFast' ($url.Replace('http://', 'http://key@') + '/0')

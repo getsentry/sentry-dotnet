@@ -462,6 +462,10 @@ jobs:
       - name: Create NuGet Packages
         run: dotnet pack ${{ matrix.slnf }} -c Release --no-build --nologo
 
+      - name: Configure WER
+        if: runner.os == 'Windows'
+        run: modules/sentry-native/scripts/configure-wer.ps1
+
       - name: Integration test
         uses: getsentry/github-workflows/sentry-cli/integration-test@36529d71129a14967bea1fb81bcaf2a5943cf877 # 3.5.0
         env:
