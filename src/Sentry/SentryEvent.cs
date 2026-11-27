@@ -268,6 +268,18 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
         ) ?? false;
     }
 
+    internal bool HasExplicitlyTerminalException()
+    {
+        if (Exception?.Data[Mechanism.HandledKey] is false)
+        {
+            return Exception.Data[Mechanism.TerminalKey] is true;
+        }
+
+        return SentryExceptions?.Any(e =>
+            e.Mechanism is { Handled: false, Terminal: true }
+        ) == true;
+    }
+
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
     /// <summary>

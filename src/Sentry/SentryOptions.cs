@@ -1437,6 +1437,18 @@ public class SentryOptions
     /// <see href="https://spotlightjs.com/"/>
     public bool EnableSpotlight { get; set; }
 
+#if PLATFORM_NEUTRAL
+    /// <summary>
+    /// Path to a crash reporter executable to launch when the application crashes.
+    /// </summary>
+    /// <remarks>
+    /// The crash reporter receives the path to an envelope file as its only argument and is responsible
+    /// for sending it to Sentry. On macOS, the path can point to an application bundle.
+    /// </remarks>
+    /// <see href="https://github.com/getsentry/sentry-desktop-crash-reporter"/>
+    public string? CrashReporterPath { get; set; }
+#endif
+
     internal SettingLocator SettingLocator { get; set; }
 
     internal ScopeDefaults ScopeDefaults

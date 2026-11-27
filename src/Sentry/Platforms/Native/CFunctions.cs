@@ -121,6 +121,21 @@ internal static class C
             sentry_options_set_database_path(cOptions, dir);
         }
 
+        // Stryker disable once all : covered by the Native AOT integration tests
+        if (options.CrashReporterPath is { } crashReporterPath)
+        {
+            if (System.OperatingSystem.IsWindows())
+            {
+                options.DiagnosticLogger?.LogDebug("Setting native CrashReporterPath on Windows: {0}", crashReporterPath);
+                sentry_options_set_external_crash_reporter_pathw(cOptions, crashReporterPath);
+            }
+            else
+            {
+                options.DiagnosticLogger?.LogDebug("Setting native CrashReporterPath: {0}", crashReporterPath);
+                sentry_options_set_external_crash_reporter_path(cOptions, crashReporterPath);
+            }
+        }
+
         if (options.DiagnosticLogger is null)
         {
             _logger?.LogDebug("Unsetting the current native logger");
@@ -374,6 +389,12 @@ internal static class C
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_database_pathw(IntPtr options, [MarshalAs(UnmanagedType.LPWStr)] string path);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_options_set_external_crash_reporter_path(IntPtr options, string path);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_options_set_external_crash_reporter_pathw(IntPtr options, [MarshalAs(UnmanagedType.LPWStr)] string path);
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_auto_session_tracking(IntPtr options, int debug);

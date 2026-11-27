@@ -56,6 +56,9 @@ internal partial class BindableSentryOptions
     public bool? JsonPreserveReferences { get; set; }
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
+#if PLATFORM_NEUTRAL
+    public string? CrashReporterPath { get; set; }
+#endif
 
     public void ApplyTo(SentryOptions options)
     {
@@ -108,6 +111,9 @@ internal partial class BindableSentryOptions
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
+#if PLATFORM_NEUTRAL
+        options.CrashReporterPath = CrashReporterPath ?? options.CrashReporterPath;
+#endif
         if (DataCollection is not null)
         {
             options.DataCollection ??= new Sentry.DataCollectionOptions();

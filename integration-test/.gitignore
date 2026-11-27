@@ -1,3 +1,4 @@
 *-app
 packages
 .nuget
+crash-reports

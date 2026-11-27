@@ -2813,4 +2813,69 @@ public partial class SentryClientTests : IDisposable
         propagationContext.DynamicSamplingContext!.Items["replay_id"].Should().Be(staleReplayId.ToString());
     }
 #endif
+
+#if PLATFORM_NEUTRAL
+    [Fact]
+    public void CaptureEvent_TerminalException_LaunchesCrashReporter()
+    {
+        // Arrange
+        var started = new List<ProcessStartInfo>();
+        var client = GetSutWithCrashReporter(started.Add);
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false, terminal: true);
+
+        // Act
+        client.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        started.Should().ContainSingle();
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureEvent_UnhandledException_DoesNotLaunchCrashReporter()
+    {
+        // Arrange
+        var started = new List<ProcessStartInfo>();
+        var client = GetSutWithCrashReporter(started.Add);
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false);
+
+        // Act
+        client.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        started.Should().BeEmpty();
+        _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureEvent_CrashReporterFails_SendsEnvelope()
+    {
+        // Arrange
+        var client = GetSutWithCrashReporter(_ => throw new InvalidOperationException());
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false, terminal: true);
+
+        // Act
+        client.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    private SentryClient GetSutWithCrashReporter(Action<ProcessStartInfo> startProcess)
+    {
+        var fileSystem = new FakeFileSystem();
+        var crashReporterPath = Path.Combine(Path.GetTempPath(), "crash-reporter");
+        fileSystem.CreateDirectory(Path.GetTempPath());
+        fileSystem.WriteAllTextToFile(crashReporterPath, "");
+        _fixture.SentryOptions.FileSystem = fileSystem;
+        _fixture.SentryOptions.CrashReporterPath = crashReporterPath;
+
+        var client = _fixture.GetSut();
+        client.CrashReporter = new CrashReporter(_fixture.SentryOptions, startProcess);
+        return client;
+    }
+#endif
 }
