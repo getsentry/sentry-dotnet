@@ -34,6 +34,10 @@ if (args.Length > 1 && args[1] == "CaughtNullReference")
         Console.WriteLine("Caught a NullReferenceException");
     }
 }
+else if (args.Length > 1 && args[1] == "FailFast")
+{
+    Environment.FailFast("Failing fast deliberately");
+}
 else if (args.Length > 1 && !string.IsNullOrEmpty(args[1]))
 {
 #pragma warning disable CS0618
@@ -206,6 +210,65 @@ internal class FakeTransport : ITransport
         $result.HasErrors() | Should -BeFalse
         $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'False'"
         $result.Envelopes() | Should -Not -AnyElementMatch '"exception":{"values":\[{"type":"(SIGSEGV|EXCEPTION_ACCESS_VIOLATION)"'
+    }
+
+    Context 'native backend' {
+        BeforeAll {
+            RegisterLocalPackage 'Sentry.Native'
+            AddPackageReference $path 'Sentry.Native'
+            # The native link doesn't rerun when only the backend's libraries change
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "console-app/obj/Release/$framework/*/native"
+            publishConsoleApp
+        }
+
+        It 'publish directory contains expected files (native backend)' {
+            $path = getConsoleAppPath
+            $items = Get-ChildItem -Path (Get-Item $path).DirectoryName
+            $exeExtension = $IsWindows ? '.exe' : ''
+            $debugExtension = $IsWindows ? '.pdb' : $IsMacOS ? '.dSYM' : '.dbg'
+            $libraryExtension = $IsWindows ? '.dll' : $IsMacOS ? '.dylib' : '.so'
+            $expected = @("console-app$exeExtension", "console-app$debugExtension", "sentry-crash$exeExtension", "sentry-crash-transport$libraryExtension")
+            if ($IsWindows)
+            {
+                $expected += 'sentry-wer.dll'
+            }
+            $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be ($expected | Sort-Object -Unique)
+        }
+
+        It 'Sends the native crash in the crashing run (native backend)' {
+            $result = Invoke-SentryServer {
+                Param([string]$url)
+                runConsoleApp $true 'Native' ($url.Replace('http://', 'http://key@') + '/0')
+            }
+            # sentry-server.py can't print the envelope, because its minidump isn't valid UTF-8
+            $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
+            $result.ScriptOutput | Should -Not -AnyElementMatch 'crash has been captured'
+        }
+
+        It 'Sends the fast-fail crash in the crashing run (native backend)' -Skip:(!$IsWindows) {
+            # WER ignores crashes in processes that inherit SEM_NOGPFAULTERRORBOX
+            $kernel32 = Add-Type -PassThru -Name Kernel32 -Namespace Win32 -MemberDefinition '
+                [DllImport("kernel32.dll")] public static extern uint GetErrorMode();
+                [DllImport("kernel32.dll")] public static extern uint SetErrorMode(uint mode);'
+            $kernel32::SetErrorMode($kernel32::GetErrorMode() -band -bnot 0x2) | Out-Null
+
+            $result = Invoke-SentryServer {
+                Param([string]$url)
+                runConsoleApp $true 'FailFast' ($url.Replace('http://', 'http://key@') + '/0')
+            }
+            $result.ScriptOutput | Should -AnyElementMatch 'Process terminated. Failing fast deliberately'
+            $result.ServerStdOut | Should -AnyElementMatch 'POST /api/0/envelope/'
+        }
+
+        It 'Produces no spurious native crash (NullReferenceException, native backend)' {
+            $result = Invoke-SentryServer {
+                Param([string]$url)
+                runConsoleApp $true 'CaughtNullReference' ($url.Replace('http://', 'http://key@') + '/0')
+            }
+            $result.HasErrors() | Should -BeFalse
+            $result.ScriptOutput | Should -AnyElementMatch 'Caught a NullReferenceException'
+            $result.ServerStdOut | Should -Not -AnyElementMatch 'POST /api/0/envelope/'
+        }
     }
 }
 

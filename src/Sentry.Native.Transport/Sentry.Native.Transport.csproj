@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The HTTP transport that sentry-crash loads from its directory, as a Native AOT shared library -->
+  <PropertyGroup>
+    <TargetFramework>$(PreviousTfm)</TargetFramework>
+    <AssemblyName>sentry-crash-transport</AssemblyName>
+    <RootNamespace>Sentry.Native</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>false</IsPackable>
+    <PublishAot>true</PublishAot>
+    <NativeLib>Shared</NativeLib>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <OptimizationPreference>Size</OptimizationPreference>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Sentry\Platforms\Native\NativeHttpClient.cs" Link="NativeHttpClient.cs" />
+    <Compile Include="..\Sentry\Internal\PartialStream.cs" Link="PartialStream.cs" />
+  </ItemGroup>
+
+</Project>

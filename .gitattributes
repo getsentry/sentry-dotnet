@@ -6,6 +6,7 @@
 .githooks/* eol=lf
 *.ps1 eol=lf
 src/Sentry/Platforms/Native/** eol=lf
+src/Sentry.Native.Transport/** eol=lf
 CHANGELOG.md merge=union
 
 

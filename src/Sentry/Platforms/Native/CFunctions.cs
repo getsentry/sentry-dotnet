@@ -81,6 +81,7 @@ internal static class C
 
     public static bool Init(SentryOptions options)
     {
+        NativeHttpClient.DefaultOptions = options;
         var cOptions = sentry_options_new();
 
         // Note: DSN is not null because options.IsValid() must have returned true for this to be called.
@@ -103,6 +104,14 @@ internal static class C
         {
             options.DiagnosticLogger?.LogDebug("Setting Sample Rate: {0}", options.SampleRate.Value);
             sentry_options_set_sample_rate(cOptions, options.SampleRate.Value);
+        }
+
+        // for the sentry-crash daemon of the native backend
+        // Stryker disable once all : only runs in Native AOT apps
+        if (options.HttpProxy is WebProxy { Address: { } address } proxy)
+        {
+            options.DiagnosticLogger?.LogDebug("Setting Proxy: {0}", address);
+            sentry_options_set_proxy(cOptions, GetProxyUrl(address, proxy.Credentials));
         }
 
         // Disabling the native in favor of the C# layer for now
@@ -136,22 +145,18 @@ internal static class C
             }
         }
 
-        // Stryker disable once all : covered by the Native AOT integration tests
-        sentry_options_set_transport(cOptions, NativeHttpClient.CreateTransport(options));
-
         options.DiagnosticLogger?.LogDebug("Initializing sentry native");
         return 0 == sentry_init(cOptions);
     }
 
     public static void Close() => sentry_close();
 
-    // Call after native init() to check if the application has crashed in the previous run and clear the status.
-    // Because the file is removed, the result will change on subsequent calls so it must be cached for the current runtime.
+    // Call after native init() to check if the application has crashed in the previous run.
+    // Because init() consumes the status, a later init() reports no crash, so it must be cached for the current runtime.
     internal static bool HandleCrashedLastRun(SentryOptions options)
     {
-        var result = sentry_get_crashed_last_run() == 1;
-        sentry_clear_crashed_last_run();
-        return result;
+        // Stryker disable once all : covered by the Native AOT integration tests
+        return sentry_get_crashed_last_run() == 1;
     }
 
     internal static string GetCacheDirectory(SentryOptions options)
@@ -168,6 +173,18 @@ internal static class C
         {
             return Path.Combine(options.CacheDirectoryPath, "SentryNative");
         }
+    }
+
+    internal static string GetProxyUrl(Uri address, ICredentials? credentials)
+    {
+        var url = new UriBuilder(address);
+        var credential = credentials as NetworkCredential;
+        if (credential?.UserName.Length > 0)
+        {
+            url.UserName = Uri.EscapeDataString(credential.UserName);
+            url.Password = Uri.EscapeDataString(credential.Password);
+        }
+        return url.Uri.AbsoluteUri;
     }
 
     [DllImport("sentry-native")]
@@ -349,9 +366,6 @@ internal static class C
     private static extern int sentry_get_crashed_last_run();
 
     [DllImport("sentry-native")]
-    private static extern int sentry_clear_crashed_last_run();
-
-    [DllImport("sentry-native")]
     private static extern IntPtr sentry_options_new();
 
     [DllImport("sentry-native")]
@@ -367,6 +381,9 @@ internal static class C
     private static extern void sentry_options_set_environment(IntPtr options, string environment);
 
     [DllImport("sentry-native")]
+    private static extern void sentry_options_set_proxy(IntPtr options, string proxy);
+
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_sample_rate(IntPtr options, double rate);
 
     [DllImport("sentry-native")]
@@ -377,9 +394,6 @@ internal static class C
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_auto_session_tracking(IntPtr options, int debug);
-
-    [DllImport("sentry-native")]
-    private static extern void sentry_options_set_transport(IntPtr options, IntPtr transport);
 
     [DllImport("sentry-native")]
     private static extern unsafe void sentry_options_set_logger(IntPtr options, delegate* unmanaged/*[Cdecl]*/<int, IntPtr, IntPtr, IntPtr, void> logger, IntPtr userData);

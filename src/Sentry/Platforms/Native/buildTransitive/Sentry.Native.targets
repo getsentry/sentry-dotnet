@@ -24,6 +24,22 @@
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'">false</FrameworkSupportsNative>
   </PropertyGroup>
 
+  <!-- Sentry ships the inproc backend, and the Sentry.Native package the native backend, which sends crashes at crash time from the out-of-process sentry-crash daemon -->
+  <PropertyGroup>
+    <_SentryNativeDirectory>$(MSBuildThisFileDirectory)..\sentry-native\</_SentryNativeDirectory>
+    <_SentryNativeDirectory Condition="'$(_SentryNativePackageDirectory)' != ''">$(_SentryNativePackageDirectory)</_SentryNativeDirectory>
+  </PropertyGroup>
+
+  <!-- The native backend's sentry-native must match the bindings in Sentry -->
+  <Target Name="_SentryCheckNativePackageVersion" BeforeTargets="BeforeBuild" Condition="'$(_SentryNativePackageDirectory)' != ''">
+    <PropertyGroup>
+      <_SentryPackageVersion>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))))</_SentryPackageVersion>
+      <_SentryNativePackageVersion>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetFullPath('$(_SentryNativePackageDirectory)..'))))</_SentryNativePackageVersion>
+    </PropertyGroup>
+    <Error Condition="'$(_SentryNativePackageVersion)' != '$(_SentryPackageVersion)'"
+           Text="Sentry.Native $(_SentryNativePackageVersion) requires Sentry $(_SentryNativePackageVersion), but the project references Sentry $(_SentryPackageVersion)." />
+  </Target>
+
   <ItemGroup>
     <!-- When user sets <SentryNative>false</SentryNative> or <SentryNative>disable</SentryNative> in their project -->
     <!-- SentryNative.IsEnabled should result in compile-time constant for trimmed applications -->
@@ -34,28 +50,53 @@
                                     Trim="true" />
   </ItemGroup>
 
+  <!-- sentry-native is built with SENTRY_TRANSPORT=custom, and Sentry exports its sentry_transport_new_default() -->
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true'">
+    <UnmanagedEntryPointsAssembly Include="Sentry" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64')">
     <DirectPInvoke Include="sentry-native" />
     <!-- See: https://github.com/getsentry/sentry-dotnet/pull/4111 -->
     <LinkerArg Include="/NODEFAULTLIB:MSVCRT" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\sentry-native.lib" />
+    <NativeLibrary Include="$(_SentryNativeDirectory)$(RuntimeIdentifier)\sentry-native.lib" />
     <NativeLibrary Include="dbghelp.lib" />
     <NativeLibrary Include="winhttp.lib" />
     <NativeLibrary Include="Gdi32.lib" />
     <NativeLibrary Include="Synchronization.lib" />
+    <NativeLibrary Include="shlwapi.lib;version.lib" Condition="'$(_SentryNativePackageDirectory)' != ''" />
+    <None Include="$(_SentryNativeDirectory)$(RuntimeIdentifier)\sentry-crash.exe;$(_SentryNativeDirectory)$(RuntimeIdentifier)\sentry-wer.dll;$(_SentryNativeDirectory)$(RuntimeIdentifier)\sentry-crash-transport.dll"
+          Condition="'$(_SentryNativePackageDirectory)' != ''"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          Link="%(Filename)%(Extension)"
+          Visible="false" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-arm64' or
                                                                     '$(RuntimeIdentifier)' == 'linux-musl-x64' or '$(RuntimeIdentifier)' == 'linux-musl-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\sentry-preload.o" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\libsentry-native.a" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\libunwind.a" />
+    <NativeLibrary Include="$(_SentryNativeDirectory)$(RuntimeIdentifier)\sentry-preload.o" />
+    <NativeLibrary Include="$(_SentryNativeDirectory)$(RuntimeIdentifier)\libsentry-native.a" />
+    <NativeLibrary Include="$(_SentryNativeDirectory)$(RuntimeIdentifier)\libunwind.a" />
+    <None Include="$(_SentryNativeDirectory)$(RuntimeIdentifier)\sentry-crash;$(_SentryNativeDirectory)$(RuntimeIdentifier)\sentry-crash-transport.so"
+          Condition="'$(_SentryNativePackageDirectory)' != ''"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          Link="%(Filename)%(Extension)"
+          Visible="false" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\sentry-preload.o" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\libsentry-native.a" />
+    <NativeLibrary Include="$(_SentryNativeDirectory)osx\sentry-preload.o" />
+    <NativeLibrary Include="$(_SentryNativeDirectory)osx\libsentry-native.a" />
+    <LinkerArg Include="-Wl,-framework,CoreFoundation;-Wl,-framework,Security" Condition="'$(_SentryNativePackageDirectory)' != ''" />
+    <None Include="$(_SentryNativeDirectory)osx\sentry-crash;$(_SentryNativeDirectory)osx\sentry-crash-transport.dylib"
+          Condition="'$(_SentryNativePackageDirectory)' != ''"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          Link="%(Filename)%(Extension)"
+          Visible="false" />
   </ItemGroup>
 </Project>

@@ -54,6 +54,7 @@ groupConfigs:
     - "**/Sentry.Bindings.Android.csproj"
     - "**/Sentry.Android.AssemblyReader.csproj"
     - "**/Sentry.Bindings.Cocoa.csproj"
+    - "**/Sentry.Native.csproj"
 
 filterConfigs:
 
