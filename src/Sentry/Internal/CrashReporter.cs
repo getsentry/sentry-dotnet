@@ -24,7 +24,7 @@ internal class CrashReporter
         }
 
         var isBundle = IsBundle(path);
-        if (isBundle ? !_options.FileSystem.DirectoryExists(path) : !_options.FileSystem.FileExists(path))
+        if (!isBundle && !_options.FileSystem.FileExists(path))
         {
             _options.LogError("Crash reporter not found: {0}", path);
             return false;
@@ -38,6 +38,7 @@ internal class CrashReporter
                 return false;
             }
 
+            // Stryker disable once all : covered by the macOS tests
             _startProcess(isBundle
                 ? CreateStartInfo("/usr/bin/open", "-a", path, "--args", file)
                 : CreateStartInfo(path, file));
@@ -74,11 +75,15 @@ internal class CrashReporter
         return file;
     }
 
-    private static bool IsBundle(string path) =>
-        RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && path.EndsWith(".app", StringComparison.Ordinal);
+    // Stryker disable once all : covered by the macOS tests
+    private bool IsBundle(string path) =>
+        RuntimeInformation.IsOSPlatform(OSPlatform.OSX) &&
+        path.EndsWith(".app", StringComparison.Ordinal) &&
+        _options.FileSystem.DirectoryExists(path);
 
     private static ProcessStartInfo CreateStartInfo(string fileName, params string[] arguments)
     {
+        // Stryker disable once all : covered by the .NET Framework tests
         var startInfo = new ProcessStartInfo(fileName) { UseShellExecute = false };
 #if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER
         foreach (var argument in arguments)

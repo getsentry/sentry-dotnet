@@ -277,7 +277,7 @@ public sealed partial class SentryEvent : IEventLike, ISentryJsonSerializable
 
         return SentryExceptions?.Any(e =>
             e.Mechanism is { Handled: false, Terminal: true }
-        ) ?? false;
+        ) == true;
     }
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
